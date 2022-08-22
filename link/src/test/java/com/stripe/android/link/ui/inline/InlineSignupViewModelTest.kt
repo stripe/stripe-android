@@ -47,7 +47,7 @@ class InlineSignupViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
             viewModel.toggleExpanded()
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
 
             verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
         }
@@ -64,7 +64,7 @@ class InlineSignupViewModelTest {
                 logger = Logger.noop()
             )
             viewModel.toggleExpanded()
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
             assertThat(viewModel.phoneController.initialPhoneNumber).isEqualTo(CUSTOMER_PHONE)
 
             verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
@@ -107,7 +107,7 @@ class InlineSignupViewModelTest {
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.userInput.value).isNull()
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
         }
 
     @Test
@@ -186,7 +186,7 @@ class InlineSignupViewModelTest {
             // Advance past lookup debounce delay
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
 
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
             verify(linkEventsReporter).onSignupStarted(true)
         }
 

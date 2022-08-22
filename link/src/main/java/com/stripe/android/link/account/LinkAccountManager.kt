@@ -129,17 +129,25 @@ internal class LinkAccountManager @Inject constructor(
      */
     suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> =
         when (userInput) {
-            is UserInput.SignIn -> lookupConsumer(userInput.email).mapCatching {
-                requireNotNull(it) { "Error fetching user account" }
+            is UserInput.SignIn -> {
+                lookupConsumer(userInput.email).mapCatching {
+                    requireNotNull(it) { "Error fetching user account" }
+                }
             }
-            is UserInput.SignUp -> signUp(userInput.email, userInput.phone, userInput.country)
-                .also {
+            is UserInput.SignUp -> {
+                signUp(
+                    email = userInput.email,
+                    phone = userInput.phone,
+                    country = userInput.country,
+                    name = userInput.name
+                ).also {
                     if (it.isSuccess) {
                         linkEventsReporter.onSignupCompleted(true)
                     } else {
                         linkEventsReporter.onSignupFailure(true)
                     }
                 }
+            }
         }
 
     /**
@@ -148,9 +156,10 @@ internal class LinkAccountManager @Inject constructor(
     suspend fun signUp(
         email: String,
         phone: String,
-        country: String
+        country: String,
+        name: String?
     ): Result<LinkAccount> =
-        linkRepository.consumerSignUp(email, phone, country, cookie())
+        linkRepository.consumerSignUp(email, phone, country, name, cookie())
             .map { consumerSession ->
                 cookieStore.storeNewUserEmail(email)
                 setAccount(consumerSession)

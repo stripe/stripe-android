@@ -29,6 +29,7 @@ import com.stripe.android.ui.core.R
 fun PhoneNumberCollectionSection(
     enabled: Boolean,
     phoneNumberController: PhoneNumberController,
+    imeAction: ImeAction = ImeAction.Done,
     @StringRes sectionTitle: Int? = null,
     requestFocusWhenShown: Boolean = false
 ) {
@@ -44,7 +45,7 @@ fun PhoneNumberCollectionSection(
     }
 
     Section(sectionTitle, sectionErrorString) {
-        PhoneNumberElementUI(enabled, phoneNumberController, requestFocusWhenShown)
+        PhoneNumberElementUI(enabled, phoneNumberController, imeAction, requestFocusWhenShown)
     }
 }
 
@@ -52,6 +53,7 @@ fun PhoneNumberCollectionSection(
 internal fun PhoneNumberElementUI(
     enabled: Boolean,
     controller: PhoneNumberController,
+    imeAction: ImeAction = ImeAction.Done,
     requestFocusWhenShown: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
@@ -97,7 +99,7 @@ internal fun PhoneNumberElementUI(
         visualTransformation = visualTransformation,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Phone,
-            imeAction = ImeAction.Done
+            imeAction = imeAction
         ),
         keyboardActions = KeyboardActions(
             onNext = {

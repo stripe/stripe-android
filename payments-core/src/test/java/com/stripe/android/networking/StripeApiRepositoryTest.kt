@@ -1712,12 +1712,15 @@ internal class StripeApiRepositoryTest {
             val email = "email@example.com"
             val phoneNumber = "phone number"
             val country = "US"
+            val name = "Who dis?"
             val locale = Locale.US
             val cookie = "cookie1"
+
             create().consumerSignUp(
                 email,
                 phoneNumber,
                 country,
+                name,
                 locale,
                 cookie,
                 DEFAULT_OPTIONS
@@ -1730,6 +1733,7 @@ internal class StripeApiRepositoryTest {
                 assertEquals(this["email_address"], email)
                 assertEquals(this["phone_number"], phoneNumber)
                 assertEquals(this["country"], country)
+                assertEquals(this["name"], name)
                 assertEquals(this["locale"], locale.toLanguageTag())
                 withNestedParams("cookies") {
                     assertEquals(this["verification_session_client_secrets"], listOf(cookie))

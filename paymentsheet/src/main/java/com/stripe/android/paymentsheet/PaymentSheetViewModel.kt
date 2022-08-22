@@ -510,7 +510,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             updateSelection(PaymentSelection.New.LinkInline(it))
             checkout(CheckoutIdentifier.SheetBottomBuy)
         } ?: run {
-            // Link PaymentDetails creationg failed, fallback to regular checkout.
+            // Link PaymentDetails creation failed, fallback to regular checkout.
             // paymentSelection is already set to the card parameters from the form.
             checkout(CheckoutIdentifier.SheetBottomBuy)
         }

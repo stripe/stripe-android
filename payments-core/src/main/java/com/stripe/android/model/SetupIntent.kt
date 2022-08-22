@@ -30,6 +30,9 @@ data class SetupIntent internal constructor(
      */
     override val created: Long,
 
+    // TODO
+    override val countryCode: String?,
+
     /**
      * The client secret of this SetupIntent. Used for client-side retrieval using a
      * publishable key.

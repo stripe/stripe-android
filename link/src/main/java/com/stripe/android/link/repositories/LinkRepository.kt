@@ -30,6 +30,7 @@ internal interface LinkRepository {
         email: String,
         phone: String,
         country: String,
+        name: String?,
         authSessionCookie: String?
     ): Result<ConsumerSession>
 

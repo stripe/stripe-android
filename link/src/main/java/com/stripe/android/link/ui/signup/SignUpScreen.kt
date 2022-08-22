@@ -53,8 +53,10 @@ private fun SignUpBodyPreview() {
                 merchantName = "Example, Inc.",
                 emailController = SimpleTextFieldController.createEmailSectionController("email"),
                 phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
-                signUpState = SignUpState.InputtingPhone,
+                nameController = SimpleTextFieldController.createNameSectionController("name"),
+                signUpState = SignUpState.InputtingPhoneOrName,
                 isReadyToSignUp = false,
+                requiresNameCollection = true,
                 errorMessage = null,
                 onSignUpClick = {}
             )
@@ -82,8 +84,10 @@ internal fun SignUpBody(
         merchantName = signUpViewModel.merchantName,
         emailController = signUpViewModel.emailController,
         phoneNumberController = signUpViewModel.phoneController,
+        nameController = signUpViewModel.nameController,
         signUpState = signUpState,
         isReadyToSignUp = isReadyToSignUp,
+        requiresNameCollection = signUpViewModel.requiresNameCollection,
         errorMessage = errorMessage,
         onSignUpClick = signUpViewModel::onSignUpClick
     )
@@ -95,8 +99,10 @@ internal fun SignUpBody(
     merchantName: String,
     emailController: TextFieldController,
     phoneNumberController: PhoneNumberController,
+    nameController: TextFieldController,
     signUpState: SignUpState,
     isReadyToSignUp: Boolean,
+    requiresNameCollection: Boolean,
     errorMessage: ErrorMessage?,
     onSignUpClick: () -> Unit
 ) {
@@ -128,7 +134,7 @@ internal fun SignUpBody(
             )
         }
         AnimatedVisibility(
-            visible = signUpState == SignUpState.InputtingPhone
+            visible = signUpState == SignUpState.InputtingPhoneOrName
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 PaymentsThemeForLink {
@@ -137,6 +143,15 @@ internal fun SignUpBody(
                         phoneNumberController = phoneNumberController,
                         requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty()
                     )
+
+                    if (requiresNameCollection) {
+                        TextFieldSection(
+                            textFieldController = nameController,
+                            imeAction = ImeAction.Done,
+                            enabled = true
+                        )
+                    }
+
                     LinkTerms(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -144,12 +159,14 @@ internal fun SignUpBody(
                         textAlign = TextAlign.Center
                     )
                 }
+
                 errorMessage?.let {
                     ErrorText(
                         text = it.getMessage(LocalContext.current.resources),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
+
                 PrimaryButton(
                     label = stringResource(R.string.sign_up),
                     state = if (isReadyToSignUp) {
@@ -180,7 +197,7 @@ internal fun EmailCollectionSection(
     ) {
         TextFieldSection(
             textFieldController = emailController,
-            imeAction = if (signUpState == SignUpState.InputtingPhone) {
+            imeAction = if (signUpState == SignUpState.InputtingPhoneOrName) {
                 ImeAction.Next
             } else {
                 ImeAction.Done

@@ -81,6 +81,9 @@ data class PaymentIntent internal constructor(
      */
     val confirmationMethod: ConfirmationMethod = ConfirmationMethod.Automatic,
 
+    // TODO
+    override val countryCode: String?,
+
     /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      */

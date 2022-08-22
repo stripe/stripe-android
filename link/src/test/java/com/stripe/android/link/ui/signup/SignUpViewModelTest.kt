@@ -141,7 +141,7 @@ class SignUpViewModelTest {
     fun `When email is provided it should not trigger lookup and should collect phone number`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
 
             verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
         }

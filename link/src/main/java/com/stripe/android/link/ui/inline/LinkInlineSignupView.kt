@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,6 +46,7 @@ import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.ui.core.elements.TextFieldSection
 import com.stripe.android.ui.core.elements.menu.Checkbox
 import com.stripe.android.ui.core.getBorderStroke
 import com.stripe.android.ui.core.injection.NonFallbackInjector
@@ -60,9 +62,11 @@ private fun Preview() {
                 merchantName = "Example, Inc.",
                 emailController = SimpleTextFieldController.createEmailSectionController("email@me.co"),
                 phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
+                nameController = SimpleTextFieldController.createNameSectionController("Me, myself and I"),
                 signUpState = SignUpState.InputtingEmail,
                 enabled = true,
                 expanded = true,
+                requiresNameCollection = true,
                 toggleExpanded = {},
                 onUserInteracted = {}
             )
@@ -103,9 +107,11 @@ private fun LinkInlineSignup(
         merchantName = viewModel.merchantName,
         emailController = viewModel.emailController,
         phoneNumberController = viewModel.phoneController,
+        nameController = viewModel.nameController,
         signUpState = signUpState,
         enabled = enabled,
         expanded = isExpanded,
+        requiresNameCollection = viewModel.requiresNameCollection,
         toggleExpanded = viewModel::toggleExpanded,
         onUserInteracted = onUserInteracted
     )
@@ -116,9 +122,11 @@ internal fun LinkInlineSignup(
     merchantName: String,
     emailController: TextFieldController,
     phoneNumberController: PhoneNumberController,
+    nameController: TextFieldController,
     signUpState: SignUpState,
     enabled: Boolean,
     expanded: Boolean,
+    requiresNameCollection: Boolean,
     toggleExpanded: () -> Unit,
     onUserInteracted: () -> Unit
 ) {
@@ -187,15 +195,29 @@ internal fun LinkInlineSignup(
                         )
 
                         AnimatedVisibility(
-                            visible = signUpState == SignUpState.InputtingPhone
+                            visible = signUpState == SignUpState.InputtingPhoneOrName
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 PhoneNumberCollectionSection(
                                     enabled = enabled,
                                     phoneNumberController = phoneNumberController,
                                     requestFocusWhenShown =
-                                    phoneNumberController.initialPhoneNumber.isEmpty()
+                                    phoneNumberController.initialPhoneNumber.isEmpty(),
+                                    imeAction = if (requiresNameCollection) {
+                                        ImeAction.Next
+                                    } else {
+                                        ImeAction.Done
+                                    }
                                 )
+
+                                if (requiresNameCollection) {
+                                    TextFieldSection(
+                                        textFieldController = nameController,
+                                        imeAction = ImeAction.Done,
+                                        enabled = enabled
+                                    )
+                                }
+
                                 LinkTerms(
                                     modifier = Modifier.padding(top = 8.dp),
                                     textAlign = TextAlign.Left

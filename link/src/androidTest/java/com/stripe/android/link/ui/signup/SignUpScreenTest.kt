@@ -47,7 +47,7 @@ internal class SignUpScreenTest {
 
     @Test
     fun status_inputting_phone_shows_all_fields() {
-        setContent(SignUpState.InputtingPhone)
+        setContent(SignUpState.InputtingPhoneOrName)
 
         onEmailField().assertExists()
         onEmailField().assertIsEnabled()
@@ -66,7 +66,7 @@ internal class SignUpScreenTest {
 
     @Test
     fun signup_button_is_disabled_when_not_ready_to_sign_up() {
-        setContent(SignUpState.InputtingPhone, isReadyToSignUp = false)
+        setContent(SignUpState.InputtingPhoneOrName, isReadyToSignUp = false)
 
         onSignUpButton().assertExists()
         onSignUpButton().assertIsNotEnabled()
@@ -74,7 +74,7 @@ internal class SignUpScreenTest {
 
     @Test
     fun signup_button_is_enabled_when_ready_to_sign_up() {
-        setContent(SignUpState.InputtingPhone, isReadyToSignUp = true)
+        setContent(SignUpState.InputtingPhoneOrName, isReadyToSignUp = true)
 
         onSignUpButton().assertExists()
         onSignUpButton().assertIsEnabled()
@@ -83,7 +83,7 @@ internal class SignUpScreenTest {
     @Test
     fun when_error_message_is_not_null_then_it_is_visible() {
         val errorMessage = "Error message"
-        setContent(SignUpState.InputtingPhone, errorMessage = ErrorMessage.Raw(errorMessage))
+        setContent(SignUpState.InputtingPhoneOrName, errorMessage = ErrorMessage.Raw(errorMessage))
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
 
