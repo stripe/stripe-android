@@ -148,9 +148,10 @@ class AddressElementTest {
         )
 
         val country = suspend {
-            addressElement.fields.first().map {
-                it.getFormFieldValueFlow().first()[0].second.value
-            }.first()
+            addressElement.fields
+                .first()[0]
+                .getFormFieldValueFlow()
+                .first()[0].second.value
         }
 
         countryDropdownFieldController.onValueChange(0)
