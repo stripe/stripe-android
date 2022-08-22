@@ -18,7 +18,9 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Partner
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
@@ -40,6 +42,38 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            val manifest = getManifest()
+            setState {
+                copy(
+                    institutionName = manifest.activeInstitution!!.name,
+                    partner = manifest.activeAuthSession!!.flow!!.toPartner()
+                )
+            }
+        }
+    }
+
+    private fun Flow.toPartner(): Partner = when (this) {
+        Flow.FINICITY_CONNECT_V2_FIX,
+        Flow.FINICITY_CONNECT_V2_LITE,
+        Flow.FINICITY_CONNECT_V2_OAUTH,
+        Flow.FINICITY_CONNECT_V2_OAUTH_REDIRECT,
+        Flow.FINICITY_CONNECT_V2_OAUTH_WEBVIEW -> Partner.FINICITY
+        Flow.MX_CONNECT,
+        Flow.MX_OAUTH,
+        Flow.MX_OAUTH_REDIRECT,
+        Flow.MX_OAUTH_WEBVIEW -> Partner.MX
+        Flow.TESTMODE,
+        Flow.TESTMODE_OAUTH,
+        Flow.TESTMODE_OAUTH_WEBVIEW -> Partner.TESTMODE
+        Flow.TRUELAYER_OAUTH,
+        Flow.TRUELAYER_OAUTH_HANDOFF,
+        Flow.TRUELAYER_OAUTH_WEBVIEW -> Partner.TRUELAYER
+        Flow.WELLS_FARGO_WEBVIEW,
+        Flow.WELLS_FARGO -> Partner.WELLS_FARGO
+    }
+
+    fun onLaunchAuthClick() {
+        viewModelScope.launch {
             val authSession = getManifest().activeAuthSession!!
             setState { copy(url = authSession.url) }
         }
@@ -51,7 +85,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         viewModelScope.launch {
             val authSession = getManifest().activeAuthSession!!
             when (webStatus) {
-                is Uninitialized,
+                is Uninitialized -> {}
                 is Loading -> setState { copy(authenticationStatus = Loading()) }
                 is Success -> {
                     logger.debug("Web AuthFlow completed! waiting for oauth results")
@@ -109,6 +143,17 @@ internal class PartnerAuthViewModel @Inject constructor(
 }
 
 internal data class PartnerAuthState(
+    val institutionName: String = "",
+    val partner: Partner = Partner.FINICITY,
     val url: String? = null,
     val authenticationStatus: Async<String> = Uninitialized
-) : MavericksState
+) : MavericksState {
+
+    enum class Partner {
+        FINICITY,
+        MX,
+        TESTMODE,
+        TRUELAYER,
+        WELLS_FARGO
+    }
+}

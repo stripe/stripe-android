@@ -87,4 +87,8 @@ internal data class PartnerAccount(
 
     @SerialName(value = "status") val status: FinancialConnectionsAccount.Status? = null
 
-)
+) {
+    internal val encryptedNumbers get() = displayableAccountNumbers?.let { "••••$it" } ?: ""
+
+    internal val fullName get() = "${this.name} $encryptedNumbers"
+}

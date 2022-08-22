@@ -22,6 +22,9 @@
     <string name="stripe_consent_requested_data_ownership_desc">Account owner name and mailing address associated with your account</string>
     <string name="stripe_consent_requested_data_learnmore"><annotation clickable="data_access">Learn more about data access</annotation></string>
     <string name="stripe_ok">OK</string>
+    <string name="stripe_prepane_title">Link with %1$s</string>
+    <string name="stripe_prepane_desc">A new window will open for you to log in and select the %1$s account(s) you want to link.\n\nThis page will update once you’re done.</string>
+    <string name="stripe_prepane_continue">Continue</string>
     <string name="stripe_institutionpicker_pane_select_bank">Select your bank</string>
     <string name="stripe_picker_loading_title">Establishing connection</string>
     <string name="stripe_picker_loading_desc">Please wait while the connection is established</string>
@@ -57,5 +60,11 @@
     <string name="data_accessible_callout_connected_accounts">%1$s - %2$s accounts</string>
     <string name="success_pane_done">Done</string>
     <string name="success_pane_disconnect">You can <annotation clickable="disconnect">disconnect your account any time.</annotation></string>
+    <string name="stripe_prepane_partner_callout">Stripe works with partners like %1$s to reliably offer access to thousands of financial institutions. <annotation clickable="privacy_center">Learn more</annotation></string>
+    <string name="stripe_partner_finicity">Finicity</string>
+    <string name="stripe_partner_mx">MX</string>
+    <string name="stripe_partner_truelayer">Truelayer</string>
+    <string name="stripe_partner_testmode">TestMode</string>
+    <string name="stripe_partner_wellsfargo">Wells Fargo</string>
 </resources>
 

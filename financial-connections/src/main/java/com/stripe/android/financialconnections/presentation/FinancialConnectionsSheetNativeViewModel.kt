@@ -20,7 +20,6 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -121,7 +120,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
 internal data class FinancialConnectionsSheetNativeState(
     val webAuthFlow: Async<String>,
-    val authorizationSession: FinancialConnectionsAuthorizationSession?,
     val configuration: FinancialConnectionsSheet.Configuration,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?
 ) : MavericksState {
@@ -133,7 +131,6 @@ internal data class FinancialConnectionsSheetNativeState(
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
         configuration = args.configuration,
-        authorizationSession = null,
         viewEffect = null
     )
 }

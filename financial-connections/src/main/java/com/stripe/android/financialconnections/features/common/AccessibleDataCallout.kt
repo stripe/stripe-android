@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
-import com.stripe.android.financialconnections.features.fullName
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Permissions
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
