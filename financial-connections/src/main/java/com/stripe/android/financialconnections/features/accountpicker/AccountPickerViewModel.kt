@@ -22,6 +22,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
@@ -30,6 +31,7 @@ internal class AccountPickerViewModel @Inject constructor(
     private val selectAccounts: SelectAccounts,
     private val getManifest: GetManifest,
     private val coordinator: NativeAuthFlowCoordinator,
+    private val navigationManager: NavigationManager,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
 ) : MavericksViewModel<AccountPickerState>(initialState) {
@@ -38,8 +40,7 @@ internal class AccountPickerViewModel @Inject constructor(
         logErrors()
         suspend {
             val manifest = getManifest()
-            val authSession = requireNotNull(manifest.activeAuthSession)
-            val partnerAccountList = pollAuthorizationSessionAccounts(authSession.id)
+            val partnerAccountList = pollAuthorizationSessionAccounts(manifest)
             val accounts = partnerAccountList.data.map { account ->
                 AccountPickerState.PartnerAccountUI(
                     account = account,
@@ -131,6 +132,10 @@ internal class AccountPickerViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun selectAnotherBank() {
+        navigationManager.navigate(NavigationDirections.institutionPicker)
     }
 
     companion object :

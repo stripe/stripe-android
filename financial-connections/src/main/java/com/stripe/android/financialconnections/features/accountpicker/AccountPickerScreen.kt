@@ -50,10 +50,12 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.PartnerAccountUI
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.institutionpicker.LoadingContent
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -69,7 +71,8 @@ internal fun AccountPickerScreen() {
     AccountPickerContent(
         state = state.value,
         onAccountClicked = viewModel::onAccountClicked,
-        onSelectAccounts = viewModel::selectAccounts
+        onSelectAccounts = viewModel::selectAccounts,
+        onSelectAnotherBank = viewModel::selectAnotherBank,
     )
 }
 
@@ -77,7 +80,8 @@ internal fun AccountPickerScreen() {
 private fun AccountPickerContent(
     state: AccountPickerState,
     onAccountClicked: (PartnerAccount) -> Unit,
-    onSelectAccounts: () -> Unit
+    onSelectAccounts: () -> Unit,
+    onSelectAnotherBank: () -> Unit
 ) {
     FinancialConnectionsScaffold {
         when (val payload = state.payload) {
@@ -94,7 +98,14 @@ private fun AccountPickerContent(
                 selectionMode = payload().selectionMode,
                 accessibleDataCalloutModel = payload().accessibleData
             )
-            is Fail -> UnclassifiedErrorContent()
+            is Fail -> when (val error = payload.error) {
+                is NoSupportedPaymentMethodTypeAccountsException ->
+                    NoSupportedPaymentMethodTypeAccountsErrorContent(
+                        error,
+                        onSelectAnotherBank
+                    )
+                else -> UnclassifiedErrorContent()
+            }
         }
     }
 }
@@ -363,7 +374,8 @@ internal fun AccountPickerPreviewMultiSelect() {
         AccountPickerContent(
             AccountPickerStates.multiSelect(),
             onAccountClicked = {},
-            onSelectAccounts = {}
+            onSelectAccounts = {},
+            onSelectAnotherBank = {}
         )
     }
 }
@@ -379,7 +391,8 @@ internal fun AccountPickerPreviewSingleSelect() {
         AccountPickerContent(
             AccountPickerStates.singleSelect(),
             onAccountClicked = {},
-            onSelectAccounts = {}
+            onSelectAccounts = {},
+            onSelectAnotherBank = {}
         )
     }
 }
@@ -395,7 +408,8 @@ internal fun AccountPickerPreviewDropdown() {
         AccountPickerContent(
             AccountPickerStates.dropdown(),
             onAccountClicked = {},
-            onSelectAccounts = {}
+            onSelectAccounts = {},
+            onSelectAnotherBank = {}
         )
     }
 }
