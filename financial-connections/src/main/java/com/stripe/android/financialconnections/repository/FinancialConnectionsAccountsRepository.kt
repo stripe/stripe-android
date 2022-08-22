@@ -28,15 +28,15 @@ internal interface FinancialConnectionsAccountsRepository {
 
     companion object {
         operator fun invoke(
-            publishableKey: String,
             requestExecutor: FinancialConnectionsRequestExecutor,
             apiRequestFactory: ApiRequest.Factory,
+            apiOptions: ApiRequest.Options,
             logger: Logger
         ): FinancialConnectionsAccountsRepository =
             FinancialConnectionsAccountsRepositoryImpl(
-                publishableKey,
                 requestExecutor,
                 apiRequestFactory,
+                apiOptions,
                 logger
             )
     }
@@ -45,15 +45,11 @@ internal interface FinancialConnectionsAccountsRepository {
 }
 
 private class FinancialConnectionsAccountsRepositoryImpl(
-    publishableKey: String,
     val requestExecutor: FinancialConnectionsRequestExecutor,
     val apiRequestFactory: ApiRequest.Factory,
+    val apiOptions: ApiRequest.Options,
     val logger: Logger
 ) : FinancialConnectionsAccountsRepository {
-
-    private val options = ApiRequest.Options(
-        apiKey = publishableKey
-    )
 
     /**
      * Ensures that manifest accesses via [getOrFetchManifest] suspend until
@@ -78,7 +74,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): PartnerAccountsList {
         val request = apiRequestFactory.createPost(
             url = accountsSessionUrl,
-            options = options,
+            options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
@@ -99,7 +95,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     ): PartnerAccountsList {
         val request = apiRequestFactory.createPost(
             url = authorizationSessionSelectedAccountsUrl,
-            options = options,
+            options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,

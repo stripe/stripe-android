@@ -42,17 +42,17 @@ internal class FinancialConnectionsSheetNativeModule {
     @Singleton
     @Provides
     fun providesFinancialConnectionsManifestRepository(
-        @Named(PUBLISHABLE_KEY) publishableKey: String,
         requestExecutor: FinancialConnectionsRequestExecutor,
         configuration: FinancialConnectionsSheet.Configuration,
         apiRequestFactory: ApiRequest.Factory,
+        apiOptions: ApiRequest.Options,
         logger: Logger,
         @Named(INITIAL_MANIFEST) initialManifest: FinancialConnectionsSessionManifest
     ) = FinancialConnectionsManifestRepository(
-        publishableKey = publishableKey,
         requestExecutor = requestExecutor,
         configuration = configuration,
         apiRequestFactory = apiRequestFactory,
+        apiOptions = apiOptions,
         logger = logger,
         initialManifest = initialManifest
     )
@@ -60,26 +60,27 @@ internal class FinancialConnectionsSheetNativeModule {
     @Singleton
     @Provides
     fun providesFinancialConnectionsAccountsRepository(
-        @Named(PUBLISHABLE_KEY) publishableKey: String,
         requestExecutor: FinancialConnectionsRequestExecutor,
+        apiOptions: ApiRequest.Options,
         apiRequestFactory: ApiRequest.Factory,
         logger: Logger
     ) = FinancialConnectionsAccountsRepository(
-        publishableKey = publishableKey,
         requestExecutor = requestExecutor,
         apiRequestFactory = apiRequestFactory,
+        apiOptions = apiOptions,
         logger = logger,
     )
 
     @Singleton
+
     @Provides
     fun providesFinancialConnectionsInstitutionsRepository(
-        @Named(PUBLISHABLE_KEY) publishableKey: String,
         requestExecutor: FinancialConnectionsRequestExecutor,
-        apiRequestFactory: ApiRequest.Factory
+        apiRequestFactory: ApiRequest.Factory,
+        apiOptions: ApiRequest.Options,
     ) = FinancialConnectionsInstitutionsRepository(
-        publishableKey,
-        requestExecutor,
-        apiRequestFactory
+        requestExecutor = requestExecutor,
+        apiOptions = apiOptions,
+        apiRequestFactory = apiRequestFactory
     )
 }

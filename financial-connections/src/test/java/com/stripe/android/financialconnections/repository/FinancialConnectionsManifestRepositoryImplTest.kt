@@ -37,7 +37,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
     private fun buildRepository(
         initialManifest: FinancialConnectionsSessionManifest? = null
     ) = FinancialConnectionsManifestRepository(
-        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
         requestExecutor = mockRequestExecutor,
         apiRequestFactory = apiRequestFactory,
         configuration = configuration,

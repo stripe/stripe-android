@@ -7,7 +7,6 @@ import com.stripe.android.financialconnections.network.FinancialConnectionsReque
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import dagger.Module
 import dagger.Provides
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -16,16 +15,16 @@ internal object FinancialConnectionsSheetModule {
     @Singleton
     @Provides
     fun providesFinancialConnectionsManifestRepository(
-        @Named(PUBLISHABLE_KEY) publishableKey: String,
         requestExecutor: FinancialConnectionsRequestExecutor,
         configuration: FinancialConnectionsSheet.Configuration,
         apiRequestFactory: ApiRequest.Factory,
+        apiOptions: ApiRequest.Options,
         logger: Logger
     ) = FinancialConnectionsManifestRepository(
-        publishableKey = publishableKey,
         requestExecutor = requestExecutor,
         configuration = configuration,
         apiRequestFactory = apiRequestFactory,
+        apiOptions = apiOptions,
         logger = logger,
         initialManifest = null
     )
