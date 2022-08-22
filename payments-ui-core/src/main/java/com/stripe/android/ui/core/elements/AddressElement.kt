@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 open class AddressElement constructor(
@@ -56,7 +57,7 @@ open class AddressElement constructor(
         )
     )
 
-    private val originalValuesMap = rawValuesMap.mapValues { it.value ?: ""}
+    private val originalValuesMap = rawValuesMap.mapValues { it.value ?: "" }
     private val emptyValuesMap = rawValuesMap.mapValues { "" }
 
     private val otherFields = countryElement.controller.rawFieldValue
@@ -67,6 +68,11 @@ open class AddressElement constructor(
             }
             addressRepository.get(countryCode)
                 ?: emptyList()
+        }
+        .onEach { fields ->
+            fields.forEach { field ->
+                field.setRawValue(rawValuesMap)
+            }
         }
 
     val fields = combine(
@@ -111,10 +117,9 @@ open class AddressElement constructor(
                     emptyValuesMap
                 }
             )
-        }
-
-        fields.forEach {
-            it.setRawValue(rawValuesMap)
+            fields.forEach {
+                it.setRawValue(rawValuesMap)
+            }
         }
 
         fields
