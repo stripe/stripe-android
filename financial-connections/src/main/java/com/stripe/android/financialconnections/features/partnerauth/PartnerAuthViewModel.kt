@@ -130,4 +130,3 @@ internal data class PartnerAuthState(
     val url: String? = null,
     val authenticationStatus: Async<String> = Uninitialized
 ) : MavericksState
-
