@@ -29,37 +29,38 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
     private val authSessionId = "AuthSessionId"
 
     private fun buildRepository() = FinancialConnectionsAccountsRepository(
-        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        apiOptions = ApiRequest.Options(
+            apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        ),
         requestExecutor = mockRequestExecutor,
-        apiRequestFactory = apiRequestFactory,,
+        apiRequestFactory = apiRequestFactory,
         logger = Logger.noop(),
     )
 
     @Test
-    fun `getOrFetchAccounts - When called twice, second call returns from cache`() =
-        runTest {
-            val repository = buildRepository()
-            val expectedAccounts = ApiKeyFixtures.partnerAccountList()
-            givenRequestReturnsAccounts(expectedAccounts)
+    fun `getOrFetchAccounts - When called twice, second call returns from cache`() = runTest {
+        val repository = buildRepository()
+        val expectedAccounts = ApiKeyFixtures.partnerAccountList()
+        givenRequestReturnsAccounts(expectedAccounts)
 
-            // first call calls backend and caches.
-            repository.getOrFetchAccounts(
-                configuration.financialConnectionsSessionClientSecret,
-                authSessionId
-            )
-            // second call reads from cache
-            val accounts = repository.getOrFetchAccounts(
-                configuration.financialConnectionsSessionClientSecret,
-                authSessionId
-            )
-            verify(
-                mockRequestExecutor, times(1)
-            ).execute(
-                any(),
-                eq(PartnerAccountsList.serializer())
-            )
-            assertThat(accounts).isEqualTo(expectedAccounts)
-        }
+        // first call calls backend and caches.
+        repository.getOrFetchAccounts(
+            configuration.financialConnectionsSessionClientSecret,
+            authSessionId
+        )
+        // second call reads from cache
+        val accounts = repository.getOrFetchAccounts(
+            configuration.financialConnectionsSessionClientSecret,
+            authSessionId
+        )
+        verify(
+            mockRequestExecutor, times(1)
+        ).execute(
+            any(),
+            eq(PartnerAccountsList.serializer())
+        )
+        assertThat(accounts).isEqualTo(expectedAccounts)
+    }
 
     /**
      * Simulates an API call to retrieve manifest that takes some time.

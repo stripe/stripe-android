@@ -7,7 +7,6 @@ import com.stripe.android.financialconnections.network.FinancialConnectionsReque
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import dagger.Module
 import dagger.Provides
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
