@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
+@Suppress("LongParameterList")
 internal class AccountPickerViewModel @Inject constructor(
     initialState: AccountPickerState,
     private val selectAccounts: SelectAccounts,
