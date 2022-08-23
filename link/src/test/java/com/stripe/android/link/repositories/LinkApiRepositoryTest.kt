@@ -3,13 +3,14 @@ package com.stripe.android.link.repositories
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
@@ -371,7 +372,99 @@ class LinkApiRepositoryTest {
     }
 
     @Test
-    fun `createPaymentDetails sends correct parameters`() = runTest {
+    fun `createFinancialConnectionsSession sends correct parameters`() = runTest {
+        val secret = "secret"
+        val consumerKey = "key"
+        linkRepository.createFinancialConnectionsSession(secret, consumerKey)
+
+        verify(stripeRepository).createLinkFinancialConnectionsSession(
+            eq(secret),
+            eq(ApiRequest.Options(consumerKey))
+        )
+    }
+
+    @Test
+    fun `createFinancialConnectionsSession returns successful result`() = runTest {
+        val session = FinancialConnectionsSession("client_secret", "id")
+        whenever(stripeRepository.createLinkFinancialConnectionsSession(any(), any())).thenReturn(
+            session
+        )
+
+        val result = linkRepository.createFinancialConnectionsSession("secret", "key")
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `createFinancialConnectionsSession catches exception and returns failure`() = runTest {
+        whenever(stripeRepository.createLinkFinancialConnectionsSession(any(), any()))
+            .thenThrow(RuntimeException("error"))
+
+        val result = linkRepository.createFinancialConnectionsSession("secret", "key")
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `createPaymentDetails for financial connections sends correct parameters`() = runTest {
+        val accountId = "id"
+        val secret = "secret"
+        val consumerKey = "key"
+
+        linkRepository.createPaymentDetails(
+            financialConnectionsAccountId = accountId,
+            consumerSessionClientSecret = secret,
+            consumerPublishableKey = consumerKey
+        )
+
+        verify(stripeRepository).createPaymentDetails(
+            eq(secret),
+            eq(accountId),
+            eq(ApiRequest.Options(consumerKey))
+        )
+    }
+
+    @Test
+    fun `createPaymentDetails for financial connections returns new LinkPaymentDetails when successful`() =
+        runTest {
+            val accountId = "id"
+            val secret = "secret"
+            val consumerKey = "key"
+
+            val paymentDetails = PaymentDetailsFixtures.CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS
+            whenever(stripeRepository.createPaymentDetails(any(), any<String>(), any()))
+                .thenReturn(paymentDetails)
+
+            val result = linkRepository.createPaymentDetails(
+                financialConnectionsAccountId = accountId,
+                consumerSessionClientSecret = secret,
+                consumerPublishableKey = consumerKey
+            )
+
+            assertThat(result.isSuccess).isTrue()
+        }
+
+    @Test
+    fun `createPaymentDetails for financial connections catches exception and returns failure`() =
+        runTest {
+            val accountId = "id"
+            val secret = "secret"
+            val consumerKey = "key"
+
+            whenever(stripeRepository.createPaymentDetails(any(), any<String>(), any()))
+                .thenThrow(RuntimeException("error"))
+
+            val result = linkRepository.createPaymentDetails(
+                financialConnectionsAccountId = accountId,
+                consumerSessionClientSecret = secret,
+                consumerPublishableKey = consumerKey
+            )
+
+            assertThat(result.isFailure).isTrue()
+        }
+
+    @Test
+    fun `createPaymentDetails for card sends correct parameters`() = runTest {
         val secret = "secret"
         val email = "email@stripe.com"
         val consumerKey = "key"
@@ -387,7 +480,7 @@ class LinkApiRepositoryTest {
 
         verify(stripeRepository).createPaymentDetails(
             eq(secret),
-            argThat {
+            argThat<ConsumerPaymentDetailsCreateParams> {
                 toParamMap() == mapOf(
                     "type" to "card",
                     "billing_email_address" to "email@stripe.com",
@@ -407,46 +500,53 @@ class LinkApiRepositoryTest {
     }
 
     @Test
-    fun `createPaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
-        val secret = "secret"
-        val email = "email@stripe.com"
+    fun `createPaymentDetails for card without consumerPublishableKey sends correct parameters`() =
+        runTest {
+            val secret = "secret"
+            val email = "email@stripe.com"
 
-        linkRepository.createPaymentDetails(
-            paymentMethod = SupportedPaymentMethod.Card,
-            paymentMethodCreateParams = cardPaymentMethodCreateParams,
-            userEmail = email,
-            stripeIntent = paymentIntent,
-            consumerSessionClientSecret = secret,
-            consumerPublishableKey = null
-        )
+            linkRepository.createPaymentDetails(
+                paymentMethod = SupportedPaymentMethod.Card,
+                paymentMethodCreateParams = cardPaymentMethodCreateParams,
+                userEmail = email,
+                stripeIntent = paymentIntent,
+                consumerSessionClientSecret = secret,
+                consumerPublishableKey = null
+            )
 
-        verify(stripeRepository).createPaymentDetails(
-            eq(secret),
-            argThat {
-                toParamMap() == mapOf(
-                    "type" to "card",
-                    "billing_email_address" to "email@stripe.com",
-                    "card" to mapOf(
-                        "number" to "5555555555554444",
-                        "exp_month" to "12",
-                        "exp_year" to "2050"
-                    ),
-                    "billing_address" to mapOf(
-                        "country_code" to "US",
-                        "postal_code" to "12345"
+            verify(stripeRepository).createPaymentDetails(
+                eq(secret),
+                argThat<ConsumerPaymentDetailsCreateParams> {
+                    toParamMap() == mapOf(
+                        "type" to "card",
+                        "billing_email_address" to "email@stripe.com",
+                        "card" to mapOf(
+                            "number" to "5555555555554444",
+                            "exp_month" to "12",
+                            "exp_year" to "2050"
+                        ),
+                        "billing_address" to mapOf(
+                            "country_code" to "US",
+                            "postal_code" to "12345"
+                        )
                     )
-                )
-            },
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
-        )
-    }
+                },
+                eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+            )
+        }
 
     @Test
-    fun `createPaymentDetails returns new LinkPaymentDetails when successful`() = runTest {
+    fun `createPaymentDetails for card returns new LinkPaymentDetails when successful`() = runTest {
         val consumerSessionSecret = "consumer_session_secret"
         val email = "email@stripe.com"
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS
-        whenever(stripeRepository.createPaymentDetails(any(), any(), any()))
+        whenever(
+            stripeRepository.createPaymentDetails(
+                any(),
+                any<ConsumerPaymentDetailsCreateParams>(),
+                any()
+            )
+        )
             .thenReturn(paymentDetails)
 
         val result = linkRepository.createPaymentDetails(
@@ -460,7 +560,7 @@ class LinkApiRepositoryTest {
 
         assertThat(result.isSuccess).isTrue()
 
-        val newLinkPaymentDetails = result.getOrThrow() as LinkPaymentDetails.New
+        val newLinkPaymentDetails = result.getOrThrow()
 
         assertThat(newLinkPaymentDetails.paymentDetails)
             .isEqualTo(paymentDetails.paymentDetails.first())
@@ -486,8 +586,14 @@ class LinkApiRepositoryTest {
     }
 
     @Test
-    fun `createPaymentDetails catches exception and returns failure`() = runTest {
-        whenever(stripeRepository.createPaymentDetails(any(), any(), any()))
+    fun `createPaymentDetails for card catches exception and returns failure`() = runTest {
+        whenever(
+            stripeRepository.createPaymentDetails(
+                any(),
+                any<ConsumerPaymentDetailsCreateParams>(),
+                any()
+            )
+        )
             .thenThrow(RuntimeException("error"))
 
         val result = linkRepository.createPaymentDetails(

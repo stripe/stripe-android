@@ -12,6 +12,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -205,6 +206,64 @@ internal class LinkApiRepository @Inject constructor(
             },
             onFailure = {
                 logger.error("Error fetching consumer payment details", it)
+                Result.failure(it)
+            }
+        )
+    }
+
+    override suspend fun createFinancialConnectionsSession(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<FinancialConnectionsSession> = withContext(workContext) {
+        runCatching {
+            stripeRepository.createLinkFinancialConnectionsSession(
+                consumerSessionClientSecret,
+                consumerPublishableKey?.let {
+                    ApiRequest.Options(it)
+                } ?: ApiRequest.Options(
+                    publishableKeyProvider(),
+                    stripeAccountIdProvider()
+                )
+            )
+        }.fold(
+            onSuccess = {
+                it?.let {
+                    Result.success(it)
+                } ?: Result.failure(InternalError("Error creating financial connections session"))
+            },
+            onFailure = {
+                logger.error("Error creating financial connections session", it)
+                Result.failure(it)
+            }
+        )
+    }
+
+    override suspend fun createPaymentDetails(
+        financialConnectionsAccountId: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerPaymentDetails.BankAccount> = withContext(workContext) {
+        runCatching {
+            stripeRepository.createPaymentDetails(
+                consumerSessionClientSecret,
+                financialConnectionsAccountId,
+                consumerPublishableKey?.let {
+                    ApiRequest.Options(it)
+                } ?: ApiRequest.Options(
+                    publishableKeyProvider(),
+                    stripeAccountIdProvider()
+                )
+            )?.paymentDetails?.first()?.let {
+                it as? ConsumerPaymentDetails.BankAccount
+            }
+        }.fold(
+            onSuccess = {
+                it?.let {
+                    Result.success(it)
+                } ?: Result.failure(InternalError("Error creating consumer payment method"))
+            },
+            onFailure = {
+                logger.error("Error creating consumer payment method", it)
                 Result.failure(it)
             }
         )
