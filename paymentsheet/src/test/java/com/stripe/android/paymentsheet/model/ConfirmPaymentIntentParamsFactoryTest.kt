@@ -4,12 +4,17 @@ import com.google.common.truth.Truth
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import org.junit.Test
 
 class ConfirmPaymentIntentParamsFactoryTest {
     private val factory = ConfirmPaymentIntentParamsFactory(
-        PaymentIntentClientSecret(CLIENT_SECRET)
+        PaymentIntentClientSecret(CLIENT_SECRET),
+        null
     )
 
     @Test
@@ -72,6 +77,73 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 clientSecret = CLIENT_SECRET,
                 setupFutureUsage = null,
                 paymentMethodOptions = PaymentMethodOptionsParams.Card()
+            )
+        )
+    }
+
+    @Test
+    fun `create() with saved card and shippingDetails sets shipping field`() {
+        val shippingDetails = AddressDetails(
+            name = "Test",
+            address = PaymentSheet.Address(
+                line1 = "line1",
+                city = "city"
+            ),
+            phoneNumber = "5555555555"
+        )
+        val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
+            PaymentIntentClientSecret(CLIENT_SECRET),
+            shippingDetails.toConfirmPaymentIntentShipping()
+        )
+
+        Truth.assertThat(
+            factoryWithConfig.create(
+                paymentSelection = PaymentSelection.Saved(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
+                )
+            )
+        ).isEqualTo(
+            ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                paymentMethodId = "pm_123456789",
+                clientSecret = CLIENT_SECRET,
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                ),
+                shipping = shippingDetails.toConfirmPaymentIntentShipping()
+            )
+        )
+    }
+
+    @Test
+    fun `create() with new card and shippingDetails sets shipping field`() {
+        val shippingDetails = AddressDetails(
+            name = "Test",
+            address = PaymentSheet.Address(
+                line1 = "line1",
+                city = "city"
+            ),
+            phoneNumber = "5555555555"
+        )
+        val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
+            PaymentIntentClientSecret(CLIENT_SECRET),
+            shippingDetails.toConfirmPaymentIntentShipping()
+        )
+
+        Truth.assertThat(
+            factoryWithConfig.create(
+                paymentSelection = PaymentSelection.New.Card(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    CardBrand.Visa,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                )
+            )
+        ).isEqualTo(
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                clientSecret = CLIENT_SECRET,
+                setupFutureUsage = null,
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(),
+                shipping = shippingDetails.toConfirmPaymentIntentShipping()
             )
         )
     }

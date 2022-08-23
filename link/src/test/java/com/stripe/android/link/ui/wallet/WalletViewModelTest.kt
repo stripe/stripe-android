@@ -19,11 +19,13 @@ import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -130,8 +132,13 @@ class WalletViewModelTest {
         }
 
     @Test
-    fun `onSelectedPaymentDetails starts payment confirmation`() {
+    fun `onSelectedPaymentDetails starts payment confirmation`() = runTest {
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+        whenever(args.shippingValues)
+            .thenReturn(null)
+
         val viewModel = createViewModel()
 
         viewModel.onItemSelected(paymentDetails)
@@ -147,6 +154,43 @@ class WalletViewModelTest {
                     CLIENT_SECRET
                 ),
                 StripeIntentFixtures.PI_SUCCEEDED.clientSecret!!
+            )
+        )
+    }
+
+    @Test
+    fun `when shippingValues are passed ConfirmPaymentIntentParams has shipping`() = runTest {
+        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+        whenever(args.shippingValues).thenReturn(
+            mapOf(
+                IdentifierSpec.Name to "Test Name",
+                IdentifierSpec.Country to "US"
+            )
+        )
+
+        val viewModel = createViewModel()
+
+        viewModel.onItemSelected(paymentDetails)
+        viewModel.onConfirmPayment()
+
+        val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
+        verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
+
+        assertThat(paramsCaptor.firstValue).isEqualTo(
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                PaymentMethodCreateParams.createLink(
+                    paymentDetails.id,
+                    CLIENT_SECRET
+                ),
+                StripeIntentFixtures.PI_SUCCEEDED.clientSecret!!,
+                shipping = ConfirmPaymentIntentParams.Shipping(
+                    address = Address(
+                        country = "US"
+                    ),
+                    name = "Test Name"
+                )
             )
         )
     }

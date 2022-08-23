@@ -68,6 +68,9 @@ public final class com/stripe/android/ui/core/address/AddressRepository_Factory 
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/address/AddressRepository;
 }
 
+public final class com/stripe/android/ui/core/address/AddressUtilKt {
+}
+
 public final class com/stripe/android/ui/core/databinding/ActivityCardScanBinding : androidx/viewbinding/ViewBinding {
 	public final field fragmentContainer Landroidx/fragment/app/FragmentContainerView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/ui/core/databinding/ActivityCardScanBinding;

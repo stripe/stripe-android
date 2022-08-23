@@ -25,6 +25,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.FormController
+import com.stripe.android.ui.core.address.AddressUtil.toConfirmPaymentIntentShipping
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -202,7 +203,10 @@ internal class PaymentMethodViewModel @Inject constructor(
     }
 
     private fun completePayment(linkPaymentDetails: LinkPaymentDetails) {
-        val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
+        val params = ConfirmStripeIntentParamsFactory.createFactory(
+            stripeIntent,
+            args.shippingValues?.toConfirmPaymentIntentShipping()
+        )
             .createConfirmStripeIntentParams(linkPaymentDetails.paymentMethodCreateParams)
 
         confirmationManager.confirmStripeIntent(params) { result ->

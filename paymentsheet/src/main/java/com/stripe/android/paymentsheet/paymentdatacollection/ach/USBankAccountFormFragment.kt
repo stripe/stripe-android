@@ -135,6 +135,7 @@ internal class USBankAccountFormFragment : Fragment() {
             { requireActivity().application },
             {
                 USBankAccountFormViewModel.Args(
+                    sheetViewModel,
                     formArgs,
                     sheetViewModel is PaymentSheetViewModel,
                     clientSecret,

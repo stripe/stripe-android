@@ -17,16 +17,24 @@ internal sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeInte
     abstract fun create(paymentSelection: PaymentSelection.New): T
 
     companion object {
-        fun createFactory(clientSecret: ClientSecret) =
+        fun createFactory(
+            clientSecret: ClientSecret,
+            shipping: ConfirmPaymentIntentParams.Shipping?
+        ) =
             when (clientSecret) {
-                is PaymentIntentClientSecret -> ConfirmPaymentIntentParamsFactory(clientSecret)
-                is SetupIntentClientSecret -> ConfirmSetupIntentParamsFactory(clientSecret)
+                is PaymentIntentClientSecret -> {
+                    ConfirmPaymentIntentParamsFactory(clientSecret, shipping)
+                }
+                is SetupIntentClientSecret -> {
+                    ConfirmSetupIntentParamsFactory(clientSecret)
+                }
             }
     }
 }
 
 internal class ConfirmPaymentIntentParamsFactory(
-    private val clientSecret: ClientSecret
+    private val clientSecret: ClientSecret,
+    private val shipping: ConfirmPaymentIntentParams.Shipping?
 ) : ConfirmStripeIntentParamsFactory<ConfirmPaymentIntentParams>() {
     override fun create(paymentSelection: PaymentSelection.Saved) =
         ConfirmPaymentIntentParams.createWithPaymentMethodId(
@@ -48,7 +56,8 @@ internal class ConfirmPaymentIntentParamsFactory(
                 }
             },
             mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
-                .takeIf { paymentSelection.paymentMethod.type?.requiresMandate == true }
+                .takeIf { paymentSelection.paymentMethod.type?.requiresMandate == true },
+            shipping = shipping
         )
 
     override fun create(paymentSelection: PaymentSelection.New) =
@@ -95,7 +104,8 @@ internal class ConfirmPaymentIntentParamsFactory(
                         setupFutureUsage = null
                     )
                 }
-            }
+            },
+            shipping = shipping
         )
 }
 

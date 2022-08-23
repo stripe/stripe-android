@@ -42,6 +42,7 @@ import kotlin.test.Test
 class USBankAccountFormViewModelTest {
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
+        sheetViewModel = null,
         formArgs = FormFragmentArguments(
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
             showCheckbox = false,
