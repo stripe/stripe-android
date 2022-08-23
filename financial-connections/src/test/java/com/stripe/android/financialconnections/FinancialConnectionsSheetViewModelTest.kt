@@ -110,9 +110,11 @@ class FinancialConnectionsSheetViewModelTest {
             )
 
             // When
-            viewModel.handleOnNewIntent(successIntent(
-                "stripe-auth://link-accounts/success?linked_account=$linkedAccountId"
-            ))
+            viewModel.handleOnNewIntent(
+                successIntent(
+                    "stripe-auth://link-accounts/success?linked_account=$linkedAccountId"
+                )
+            )
 
             // Then
             withState(viewModel) {
@@ -136,9 +138,11 @@ class FinancialConnectionsSheetViewModelTest {
             )
 
             // When
-            viewModel.handleOnNewIntent(successIntent(
-                "stripe-auth://link-accounts/success"
-            ))
+            viewModel.handleOnNewIntent(
+                successIntent(
+                    "stripe-auth://link-accounts/success"
+                )
+            )
 
             // Then
             withState(viewModel) {
