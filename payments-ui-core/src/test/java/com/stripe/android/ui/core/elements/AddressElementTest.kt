@@ -139,6 +139,31 @@ class AddressElementTest {
     }
 
     @Test
+    fun `changing country updates the fields`() = runTest {
+        val addressElement = AddressElement(
+            IdentifierSpec.Generic("address"),
+            addressRepository,
+            countryDropdownFieldController = countryDropdownFieldController,
+            sameAsShippingController = null
+        )
+
+        val country = suspend {
+            addressElement.fields
+                .first()[0]
+                .getFormFieldValueFlow()
+                .first()[0].second.value
+        }
+
+        countryDropdownFieldController.onValueChange(0)
+
+        assertThat(country()).isEqualTo("US")
+
+        countryDropdownFieldController.onValueChange(1)
+
+        assertThat(country()).isEqualTo("JP")
+    }
+
+    @Test
     fun `condensed shipping address element should have name and phone number fields when required`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
@@ -339,7 +364,7 @@ class AddressElementTest {
             addressRepository,
             mapOf(
                 IdentifierSpec.SameAsShipping to "true",
-                IdentifierSpec.Country to "JP",
+                IdentifierSpec.Country to "JP"
             ),
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.Normal(),

@@ -6,6 +6,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 
@@ -67,6 +68,17 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails>
+
+    suspend fun createFinancialConnectionsSession(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<FinancialConnectionsSession>
+
+    suspend fun createPaymentDetails(
+        financialConnectionsAccountId: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerPaymentDetails.BankAccount>
 
     /**
      * Create a new payment method in the consumer account.

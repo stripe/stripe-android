@@ -440,6 +440,19 @@ abstract class StripeRepository {
     ): ConsumerSession?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun createLinkFinancialConnectionsSession(
+        consumerSessionClientSecret: String,
+        requestOptions: ApiRequest.Options
+    ): FinancialConnectionsSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        financialConnectionsAccountId: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
