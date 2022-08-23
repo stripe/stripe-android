@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.link
+package com.stripe.android.financialconnections.launcher
 
 import android.content.Context
 import android.content.Intent
@@ -6,9 +6,6 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import com.airbnb.mvrx.Mavericks
 import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity
-import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Companion.EXTRA_RESULT
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

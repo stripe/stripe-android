@@ -1,8 +1,7 @@
-package com.stripe.android.financialconnections.link
+package com.stripe.android.financialconnections.launcher
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -12,7 +11,7 @@ import kotlinx.parcelize.Parcelize
 sealed class FinancialConnectionsSheetLinkResult : Parcelable {
     /**
      * The customer completed the connections session.
-     * @param financialConnectionsSession The financial connections session connected
+     * @param linkedAccountId The linked account id result of the AuthFlow.
      */
     @Parcelize
     data class Completed(
