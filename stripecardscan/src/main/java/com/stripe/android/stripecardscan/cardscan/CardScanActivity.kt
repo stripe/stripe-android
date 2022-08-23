@@ -203,6 +203,10 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             )
             true
         }
+        viewBinding.cannotScan.setVisible(params.configuration.enableCannotScanButton)
+        viewBinding.cannotScan.setOnClickListener {
+            userCannotScan()
+        }
 
         displayState(requireNotNull(scanState), scanStatePrevious)
     }

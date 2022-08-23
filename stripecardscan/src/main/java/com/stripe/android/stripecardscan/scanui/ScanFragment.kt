@@ -208,6 +208,15 @@ abstract class ScanFragment : Fragment(), CoroutineScope {
     }
 
     /**
+     * The user cannot scan the required object.
+     */
+    protected open fun userCannotScan() {
+        runBlocking { scanStat.trackResult("user_missing_card") }
+        resultListener.userCanceled(CancellationReason.UserCannotScan)
+        closeScanner()
+    }
+
+    /**
      * Close the scanner.
      */
     protected open fun closeScanner() {

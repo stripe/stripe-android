@@ -21,7 +21,8 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class CardScanSheetParams(
-    val stripePublishableKey: String
+    val stripePublishableKey: String,
+    val configuration: CardScanSheet.Configuration
 ) : Parcelable
 
 sealed interface CardScanSheetResult : Parcelable {
@@ -42,9 +43,22 @@ sealed interface CardScanSheetResult : Parcelable {
 
 private const val CARD_SCAN_FRAGMENT_TAG = "CardScanFragmentTag"
 
-class CardScanSheet private constructor(private val stripePublishableKey: String) {
+class CardScanSheet private constructor(
+    private val stripePublishableKey: String,
+    private val config: Configuration
+) {
 
     private lateinit var launcher: ActivityResultLauncher<CardScanSheetParams>
+
+    @Parcelize
+    data class Configuration(
+        /**
+         * Determine if the "I can't scan this card" button should be included in the scan window.
+         * This is an experimental feature that should only be used with guidance from Stripe
+         * support.
+         */
+        val enableCannotScanButton: Boolean = true
+    ) : Parcelable
 
     /**
      * Callback to notify when scanning finishes and a result is available.
@@ -65,10 +79,11 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
         fun create(
             from: ComponentActivity,
             stripePublishableKey: String,
+            config: Configuration = Configuration(),
             cardScanSheetResultCallback: CardScanResultCallback,
             registry: ActivityResultRegistry = from.activityResultRegistry
         ) =
-            CardScanSheet(stripePublishableKey).apply {
+            CardScanSheet(stripePublishableKey, config).apply {
                 launcher = from.registerForActivityResult(
                     activityResultContract,
                     registry,
@@ -87,10 +102,11 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
         fun create(
             from: Fragment,
             stripePublishableKey: String,
+            config: Configuration = Configuration(),
             cardScanSheetResultCallback: CardScanResultCallback,
             registry: ActivityResultRegistry? = null
         ) =
-            CardScanSheet(stripePublishableKey).apply {
+            CardScanSheet(stripePublishableKey, config).apply {
                 launcher = if (registry != null) {
                     from.registerForActivityResult(
                         activityResultContract,
@@ -153,7 +169,8 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
     fun present() {
         launcher.launch(
             CardScanSheetParams(
-                stripePublishableKey = stripePublishableKey
+                stripePublishableKey = stripePublishableKey,
+                configuration = config
             )
         )
     }
@@ -173,7 +190,8 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
             add<CardScanFragment>(
                 fragmentContainer,
                 args = bundleOf(
-                    CARD_SCAN_FRAGMENT_PARAMS_KEY to CardScanSheetParams(stripePublishableKey)
+                    CARD_SCAN_FRAGMENT_PARAMS_KEY to
+                        CardScanSheetParams(stripePublishableKey, config)
                 ),
                 tag = CARD_SCAN_FRAGMENT_TAG
             )

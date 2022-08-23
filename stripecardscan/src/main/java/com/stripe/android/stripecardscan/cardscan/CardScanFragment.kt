@@ -35,6 +35,7 @@ import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanFragment
 import com.stripe.android.stripecardscan.scanui.util.getColorByRes
 import com.stripe.android.stripecardscan.scanui.util.getFloatResource
+import com.stripe.android.stripecardscan.scanui.util.setVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -176,6 +177,10 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
                 )
             )
             true
+        }
+        viewBinding.cannotScan.setVisible(params.configuration.enableCannotScanButton)
+        viewBinding.cannotScan.setOnClickListener {
+            userCannotScan()
         }
 
         displayState(requireNotNull(scanState), scanStatePrevious)
