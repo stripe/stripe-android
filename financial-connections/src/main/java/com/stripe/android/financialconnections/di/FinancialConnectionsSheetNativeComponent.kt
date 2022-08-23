@@ -7,6 +7,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
+import com.stripe.android.financialconnections.features.manualentry.ManualEntrySubcomponent
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
 import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -36,6 +37,7 @@ internal interface FinancialConnectionsSheetNativeComponent {
     val consentBuilder: ConsentSubcomponent.Builder
     val institutionPickerBuilder: InstitutionPickerSubcomponent.Builder
     val accountPickerBuilder: AccountPickerSubcomponent.Builder
+    val manualEntryBuilder: ManualEntrySubcomponent.Builder
     val partnerAuthSubcomponent: PartnerAuthSubcomponent.Builder
     val successSubcomponent: SuccessSubcomponent.Builder
 

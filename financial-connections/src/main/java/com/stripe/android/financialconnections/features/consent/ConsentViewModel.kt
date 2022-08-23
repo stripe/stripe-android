@@ -12,7 +12,6 @@ import com.stripe.android.financialconnections.features.consent.ConsentState.Vie
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
-import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -70,17 +69,13 @@ internal class ConsentViewModel @Inject constructor(
             ConsentClickableText.DATA_ACCESS ->
                 setState { copy(viewEffect = OpenUrl(dataPolicyUrl)) }
             ConsentClickableText.MANUAL_ENTRY ->
-                navigationManager.navigate(NavigationDirections.institutionPicker)
+                navigationManager.navigate(NavigationDirections.manualEntry)
             null -> logger.error("Unrecognized clickable text: $tag")
         }
     }
 
     fun onViewEffectLaunched() {
-        setState {
-            copy(
-                viewEffect = null
-            )
-        }
+        setState { copy(viewEffect = null) }
     }
 
     companion object : MavericksViewModelFactory<ConsentViewModel, ConsentState> {

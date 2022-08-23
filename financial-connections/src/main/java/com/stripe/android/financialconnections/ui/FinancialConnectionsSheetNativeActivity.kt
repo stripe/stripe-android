@@ -22,6 +22,7 @@ import com.airbnb.mvrx.withState
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
+import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.navigation.NavigationDirections
@@ -79,6 +80,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         NavHost(navController, startDestination = NavigationDirections.consent.destination) {
             composable(NavigationDirections.consent.destination) {
                 ConsentScreen()
+            }
+            composable(NavigationDirections.manualEntry.destination) {
+                ManualEntryScreen()
             }
             composable(NavigationDirections.institutionPicker.destination) {
                 InstitutionPickerScreen()

@@ -38,6 +38,11 @@ internal object NavigationDirections {
         override val destination = "success"
     }
 
+    val manualEntry = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "manual_entry"
+    }
+
     val Default = object : NavigationCommand {
         override val arguments = emptyList<NamedNavArgument>()
         override val destination = ""

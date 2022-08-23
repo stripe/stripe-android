@@ -6,6 +6,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
+import com.stripe.android.financialconnections.features.manualentry.ManualEntrySubcomponent
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
 import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -25,6 +26,7 @@ import javax.inject.Singleton
 @Module(
     subcomponents = [
         ConsentSubcomponent::class,
+        ManualEntrySubcomponent::class,
         InstitutionPickerSubcomponent::class,
         PartnerAuthSubcomponent::class,
         SuccessSubcomponent::class,
