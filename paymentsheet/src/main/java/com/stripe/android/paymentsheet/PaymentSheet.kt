@@ -129,8 +129,8 @@ class PaymentSheet internal constructor(
         /**
          * 🏗 Under construction
          * The shipping information for the customer.
-         * * If set, PaymentSheet will pre-populate the form fields with the values provided.
-         * This is used to display a "Billing address is same as shipping" checkbox if `defaultBillingDetails` is not provided
+         * If set, PaymentSheet will pre-populate the form fields with the values provided.
+         * This is used to display a "Billing address is same as shipping" checkbox if `defaultBillingDetails` is not provided.
          * If `name` and `line1` are populated, it's also [attached to the PaymentIntent](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping) during payment.
          */
         val shippingDetails: AddressDetails? = null,
