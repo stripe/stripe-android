@@ -6,6 +6,7 @@ import android.text.Annotation
 import android.text.SpannedString
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -18,6 +19,7 @@ internal fun AnnotatedText(
     text: TextResource,
     onClickableTextClick: (String) -> Unit,
     defaultStyle: TextStyle,
+    modifier: Modifier = Modifier,
     annotationStyles: Map<StringAnnotation, SpanStyle> = mapOf(
         StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.bodyEmphasized
             .toSpanStyle()
@@ -34,6 +36,7 @@ internal fun AnnotatedText(
     ClickableText(
         text = resource,
         style = defaultStyle,
+        modifier = modifier,
         onClick = { offset ->
             resource.getStringAnnotations(
                 tag = StringAnnotation.CLICKABLE.value,

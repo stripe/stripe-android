@@ -170,6 +170,7 @@ private fun ConsentMainContent(
                 Spacer(modifier = Modifier.weight(1f))
             }
             ConsentFooter(
+                manualEntryEnabled = state.manualEntryEnabled,
                 acceptConsent = state.acceptConsent,
                 onClickableTextClick = onClickableTextClick,
                 onContinueClick = onContinueClick
@@ -181,6 +182,7 @@ private fun ConsentMainContent(
 @Composable
 private fun ConsentFooter(
     acceptConsent: Async<Unit>,
+    manualEntryEnabled: Boolean,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit
 ) {
@@ -201,6 +203,19 @@ private fun ConsentFooter(
                 .fillMaxWidth()
         ) {
             Text(text = stringResource(R.string.stripe_consent_pane_agree))
+        }
+        if (manualEntryEnabled) {
+            Spacer(modifier = Modifier.size(24.dp))
+            AnnotatedText(
+                modifier = Modifier.fillMaxWidth(),
+                text = TextResource.StringId(R.string.consent_pane_manual_entry),
+                onClickableTextClick = { onClickableTextClick(it) },
+                defaultStyle = FinancialConnectionsTheme.typography.body.copy(
+                    textAlign = TextAlign.Center,
+                    color = FinancialConnectionsTheme.colors.textSecondary
+                )
+            )
+            Spacer(modifier = Modifier.size(16.dp))
         }
     }
 }

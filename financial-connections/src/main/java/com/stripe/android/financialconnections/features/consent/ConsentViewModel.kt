@@ -5,10 +5,12 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.domain.AcceptConsent
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -18,16 +20,18 @@ import javax.inject.Inject
 internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
     private val acceptConsent: AcceptConsent,
+    private val getManifest: GetManifest,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-    private val repository: FinancialConnectionsManifestRepository,
+    private val navigationManager: NavigationManager,
     private val logger: Logger
 ) : MavericksViewModel<ConsentState>(initialState) {
 
     init {
         viewModelScope.launch {
-            val manifest = repository.getOrFetchManifest()
+            val manifest = getManifest()
             setState {
                 copy(
+                    manualEntryEnabled = manifest.allowManualEntry,
                     disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest),
                     faqUrl = FinancialConnectionsUrlResolver.getFAQUrl(manifest),
                     dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest),
@@ -52,25 +56,22 @@ internal class ConsentViewModel @Inject constructor(
     }
 
     fun onClickableTextClick(tag: String) {
-        setState {
-            when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
-                ConsentClickableText.TERMS ->
-                    copy(viewEffect = OpenUrl(stripeToSUrl))
-                ConsentClickableText.PRIVACY ->
-                    copy(viewEffect = OpenUrl(FinancialConnectionsUrls.StripePrivacyPolicy))
-                ConsentClickableText.DISCONNECT ->
-                    copy(viewEffect = OpenUrl(disconnectUrl))
-                ConsentClickableText.DATA ->
-                    copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet)
-                ConsentClickableText.PRIVACY_CENTER ->
-                    copy(viewEffect = OpenUrl(privacyCenterUrl))
-                ConsentClickableText.DATA_ACCESS ->
-                    copy(viewEffect = OpenUrl(dataPolicyUrl))
-                null -> {
-                    logger.error("Unrecognized clickable text: $tag")
-                    this
-                }
-            }
+        when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
+            ConsentClickableText.TERMS ->
+                setState { copy(viewEffect = OpenUrl(stripeToSUrl)) }
+            ConsentClickableText.PRIVACY ->
+                setState { copy(viewEffect = OpenUrl(FinancialConnectionsUrls.StripePrivacyPolicy)) }
+            ConsentClickableText.DISCONNECT ->
+                setState { copy(viewEffect = OpenUrl(disconnectUrl)) }
+            ConsentClickableText.DATA ->
+                setState { copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet) }
+            ConsentClickableText.PRIVACY_CENTER ->
+                setState { copy(viewEffect = OpenUrl(privacyCenterUrl)) }
+            ConsentClickableText.DATA_ACCESS ->
+                setState { copy(viewEffect = OpenUrl(dataPolicyUrl)) }
+            ConsentClickableText.MANUAL_ENTRY ->
+                navigationManager.navigate(NavigationDirections.institutionPicker)
+            null -> logger.error("Unrecognized clickable text: $tag")
         }
     }
 
