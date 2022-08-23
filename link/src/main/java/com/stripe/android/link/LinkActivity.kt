@@ -35,6 +35,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stripe.android.link.model.AccountStatus
@@ -108,9 +109,20 @@ internal class LinkActivity : ComponentActivity() {
                         val linkAccount by viewModel.linkAccount.collectAsState(null)
                         val isOnRootScreen by isRootScreenFlow().collectAsState(true)
 
+                        val backStackEntry by navController.currentBackStackEntryAsState()
+
+                        val hideLinkHeader = remember(backStackEntry) {
+                            val currentRoute = backStackEntry?.destination?.route
+                            currentRoute in setOf(
+                                LinkScreen.CardEdit.route,
+                                LinkScreen.PaymentMethod.route
+                            )
+                        }
+
                         LinkAppBar(
                             email = linkAccount?.email,
                             isRootScreen = isOnRootScreen,
+                            hideLinkHeader = hideLinkHeader,
                             onButtonClick = { viewModel.navigator.onBack() }
                         )
 

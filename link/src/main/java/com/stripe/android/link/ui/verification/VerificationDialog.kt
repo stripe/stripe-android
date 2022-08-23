@@ -75,6 +75,7 @@ fun LinkVerificationDialog(
                                     LinkAppBar(
                                         email = account.email,
                                         isRootScreen = true,
+                                        hideLinkHeader = false,
                                         onButtonClick = onDismiss
                                     )
                                     VerificationBody(

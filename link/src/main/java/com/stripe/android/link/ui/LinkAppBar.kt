@@ -36,6 +36,7 @@ import com.stripe.android.link.theme.linkColors
 internal fun LinkAppBar(
     email: String?,
     isRootScreen: Boolean,
+    hideLinkHeader: Boolean,
     onButtonClick: () -> Unit
 ) {
     Row(
@@ -63,7 +64,7 @@ internal fun LinkAppBar(
             )
         }
 
-        val contentAlpha by animateFloatAsState(targetValue = if (isRootScreen) 1f else 0f)
+        val contentAlpha by animateFloatAsState(targetValue = if (hideLinkHeader) 0f else 1f)
 
         Column(
             modifier = Modifier
@@ -103,12 +104,13 @@ internal fun LinkAppBar(
 
 @Preview
 @Composable
-internal fun LinkAppBar() {
+private fun LinkAppBar() {
     DefaultLinkTheme {
         Surface {
             LinkAppBar(
                 email = "email@example.com",
                 isRootScreen = true,
+                hideLinkHeader = false,
                 onButtonClick = {}
             )
         }
@@ -117,12 +119,13 @@ internal fun LinkAppBar() {
 
 @Preview
 @Composable
-internal fun LinkAppBar_NoEmail() {
+private fun LinkAppBar_NoEmail() {
     DefaultLinkTheme {
         Surface {
             LinkAppBar(
                 email = null,
                 isRootScreen = true,
+                hideLinkHeader = false,
                 onButtonClick = {}
             )
         }
@@ -131,12 +134,13 @@ internal fun LinkAppBar_NoEmail() {
 
 @Preview
 @Composable
-internal fun LinkAppBar_ChildScreen() {
+private fun LinkAppBar_ChildScreen() {
     DefaultLinkTheme {
         Surface {
             LinkAppBar(
                 email = "email@example.com",
                 isRootScreen = false,
+                hideLinkHeader = true,
                 onButtonClick = {}
             )
         }
@@ -145,12 +149,13 @@ internal fun LinkAppBar_ChildScreen() {
 
 @Preview
 @Composable
-internal fun LinkAppBar_ChildScreen_NoEmail() {
+private fun LinkAppBar_ChildScreen_NoEmail() {
     DefaultLinkTheme {
         Surface {
             LinkAppBar(
                 email = null,
                 isRootScreen = false,
+                hideLinkHeader = true,
                 onButtonClick = {}
             )
         }
