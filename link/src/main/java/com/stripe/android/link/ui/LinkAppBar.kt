@@ -34,9 +34,7 @@ import com.stripe.android.link.theme.linkColors
 
 @Composable
 internal fun LinkAppBar(
-    email: String?,
-    isRootScreen: Boolean,
-    hideLinkHeader: Boolean,
+    state: LinkAppBarState,
     onButtonClick: () -> Unit
 ) {
     Row(
@@ -48,23 +46,16 @@ internal fun LinkAppBar(
     ) {
         IconButton(
             onClick = onButtonClick,
-            modifier = Modifier
-                .padding(4.dp)
+            modifier = Modifier.padding(4.dp)
         ) {
             Icon(
-                painter = painterResource(
-                    id = if (isRootScreen) {
-                        R.drawable.ic_link_close
-                    } else {
-                        R.drawable.ic_link_back
-                    }
-                ),
+                painter = painterResource(state.navigationIcon),
                 contentDescription = stringResource(id = R.string.back),
                 tint = MaterialTheme.linkColors.closeButton
             )
         }
 
-        val contentAlpha by animateFloatAsState(targetValue = if (hideLinkHeader) 0f else 1f)
+        val contentAlpha by animateFloatAsState(targetValue = if (state.hideHeader) 0f else 1f)
 
         Column(
             modifier = Modifier
@@ -79,8 +70,7 @@ internal fun LinkAppBar(
                 tint = MaterialTheme.linkColors.linkLogo
             )
 
-            val showEmail = isRootScreen && !email.isNullOrEmpty()
-            AnimatedVisibility(visible = showEmail) {
+            AnimatedVisibility(visible = state.email != null) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -89,7 +79,7 @@ internal fun LinkAppBar(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = email.orEmpty(),
+                        text = state.email.orEmpty(),
                         color = MaterialTheme.linkColors.disabledText,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1
@@ -108,9 +98,11 @@ private fun LinkAppBar() {
     DefaultLinkTheme {
         Surface {
             LinkAppBar(
-                email = "email@example.com",
-                isRootScreen = true,
-                hideLinkHeader = false,
+                state = LinkAppBarState(
+                    navigationIcon = R.drawable.ic_link_close,
+                    hideHeader = false,
+                    email = "email@example.com"
+                ),
                 onButtonClick = {}
             )
         }
@@ -123,9 +115,11 @@ private fun LinkAppBar_NoEmail() {
     DefaultLinkTheme {
         Surface {
             LinkAppBar(
-                email = null,
-                isRootScreen = true,
-                hideLinkHeader = false,
+                state = LinkAppBarState(
+                    navigationIcon = R.drawable.ic_link_close,
+                    hideHeader = false,
+                    email = null
+                ),
                 onButtonClick = {}
             )
         }
@@ -138,9 +132,11 @@ private fun LinkAppBar_ChildScreen() {
     DefaultLinkTheme {
         Surface {
             LinkAppBar(
-                email = "email@example.com",
-                isRootScreen = false,
-                hideLinkHeader = true,
+                state = LinkAppBarState(
+                    navigationIcon = R.drawable.ic_link_back,
+                    hideHeader = true,
+                    email = "email@example.com"
+                ),
                 onButtonClick = {}
             )
         }
@@ -153,9 +149,11 @@ private fun LinkAppBar_ChildScreen_NoEmail() {
     DefaultLinkTheme {
         Surface {
             LinkAppBar(
-                email = null,
-                isRootScreen = false,
-                hideLinkHeader = true,
+                state = LinkAppBarState(
+                    navigationIcon = R.drawable.ic_link_back,
+                    hideHeader = true,
+                    email = null
+                ),
                 onButtonClick = {}
             )
         }

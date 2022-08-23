@@ -46,6 +46,7 @@ import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.cardedit.CardEditBody
 import com.stripe.android.link.ui.paymentmethod.PaymentMethodBody
+import com.stripe.android.link.ui.rememberLinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpBody
 import com.stripe.android.link.ui.verification.VerificationBodyFullFlow
 import com.stripe.android.link.ui.wallet.WalletBody
@@ -110,19 +111,14 @@ internal class LinkActivity : ComponentActivity() {
                         val isOnRootScreen by isRootScreenFlow().collectAsState(true)
 
                         val backStackEntry by navController.currentBackStackEntryAsState()
-
-                        val hideLinkHeader = remember(backStackEntry) {
-                            val currentRoute = backStackEntry?.destination?.route
-                            currentRoute in setOf(
-                                LinkScreen.CardEdit.route,
-                                LinkScreen.PaymentMethod.route
-                            )
-                        }
+                        val appBarState = rememberLinkAppBarState(
+                            isRootScreen = isOnRootScreen,
+                            currentRoute = backStackEntry?.destination?.route,
+                            email = linkAccount?.email
+                        )
 
                         LinkAppBar(
-                            email = linkAccount?.email,
-                            isRootScreen = isOnRootScreen,
-                            hideLinkHeader = hideLinkHeader,
+                            state = appBarState,
                             onButtonClick = { viewModel.navigator.onBack() }
                         )
 
