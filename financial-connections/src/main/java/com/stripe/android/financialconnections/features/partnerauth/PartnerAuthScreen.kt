@@ -1,10 +1,8 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -31,14 +29,13 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.PartnerCallout
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.institutionpicker.LoadingContent
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
-import com.stripe.android.financialconnections.ui.TextResource
-import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -70,7 +67,8 @@ private fun PartnerAuthScreenContent(
         when (state.authenticationStatus) {
             is Uninitialized -> PrePaneContent(
                 institutionName = state.institutionName,
-                partner = state.partner,
+                flow = state.flow,
+                showPartnerDisclosure = state.showPartnerDisclosure,
                 onContinueClick = onContinueClick
             )
             is Loading, is Success -> LoadingContent(
@@ -88,7 +86,8 @@ private fun PartnerAuthScreenContent(
 @Composable
 private fun PrePaneContent(
     institutionName: String,
-    partner: PartnerAuthState.Partner,
+    flow: Flow?,
+    showPartnerDisclosure: Boolean,
     onContinueClick: () -> Unit
 ) {
     Column(
@@ -113,7 +112,7 @@ private fun PrePaneContent(
             style = FinancialConnectionsTheme.typography.body
         )
         Spacer(modifier = Modifier.weight(1f))
-        Callout(partner = partner)
+        if (flow != null && showPartnerDisclosure) PartnerCallout(flow = flow)
         Spacer(modifier = Modifier.size(16.dp))
         FinancialConnectionsButton(
             onClick = onContinueClick,
@@ -138,51 +137,6 @@ private fun PrePaneContent(
 }
 
 @Composable
-private fun Callout(
-    partner: PartnerAuthState.Partner
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(color = FinancialConnectionsTheme.colors.backgroundContainer)
-            .padding(12.dp)
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
-            contentDescription = null,
-            modifier = Modifier
-                .size(16.dp)
-                .clip(RoundedCornerShape(6.dp))
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        AnnotatedText(
-            TextResource.StringId(
-                R.string.stripe_prepane_partner_callout,
-                listOf(stringResource(id = partner.toStringResId()))
-            ),
-            defaultStyle = FinancialConnectionsTheme.typography.captionTight.copy(
-                color = FinancialConnectionsTheme.colors.textSecondary
-            ),
-            annotationStyles = mapOf(
-                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionTightEmphasized
-                    .toSpanStyle()
-                    .copy(color = FinancialConnectionsTheme.colors.textBrand)
-            ),
-            onClickableTextClick = {}
-        )
-    }
-}
-
-private fun PartnerAuthState.Partner.toStringResId(): Int = when (this) {
-    PartnerAuthState.Partner.FINICITY -> R.string.stripe_partner_finicity
-    PartnerAuthState.Partner.MX -> R.string.stripe_partner_mx
-    PartnerAuthState.Partner.TESTMODE -> R.string.stripe_partner_testmode
-    PartnerAuthState.Partner.TRUELAYER -> R.string.stripe_partner_truelayer
-    PartnerAuthState.Partner.WELLS_FARGO -> R.string.stripe_partner_wellsfargo
-}
-
-@Composable
 @Preview
 internal fun PrepaneContentPreview() {
     FinancialConnectionsTheme {
@@ -191,7 +145,7 @@ internal fun PrepaneContentPreview() {
                 institutionName = "Random bank",
                 url = null,
                 authenticationStatus = Uninitialized,
-                partner = PartnerAuthState.Partner.FINICITY
+                flow = Flow.FINICITY_CONNECT_V2_OAUTH
             ),
             onContinueClick = {}
         )

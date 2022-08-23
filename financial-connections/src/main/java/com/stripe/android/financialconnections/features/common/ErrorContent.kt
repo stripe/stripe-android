@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.InstitutionPlannedException
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
+import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import java.text.SimpleDateFormat
@@ -70,6 +71,27 @@ internal fun InstitutionPlannedDowntimeErrorContent(
         content = stringResource(
             R.string.stripe_error_planned_downtime_desc,
             readableDate,
+        ),
+        ctaText = stringResource(R.string.stripe_error_cta_select_another_bank),
+        onCtaClick = onSelectAnotherBank
+    )
+}
+
+@Composable
+internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
+    exception: NoSupportedPaymentMethodTypeAccountsException,
+    onSelectAnotherBank: () -> Unit
+) {
+    ErrorContent(
+        painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        title = stringResource(
+            R.string.stripe_account_picker_error_no_payment_method_title,
+        ),
+        content = stringResource(
+            R.string.stripe_account_picker_error_no_payment_method_desc,
+            exception.accountsCount.toString(),
+            exception.institution.name,
+            exception.merchantName
         ),
         ctaText = stringResource(R.string.stripe_error_cta_select_another_bank),
         onCtaClick = onSelectAnotherBank

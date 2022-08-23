@@ -20,34 +20,34 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
     // TODO@carlosmuvi migrate to PreviewParameterProvider when showkase adds support.
     companion object {
         fun multiSelect() = AccountPickerState(
-            selectedIds = setOf("id1"),
             payload = Success(
                 AccountPickerState.Payload(
                     selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
                     accounts = partnerAccountList(),
-                    accessibleData = accessibleCallout()
+                    accessibleData = accessibleCallout(),
+                    selectedIds = setOf("id1")
                 )
             )
         )
 
         fun singleSelect() = AccountPickerState(
-            selectedIds = setOf("id1"),
             payload = Success(
                 AccountPickerState.Payload(
                     selectionMode = AccountPickerState.SelectionMode.RADIO,
                     accounts = partnerAccountList(),
-                    accessibleData = accessibleCallout()
+                    accessibleData = accessibleCallout(),
+                    selectedIds = setOf("id1")
                 )
             )
         )
 
         fun dropdown() = AccountPickerState(
-            selectedIds = setOf("id1"),
             payload = Success(
                 AccountPickerState.Payload(
                     selectionMode = AccountPickerState.SelectionMode.DROPDOWN,
                     accounts = partnerAccountList(),
-                    accessibleData = accessibleCallout()
+                    accessibleData = accessibleCallout(),
+                    selectedIds = setOf("id1")
                 )
             )
         )

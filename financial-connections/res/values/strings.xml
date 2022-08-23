@@ -66,5 +66,7 @@
     <string name="stripe_partner_truelayer">Truelayer</string>
     <string name="stripe_partner_testmode">TestMode</string>
     <string name="stripe_partner_wellsfargo">Wells Fargo</string>
+    <string name="stripe_account_picker_error_no_payment_method_title">No checking or savings account available</string>
+    <string name="stripe_account_picker_error_no_payment_method_desc">We found %1$s %2$s accounts but you can only link checking or savings to %3$s. Please try selecting another bank.</string>
 </resources>
 
