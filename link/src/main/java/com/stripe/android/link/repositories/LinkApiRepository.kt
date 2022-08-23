@@ -1,6 +1,5 @@
 package com.stripe.android.link.repositories
 
-import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -31,7 +30,6 @@ internal class LinkApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     private val stripeRepository: StripeRepository,
-    private val logger: Logger,
     @IOContext private val workContext: CoroutineContext,
     private val locale: Locale?
 ) : LinkRepository {
@@ -41,25 +39,17 @@ internal class LinkApiRepository @Inject constructor(
         authSessionCookie: String?
     ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
-            stripeRepository.lookupConsumerSession(
-                email,
-                authSessionCookie,
-                ApiRequest.Options(
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
+            requireNotNull(
+                stripeRepository.lookupConsumerSession(
+                    email,
+                    authSessionCookie,
+                    ApiRequest.Options(
+                        publishableKeyProvider(),
+                        stripeAccountIdProvider()
+                    )
                 )
             )
-        }.fold(
-            onSuccess = {
-                it?.let {
-                    Result.success(it)
-                } ?: Result.failure(InternalError("Error looking up consumer"))
-            },
-            onFailure = {
-                logger.error("Error looking up consumer", it)
-                Result.failure(it)
-            }
-        )
+        }
     }
 
     override suspend fun consumerSignUp(
@@ -69,28 +59,20 @@ internal class LinkApiRepository @Inject constructor(
         authSessionCookie: String?
     ): Result<ConsumerSession> = withContext(workContext) {
         runCatching {
-            stripeRepository.consumerSignUp(
-                email,
-                phone,
-                country,
-                locale,
-                authSessionCookie,
-                ApiRequest.Options(
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
+            requireNotNull(
+                stripeRepository.consumerSignUp(
+                    email,
+                    phone,
+                    country,
+                    locale,
+                    authSessionCookie,
+                    ApiRequest.Options(
+                        publishableKeyProvider(),
+                        stripeAccountIdProvider()
+                    )
                 )
             )
-        }.fold(
-            onSuccess = {
-                it?.let {
-                    Result.success(it)
-                } ?: Result.failure(InternalError("Error signing up consumer"))
-            },
-            onFailure = {
-                logger.error("Error signing up consumer", it)
-                Result.failure(it)
-            }
-        )
+        }
     }
 
     override suspend fun startVerification(
@@ -99,28 +81,20 @@ internal class LinkApiRepository @Inject constructor(
         authSessionCookie: String?
     ): Result<ConsumerSession> = withContext(workContext) {
         runCatching {
-            stripeRepository.startConsumerVerification(
-                consumerSessionClientSecret,
-                locale ?: Locale.US,
-                authSessionCookie,
-                consumerPublishableKey?.let {
-                    ApiRequest.Options(it)
-                } ?: ApiRequest.Options(
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
+            requireNotNull(
+                stripeRepository.startConsumerVerification(
+                    consumerSessionClientSecret,
+                    locale ?: Locale.US,
+                    authSessionCookie,
+                    consumerPublishableKey?.let {
+                        ApiRequest.Options(it)
+                    } ?: ApiRequest.Options(
+                        publishableKeyProvider(),
+                        stripeAccountIdProvider()
+                    )
                 )
             )
-        }.fold(
-            onSuccess = {
-                it?.let {
-                    Result.success(it)
-                } ?: Result.failure(InternalError("Error starting consumer verification"))
-            },
-            onFailure = {
-                logger.error("Error starting consumer verification", it)
-                Result.failure(it)
-            }
-        )
+        }
     }
 
     override suspend fun confirmVerification(
@@ -130,28 +104,20 @@ internal class LinkApiRepository @Inject constructor(
         authSessionCookie: String?
     ): Result<ConsumerSession> = withContext(workContext) {
         runCatching {
-            stripeRepository.confirmConsumerVerification(
-                consumerSessionClientSecret,
-                verificationCode,
-                authSessionCookie,
-                consumerPublishableKey?.let {
-                    ApiRequest.Options(it)
-                } ?: ApiRequest.Options(
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
+            requireNotNull(
+                stripeRepository.confirmConsumerVerification(
+                    consumerSessionClientSecret,
+                    verificationCode,
+                    authSessionCookie,
+                    consumerPublishableKey?.let {
+                        ApiRequest.Options(it)
+                    } ?: ApiRequest.Options(
+                        publishableKeyProvider(),
+                        stripeAccountIdProvider()
+                    )
                 )
             )
-        }.fold(
-            onSuccess = {
-                it?.let {
-                    Result.success(it)
-                } ?: Result.failure(InternalError("Error confirming consumer verification"))
-            },
-            onFailure = {
-                logger.error("Error confirming consumer verification", it)
-                Result.failure(it)
-            }
-        )
+        }
     }
 
     override suspend fun logout(
@@ -160,27 +126,19 @@ internal class LinkApiRepository @Inject constructor(
         authSessionCookie: String?
     ): Result<ConsumerSession> = withContext(workContext) {
         runCatching {
-            stripeRepository.logoutConsumer(
-                consumerSessionClientSecret,
-                authSessionCookie,
-                consumerPublishableKey?.let {
-                    ApiRequest.Options(it)
-                } ?: ApiRequest.Options(
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
+            requireNotNull(
+                stripeRepository.logoutConsumer(
+                    consumerSessionClientSecret,
+                    authSessionCookie,
+                    consumerPublishableKey?.let {
+                        ApiRequest.Options(it)
+                    } ?: ApiRequest.Options(
+                        publishableKeyProvider(),
+                        stripeAccountIdProvider()
+                    )
                 )
             )
-        }.fold(
-            onSuccess = {
-                it?.let {
-                    Result.success(it)
-                } ?: Result.failure(InternalError("Error logging out"))
-            },
-            onFailure = {
-                logger.error("Error logging out", it)
-                Result.failure(it)
-            }
-        )
+        }
     }
 
     override suspend fun listPaymentDetails(
@@ -188,27 +146,19 @@ internal class LinkApiRepository @Inject constructor(
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails> = withContext(workContext) {
         runCatching {
-            stripeRepository.listPaymentDetails(
-                consumerSessionClientSecret,
-                SupportedPaymentMethod.allTypes,
-                consumerPublishableKey?.let {
-                    ApiRequest.Options(it)
-                } ?: ApiRequest.Options(
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
+            requireNotNull(
+                stripeRepository.listPaymentDetails(
+                    consumerSessionClientSecret,
+                    SupportedPaymentMethod.allTypes,
+                    consumerPublishableKey?.let {
+                        ApiRequest.Options(it)
+                    } ?: ApiRequest.Options(
+                        publishableKeyProvider(),
+                        stripeAccountIdProvider()
+                    )
                 )
             )
-        }.fold(
-            onSuccess = {
-                it?.let {
-                    Result.success(it)
-                } ?: Result.failure(InternalError("Error fetching consumer payment details"))
-            },
-            onFailure = {
-                logger.error("Error fetching consumer payment details", it)
-                Result.failure(it)
-            }
-        )
+        }
     }
 
     override suspend fun createFinancialConnectionsSession(
@@ -216,26 +166,18 @@ internal class LinkApiRepository @Inject constructor(
         consumerPublishableKey: String?
     ): Result<FinancialConnectionsSession> = withContext(workContext) {
         runCatching {
-            stripeRepository.createLinkFinancialConnectionsSession(
-                consumerSessionClientSecret,
-                consumerPublishableKey?.let {
-                    ApiRequest.Options(it)
-                } ?: ApiRequest.Options(
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
+            requireNotNull(
+                stripeRepository.createLinkFinancialConnectionsSession(
+                    consumerSessionClientSecret,
+                    consumerPublishableKey?.let {
+                        ApiRequest.Options(it)
+                    } ?: ApiRequest.Options(
+                        publishableKeyProvider(),
+                        stripeAccountIdProvider()
+                    )
                 )
             )
-        }.fold(
-            onSuccess = {
-                it?.let {
-                    Result.success(it)
-                } ?: Result.failure(InternalError("Error creating financial connections session"))
-            },
-            onFailure = {
-                logger.error("Error creating financial connections session", it)
-                Result.failure(it)
-            }
-        )
+        }
     }
 
     override suspend fun createPaymentDetails(
@@ -244,29 +186,21 @@ internal class LinkApiRepository @Inject constructor(
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails.BankAccount> = withContext(workContext) {
         runCatching {
-            stripeRepository.createPaymentDetails(
-                consumerSessionClientSecret,
-                financialConnectionsAccountId,
-                consumerPublishableKey?.let {
-                    ApiRequest.Options(it)
-                } ?: ApiRequest.Options(
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
-                )
-            )?.paymentDetails?.first()?.let {
-                it as? ConsumerPaymentDetails.BankAccount
-            }
-        }.fold(
-            onSuccess = {
-                it?.let {
-                    Result.success(it)
-                } ?: Result.failure(InternalError("Error creating consumer payment method"))
-            },
-            onFailure = {
-                logger.error("Error creating consumer payment method", it)
-                Result.failure(it)
-            }
-        )
+            requireNotNull(
+                stripeRepository.createPaymentDetails(
+                    consumerSessionClientSecret,
+                    financialConnectionsAccountId,
+                    consumerPublishableKey?.let {
+                        ApiRequest.Options(it)
+                    } ?: ApiRequest.Options(
+                        publishableKeyProvider(),
+                        stripeAccountIdProvider()
+                    )
+                )?.paymentDetails?.first()?.let {
+                    it as? ConsumerPaymentDetails.BankAccount
+                }
+            )
+        }
     }
 
     override suspend fun createPaymentDetails(
@@ -278,38 +212,30 @@ internal class LinkApiRepository @Inject constructor(
         consumerPublishableKey: String?
     ): Result<LinkPaymentDetails.New> = withContext(workContext) {
         runCatching {
-            stripeRepository.createPaymentDetails(
-                consumerSessionClientSecret,
-                paymentMethod.createParams(paymentMethodCreateParams, userEmail),
-                consumerPublishableKey?.let {
-                    ApiRequest.Options(it)
-                } ?: ApiRequest.Options(
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
-                )
-            )?.paymentDetails?.first()?.let {
-                LinkPaymentDetails.New(
-                    it,
-                    ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
-                        .createPaymentMethodCreateParams(
-                            consumerSessionClientSecret,
-                            it,
-                            paymentMethod.extraConfirmationParams(paymentMethodCreateParams)
-                        ),
-                    paymentMethodCreateParams
-                )
-            }
-        }.fold(
-            onSuccess = {
-                it?.let {
-                    Result.success(it)
-                } ?: Result.failure(InternalError("Error creating consumer payment method"))
-            },
-            onFailure = {
-                logger.error("Error creating consumer payment method", it)
-                Result.failure(it)
-            }
-        )
+            requireNotNull(
+                stripeRepository.createPaymentDetails(
+                    consumerSessionClientSecret,
+                    paymentMethod.createParams(paymentMethodCreateParams, userEmail),
+                    consumerPublishableKey?.let {
+                        ApiRequest.Options(it)
+                    } ?: ApiRequest.Options(
+                        publishableKeyProvider(),
+                        stripeAccountIdProvider()
+                    )
+                )?.paymentDetails?.first()?.let {
+                    LinkPaymentDetails.New(
+                        it,
+                        ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
+                            .createPaymentMethodCreateParams(
+                                consumerSessionClientSecret,
+                                it,
+                                paymentMethod.extraConfirmationParams(paymentMethodCreateParams)
+                            ),
+                        paymentMethodCreateParams
+                    )
+                }
+            )
+        }
     }
 
     override suspend fun updatePaymentDetails(
@@ -318,27 +244,19 @@ internal class LinkApiRepository @Inject constructor(
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails> = withContext(workContext) {
         runCatching {
-            stripeRepository.updatePaymentDetails(
-                consumerSessionClientSecret,
-                updateParams,
-                consumerPublishableKey?.let {
-                    ApiRequest.Options(it)
-                } ?: ApiRequest.Options(
-                    publishableKeyProvider(),
-                    stripeAccountIdProvider()
+            requireNotNull(
+                stripeRepository.updatePaymentDetails(
+                    consumerSessionClientSecret,
+                    updateParams,
+                    consumerPublishableKey?.let {
+                        ApiRequest.Options(it)
+                    } ?: ApiRequest.Options(
+                        publishableKeyProvider(),
+                        stripeAccountIdProvider()
+                    )
                 )
             )
-        }.fold(
-            onSuccess = {
-                it?.let {
-                    Result.success(it)
-                } ?: Result.failure(InternalError("Error updating consumer payment method"))
-            },
-            onFailure = {
-                logger.error("Error updating consumer payment method", it)
-                Result.failure(it)
-            }
-        )
+        }
     }
 
     override suspend fun deletePaymentDetails(
@@ -357,14 +275,6 @@ internal class LinkApiRepository @Inject constructor(
                     stripeAccountIdProvider()
                 )
             )
-        }.fold(
-            onSuccess = {
-                Result.success(Unit)
-            },
-            onFailure = {
-                logger.error("Error deleting consumer payment method", it)
-                Result.failure(it)
-            }
-        )
+        }
     }
 }

@@ -1,7 +1,6 @@
 package com.stripe.android.link.repositories
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
@@ -45,7 +44,6 @@ class LinkApiRepositoryTest {
         publishableKeyProvider = { PUBLISHABLE_KEY },
         stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
         stripeRepository = stripeRepository,
-        logger = Logger.noop(),
         workContext = Dispatchers.IO,
         locale = Locale.US
     )
