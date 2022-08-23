@@ -451,7 +451,7 @@ internal class DefaultFlowController @Inject internal constructor(
         val config = requireNotNull(initData.config)
 
         lifecycleScope.launch {
-            val shippingDetails: AddressDetails? = null // TODO: config.shippingDetails
+            val shippingDetails: AddressDetails? = config.shippingDetails
             val customerPhone = if (shippingDetails?.isCheckboxSelected == true) {
                 shippingDetails.phoneNumber
             } else {
