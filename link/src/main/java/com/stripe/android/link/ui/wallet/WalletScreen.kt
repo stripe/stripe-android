@@ -202,18 +202,18 @@ internal fun WalletBody(
                 },
                 onMenuButtonClick = {
                     showBottomSheetContent {
-                        WalletBottomSheetContent(
+                        WalletPaymentMethodMenu(
                             paymentDetails = it,
+                            onEditClick = {
+                                showBottomSheetContent(null)
+                                onEditPaymentMethod(it)
+                            },
                             onRemoveClick = {
                                 showBottomSheetContent(null)
                                 itemBeingRemoved = it
                             },
                             onCancelClick = {
                                 showBottomSheetContent(null)
-                            },
-                            onEditClick = {
-                                showBottomSheetContent(null)
-                                onEditPaymentMethod(it)
                             }
                         )
                     }

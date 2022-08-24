@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
@@ -100,6 +101,10 @@ internal class LinkActivity : ComponentActivity() {
                     },
                     modifier = Modifier.fillMaxHeight(),
                     sheetState = sheetState,
+                    sheetShape = MaterialTheme.shapes.large.copy(
+                        bottomStart = CornerSize(0.dp),
+                        bottomEnd = CornerSize(0.dp)
+                    ),
                     scrimColor = MaterialTheme.linkColors.sheetScrim
                 ) {
                     navController = rememberNavController()
