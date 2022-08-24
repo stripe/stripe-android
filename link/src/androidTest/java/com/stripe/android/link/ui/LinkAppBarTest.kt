@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import org.junit.Rule
 import org.junit.Test
@@ -40,8 +41,11 @@ internal class LinkAppBarTest {
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             LinkAppBar(
-                email = email,
-                isRootScreen = true,
+                state = LinkAppBarState(
+                    navigationIcon = R.drawable.ic_link_close,
+                    hideHeader = false,
+                    email = email
+                ),
                 onButtonClick = onButtonClick
             )
         }

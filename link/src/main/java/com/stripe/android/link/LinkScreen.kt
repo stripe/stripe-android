@@ -11,6 +11,7 @@ internal sealed class LinkScreen(
 ) {
     object Loading : LinkScreen("Loading")
     object Verification : LinkScreen("Verification")
+    object VerificationDialog : LinkScreen("VerificationDialog")
     object Wallet : LinkScreen("Wallet")
 
     class PaymentMethod(loadFromArgs: Boolean = false) :

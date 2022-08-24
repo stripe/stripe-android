@@ -22,8 +22,7 @@ internal fun ScrollableTopLevelColumn(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Box(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
+        modifier = Modifier.verticalScroll(rememberScrollState())
     ) {
         Column(
             modifier = Modifier
