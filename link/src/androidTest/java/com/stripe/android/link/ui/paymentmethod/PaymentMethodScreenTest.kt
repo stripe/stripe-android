@@ -92,17 +92,23 @@ internal class PaymentMethodScreenTest {
     }
 
     private fun setContent(
+        supportedPaymentMethods: List<SupportedPaymentMethod> = SupportedPaymentMethod.allValues,
+        selectedPaymentMethod: SupportedPaymentMethod = SupportedPaymentMethod.Card,
         primaryButtonState: PrimaryButtonState = PrimaryButtonState.Enabled,
         errorMessage: ErrorMessage? = null,
+        onPaymentMethodSelected: (SupportedPaymentMethod) -> Unit = {},
         onPayButtonClick: () -> Unit = {},
         onSecondaryButtonClick: () -> Unit = {}
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             PaymentMethodBody(
+                supportedPaymentMethods = supportedPaymentMethods,
+                selectedPaymentMethod = selectedPaymentMethod,
                 primaryButtonLabel = primaryButtonLabel,
                 primaryButtonState = primaryButtonState,
                 secondaryButtonLabel = secondaryButtonLabel,
                 errorMessage = errorMessage,
+                onPaymentMethodSelected = onPaymentMethodSelected,
                 onPrimaryButtonClick = onPayButtonClick,
                 onSecondaryButtonClick = onSecondaryButtonClick,
                 formContent = {}

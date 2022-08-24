@@ -97,7 +97,10 @@ internal class WalletScreenTest {
     @Test
     fun selected_payment_method_is_shown_when_collapsed() {
         val initiallySelectedItem = paymentDetails[4]
-        setContent(selectedItem = initiallySelectedItem)
+        setContent(
+            isExpanded = false,
+            selectedItem = initiallySelectedItem
+        )
 
         composeTestRule.onNodeWithText("Payment").onParent().onChildren()
             .filter(hasText(initiallySelectedItem.label, substring = true))
@@ -105,9 +108,31 @@ internal class WalletScreenTest {
     }
 
     @Test
-    fun when_no_payment_option_is_selected_then_list_is_expanded() {
-        setContent(selectedItem = null)
+    fun expand_list_triggers_callback() {
+        var expanded: Boolean? = null
+        setContent(
+            isExpanded = false,
+            setExpanded = {
+                expanded = it
+            }
+        )
+        assertCollapsed()
+        composeTestRule.onNodeWithText("Payment").performClick()
+        assertThat(expanded).isTrue()
+    }
+
+    @Test
+    fun collapse_list_triggers_callback() {
+        var expanded: Boolean? = null
+        setContent(
+            isExpanded = true,
+            setExpanded = {
+                expanded = it
+            }
+        )
         assertExpanded()
+        composeTestRule.onNodeWithText("Payment methods").performClick()
+        assertThat(expanded).isFalse()
     }
 
     @Test
@@ -357,8 +382,10 @@ internal class WalletScreenTest {
     private fun setContent(
         supportedTypes: Set<String> = SupportedPaymentMethod.allTypes,
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = paymentDetails.first(),
+        isExpanded: Boolean = true,
         primaryButtonState: PrimaryButtonState = PrimaryButtonState.Enabled,
         errorMessage: ErrorMessage? = null,
+        setExpanded: (Boolean) -> Unit = {},
         onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onAddNewPaymentMethodClick: () -> Unit = {},
         onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
@@ -395,9 +422,11 @@ internal class WalletScreenTest {
                     paymentDetailsList = paymentDetailsList,
                     supportedTypes = supportedTypes,
                     selectedItem = selectedItem,
+                    isExpanded = isExpanded,
                     primaryButtonLabel = primaryButtonLabel,
                     primaryButtonState = primaryButtonState,
                     errorMessage = errorMessage,
+                    setExpanded = setExpanded,
                     onItemSelected = onItemSelected,
                     onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
                     onEditPaymentMethod = onEditPaymentMethod,
