@@ -14,6 +14,7 @@ sealed class FinancialConnectionsSheetLinkResult : Parcelable {
      * @param linkedAccountId The linked account id result of the AuthFlow.
      */
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Completed(
         val linkedAccountId: String
     ) : FinancialConnectionsSheetLinkResult()
@@ -22,6 +23,7 @@ sealed class FinancialConnectionsSheetLinkResult : Parcelable {
      * The customer canceled the connections session attempt.
      */
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object Canceled : FinancialConnectionsSheetLinkResult()
 
     /**
@@ -29,6 +31,7 @@ sealed class FinancialConnectionsSheetLinkResult : Parcelable {
      * @param error The error encountered by the customer.
      */
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Failed(
         val error: Throwable
     ) : FinancialConnectionsSheetLinkResult()

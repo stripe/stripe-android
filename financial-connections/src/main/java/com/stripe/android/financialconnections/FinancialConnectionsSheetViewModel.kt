@@ -215,7 +215,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             val receivedUrl: Uri? = intent?.data?.toString()?.toUriOrNull()
             if (receivedUrl == null) {
                 onFatal(state, Exception("Intent url received from web flow is null"))
-            } else when (val urlWithoutPath = receivedUrl.buildUpon().clearQuery().toString()) {
+            } else when (receivedUrl.buildUpon().clearQuery().toString()) {
                 state.manifest?.successUrl -> when (state.initialArgs) {
                     is ForData -> fetchFinancialConnectionsSession(state)
                     is ForToken -> fetchFinancialConnectionsSessionForToken(state)
