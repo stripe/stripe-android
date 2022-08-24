@@ -1,21 +1,8 @@
 package com.stripe.android.financialconnections.features.manualentry
 
-import androidx.annotation.StringRes
 import com.stripe.android.financialconnections.R
 
 internal object ManualEntryInputValidator {
-
-    fun validate(
-        routing: String,
-        account: String,
-        accountConfirm: String
-    ): ManualEntryInputErrors {
-        return ManualEntryInputErrors(
-            routingError = getRoutingErrorIdOrNull(routing),
-            accountError = getAccountErrorIdOrNull(account),
-            accountConfirmError = getAccountConfirmIdOrNull(account, accountConfirm)
-        )
-    }
 
     fun getRoutingErrorIdOrNull(input: String): Int? = when {
         input.isEmpty() -> R.string.stripe_validation_routing_required
@@ -60,13 +47,4 @@ internal object ManualEntryInputValidator {
 
     private const val ROUTING_NUMBER_LENGTH = 9
     private const val ACCOUNT_NUMBER_MAX_LENGTH = 17
-}
-
-data class ManualEntryInputErrors(
-    @StringRes val routingError: Int?,
-    @StringRes val accountError: Int?,
-    @StringRes val accountConfirmError: Int?
-) {
-    val isValid: Boolean
-        get() = routingError == null && accountError == null && accountConfirmError == null
 }
