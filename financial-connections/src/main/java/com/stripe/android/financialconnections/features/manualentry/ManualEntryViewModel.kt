@@ -1,25 +1,40 @@
 package com.stripe.android.financialconnections.features.manualentry
 
+import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.domain.AttachPaymentAccount
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
+import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
 @Suppress("LongParameterList")
 internal class ManualEntryViewModel @Inject constructor(
     initialState: ManualEntryState,
-    val getManifest: GetManifest
+    val attachPaymentAccount: AttachPaymentAccount,
+    val getManifest: GetManifest,
+    val logger: Logger
 ) : MavericksViewModel<ManualEntryState>(initialState) {
 
     init {
+        logErrors()
         suspend {
             getManifest().manualEntryUsesMicrodeposits
         }.execute {
             copy(verifyWithMicrodeposits = it() ?: false)
         }
+    }
+
+    private fun logErrors() {
+        onAsync(ManualEntryState::linkPaymentAccount, onFail = {
+            logger.error("Error linking payment account", it)
+        })
     }
 
     fun onRoutingEntered(input: String) {
@@ -56,8 +71,15 @@ internal class ManualEntryViewModel @Inject constructor(
     }
 
     fun onSubmit() {
-        withState {
-        }
+        suspend {
+            val state = awaitState()
+            attachPaymentAccount(
+                PaymentAccountParams.BankAccount(
+                    routingNumber = requireNotNull(state.routing.first),
+                    accountNumber = requireNotNull(state.account.first),
+                )
+            )
+        }.execute { copy(linkPaymentAccount = it) }
     }
 
     companion object :
@@ -82,6 +104,7 @@ internal data class ManualEntryState(
     val routing: Pair<String?, Int?> = null to null,
     val account: Pair<String?, Int?> = null to null,
     val accountConfirm: Pair<String?, Int?> = null to null,
+    val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized,
     val verifyWithMicrodeposits: Boolean = false
 ) : MavericksState {
 
