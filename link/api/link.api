@@ -179,6 +179,7 @@ public final class com/stripe/android/link/LinkPaymentDetails$Saved$Creator : an
 }
 
 public final class com/stripe/android/link/LinkPaymentLauncher$Companion {
+	public final fun getLINK_ENABLED ()Z
 }
 
 public final class com/stripe/android/link/LinkPaymentLauncher_Factory {
@@ -559,20 +560,20 @@ public final class com/stripe/android/link/ui/verification/VerificationViewModel
 	public static fun injectViewModel (Lcom/stripe/android/link/ui/verification/VerificationViewModel$Factory;Lcom/stripe/android/link/ui/verification/VerificationViewModel;)V
 }
 
-public final class com/stripe/android/link/ui/wallet/ComposableSingletons$PaymentDetailsKt {
-	public static final field INSTANCE Lcom/stripe/android/link/ui/wallet/ComposableSingletons$PaymentDetailsKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class com/stripe/android/link/ui/wallet/ComposableSingletons$WalletModalsKt {
-	public static final field INSTANCE Lcom/stripe/android/link/ui/wallet/ComposableSingletons$WalletModalsKt;
+public final class com/stripe/android/link/ui/wallet/ComposableSingletons$ConfirmRemoveDialogKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/wallet/ComposableSingletons$ConfirmRemoveDialogKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public static field lambda-2 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$link_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class com/stripe/android/link/ui/wallet/ComposableSingletons$PaymentDetailsKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/wallet/ComposableSingletons$PaymentDetailsKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/wallet/ComposableSingletons$WalletScreenKt {
