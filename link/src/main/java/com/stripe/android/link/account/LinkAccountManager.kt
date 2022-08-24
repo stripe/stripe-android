@@ -233,7 +233,7 @@ internal class LinkAccountManager @Inject constructor(
     suspend fun createPaymentDetails(
         financialConnectionsAccountId: String
     ) = retryingOnAuthError { clientSecret ->
-        linkRepository.createPaymentDetails(
+        linkRepository.createBankAccountPaymentDetails(
             financialConnectionsAccountId,
             clientSecret,
             consumerPublishableKey

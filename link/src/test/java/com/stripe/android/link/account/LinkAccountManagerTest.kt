@@ -429,7 +429,7 @@ class LinkAccountManagerTest {
         val accountManager = accountManager()
         accountManager.setAccountNullable(mockConsumerSession)
 
-        whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
+        whenever(linkRepository.createBankAccountPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
             .thenReturn(
                 Result.failure(AuthenticationException(StripeError())),
                 Result.success(mock())
@@ -438,7 +438,7 @@ class LinkAccountManagerTest {
         accountManager.createPaymentDetails("")
 
         verify(linkRepository, times(2))
-            .createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+            .createBankAccountPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
         verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
 
         assertThat(accountManager.linkAccount.value).isNotNull()
@@ -451,7 +451,7 @@ class LinkAccountManagerTest {
             val accountManager = accountManager()
             accountManager.setAccountNullable(mockConsumerSession)
 
-            whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
+            whenever(linkRepository.createBankAccountPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
                 .thenReturn(
                     Result.failure(AuthenticationException(StripeError())),
                     Result.success(mock())
@@ -460,7 +460,7 @@ class LinkAccountManagerTest {
             accountManager.createPaymentDetails("")
 
             verify(linkRepository)
-                .createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+                .createBankAccountPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
             verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
         }
 

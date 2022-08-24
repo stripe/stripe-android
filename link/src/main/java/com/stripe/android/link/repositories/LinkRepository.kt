@@ -80,7 +80,7 @@ internal interface LinkRepository {
     /**
      * Create a new linked bank account payment method in the consumer account.
      */
-    suspend fun createPaymentDetails(
+    suspend fun createBankAccountPaymentDetails(
         financialConnectionsAccountId: String,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?

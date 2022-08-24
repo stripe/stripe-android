@@ -409,7 +409,7 @@ class LinkApiRepositoryTest {
         val secret = "secret"
         val consumerKey = "key"
 
-        linkRepository.createPaymentDetails(
+        linkRepository.createBankAccountPaymentDetails(
             financialConnectionsAccountId = accountId,
             consumerSessionClientSecret = secret,
             consumerPublishableKey = consumerKey
@@ -433,7 +433,7 @@ class LinkApiRepositoryTest {
             whenever(stripeRepository.createPaymentDetails(any(), any<String>(), any()))
                 .thenReturn(paymentDetails)
 
-            val result = linkRepository.createPaymentDetails(
+            val result = linkRepository.createBankAccountPaymentDetails(
                 financialConnectionsAccountId = accountId,
                 consumerSessionClientSecret = secret,
                 consumerPublishableKey = consumerKey
@@ -452,7 +452,7 @@ class LinkApiRepositoryTest {
             whenever(stripeRepository.createPaymentDetails(any(), any<String>(), any()))
                 .thenThrow(RuntimeException("error"))
 
-            val result = linkRepository.createPaymentDetails(
+            val result = linkRepository.createBankAccountPaymentDetails(
                 financialConnectionsAccountId = accountId,
                 consumerSessionClientSecret = secret,
                 consumerPublishableKey = consumerKey

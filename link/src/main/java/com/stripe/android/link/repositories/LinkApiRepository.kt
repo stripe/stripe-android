@@ -181,7 +181,7 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
-    override suspend fun createPaymentDetails(
+    override suspend fun createBankAccountPaymentDetails(
         financialConnectionsAccountId: String,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
