@@ -2545,10 +2545,15 @@ public abstract class com/stripe/android/model/ConsumerPaymentDetailsCreateParam
 public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card : com/stripe/android/model/ConsumerPaymentDetailsCreateParams {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card$Companion;
 	public fun <init> (Ljava/util/Map;Ljava/lang/String;)V
 	public fun describeContents ()I
 	public fun toParamMap ()Ljava/util/Map;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card$Companion {
+	public final fun extraConfirmationParams (Lcom/stripe/android/model/PaymentMethodCreateParams;)Ljava/util/Map;
 }
 
 public final class com/stripe/android/model/ConsumerPaymentDetailsCreateParams$Card$Creator : android/os/Parcelable$Creator {

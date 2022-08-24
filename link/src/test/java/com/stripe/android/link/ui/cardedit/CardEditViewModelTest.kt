@@ -7,6 +7,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.PaymentDetailsFixtures
+import com.stripe.android.link.ui.wallet.PaymentDetailsResult
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -85,7 +86,7 @@ class CardEditViewModelTest {
         val viewModel = createViewModel()
         viewModel.initWithPaymentDetailsId("UNKNOWN_ID")
 
-        verify(navigator).setResult(any(), argWhere { it is CardEditViewModel.Result.Failure })
+        verify(navigator).setResult(any(), argWhere { it is PaymentDetailsResult.Failure })
     }
 
     @Test
@@ -96,7 +97,7 @@ class CardEditViewModelTest {
         val viewModel = createViewModel()
         viewModel.initWithPaymentDetailsId("any")
 
-        verify(navigator).setResult(any(), argWhere { it is CardEditViewModel.Result.Failure })
+        verify(navigator).setResult(any(), argWhere { it is PaymentDetailsResult.Failure })
     }
 
     @Test
@@ -173,8 +174,8 @@ class CardEditViewModelTest {
         val viewModel = createAndInitViewModel()
         viewModel.dismiss()
         verify(navigator).setResult(
-            eq(CardEditViewModel.Result.KEY),
-            argWhere { it is CardEditViewModel.Result.Cancelled }
+            eq(PaymentDetailsResult.KEY),
+            argWhere { it is PaymentDetailsResult.Cancelled }
         )
         verify(navigator).onBack()
     }

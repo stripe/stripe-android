@@ -10,7 +10,6 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -41,7 +40,6 @@ internal class LinkAccountManager @Inject constructor(
     /**
      * The publishable key for the signed in Link account.
      */
-    @VisibleForTesting
     var consumerPublishableKey: String? = null
 
     val accountStatus = linkAccount.transform { value ->
@@ -201,18 +199,16 @@ internal class LinkAccountManager @Inject constructor(
     }
 
     /**
-     * Creates a new PaymentDetails attached to the current account.
+     * Creates a new PaymentDetails.Card attached to the current account.
      *
      * @return The parameters needed to confirm the current Stripe Intent using the newly created
      *          Payment Details.
      */
-    suspend fun createPaymentDetails(
-        paymentMethod: SupportedPaymentMethod,
+    suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.New> =
         linkAccount.value?.let { account ->
-            createPaymentDetails(
-                paymentMethod,
+            createCardPaymentDetails(
                 paymentMethodCreateParams,
                 account.email,
                 stripeIntent
@@ -222,16 +218,37 @@ internal class LinkAccountManager @Inject constructor(
         )
 
     /**
-     * Create a new payment method in the signed in consumer account.
+     * Create a session used to connect a bank account through Financial Connections.
+     */
+    suspend fun createFinancialConnectionsSession() = retryingOnAuthError { clientSecret ->
+        linkRepository.createFinancialConnectionsSession(
+            clientSecret,
+            consumerPublishableKey
+        )
+    }
+
+    /**
+     * Create a new Bank Account payment method attached to the consumer account.
      */
     suspend fun createPaymentDetails(
-        paymentMethod: SupportedPaymentMethod,
+        financialConnectionsAccountId: String
+    ) = retryingOnAuthError { clientSecret ->
+        linkRepository.createPaymentDetails(
+            financialConnectionsAccountId,
+            clientSecret,
+            consumerPublishableKey
+        )
+    }
+
+    /**
+     * Create a new Card payment method attached to the consumer account.
+     */
+    suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         userEmail: String,
         stripeIntent: StripeIntent
     ) = retryingOnAuthError { clientSecret ->
-        linkRepository.createPaymentDetails(
-            paymentMethod,
+        linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams,
             userEmail,
             stripeIntent,

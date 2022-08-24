@@ -119,7 +119,7 @@ internal class LinkActivity : ComponentActivity() {
 
                         LinkAppBar(
                             state = appBarState,
-                            onButtonClick = { viewModel.navigator.onBack() }
+                            onButtonClick = { viewModel.navigator.onBack(true) }
                         )
 
                         NavHost(navController, LinkScreen.Loading.route) {

@@ -467,8 +467,7 @@ class LinkApiRepositoryTest {
         val email = "email@stripe.com"
         val consumerKey = "key"
 
-        linkRepository.createPaymentDetails(
-            paymentMethod = SupportedPaymentMethod.Card,
+        linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             userEmail = email,
             stripeIntent = paymentIntent,
@@ -503,8 +502,7 @@ class LinkApiRepositoryTest {
             val secret = "secret"
             val email = "email@stripe.com"
 
-            linkRepository.createPaymentDetails(
-                paymentMethod = SupportedPaymentMethod.Card,
+            linkRepository.createCardPaymentDetails(
                 paymentMethodCreateParams = cardPaymentMethodCreateParams,
                 userEmail = email,
                 stripeIntent = paymentIntent,
@@ -547,8 +545,7 @@ class LinkApiRepositoryTest {
         )
             .thenReturn(paymentDetails)
 
-        val result = linkRepository.createPaymentDetails(
-            paymentMethod = SupportedPaymentMethod.Card,
+        val result = linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             userEmail = email,
             stripeIntent = paymentIntent,
@@ -594,8 +591,7 @@ class LinkApiRepositoryTest {
         )
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.createPaymentDetails(
-            paymentMethod = SupportedPaymentMethod.Card,
+        val result = linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             userEmail = "email@stripe.com",
             stripeIntent = paymentIntent,

@@ -385,13 +385,92 @@ class LinkAccountManagerTest {
     }
 
     @Test
-    fun `createPaymentDetails retries on auth error`() = runSuspendTest {
+    fun `createFinancialConnectionsSession retries on auth error`() = runSuspendTest {
+        val accountManager = accountManager()
+        accountManager.setAccountNullable(mockConsumerSession)
+
+        whenever(linkRepository.createFinancialConnectionsSession(anyOrNull(), anyOrNull()))
+            .thenReturn(
+                Result.failure(AuthenticationException(StripeError())),
+                Result.success(mock())
+            )
+
+        accountManager.createFinancialConnectionsSession()
+
+        verify(linkRepository, times(2))
+            .createFinancialConnectionsSession(anyOrNull(), anyOrNull())
+        verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
+
+        assertThat(accountManager.linkAccount.value).isNotNull()
+    }
+
+    @Test
+    fun `createFinancialConnectionsSession does not retry on auth error if no cookie exists`() =
+        runSuspendTest {
+            whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
+            val accountManager = accountManager()
+            accountManager.setAccountNullable(mockConsumerSession)
+
+            whenever(linkRepository.createFinancialConnectionsSession(anyOrNull(), anyOrNull()))
+                .thenReturn(
+                    Result.failure(AuthenticationException(StripeError())),
+                    Result.success(mock())
+                )
+
+            accountManager.createFinancialConnectionsSession()
+
+            verify(linkRepository)
+                .createFinancialConnectionsSession(anyOrNull(), anyOrNull())
+            verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
+        }
+
+    @Test
+    fun `createPaymentDetails for bank account retries on auth error`() = runSuspendTest {
+        val accountManager = accountManager()
+        accountManager.setAccountNullable(mockConsumerSession)
+
+        whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
+            .thenReturn(
+                Result.failure(AuthenticationException(StripeError())),
+                Result.success(mock())
+            )
+
+        accountManager.createPaymentDetails("")
+
+        verify(linkRepository, times(2))
+            .createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+        verify(linkRepository).lookupConsumer(anyOrNull(), anyOrNull())
+
+        assertThat(accountManager.linkAccount.value).isNotNull()
+    }
+
+    @Test
+    fun `createPaymentDetails for bank account does not retry on auth error if no cookie exists`() =
+        runSuspendTest {
+            whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
+            val accountManager = accountManager()
+            accountManager.setAccountNullable(mockConsumerSession)
+
+            whenever(linkRepository.createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
+                .thenReturn(
+                    Result.failure(AuthenticationException(StripeError())),
+                    Result.success(mock())
+                )
+
+            accountManager.createPaymentDetails("")
+
+            verify(linkRepository)
+                .createPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+            verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
+        }
+
+    @Test
+    fun `createPaymentDetails for card retries on auth error`() = runSuspendTest {
         val accountManager = accountManager()
         accountManager.setAccountNullable(mockConsumerSession)
 
         whenever(
-            linkRepository.createPaymentDetails(
-                anyOrNull(),
+            linkRepository.createCardPaymentDetails(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
@@ -403,11 +482,10 @@ class LinkAccountManagerTest {
             Result.success(mock())
         )
 
-        accountManager.createPaymentDetails(mock(), mock(), "", mock())
+        accountManager.createCardPaymentDetails(mock(), "", mock())
 
         verify(linkRepository, times(2))
-            .createPaymentDetails(
-                anyOrNull(),
+            .createCardPaymentDetails(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
@@ -420,38 +498,37 @@ class LinkAccountManagerTest {
     }
 
     @Test
-    fun `createPaymentDetails does not retry on auth error if no cookie exists`() = runSuspendTest {
-        whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
-        val accountManager = accountManager()
-        accountManager.setAccountNullable(mockConsumerSession)
+    fun `createPaymentDetails for card does not retry on auth error if no cookie exists`() =
+        runSuspendTest {
+            whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
+            val accountManager = accountManager()
+            accountManager.setAccountNullable(mockConsumerSession)
 
-        whenever(
-            linkRepository.createPaymentDetails(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
+            whenever(
+                linkRepository.createCardPaymentDetails(
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull()
+                )
+            ).thenReturn(
+                Result.failure(AuthenticationException(StripeError())),
+                Result.success(mock())
             )
-        ).thenReturn(
-            Result.failure(AuthenticationException(StripeError())),
-            Result.success(mock())
-        )
 
-        accountManager.createPaymentDetails(mock(), mock(), "", mock())
+            accountManager.createCardPaymentDetails(mock(), "", mock())
 
-        verify(linkRepository)
-            .createPaymentDetails(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
-        verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
-    }
+            verify(linkRepository)
+                .createCardPaymentDetails(
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull()
+                )
+            verify(linkRepository, times(0)).lookupConsumer(anyOrNull(), anyOrNull())
+        }
 
     @Test
     fun `updatePaymentDetails retries on auth error`() = runSuspendTest {
