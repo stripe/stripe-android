@@ -80,5 +80,7 @@
     <string name="stripe_validation_account_required">Account number required.</string>
     <string name="stripe_validation_account_too_long">Invalid bank account number: must be at most 17 digits long.</string>
     <string name="stripe_validation_account_confirm_mismatch">Your account numbers don\'t match.</string>
+    <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified with micro-deposits to your account.</string>
+    <string name="stripe_manualentry_account_type_disclaimer">Your account can be checking or savings.</string>
 </resources>
 
