@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.model
 
-sealed class PaymentAccountParams(val type: String) {
+internal sealed class PaymentAccountParams(val type: String) {
 
     abstract fun toParamMap(): Map<String, String>
 
