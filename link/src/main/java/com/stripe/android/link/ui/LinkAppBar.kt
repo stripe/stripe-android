@@ -5,17 +5,17 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -29,13 +29,14 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.AppBarHeight
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.MinimumTouchTargetSize
 import com.stripe.android.link.theme.linkColors
 
 @Composable
 internal fun LinkAppBar(
     state: LinkAppBarState,
-    onButtonClick: () -> Unit
+    onBackPress: () -> Unit,
+    onLogout: () -> Unit,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -45,7 +46,7 @@ internal fun LinkAppBar(
         verticalAlignment = Alignment.Top
     ) {
         IconButton(
-            onClick = onButtonClick,
+            onClick = onBackPress,
             modifier = Modifier.padding(4.dp)
         ) {
             Icon(
@@ -55,7 +56,7 @@ internal fun LinkAppBar(
             )
         }
 
-        val contentAlpha by animateFloatAsState(targetValue = if (state.hideHeader) 0f else 1f)
+        val contentAlpha by animateFloatAsState(targetValue = if (state.showHeader) 1f else 0f)
 
         Column(
             modifier = Modifier
@@ -88,7 +89,35 @@ internal fun LinkAppBar(
             }
         }
 
-        Spacer(modifier = Modifier.width(MinimumTouchTargetSize))
+        val overflowIconAlpha by animateFloatAsState(
+            targetValue = if (state.showOverflowMenu) 1f else 0f
+        )
+
+        IconButton(
+            onClick = {
+                showBottomSheetContent {
+                    LinkLogoutSheet(
+                        onLogoutClick = {
+                            showBottomSheetContent(null)
+                            onLogout()
+                        },
+                        onCancelClick = {
+                            showBottomSheetContent(null)
+                        }
+                    )
+                }
+            },
+            enabled = state.showOverflowMenu,
+            modifier = Modifier
+                .alpha(overflowIconAlpha)
+                .padding(4.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = stringResource(R.string.menu),
+                tint = MaterialTheme.linkColors.closeButton
+            )
+        }
     }
 }
 
@@ -100,10 +129,13 @@ private fun LinkAppBar() {
             LinkAppBar(
                 state = LinkAppBarState(
                     navigationIcon = R.drawable.ic_link_close,
-                    hideHeader = false,
+                    showHeader = true,
+                    showOverflowMenu = true,
                     email = "email@example.com"
                 ),
-                onButtonClick = {}
+                onBackPress = {},
+                onLogout = {},
+                showBottomSheetContent = {}
             )
         }
     }
@@ -117,10 +149,13 @@ private fun LinkAppBar_NoEmail() {
             LinkAppBar(
                 state = LinkAppBarState(
                     navigationIcon = R.drawable.ic_link_close,
-                    hideHeader = false,
+                    showHeader = true,
+                    showOverflowMenu = true,
                     email = null
                 ),
-                onButtonClick = {}
+                onBackPress = {},
+                onLogout = {},
+                showBottomSheetContent = {}
             )
         }
     }
@@ -134,10 +169,13 @@ private fun LinkAppBar_ChildScreen() {
             LinkAppBar(
                 state = LinkAppBarState(
                     navigationIcon = R.drawable.ic_link_back,
-                    hideHeader = true,
+                    showHeader = false,
+                    showOverflowMenu = false,
                     email = "email@example.com"
                 ),
-                onButtonClick = {}
+                onBackPress = {},
+                onLogout = {},
+                showBottomSheetContent = {}
             )
         }
     }
@@ -151,10 +189,13 @@ private fun LinkAppBar_ChildScreen_NoEmail() {
             LinkAppBar(
                 state = LinkAppBarState(
                     navigationIcon = R.drawable.ic_link_back,
-                    hideHeader = true,
+                    showHeader = false,
+                    showOverflowMenu = false,
                     email = null
                 ),
-                onButtonClick = {}
+                onBackPress = {},
+                onLogout = {},
+                showBottomSheetContent = {}
             )
         }
     }

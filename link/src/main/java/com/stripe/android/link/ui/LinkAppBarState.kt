@@ -8,7 +8,8 @@ import com.stripe.android.link.R
 
 internal data class LinkAppBarState(
     @DrawableRes val navigationIcon: Int,
-    val hideHeader: Boolean,
+    val showHeader: Boolean,
+    val showOverflowMenu: Boolean,
     val email: String?
 )
 
@@ -32,13 +33,16 @@ internal fun rememberLinkAppBarState(
         val hideHeader = currentRoute in routesWithoutHeader
         val hideEmail = email.isNullOrBlank() || currentRoute in routesWithoutEmail
 
+        val showOverflowMenu = currentRoute == LinkScreen.Wallet.route
+
         LinkAppBarState(
             navigationIcon = if (isRootScreen) {
                 R.drawable.ic_link_close
             } else {
                 R.drawable.ic_link_back
             },
-            hideHeader = hideHeader,
+            showHeader = !hideHeader,
+            showOverflowMenu = showOverflowMenu,
             email = email?.takeIf { it.isNotBlank() && !hideEmail }
         )
     }

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.ViewTreeObserver
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
@@ -78,6 +79,10 @@ internal class LinkActivity : ComponentActivity() {
         // TODO(brnunes-stripe): Migrate to androidx.compose.foundation 1.2.0 when out of beta
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
 
+        onBackPressedDispatcher.addCallback(this) {
+            viewModel.navigator.onBack()
+        }
+
         setContent {
             var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
             val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -124,7 +129,18 @@ internal class LinkActivity : ComponentActivity() {
 
                         LinkAppBar(
                             state = appBarState,
-                            onButtonClick = { viewModel.navigator.onBack() }
+                            onBackPress = viewModel::onBackPress,
+                            onLogout = viewModel::logout,
+                            showBottomSheetContent = {
+                                if (it == null) {
+                                    coroutineScope.launch {
+                                        sheetState.hide()
+                                        bottomSheetContent = null
+                                    }
+                                } else {
+                                    bottomSheetContent = it
+                                }
+                            }
                         )
 
                         NavHost(navController, LinkScreen.Loading.route) {
@@ -255,7 +271,7 @@ internal class LinkActivity : ComponentActivity() {
         viewModel.unregisterFromActivity()
     }
 
-    private fun dismiss(result: LinkActivityResult = LinkActivityResult.Canceled) {
+    private fun dismiss(result: LinkActivityResult) {
         setResult(
             result.resultCode,
             Intent().putExtras(LinkActivityContract.Result(result).toBundle())

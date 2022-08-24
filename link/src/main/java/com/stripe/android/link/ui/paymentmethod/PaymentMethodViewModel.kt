@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Origin.PayAnotherWay
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
@@ -124,8 +125,7 @@ internal class PaymentMethodViewModel @Inject constructor(
 
     private fun payAnotherWay() {
         clearError()
-        navigator.dismiss()
-        linkAccountManager.logout()
+        navigator.dismiss(result = LinkActivityResult.Canceled(origin = PayAnotherWay))
     }
 
     private fun completePayment(linkPaymentDetails: LinkPaymentDetails) {

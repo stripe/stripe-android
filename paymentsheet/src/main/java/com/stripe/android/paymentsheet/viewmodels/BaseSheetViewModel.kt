@@ -15,6 +15,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
@@ -185,7 +186,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     var usBankAccountSavedScreenState: USBankAccountFormScreenState? = null
 
-    val linkLauncher = linkPaymentLauncherFactory.let {
+    val linkLauncher: LinkPaymentLauncher = linkPaymentLauncherFactory.let {
         val shippingDetails: AddressDetails? = config?.shippingDetails
         val customerPhone = if (shippingDetails?.isCheckboxSelected == true) {
             shippingDetails.phoneNumber

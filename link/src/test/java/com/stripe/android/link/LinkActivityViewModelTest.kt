@@ -20,6 +20,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.isA
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
@@ -130,6 +131,14 @@ class LinkActivityViewModelTest {
                 it.application == context
             }
         )
+    }
+
+    @Test
+    fun `Logging out actually logs out and navigates back`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.logout()
+        verify(navigator).dismiss(isA<LinkActivityResult.Canceled>())
+        verify(linkAccountManager).logout()
     }
 
     private fun createViewModel(args: LinkActivityContract.Args = defaultArgs) =
