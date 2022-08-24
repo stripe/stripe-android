@@ -10,11 +10,11 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class FinancialConnectionsSheetForLinkContract :
-    ActivityResultContract<FinancialConnectionsSheetActivityArgs.ForData, FinancialConnectionsSheetLinkResult>() {
+    ActivityResultContract<FinancialConnectionsSheetActivityArgs.ForLink, FinancialConnectionsSheetLinkResult>() {
 
     override fun createIntent(
         context: Context,
-        input: FinancialConnectionsSheetActivityArgs.ForData
+        input: FinancialConnectionsSheetActivityArgs.ForLink
     ): Intent {
         return Intent(context, FinancialConnectionsSheetActivity::class.java)
             .putExtra(Mavericks.KEY_ARG, input)
