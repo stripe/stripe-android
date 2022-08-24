@@ -13,16 +13,20 @@ import java.security.InvalidParameterException
  * [com.stripe.android.financialconnections.FinancialConnectionsSheetActivity] and
  * instances of [com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher].
  */
-internal sealed class FinancialConnectionsSheetActivityArgs constructor(
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class FinancialConnectionsSheetActivityArgs constructor(
     open val configuration: FinancialConnectionsSheet.Configuration
 ) : Parcelable {
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class ForData(
         override val configuration: FinancialConnectionsSheet.Configuration
     ) : FinancialConnectionsSheetActivityArgs(configuration)
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class ForToken(
         override val configuration: FinancialConnectionsSheet.Configuration
     ) : FinancialConnectionsSheetActivityArgs(configuration)
@@ -33,7 +37,7 @@ internal sealed class FinancialConnectionsSheetActivityArgs constructor(
         override val configuration: FinancialConnectionsSheet.Configuration
     ) : FinancialConnectionsSheetActivityArgs(configuration)
 
-    fun validate() {
+    internal fun validate() {
         if (configuration.financialConnectionsSessionClientSecret.isBlank()) {
             throw InvalidParameterException(
                 "The session client secret cannot be an empty string."

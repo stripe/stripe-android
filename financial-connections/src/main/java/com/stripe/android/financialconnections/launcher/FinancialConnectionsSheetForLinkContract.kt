@@ -9,7 +9,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Companion.EXTRA_RESULT
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-internal class FinancialConnectionsSheetForLinkContract :
+class FinancialConnectionsSheetForLinkContract :
     ActivityResultContract<FinancialConnectionsSheetActivityArgs.ForLink, FinancialConnectionsSheetLinkResult>() {
 
     override fun createIntent(
