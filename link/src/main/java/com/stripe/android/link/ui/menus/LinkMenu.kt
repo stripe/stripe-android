@@ -22,11 +22,11 @@ import com.stripe.android.link.theme.linkColors
  * An item to be displayed in a [LinkMenu].
  *
  * @property textResId The resource ID of the text of the item
- * @property destructive Whether this item should be rendered with the error text color
+ * @property isDestructive Whether this item should be rendered with the error text color
  */
 internal interface LinkMenuItem {
     val textResId: Int
-    val destructive: Boolean
+    val isDestructive: Boolean
 }
 
 /**
@@ -69,7 +69,7 @@ private fun <T : LinkMenuItem> LinkBottomSheetRow(
     ) {
         Text(
             text = stringResource(item.textResId),
-            color = if (item.destructive) {
+            color = if (item.isDestructive) {
                 MaterialTheme.linkColors.errorText
             } else {
                 Color.Unspecified

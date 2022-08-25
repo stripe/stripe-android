@@ -10,7 +10,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 
 internal sealed class WalletPaymentMethodMenuItem(
     override val textResId: Int,
-    override val destructive: Boolean = false
+    override val isDestructive: Boolean = false
 ) : LinkMenuItem {
 
     data class RemoveItem(
