@@ -21,7 +21,9 @@ sealed interface StripeIntent : StripeModel {
      */
     val created: Long
 
-    // TODO
+    /**
+     * Country code of the user.
+     */
     val countryCode: String?
 
     /**

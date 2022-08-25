@@ -179,7 +179,7 @@ class SignUpViewModelTest {
     fun `When signUp fails then an error message is shown`() =
         runTest(UnconfinedTestDispatcher()) {
             val errorMessage = "Error message"
-            whenever(linkAccountManager.signUp(any(), any(), any()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull()))
                 .thenReturn(Result.failure(RuntimeException(errorMessage)))
 
             val viewModel = createViewModel()
@@ -200,7 +200,7 @@ class SignUpViewModelTest {
                 )
             )
 
-            whenever(linkAccountManager.signUp(any(), any(), any()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull()))
                 .thenReturn(Result.success(linkAccount))
 
             viewModel.performValidSignup()
@@ -221,7 +221,7 @@ class SignUpViewModelTest {
                 )
             )
 
-            whenever(linkAccountManager.signUp(any(), any(), any()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull()))
                 .thenReturn(Result.success(linkAccount))
 
             viewModel.performValidSignup()
@@ -241,7 +241,7 @@ class SignUpViewModelTest {
                 )
             )
 
-            whenever(linkAccountManager.signUp(any(), any(), any()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull()))
                 .thenReturn(Result.success(linkAccount))
 
             viewModel.performValidSignup()
@@ -254,7 +254,7 @@ class SignUpViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
 
-            whenever(linkAccountManager.signUp(any(), any(), any()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull()))
                 .thenReturn(Result.failure(Exception()))
 
             viewModel.performValidSignup()

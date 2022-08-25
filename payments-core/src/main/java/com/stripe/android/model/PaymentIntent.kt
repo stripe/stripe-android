@@ -81,7 +81,9 @@ data class PaymentIntent internal constructor(
      */
     val confirmationMethod: ConfirmationMethod = ConfirmationMethod.Automatic,
 
-    // TODO
+    /**
+     * Country code of the user.
+     */
     override val countryCode: String?,
 
     /**

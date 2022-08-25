@@ -183,17 +183,18 @@ class LinkAccountManagerTest {
             val accountManager = accountManager()
             val phone = "phone"
             val country = "country"
+            val name = "name"
 
-            accountManager.signInWithUserInput(UserInput.SignUp(EMAIL, phone, country))
+            accountManager.signInWithUserInput(UserInput.SignUp(EMAIL, phone, country, name))
 
-            verify(linkRepository).consumerSignUp(eq(EMAIL), eq(phone), eq(country), anyOrNull())
+            verify(linkRepository).consumerSignUp(eq(EMAIL), eq(phone), eq(country), eq(name), anyOrNull())
             assertThat(accountManager.linkAccount.value).isNotNull()
         }
 
     @Test
     fun `signInWithUserInput for new user sends analytics event when call succeeds`() =
         runSuspendTest {
-            accountManager().signInWithUserInput(UserInput.SignUp(EMAIL, "phone", "country"))
+            accountManager().signInWithUserInput(UserInput.SignUp(EMAIL, "phone", "country", "name"))
 
             verify(linkEventsReporter).onSignupCompleted(true)
         }
@@ -206,12 +207,13 @@ class LinkAccountManagerTest {
                     anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
+                    anyOrNull(),
                     anyOrNull()
                 )
             )
                 .thenReturn(Result.failure(Exception()))
 
-            accountManager().signInWithUserInput(UserInput.SignUp(EMAIL, "phone", "country"))
+            accountManager().signInWithUserInput(UserInput.SignUp(EMAIL, "phone", "country", "name"))
 
             verify(linkEventsReporter).onSignupFailure(true)
         }
@@ -220,7 +222,7 @@ class LinkAccountManagerTest {
     fun `signUp stores email when successfully signed up`() = runSuspendTest {
         val accountManager = accountManager()
 
-        accountManager.signUp(EMAIL, "phone", "US")
+        accountManager.signUp(EMAIL, "phone", "US", name = null)
 
         verify(cookieStore).storeNewUserEmail(EMAIL)
     }
@@ -544,7 +546,7 @@ class LinkAccountManagerTest {
             .thenReturn(Result.success(consumerSessionLookup))
         whenever(linkRepository.startVerification(anyOrNull(), anyOrNull(), anyOrNull()))
             .thenReturn(Result.success(mockConsumerSession))
-        whenever(linkRepository.consumerSignUp(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull()))
+        whenever(linkRepository.consumerSignUp(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull()))
             .thenReturn(Result.success(mockConsumerSession))
     }
 

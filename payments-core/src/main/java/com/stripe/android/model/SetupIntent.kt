@@ -30,7 +30,9 @@ data class SetupIntent internal constructor(
      */
     override val created: Long,
 
-    // TODO
+    /**
+     * Country code of the user.
+     */
     override val countryCode: String?,
 
     /**

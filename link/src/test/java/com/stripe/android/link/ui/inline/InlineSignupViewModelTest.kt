@@ -2,12 +2,14 @@ package com.stripe.android.link.ui.inline
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -18,6 +20,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -29,6 +32,7 @@ import kotlin.test.BeforeTest
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class InlineSignupViewModelTest {
+
     private val linkAccountManager = mock<LinkAccountManager>()
     private val linkEventsReporter = mock<LinkEventsReporter>()
 
@@ -56,6 +60,7 @@ class InlineSignupViewModelTest {
     fun `When email and phone are provided it should prefill all values`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = InlineSignupViewModel(
+                stripeIntent = mockStripeIntent(countryCode = CountryCode.CA),
                 merchantName = MERCHANT_NAME,
                 customerEmail = CUSTOMER_EMAIL,
                 customerPhone = CUSTOMER_PHONE,
@@ -114,7 +119,7 @@ class InlineSignupViewModelTest {
     fun `When entered all fields for new account then it emits user input`() =
         runTest(UnconfinedTestDispatcher()) {
             val email = "valid@email.com"
-            val viewModel = createViewModel()
+            val viewModel = createViewModel(countryCode = CountryCode.US)
             viewModel.toggleExpanded()
             viewModel.emailController.onRawValueChange(email)
 
@@ -132,7 +137,35 @@ class InlineSignupViewModelTest {
             viewModel.phoneController.onRawValueChange(phone)
 
             assertThat(viewModel.userInput.value)
-                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US"))
+                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US", name = null))
+        }
+
+    @Test
+    fun `When entered all fields for new account with name collection then it emits user input`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val email = "valid@email.com"
+            val viewModel = createViewModel(countryCode = CountryCode.CA)
+            viewModel.toggleExpanded()
+            viewModel.emailController.onRawValueChange(email)
+
+            assertThat(viewModel.userInput.value).isNull()
+
+            whenever(linkAccountManager.lookupConsumer(any(), any()))
+                .thenReturn(Result.success(null))
+
+            // Advance past lookup debounce delay
+            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
+
+            assertThat(viewModel.userInput.value).isNull()
+
+            val phone = "1234567890"
+            viewModel.phoneController.onRawValueChange(phone)
+
+            val name = "A name"
+            viewModel.nameController.onRawValueChange(name)
+
+            assertThat(viewModel.userInput.value)
+                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US", name))
         }
 
     @Test
@@ -157,7 +190,7 @@ class InlineSignupViewModelTest {
             viewModel.phoneController.onRawValueChange(phone)
 
             assertThat(viewModel.userInput.value)
-                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US"))
+                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US", name = null))
 
             viewModel.phoneController.onRawValueChange("")
 
@@ -190,7 +223,10 @@ class InlineSignupViewModelTest {
             verify(linkEventsReporter).onSignupStarted(true)
         }
 
-    private fun createViewModel() = InlineSignupViewModel(
+    private fun createViewModel(
+        countryCode: CountryCode = CountryCode.US
+    ) = InlineSignupViewModel(
+        stripeIntent = mockStripeIntent(countryCode = countryCode),
         merchantName = MERCHANT_NAME,
         customerEmail = CUSTOMER_EMAIL,
         customerPhone = null,
@@ -213,6 +249,10 @@ class InlineSignupViewModelTest {
         whenever(consumerSession.clientSecret).thenReturn("secret")
         whenever(consumerSession.emailAddress).thenReturn("email")
         return consumerSession
+    }
+
+    private fun mockStripeIntent(countryCode: CountryCode): StripeIntent = mock {
+        on { this.countryCode } doReturn countryCode.value
     }
 
     private companion object {
