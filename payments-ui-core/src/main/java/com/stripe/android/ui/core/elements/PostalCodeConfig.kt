@@ -13,18 +13,27 @@ internal class PostalCodeConfig(
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null),
     country: String
 ) : TextFieldConfig {
-    override val debugLabel: String = "postal_code_text"
-    override val visualTransformation: VisualTransformation? = null
-    override val loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private val format = CountryPostalFormat.forCountry(country)
+
+    override val debugLabel: String = "postal_code_text"
+    override val visualTransformation: VisualTransformation =
+        PostalCodeVisualTransformation(format)
+    override val loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean) = false
 
         override fun isValid(): Boolean {
             val formatted = input.replace(Regex("\\s+"), "")
-            return formatted.length in format.minimumLength..format.maximumLength &&
-                input.matches(format.regexPattern)
+            return when (format) {
+                is CountryPostalFormat.Other -> {
+                    true
+                }
+                else -> {
+                    formatted.length in format.minimumLength..format.maximumLength &&
+                        input.matches(format.regexPattern)
+                }
+            }
         }
 
         override fun getError(): FieldError? = null
@@ -54,7 +63,7 @@ internal class PostalCodeConfig(
     ) {
         object CA : CountryPostalFormat(
             minimumLength = 6,
-            maximumLength = 6,
+            maximumLength = 7,
             regexPattern = Regex("[a-zA-Z]\\d[a-zA-Z][\\s-]?\\d[a-zA-Z]\\d")
         )
         object US : CountryPostalFormat(
@@ -63,8 +72,8 @@ internal class PostalCodeConfig(
             regexPattern = Regex("\\d+")
         )
         object Other : CountryPostalFormat(
-            minimumLength = 4,
-            maximumLength = 12,
+            minimumLength = 0,
+            maximumLength = 0,
             regexPattern = Regex(".+")
         )
 
