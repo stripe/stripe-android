@@ -128,7 +128,9 @@ class SimpleTextFieldController constructor(
     override fun onValueChange(displayFormatted: String): TextFieldState? {
         val originalTextStateValue = _fieldState.value
         _fieldValue.value = textFieldConfig.filter(displayFormatted)
-        listener?.invoke(_fieldValue.value)
+        if (_hasFocus.value) {
+            listener?.invoke(_fieldValue.value)
+        }
 
         // Should be filtered value
         _fieldState.value = textFieldConfig.determineState(_fieldValue.value)

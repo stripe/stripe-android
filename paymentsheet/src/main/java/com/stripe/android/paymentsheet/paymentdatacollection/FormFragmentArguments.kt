@@ -6,7 +6,6 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.convertToFormValuesMap
@@ -30,11 +29,6 @@ internal fun FormFragmentArguments.getInitialValuesMap(): Map<IdentifierSpec, St
         convertToFormValuesMap(it.toParamMap())
     } ?: emptyMap()
 
-    val shippingDetailsMap = shippingDetails
-        ?.toIdentifierMap()
-        ?.takeIf { billingDetails == null }
-        ?: emptyMap()
-
     return mapOf(
         IdentifierSpec.Name to this.billingDetails?.name,
         IdentifierSpec.Email to this.billingDetails?.email,
@@ -45,5 +39,5 @@ internal fun FormFragmentArguments.getInitialValuesMap(): Map<IdentifierSpec, St
         IdentifierSpec.State to this.billingDetails?.address?.state,
         IdentifierSpec.Country to this.billingDetails?.address?.country,
         IdentifierSpec.PostalCode to this.billingDetails?.address?.postalCode
-    ).plus(initialValues).plus(shippingDetailsMap)
+    ).plus(initialValues)
 }

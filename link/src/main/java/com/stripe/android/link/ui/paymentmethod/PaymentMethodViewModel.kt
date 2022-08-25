@@ -179,6 +179,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                 .initialValues(initialValues)
                 .stripeIntent(args.stripeIntent)
                 .merchantName(args.merchantName)
+                .shippingValues(args.shippingValues)
                 .build()
                 .formController
                 .also { formControllersCache[paymentMethod.value] = it }

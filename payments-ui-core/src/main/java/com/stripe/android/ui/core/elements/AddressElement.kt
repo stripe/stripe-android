@@ -24,7 +24,8 @@ open class AddressElement constructor(
         CountryConfig(countryCodes),
         rawValuesMap[IdentifierSpec.Country]
     ),
-    sameAsShippingController: SameAsShippingController?
+    sameAsShippingController: SameAsShippingController?,
+    shippingValuesMap: Map<IdentifierSpec, String?>?
 ) : SectionMultiFieldElement(_identifier) {
 
     @VisibleForTesting
@@ -57,8 +58,7 @@ open class AddressElement constructor(
         )
     )
 
-    private val originalValuesMap = rawValuesMap.mapValues { it.value ?: "" }.toMutableMap()
-    private val shippingDetailsMap = rawValuesMap.mapValues { it.value ?: "" }
+    private val currentValuesMap = mutableMapOf<IdentifierSpec, String?>()
 
     private val otherFields = countryElement.controller.rawFieldValue
         .distinctUntilChanged()
@@ -110,27 +110,30 @@ open class AddressElement constructor(
         }
 
         country?.let {
-            originalValuesMap[IdentifierSpec.Country] = it
+            currentValuesMap[IdentifierSpec.Country] = it
         }
 
         sameAsShipping?.let {
-            setRawValue(
+            val values = (
                 if (it) {
-                    shippingDetailsMap
+                    shippingValuesMap ?: emptyMap()
                 } else {
-                    originalValuesMap
+                    currentValuesMap.mapValues {
+                        if (it.key == IdentifierSpec.Country) it.value
+                        else rawValuesMap[it.key] ?: ""
+                    }
                 }
-            )
+                )
             fields.forEach { field ->
-                field.setRawValue(rawValuesMap)
+                field.setRawValue(values)
             }
         }
 
         otherFields.forEach { field ->
             field.setTextFieldOnChangeListener { identifier, text ->
-                originalValuesMap[identifier] = text
-                val same = shippingDetailsMap.all {
-                    originalValuesMap[it.key] == it.value
+                currentValuesMap[identifier] = text
+                val same = currentValuesMap.all {
+                    shippingValuesMap?.get(it.key) == it.value
                 }
                 sameAsShippingController?.onValueChange(same)
             }

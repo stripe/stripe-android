@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import android.content.Context
+import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
 import com.stripe.android.ui.core.address.AddressRepository
@@ -24,7 +25,9 @@ internal class TransformSpecToElement @Inject constructor(
             amount = formFragmentArguments.amount,
             saveForFutureUseInitialValue = formFragmentArguments.showCheckboxControlledFields,
             merchantName = formFragmentArguments.merchantName,
-            context = context
+            context = context,
+            shippingValues = formFragmentArguments.shippingDetails
+                ?.toIdentifierMap(formFragmentArguments.billingDetails)
         )
 
     internal fun transform(list: List<FormItemSpec>) = transformSpecToElements.transform(list)

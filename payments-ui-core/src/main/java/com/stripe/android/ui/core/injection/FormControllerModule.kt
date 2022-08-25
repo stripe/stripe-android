@@ -25,10 +25,12 @@ abstract class FormControllerModule {
             merchantName: String,
             stripeIntent: StripeIntent?,
             initialValues: Map<IdentifierSpec, String?>,
+            shippingValues: Map<IdentifierSpec, String?>?,
             viewOnlyFields: Set<IdentifierSpec>
         ) = TransformSpecToElements(
             addressResourceRepository = addressResourceRepository,
             initialValues = initialValues,
+            shippingValues = shippingValues,
             amount = (stripeIntent as? PaymentIntent)?.let {
                 val amount = it.amount
                 val currency = it.currency

@@ -68,7 +68,8 @@ data class AddressSpec(
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
-        addressRepository: AddressRepository
+        addressRepository: AddressRepository,
+        shippingValues: Map<IdentifierSpec, String?>?
     ): SectionElement {
         val label = if (showLabel) R.string.billing_details else null
         return if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
@@ -84,7 +85,7 @@ data class AddressSpec(
             )
         } else {
             val sameAsShippingElement =
-                initialValues[IdentifierSpec.SameAsShipping]
+                shippingValues?.get(IdentifierSpec.SameAsShipping)
                     ?.toBooleanStrictOrNull()
                     ?.let {
                         SameAsShippingElement(
@@ -98,7 +99,8 @@ data class AddressSpec(
                 rawValuesMap = initialValues,
                 countryCodes = allowedCountryCodes,
                 addressType = type,
-                sameAsShippingController = sameAsShippingElement?.controller
+                sameAsShippingController = sameAsShippingElement?.controller,
+                shippingValuesMap = shippingValues
             )
             createSectionElement(
                 sectionFieldElements = listOfNotNull(

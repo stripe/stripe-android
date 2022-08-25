@@ -24,7 +24,7 @@ const val CUSTOMER_PHONE = "customerPhone"
  * Identifies the shipping address passed in from the customer, used to pre-fill address forms.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val INITIAL_FORM_VALUES_MAP = "initialFormValuesMap"
+const val SHIPPING_VALUES = "shippingValues"
 
 /**
  * Identifies the Stripe Intent being processed by Link.

@@ -41,7 +41,7 @@ internal interface LinkActivityContractArgsModule {
 
         @Provides
         @Singleton
-        @Named(INITIAL_FORM_VALUES_MAP)
-        fun provideInitialFormValuesMap(args: LinkActivityContract.Args) = args.initialFormValuesMap
+        @Named(SHIPPING_VALUES)
+        fun provideShippingValues(args: LinkActivityContract.Args) = args.shippingValues
     }
 }

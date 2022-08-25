@@ -34,8 +34,7 @@ data class AddressDetails(
 }
 
 internal fun AddressDetails.toIdentifierMap(
-    billingDetails: PaymentSheet.BillingDetails? = null,
-    billingSameAsShipping: Boolean = true
+    billingDetails: PaymentSheet.BillingDetails? = null
 ): Map<IdentifierSpec, String?> {
     return if (billingDetails == null) {
         mapOf(
@@ -50,7 +49,7 @@ internal fun AddressDetails.toIdentifierMap(
         ).plus(
             mapOf(
                 IdentifierSpec.SameAsShipping to isCheckboxSelected?.toString()
-            ).takeIf { isCheckboxSelected != null && billingSameAsShipping } ?: emptyMap()
+            ).takeIf { isCheckboxSelected != null } ?: emptyMap()
         )
     } else {
         emptyMap()

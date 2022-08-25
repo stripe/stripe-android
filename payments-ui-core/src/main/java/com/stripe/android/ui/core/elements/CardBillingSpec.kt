@@ -16,10 +16,11 @@ data class CardBillingSpec(
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
-        addressRepository: AddressRepository
+        addressRepository: AddressRepository,
+        shippingValues: Map<IdentifierSpec, String?>?
     ): SectionElement {
         val sameAsShippingElement =
-            initialValues[IdentifierSpec.SameAsShipping]
+            shippingValues?.get(IdentifierSpec.SameAsShipping)
                 ?.toBooleanStrictOrNull()
                 ?.let {
                     SameAsShippingElement(
@@ -32,7 +33,8 @@ data class CardBillingSpec(
             addressRepository = addressRepository,
             countryCodes = allowedCountryCodes,
             rawValuesMap = initialValues,
-            sameAsShippingController = sameAsShippingElement?.controller
+            sameAsShippingController = sameAsShippingElement?.controller,
+            shippingValuesMap = shippingValues
         )
 
         return createSectionElement(
