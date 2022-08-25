@@ -57,8 +57,8 @@ open class AddressElement constructor(
         )
     )
 
-    private val originalValuesMap = rawValuesMap.mapValues { it.value ?: "" }
-    private val emptyValuesMap = rawValuesMap.mapValues { "" }
+    private val billingDetailsMap = rawValuesMap.mapValues { it.value ?: "" }.toMutableMap()
+    private val shippingDetailsMap = rawValuesMap.mapValues { it.value ?: "" }
 
     private val otherFields = countryElement.controller.rawFieldValue
         .distinctUntilChanged()
@@ -109,16 +109,30 @@ open class AddressElement constructor(
             baseElements
         }
 
+        country?.let {
+            billingDetailsMap[IdentifierSpec.Country] = it
+        }
+
         sameAsShipping?.let {
             setRawValue(
                 if (it) {
-                    originalValuesMap
+                    shippingDetailsMap
                 } else {
-                    emptyValuesMap
+                    billingDetailsMap
                 }
             )
-            fields.forEach {
-                it.setRawValue(rawValuesMap)
+            fields.forEach { field ->
+                field.setRawValue(rawValuesMap)
+            }
+        }
+
+        otherFields.forEach { field ->
+            field.setTextFieldOnChangeListener { identifier, text ->
+                billingDetailsMap[identifier] = text
+                val same = shippingDetailsMap.all {
+                    billingDetailsMap[it.key] == it.value
+                }
+                sameAsShippingController?.onValueChange(same)
             }
         }
 

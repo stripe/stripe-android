@@ -38,4 +38,8 @@ sealed class SectionSingleFieldElement(
             listOf(identifier).takeIf { controller is TextFieldController }
                 ?: emptyList()
         )
+
+    override fun setTextFieldOnChangeListener(listener: (IdentifierSpec, String) -> Unit) {
+        controller.setOnChangeListener(identifier, listener)
+    }
 }

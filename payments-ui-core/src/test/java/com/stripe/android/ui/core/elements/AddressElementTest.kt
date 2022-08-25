@@ -364,7 +364,7 @@ class AddressElementTest {
             addressRepository,
             mapOf(
                 IdentifierSpec.SameAsShipping to "true",
-                IdentifierSpec.Country to "JP"
+                IdentifierSpec.Country to "US"
             ),
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.Normal(),
@@ -372,15 +372,18 @@ class AddressElementTest {
         )
 
         val country = suspend {
-            addressElement.fields.first().map {
-                it.getFormFieldValueFlow().first()[0].second.value
-            }.first()
+            addressElement.fields
+                .first()[0]
+                .getFormFieldValueFlow()
+                .first()[0].second.value
         }
 
-        assertThat(country()).isEqualTo("US")
+        countryDropdownFieldController.onValueChange(1)
+
+        assertThat(country()).isEqualTo("JP")
 
         sameAsShippingController.onValueChange(true)
 
-        assertThat(country()).isEqualTo("JP")
+        assertThat(country()).isEqualTo("US")
     }
 }

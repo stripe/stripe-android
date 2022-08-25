@@ -116,6 +116,8 @@ class SimpleTextFieldController constructor(
             FormFieldEntry(value, complete)
         }
 
+    private var listener: ((String) -> Unit)? = null
+
     init {
         initialValue?.let { onRawValueChange(it) }
     }
@@ -126,6 +128,7 @@ class SimpleTextFieldController constructor(
     override fun onValueChange(displayFormatted: String): TextFieldState? {
         val originalTextStateValue = _fieldState.value
         _fieldValue.value = textFieldConfig.filter(displayFormatted)
+        listener?.invoke(_fieldValue.value)
 
         // Should be filtered value
         _fieldState.value = textFieldConfig.determineState(_fieldValue.value)
@@ -142,6 +145,15 @@ class SimpleTextFieldController constructor(
      */
     override fun onRawValueChange(rawValue: String) {
         onValueChange(textFieldConfig.convertFromRaw(rawValue))
+    }
+
+    override fun setOnChangeListener(
+        identifierSpec: IdentifierSpec,
+        listener: (IdentifierSpec, String) -> Unit
+    ) {
+        this.listener = {
+            listener(identifierSpec, it)
+        }
     }
 
     override fun onFocusChange(newHasFocus: Boolean) {

@@ -14,4 +14,5 @@ sealed interface SectionFieldElement {
     fun sectionFieldErrorController(): SectionFieldErrorController
     fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>)
     fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>>
+    fun setTextFieldOnChangeListener(listener: (IdentifierSpec, String) -> Unit) {}
 }
