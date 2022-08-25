@@ -6,9 +6,9 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
+import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
@@ -19,8 +19,8 @@ import javax.inject.Inject
 internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
     private val acceptConsent: AcceptConsent,
+    private val goNext: GoNext,
     private val getManifest: GetManifest,
-    private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val navigationManager: NavigationManager,
     private val logger: Logger
 ) : MavericksViewModel<ConsentState>(initialState) {
@@ -47,10 +47,9 @@ internal class ConsentViewModel @Inject constructor(
 
     fun onContinueClick() {
         suspend {
-            acceptConsent()
-            with(nativeAuthFlowCoordinator()) {
-                emit(RequestNextStep(currentStep = NavigationDirections.consent))
-            }
+            val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
+            goNext(updatedManifest.nextPane)
+            Unit
         }.execute { copy(acceptConsent = it) }
     }
 

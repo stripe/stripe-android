@@ -1,64 +1,25 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
-import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationCommand
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import javax.inject.Inject
 
 /**
- * Usecase that determines the next step to navigate based on the received input.
- *
- * @see [FinancialConnectionsSessionManifest.nextPane]
- * @see [FinancialConnectionsAuthorizationSession.nextPane]
- * @see [com.stripe.android.financialconnections.model.PartnerAccountsList.nextPane]
- *
+ * Navigates to the next screen given a [NextPane].
  */
 internal class GoNext @Inject constructor(
     private val navigationManager: NavigationManager,
-    private val getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
-    private val getManifest: GetManifest,
     private val logger: Logger
 ) {
 
-    suspend operator fun invoke(currentPane: NavigationCommand): NavigationCommand {
-        val manifest = getManifest()
-        val nextPane = when (currentPane.destination) {
-            /**
-             * institution picker step receives a fresh [FinancialConnectionsAuthorizationSession]
-             * after picking a bank, source of truth for navigation.
-             */
-            NavigationDirections.institutionPicker.destination ->
-                manifest.activeAuthSession!!.nextPane.toNavigationCommand()
-            /**
-             * Consent step receives a fresh [FinancialConnectionsSessionManifest]
-             * after agreeing, source of truth for navigation.
-             */
-            NavigationDirections.consent.destination ->
-                manifest.nextPane.toNavigationCommand()
-            /**
-             * Auth session authorization endpoint receives a
-             * fresh [FinancialConnectionsAuthorizationSession], source of truth for navigation.
-             */
-            NavigationDirections.partnerAuth.destination ->
-                manifest.activeAuthSession!!.nextPane.toNavigationCommand()
-            /**
-             * Account selection returns a [PartnerAccountsList] that includes the next pane,
-             * source of truth for navigation.
-             */
-            NavigationDirections.accountPicker.destination -> {
-
-                getAuthorizationSessionAccounts(manifest.activeAuthSession!!.id).nextPane.toNavigationCommand()
-            }
-            else -> TODO()
-        }
-        logger.debug("Navigating to next pane: ${nextPane.destination}")
-        navigationManager.navigate(nextPane)
-        return nextPane
+    operator fun invoke(nextPane: NextPane): NavigationCommand {
+        val nextPaneDirection = nextPane.toNavigationCommand()
+        logger.debug("Navigating to next pane: ${nextPaneDirection.destination}")
+        navigationManager.navigate(nextPaneDirection)
+        return nextPaneDirection
     }
 
     @Suppress("ComplexMethod")

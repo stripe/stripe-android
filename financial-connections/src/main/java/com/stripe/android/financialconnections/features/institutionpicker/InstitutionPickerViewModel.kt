@@ -9,13 +9,11 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
+import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
-import com.stripe.android.financialconnections.navigation.NavigationDirections.institutionPicker
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -25,7 +23,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private val configuration: FinancialConnectionsSheet.Configuration,
     private val searchInstitutions: SearchInstitutions,
     private val postAuthorizationSession: PostAuthorizationSession,
-    private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+    private val goNext: GoNext,
     private val logger: Logger,
     initialState: InstitutionPickerState
 ) : MavericksViewModel<InstitutionPickerState>(initialState) {
@@ -69,9 +67,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
         clearSearch()
         suspend {
             // api call
-            postAuthorizationSession(institution)
+            val authSession = postAuthorizationSession(institution)
             // navigate to next step
-            nativeAuthFlowCoordinator().emit(RequestNextStep(currentStep = institutionPicker))
+            goNext(authSession.nextPane)
+            Unit
         }.execute {
             copy(
                 selectInstitution = it,

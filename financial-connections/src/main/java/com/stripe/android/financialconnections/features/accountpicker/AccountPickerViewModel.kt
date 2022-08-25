@@ -9,8 +9,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
+import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
@@ -31,7 +30,7 @@ internal class AccountPickerViewModel @Inject constructor(
     initialState: AccountPickerState,
     private val selectAccounts: SelectAccounts,
     private val getManifest: GetManifest,
-    private val coordinator: NativeAuthFlowCoordinator,
+    private val goNext: GoNext,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
@@ -126,7 +125,7 @@ internal class AccountPickerViewModel @Inject constructor(
                             .map { it.account },
                         sessionId = manifest.activeAuthSession!!.id,
                     )
-                    coordinator().emit(RequestNextStep(currentStep = NavigationDirections.accountPicker))
+                    goNext(accountsList.nextPane)
                     accountsList
                 }.execute {
                     copy(selectAccounts = it)
