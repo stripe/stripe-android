@@ -6,6 +6,7 @@ import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
@@ -29,7 +30,7 @@ internal class InstitutionPickerViewModelTest {
 
     private val searchInstitutions = mock<SearchInstitutions>()
     private val postAuthorizationSession = mock<PostAuthorizationSession>()
-    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
+    private val goNext = mock<GoNext>()
     private val defaultConfiguration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
@@ -41,7 +42,7 @@ internal class InstitutionPickerViewModelTest {
         configuration = defaultConfiguration,
         searchInstitutions = searchInstitutions,
         postAuthorizationSession = postAuthorizationSession,
-        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+        goNext = goNext,
         logger = Logger.noop(),
         initialState = state
     )
