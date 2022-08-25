@@ -27,7 +27,6 @@ import com.stripe.android.financialconnections.features.manualentrysuccess.Manua
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.navigation.NavigationDirections.ManualEntrySuccessNavigation
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
@@ -87,12 +86,14 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 ManualEntryScreen()
             }
             composable(
-                route = ManualEntrySuccessNavigation.route,
-                arguments = ManualEntrySuccessNavigation.arguments
+                route = NavigationDirections.ManualEntrySuccess.route,
+                arguments = NavigationDirections.ManualEntrySuccess.arguments
             ) {
                 ManualEntrySuccessScreen(
-                    microdepositVerificationMethod = ManualEntrySuccessNavigation.microdeposits(it),
-                    last4 = ManualEntrySuccessNavigation.last4(it)
+                    microdepositVerificationMethod = NavigationDirections
+                        .ManualEntrySuccess.microdeposits(it),
+                    last4 = NavigationDirections
+                        .ManualEntrySuccess.last4(it)
                 )
             }
             composable(NavigationDirections.institutionPicker.destination) {

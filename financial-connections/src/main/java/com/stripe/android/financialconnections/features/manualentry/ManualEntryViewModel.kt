@@ -13,7 +13,7 @@ import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.*
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
-import com.stripe.android.financialconnections.navigation.NavigationDirections.ManualEntrySuccessNavigation
+import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
@@ -85,7 +85,7 @@ internal class ManualEntryViewModel @Inject constructor(
             ).also {
                 goNext(
                     it.nextPane ?: NextPane.MANUAL_ENTRY_SUCCESS,
-                    args = ManualEntrySuccessNavigation.argMap(
+                    args = NavigationDirections.ManualEntrySuccess.argMap(
                         microdepositVerificationMethod = it.microdepositVerificationMethod,
                         last4 = state.account.first?.takeLast(4)
                     )
@@ -113,9 +113,9 @@ internal class ManualEntryViewModel @Inject constructor(
 }
 
 internal data class ManualEntryState(
-    val routing: Pair<String?, Int?> = "110000000" to null,
-    val account: Pair<String?, Int?> = "000123456789" to null,
-    val accountConfirm: Pair<String?, Int?> = "000123456789" to null,
+    val routing: Pair<String?, Int?> = null to null,
+    val account: Pair<String?, Int?> = null to null,
+    val accountConfirm: Pair<String?, Int?> = null to null,
     val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized,
     val verifyWithMicrodeposits: Boolean = false
 ) : MavericksState {

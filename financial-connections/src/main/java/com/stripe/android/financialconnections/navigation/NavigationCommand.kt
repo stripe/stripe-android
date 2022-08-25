@@ -48,7 +48,7 @@ internal object NavigationDirections {
         override val destination = "manual_entry"
     }
 
-    object ManualEntrySuccessNavigation {
+    object ManualEntrySuccess {
 
         private const val KEY_MICRODEPOSITS = "microdeposits"
         private const val KEY_LAST4 = "last4"
@@ -75,8 +75,8 @@ internal object NavigationDirections {
 
         fun last4(backStackEntry: NavBackStackEntry): String? =
             backStackEntry.arguments?.getString(KEY_LAST4)
-        fun navigationCommand(args: Map<String, Any?>) = object : NavigationCommand {
-            override val arguments = ManualEntrySuccessNavigation.arguments
+        operator fun invoke(args: Map<String, Any?>) = object : NavigationCommand {
+            override val arguments = ManualEntrySuccess.arguments
             val last4 = args.getValue(KEY_LAST4) as? String
             val microdeposits = args.getValue(KEY_MICRODEPOSITS) as? MicrodepositVerificationMethod
             override val destination = "manual_entry_success?" +

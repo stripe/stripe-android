@@ -4,7 +4,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.navigation.NavigationCommand
 import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.navigation.NavigationDirections.ManualEntrySuccessNavigation
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import javax.inject.Inject
 
@@ -36,7 +35,7 @@ internal class GoNext @Inject constructor(
         NextPane.ACCOUNT_PICKER -> NavigationDirections.accountPicker
         NextPane.SUCCESS -> NavigationDirections.success
         NextPane.MANUAL_ENTRY -> NavigationDirections.manualEntry
-        NextPane.MANUAL_ENTRY_SUCCESS -> ManualEntrySuccessNavigation.navigationCommand(args)
+        NextPane.MANUAL_ENTRY_SUCCESS -> NavigationDirections.ManualEntrySuccess(args)
         NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT,
         NextPane.AUTH_OPTIONS,
         NextPane.LINK_CONSENT,
