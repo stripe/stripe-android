@@ -40,6 +40,9 @@ sealed class SectionSingleFieldElement(
         )
 
     override fun setTextFieldOnChangeListener(listener: (IdentifierSpec, String) -> Unit) {
-        controller.setOnChangeListener(identifier, listener)
+        val onChangeListener: (String) -> Unit = { value ->
+            listener(identifier, value)
+        }
+        controller.setOnChangeListener(onChangeListener)
     }
 }

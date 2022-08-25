@@ -147,13 +147,8 @@ class SimpleTextFieldController constructor(
         onValueChange(textFieldConfig.convertFromRaw(rawValue))
     }
 
-    override fun setOnChangeListener(
-        identifierSpec: IdentifierSpec,
-        listener: (IdentifierSpec, String) -> Unit
-    ) {
-        this.listener = {
-            listener(identifierSpec, it)
-        }
+    override fun setOnChangeListener(listener: (String) -> Unit) {
+        this.listener = listener
     }
 
     override fun onFocusChange(newHasFocus: Boolean) {

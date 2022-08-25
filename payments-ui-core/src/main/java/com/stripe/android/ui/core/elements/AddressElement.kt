@@ -57,7 +57,7 @@ open class AddressElement constructor(
         )
     )
 
-    private val billingDetailsMap = rawValuesMap.mapValues { it.value ?: "" }.toMutableMap()
+    private val originalValuesMap = rawValuesMap.mapValues { it.value ?: "" }.toMutableMap()
     private val shippingDetailsMap = rawValuesMap.mapValues { it.value ?: "" }
 
     private val otherFields = countryElement.controller.rawFieldValue
@@ -110,7 +110,7 @@ open class AddressElement constructor(
         }
 
         country?.let {
-            billingDetailsMap[IdentifierSpec.Country] = it
+            originalValuesMap[IdentifierSpec.Country] = it
         }
 
         sameAsShipping?.let {
@@ -118,7 +118,7 @@ open class AddressElement constructor(
                 if (it) {
                     shippingDetailsMap
                 } else {
-                    billingDetailsMap
+                    originalValuesMap
                 }
             )
             fields.forEach { field ->
@@ -128,9 +128,9 @@ open class AddressElement constructor(
 
         otherFields.forEach { field ->
             field.setTextFieldOnChangeListener { identifier, text ->
-                billingDetailsMap[identifier] = text
+                originalValuesMap[identifier] = text
                 val same = shippingDetailsMap.all {
-                    billingDetailsMap[it.key] == it.value
+                    originalValuesMap[it.key] == it.value
                 }
                 sameAsShippingController?.onValueChange(same)
             }
