@@ -14,7 +14,6 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
@@ -31,7 +30,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      * No other dependencies should be exposed from the viewModel
      */
     val activityRetainedComponent: FinancialConnectionsSheetNativeComponent,
-    private val goNext: GoNext,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
     initialState: FinancialConnectionsSheetNativeState
@@ -41,12 +39,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
                 when (message) {
-                    is Message.RequestNextStep -> goNext(currentPane = message.currentStep)
                     Message.OpenWebAuthFlow -> {
                         val manifest = getManifest()
-                        setState {
-                            copy(viewEffect = OpenUrl(manifest.hostedAuthUrl))
-                        }
+                        setState { copy(viewEffect = OpenUrl(manifest.hostedAuthUrl)) }
                     }
                 }
             }

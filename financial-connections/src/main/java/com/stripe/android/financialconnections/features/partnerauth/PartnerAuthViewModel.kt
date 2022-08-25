@@ -13,15 +13,13 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.RequestNextStep
+import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.MixedOAuthParams
-import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
@@ -32,7 +30,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     val completeAuthorizationSession: CompleteAuthorizationSession,
     val configuration: FinancialConnectionsSheet.Configuration,
     val getManifest: GetManifest,
-    val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+    val goNext: GoNext,
     val repository: FinancialConnectionsRepository,
     val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     val logger: Logger,
@@ -94,12 +92,12 @@ internal class PartnerAuthViewModel @Inject constructor(
         authSession: FinancialConnectionsAuthorizationSession
     ) {
         kotlin.runCatching {
-            completeAuthorizationSession(
+            val updatedSession = completeAuthorizationSession(
                 authorizationSessionId = authSession.id,
                 publicToken = oAuthParams.memberGuid
             )
             logger.debug("Session authorized!")
-            nativeAuthFlowCoordinator().emit(RequestNextStep(currentStep = NavigationDirections.partnerAuth))
+            goNext(updatedSession.nextPane)
         }.onFailure {
             logger.error("failed authorizing session", it)
             setState { copy(authenticationStatus = Fail(it)) }

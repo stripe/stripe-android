@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.financialconnections.navigation.NavigationCommand
 import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,13 +20,6 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
     }
 
     internal sealed interface Message {
-        /**
-         * Request navigation to Next available Pane
-         */
-        data class RequestNextStep(
-            val currentStep: NavigationCommand,
-        ) : Message
-
         object OpenWebAuthFlow : Message
     }
 }
