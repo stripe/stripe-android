@@ -76,11 +76,15 @@ internal class CardEditViewModel @Inject constructor(
                         } ?: dismiss(
                         PaymentDetailsResult.Failure(
                             ErrorMessage.Raw("Payment details $paymentDetailsId not found.")
-                        )
+                        ),
+                        userInitiated = false
                     )
                 },
                 onFailure = {
-                    dismiss(PaymentDetailsResult.Failure(it.getErrorMessage()))
+                    dismiss(
+                        PaymentDetailsResult.Failure(it.getErrorMessage()),
+                        userInitiated = false
+                    )
                 }
             )
         }
@@ -111,16 +115,16 @@ internal class CardEditViewModel @Inject constructor(
             linkAccountManager.updatePaymentDetails(updateParams).fold(
                 onSuccess = {
                     _isProcessing.value = false
-                    dismiss(PaymentDetailsResult.Success(paymentDetails.id))
+                    dismiss(PaymentDetailsResult.Success(paymentDetails.id), userInitiated = false)
                 },
                 onFailure = ::onError
             )
         }
     }
 
-    fun dismiss(result: PaymentDetailsResult = PaymentDetailsResult.Cancelled) {
+    fun dismiss(result: PaymentDetailsResult, userInitiated: Boolean) {
         navigator.setResult(PaymentDetailsResult.KEY, result)
-        navigator.onBack()
+        navigator.onBack(userInitiated)
     }
 
     private fun clearError() {

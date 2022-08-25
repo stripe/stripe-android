@@ -172,12 +172,12 @@ class CardEditViewModelTest {
     @Test
     fun `dismiss navigates back`() = runTest {
         val viewModel = createAndInitViewModel()
-        viewModel.dismiss()
+        viewModel.dismiss(PaymentDetailsResult.Cancelled, userInitiated = true)
         verify(navigator).setResult(
             eq(PaymentDetailsResult.KEY),
             argWhere { it is PaymentDetailsResult.Cancelled }
         )
-        verify(navigator).onBack()
+        verify(navigator).onBack(userInitiated = true)
     }
 
     private fun createViewModel() =

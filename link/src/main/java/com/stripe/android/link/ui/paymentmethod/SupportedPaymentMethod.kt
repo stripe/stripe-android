@@ -66,7 +66,6 @@ internal enum class SupportedPaymentMethod(
     ): String
 
     internal companion object {
-        val allValues = listOf(Card, BankAccount)
-        val allTypes = allValues.map { it.type }.toSet()
+        val allTypes = values().map { it.type }.toSet()
     }
 }

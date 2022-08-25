@@ -45,7 +45,7 @@ internal class Navigator @Inject constructor() {
      *
      * @param userInitiated Whether the action was initiated by user interaction.
      */
-    fun onBack(userInitiated: Boolean = false) {
+    fun onBack(userInitiated: Boolean) {
         if (!userInitiated || userNavigationEnabled) {
             navigationController?.let { navController ->
                 if (!navController.popBackStack()) {

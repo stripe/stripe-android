@@ -3,7 +3,7 @@ package com.stripe.android.link.ui
 import android.content.res.Resources
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -25,11 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.model.PaymentIntent
@@ -55,6 +55,8 @@ internal enum class PrimaryButtonState(val isBlocking: Boolean) {
     }
 }
 
+private val PrimaryButtonIconWidth = 13.dp
+private val PrimaryButtonIconHeight = 16.dp
 internal const val progressIndicatorTestTag = "CircularProgressIndicator"
 internal const val completedIconTestTag = "CompletedIcon"
 
@@ -94,15 +96,12 @@ internal fun PrimaryButton(
         LocalContentAlpha provides
             if (state == PrimaryButtonState.Disabled) ContentAlpha.disabled else ContentAlpha.high
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(PrimaryButtonHeight + 32.dp)
-                .padding(vertical = 16.dp)
-        ) {
+        Box(modifier = Modifier.padding(vertical = 16.dp)) {
             Button(
                 onClick = onButtonClick,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .height(PrimaryButtonHeight)
+                    .fillMaxWidth(),
                 enabled = state == PrimaryButtonState.Enabled,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = MaterialTheme.shapes.medium,
@@ -131,29 +130,16 @@ internal fun PrimaryButton(
                             },
                         tint = MaterialTheme.linkColors.buttonLabel
                     )
-                    else -> Text(
-                        text = label,
-                        color = MaterialTheme.linkColors.buttonLabel
-                            .copy(alpha = LocalContentAlpha.current)
-                    )
-                }
-            }
-            // Show icons only when button label is visible
-            if (state in setOf(PrimaryButtonState.Enabled, PrimaryButtonState.Disabled)) {
-                iconStart?.let { icon ->
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        PrimaryButtonIcon(icon)
-                    }
-                }
-                iconEnd?.let { icon ->
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        PrimaryButtonIcon(icon)
+                    else -> Row(Modifier.fillMaxWidth()) {
+                        PrimaryButtonIcon(iconStart)
+                        Text(
+                            text = label,
+                            modifier = Modifier.weight(1f),
+                            color = MaterialTheme.linkColors.buttonLabel
+                                .copy(alpha = LocalContentAlpha.current),
+                            textAlign = TextAlign.Center
+                        )
+                        PrimaryButtonIcon(iconEnd)
                     }
                 }
             }
@@ -163,17 +149,25 @@ internal fun PrimaryButton(
 
 @Composable
 private fun PrimaryButtonIcon(
-    @DrawableRes icon: Int
+    @DrawableRes icon: Int?
 ) {
-    Icon(
-        painter = painterResource(id = icon),
-        contentDescription = null,
+    Box(
         modifier = Modifier
-            .height(16.dp)
-            .width(13.dp + 40.dp)
-            .padding(horizontal = HorizontalPadding),
-        tint = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current)
-    )
+            .width(PrimaryButtonIconWidth)
+            .height(PrimaryButtonIconHeight),
+        contentAlignment = Alignment.Center
+    ) {
+        icon?.let { icon ->
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .width(PrimaryButtonIconWidth)
+                    .height(PrimaryButtonIconHeight),
+                tint = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current)
+            )
+        }
+    }
 }
 
 @Composable

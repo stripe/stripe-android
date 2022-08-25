@@ -117,7 +117,7 @@ internal class PaymentMethodViewModel @Inject constructor(
         if (isRootScreen) {
             payAnotherWay()
         } else {
-            navigator.onBack()
+            navigator.onBack(userInitiated = true)
         }
     }
 
