@@ -6,6 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.airbnb.mvrx.test.MvRxTestRule
 import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
@@ -13,6 +14,7 @@ import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsS
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.GenerateFinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
@@ -98,6 +100,59 @@ class FinancialConnectionsSheetViewModelTest {
     }
 
     @Test
+    fun `handleOnNewIntent - on Link flows with valid account, id param is extracted`() {
+        runTest {
+            // Given
+            val linkedAccountId = "1234"
+            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            val viewModel = createViewModel(
+                defaultInitialState.copy(initialArgs = ForLink(configuration))
+            )
+
+            // When
+            viewModel.handleOnNewIntent(
+                successIntent(
+                    "stripe-auth://link-accounts/success?linked_account=$linkedAccountId"
+                )
+            )
+
+            // Then
+            withState(viewModel) {
+                assertThat(it.authFlowActive).isFalse()
+                val viewEffect = it.viewEffect as FinishWithResult
+                assertThat(viewEffect.result).isEqualTo(
+                    Completed(linkedAccountId = linkedAccountId)
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `handleOnNewIntent - on Link flows with invalid account, error is thrown`() {
+        runTest {
+            // Given
+            val linkedAccountId = "1234"
+            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            val viewModel = createViewModel(
+                defaultInitialState.copy(initialArgs = ForLink(configuration))
+            )
+
+            // When
+            viewModel.handleOnNewIntent(
+                successIntent(
+                    "stripe-auth://link-accounts/success"
+                )
+            )
+
+            // Then
+            withState(viewModel) {
+                val viewEffect = it.viewEffect as FinishWithResult
+                assertThat(viewEffect.result).isInstanceOf(Failed::class.java)
+            }
+        }
+    }
+
+    @Test
     fun `handleOnNewIntent - intent with cancel url should fire analytics event and set cancel result`() {
         runTest {
             // Given
@@ -170,7 +225,9 @@ class FinancialConnectionsSheetViewModelTest {
             withState(viewModel) {
                 assertThat(it.authFlowActive).isFalse()
                 val viewEffect = it.viewEffect as FinishWithResult
-                assertThat(viewEffect.result).isEqualTo(Completed(expectedSession))
+                assertThat(viewEffect.result).isEqualTo(
+                    Completed(financialConnectionsSession = expectedSession)
+                )
             }
         }
 
@@ -275,9 +332,9 @@ class FinancialConnectionsSheetViewModelTest {
         }
     }
 
-    private fun successIntent(): Intent = Intent().apply {
-        data = Uri.parse(ApiKeyFixtures.SUCCESS_URL)
-    }
+    private fun successIntent(
+        url: String = ApiKeyFixtures.SUCCESS_URL
+    ): Intent = Intent().apply { data = Uri.parse(url) }
 
     private fun cancelIntent() = Intent().also {
         it.data = Uri.parse(ApiKeyFixtures.CANCEL_URL)
@@ -308,7 +365,8 @@ class FinancialConnectionsSheetViewModelTest {
             generateFinancialConnectionsSessionManifest = generateFinancialConnectionsSessionManifest,
             fetchFinancialConnectionsSession = fetchFinancialConnectionsSession,
             fetchFinancialConnectionsSessionForToken = fetchFinancialConnectionsSessionForToken,
-            eventReporter = eventReporter
+            eventReporter = eventReporter,
+            logger = Logger.noop()
         )
     }
 }
