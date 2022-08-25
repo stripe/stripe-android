@@ -404,7 +404,7 @@ class PaymentMethodViewModelTest {
 
         createViewModel().onSecondaryButtonClick()
 
-        verify(navigator).onBack(true)
+        verify(navigator).onBack(userInitiated = true)
     }
 
     @Test
