@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.PaymentsThemeDefaults
 
 @Composable
 internal fun EnterManuallyText(
@@ -20,6 +21,7 @@ internal fun EnterManuallyText(
             )
         },
         style = MaterialTheme.typography.body1.copy(
+            fontSize = PaymentsThemeDefaults.typography.largeFontSize,
             color = MaterialTheme.colors.primary
         )
     ) {

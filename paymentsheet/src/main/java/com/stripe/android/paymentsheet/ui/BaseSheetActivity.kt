@@ -43,6 +43,7 @@ import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.getBackgroundColor
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
 
@@ -169,7 +170,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(0, 0)
+        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 
     override fun onBackPressed() {
