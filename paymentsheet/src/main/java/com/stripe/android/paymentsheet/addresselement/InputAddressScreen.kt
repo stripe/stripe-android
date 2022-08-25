@@ -120,7 +120,7 @@ internal fun InputAddressScreen(
                     }
                 },
                 checkboxContent = {
-                    viewModel.args.config?.checkboxLabel?.let { label ->
+                    viewModel.args.config?.additionalFields?.checkboxLabel?.let { label ->
                         CheckboxElementUI(
                             isChecked = checkboxChecked,
                             label = label,
