@@ -4,6 +4,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.navigation.NavigationCommand
 import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.NavigationDirections.ManualEntrySuccessNavigation
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import javax.inject.Inject
 
@@ -15,26 +16,31 @@ internal class GoNext @Inject constructor(
     private val logger: Logger
 ) {
 
-    operator fun invoke(nextPane: NextPane): NavigationCommand {
-        val nextPaneDirection = nextPane.toNavigationCommand()
+    operator fun invoke(
+        nextPane: NextPane,
+        args: Map<String, Any?> = emptyMap()
+    ): NavigationCommand {
+        val nextPaneDirection = nextPane.toNavigationCommand(args)
         logger.debug("Navigating to next pane: ${nextPaneDirection.destination}")
         navigationManager.navigate(nextPaneDirection)
         return nextPaneDirection
     }
 
     @Suppress("ComplexMethod")
-    private fun NextPane.toNavigationCommand(): NavigationCommand = when (this) {
+    private fun NextPane.toNavigationCommand(
+        args: Map<String, Any?>
+    ): NavigationCommand = when (this) {
         NextPane.INSTITUTION_PICKER -> NavigationDirections.institutionPicker
         NextPane.PARTNER_AUTH -> NavigationDirections.partnerAuth
         NextPane.CONSENT -> NavigationDirections.consent
         NextPane.ACCOUNT_PICKER -> NavigationDirections.accountPicker
         NextPane.SUCCESS -> NavigationDirections.success
+        NextPane.MANUAL_ENTRY -> NavigationDirections.manualEntry
+        NextPane.MANUAL_ENTRY_SUCCESS -> ManualEntrySuccessNavigation.navigationCommand(args)
         NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT,
         NextPane.AUTH_OPTIONS,
         NextPane.LINK_CONSENT,
         NextPane.LINK_LOGIN,
-        NextPane.MANUAL_ENTRY,
-        NextPane.MANUAL_ENTRY_SUCCESS,
         NextPane.NETWORKING_LINK_LOGIN_WARMUP,
         NextPane.NETWORKING_LINK_SIGNUP_PANE,
         NextPane.NETWORKING_LINK_VERIFICATION,
