@@ -33,6 +33,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -1714,12 +1715,14 @@ internal class StripeApiRepositoryTest {
             val country = "US"
             val locale = Locale.US
             val cookie = "cookie1"
+            val consentAction = ConsumerSignUpConsentAction.Button
             create().consumerSignUp(
                 email,
                 phoneNumber,
                 country,
                 locale,
                 cookie,
+                consentAction,
                 DEFAULT_OPTIONS
             )
 
@@ -1731,6 +1734,7 @@ internal class StripeApiRepositoryTest {
                 assertEquals(this["phone_number"], phoneNumber)
                 assertEquals(this["country"], country)
                 assertEquals(this["locale"], locale.toLanguageTag())
+                assertEquals(this["consent_action"], "button_mobile")
                 withNestedParams("cookies") {
                     assertEquals(this["verification_session_client_secrets"], listOf(cookie))
                 }

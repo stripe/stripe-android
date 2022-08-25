@@ -17,6 +17,7 @@ import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.signup.SignUpViewModel.Companion.LOOKUP_DEBOUNCE_MS
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,6 +33,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doSuspendableAnswer
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.stub
@@ -176,10 +178,24 @@ class SignUpViewModelTest {
         }
 
     @Test
+    fun `signUp sends correct ConsumerSignUpConsentAction`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel()
+            viewModel.performValidSignup()
+
+            verify(linkAccountManager).signUp(
+                any(),
+                any(),
+                any(),
+                eq(ConsumerSignUpConsentAction.Button)
+            )
+        }
+
+    @Test
     fun `When signUp fails then an error message is shown`() =
         runTest(UnconfinedTestDispatcher()) {
             val errorMessage = "Error message"
-            whenever(linkAccountManager.signUp(any(), any(), any()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), any()))
                 .thenReturn(Result.failure(RuntimeException(errorMessage)))
 
             val viewModel = createViewModel()
@@ -200,7 +216,7 @@ class SignUpViewModelTest {
                 )
             )
 
-            whenever(linkAccountManager.signUp(any(), any(), any()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), any()))
                 .thenReturn(Result.success(linkAccount))
 
             viewModel.performValidSignup()
@@ -221,7 +237,7 @@ class SignUpViewModelTest {
                 )
             )
 
-            whenever(linkAccountManager.signUp(any(), any(), any()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), any()))
                 .thenReturn(Result.success(linkAccount))
 
             viewModel.performValidSignup()
@@ -241,7 +257,7 @@ class SignUpViewModelTest {
                 )
             )
 
-            whenever(linkAccountManager.signUp(any(), any(), any()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), any()))
                 .thenReturn(Result.success(linkAccount))
 
             viewModel.performValidSignup()
@@ -254,7 +270,7 @@ class SignUpViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
 
-            whenever(linkAccountManager.signUp(any(), any(), any()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), any()))
                 .thenReturn(Result.failure(Exception()))
 
             viewModel.performValidSignup()

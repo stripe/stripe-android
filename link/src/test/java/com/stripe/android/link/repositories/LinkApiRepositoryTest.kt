@@ -9,6 +9,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -89,7 +90,13 @@ class LinkApiRepositoryTest {
         val phone = "phone"
         val country = "US"
         val cookie = "cookie2"
-        linkRepository.consumerSignUp(email, phone, country, cookie)
+        linkRepository.consumerSignUp(
+            email,
+            phone,
+            country,
+            cookie,
+            ConsumerSignUpConsentAction.Checkbox
+        )
 
         verify(stripeRepository).consumerSignUp(
             eq(email),
@@ -97,6 +104,7 @@ class LinkApiRepositoryTest {
             eq(country),
             eq(Locale.US),
             eq(cookie),
+            eq(ConsumerSignUpConsentAction.Checkbox),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
@@ -104,10 +112,26 @@ class LinkApiRepositoryTest {
     @Test
     fun `consumerSignUp returns successful result`() = runTest {
         val consumerSession = mock<ConsumerSession>()
-        whenever(stripeRepository.consumerSignUp(any(), any(), any(), any(), anyOrNull(), any()))
+        whenever(
+            stripeRepository.consumerSignUp(
+                any(),
+                any(),
+                any(),
+                any(),
+                anyOrNull(),
+                any(),
+                any()
+            )
+        )
             .thenReturn(consumerSession)
 
-        val result = linkRepository.consumerSignUp("email", "phone", "country", "cookie")
+        val result = linkRepository.consumerSignUp(
+            "email",
+            "phone",
+            "country",
+            "cookie",
+            ConsumerSignUpConsentAction.Checkbox
+        )
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(consumerSession)
@@ -115,10 +139,26 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `consumerSignUp catches exception and returns failure`() = runTest {
-        whenever(stripeRepository.consumerSignUp(any(), any(), any(), any(), anyOrNull(), any()))
+        whenever(
+            stripeRepository.consumerSignUp(
+                any(),
+                any(),
+                any(),
+                any(),
+                anyOrNull(),
+                any(),
+                any()
+            )
+        )
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.consumerSignUp("email", "phone", "country", "cookie")
+        val result = linkRepository.consumerSignUp(
+            "email",
+            "phone",
+            "country",
+            "cookie",
+            ConsumerSignUpConsentAction.Button
+        )
 
         assertThat(result.isFailure).isTrue()
     }

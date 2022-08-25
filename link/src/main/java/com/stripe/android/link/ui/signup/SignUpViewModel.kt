@@ -13,6 +13,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
@@ -103,16 +104,17 @@ internal class SignUpViewModel @Inject constructor(
         val phone = phoneController.getE164PhoneNumber(requireNotNull(consumerPhoneNumber.value))
         val country = phoneController.getCountryCode()
         viewModelScope.launch {
-            linkAccountManager.signUp(email, phone, country).fold(
-                onSuccess = {
-                    onAccountFetched(it)
-                    linkEventsReporter.onSignupCompleted()
-                },
-                onFailure = {
-                    onError(it)
-                    linkEventsReporter.onSignupFailure()
-                }
-            )
+            linkAccountManager.signUp(email, phone, country, ConsumerSignUpConsentAction.Button)
+                .fold(
+                    onSuccess = {
+                        onAccountFetched(it)
+                        linkEventsReporter.onSignupCompleted()
+                    },
+                    onFailure = {
+                        onError(it)
+                        linkEventsReporter.onSignupFailure()
+                    }
+                )
         }
     }
 

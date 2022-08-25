@@ -20,6 +20,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
 import com.stripe.android.model.FinancialConnectionsSession
@@ -413,6 +414,7 @@ abstract class StripeRepository {
         country: String,
         locale: Locale?,
         authSessionCookie: String?,
+        consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?
 

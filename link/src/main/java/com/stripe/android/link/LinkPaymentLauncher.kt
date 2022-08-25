@@ -168,8 +168,8 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     }
 
     /**
-     * Trigger Link sign in with the input collected from the user, whether it's a new or existing
-     * account.
+     * Trigger Link sign in with the input collected from the user inline in PaymentSheet, whether
+     * it's a new or existing account.
      */
     suspend fun signInWithUserInput(userInput: UserInput) =
         linkAccountManager.signInWithUserInput(userInput).map { true }

@@ -9,6 +9,7 @@ import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -186,7 +187,13 @@ class LinkAccountManagerTest {
 
             accountManager.signInWithUserInput(UserInput.SignUp(EMAIL, phone, country))
 
-            verify(linkRepository).consumerSignUp(eq(EMAIL), eq(phone), eq(country), anyOrNull())
+            verify(linkRepository).consumerSignUp(
+                eq(EMAIL),
+                eq(phone),
+                eq(country),
+                anyOrNull(),
+                eq(ConsumerSignUpConsentAction.Checkbox)
+            )
             assertThat(accountManager.linkAccount.value).isNotNull()
         }
 
@@ -206,10 +213,10 @@ class LinkAccountManagerTest {
                     anyOrNull(),
                     anyOrNull(),
                     anyOrNull(),
+                    anyOrNull(),
                     anyOrNull()
                 )
-            )
-                .thenReturn(Result.failure(Exception()))
+            ).thenReturn(Result.failure(Exception()))
 
             accountManager().signInWithUserInput(UserInput.SignUp(EMAIL, "phone", "country"))
 
@@ -220,7 +227,7 @@ class LinkAccountManagerTest {
     fun `signUp stores email when successfully signed up`() = runSuspendTest {
         val accountManager = accountManager()
 
-        accountManager.signUp(EMAIL, "phone", "US")
+        accountManager.signUp(EMAIL, "phone", "US", ConsumerSignUpConsentAction.Checkbox)
 
         verify(cookieStore).storeNewUserEmail(EMAIL)
     }
@@ -544,8 +551,15 @@ class LinkAccountManagerTest {
             .thenReturn(Result.success(consumerSessionLookup))
         whenever(linkRepository.startVerification(anyOrNull(), anyOrNull(), anyOrNull()))
             .thenReturn(Result.success(mockConsumerSession))
-        whenever(linkRepository.consumerSignUp(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull()))
-            .thenReturn(Result.success(mockConsumerSession))
+        whenever(
+            linkRepository.consumerSignUp(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        ).thenReturn(Result.success(mockConsumerSession))
     }
 
     private suspend fun mockUnverifiedAccountLookup() {
