@@ -66,7 +66,8 @@ internal class InputAddressViewModel @Inject constructor(
 
         viewModelScope.launch {
             collectedAddress.collect { addressDetails ->
-                val initialValues: Map<IdentifierSpec, String?> = addressDetails?.toIdentifierMap()
+                val initialValues: Map<IdentifierSpec, String?> = addressDetails
+                    ?.toIdentifierMap(billingSameAsShipping = false)
                     ?: emptyMap()
 
                 _formController.value = formControllerProvider.get()

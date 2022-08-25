@@ -186,7 +186,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     var usBankAccountSavedScreenState: USBankAccountFormScreenState? = null
 
     val linkLauncher = linkPaymentLauncherFactory.let {
-        val shippingDetails: AddressDetails? = null // TODO: config.shippingDetails
+        val shippingDetails: AddressDetails? = config?.shippingDetails
         val customerPhone = if (shippingDetails?.isCheckboxSelected == true) {
             shippingDetails.phoneNumber
         } else {

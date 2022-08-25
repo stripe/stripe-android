@@ -42,7 +42,8 @@ internal fun AddressLauncher.DefaultAddressDetails.toAddressDetails(): AddressDe
     )
 
 internal fun AddressDetails.toIdentifierMap(
-    billingDetails: PaymentSheet.BillingDetails? = null
+    billingDetails: PaymentSheet.BillingDetails? = null,
+    billingSameAsShipping: Boolean = true
 ): Map<IdentifierSpec, String?> {
     return if (billingDetails == null) {
         mapOf(
@@ -57,7 +58,7 @@ internal fun AddressDetails.toIdentifierMap(
         ).plus(
             mapOf(
                 IdentifierSpec.SameAsShipping to isCheckboxSelected?.toString()
-            ).takeIf { isCheckboxSelected != null } ?: emptyMap()
+            ).takeIf { isCheckboxSelected != null && billingSameAsShipping } ?: emptyMap()
         )
     } else {
         emptyMap()

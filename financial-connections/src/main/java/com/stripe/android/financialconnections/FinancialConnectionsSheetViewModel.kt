@@ -2,10 +2,12 @@ package com.stripe.android.financialconnections
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import androidx.activity.result.ActivityResult
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
@@ -15,9 +17,12 @@ import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsShee
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.GenerateFinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForToken
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import kotlinx.coroutines.launch
@@ -30,6 +35,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val generateFinancialConnectionsSessionManifest: GenerateFinancialConnectionsSessionManifest,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
+    private val logger: Logger,
     private val eventReporter: FinancialConnectionsEventReporter,
     initialState: FinancialConnectionsSheetState
 ) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
@@ -162,7 +168,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             kotlin.runCatching {
                 fetchFinancialConnectionsSession(state.sessionSecret)
             }.onSuccess {
-                val result = FinancialConnectionsSheetActivityResult.Completed(it)
+                val result = Completed(financialConnectionsSession = it)
                 eventReporter.onResult(state.initialArgs.configuration, result)
                 setState { copy(viewEffect = FinishWithResult(result)) }
             }.onFailure {
@@ -183,7 +189,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             kotlin.runCatching {
                 fetchFinancialConnectionsSessionForToken(clientSecret = state.sessionSecret)
             }.onSuccess { (las, token) ->
-                val result = FinancialConnectionsSheetActivityResult.Completed(las, token)
+                val result = Completed(financialConnectionsSession = las, token = token)
                 eventReporter.onResult(state.initialArgs.configuration, result)
                 setState { copy(viewEffect = FinishWithResult(result)) }
             }.onFailure {
@@ -226,12 +232,14 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun handleOnNewIntent(intent: Intent?) {
         setState { copy(authFlowActive = false) }
         withState { state ->
-            when (intent?.data.toString()) {
+            val receivedUrl: Uri? = intent?.data?.toString()?.toUriOrNull()
+            if (receivedUrl == null) {
+                onFatal(state, Exception("Intent url received from web flow is null"))
+            } else when (receivedUrl.buildUpon().clearQuery().toString()) {
                 state.manifest?.successUrl -> when (state.initialArgs) {
-                    is FinancialConnectionsSheetActivityArgs.ForData ->
-                        fetchFinancialConnectionsSession(state)
-                    is FinancialConnectionsSheetActivityArgs.ForToken ->
-                        fetchFinancialConnectionsSessionForToken(state)
+                    is ForData -> fetchFinancialConnectionsSession(state)
+                    is ForToken -> fetchFinancialConnectionsSessionForToken(state)
+                    is ForLink -> onSuccessFromLinkFlow(receivedUrl)
                 }
                 state.manifest?.cancelUrl -> onUserCancel(state)
                 else ->
@@ -242,6 +250,30 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     internal fun onViewEffectLaunched() {
         setState { copy(viewEffect = null) }
+    }
+
+    /**
+     * Link flows do not need to fetch the FC session, since the linked account id is
+     * appended to the web success url.
+     */
+    private fun onSuccessFromLinkFlow(url: Uri) {
+        kotlin.runCatching {
+            requireNotNull(url.getQueryParameter(QUERY_PARAM_LINKED_ACCOUNT))
+        }.onSuccess {
+            setState { copy(viewEffect = FinishWithResult(Completed(linkedAccountId = it))) }
+        }.onFailure { error ->
+            logger.error("Could not retrieve linked account from success url", error)
+            withState { state -> onFatal(state, error) }
+        }
+    }
+
+    private fun String.toUriOrNull(): Uri? {
+        Uri.parse(this).buildUpon().clearQuery()
+        return kotlin.runCatching {
+            return Uri.parse(this)
+        }.onFailure {
+            logger.error("Could not parse web flow url", it)
+        }.getOrNull()
     }
 
     companion object :
@@ -260,5 +292,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
 
         internal const val MAX_ACCOUNTS = 100
+        internal const val QUERY_PARAM_LINKED_ACCOUNT = "linked_account"
     }
 }
