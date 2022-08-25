@@ -78,7 +78,7 @@ internal class AddressLauncher internal constructor(
         /**
          * The values to pre-populate shipping address fields with.
          */
-        val defaultValues: DefaultAddressDetails? = null,
+        val address: AddressDetails? = null,
 
         /**
          * A list of two-letter country codes representing countries the customers can select.
@@ -114,7 +114,7 @@ internal class AddressLauncher internal constructor(
          */
         class Builder {
             private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
-            private var defaultValues: DefaultAddressDetails? = null
+            private var address: AddressDetails? = null
             private var allowedCountries: Set<String> = emptySet()
             private var buttonTitle: String? = null
             private var additionalFields: AdditionalFieldsConfiguration? = null
@@ -124,8 +124,8 @@ internal class AddressLauncher internal constructor(
             fun appearance(appearance: PaymentSheet.Appearance) =
                 apply { this.appearance = appearance }
 
-            fun defaultValues(defaultValues: DefaultAddressDetails?) =
-                apply { this.defaultValues = defaultValues }
+            fun address(address: AddressDetails?) =
+                apply { this.address = address }
 
             fun allowedCountries(allowedCountries: Set<String>) =
                 apply { this.allowedCountries = allowedCountries }
@@ -144,7 +144,7 @@ internal class AddressLauncher internal constructor(
 
             fun build() = Configuration(
                 appearance,
-                defaultValues,
+                address,
                 allowedCountries,
                 buttonTitle,
                 additionalFields,
@@ -183,28 +183,4 @@ internal class AddressLauncher internal constructor(
             REQUIRED
         }
     }
-
-    @Parcelize
-    data class DefaultAddressDetails(
-        /**
-         * The customer's full name
-         */
-        val name: String? = null,
-
-        /**
-         * The customer's address
-         */
-        val address: PaymentSheet.Address? = null,
-
-        /**
-         * The customer's phone number, without formatting e.g. "5551234567"
-         */
-        val phoneNumber: String? = null,
-
-        /**
-         * Whether or not your custom checkbox is intially selected.
-         * Note: The checkbox is displayed below the other fields when AdditionalFieldsConfiguration.checkboxLabel is set.
-         */
-        val isCheckboxSelected: Boolean? = null
-    ) : Parcelable
 }

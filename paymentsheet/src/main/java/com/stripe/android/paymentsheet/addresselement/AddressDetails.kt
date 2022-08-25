@@ -33,14 +33,6 @@ data class AddressDetails(
     }
 }
 
-internal fun AddressLauncher.DefaultAddressDetails.toAddressDetails(): AddressDetails =
-    AddressDetails(
-        name = this.name,
-        address = this.address,
-        phoneNumber = this.phoneNumber,
-        isCheckboxSelected = this.isCheckboxSelected
-    )
-
 internal fun AddressDetails.toIdentifierMap(
     billingDetails: PaymentSheet.BillingDetails? = null,
     billingSameAsShipping: Boolean = true
