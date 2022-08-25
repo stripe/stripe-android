@@ -107,26 +107,19 @@ internal class AddressLauncher internal constructor(
          * Google Places api key used to provide autocomplete suggestions
          * When null, autocomplete is disabled.
          */
-        val googlePlacesApiKey: String? = null,
-
-        /**
-         * The label of a checkbox displayed below other fields. If null, the checkbox is not displayed.
-         * Defaults to null
-         */
-        val checkboxLabel: String? = null
+        val googlePlacesApiKey: String? = null
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
         class Builder {
-            var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
-            var defaultValues: DefaultAddressDetails? = null
-            var allowedCountries: Set<String> = emptySet()
-            var buttonTitle: String? = null
-            var additionalFields: AdditionalFieldsConfiguration? = null
-            var title: String? = null
-            var googlePlacesApiKey: String? = null
-            var checkboxLabel: String? = null
+            private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
+            private var defaultValues: DefaultAddressDetails? = null
+            private var allowedCountries: Set<String> = emptySet()
+            private var buttonTitle: String? = null
+            private var additionalFields: AdditionalFieldsConfiguration? = null
+            private var title: String? = null
+            private var googlePlacesApiKey: String? = null
 
             fun appearance(appearance: PaymentSheet.Appearance) =
                 apply { this.appearance = appearance }
@@ -149,9 +142,6 @@ internal class AddressLauncher internal constructor(
             fun googlePlacesApiKey(googlePlacesApiKey: String?) =
                 apply { this.googlePlacesApiKey = googlePlacesApiKey }
 
-            fun checkBoxLabel(checkboxLabel: String?) =
-                apply { this.checkboxLabel = checkboxLabel }
-
             fun build() = Configuration(
                 appearance,
                 defaultValues,
@@ -159,8 +149,7 @@ internal class AddressLauncher internal constructor(
                 buttonTitle,
                 additionalFields,
                 title,
-                googlePlacesApiKey,
-                checkboxLabel
+                googlePlacesApiKey
             )
         }
     }
