@@ -230,7 +230,7 @@ internal class LinkAccountManager @Inject constructor(
     /**
      * Create a new Bank Account payment method attached to the consumer account.
      */
-    suspend fun createPaymentDetails(
+    suspend fun createBankAccountPaymentDetails(
         financialConnectionsAccountId: String
     ) = retryingOnAuthError { clientSecret ->
         linkRepository.createBankAccountPaymentDetails(

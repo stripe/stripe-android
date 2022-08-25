@@ -435,7 +435,7 @@ class LinkAccountManagerTest {
                 Result.success(mock())
             )
 
-        accountManager.createPaymentDetails("")
+        accountManager.createBankAccountPaymentDetails("")
 
         verify(linkRepository, times(2))
             .createBankAccountPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
@@ -457,7 +457,7 @@ class LinkAccountManagerTest {
                     Result.success(mock())
                 )
 
-            accountManager.createPaymentDetails("")
+            accountManager.createBankAccountPaymentDetails("")
 
             verify(linkRepository)
                 .createBankAccountPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())

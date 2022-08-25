@@ -158,7 +158,7 @@ internal class PaymentMethodViewModel @Inject constructor(
             is FinancialConnectionsSheetLinkResult.Failed -> onError(result.error)
             is FinancialConnectionsSheetLinkResult.Completed -> {
                 viewModelScope.launch {
-                    linkAccountManager.createPaymentDetails(result.linkedAccountId)
+                    linkAccountManager.createBankAccountPaymentDetails(result.linkedAccountId)
                         .fold(
                             onSuccess = ::navigateToWallet,
                             onFailure = ::onError

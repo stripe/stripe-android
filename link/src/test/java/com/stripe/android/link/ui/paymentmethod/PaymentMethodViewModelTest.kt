@@ -330,7 +330,7 @@ class PaymentMethodViewModelTest {
     fun `when account linked at root screen then it navigates to wallet`() = runTest {
         val sessionId = "session_id"
         val account = mock<ConsumerPaymentDetails.BankAccount>()
-        whenever(linkAccountManager.createPaymentDetails(any())).thenReturn(Result.success(account))
+        whenever(linkAccountManager.createBankAccountPaymentDetails(any())).thenReturn(Result.success(account))
         whenever(navigator.isOnRootScreen()).thenReturn(true)
 
         val viewModel = createViewModel()
@@ -348,7 +348,7 @@ class PaymentMethodViewModelTest {
         val account = mock<ConsumerPaymentDetails.BankAccount>().apply {
             whenever(id).thenReturn(accountId)
         }
-        whenever(linkAccountManager.createPaymentDetails(any())).thenReturn(Result.success(account))
+        whenever(linkAccountManager.createBankAccountPaymentDetails(any())).thenReturn(Result.success(account))
         whenever(navigator.isOnRootScreen()).thenReturn(false)
 
         val viewModel = createViewModel()
