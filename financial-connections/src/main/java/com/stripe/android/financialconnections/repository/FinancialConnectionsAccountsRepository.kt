@@ -3,7 +3,9 @@ package com.stripe.android.financialconnections.repository
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
+import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
 import kotlinx.coroutines.sync.Mutex
@@ -15,10 +17,21 @@ import kotlinx.coroutines.sync.withLock
  */
 internal interface FinancialConnectionsAccountsRepository {
 
+    suspend fun getOrFetchAccounts(
+        clientSecret: String,
+        sessionId: String
+    ): PartnerAccountsList
+
     suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
         sessionId: String
     ): PartnerAccountsList
+
+    suspend fun postLinkAccountSessionPaymentAccount(
+        clientSecret: String,
+        paymentAccount: PaymentAccountParams,
+        consumerSessionClientSecret: String? = null
+    ): LinkAccountSessionPaymentAccount
 
     suspend fun postAuthorizationSessionSelectedAccounts(
         clientSecret: String,
@@ -40,8 +53,6 @@ internal interface FinancialConnectionsAccountsRepository {
                 logger
             )
     }
-
-    suspend fun getOrFetchAccounts(clientSecret: String, sessionId: String): PartnerAccountsList
 }
 
 private class FinancialConnectionsAccountsRepositoryImpl(
@@ -88,6 +99,24 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         }
     }
 
+    override suspend fun postLinkAccountSessionPaymentAccount(
+        clientSecret: String,
+        paymentAccount: PaymentAccountParams,
+        consumerSessionClientSecret: String?
+    ): LinkAccountSessionPaymentAccount {
+        val request = apiRequestFactory.createPost(
+            url = attachPaymentAccountUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
+            ) + paymentAccount.toParamMap()
+        )
+        return requestExecutor.execute(
+            request,
+            LinkAccountSessionPaymentAccount.serializer()
+        )
+    }
+
     override suspend fun postAuthorizationSessionSelectedAccounts(
         clientSecret: String,
         sessionId: String,
@@ -122,6 +151,9 @@ private class FinancialConnectionsAccountsRepositoryImpl(
 
         internal const val accountsSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/accounts"
+
+        internal const val attachPaymentAccountUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/attach_payment_account"
 
         internal const val authorizationSessionSelectedAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/selected_accounts"

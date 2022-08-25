@@ -21,6 +21,7 @@ internal fun FinancialConnectionsOutlinedTextField(
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
     readOnly: Boolean = false,
+    isError: Boolean = false,
     trailingIcon: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     label: @Composable (() -> Unit)? = null
@@ -31,14 +32,19 @@ internal fun FinancialConnectionsOutlinedTextField(
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         readOnly = readOnly,
+        isError = isError,
         value = value,
         colors = outlinedTextFieldColors(
             focusedBorderColor = FinancialConnectionsTheme.colors.borderFocus,
             unfocusedBorderColor = FinancialConnectionsTheme.colors.borderDefault,
             disabledBorderColor = FinancialConnectionsTheme.colors.textDisabled,
             unfocusedLabelColor = FinancialConnectionsTheme.colors.textSecondary,
+            errorBorderColor = FinancialConnectionsTheme.colors.textCritical,
             focusedLabelColor = FinancialConnectionsTheme.colors.textBrand,
             cursorColor = FinancialConnectionsTheme.colors.textBrand,
+            errorCursorColor = FinancialConnectionsTheme.colors.textCritical,
+            errorLabelColor = FinancialConnectionsTheme.colors.textCritical,
+            errorTrailingIconColor = FinancialConnectionsTheme.colors.textCritical,
             trailingIconColor = FinancialConnectionsTheme.colors.borderDefault,
             focusedTrailingIconColor = FinancialConnectionsTheme.colors.borderDefault
         ),

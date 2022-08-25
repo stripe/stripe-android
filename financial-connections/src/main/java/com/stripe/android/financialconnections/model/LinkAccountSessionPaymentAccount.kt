@@ -1,0 +1,33 @@
+package com.stripe.android.financialconnections.model
+
+import kotlinx.serialization.Required
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+internal data class LinkAccountSessionPaymentAccount(
+
+    @SerialName(value = "id")
+    @Required
+    val id: String,
+
+    @SerialName(value = "eligible_for_networking")
+    val eligibleForNetworking: Boolean? = null,
+
+    @SerialName(value = "microdeposit_verification_method")
+    val microdepositVerificationMethod: MicrodepositVerificationMethod? = null,
+
+    @SerialName(value = "networking_successful")
+    val networkingSuccessful: Boolean? = null,
+
+    @SerialName(value = "next_pane")
+    val nextPane: FinancialConnectionsSessionManifest.NextPane? = null
+
+) {
+
+    @Serializable
+    enum class MicrodepositVerificationMethod(val value: String) {
+        @SerialName(value = "amounts") AMOUNTS("amounts"),
+        @SerialName(value = "descriptor_code") DESCRIPTOR_CODE("descriptor_code");
+    }
+}

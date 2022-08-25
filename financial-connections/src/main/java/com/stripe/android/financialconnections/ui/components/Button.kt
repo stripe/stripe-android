@@ -24,13 +24,14 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun FinancialConnectionsButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     loading: Boolean = false,
     content: @Composable (RowScope.() -> Unit)
 ) {
     Button(
         onClick = onClick,
         modifier = modifier,
-        enabled = loading.not(),
+        enabled = enabled,
         shape = RoundedCornerShape(12.dp),
         contentPadding = PaddingValues(
             start = 16.dp,
