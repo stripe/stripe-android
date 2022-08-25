@@ -156,11 +156,12 @@ internal fun SignUpBody(
                         PrimaryButtonState.Enabled
                     } else {
                         PrimaryButtonState.Disabled
+                    },
+                    onButtonClick = {
+                        onSignUpClick()
+                        keyboardController?.hide()
                     }
-                ) {
-                    onSignUpClick()
-                    keyboardController?.hide()
-                }
+                )
             }
         }
     }

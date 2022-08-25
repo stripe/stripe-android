@@ -183,8 +183,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     suspend fun attachNewCardToAccount(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.New> =
-        linkAccountManager.createPaymentDetails(
-            SupportedPaymentMethod.Card,
+        linkAccountManager.createCardPaymentDetails(
             paymentMethodCreateParams
         )
 

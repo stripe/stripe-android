@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.cardedit
 
-import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -13,6 +12,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
+import com.stripe.android.link.ui.wallet.PaymentDetailsResult
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentMethod
@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -75,13 +74,13 @@ internal class CardEditViewModel @Inject constructor(
                                 .merchantName(args.merchantName)
                                 .build().formController
                         } ?: dismiss(
-                        Result.Failure(
+                        PaymentDetailsResult.Failure(
                             ErrorMessage.Raw("Payment details $paymentDetailsId not found.")
                         )
                     )
                 },
                 onFailure = {
-                    dismiss(Result.Failure(it.getErrorMessage()))
+                    dismiss(PaymentDetailsResult.Failure(it.getErrorMessage()))
                 }
             )
         }
@@ -112,15 +111,15 @@ internal class CardEditViewModel @Inject constructor(
             linkAccountManager.updatePaymentDetails(updateParams).fold(
                 onSuccess = {
                     _isProcessing.value = false
-                    dismiss(Result.Success)
+                    dismiss(PaymentDetailsResult.Success(paymentDetails.id))
                 },
                 onFailure = ::onError
             )
         }
     }
 
-    fun dismiss(result: Result = Result.Cancelled) {
-        navigator.setResult(Result.KEY, result)
+    fun dismiss(result: PaymentDetailsResult = PaymentDetailsResult.Cancelled) {
+        navigator.setResult(PaymentDetailsResult.KEY, result)
         navigator.onBack()
     }
 
@@ -159,21 +158,6 @@ internal class CardEditViewModel @Inject constructor(
                 .build().cardEditViewModel.apply {
                     initWithPaymentDetailsId(paymentDetailsId)
                 } as T
-        }
-    }
-
-    sealed class Result : Parcelable {
-        @Parcelize
-        object Success : Result()
-
-        @Parcelize
-        object Cancelled : Result()
-
-        @Parcelize
-        class Failure(val error: ErrorMessage) : Result()
-
-        companion object {
-            const val KEY = "CardEditScreenResult"
         }
     }
 }

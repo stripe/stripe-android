@@ -102,8 +102,7 @@ internal class PaymentMethodViewModel @Inject constructor(
             )
 
         viewModelScope.launch {
-            linkAccountManager.createPaymentDetails(
-                paymentMethod,
+            linkAccountManager.createCardPaymentDetails(
                 paymentMethodCreateParams,
                 linkAccount.email,
                 args.stripeIntent
@@ -169,7 +168,7 @@ internal class PaymentMethodViewModel @Inject constructor(
 
     private fun setState(state: PrimaryButtonState) {
         _primaryButtonState.value = state
-        navigator.backNavigationEnabled = !state.isBlocking
+        navigator.userNavigationEnabled = !state.isBlocking
     }
 
     internal class Factory(

@@ -108,7 +108,7 @@ internal class VerificationViewModel @Inject constructor(
 
     fun onBack() {
         clearError()
-        navigator.onBack()
+        navigator.onBack(true)
         linkEventsReporter.on2FACancel()
         linkAccountManager.logout()
     }
