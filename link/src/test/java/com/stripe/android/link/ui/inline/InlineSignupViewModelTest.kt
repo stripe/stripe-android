@@ -9,7 +9,8 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.ui.core.elements.PhoneNumberController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -194,8 +195,49 @@ class InlineSignupViewModelTest {
             verify(linkEventsReporter).onSignupStarted(true)
         }
 
+    @Test
+    fun `User input is valid without name for US users`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(countryCode = CountryCode.US)
+
+        viewModel.toggleExpanded()
+        viewModel.emailController.onRawValueChange("valid@email.com")
+        viewModel.phoneController.onRawValueChange("1234567890")
+
+        assertThat(viewModel.userInput.value).isEqualTo(
+            UserInput.SignUp(
+                email = "valid@email.com",
+                phone = "+11234567890",
+                country = CountryCode.US.value
+            )
+        )
+    }
+
+    @Test
+    fun `User input is only valid with name for non-US users`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(countryCode = CountryCode.CA)
+
+            viewModel.toggleExpanded()
+            viewModel.emailController.onRawValueChange("valid@email.com")
+            viewModel.phoneController.selectCanadianPhoneNumber()
+            viewModel.phoneController.onRawValueChange("1234567890")
+
+            assertThat(viewModel.userInput.value).isNull()
+
+            viewModel.nameController.onRawValueChange("Someone from Canada")
+
+            assertThat(viewModel.userInput.value).isEqualTo(
+                UserInput.SignUp(
+                    email = "valid@email.com",
+                    phone = "+11234567890",
+                    country = CountryCode.CA.value,
+                    name = "Someone from Canada"
+                )
+            )
+        }
+
     private fun createViewModel(
-        countryCode: CountryCode = CountryCode.US,
+        countryCode: CountryCode = CountryCode.US
     ) = InlineSignupViewModel(
         stripeIntent = mockStripeIntent(countryCode),
         merchantName = MERCHANT_NAME,
@@ -224,8 +266,15 @@ class InlineSignupViewModelTest {
 
     private fun mockStripeIntent(
         countryCode: CountryCode = CountryCode.US
-    ): StripeIntent = mock {
+    ): PaymentIntent = mock {
         on { this.countryCode } doReturn countryCode.value
+    }
+
+    private fun PhoneNumberController.selectCanadianPhoneNumber() {
+        val canada = countryDropdownController.displayItems.indexOfFirst {
+            it.contains("Canada")
+        }
+        onSelectedCountryIndex(canada)
     }
 
     private companion object {

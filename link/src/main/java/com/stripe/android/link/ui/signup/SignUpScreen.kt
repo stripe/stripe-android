@@ -77,7 +77,7 @@ internal fun SignUpBody(
     )
 
     val signUpState by signUpViewModel.signUpState.collectAsState()
-    val isReadyToSignUp by signUpViewModel.isReadyToSignUp.collectAsState(false)
+    val isReadyToSignUp by signUpViewModel.isReadyToSignUp.collectAsState()
     val errorMessage by signUpViewModel.errorMessage.collectAsState()
 
     SignUpBody(

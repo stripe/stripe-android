@@ -14,6 +14,8 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
@@ -24,6 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -77,15 +80,16 @@ internal class SignUpViewModel @Inject constructor(
             .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val requiresNameCollection: Boolean
-        get() = args.stripeIntent.countryCode != CountryCode.US.value
+        get() {
+            val countryCode = when (val stripeIntent = args.stripeIntent) {
+                is PaymentIntent -> stripeIntent.countryCode
+                is SetupIntent -> stripeIntent.countryCode
+            }
+            return countryCode != CountryCode.US.value
+        }
 
-    val isReadyToSignUp = combine(
-        consumerEmail,
-        consumerPhoneNumber,
-        consumerName
-    ) { email, phone, name ->
-        email != null && phone != null && (!requiresNameCollection || !name.isNullOrBlank())
-    }
+    private val _isReadyToSignUp = MutableStateFlow(false)
+    val isReadyToSignUp: StateFlow<Boolean> = _isReadyToSignUp
 
     private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
     val signUpState: StateFlow<SignUpState> = _signUpStatus
@@ -109,7 +113,26 @@ internal class SignUpViewModel @Inject constructor(
             }
         )
 
+        viewModelScope.launch {
+            combine(
+                consumerEmail,
+                consumerPhoneNumber,
+                consumerName,
+                this@SignUpViewModel::determineIsReadyToSignUp
+            ).collect {
+                _isReadyToSignUp.value = it
+            }
+        }
+
         linkEventsReporter.onSignupFlowPresented()
+    }
+
+    private fun determineIsReadyToSignUp(
+        email: String?,
+        phone: String?,
+        name: String?
+    ): Boolean {
+        return email != null && phone != null && (!requiresNameCollection || !name.isNullOrBlank())
     }
 
     fun onSignUpClick() {

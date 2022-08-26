@@ -203,7 +203,7 @@ internal fun LinkInlineSignup(
                                     enabled = enabled,
                                     phoneNumberController = phoneNumberController,
                                     requestFocusWhenShown =
-                                        phoneNumberController.initialPhoneNumber.isEmpty(),
+                                    phoneNumberController.initialPhoneNumber.isEmpty(),
                                     imeAction = if (requiresNameCollection) {
                                         ImeAction.Next
                                     } else {

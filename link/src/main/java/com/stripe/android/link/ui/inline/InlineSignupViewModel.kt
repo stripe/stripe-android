@@ -13,6 +13,8 @@ import com.stripe.android.link.injection.LINK_INTENT
 import com.stripe.android.link.injection.MERCHANT_NAME
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
@@ -73,7 +75,13 @@ internal class InlineSignupViewModel @Inject constructor(
     val isExpanded = MutableStateFlow(false)
 
     val requiresNameCollection: Boolean
-        get() = stripeIntent.countryCode != CountryCode.US.value
+        get() {
+            val countryCode = when (stripeIntent) {
+                is PaymentIntent -> stripeIntent.countryCode
+                is SetupIntent -> stripeIntent.countryCode
+            }
+            return countryCode != CountryCode.US.value
+        }
 
     /**
      * The collected input from the user, always valid unless null.
@@ -105,7 +113,7 @@ internal class InlineSignupViewModel @Inject constructor(
                 if (it == SignUpState.InputtingEmail || it == SignUpState.VerifyingEmail) {
                     userInput.value = null
                 } else if (it == SignUpState.InputtingPhoneOrName) {
-                    userInput.value = createUserInput(
+                    userInput.value = mapToUserInput(
                         phoneNumber = consumerPhoneNumber.value,
                         name = consumerName.value
                     )
@@ -122,14 +130,14 @@ internal class InlineSignupViewModel @Inject constructor(
             combine(
                 consumerPhoneNumber,
                 consumerName,
-                this@InlineSignupViewModel::createUserInput
+                this@InlineSignupViewModel::mapToUserInput
             ).collect {
                 userInput.value = it
             }
         }
     }
 
-    private fun createUserInput(
+    private fun mapToUserInput(
         phoneNumber: String?,
         name: String?
     ): UserInput? {
@@ -141,7 +149,7 @@ internal class InlineSignupViewModel @Inject constructor(
             val phone = phoneController.getE164PhoneNumber(phoneNumber)
             val country = phoneController.getCountryCode()
 
-            UserInput.SignUp(email, phone, country).takeIf { isNameValid }
+            UserInput.SignUp(email, phone, country, name).takeIf { isNameValid }
         } else {
             null
         }

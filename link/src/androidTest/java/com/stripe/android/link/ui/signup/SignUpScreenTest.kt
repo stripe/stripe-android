@@ -31,6 +31,7 @@ internal class SignUpScreenTest {
         onEmailField().assertIsEnabled()
         onProgressIndicator().assertDoesNotExist()
         onPhoneField().assertDoesNotExist()
+        onNameField().assertDoesNotExist()
         onSignUpButton().assertDoesNotExist()
     }
 
@@ -42,11 +43,29 @@ internal class SignUpScreenTest {
         onEmailField().assertIsNotEnabled()
         onProgressIndicator().assertExists()
         onPhoneField().assertDoesNotExist()
+        onNameField().assertDoesNotExist()
         onSignUpButton().assertDoesNotExist()
     }
 
     @Test
-    fun status_inputting_phone_shows_all_fields() {
+    fun status_inputting_phone_shows_all_fields_if_name_required() {
+        setContent(
+            signUpState = SignUpState.InputtingPhoneOrName,
+            requiresNameCollection = true
+        )
+
+        onEmailField().assertExists()
+        onEmailField().assertIsEnabled()
+        onProgressIndicator().assertDoesNotExist()
+        onPhoneField().assertExists()
+        onPhoneField().assertIsEnabled()
+        onNameField().assertExists()
+        onNameField().assertIsEnabled()
+        onSignUpButton().assertExists()
+    }
+
+    @Test
+    fun status_inputting_phone_shows_only_phone_field_if_name_not_required() {
         setContent(SignUpState.InputtingPhoneOrName)
 
         onEmailField().assertExists()
@@ -54,6 +73,7 @@ internal class SignUpScreenTest {
         onProgressIndicator().assertDoesNotExist()
         onPhoneField().assertExists()
         onPhoneField().assertIsEnabled()
+        onNameField().assertDoesNotExist()
         onSignUpButton().assertExists()
     }
 
@@ -90,6 +110,7 @@ internal class SignUpScreenTest {
     private fun setContent(
         signUpState: SignUpState,
         isReadyToSignUp: Boolean = true,
+        requiresNameCollection: Boolean = false,
         errorMessage: ErrorMessage? = null
     ) =
         composeTestRule.setContent {
@@ -99,8 +120,11 @@ internal class SignUpScreenTest {
                     emailController = SimpleTextFieldController
                         .createEmailSectionController(""),
                     phoneNumberController = PhoneNumberController.createPhoneNumberController(),
+                    nameController = SimpleTextFieldController
+                        .createNameSectionController(null),
                     signUpState = signUpState,
                     isReadyToSignUp = isReadyToSignUp,
+                    requiresNameCollection = requiresNameCollection,
                     errorMessage = errorMessage,
                     onSignUpClick = {}
                 )
@@ -110,5 +134,6 @@ internal class SignUpScreenTest {
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(progressIndicatorTestTag)
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
+    private fun onNameField() = composeTestRule.onNodeWithText("Name")
     private fun onSignUpButton() = composeTestRule.onNodeWithText("Join Link")
 }
