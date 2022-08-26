@@ -2,7 +2,6 @@ package com.stripe.android.link
 
 import android.app.Application
 import androidx.lifecycle.Lifecycle
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
@@ -54,7 +53,6 @@ class LinkActivityViewModelTest {
 
     private val linkAccountManager = mock<LinkAccountManager>()
     private val confirmationManager = mock<ConfirmationManager>()
-
     private val navigator = mock<Navigator>()
 
     init {
