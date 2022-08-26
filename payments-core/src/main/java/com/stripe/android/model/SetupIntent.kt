@@ -33,7 +33,7 @@ data class SetupIntent internal constructor(
     /**
      * Country code of the user.
      */
-    override val countryCode: String?,
+    internal val countryCode: String?,
 
     /**
      * The client secret of this SetupIntent. Used for client-side retrieval using a

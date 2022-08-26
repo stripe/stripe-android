@@ -84,7 +84,7 @@ data class PaymentIntent internal constructor(
     /**
      * Country code of the user.
      */
-    override val countryCode: String?,
+    internal val countryCode: String?,
 
     /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
