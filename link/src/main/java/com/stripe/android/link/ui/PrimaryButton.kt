@@ -130,7 +130,10 @@ internal fun PrimaryButton(
                             },
                         tint = MaterialTheme.linkColors.buttonLabel
                     )
-                    else -> Row(Modifier.fillMaxWidth()) {
+                    else -> Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         PrimaryButtonIcon(iconStart)
                         Text(
                             text = label,
