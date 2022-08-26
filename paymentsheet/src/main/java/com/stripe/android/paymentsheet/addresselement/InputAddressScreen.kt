@@ -34,7 +34,7 @@ internal fun InputAddressScreen(
     formContent: @Composable ColumnScope.() -> Unit,
     checkboxContent: @Composable ColumnScope.() -> Unit
 ) {
-    Column(
+    ScrollableColumn(
         modifier = Modifier
             .fillMaxHeight()
             .background(MaterialTheme.colors.surface)
