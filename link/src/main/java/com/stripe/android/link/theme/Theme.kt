@@ -26,7 +26,7 @@ internal fun DefaultLinkTheme(
         MaterialTheme(
             colors = colors.materialColors,
             typography = Typography,
-            shapes = Shapes,
+            shapes = MaterialTheme.shapes,
             content = content
         )
     }
