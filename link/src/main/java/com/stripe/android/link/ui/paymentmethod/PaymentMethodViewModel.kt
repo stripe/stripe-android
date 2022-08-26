@@ -74,7 +74,7 @@ internal class PaymentMethodViewModel @Inject constructor(
 
     val supportedTypes = args.stripeIntent.supportedPaymentMethodTypes(linkAccount)
         .let { supportedTypes ->
-            SupportedPaymentMethod.allValues.filter { supportedTypes.contains(it.type) }
+            SupportedPaymentMethod.values().filter { supportedTypes.contains(it.type) }
         }
 
     private val _paymentMethod = MutableStateFlow(supportedTypes.first())
@@ -190,7 +190,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                 PaymentDetailsResult.KEY,
                 PaymentDetailsResult.Success(selectedAccount.id)
             )
-            navigator.onBack()
+            navigator.onBack(userInitiated = false)
         } else {
             navigator.navigateTo(LinkScreen.Wallet, clearBackStack = true)
         }

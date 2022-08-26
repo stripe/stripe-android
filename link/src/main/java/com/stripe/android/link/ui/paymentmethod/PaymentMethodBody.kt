@@ -59,7 +59,7 @@ private fun PaymentMethodBodyPreview() {
     DefaultLinkTheme {
         Surface {
             PaymentMethodBody(
-                supportedPaymentMethods = SupportedPaymentMethod.allValues,
+                supportedPaymentMethods = SupportedPaymentMethod.values().toList(),
                 selectedPaymentMethod = SupportedPaymentMethod.Card,
                 primaryButtonLabel = "Pay $10.99",
                 primaryButtonState = PrimaryButtonState.Enabled,
