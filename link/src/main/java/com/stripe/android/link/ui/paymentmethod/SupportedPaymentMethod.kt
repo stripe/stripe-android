@@ -1,8 +1,12 @@
 package com.stripe.android.link.ui.paymentmethod
 
+import android.content.res.Resources
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import com.stripe.android.link.R
+import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
-import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.forms.LinkCardForm
 
@@ -11,58 +15,57 @@ import com.stripe.android.ui.core.forms.LinkCardForm
  *
  * @param type The Payment Method type. Matches the [ConsumerPaymentDetails] types.
  * @param formSpec Specification of how the payment method data collection UI should look.
+ * @param nameResourceId String resource id for the name of this payment method.
+ * @param iconResourceId Drawable resource id for the icon representing this payment method.
+ * @param primaryButtonStartIconResourceId Drawable resource id for the icon to be displayed at the
+ *      start of the primary button when this payment method is being created.
+ * @param primaryButtonEndIconResourceId Drawable resource id for the icon to be displayed at the
+ *      end of the primary button when this payment method is being created.
  */
 internal enum class SupportedPaymentMethod(
     val type: String,
-    val formSpec: List<FormItemSpec>
+    val formSpec: List<FormItemSpec>,
+    @StringRes val nameResourceId: Int,
+    @DrawableRes val iconResourceId: Int,
+    @DrawableRes val primaryButtonStartIconResourceId: Int? = null,
+    @DrawableRes val primaryButtonEndIconResourceId: Int? = null
 ) {
     Card(
         ConsumerPaymentDetails.Card.type,
-        LinkCardForm.items
+        LinkCardForm.items,
+        R.string.stripe_paymentsheet_payment_method_card,
+        R.drawable.ic_link_card,
+        primaryButtonEndIconResourceId = R.drawable.stripe_ic_lock
     ) {
-        override fun createParams(
-            paymentMethodCreateParams: PaymentMethodCreateParams,
-            email: String
-        ) = ConsumerPaymentDetailsCreateParams.Card(
-            paymentMethodCreateParams.toParamMap(),
-            email
-        )
-
-        /**
-         * CVC is not passed during creation, and must be included when confirming the payment.
-         */
-        override fun extraConfirmationParams(paymentMethodCreateParams: PaymentMethodCreateParams) =
-            (paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>)?.let { card ->
-                mapOf("card" to mapOf("cvc" to card["cvc"]))
-            }
+        override fun primaryButtonLabel(
+            stripeIntent: StripeIntent,
+            resources: Resources
+        ) = completePaymentButtonLabel(stripeIntent, resources)
     },
     BankAccount(
         ConsumerPaymentDetails.BankAccount.type,
-        emptyList()
+        emptyList(),
+        R.string.stripe_payment_method_bank,
+        R.drawable.ic_link_bank,
+        primaryButtonStartIconResourceId = R.drawable.ic_link_add
     ) {
-        override fun createParams(
-            paymentMethodCreateParams: PaymentMethodCreateParams,
-            email: String
-        ): ConsumerPaymentDetailsCreateParams {
-            TODO("Not yet implemented")
-        }
+        override fun primaryButtonLabel(
+            stripeIntent: StripeIntent,
+            resources: Resources
+        ) = resources.getString(R.string.add_bank_account)
     };
 
-    /**
-     * Build the [ConsumerPaymentDetailsCreateParams] that will to create this payment method.
-     */
-    abstract fun createParams(
-        paymentMethodCreateParams: PaymentMethodCreateParams,
-        email: String
-    ): ConsumerPaymentDetailsCreateParams
+    val showsForm = formSpec.isNotEmpty()
 
     /**
-     * A map containing additional parameters that must be sent during payment confirmation.
+     * The label for the primary button when this payment method is being created.
      */
-    open fun extraConfirmationParams(paymentMethodCreateParams: PaymentMethodCreateParams):
-        Map<String, Any>? = null
+    abstract fun primaryButtonLabel(
+        stripeIntent: StripeIntent,
+        resources: Resources
+    ): String
 
     internal companion object {
-        val allTypes = setOf(Card.type, BankAccount.type)
+        val allTypes = values().map { it.type }.toSet()
     }
 }

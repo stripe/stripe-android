@@ -49,8 +49,8 @@ import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
+import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
-import com.stripe.android.link.ui.primaryButtonLabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.ui.core.elements.Html
@@ -130,7 +130,10 @@ internal fun WalletBody(
             paymentDetailsList = paymentDetailsList,
             supportedTypes = viewModel.supportedTypes,
             selectedItem = selectedItem,
-            primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
+            primaryButtonLabel = completePaymentButtonLabel(
+                viewModel.args.stripeIntent,
+                LocalContext.current.resources
+            ),
             primaryButtonState = primaryButtonState,
             errorMessage = errorMessage,
             onItemSelected = viewModel::onItemSelected,
@@ -260,8 +263,8 @@ internal fun WalletBody(
             } else {
                 PrimaryButtonState.Disabled
             },
-            icon = R.drawable.stripe_ic_lock,
-            onButtonClick = onPrimaryButtonClick
+            onButtonClick = onPrimaryButtonClick,
+            iconEnd = R.drawable.stripe_ic_lock
         )
         SecondaryButton(
             enabled = !primaryButtonState.isBlocking,
@@ -401,7 +404,7 @@ private fun ExpandedPaymentDetails(
                 tint = Color.Unspecified
             )
             Text(
-                text = stringResource(id = R.string.wallet_add_payment_method),
+                text = stringResource(id = R.string.add_payment_method),
                 modifier = Modifier.padding(end = HorizontalPadding, bottom = 4.dp),
                 color = MaterialTheme.linkColors.actionLabel,
                 style = MaterialTheme.typography.button

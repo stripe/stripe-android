@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 
 internal val MinimumTouchTargetSize = 48.dp
 internal val AppBarHeight = 56.dp
+internal val PrimaryButtonHeight = 56.dp
 internal val HorizontalPadding = 20.dp
 
 private val LocalColors = staticCompositionLocalOf { LinkThemeConfig.colors(false) }

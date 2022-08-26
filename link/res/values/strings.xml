@@ -31,10 +31,10 @@
     <string name="wallet_remove_account_confirmation">Are you sure you want to remove this account?</string>
     <string name="wallet_bank_account_terms">By continuing, you agree to authorize payments pursuant to &lt;a href=\"https://stripe.com/legal/ach-payments/authorization\"&gt;these terms&lt;/a&gt;.</string>
 
-    <string name="wallet_add_payment_method">Add a payment method</string>
+    <string name="add_payment_method">Add a payment method</string>
+    <string name="add_bank_account">Add bank account</string>
     <string name="wallet_pay_another_way">Pay another way</string>
 
-    <string name="pm_add_new_card">Add a new card</string>
     <string name="pm_your_default">This is your default</string>
     <string name="pm_set_as_default">Set as default payment</string>
 </resources>

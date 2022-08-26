@@ -16,7 +16,6 @@ import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
-import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -60,12 +59,12 @@ internal class WalletViewModel @Inject constructor(
         loadPaymentDetails(true)
 
         viewModelScope.launch {
-            navigator.getResultFlow<CardEditViewModel.Result>(CardEditViewModel.Result.KEY)
+            navigator.getResultFlow<PaymentDetailsResult>(PaymentDetailsResult.KEY)
                 ?.collect {
                     when (it) {
-                        CardEditViewModel.Result.Success -> loadPaymentDetails()
-                        CardEditViewModel.Result.Cancelled -> {}
-                        is CardEditViewModel.Result.Failure -> onError(it.error)
+                        is PaymentDetailsResult.Success -> loadPaymentDetails()
+                        PaymentDetailsResult.Cancelled -> {}
+                        is PaymentDetailsResult.Failure -> onError(it.error)
                     }
                 }
         }
@@ -198,7 +197,7 @@ internal class WalletViewModel @Inject constructor(
 
     private fun setState(state: PrimaryButtonState) {
         _primaryButtonState.value = state
-        navigator.backNavigationEnabled = !state.isBlocking
+        navigator.userNavigationEnabled = !state.isBlocking
     }
 
     /**
