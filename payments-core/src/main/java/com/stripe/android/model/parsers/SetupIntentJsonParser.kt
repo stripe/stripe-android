@@ -37,6 +37,7 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
             cancellationReason = SetupIntent.CancellationReason.fromCode(
                 optString(json, FIELD_CANCELLATION_REASON)
             ),
+            countryCode = optString(json, FIELD_COUNTRY_CODE),
             description = optString(json, FIELD_DESCRIPTION),
             isLiveMode = json.optBoolean(FIELD_LIVEMODE),
             paymentMethod = paymentMethod,
@@ -91,6 +92,7 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         private const val FIELD_CANCELLATION_REASON = "cancellation_reason"
         private const val FIELD_CREATED = "created"
         private const val FIELD_CLIENT_SECRET = "client_secret"
+        private const val FIELD_COUNTRY_CODE = "country_code"
         private const val FIELD_DESCRIPTION = "description"
         private const val FIELD_LAST_SETUP_ERROR = "last_setup_error"
         private const val FIELD_LIVEMODE = "livemode"

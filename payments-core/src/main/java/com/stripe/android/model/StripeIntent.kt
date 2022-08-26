@@ -22,6 +22,11 @@ sealed interface StripeIntent : StripeModel {
     val created: Long
 
     /**
+     * Country code of the user.
+     */
+    val countryCode: String?
+
+    /**
      * An arbitrary string attached to the object. Often useful for displaying to users.
      */
     val description: String?
