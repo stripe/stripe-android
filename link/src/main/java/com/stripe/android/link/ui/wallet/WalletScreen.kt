@@ -41,6 +41,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
@@ -291,11 +292,11 @@ internal fun CollapsedPaymentDetails(
             .border(
                 width = 1.dp,
                 color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
             .background(
                 color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
             .clickable(
                 enabled = enabled,
@@ -343,11 +344,11 @@ private fun ExpandedPaymentDetails(
             .border(
                 width = 1.dp,
                 color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
             .background(
                 color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
     ) {
         Row(

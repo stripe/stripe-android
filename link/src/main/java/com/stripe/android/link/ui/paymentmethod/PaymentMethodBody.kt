@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
@@ -44,6 +44,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PaymentsThemeForLink
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
@@ -105,8 +106,8 @@ internal fun PaymentMethodBody(
 
     val formController by viewModel.formController.collectAsState()
 
-    formController?.let {
-        val formValues by it.completeFormValues.collectAsState(null)
+    formController?.let { controller ->
+        val formValues by controller.completeFormValues.collectAsState(null)
         val primaryButtonState by viewModel.primaryButtonState.collectAsState()
         val errorMessage by viewModel.errorMessage.collectAsState()
         val paymentMethod by viewModel.paymentMethod.collectAsState()
@@ -131,7 +132,7 @@ internal fun PaymentMethodBody(
             onSecondaryButtonClick = viewModel::onSecondaryButtonClick,
             formContent = {
                 Form(
-                    it,
+                    controller,
                     viewModel.isEnabled
                 )
             }
@@ -172,22 +173,19 @@ internal fun PaymentMethodBody(
         )
         if (supportedPaymentMethods.size > 1) {
             Row(
-                Modifier
+                modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp)
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                supportedPaymentMethods.forEachIndexed { index, paymentMethod ->
+                supportedPaymentMethods.forEach { paymentMethod ->
                     PaymentMethodTypeCell(
                         paymentMethod = paymentMethod,
                         selected = paymentMethod == selectedPaymentMethod,
                         enabled = !primaryButtonState.isBlocking,
                         onSelected = {
                             onPaymentMethodSelected(paymentMethod)
-                        },
-                        modifier = Modifier.padding(
-                            start = if (index > 0) 10.dp else 0.dp,
-                            end = if (index < supportedPaymentMethods.lastIndex) 10.dp else 0.dp
-                        )
+                        }
                     )
                 }
             }
@@ -233,7 +231,7 @@ private fun RowScope.PaymentMethodTypeCell(
             modifier = modifier
                 .height(56.dp)
                 .weight(1f),
-            shape = RoundedCornerShape(8.dp),
+            shape = MaterialTheme.linkShapes.small,
             color = MaterialTheme.linkColors.componentBackground,
             border = BorderStroke(
                 width = if (selected) {

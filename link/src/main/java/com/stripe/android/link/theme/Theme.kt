@@ -36,3 +36,8 @@ internal val MaterialTheme.linkColors: LinkColors
     @Composable
     @ReadOnlyComposable
     get() = LocalColors.current
+
+internal val MaterialTheme.linkShapes: LinkShapes
+    @Composable
+    @ReadOnlyComposable
+    get() = LinkShapes

@@ -1,11 +1,13 @@
 package com.stripe.android.link.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Colors
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.elements.OTPElementColors
@@ -66,6 +68,13 @@ internal data class LinkColors(
     val materialColors: Colors
 )
 
+internal object LinkShapes {
+    val extraSmall = RoundedCornerShape(4.dp)
+    val small = RoundedCornerShape(8.dp)
+    val medium = RoundedCornerShape(12.dp)
+    val large = RoundedCornerShape(14.dp)
+}
+
 @Composable
 internal fun PaymentsThemeForLink(
     content: @Composable () -> Unit
@@ -89,6 +98,8 @@ internal object LinkThemeConfig {
     fun colors(isDark: Boolean): LinkColors {
         return if (isDark) colorsDark else colorsLight
     }
+
+    val shapes = LinkShapes
 
     private val colorsLight = LinkColors(
         componentBackground = LightComponentBackground,

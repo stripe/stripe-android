@@ -24,6 +24,7 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.rememberLinkAppBarState
 
@@ -74,7 +75,7 @@ fun LinkVerificationDialog(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(16.dp),
-                                shape = MaterialTheme.shapes.medium
+                                shape = MaterialTheme.linkShapes.medium
                             ) {
                                 Column {
                                     val appBarState = rememberLinkAppBarState(

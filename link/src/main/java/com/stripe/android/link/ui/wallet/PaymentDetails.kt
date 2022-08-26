@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.link.R
 import com.stripe.android.link.model.icon
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ErrorTextStyle
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -81,7 +82,7 @@ internal fun PaymentDetailsListItem(
                             .height(20.dp)
                             .background(
                                 color = MaterialTheme.colors.secondary,
-                                shape = MaterialTheme.shapes.small
+                                shape = MaterialTheme.linkShapes.extraSmall
                             ),
                         contentAlignment = Alignment.Center
                     ) {
