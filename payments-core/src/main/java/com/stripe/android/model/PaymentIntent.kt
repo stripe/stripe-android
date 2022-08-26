@@ -84,7 +84,8 @@ data class PaymentIntent internal constructor(
     /**
      * Country code of the user.
      */
-    internal val countryCode: String?,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val countryCode: String?,
 
     /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.

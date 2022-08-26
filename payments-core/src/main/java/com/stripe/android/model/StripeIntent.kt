@@ -281,13 +281,3 @@ sealed interface StripeIntent : StripeModel {
         ) : NextActionData()
     }
 }
-
-/**
- * Country code of the user.
- */
-internal val StripeIntent.countryCode: String?
-    // We need to do this because an interface can't have an internal property
-    get() = when (this) {
-        is PaymentIntent -> countryCode
-        is SetupIntent -> countryCode
-    }

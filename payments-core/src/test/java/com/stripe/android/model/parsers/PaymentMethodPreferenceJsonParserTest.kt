@@ -2,10 +2,11 @@ package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS
 import com.stripe.android.model.PaymentIntentFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS_NO_ORDERED_LPMS
 import com.stripe.android.model.PaymentMethodPreferenceFixtures
-import com.stripe.android.model.countryCode
+import com.stripe.android.model.SetupIntent
 import org.json.JSONObject
 import org.junit.Test
 
@@ -158,7 +159,14 @@ class PaymentMethodPreferenceJsonParserTest {
         val parsedData = PaymentMethodPreferenceForPaymentIntentJsonParser().parse(
             PaymentMethodPreferenceFixtures.EXPANDED_PAYMENT_INTENT_JSON
         )
-        assertThat(parsedData?.intent?.countryCode).isEqualTo("US")
+
+        val countryCode = when (val intent = parsedData?.intent) {
+            is PaymentIntent -> intent.countryCode
+            is SetupIntent -> intent.countryCode
+            null -> null
+        }
+
+        assertThat(countryCode).isEqualTo("US")
     }
 
     @Test
@@ -166,6 +174,13 @@ class PaymentMethodPreferenceJsonParserTest {
         val parsedData = PaymentMethodPreferenceForSetupIntentJsonParser().parse(
             PaymentMethodPreferenceFixtures.EXPANDED_SETUP_INTENT_JSON
         )
-        assertThat(parsedData?.intent?.countryCode).isEqualTo("US")
+
+        val countryCode = when (val intent = parsedData?.intent) {
+            is PaymentIntent -> intent.countryCode
+            is SetupIntent -> intent.countryCode
+            null -> null
+        }
+
+        assertThat(countryCode).isEqualTo("US")
     }
 }

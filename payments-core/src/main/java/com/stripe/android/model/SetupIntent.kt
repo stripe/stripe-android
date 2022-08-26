@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import kotlinx.parcelize.Parcelize
@@ -33,7 +34,8 @@ data class SetupIntent internal constructor(
     /**
      * Country code of the user.
      */
-    internal val countryCode: String?,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val countryCode: String?,
 
     /**
      * The client secret of this SetupIntent. Used for client-side retrieval using a
