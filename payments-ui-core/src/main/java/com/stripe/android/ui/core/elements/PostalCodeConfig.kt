@@ -27,8 +27,9 @@ internal class PostalCodeConfig(
         override fun isValid(): Boolean {
             return when (format) {
                 is CountryPostalFormat.Other -> input.isNotBlank()
-                else -> input.length in format.minimumLength..format.maximumLength &&
-                    input.matches(format.regexPattern)
+                else ->
+                    input.length in format.minimumLength..format.maximumLength &&
+                        input.matches(format.regexPattern)
             }
         }
 
@@ -63,11 +64,13 @@ internal class PostalCodeConfig(
             maximumLength = 6,
             regexPattern = Regex("[a-zA-Z]\\d[a-zA-Z][\\s-]?\\d[a-zA-Z]\\d")
         )
+
         object US : CountryPostalFormat(
             minimumLength = 5,
             maximumLength = 5,
             regexPattern = Regex("\\d+")
         )
+
         object Other : CountryPostalFormat(
             minimumLength = 1,
             maximumLength = Int.MAX_VALUE,
