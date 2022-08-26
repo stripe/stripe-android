@@ -3185,7 +3185,6 @@ public final class com/stripe/android/model/PaymentIntent : com/stripe/android/m
 	public final fun getCaptureMethod ()Lcom/stripe/android/model/PaymentIntent$CaptureMethod;
 	public fun getClientSecret ()Ljava/lang/String;
 	public final fun getConfirmationMethod ()Lcom/stripe/android/model/PaymentIntent$ConfirmationMethod;
-	public fun getCountryCode ()Ljava/lang/String;
 	public fun getCreated ()J
 	public final fun getCurrency ()Ljava/lang/String;
 	public fun getDescription ()Ljava/lang/String;
@@ -4844,7 +4843,6 @@ public final class com/stripe/android/model/SetupIntent : com/stripe/android/mod
 	public static final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/SetupIntent;
 	public final fun getCancellationReason ()Lcom/stripe/android/model/SetupIntent$CancellationReason;
 	public fun getClientSecret ()Ljava/lang/String;
-	public fun getCountryCode ()Ljava/lang/String;
 	public fun getCreated ()J
 	public fun getDescription ()Ljava/lang/String;
 	public fun getId ()Ljava/lang/String;
@@ -5924,7 +5922,6 @@ public final class com/stripe/android/model/Stripe3ds2Fingerprint$DirectoryServe
 
 public abstract interface class com/stripe/android/model/StripeIntent : com/stripe/android/core/model/StripeModel {
 	public abstract fun getClientSecret ()Ljava/lang/String;
-	public abstract fun getCountryCode ()Ljava/lang/String;
 	public abstract fun getCreated ()J
 	public abstract fun getDescription ()Ljava/lang/String;
 	public abstract fun getId ()Ljava/lang/String;
