@@ -99,7 +99,7 @@ data class AddressSpec(
                 rawValuesMap = initialValues,
                 countryCodes = allowedCountryCodes,
                 addressType = type,
-                sameAsShippingController = sameAsShippingElement?.controller,
+                sameAsShippingElement = sameAsShippingElement,
                 shippingValuesMap = shippingValues
             )
             createSectionElement(

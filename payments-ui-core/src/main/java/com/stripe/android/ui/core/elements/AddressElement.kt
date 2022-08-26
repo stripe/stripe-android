@@ -24,7 +24,7 @@ open class AddressElement constructor(
         CountryConfig(countryCodes),
         rawValuesMap[IdentifierSpec.Country]
     ),
-    sameAsShippingController: SameAsShippingController?,
+    sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?
 ) : SectionMultiFieldElement(_identifier) {
 
@@ -78,8 +78,18 @@ open class AddressElement constructor(
     val fields = combine(
         countryElement.controller.rawFieldValue,
         otherFields,
-        sameAsShippingController?.value ?: flowOf(null)
-    ) { country, otherFields, sameAsShipping ->
+        otherFields.flatMapLatest { fieldElements ->
+            combine(
+                fieldElements
+                    .map {
+                        it.getFormFieldValueFlow()
+                    }
+            ) {
+                it.toList().flatten()
+            }
+        }.distinctUntilChanged(),
+        sameAsShippingElement?.controller?.value ?: flowOf(null)
+    ) { country, otherFields, otherFieldsValues, sameAsShipping ->
         val condensed = listOf(nameElement, countryElement, addressAutoCompleteElement)
         val expanded = listOf(nameElement, countryElement).plus(otherFields)
         val baseElements = when (addressType) {
@@ -113,31 +123,52 @@ open class AddressElement constructor(
             currentValuesMap[IdentifierSpec.Country] = it
         }
 
-        sameAsShipping?.let {
-            val values = (
-                if (it) {
-                    shippingValuesMap ?: emptyMap()
-                } else {
-                    currentValuesMap.mapValues {
+        currentValuesMap.putAll(
+            otherFieldsValues.associate {
+                Pair(it.first, it.second.value)
+            }
+        )
+
+//        println("James: ${otherFieldsValues.map { "${it.second.value}" }}")
+//        println("James: ${currentValuesMap.map { "${it.value}" }}")
+//        println("James: ${shippingValuesMap?.map { it.value ?: "" }}")
+
+
+
+//        if (!same) {
+//            sameAsShippingElement?.setRawValue(mapOf(sameAsShippingElement.identifier to "false"))
+//        }
+
+        // if current values == shipping values, then set same as shipping to true
+        // if current values != shipping values, then set same as shipping to false
+        // if sameAsShipping = true, set values to shippingValues map
+        // if sameAsShipping = false, set values to original map
+
+        sameAsShippingElement?.let {
+            when (sameAsShipping) {
+                true -> {
+                    fields.forEach { field ->
+                        val values = shippingValuesMap ?: emptyMap()
+                        field.setRawValue(values)
+                    }
+                }
+                false -> {
+                    val values = currentValuesMap.mapValues {
                         if (it.key == IdentifierSpec.Country) it.value
                         else rawValuesMap[it.key] ?: ""
                     }
+                    fields.forEach { field ->
+                        field.setRawValue(values)
+                    }
                 }
-                )
-            fields.forEach { field ->
-                field.setRawValue(values)
+                else -> {}
             }
         }
 
-        otherFields.forEach { field ->
-            field.setTextFieldOnChangeListener { identifier, text ->
-                currentValuesMap[identifier] = text
-                val same = currentValuesMap.all {
-                    shippingValuesMap?.get(it.key) == it.value
-                }
-                sameAsShippingController?.onValueChange(same)
-            }
+        val same = currentValuesMap.all {
+            (shippingValuesMap?.get(it.key) ?: "") == it.value
         }
+//        sameAsShippingElement?.setRawValue(mapOf(sameAsShippingElement.identifier to same.toString()))
 
         fields
     }

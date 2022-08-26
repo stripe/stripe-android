@@ -33,7 +33,7 @@ data class CardBillingSpec(
             addressRepository = addressRepository,
             countryCodes = allowedCountryCodes,
             rawValuesMap = initialValues,
-            sameAsShippingController = sameAsShippingElement?.controller,
+            sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = shippingValues
         )
 

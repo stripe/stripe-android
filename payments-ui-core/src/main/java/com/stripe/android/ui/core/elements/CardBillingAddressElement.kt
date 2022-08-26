@@ -21,7 +21,7 @@ class CardBillingAddressElement(
         CountryConfig(countryCodes),
         rawValuesMap[IdentifierSpec.Country]
     ),
-    sameAsShippingController: SameAsShippingController?,
+    sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?
 ) : AddressElement(
     identifier,
@@ -30,7 +30,7 @@ class CardBillingAddressElement(
     AddressType.Normal(),
     countryCodes,
     countryDropdownFieldController,
-    sameAsShippingController,
+    sameAsShippingElement,
     shippingValuesMap
 ) {
     // Save for future use puts this in the controller rather than element
