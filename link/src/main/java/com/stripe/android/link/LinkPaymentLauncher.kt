@@ -26,6 +26,7 @@ import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
+import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletViewModel
@@ -236,7 +237,9 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         WeakMapInjectorRegistry.register(injector, injectorKey)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         val LINK_ENABLED = BuildConfig.DEBUG
+        val supportedFundingSources = SupportedPaymentMethod.allTypes
     }
 }

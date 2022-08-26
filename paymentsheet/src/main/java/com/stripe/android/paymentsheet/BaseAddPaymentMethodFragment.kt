@@ -219,6 +219,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
     private fun updateLinkInlineSignupVisibility(selectedPaymentMethod: SupportedPaymentMethod) {
         showLinkInlineSignup = sheetViewModel.isLinkEnabled.value == true &&
+            (sheetViewModel.stripeIntent.value
+                ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) ?: false) &&
             selectedPaymentMethod.code == PaymentMethod.Type.Card.code &&
             sheetViewModel.linkLauncher.accountStatus.value == AccountStatus.SignedOut
 
