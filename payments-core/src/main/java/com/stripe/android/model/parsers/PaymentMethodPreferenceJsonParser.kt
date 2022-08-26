@@ -22,6 +22,8 @@ internal sealed class PaymentMethodPreferenceJsonParser<StripeIntentType : Strip
             return null
         }
 
+        val countryCode = paymentMethodPreference.optString(FIELD_COUNTRY_CODE)
+
         val paymentMethodSpecs = json.optJSONArray(FIELD_TYPE_PAYMENT_METHOD_SCHEMA)
 
         val linkFundingSources =
@@ -49,6 +51,10 @@ internal sealed class PaymentMethodPreferenceJsonParser<StripeIntentType : Strip
                     FIELD_LINK_FUNDING_SOURCES,
                     linkFundingSources
                 )
+                stripeIntentJsonObject.put(
+                    FIELD_COUNTRY_CODE,
+                    countryCode
+                )
                 parseStripeIntent(stripeIntentJsonObject)
             }?.let {
                 PaymentMethodPreference(
@@ -64,6 +70,7 @@ internal sealed class PaymentMethodPreferenceJsonParser<StripeIntentType : Strip
         private const val OBJECT_TYPE_PREFERENCE = "payment_method_preference"
 
         private const val FIELD_OBJECT = "object"
+        private const val FIELD_COUNTRY_CODE = "country_code"
         private const val FIELD_ORDERED_PAYMENT_METHOD_TYPES = "ordered_payment_method_types"
         private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES =

@@ -231,4 +231,10 @@ class PaymentIntentJsonParserTest {
         val paymentIntent = PaymentIntentFixtures.PI_WITH_LINK_FUNDING_SOURCES
         assertThat(paymentIntent.linkFundingSources).containsExactly("card", "bank_account")
     }
+
+    @Test
+    fun parse_withCountryCode_shouldCreateExpectedObject() {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_COUNTRY_CODE
+        assertThat(paymentIntent.countryCode).isEqualTo("US")
+    }
 }

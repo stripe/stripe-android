@@ -2,6 +2,10 @@
 
 ## X.X.X - 2022-XX-XX
 
+### PaymentSheet
+
+* [ADDED][5456](https://github.com/stripe/stripe-android/pull/5456) Added postal code validation
+
 ## 20.10.0 - 2022-08-22
 This release contains several bug fixes for PaymentSheet and binary size optimization for Identity.
 

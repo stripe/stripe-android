@@ -1,10 +1,17 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import kotlin.math.min
 
 // https://gist.github.com/ademar111190/34d3de41308389a0d0d8
 
-fun CharSequence.levenshtein(other: CharSequence): Int {
+internal fun CharSequence.levenshtein(other: CharSequence): Int {
     if (this == other) { return 0 }
     if (this.isEmpty()) { return other.length }
     if (other.isEmpty()) { return this.length }
@@ -46,4 +53,19 @@ internal fun AddressDetails.editDistance(otherAddress: AddressDetails?): Int {
     editDistance += (address?.postalCode ?: "").levenshtein(comparedAddress?.postalCode ?: "")
     editDistance += (address?.state ?: "").levenshtein(comparedAddress?.state ?: "")
     return editDistance
+}
+
+@Composable
+internal fun ScrollableColumn(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Box(
+        modifier = Modifier.verticalScroll(rememberScrollState())
+    ) {
+        Column(
+            modifier = modifier,
+            content = content
+        )
+    }
 }

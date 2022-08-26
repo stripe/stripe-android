@@ -45,7 +45,7 @@ class AddressRepository @Inject constructor(
         countryAddressSchemaPair.map { (countryCode, schemaList) ->
             countryCode to requireNotNull(
                 schemaList
-                    .transformToElementList()
+                    .transformToElementList(countryCode)
             )
         }.forEach { add(it.first, it.second) }
     }
