@@ -650,4 +650,26 @@ internal object SetupIntentFixtures {
     )
 
     val SI_3DS2_PROCESSING = PARSER.parse(SI_3DS2_PROCESSING_JSON)!!
+
+    internal val SI_WITH_COUNTRY_CODE = JSONObject(
+        """
+        {
+            "id": "seti_1EqTSZGMT9dGPIDGVzCUs6dV",
+            "object": "setup_intent",
+            "cancellation_reason": null,
+            "client_secret": "seti_1EqTSZGMT9dGPIDGVzCUs6dV_secret_FL9mS9ILygVyGEOSmVNqHT83rxkqy0Y",
+            "created": 1561677666,
+            "description": "a description",
+            "last_setup_error": null,
+            "livemode": false,
+            "payment_method": "pm_1EqTSoGMT9dGPIDG7dgafX1H",
+            "payment_method_types": [
+                "card"
+            ],
+            "status": "requires_action",
+            "usage": "off_session",
+            "country_code": "CA"
+        }
+        """.trimIndent()
+    )
 }
