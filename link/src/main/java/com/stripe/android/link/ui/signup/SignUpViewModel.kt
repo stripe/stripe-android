@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
@@ -36,7 +37,7 @@ import javax.inject.Provider
  * ViewModel that handles user sign up logic.
  */
 internal class SignUpViewModel @Inject constructor(
-    args: LinkActivityContract.Args,
+    private val args: LinkActivityContract.Args,
     @Named(PREFILLED_EMAIL) private val customerEmail: String?,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
@@ -52,6 +53,7 @@ internal class SignUpViewModel @Inject constructor(
 
     val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
     val phoneController = PhoneNumberController.createPhoneNumberController(prefilledPhone)
+    val nameController = SimpleTextFieldController.createNameSectionController(null) // TODO
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
@@ -67,8 +69,22 @@ internal class SignUpViewModel @Inject constructor(
         phoneController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
             .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    val isReadyToSignUp = combine(consumerEmail, consumerPhoneNumber) { email, phone ->
-        email != null && phone != null
+    /**
+     * Emits the name entered in the form if valid, null otherwise.
+     */
+    private val consumerName: StateFlow<String?> =
+        nameController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val requiresNameCollection: Boolean
+        get() = args.stripeIntent.countryCode != CountryCode.US.value
+
+    val isReadyToSignUp = combine(
+        consumerEmail,
+        consumerPhoneNumber,
+        consumerName
+    ) { email, phone, name ->
+        email != null && phone != null && (!requiresNameCollection || !name.isNullOrBlank())
     }
 
     private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
@@ -123,7 +139,7 @@ internal class SignUpViewModel @Inject constructor(
                 if (it != null) {
                     onAccountFetched(it)
                 } else {
-                    _signUpStatus.value = SignUpState.InputtingPhone
+                    _signUpStatus.value = SignUpState.InputtingPhoneOrName
                     linkEventsReporter.onSignupStarted()
                 }
             },
@@ -173,7 +189,7 @@ internal class SignUpViewModel @Inject constructor(
                     if (email == initialEmail && lookupJob == null) {
                         // If it's a valid email, collect phone number
                         if (email != null) {
-                            onStateChanged(SignUpState.InputtingPhone)
+                            onStateChanged(SignUpState.InputtingPhoneOrName)
                         }
                         return@collect
                     }

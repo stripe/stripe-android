@@ -53,7 +53,7 @@ internal class LinkInlineSignupViewTest {
 
     @Test
     fun status_inputting_phone_shows_all_fields() {
-        setContent(signUpState = SignUpState.InputtingPhone)
+        setContent(signUpState = SignUpState.InputtingPhoneOrName)
 
         onEmailField().assertExists()
         onEmailField().assertIsEnabled()

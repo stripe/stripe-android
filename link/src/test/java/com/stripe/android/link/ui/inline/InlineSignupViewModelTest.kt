@@ -2,12 +2,14 @@ package com.stripe.android.link.ui.inline
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -18,6 +20,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -47,7 +50,7 @@ class InlineSignupViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
             viewModel.toggleExpanded()
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
 
             verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
         }
@@ -56,6 +59,7 @@ class InlineSignupViewModelTest {
     fun `When email and phone are provided it should prefill all values`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = InlineSignupViewModel(
+                stripeIntent = mockStripeIntent(),
                 merchantName = MERCHANT_NAME,
                 customerEmail = CUSTOMER_EMAIL,
                 customerPhone = CUSTOMER_PHONE,
@@ -64,7 +68,7 @@ class InlineSignupViewModelTest {
                 logger = Logger.noop()
             )
             viewModel.toggleExpanded()
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
             assertThat(viewModel.phoneController.initialPhoneNumber).isEqualTo(CUSTOMER_PHONE)
 
             verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
@@ -107,7 +111,7 @@ class InlineSignupViewModelTest {
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.userInput.value).isNull()
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
         }
 
     @Test
@@ -186,11 +190,14 @@ class InlineSignupViewModelTest {
             // Advance past lookup debounce delay
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
 
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
             verify(linkEventsReporter).onSignupStarted(true)
         }
 
-    private fun createViewModel() = InlineSignupViewModel(
+    private fun createViewModel(
+        countryCode: CountryCode = CountryCode.US,
+    ) = InlineSignupViewModel(
+        stripeIntent = mockStripeIntent(countryCode),
         merchantName = MERCHANT_NAME,
         customerEmail = CUSTOMER_EMAIL,
         customerPhone = null,
@@ -213,6 +220,12 @@ class InlineSignupViewModelTest {
         whenever(consumerSession.clientSecret).thenReturn("secret")
         whenever(consumerSession.emailAddress).thenReturn("email")
         return consumerSession
+    }
+
+    private fun mockStripeIntent(
+        countryCode: CountryCode = CountryCode.US
+    ): StripeIntent = mock {
+        on { this.countryCode } doReturn countryCode.value
     }
 
     private companion object {

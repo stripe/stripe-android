@@ -4,13 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
 import com.stripe.android.link.injection.CUSTOMER_PHONE
+import com.stripe.android.link.injection.LINK_INTENT
 import com.stripe.android.link.injection.MERCHANT_NAME
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
@@ -18,6 +21,7 @@ import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -25,6 +29,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 internal class InlineSignupViewModel @Inject constructor(
+    @Named(LINK_INTENT) val stripeIntent: StripeIntent,
     @Named(MERCHANT_NAME) val merchantName: String,
     @Named(CUSTOMER_EMAIL) customerEmail: String?,
     @Named(CUSTOMER_PHONE) customerPhone: String?,
@@ -39,6 +44,7 @@ internal class InlineSignupViewModel @Inject constructor(
 
     val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
     val phoneController = PhoneNumberController.createPhoneNumberController(prefilledPhone)
+    val nameController = SimpleTextFieldController.createNameSectionController(null) // TODO
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
@@ -54,10 +60,20 @@ internal class InlineSignupViewModel @Inject constructor(
         phoneController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
             .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
+    /**
+     * Emits the name entered in the form if valid, null otherwise.
+     */
+    private val consumerName: StateFlow<String?> =
+        nameController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
+            .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
     private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
     val signUpState: StateFlow<SignUpState> = _signUpStatus
 
     val isExpanded = MutableStateFlow(false)
+
+    val requiresNameCollection: Boolean
+        get() = stripeIntent.countryCode != CountryCode.US.value
 
     /**
      * The collected input from the user, always valid unless null.
@@ -88,8 +104,11 @@ internal class InlineSignupViewModel @Inject constructor(
                 _signUpStatus.value = it
                 if (it == SignUpState.InputtingEmail || it == SignUpState.VerifyingEmail) {
                     userInput.value = null
-                } else if (it == SignUpState.InputtingPhone) {
-                    onPhoneInput(consumerPhoneNumber.value)
+                } else if (it == SignUpState.InputtingPhoneOrName) {
+                    userInput.value = createUserInput(
+                        phoneNumber = consumerPhoneNumber.value,
+                        name = consumerName.value
+                    )
                 }
             },
             onValidEmailEntered = {
@@ -100,22 +119,31 @@ internal class InlineSignupViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            consumerPhoneNumber.collect {
-                onPhoneInput(it)
+            combine(
+                consumerPhoneNumber,
+                consumerName,
+                this@InlineSignupViewModel::createUserInput
+            ).collect {
+                userInput.value = it
             }
         }
     }
 
-    private fun onPhoneInput(phoneNumber: String?) {
-        if (phoneNumber != null) {
-            // Email must be valid otherwise phone number collection UI would not be visible
+    private fun createUserInput(
+        phoneNumber: String?,
+        name: String?
+    ): UserInput? {
+        return if (phoneNumber != null) {
+            // Email must be valid otherwise phone number and name collection UI would not be visible
             val email = requireNotNull(consumerEmail.value)
+            val isNameValid = !requiresNameCollection || !name.isNullOrBlank()
+
             val phone = phoneController.getE164PhoneNumber(phoneNumber)
             val country = phoneController.getCountryCode()
 
-            userInput.value = UserInput.SignUp(email, phone, country)
+            UserInput.SignUp(email, phone, country).takeIf { isNameValid }
         } else {
-            userInput.value = null
+            null
         }
     }
 
@@ -127,7 +155,7 @@ internal class InlineSignupViewModel @Inject constructor(
                     _signUpStatus.value = SignUpState.InputtingEmail
                 } else {
                     userInput.value = null
-                    _signUpStatus.value = SignUpState.InputtingPhone
+                    _signUpStatus.value = SignUpState.InputtingPhoneOrName
                     linkEventsReporter.onSignupStarted(true)
                 }
             },
