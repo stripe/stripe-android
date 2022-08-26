@@ -7,25 +7,7 @@ import org.junit.Test
 internal class PostalCodeVisualTransformationTest {
 
     @Test
-    fun `verify US zip with zip+4`() {
-        val transform = PostalCodeVisualTransformation(
-            PostalCodeConfig.CountryPostalFormat.US
-        )
-        Truth.assertThat(transform.filter(AnnotatedString("902101234")).text.text)
-            .isEqualTo("90210-1234")
-    }
-
-    @Test
-    fun `verify US zip with zip+4 and less than 9`() {
-        val transform = PostalCodeVisualTransformation(
-            PostalCodeConfig.CountryPostalFormat.US
-        )
-        Truth.assertThat(transform.filter(AnnotatedString("90210123")).text.text)
-            .isEqualTo("90210-123")
-    }
-
-    @Test
-    fun `verify US zip without zip+4`() {
+    fun `verify US zip`() {
         val transform = PostalCodeVisualTransformation(
             PostalCodeConfig.CountryPostalFormat.US
         )

@@ -5,6 +5,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlin.math.max
 
 internal class PostalCodeConfig(
     @StringRes override val label: Int,
@@ -24,15 +25,10 @@ internal class PostalCodeConfig(
         override fun shouldShowError(hasFocus: Boolean) = false
 
         override fun isValid(): Boolean {
-            val formatted = input.replace(Regex("\\s+"), "")
             return when (format) {
-                is CountryPostalFormat.Other -> {
-                    true
-                }
-                else -> {
-                    formatted.length in format.minimumLength..format.maximumLength &&
-                        input.matches(format.regexPattern)
-                }
+                is CountryPostalFormat.Other -> input.isNotBlank()
+                else -> input.length in format.minimumLength..format.maximumLength &&
+                    input.matches(format.regexPattern)
             }
         }
 
@@ -50,11 +46,12 @@ internal class PostalCodeConfig(
             userTyped.filter { it.isDigit() }
         } else {
             userTyped
-        }
+        }.dropLast(max(0, userTyped.length - format.maximumLength))
 
     override fun convertToRaw(displayName: String) = displayName
 
-    override fun convertFromRaw(rawValue: String) = rawValue
+    override fun convertFromRaw(rawValue: String) =
+        rawValue.replace(Regex("\\s+"), "")
 
     sealed class CountryPostalFormat(
         val minimumLength: Int,
@@ -63,18 +60,18 @@ internal class PostalCodeConfig(
     ) {
         object CA : CountryPostalFormat(
             minimumLength = 6,
-            maximumLength = 7,
+            maximumLength = 6,
             regexPattern = Regex("[a-zA-Z]\\d[a-zA-Z][\\s-]?\\d[a-zA-Z]\\d")
         )
         object US : CountryPostalFormat(
             minimumLength = 5,
-            maximumLength = 9,
+            maximumLength = 5,
             regexPattern = Regex("\\d+")
         )
         object Other : CountryPostalFormat(
-            minimumLength = 0,
-            maximumLength = 0,
-            regexPattern = Regex(".+")
+            minimumLength = 1,
+            maximumLength = Int.MAX_VALUE,
+            regexPattern = Regex(".*")
         )
 
         companion object {
