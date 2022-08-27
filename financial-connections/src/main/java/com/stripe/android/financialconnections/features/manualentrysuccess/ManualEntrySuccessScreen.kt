@@ -82,7 +82,7 @@ internal fun ManualEntrySuccessContent(
                     color = FinancialConnectionsTheme.colors.textSecondary
                 )
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             TransactionHistoryTable(
                 microdepositVerificationMethod = microdepositVerificationMethod,
                 last4 = last4
