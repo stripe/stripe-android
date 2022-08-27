@@ -107,7 +107,7 @@ internal fun ManualEntrySuccessContent(
 internal fun resolveText(
     microdepositVerificationMethod: MicrodepositVerificationMethod,
     last4: String?
-) = when(microdepositVerificationMethod) {
+) = when (microdepositVerificationMethod) {
     MicrodepositVerificationMethod.AMOUNTS -> when {
         last4 != null -> stringResource(R.string.stripe_manualentrysuccess_desc, last4)
         else -> stringResource(R.string.stripe_manualentrysuccess_desc_noaccount)
@@ -140,7 +140,6 @@ internal fun TransactionHistoryTable(
         ) {
             val titleColor = FinancialConnectionsTheme.colors.textSecondary
             val tableData = buildTableRows(microdepositVerificationMethod)
-            val columnWeight = .33f
             last4?.let {
                 Text(
                     text = stringResource(R.string.stripe_manualentrysuccess_table_title, it),
@@ -148,9 +147,9 @@ internal fun TransactionHistoryTable(
                 )
             }
             Row {
-                TableCell(text = "Transaction", weight = columnWeight, titleColor)
-                TableCell(text = "Amount", weight = columnWeight, titleColor)
-                TableCell(text = "Type", weight = columnWeight, titleColor)
+                TableCell(text = "Transaction", titleColor)
+                TableCell(text = "Amount", titleColor)
+                TableCell(text = "Type", titleColor)
             }
             Divider(
                 modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
@@ -159,9 +158,9 @@ internal fun TransactionHistoryTable(
             for (item in tableData) {
                 val (transaction, amount, type) = item
                 Row(Modifier.fillMaxWidth()) {
-                    TableCell(text = transaction.first, weight = columnWeight, transaction.second)
-                    TableCell(text = amount.first, weight = columnWeight, amount.second)
-                    TableCell(text = type.first, weight = columnWeight, type.second)
+                    TableCell(text = transaction.first, transaction.second)
+                    TableCell(text = amount.first, amount.second)
+                    TableCell(text = type.first, type.second)
                 }
             }
         }
@@ -206,7 +205,6 @@ private fun buildTableRows(
 @Composable
 private fun RowScope.TableCell(
     text: String,
-    weight: Float,
     color: Color
 ) {
     Text(
@@ -216,7 +214,7 @@ private fun RowScope.TableCell(
         ),
         modifier = Modifier
             .padding(4.dp)
-            .weight(weight)
+            .weight(1f)
     )
 }
 

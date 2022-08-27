@@ -10,7 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.domain.AttachPaymentAccount
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.*
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.NavigationDirections
@@ -74,6 +74,7 @@ internal class ManualEntryViewModel @Inject constructor(
         }
     }
 
+    @Suppress("MagicNumber")
     fun onSubmit() {
         suspend {
             val state = awaitState()
