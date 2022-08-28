@@ -6,6 +6,10 @@
 
 * [ADDED][5456](https://github.com/stripe/stripe-android/pull/5456) Added postal code validation
 
+### Identity 
+
+* [FIXED][5474](https://github.com/stripe/stripe-android/pull/5474) Update fileprovider name.
+
 ## 20.10.0 - 2022-08-22
 This release contains several bug fixes for PaymentSheet and binary size optimization for Identity.
 
