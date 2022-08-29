@@ -15,12 +15,7 @@ import java.util.Locale
 @RunWith(RobolectricTestRunner::class)
 class LpmRepositoryTest {
     private val lpmRepository = LpmRepository(
-        ApplicationProvider.getApplicationContext<Application>().resources,
-        object : IsFinancialConnectionsAvailable {
-            override fun invoke(): Boolean {
-                return true
-            }
-        }
+        ApplicationProvider.getApplicationContext<Application>().resources
     )
 
     @Test
@@ -144,24 +139,28 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify no fields in the default json are ignored the lpms package should be correct`() {
+    fun `Verify no fields in the default json are ignored the lpms fields should be correct`() {
+        val lpmRepository = LpmRepository(
+            resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            object : IsFinancialConnectionsAvailable {
+                override fun invoke(): Boolean {
+                    return true
+                }
+            }
+        )
         lpmRepository.updateFromDisk()
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
         LpmRepository.exposedPaymentMethods.forEach { code ->
-            if (!hasEmptyForm(code)) {
+            if ((code == "paypal" || code == "us_bank_account")) {
                 assertThat(
-                    lpmRepository.fromCode(code)!!.formSpec.items
-                        .filter {
-                            it is EmptyFormSpec && !hasEmptyForm(code)
-                        }
-
-                ).isEmpty()
+                    hasEmptyForm(lpmRepository, code)
+                ).isTrue()
             }
         }
     }
 
-    private fun hasEmptyForm(code: String) =
+    private fun hasEmptyForm(lpmRepository: LpmRepository, code: String) =
         (code == "paypal" || code == "us_bank_account") &&
             lpmRepository.fromCode(code)!!.formSpec.items.size == 1 &&
             lpmRepository.fromCode(code)!!.formSpec.items.first() == EmptyFormSpec
@@ -253,6 +252,12 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify that us_bank_account is supported when financial connections sdk available`() {
+        val lpmRepository = LpmRepository(
+            ApplicationProvider.getApplicationContext<Application>().resources,
+            object : IsFinancialConnectionsAvailable {
+                override fun invoke() = true
+            }
+        )
         lpmRepository.forceUpdate(
             emptyList(),
             """
@@ -272,9 +277,7 @@ class LpmRepositoryTest {
         val lpmRepository = LpmRepository(
             ApplicationProvider.getApplicationContext<Application>().resources,
             object : IsFinancialConnectionsAvailable {
-                override fun invoke(): Boolean {
-                    return false
-                }
+                override fun invoke() = false
             }
         )
 

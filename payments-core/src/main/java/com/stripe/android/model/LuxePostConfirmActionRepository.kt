@@ -56,6 +56,7 @@ class LuxePostConfirmActionRepository {
             ?.firstOrNull()
 
     companion object {
+        // TODO: Can we remove this singleton?
         val Instance: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository()
     }
 

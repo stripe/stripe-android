@@ -55,13 +55,23 @@ import javax.inject.Singleton
  */
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LpmRepository @Inject constructor(
-    val resources: Resources?
-) {
+class LpmRepository constructor(
+    val resources: Resources?,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
-        DefaultIsFinancialConnectionsAvailable()
-    private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData()
-    private val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
+        DefaultIsFinancialConnectionsAvailable(),
+    private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData(),
+    private val lpmPostConfirmData: LuxePostConfirmActionRepository =
+        LuxePostConfirmActionRepository()
+) {
+
+    @Inject
+    constructor(resources: Resources?) : this(
+        resources,
+        DefaultIsFinancialConnectionsAvailable(),
+        LpmInitialFormData(),
+        LuxePostConfirmActionRepository()
+    )
+
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
