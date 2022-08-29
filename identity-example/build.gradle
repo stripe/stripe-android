@@ -101,7 +101,7 @@ dependencies {
     // Integration with observables
     implementation("androidx.compose.runtime:runtime-livedata:$androidxComposeVersion")
     // MdcTheme
-    implementation "com.google.android.material:compose-theme-adapter:1.1.15"
+    implementation "com.google.android.material:compose-theme-adapter:1.1.16"
 
 }
 

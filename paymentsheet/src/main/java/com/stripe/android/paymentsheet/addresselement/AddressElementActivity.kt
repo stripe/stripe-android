@@ -29,7 +29,9 @@ import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.ui.core.PaymentsTheme
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -57,14 +59,22 @@ internal class AddressElementActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         starterArgs.config?.appearance?.parseAppearance()
 
+        starterArgs.statusBarColor?.let {
+            window.statusBarColor = it
+        }
+
         // set a default result in case the user closes the sheet manually
         setResult()
 
         setContent {
-            val modalBottomSheetState =
-                rememberModalBottomSheetState(
-                    ModalBottomSheetValue.Expanded
-                )
+            val modalBottomSheetState = rememberModalBottomSheetState(
+                initialValue = ModalBottomSheetValue.Hidden,
+                skipHalfExpanded = true,
+                confirmStateChange = {
+                    val route = navController.currentDestination?.route
+                    route != AddressElementScreen.Autocomplete.route
+                }
+            )
 
             navController = rememberAnimatedNavController()
             viewModel.navigator.navigationController = navController
@@ -72,7 +82,13 @@ internal class AddressElementActivity : ComponentActivity() {
             val coroutineScope = rememberCoroutineScope()
 
             LaunchedEffect(Unit) {
-                snapshotFlow { modalBottomSheetState.currentValue }.collect {
+                modalBottomSheetState.show()
+            }
+
+            LaunchedEffect(Unit) {
+                // We need to drop(1) to avoid the sheet being closed on the first composition,
+                // given that the initial bottom sheet state is `hidden`.
+                snapshotFlow { modalBottomSheetState.currentValue }.drop(1).collect {
                     // finish the activity when the sheet closes.
                     if (it == ModalBottomSheetValue.Hidden) {
                         finish()
@@ -125,7 +141,9 @@ internal class AddressElementActivity : ComponentActivity() {
                     }
                 },
                 content = {},
-                modifier = Modifier.navigationBarsPadding().systemBarsPadding()
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .systemBarsPadding()
             )
         }
     }
@@ -137,5 +155,10 @@ internal class AddressElementActivity : ComponentActivity() {
                 AddressElementActivityContract.Result(result).toBundle()
             )
         )
+    }
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 }

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
@@ -21,7 +20,6 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.stateIn
@@ -127,7 +125,7 @@ class USBankAccountFormViewModelTest {
 
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection)
 
-            verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any())
+            verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
 
     @Test
@@ -221,7 +219,7 @@ class USBankAccountFormViewModelTest {
 
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection)
 
-            verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any())
+            verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
 
     @Test
@@ -298,7 +296,10 @@ class USBankAccountFormViewModelTest {
     private fun createViewModel(
         args: USBankAccountFormViewModel.Args = defaultArgs
     ): USBankAccountFormViewModel {
-        val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        val paymentConfiguration = PaymentConfiguration(
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            STRIPE_ACCOUNT_ID
+        )
         return USBankAccountFormViewModel(
             args = args,
             application = ApplicationProvider.getApplicationContext(),
@@ -365,5 +366,6 @@ class USBankAccountFormViewModelTest {
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_NAME = "Jenny Rose"
         const val CUSTOMER_EMAIL = "email@email.com"
+        const val STRIPE_ACCOUNT_ID = "stripe_account_id"
     }
 }

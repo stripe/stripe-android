@@ -13,7 +13,7 @@ class ConsumerPaymentDetailsJsonParserTest {
     fun `parse single card payment details`() {
         assertEquals(
             ConsumerPaymentDetailsJsonParser()
-                .parse(ConsumerFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS_JSON),
+                .parse(ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON),
             ConsumerPaymentDetails(
                 listOf(
                     ConsumerPaymentDetails.Card(
@@ -30,7 +30,26 @@ class ConsumerPaymentDetailsJsonParserTest {
     }
 
     @Test
-    fun `parse multiple card payment details`() {
+    fun `parse single bank account payment details`() {
+        assertEquals(
+            ConsumerPaymentDetailsJsonParser()
+                .parse(ConsumerFixtures.CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_JSON),
+            ConsumerPaymentDetails(
+                listOf(
+                    ConsumerPaymentDetails.BankAccount(
+                        id = "wAAACGA",
+                        isDefault = true,
+                        bankIconCode = null,
+                        bankName = "STRIPE TEST BANK",
+                        last4 = "6789"
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `parse multiple payment details`() {
         assertEquals(
             ConsumerPaymentDetailsJsonParser().parse(ConsumerFixtures.CONSUMER_PAYMENT_DETAILS_JSON),
             ConsumerPaymentDetails(
@@ -50,6 +69,13 @@ class ConsumerPaymentDetailsJsonParserTest {
                         expiryMonth = 4,
                         brand = CardBrand.Visa,
                         last4 = "4242"
+                    ),
+                    ConsumerPaymentDetails.BankAccount(
+                        id = "wAAACGA",
+                        isDefault = false,
+                        bankIconCode = null,
+                        bankName = "STRIPE TEST BANK",
+                        last4 = "6789"
                     )
                 )
             )

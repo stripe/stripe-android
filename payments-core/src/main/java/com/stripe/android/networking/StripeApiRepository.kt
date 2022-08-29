@@ -1336,6 +1336,52 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override suspend fun createLinkFinancialConnectionsSession(
+        consumerSessionClientSecret: String,
+        requestOptions: ApiRequest.Options
+    ): FinancialConnectionsSession? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                linkFinancialConnectionsSessionUrl,
+                requestOptions,
+                mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    )
+                )
+            ),
+            FinancialConnectionsSessionJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    override suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        financialConnectionsAccountId: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails? {
+        return fetchStripeModel(
+            apiRequestFactory.createPost(
+                consumerPaymentDetailsUrl,
+                requestOptions,
+                mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "type" to "bank_account",
+                    "bank_account" to mapOf("account" to financialConnectionsAccountId),
+                    "is_default" to true
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
     override suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
@@ -1977,6 +2023,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val listConsumerPaymentDetailsUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/payment_details/list")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/link_account_sessions`
+         */
+        internal val linkFinancialConnectionsSessionUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/link_account_sessions")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/:id`

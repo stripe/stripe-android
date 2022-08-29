@@ -69,24 +69,44 @@ data class AddressSpec(
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
         addressRepository: AddressRepository
-    ) = createSectionElement(
-        if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
-            CountryElement(
-                IdentifierSpec.Generic("billing_details[address][country]"),
-                DropdownFieldController(
-                    CountryConfig(this.allowedCountryCodes),
-                    initialValue = initialValues[this.apiPath]
-                )
+    ): SectionElement {
+        val label = if (showLabel) R.string.billing_details else null
+        return if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
+            createSectionElement(
+                sectionFieldElement = CountryElement(
+                    identifier = IdentifierSpec.Generic("billing_details[address][country]"),
+                    controller = DropdownFieldController(
+                        CountryConfig(this.allowedCountryCodes),
+                        initialValue = initialValues[this.apiPath]
+                    )
+                ),
+                label = label
             )
         } else {
-            AddressElement(
-                apiPath,
-                addressRepository,
-                initialValues,
+            val sameAsShippingElement =
+                initialValues[IdentifierSpec.SameAsShipping]
+                    ?.toBooleanStrictOrNull()
+                    ?.let {
+                        SameAsShippingElement(
+                            identifier = IdentifierSpec.SameAsShipping,
+                            controller = SameAsShippingController(it)
+                        )
+                    }
+            val addressElement = AddressElement(
+                _identifier = apiPath,
+                addressRepository = addressRepository,
+                rawValuesMap = initialValues,
                 countryCodes = allowedCountryCodes,
-                addressType = type
+                addressType = type,
+                sameAsShippingController = sameAsShippingElement?.controller
             )
-        },
-        label = if (showLabel) R.string.billing_details else null
-    )
+            createSectionElement(
+                sectionFieldElements = listOfNotNull(
+                    addressElement,
+                    sameAsShippingElement
+                ),
+                label = label
+            )
+        }
+    }
 }

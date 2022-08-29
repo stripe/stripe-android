@@ -5,6 +5,7 @@ import android.text.SpannableString
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.ui.core.elements.TextFieldIcon
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -77,12 +78,14 @@ class AutocompleteViewModelTest {
         )
         val expectedResult = Result.success(
             AddressDetails(
-                city = null,
-                country = null,
-                line1 = "",
-                line2 = null,
-                postalCode = null,
-                state = null
+                address = PaymentSheet.Address(
+                    city = null,
+                    country = null,
+                    line1 = "",
+                    line2 = null,
+                    postalCode = null,
+                    state = null
+                )
             )
         )
         whenever(mockClient.fetchPlace(any())).thenReturn(fetchPlaceResponse)
@@ -134,7 +137,9 @@ class AutocompleteViewModelTest {
         val viewModel = createViewModel()
         val expectedResult = Result.success(
             AddressDetails(
-                line1 = "Some query"
+                address = PaymentSheet.Address(
+                    line1 = "Some query"
+                )
             )
         )
 
@@ -150,7 +155,9 @@ class AutocompleteViewModelTest {
         val viewModel = createViewModel()
         val expectedResult = Result.success(
             AddressDetails(
-                line1 = ""
+                address = PaymentSheet.Address(
+                    line1 = ""
+                )
             )
         )
 
@@ -229,7 +236,10 @@ class AutocompleteViewModelTest {
         viewModel.textFieldController.onRawValueChange("a")
         viewModel.onBackPressed()
 
-        verify(viewModel.navigator).setResult(eq(AddressDetails.KEY), eq(AddressDetails(line1 = "a")))
+        verify(viewModel.navigator).setResult(
+            eq(AddressDetails.KEY),
+            eq(AddressDetails(address = PaymentSheet.Address(line1 = "a")))
+        )
     }
 
     @Test

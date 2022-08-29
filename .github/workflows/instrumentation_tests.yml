@@ -97,7 +97,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-
       - name: run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -119,7 +118,7 @@ jobs:
           if: success() || failure()
           name: screenshot-test-report-paymentsheet
           path: /Users/runner/work/stripe-android/stripe-android/paymentsheet/build/reports/shot/debug/verification/
-      - name: Notify failure endpoint
-        id: notifyFailureEndpoint
-        if: failure()
-        run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}
+#       - name: Notify failure endpoint
+#         id: notifyFailureEndpoint
+#         if: failure()
+#         run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}

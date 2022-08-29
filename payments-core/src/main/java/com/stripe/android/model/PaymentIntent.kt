@@ -82,6 +82,12 @@ data class PaymentIntent internal constructor(
     val confirmationMethod: ConfirmationMethod = ConfirmationMethod.Automatic,
 
     /**
+     * Country code of the user.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val countryCode: String?,
+
+    /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     override val created: Long,
@@ -136,6 +142,11 @@ data class PaymentIntent internal constructor(
      * Payment types that have not been activated in livemode, but have been activated in testmode.
      */
     override val unactivatedPaymentMethods: List<String>,
+
+    /**
+     * Payment types that are accepted when paying with Link.
+     */
+    override val linkFundingSources: List<String> = emptyList(),
 
     override val nextActionData: StripeIntent.NextActionData? = null,
 

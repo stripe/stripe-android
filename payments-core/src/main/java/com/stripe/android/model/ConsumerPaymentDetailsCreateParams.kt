@@ -43,5 +43,16 @@ sealed class ConsumerPaymentDetailsCreateParams(
             }
             return params
         }
+
+        companion object {
+            /**
+             * A map containing additional parameters that must be sent during payment confirmation.
+             * CVC is not passed during creation, and must be included when confirming the payment.
+             */
+            fun extraConfirmationParams(paymentMethodCreateParams: PaymentMethodCreateParams) =
+                (paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>)?.let { card ->
+                    mapOf("card" to mapOf("cvc" to card["cvc"]))
+                }
+        }
     }
 }

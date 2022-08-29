@@ -13,9 +13,9 @@ import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
-import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -37,9 +37,17 @@ internal class WalletViewModel @Inject constructor(
 ) : ViewModel() {
     private val stripeIntent = args.stripeIntent
 
-    private val _paymentDetails =
+    private val _paymentDetailsList =
         MutableStateFlow<List<ConsumerPaymentDetails.PaymentDetails>>(emptyList())
-    val paymentDetails: StateFlow<List<ConsumerPaymentDetails.PaymentDetails>> = _paymentDetails
+    val paymentDetailsList: StateFlow<List<ConsumerPaymentDetails.PaymentDetails>> =
+        _paymentDetailsList
+
+    val supportedTypes = args.stripeIntent.supportedPaymentMethodTypes(
+        requireNotNull(linkAccountManager.linkAccount.value)
+    )
+
+    private val _selectedItem = MutableStateFlow<ConsumerPaymentDetails.PaymentDetails?>(null)
+    val selectedItem: StateFlow<ConsumerPaymentDetails.PaymentDetails?> = _selectedItem
 
     private val _primaryButtonState = MutableStateFlow(PrimaryButtonState.Disabled)
     val primaryButtonState: StateFlow<PrimaryButtonState> = _primaryButtonState
@@ -51,18 +59,20 @@ internal class WalletViewModel @Inject constructor(
         loadPaymentDetails(true)
 
         viewModelScope.launch {
-            navigator.getResultFlow<CardEditViewModel.Result>(CardEditViewModel.Result.KEY)
+            navigator.getResultFlow<PaymentDetailsResult>(PaymentDetailsResult.KEY)
                 ?.collect {
                     when (it) {
-                        CardEditViewModel.Result.Success -> loadPaymentDetails()
-                        CardEditViewModel.Result.Cancelled -> {}
-                        is CardEditViewModel.Result.Failure -> onError(it.error)
+                        is PaymentDetailsResult.Success -> loadPaymentDetails()
+                        PaymentDetailsResult.Cancelled -> {}
+                        is PaymentDetailsResult.Failure -> onError(it.error)
                     }
                 }
         }
     }
 
-    fun onSelectedPaymentDetails(selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails) {
+    fun onConfirmPayment() {
+        val selectedPaymentDetails = selectedItem.value ?: return
+
         clearError()
         setState(PrimaryButtonState.Processing)
 
@@ -133,26 +143,30 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
+    fun onItemSelected(item: ConsumerPaymentDetails.PaymentDetails) {
+        _selectedItem.value = item
+    }
+
     private fun loadPaymentDetails(initialSetup: Boolean = false) {
         setState(PrimaryButtonState.Processing)
         viewModelScope.launch {
             linkAccountManager.listPaymentDetails().fold(
                 onSuccess = { response ->
                     setState(PrimaryButtonState.Enabled)
-                    val hasSavedCards =
-                        response.paymentDetails.filterIsInstance<ConsumerPaymentDetails.Card>()
-                            .takeIf { it.isNotEmpty() }?.let {
-                                _paymentDetails.value = it
-                                true
-                            } ?: false
+                    _paymentDetailsList.value = response.paymentDetails
+
+                    _selectedItem.value = _selectedItem.value?.let { previouslySelectedItem ->
+                        // If currently selected item is still available, keep it selected
+                        response.paymentDetails.firstOrNull { it.id == previouslySelectedItem.id }
+                    } ?: getDefaultItemSelection(response.paymentDetails)
 
                     if (initialSetup && args.prefilledCardParams != null) {
-                        // User is returning and had previously added a new payment method
+                        // User has already pre-filled the payment details
                         navigator.navigateTo(
                             LinkScreen.PaymentMethod(true),
-                            clearBackStack = !hasSavedCards
+                            clearBackStack = response.paymentDetails.isEmpty()
                         )
-                    } else if (!hasSavedCards) {
+                    } else if (response.paymentDetails.isEmpty()) {
                         addNewPaymentMethod(clearBackStack = true)
                     }
                 },
@@ -183,7 +197,18 @@ internal class WalletViewModel @Inject constructor(
 
     private fun setState(state: PrimaryButtonState) {
         _primaryButtonState.value = state
-        navigator.backNavigationEnabled = !state.isBlocking
+        navigator.userNavigationEnabled = !state.isBlocking
+    }
+
+    /**
+     * The item that should be selected by default from the [paymentDetailsList].
+     *
+     * @return the default item, if supported. Otherwise the first supported item on the list.
+     */
+    private fun getDefaultItemSelection(
+        paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>
+    ) = paymentDetailsList.filter { supportedTypes.contains(it.type) }.let { filteredItems ->
+        filteredItems.firstOrNull { it.isDefault } ?: filteredItems.firstOrNull()
     }
 
     internal class Factory(

@@ -79,11 +79,10 @@ class TransformSpecToElements(
                     addressResourceRepository.getRepository()
                 )
                 is CardBillingSpec -> it.transform(
-                    addressResourceRepository.getRepository(),
-                    initialValues
+                    initialValues,
+                    addressResourceRepository.getRepository()
                 )
                 is SepaMandateTextSpec -> it.transform(merchantName)
-                else -> EmptyFormElement()
             }
-        }
+        }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
 }

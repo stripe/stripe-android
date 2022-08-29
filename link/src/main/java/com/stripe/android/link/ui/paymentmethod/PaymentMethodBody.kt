@@ -32,8 +32,8 @@ import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
+import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.ui.forms.Form
-import com.stripe.android.link.ui.primaryButtonLabel
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 @Preview
@@ -81,8 +81,8 @@ internal fun PaymentMethodBody(
             val errorMessage by viewModel.errorMessage.collectAsState()
 
             PaymentMethodBody(
-                primaryButtonLabel = primaryButtonLabel(
-                    viewModel.args,
+                primaryButtonLabel = completePaymentButtonLabel(
+                    viewModel.args.stripeIntent,
                     LocalContext.current.resources
                 ),
                 primaryButtonState = primaryButtonState.takeIf { formValues != null }
@@ -117,7 +117,7 @@ internal fun PaymentMethodBody(
 ) {
     ScrollableTopLevelColumn {
         Text(
-            text = stringResource(R.string.pm_add_new_card),
+            text = stringResource(R.string.add_payment_method),
             modifier = Modifier
                 .padding(top = 4.dp, bottom = 32.dp),
             textAlign = TextAlign.Center,
@@ -129,13 +129,16 @@ internal fun PaymentMethodBody(
         }
         Spacer(modifier = Modifier.height(8.dp))
         errorMessage?.let {
-            ErrorText(text = it.getMessage(LocalContext.current.resources))
+            ErrorText(
+                text = it.getMessage(LocalContext.current.resources),
+                modifier = Modifier.fillMaxWidth()
+            )
         }
         PrimaryButton(
             label = primaryButtonLabel,
             state = primaryButtonState,
-            icon = R.drawable.stripe_ic_lock,
-            onButtonClick = onPrimaryButtonClick
+            onButtonClick = onPrimaryButtonClick,
+            iconEnd = R.drawable.stripe_ic_lock
         )
         SecondaryButton(
             enabled = !primaryButtonState.isBlocking,

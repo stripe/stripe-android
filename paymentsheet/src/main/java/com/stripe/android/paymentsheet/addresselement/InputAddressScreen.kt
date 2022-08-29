@@ -15,13 +15,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.FormUI
-import com.stripe.android.ui.core.elements.CheckboxElementUi
+import com.stripe.android.ui.core.elements.CheckboxElementUI
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 @Composable
@@ -34,14 +35,19 @@ internal fun InputAddressScreen(
     formContent: @Composable ColumnScope.() -> Unit,
     checkboxContent: @Composable ColumnScope.() -> Unit
 ) {
-    Column(
+    val focusManager = LocalFocusManager.current
+
+    ScrollableColumn(
         modifier = Modifier
             .fillMaxHeight()
             .background(MaterialTheme.colors.surface)
     ) {
         AddressOptionsAppBar(
             isRootScreen = true,
-            onButtonClick = { onCloseClick() }
+            onButtonClick = {
+                focusManager.clearFocus()
+                onCloseClick()
+            }
         )
         Column(
             Modifier
@@ -58,6 +64,7 @@ internal fun InputAddressScreen(
                 isEnabled = primaryButtonEnabled,
                 text = primaryButtonText
             ) {
+                focusManager.clearFocus()
                 onPrimaryButtonClick()
             }
         }
@@ -120,8 +127,8 @@ internal fun InputAddressScreen(
                     }
                 },
                 checkboxContent = {
-                    viewModel.args.config?.checkboxLabel?.let { label ->
-                        CheckboxElementUi(
+                    viewModel.args.config?.additionalFields?.checkboxLabel?.let { label ->
+                        CheckboxElementUI(
                             isChecked = checkboxChecked,
                             label = label,
                             isEnabled = formEnabled,

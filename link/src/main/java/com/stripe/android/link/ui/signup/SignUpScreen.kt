@@ -145,7 +145,10 @@ internal fun SignUpBody(
                     )
                 }
                 errorMessage?.let {
-                    ErrorText(text = it.getMessage(LocalContext.current.resources))
+                    ErrorText(
+                        text = it.getMessage(LocalContext.current.resources),
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
                 PrimaryButton(
                     label = stringResource(R.string.sign_up),
@@ -153,11 +156,12 @@ internal fun SignUpBody(
                         PrimaryButtonState.Enabled
                     } else {
                         PrimaryButtonState.Disabled
+                    },
+                    onButtonClick = {
+                        onSignUpClick()
+                        keyboardController?.hide()
                     }
-                ) {
-                    onSignUpClick()
-                    keyboardController?.hide()
-                }
+                )
             }
         }
     }

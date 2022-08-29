@@ -23,11 +23,13 @@ class FinancialConnectionsSheet internal constructor(
      *
      * @param financialConnectionsSessionClientSecret the session client secret
      * @param publishableKey the Stripe publishable key
+     * @param stripeAccountId (optional) connected account ID
      */
     @Parcelize
     data class Configuration(
         val financialConnectionsSessionClientSecret: String,
-        val publishableKey: String
+        val publishableKey: String,
+        val stripeAccountId: String? = null
     ) : Parcelable
 
     /**

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
@@ -35,6 +36,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stripe.android.link.model.AccountStatus
@@ -45,6 +47,7 @@ import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.cardedit.CardEditBody
 import com.stripe.android.link.ui.paymentmethod.PaymentMethodBody
+import com.stripe.android.link.ui.rememberLinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpBody
 import com.stripe.android.link.ui.verification.VerificationBodyFullFlow
 import com.stripe.android.link.ui.wallet.WalletBody
@@ -98,6 +101,10 @@ internal class LinkActivity : ComponentActivity() {
                     },
                     modifier = Modifier.fillMaxHeight(),
                     sheetState = sheetState,
+                    sheetShape = MaterialTheme.shapes.large.copy(
+                        bottomStart = CornerSize(0.dp),
+                        bottomEnd = CornerSize(0.dp)
+                    ),
                     scrimColor = MaterialTheme.linkColors.sheetScrim
                 ) {
                     navController = rememberNavController()
@@ -108,10 +115,16 @@ internal class LinkActivity : ComponentActivity() {
                         val linkAccount by viewModel.linkAccount.collectAsState(null)
                         val isOnRootScreen by isRootScreenFlow().collectAsState(true)
 
-                        LinkAppBar(
-                            email = linkAccount?.email,
+                        val backStackEntry by navController.currentBackStackEntryAsState()
+                        val appBarState = rememberLinkAppBarState(
                             isRootScreen = isOnRootScreen,
-                            onButtonClick = { viewModel.navigator.onBack() }
+                            currentRoute = backStackEntry?.destination?.route,
+                            email = linkAccount?.email
+                        )
+
+                        LinkAppBar(
+                            state = appBarState,
+                            onButtonClick = { viewModel.navigator.onBack(userInitiated = true) }
                         )
 
                         NavHost(navController, LinkScreen.Loading.route) {

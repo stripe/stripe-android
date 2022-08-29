@@ -34,24 +34,45 @@ fun SectionElementUI(
             } ?: stringResource(it.errorMessage)
         }
 
-        Section(controller.label, sectionErrorString) {
-            element.fields.forEachIndexed { index, field ->
-                SectionFieldElementUI(
-                    enabled,
-                    field,
-                    hiddenIdentifiers = hiddenIdentifiers,
-                    lastTextFieldIdentifier = lastTextFieldIdentifier
-                )
-                if (index != element.fields.lastIndex) {
-                    Divider(
-                        color = MaterialTheme.paymentsColors.componentDivider,
-                        thickness = MaterialTheme.paymentsShapes.borderStrokeWidth.dp,
-                        modifier = Modifier.padding(
-                            horizontal = MaterialTheme.paymentsShapes.borderStrokeWidth.dp
-                        )
+        val elementsInsideCard = element.fields.filter {
+            !it.shouldRenderOutsideCard
+        }
+        val elementsOutsideCard = element.fields.filter {
+            it.shouldRenderOutsideCard
+        }
+
+        Section(
+            controller.label,
+            sectionErrorString,
+            contentOutsideCard = {
+                elementsOutsideCard.forEach { field ->
+                    SectionFieldElementUI(
+                        enabled,
+                        field,
+                        hiddenIdentifiers = hiddenIdentifiers,
+                        lastTextFieldIdentifier = lastTextFieldIdentifier
                     )
                 }
+            },
+            contentInCard = {
+                elementsInsideCard.forEachIndexed { index, field ->
+                    SectionFieldElementUI(
+                        enabled,
+                        field,
+                        hiddenIdentifiers = hiddenIdentifiers,
+                        lastTextFieldIdentifier = lastTextFieldIdentifier
+                    )
+                    if (index != element.fields.lastIndex) {
+                        Divider(
+                            color = MaterialTheme.paymentsColors.componentDivider,
+                            thickness = MaterialTheme.paymentsShapes.borderStrokeWidth.dp,
+                            modifier = Modifier.padding(
+                                horizontal = MaterialTheme.paymentsShapes.borderStrokeWidth.dp
+                            )
+                        )
+                    }
+                }
             }
-        }
+        )
     }
 }

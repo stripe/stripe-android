@@ -4,6 +4,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
@@ -29,7 +30,7 @@ internal class InputAddressViewModel @Inject constructor(
     private val eventReporter: AddressLauncherEventReporter,
     formControllerProvider: Provider<FormControllerSubcomponent.Builder>
 ) : ViewModel() {
-    private val _collectedAddress = MutableStateFlow(args.config?.defaultValues)
+    private val _collectedAddress = MutableStateFlow(args.config?.address)
     val collectedAddress: StateFlow<AddressDetails?> = _collectedAddress
 
     private val _formController = MutableStateFlow<FormController?>(null)
@@ -44,50 +45,44 @@ internal class InputAddressViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             navigator.getResultFlow<AddressDetails?>(AddressDetails.KEY)?.collect {
-                val oldShippingAddress = _collectedAddress.value
+                val oldAddress = _collectedAddress.value
                 val autocompleteAddress = AddressDetails(
-                    name = oldShippingAddress?.name ?: it?.name,
-                    company = oldShippingAddress?.company ?: it?.company,
-                    phoneNumber = oldShippingAddress?.phoneNumber ?: it?.phoneNumber,
-                    city = it?.city,
-                    country = it?.country,
-                    line1 = it?.line1,
-                    line2 = it?.line2,
-                    state = it?.state,
-                    postalCode = it?.postalCode
+                    name = oldAddress?.name ?: it?.name,
+                    address = oldAddress?.address?.copy(
+                        city = oldAddress.address.city ?: it?.address?.city,
+                        country = oldAddress.address.country ?: it?.address?.country,
+                        line1 = oldAddress.address.line1 ?: it?.address?.line1,
+                        line2 = oldAddress.address.line2 ?: it?.address?.line2,
+                        postalCode = oldAddress.address.postalCode ?: it?.address?.postalCode,
+                        state = oldAddress.address.state ?: it?.address?.state
+                    ) ?: it?.address,
+                    phoneNumber = oldAddress?.phoneNumber ?: it?.phoneNumber,
+                    isCheckboxSelected = oldAddress?.isCheckboxSelected
+                        ?: it?.isCheckboxSelected
                 )
                 _collectedAddress.emit(autocompleteAddress)
             }
         }
 
         viewModelScope.launch {
-            collectedAddress.collect { shippingAddress ->
-                val initialValues: Map<IdentifierSpec, String?> = shippingAddress?.let {
-                    mapOf(
-                        IdentifierSpec.Name to shippingAddress.name,
-                        IdentifierSpec.Line1 to shippingAddress.line1,
-                        IdentifierSpec.Line2 to shippingAddress.line2,
-                        IdentifierSpec.City to shippingAddress.city,
-                        IdentifierSpec.State to shippingAddress.state,
-                        IdentifierSpec.PostalCode to shippingAddress.postalCode,
-                        IdentifierSpec.Country to shippingAddress.country,
-                        IdentifierSpec.Phone to shippingAddress.phoneNumber
-                    )
-                } ?: emptyMap()
+            collectedAddress.collect { addressDetails ->
+                val initialValues: Map<IdentifierSpec, String?> = addressDetails
+                    ?.toIdentifierMap(billingSameAsShipping = false)
+                    ?: emptyMap()
 
                 _formController.value = formControllerProvider.get()
                     .viewOnlyFields(emptySet())
                     .viewModelScope(viewModelScope)
                     .stripeIntent(null)
                     .merchantName("")
-                    .formSpec(buildFormSpec(shippingAddress?.line1 == null))
+                    .formSpec(buildFormSpec(addressDetails?.address?.line1 == null))
                     .initialValues(initialValues)
                     .build().formController
             }
         }
 
         // allows merchants to check the box by default and to restore the value later.
-        args.config?.defaultValues?.checkboxChecked?.let {
+        args.config?.address?.isCheckboxSelected?.let {
             _checkboxChecked.value = it
         }
     }
@@ -100,19 +95,21 @@ internal class InputAddressViewModel @Inject constructor(
             ?.let {
                 AddressDetails(
                     name = it[IdentifierSpec.Name]?.value,
-                    city = it[IdentifierSpec.City]?.value,
-                    country = it[IdentifierSpec.Country]?.value,
-                    line1 = it[IdentifierSpec.Line1]?.value,
-                    line2 = it[IdentifierSpec.Line2]?.value,
-                    postalCode = it[IdentifierSpec.PostalCode]?.value,
-                    state = it[IdentifierSpec.State]?.value,
+                    address = PaymentSheet.Address(
+                        city = it[IdentifierSpec.City]?.value,
+                        country = it[IdentifierSpec.Country]?.value,
+                        line1 = it[IdentifierSpec.Line1]?.value,
+                        line2 = it[IdentifierSpec.Line2]?.value,
+                        postalCode = it[IdentifierSpec.PostalCode]?.value,
+                        state = it[IdentifierSpec.State]?.value
+                    ),
                     phoneNumber = it[IdentifierSpec.Phone]?.value
                 )
             }
     }
 
     private fun buildFormSpec(condensedForm: Boolean): LayoutSpec {
-        val phoneNumberState = parsePhoneNumberConfig(args.config?.phone)
+        val phoneNumberState = parsePhoneNumberConfig(args.config?.additionalFields?.phone)
         val addressSpec = if (condensedForm) {
             AddressSpec(
                 showLabel = false,
@@ -121,11 +118,11 @@ internal class InputAddressViewModel @Inject constructor(
                     phoneNumberState = phoneNumberState
                 ) {
                     viewModelScope.launch {
-                        val address = getCurrentAddress()
-                        address?.let {
+                        val addressDetails = getCurrentAddress()
+                        addressDetails?.let {
                             _collectedAddress.emit(it)
                         }
-                        address?.country?.let {
+                        addressDetails?.address?.country?.let {
                             navigator.navigateTo(
                                 AddressElementScreen.Autocomplete(
                                     country = it
@@ -163,29 +160,31 @@ internal class InputAddressViewModel @Inject constructor(
         dismissWithAddress(
             AddressDetails(
                 name = completedFormValues?.get(IdentifierSpec.Name)?.value,
-                city = completedFormValues?.get(IdentifierSpec.City)?.value,
-                country = completedFormValues?.get(IdentifierSpec.Country)?.value,
-                line1 = completedFormValues?.get(IdentifierSpec.Line1)?.value,
-                line2 = completedFormValues?.get(IdentifierSpec.Line2)?.value,
-                postalCode = completedFormValues?.get(IdentifierSpec.PostalCode)?.value,
-                state = completedFormValues?.get(IdentifierSpec.State)?.value,
+                address = PaymentSheet.Address(
+                    city = completedFormValues?.get(IdentifierSpec.City)?.value,
+                    country = completedFormValues?.get(IdentifierSpec.Country)?.value,
+                    line1 = completedFormValues?.get(IdentifierSpec.Line1)?.value,
+                    line2 = completedFormValues?.get(IdentifierSpec.Line2)?.value,
+                    postalCode = completedFormValues?.get(IdentifierSpec.PostalCode)?.value,
+                    state = completedFormValues?.get(IdentifierSpec.State)?.value
+                ),
                 phoneNumber = completedFormValues?.get(IdentifierSpec.Phone)?.value,
-                checkboxChecked = checkboxChecked
+                isCheckboxSelected = checkboxChecked
             )
         )
     }
 
     @VisibleForTesting
-    fun dismissWithAddress(address: AddressDetails) {
-        address.country?.let { country ->
+    fun dismissWithAddress(addressDetails: AddressDetails) {
+        addressDetails.address?.country?.let { country ->
             eventReporter.onCompleted(
                 country = country,
-                autocompleteResultSelected = collectedAddress.value?.line1 != null,
-                editDistance = address.editDistance(collectedAddress.value)
+                autocompleteResultSelected = collectedAddress.value?.address?.line1 != null,
+                editDistance = addressDetails.editDistance(collectedAddress.value)
             )
         }
         navigator.dismiss(
-            AddressLauncherResult.Succeeded(address)
+            AddressLauncherResult.Succeeded(addressDetails)
         )
     }
 
@@ -212,12 +211,15 @@ internal class InputAddressViewModel @Inject constructor(
     internal companion object {
         // This mapping is required to prevent merchants from depending on ui-core
         fun parsePhoneNumberConfig(
-            configuration: AddressLauncher.AdditionalFieldsConfiguration?
+            configuration: AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration?
         ): PhoneNumberState {
             return when (configuration) {
-                AddressLauncher.AdditionalFieldsConfiguration.HIDDEN -> PhoneNumberState.HIDDEN
-                AddressLauncher.AdditionalFieldsConfiguration.OPTIONAL -> PhoneNumberState.OPTIONAL
-                AddressLauncher.AdditionalFieldsConfiguration.REQUIRED -> PhoneNumberState.REQUIRED
+                AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN ->
+                    PhoneNumberState.HIDDEN
+                AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.OPTIONAL ->
+                    PhoneNumberState.OPTIONAL
+                AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.REQUIRED ->
+                    PhoneNumberState.REQUIRED
                 null -> PhoneNumberState.OPTIONAL
             }
         }

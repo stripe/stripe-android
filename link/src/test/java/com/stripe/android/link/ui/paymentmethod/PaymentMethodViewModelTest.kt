@@ -102,8 +102,7 @@ class PaymentMethodViewModelTest {
     @Test
     fun `startPayment creates PaymentDetails`() = runTest {
         whenever(
-            linkAccountManager.createPaymentDetails(
-                anyOrNull(),
+            linkAccountManager.createCardPaymentDetails(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull()
@@ -113,8 +112,7 @@ class PaymentMethodViewModelTest {
         createViewModel().startPayment(cardFormFieldValues)
 
         val paramsCaptor = argumentCaptor<PaymentMethodCreateParams>()
-        verify(linkAccountManager).createPaymentDetails(
-            any(),
+        verify(linkAccountManager).createCardPaymentDetails(
             paramsCaptor.capture(),
             any(),
             anyOrNull()
@@ -144,8 +142,7 @@ class PaymentMethodViewModelTest {
         runTest {
             val value = createLinkPaymentDetails()
             whenever(
-                linkAccountManager.createPaymentDetails(
-                    anyOrNull(),
+                linkAccountManager.createCardPaymentDetails(
                     anyOrNull(),
                     anyOrNull(),
                     anyOrNull()
@@ -188,8 +185,7 @@ class PaymentMethodViewModelTest {
     @Test
     fun `startPayment dismisses Link on success`() = runTest {
         whenever(
-            linkAccountManager.createPaymentDetails(
-                anyOrNull(),
+            linkAccountManager.createCardPaymentDetails(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull()
@@ -222,8 +218,7 @@ class PaymentMethodViewModelTest {
     @Test
     fun `startPayment starts processing`() = runTest {
         whenever(
-            linkAccountManager.createPaymentDetails(
-                anyOrNull(),
+            linkAccountManager.createCardPaymentDetails(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull()
@@ -245,8 +240,7 @@ class PaymentMethodViewModelTest {
     @Test
     fun `startPayment stops processing on error`() = runTest {
         whenever(
-            linkAccountManager.createPaymentDetails(
-                anyOrNull(),
+            linkAccountManager.createCardPaymentDetails(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull()
@@ -282,8 +276,7 @@ class PaymentMethodViewModelTest {
     fun `when startPayment fails then an error message is shown`() = runTest {
         val errorMessage = "Error message"
         whenever(
-            linkAccountManager.createPaymentDetails(
-                anyOrNull(),
+            linkAccountManager.createCardPaymentDetails(
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull()
@@ -338,7 +331,7 @@ class PaymentMethodViewModelTest {
 
         createViewModel().onSecondaryButtonClick()
 
-        verify(navigator).onBack()
+        verify(navigator).onBack(userInitiated = true)
     }
 
     @Test
