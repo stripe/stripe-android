@@ -7,7 +7,7 @@ This release adds postal code validation for PaymentSheet and fixed a fileprovid
 
 ### PaymentSheet
 
-* [ADDED][5456](https://github.com/stripe/stripe-android/pull/5456) Added postal code validation
+* [ADDED][5456](https://github.com/stripe/stripe-android/pull/5456) Added postal code validation.
 
 ### Identity 
 
