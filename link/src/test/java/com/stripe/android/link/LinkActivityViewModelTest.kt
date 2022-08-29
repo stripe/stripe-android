@@ -140,7 +140,7 @@ class LinkActivityViewModelTest {
         val viewModel = createViewModel()
         setupNavigation(hasBackStack = false)
 
-        viewModel.onBack()
+        viewModel.onBackPressed()
 
         spy(navigator).dismiss()
         verify(linkAccountManager, never()).logout()
@@ -151,7 +151,7 @@ class LinkActivityViewModelTest {
         val viewModel = createViewModel()
         setupNavigation(hasBackStack = true)
 
-        viewModel.onBack()
+        viewModel.onBackPressed()
 
         verify(navigator, never()).dismiss()
         verify(linkAccountManager, never()).logout()
@@ -162,7 +162,7 @@ class LinkActivityViewModelTest {
         val viewModel = createViewModel()
         setupNavigation(backNavigationEnabled = false)
 
-        viewModel.onBack()
+        viewModel.onBackPressed()
 
         verify(navigator, never()).dismiss()
         verify(linkAccountManager, never()).logout()

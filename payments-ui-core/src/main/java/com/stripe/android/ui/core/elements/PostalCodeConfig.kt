@@ -27,9 +27,10 @@ internal class PostalCodeConfig(
         override fun isValid(): Boolean {
             return when (format) {
                 is CountryPostalFormat.Other -> input.isNotBlank()
-                else ->
+                else -> {
                     input.length in format.minimumLength..format.maximumLength &&
                         input.matches(format.regexPattern)
+                }
             }
         }
 
