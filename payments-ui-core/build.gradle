@@ -21,7 +21,7 @@ if (System.getenv("JITPACK")) {
 dependencies {
     implementation project(":stripe-core")
     implementation project(":payments-core")
-    compileOnly project(":stripecardscan")
+    compileOnly 'com.stripe:stripecardscan:20.10.0'
     compileOnly "com.google.android.libraries.places:places:$placesVersion"
 
     implementation 'androidx.constraintlayout:constraintlayout-compose:1.0.1'
@@ -68,7 +68,7 @@ dependencies {
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
     testImplementation "com.google.android.libraries.places:places:$placesVersion"
-    testImplementation project(':stripecardscan')
+    testImplementation 'com.stripe:stripecardscan:20.10.0'
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 }
