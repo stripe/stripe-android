@@ -7,6 +7,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
@@ -35,6 +36,7 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.ui.core.elements.transform
 import java.io.InputStream
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
@@ -59,6 +61,7 @@ class LpmRepository @Inject constructor(
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
         DefaultIsFinancialConnectionsAvailable()
     private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData()
+    private val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
@@ -140,6 +143,13 @@ class LpmRepository @Inject constructor(
                         .mapNotNull { convertToSupportedPaymentMethod(it) }
                         .associateBy { it.code }
                 )
+                mapFromDisk
+                    ?.mapValues { it.value.nextActionSpec.transform() }
+                    ?.let {
+                        lpmPostConfirmData.update(
+                            it
+                        )
+                    }
             }
 
             serverInitializedLatch.countDown()
