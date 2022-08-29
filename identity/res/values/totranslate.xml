@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="description_plus">plus icon</string>
+    <string name="description_stripe_logo">stripe logo</string>
+    <string name="description_time_estimate">estimated time to complete verification icon</string>
+    <string name="description_privacy_policy">privacy policy icon</string>
+</resources>

@@ -5,6 +5,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -14,15 +18,13 @@ import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
-import com.stripe.android.identity.databinding.ConsentFragmentBinding
+import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.VerificationPage.Companion.isUnsupportedClient
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
+import com.stripe.android.identity.ui.ConsentScreen
 import com.stripe.android.identity.utils.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
-import com.stripe.android.identity.utils.setHtmlString
 import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
@@ -36,8 +38,6 @@ internal class ConsentFragment(
     private val consentViewModelFactory: ViewModelProvider.Factory,
     private val fallbackUrlLauncher: FallbackUrlLauncher
 ) : Fragment() {
-    private lateinit var binding: ConsentFragmentBinding
-
     private val identityViewModel: IdentityViewModel by activityViewModels {
         identityViewModelFactory
     }
@@ -50,50 +50,62 @@ internal class ConsentFragment(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = ConsentFragmentBinding.inflate(inflater, container, false)
-
-        consentViewModel.loadUriIntoImageView(
-            identityViewModel.verificationArgs.brandLogo,
-            binding.merchantLogo
-        )
-
-        return binding.root
+    ) = ComposeView(requireContext()).apply {
+        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        setContent {
+            val verificationState by identityViewModel.verificationPage.observeAsState(Resource.loading())
+            ConsentScreen(
+                verificationState = verificationState,
+                onMerchantViewCreated = {
+                    consentViewModel.loadUriIntoImageView(
+                        identityViewModel.verificationArgs.brandLogo,
+                        it
+                    )
+                },
+                onSuccess = { verificationPage ->
+                    identityViewModel.updateAnalyticsState { oldState ->
+                        oldState.copy(
+                            requireSelfie = verificationPage.requireSelfie()
+                        )
+                    }
+                },
+                onFallbackUrl = { url ->
+                    Log.e(TAG, "Unsupported client, launching fallback url")
+                    fallbackUrlLauncher.launchFallbackUrl(url)
+                },
+                onError = { throwable ->
+                    Log.e(
+                        TAG,
+                        "Failed to get verificationPage: $throwable"
+                    )
+                    navigateToErrorFragmentWithFailedReason(throwable)
+                },
+                onConsentAgreed = { requireSelfie ->
+                    postVerificationPageDataAndNavigate(
+                        CollectedDataParam(
+                            biometricConsent = true
+                        ),
+                        requireSelfie
+                    )
+                },
+                onConsentDeclined = { requireSelfie ->
+                    postVerificationPageDataAndNavigate(
+                        CollectedDataParam(
+                            biometricConsent = false
+                        ),
+                        requireSelfie
+                    )
+                }
+            )
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        identityViewModel.observeForVerificationPage(
-            viewLifecycleOwner,
-            onSuccess = { verificationPage ->
-                identityViewModel.updateAnalyticsState { oldState ->
-                    oldState.copy(
-                        requireSelfie = verificationPage.requireSelfie()
-                    )
-                }
-                if (verificationPage.isUnsupportedClient()) {
-                    Log.e(TAG, "Unsupported client, launching fallback url")
-                    fallbackUrlLauncher.launchFallbackUrl(verificationPage.fallbackUrl)
-                } else {
-                    setLoadingFinishedUI()
-                    bindViewData(
-                        verificationPage.biometricConsent,
-                        verificationPage.requireSelfie()
-                    )
 
-                    lifecycleScope.launch(identityViewModel.workContext) {
-                        identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONSENT)
-                    }
-                }
-            },
-            onFailure = {
-                Log.e(TAG, "Failed to get verificationPage: $it")
-                // TODO(ccen) parse the error message from Status.ERROR
-                navigateToErrorFragmentWithFailedReason(
-                    it ?: IllegalStateException("Failed to get verificationPage")
-                )
-            }
-        )
+        lifecycleScope.launch(identityViewModel.workContext) {
+            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONSENT)
+        }
 
         identityViewModel.sendAnalyticsRequest(
             identityViewModel.identityAnalyticsRequestFactory.screenPresented(
@@ -116,73 +128,10 @@ internal class ConsentFragment(
                 if (requireSelfie) ClearDataParam.CONSENT_TO_DOC_SELECT_WITH_SELFIE else ClearDataParam.CONSENT_TO_DOC_SELECT,
                 fromFragment = R.id.consentFragment,
                 notSubmitBlock = {
-                    navigateToDocSelection()
+                    findNavController().navigate(R.id.action_consentFragment_to_docSelectionFragment)
                 }
             )
         }
-    }
-
-    private fun navigateToDocSelection() {
-        findNavController().navigate(R.id.action_consentFragment_to_docSelectionFragment)
-    }
-
-    private fun bindViewData(
-        consentPage: VerificationPageStaticContentConsentPage,
-        requireSelfie: Boolean
-    ) {
-        binding.titleText.text = consentPage.title
-
-        consentPage.privacyPolicy?.let {
-            binding.privacyPolicy.setHtmlString(it)
-        } ?: run {
-            binding.privacyPolicy.visibility = View.GONE
-        }
-
-        consentPage.timeEstimate?.let {
-            binding.timeEstimate.text = it
-        } ?: run {
-            binding.timeEstimate.visibility = View.GONE
-        }
-
-        if (binding.privacyPolicy.visibility == View.GONE &&
-            binding.timeEstimate.visibility == View.GONE
-        ) {
-            binding.divider.visibility = View.GONE
-        }
-
-        binding.body.setHtmlString(consentPage.body)
-        binding.agree.setText(consentPage.acceptButtonText)
-        binding.decline.setText(consentPage.declineButtonText)
-
-        binding.agree.setOnClickListener {
-            binding.agree.toggleToLoading()
-            binding.decline.isEnabled = false
-            postVerificationPageDataAndNavigate(
-                CollectedDataParam(
-                    biometricConsent = true
-                ),
-                requireSelfie
-            )
-        }
-        binding.decline.setOnClickListener {
-            binding.decline.toggleToLoading()
-            binding.agree.isEnabled = false
-            postVerificationPageDataAndNavigate(
-                CollectedDataParam(
-                    biometricConsent = false
-                ),
-                requireSelfie
-            )
-        }
-        binding.progressCircular.setOnClickListener {
-            setLoadingFinishedUI()
-        }
-    }
-
-    private fun setLoadingFinishedUI() {
-        binding.loadings.visibility = View.GONE
-        binding.texts.visibility = View.VISIBLE
-        binding.buttons.visibility = View.VISIBLE
     }
 
     private companion object {
