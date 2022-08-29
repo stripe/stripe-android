@@ -267,7 +267,7 @@ internal class LinkActivity : ComponentActivity() {
         viewModel.unregisterFromActivity()
     }
 
-    private fun dismiss(result: LinkActivityResult = LinkActivityResult.Canceled) {
+    private fun dismiss(result: LinkActivityResult) {
         setResult(
             result.resultCode,
             Intent().putExtras(LinkActivityContract.Result(result).toBundle())
