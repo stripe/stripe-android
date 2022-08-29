@@ -160,7 +160,7 @@ class LinkActivityViewModelTest {
     @Test
     fun `Navigating back is prevented when back navigation is disabled`() {
         val viewModel = createViewModel()
-        setupNavigation(backNavigationEnabled = false)
+        setupNavigation(userNavigationEnabled = false)
 
         viewModel.onBackPressed()
 
@@ -188,12 +188,12 @@ class LinkActivityViewModelTest {
 
     private fun setupNavigation(
         hasBackStack: Boolean = false,
-        backNavigationEnabled: Boolean = true
+        userNavigationEnabled: Boolean = true
     ) {
         val mockNavController = mock<NavHostController> {
             on { popBackStack() } doReturn hasBackStack
         }
-        whenever(navigator.backNavigationEnabled).thenReturn(backNavigationEnabled)
+        whenever(navigator.userNavigationEnabled).thenReturn(userNavigationEnabled)
         whenever(navigator.navigationController).thenReturn(mockNavController)
     }
 
