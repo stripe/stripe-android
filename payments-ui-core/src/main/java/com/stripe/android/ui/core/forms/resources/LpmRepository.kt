@@ -53,8 +53,7 @@ import java.util.concurrent.TimeUnit
 class LpmRepository constructor(
     private val arguments: LpmRepositoryArguments,
     private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance,
-    @get:VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
+    private val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
 ) {
 
     private val lpmSerializer = LpmSerializer()
