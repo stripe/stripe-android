@@ -255,6 +255,7 @@ class PlaygroundTestDriver(
 
         selectors.checkout.click()
         selectors.delayed.click()
+        selectors.shipping.click()
 
         // billing is not saved to preferences
         selectors.billing.click()
