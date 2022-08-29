@@ -249,12 +249,4 @@ class TestPaymentSheetScreenshots {
             )
         )
     }
-
-    companion object {
-        private val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
-                InstrumentationRegistry.getInstrumentation().targetContext.resources
-            )
-        )
-    }
 }

@@ -139,9 +139,7 @@ class TestFieldPopulation {
 
     companion object {
         private val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
-                InstrumentationRegistry.getInstrumentation().targetContext.resources
-            )
+            InstrumentationRegistry.getInstrumentation().targetContext.resources
         ).apply {
             forceUpdate(LpmRepository.exposedPaymentMethods, null)
         }

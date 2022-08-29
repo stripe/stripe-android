@@ -207,9 +207,7 @@ class TestMultiStepFieldsReloaded {
         // their files in the same directory.
         private val screenshotProcessor = MyScreenCaptureProcessor()
         private val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
-                InstrumentationRegistry.getInstrumentation().targetContext.resources
-            )
+            InstrumentationRegistry.getInstrumentation().targetContext.resources
         ).apply {
             forceUpdate(LpmRepository.exposedPaymentMethods, null)
         }
