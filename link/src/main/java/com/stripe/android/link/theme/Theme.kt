@@ -26,7 +26,7 @@ internal fun DefaultLinkTheme(
         MaterialTheme(
             colors = colors.materialColors,
             typography = Typography,
-            shapes = Shapes,
+            shapes = MaterialTheme.shapes,
             content = content
         )
     }
@@ -36,3 +36,8 @@ internal val MaterialTheme.linkColors: LinkColors
     @Composable
     @ReadOnlyComposable
     get() = LocalColors.current
+
+internal val MaterialTheme.linkShapes: LinkShapes
+    @Composable
+    @ReadOnlyComposable
+    get() = LinkShapes

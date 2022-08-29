@@ -35,6 +35,7 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.linkShapes
 
 private val LinkButtonVerticalPadding = 6.dp
 private val LinkButtonHorizontalPadding = 10.dp
@@ -106,7 +107,7 @@ private fun LinkButton(
                         modifier = Modifier
                             .background(
                                 color = Color.Black.copy(alpha = 0.05f),
-                                shape = MaterialTheme.shapes.small
+                                shape = MaterialTheme.linkShapes.extraSmall
                             )
                     ) {
                         Text(

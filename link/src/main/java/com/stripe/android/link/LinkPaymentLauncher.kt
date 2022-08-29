@@ -237,7 +237,9 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         WeakMapInjectorRegistry.register(injector, injectorKey)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         val LINK_ENABLED = BuildConfig.DEBUG
+        val supportedFundingSources = SupportedPaymentMethod.allTypes
     }
 }
