@@ -8,6 +8,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
@@ -44,6 +45,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -287,7 +289,8 @@ class WalletViewModelTest {
 
         viewModel.payAnotherWay()
 
-        verify(navigator).dismiss()
+        verify(navigator).cancel(reason = eq(Reason.PayAnotherWay))
+        verify(linkAccountManager, never()).logout()
     }
 
     @Test

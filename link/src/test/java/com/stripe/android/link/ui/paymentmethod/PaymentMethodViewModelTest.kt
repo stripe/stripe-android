@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.R
@@ -54,6 +55,7 @@ import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -409,13 +411,13 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `payAnotherWay dismisses and logs out`() = runTest {
+    fun `payAnotherWay dismisses, but doesn't log out`() = runTest {
         whenever(navigator.isOnRootScreen()).thenReturn(true)
 
         createViewModel().onSecondaryButtonClick()
 
-        verify(navigator).dismiss()
-        verify(linkAccountManager).logout()
+        verify(navigator).cancel(reason = eq(Reason.PayAnotherWay))
+        verify(linkAccountManager, never()).logout()
     }
 
     @Test
