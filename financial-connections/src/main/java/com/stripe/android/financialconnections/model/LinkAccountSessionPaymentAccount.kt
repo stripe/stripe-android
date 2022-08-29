@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.model
 
+import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod.UNKNOWN
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -15,7 +16,7 @@ internal data class LinkAccountSessionPaymentAccount(
     val eligibleForNetworking: Boolean? = null,
 
     @SerialName(value = "microdeposit_verification_method")
-    val microdepositVerificationMethod: MicrodepositVerificationMethod? = null,
+    val microdepositVerificationMethod: MicrodepositVerificationMethod = UNKNOWN,
 
     @SerialName(value = "networking_successful")
     val networkingSuccessful: Boolean? = null,
@@ -27,7 +28,13 @@ internal data class LinkAccountSessionPaymentAccount(
 
     @Serializable
     enum class MicrodepositVerificationMethod(val value: String) {
-        @SerialName(value = "amounts") AMOUNTS("amounts"),
-        @SerialName(value = "descriptor_code") DESCRIPTOR_CODE("descriptor_code");
+        @SerialName(value = "amounts")
+        AMOUNTS("amounts"),
+
+        @SerialName(value = "descriptor_code")
+        DESCRIPTOR_CODE("descriptor_code"),
+
+        @SerialName(value = "unknown")
+        UNKNOWN("unknown");
     }
 }

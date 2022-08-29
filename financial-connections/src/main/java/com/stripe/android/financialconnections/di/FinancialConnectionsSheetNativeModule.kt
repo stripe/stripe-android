@@ -74,7 +74,6 @@ internal class FinancialConnectionsSheetNativeModule {
     )
 
     @Singleton
-
     @Provides
     fun providesFinancialConnectionsInstitutionsRepository(
         requestExecutor: FinancialConnectionsRequestExecutor,

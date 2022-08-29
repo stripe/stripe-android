@@ -82,5 +82,11 @@
     <string name="stripe_validation_account_confirm_mismatch">Your account numbers don\'t match.</string>
     <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified with micro-deposits to your account.</string>
     <string name="stripe_manualentry_account_type_disclaimer">Your account can be checking or savings.</string>
+    <string name="stripe_manualentrysuccess_title">Micro-deposits initiated</string>
+    <string name="stripe_manualentrysuccess_desc">Expect two small deposits to the account ending in ••••%1$s in 1–2 business days and an email with additional instructions to verify your bank account.</string>
+    <string name="stripe_manualentrysuccess_desc_noaccount">Expect two small deposits to your account in 1–2 business days and an email with additional instructions to verify your bank account.</string>
+    <string name="stripe_manualentrysuccess_desc_descriptorcode">Expect a $0.01 deposit to the account ending in ••••%1$s in 1–2 business days and an email with additional instructions to verify your bank account.</string>
+    <string name="stripe_manualentrysuccess_desc_noaccount_descriptorcode">Expect a $0.01 deposit to your account in 1–2 business days and an email with additional instructions to verify your bank account.</string>
+    <string name="stripe_manualentrysuccess_table_title">••••%1$s BANK STATEMENT</string>
 </resources>
 
