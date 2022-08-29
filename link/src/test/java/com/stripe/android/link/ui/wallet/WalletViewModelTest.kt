@@ -19,7 +19,6 @@ import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
-import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -66,6 +65,7 @@ class WalletViewModelTest {
         whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
         val mockLinkAccount = mock<LinkAccount>().apply {
             whenever(clientSecret).thenReturn(CLIENT_SECRET)
+            whenever(email).thenReturn("email@stripe.com")
         }
         linkAccountManager = mock<LinkAccountManager>().apply {
             whenever(linkAccount).thenReturn(MutableStateFlow(mockLinkAccount))
@@ -81,7 +81,7 @@ class WalletViewModelTest {
     fun `On initialization start collecting CardEdit result`() = runTest {
         createViewModel()
 
-        verify(navigator).getResultFlow<CardEditViewModel.Result>(any())
+        verify(navigator).getResultFlow<PaymentDetailsResult>(any())
     }
 
     @Test
@@ -96,7 +96,7 @@ class WalletViewModelTest {
 
         val viewModel = createViewModel()
 
-        assertThat(viewModel.paymentDetails.value).containsExactly(card1, card2)
+        assertThat(viewModel.paymentDetailsList.value).containsExactly(card1, card2)
     }
 
     @Test
@@ -132,8 +132,10 @@ class WalletViewModelTest {
     @Test
     fun `onSelectedPaymentDetails starts payment confirmation`() {
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
+        val viewModel = createViewModel()
 
-        createViewModel().onSelectedPaymentDetails(paymentDetails)
+        viewModel.onItemSelected(paymentDetails)
+        viewModel.onConfirmPayment()
 
         val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
         verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
@@ -150,11 +152,65 @@ class WalletViewModelTest {
     }
 
     @Test
+    fun `onItemSelected updates selected item`() {
+        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
+        val viewModel = createViewModel()
+
+        viewModel.onItemSelected(paymentDetails)
+
+        assertThat(viewModel.selectedItem.value).isEqualTo(paymentDetails)
+    }
+
+    @Test
+    fun `when selected item is removed then default item is selected`() = runTest {
+        val deletedPaymentDetails =
+            PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails[1]
+        val viewModel = createViewModel()
+        viewModel.onItemSelected(deletedPaymentDetails)
+
+        assertThat(viewModel.selectedItem.value).isEqualTo(deletedPaymentDetails)
+
+        whenever(linkAccountManager.deletePaymentDetails(anyOrNull()))
+            .thenReturn(Result.success(Unit))
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(
+                Result.success(
+                    PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.copy(
+                        paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails
+                            .filter { it != deletedPaymentDetails }
+                    )
+                )
+            )
+
+        viewModel.deletePaymentMethod(deletedPaymentDetails)
+
+        assertThat(viewModel.selectedItem.value)
+            .isEqualTo(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first())
+    }
+
+    @Test
+    fun `when default item is not supported then first supported item is selected`() = runTest {
+        whenever(args.stripeIntent).thenReturn(
+            StripeIntentFixtures.PI_SUCCEEDED.copy(
+                linkFundingSources = listOf(ConsumerPaymentDetails.BankAccount.type)
+            )
+        )
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+
+        val viewModel = createViewModel()
+
+        val bankAccount = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails[2]
+        assertThat(viewModel.selectedItem.value).isEqualTo(bankAccount)
+    }
+
+    @Test
     fun `when payment confirmation fails then an error message is shown`() {
         val errorThrown = "Error message"
         val viewModel = createViewModel()
 
-        viewModel.onSelectedPaymentDetails(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first())
+        viewModel.onItemSelected(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first())
+        viewModel.onConfirmPayment()
 
         val callbackCaptor = argumentCaptor<PaymentConfirmationCallback>()
         verify(confirmationManager).confirmStripeIntent(any(), callbackCaptor.capture())
@@ -175,7 +231,7 @@ class WalletViewModelTest {
         clearInvocations(linkAccountManager)
 
         // Initially has two elements
-        assertThat(viewModel.paymentDetails.value)
+        assertThat(viewModel.paymentDetailsList.value)
             .containsExactlyElementsIn(paymentDetails.paymentDetails)
 
         whenever(linkAccountManager.deletePaymentDetails(anyOrNull()))
@@ -216,7 +272,7 @@ class WalletViewModelTest {
 
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
         val viewModel = createViewModel()
-        viewModel.onSelectedPaymentDetails(paymentDetails)
+        viewModel.onConfirmPayment()
 
         assertThat(viewModel.primaryButtonState.value).isEqualTo(PrimaryButtonState.Completed)
 
@@ -263,26 +319,26 @@ class WalletViewModelTest {
 
     @Test
     fun `On CardEdit result successful then it reloads payment details`() = runTest {
-        val flow = MutableStateFlow<CardEditViewModel.Result?>(null)
-        whenever(navigator.getResultFlow<CardEditViewModel.Result>(any())).thenReturn(flow)
+        val flow = MutableStateFlow<PaymentDetailsResult?>(null)
+        whenever(navigator.getResultFlow<PaymentDetailsResult>(any())).thenReturn(flow)
 
         createViewModel()
         verify(linkAccountManager).listPaymentDetails()
         clearInvocations(linkAccountManager)
 
-        flow.emit(CardEditViewModel.Result.Success)
+        flow.emit(PaymentDetailsResult.Success(""))
         verify(linkAccountManager).listPaymentDetails()
     }
 
     @Test
     fun `On CardEdit result failure then it shows error`() = runTest {
-        val flow = MutableStateFlow<CardEditViewModel.Result?>(null)
-        whenever(navigator.getResultFlow<CardEditViewModel.Result>(any())).thenReturn(flow)
+        val flow = MutableStateFlow<PaymentDetailsResult?>(null)
+        whenever(navigator.getResultFlow<PaymentDetailsResult>(any())).thenReturn(flow)
 
         val viewModel = createViewModel()
 
         val error = ErrorMessage.Raw("Error message")
-        flow.emit(CardEditViewModel.Result.Failure(error))
+        flow.emit(PaymentDetailsResult.Failure(error))
 
         assertThat(viewModel.errorMessage.value).isEqualTo(error)
     }

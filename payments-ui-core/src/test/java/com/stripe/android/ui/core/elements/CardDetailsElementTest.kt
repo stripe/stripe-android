@@ -46,7 +46,7 @@ class CardDetailsElementTest {
                 IdentifierSpec.CardNumber to FormFieldEntry("4242424242424242", true),
                 IdentifierSpec.CardCvc to FormFieldEntry("321", true),
                 IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                IdentifierSpec.CardExpMonth to FormFieldEntry("1", true),
+                IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
                 IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
             )
         )
@@ -71,7 +71,7 @@ class CardDetailsElementTest {
             }
 
         cardDetailsElement.controller.cvcElement.controller.onValueChange("321")
-        cardDetailsElement.controller.expirationDateElement.controller.onValueChange("130")
+        cardDetailsElement.controller.expirationDateElement.controller.onValueChange("1230")
 
         idleLooper()
 
@@ -80,7 +80,7 @@ class CardDetailsElementTest {
                 IdentifierSpec.CardNumber to FormFieldEntry("4242424242424242", true),
                 IdentifierSpec.CardCvc to FormFieldEntry("321", true),
                 IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
-                IdentifierSpec.CardExpMonth to FormFieldEntry("1", true),
+                IdentifierSpec.CardExpMonth to FormFieldEntry("12", true),
                 IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
             )
         )

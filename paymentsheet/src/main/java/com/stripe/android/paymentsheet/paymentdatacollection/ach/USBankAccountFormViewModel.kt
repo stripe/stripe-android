@@ -298,9 +298,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         when (clientSecret) {
             is PaymentIntentClientSecret -> {
                 collectBankAccountLauncher?.presentWithPaymentIntent(
-                    lazyPaymentConfig.get().publishableKey,
-                    clientSecret.value,
-                    CollectBankAccountConfiguration.USBankAccount(
+                    publishableKey = lazyPaymentConfig.get().publishableKey,
+                    stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                    clientSecret = clientSecret.value,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
                         name.value,
                         email.value
                     )
@@ -308,9 +309,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
             is SetupIntentClientSecret -> {
                 collectBankAccountLauncher?.presentWithSetupIntent(
-                    lazyPaymentConfig.get().publishableKey,
-                    clientSecret.value,
-                    CollectBankAccountConfiguration.USBankAccount(
+                    publishableKey = lazyPaymentConfig.get().publishableKey,
+                    stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                    clientSecret = clientSecret.value,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
                         name.value,
                         email.value
                     )

@@ -1,11 +1,11 @@
 package com.stripe.android.link.repositories
 
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 
@@ -69,10 +69,27 @@ internal interface LinkRepository {
     ): Result<ConsumerPaymentDetails>
 
     /**
-     * Create a new payment method in the consumer account.
+     * Create a new [FinancialConnectionsSession], used to link a bank account using the Financial
+     * Connections SDK.
      */
-    suspend fun createPaymentDetails(
-        paymentMethod: SupportedPaymentMethod,
+    suspend fun createFinancialConnectionsSession(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<FinancialConnectionsSession>
+
+    /**
+     * Create a new linked bank account payment method in the consumer account.
+     */
+    suspend fun createBankAccountPaymentDetails(
+        financialConnectionsAccountId: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerPaymentDetails.BankAccount>
+
+    /**
+     * Create a new card payment method in the consumer account.
+     */
+    suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         userEmail: String,
         stripeIntent: StripeIntent,

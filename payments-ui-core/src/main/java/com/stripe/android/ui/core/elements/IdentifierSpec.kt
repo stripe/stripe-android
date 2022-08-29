@@ -1,16 +1,23 @@
 package com.stripe.android.ui.core.elements
 
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import kotlinx.parcelize.Parcelize
 
 /**
  * This uniquely identifies a element in the form.  The vals here are for identifier
  * specs that need to be found when pre-populating fields, or when extracting data.
+ * @param ignoreField set this to true to ensure that the field does not get put in the params list
+ * when making a Stripe request. Used in [FieldValuesToParamsMapConverter.kt]
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @kotlinx.serialization.Serializable
-data class IdentifierSpec(val v1: String) {
-    constructor() : this("") {
-    }
+@Parcelize
+data class IdentifierSpec(
+    val v1: String,
+    val ignoreField: Boolean = false
+) : Parcelable {
+    constructor() : this("")
 
     companion object {
         fun Generic(_value: String) = IdentifierSpec(_value)
@@ -52,6 +59,7 @@ data class IdentifierSpec(val v1: String) {
         // Unique extracting functionality
         val SaveForFutureUse = IdentifierSpec("save_for_future_use")
         val OneLineAddress = IdentifierSpec("address")
+        val SameAsShipping = IdentifierSpec("same_as_shipping", ignoreField = true)
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {

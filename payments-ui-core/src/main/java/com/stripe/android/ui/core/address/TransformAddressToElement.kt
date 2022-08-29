@@ -5,6 +5,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.PostalCodeConfig
 import com.stripe.android.ui.core.elements.RowController
 import com.stripe.android.ui.core.elements.RowElement
 import com.stripe.android.ui.core.elements.SectionFieldElement
@@ -212,7 +213,7 @@ internal fun parseAddressesSchema(inputStream: InputStream?) =
 private fun getJsonStringFromInputStream(inputStream: InputStream?) =
     inputStream?.bufferedReader().use { it?.readText() }
 
-internal fun List<CountryAddressSchema>.transformToElementList(): List<SectionFieldElement> {
+internal fun List<CountryAddressSchema>.transformToElementList(countryCode: String): List<SectionFieldElement> {
     val countryAddressElements = this
         .filterNot {
             it.type == FieldType.SortingCode ||
@@ -220,14 +221,28 @@ internal fun List<CountryAddressSchema>.transformToElementList(): List<SectionFi
         }
         .mapNotNull { addressField ->
             addressField.type?.let {
-                SimpleTextElement(
-                    addressField.type.identifierSpec,
-                    SimpleTextFieldController(
+                val textFieldConfig = when (it) {
+                    FieldType.PostalCode -> {
+                        PostalCodeConfig(
+                            label = addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
+                            capitalization = it.capitalization(),
+                            keyboard = getKeyboard(addressField.schema),
+                            country = countryCode
+                        )
+                    }
+                    else -> {
                         SimpleTextFieldConfig(
                             label = addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
                             capitalization = it.capitalization(),
                             keyboard = getKeyboard(addressField.schema)
-                        ),
+                        )
+                    }
+                }
+
+                SimpleTextElement(
+                    addressField.type.identifierSpec,
+                    SimpleTextFieldController(
+                        textFieldConfig = textFieldConfig,
                         showOptionalLabel = !addressField.required
                     )
                 )

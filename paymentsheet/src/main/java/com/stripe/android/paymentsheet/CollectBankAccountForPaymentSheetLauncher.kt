@@ -14,12 +14,14 @@ internal class CollectBankAccountForPaymentSheetLauncher(
 
     override fun presentWithPaymentIntent(
         publishableKey: String,
+        stripeAccountId: String?,
         clientSecret: String,
         configuration: CollectBankAccountConfiguration
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
                 publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
                 attachToIntent = false
@@ -29,12 +31,14 @@ internal class CollectBankAccountForPaymentSheetLauncher(
 
     override fun presentWithSetupIntent(
         publishableKey: String,
+        stripeAccountId: String?,
         clientSecret: String,
         configuration: CollectBankAccountConfiguration
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForSetupIntent(
                 publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
                 attachToIntent = false

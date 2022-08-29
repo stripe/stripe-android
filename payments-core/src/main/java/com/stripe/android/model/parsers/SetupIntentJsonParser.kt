@@ -3,6 +3,7 @@ package com.stripe.android.model.parsers
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
@@ -22,9 +23,12 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
             paymentMethod == null
         } ?: paymentMethod?.id
 
-        val unactivatedPaymentMethods = ModelJsonParser.jsonArrayToList(
+        val unactivatedPaymentMethods = jsonArrayToList(
             json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
         )
+
+        val linkFundingSources = jsonArrayToList(json.optJSONArray(FIELD_LINK_FUNDING_SOURCES))
+            .map { it.lowercase() }
 
         return SetupIntent(
             id = optString(json, FIELD_ID),
@@ -33,11 +37,12 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
             cancellationReason = SetupIntent.CancellationReason.fromCode(
                 optString(json, FIELD_CANCELLATION_REASON)
             ),
+            countryCode = optString(json, FIELD_COUNTRY_CODE),
             description = optString(json, FIELD_DESCRIPTION),
             isLiveMode = json.optBoolean(FIELD_LIVEMODE),
             paymentMethod = paymentMethod,
             paymentMethodId = paymentMethodId,
-            paymentMethodTypes = ModelJsonParser.jsonArrayToList(
+            paymentMethodTypes = jsonArrayToList(
                 json.optJSONArray(FIELD_PAYMENT_METHOD_TYPES)
             ),
             status = StripeIntent.Status.fromCode(optString(json, FIELD_STATUS)),
@@ -45,10 +50,11 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
             lastSetupError = json.optJSONObject(FIELD_LAST_SETUP_ERROR)?.let {
                 ErrorJsonParser().parse(it)
             },
+            unactivatedPaymentMethods = unactivatedPaymentMethods,
+            linkFundingSources = linkFundingSources,
             nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
                 NextActionDataParser().parse(it)
-            },
-            unactivatedPaymentMethods = unactivatedPaymentMethods
+            }
         )
     }
 
@@ -86,6 +92,7 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         private const val FIELD_CANCELLATION_REASON = "cancellation_reason"
         private const val FIELD_CREATED = "created"
         private const val FIELD_CLIENT_SECRET = "client_secret"
+        private const val FIELD_COUNTRY_CODE = "country_code"
         private const val FIELD_DESCRIPTION = "description"
         private const val FIELD_LAST_SETUP_ERROR = "last_setup_error"
         private const val FIELD_LIVEMODE = "livemode"
@@ -96,5 +103,6 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         private const val FIELD_PAYMENT_METHOD = "payment_method"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES =
             "unactivated_payment_method_types"
+        private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
     }
 }

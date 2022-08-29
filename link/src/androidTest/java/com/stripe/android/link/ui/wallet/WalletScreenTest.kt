@@ -17,11 +17,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.filterToOne
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -34,6 +36,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -51,74 +54,142 @@ internal class WalletScreenTest {
     private val primaryButtonLabel = "Pay $10.99"
     private val paymentDetails = listOf(
         ConsumerPaymentDetails.Card(
-            "id1",
-            true,
-            2022,
-            12,
-            CardBrand.Visa,
-            "4242"
+            id = "id1",
+            isDefault = true,
+            expiryYear = 2022,
+            expiryMonth = 12,
+            brand = CardBrand.Visa,
+            last4 = "4242"
         ),
         ConsumerPaymentDetails.Card(
-            "id2",
-            false,
-            2023,
-            11,
-            CardBrand.MasterCard,
-            "4444"
+            id = "id2",
+            isDefault = false,
+            expiryYear = 2023,
+            expiryMonth = 11,
+            brand = CardBrand.MasterCard,
+            last4 = "4444"
         ),
         ConsumerPaymentDetails.Card(
-            "id3",
-            false,
-            2023,
-            11,
-            CardBrand.AmericanExpress,
-            "0005"
+            id = "id3",
+            isDefault = false,
+            expiryYear = 2023,
+            expiryMonth = 11,
+            brand = CardBrand.AmericanExpress,
+            last4 = "0005"
+        ),
+        ConsumerPaymentDetails.BankAccount(
+            id = "id4",
+            isDefault = false,
+            bankIconCode = "icon",
+            bankName = "Stripe Bank",
+            last4 = "6789"
+        ),
+        ConsumerPaymentDetails.BankAccount(
+            id = "id5",
+            isDefault = false,
+            bankIconCode = "icon2",
+            bankName = "Stripe Credit Union",
+            last4 = "1234"
         )
     )
     private val paymentDetailsFlow = MutableStateFlow(paymentDetails)
 
     @Test
-    fun default_payment_method_is_initially_selected() {
-        var paymentMethod: ConsumerPaymentDetails.PaymentDetails? = null
-        setContent(
-            onPayButtonClick = {
-                paymentMethod = it
-            }
-        )
-
-        onPrimaryButton().performClick()
-        assertThat(paymentMethod).isEqualTo(paymentDetails.first())
-    }
-
-    @Test
     fun selected_payment_method_is_shown_when_collapsed() {
-        setContent()
-
-        val secondPaymentMethod = paymentDetails[1]
-
-        toggleListExpanded()
-        onPaymentDetailsItem(secondPaymentMethod).performClick()
+        val initiallySelectedItem = paymentDetails[4]
+        setContent(selectedItem = initiallySelectedItem)
 
         composeTestRule.onNodeWithText("Payment").onParent().onChildren()
-            .filter(hasText(secondPaymentMethod.last4, substring = true)).assertCountEquals(1)
+            .filter(hasText(initiallySelectedItem.label, substring = true))
+            .assertCountEquals(1)
     }
 
     @Test
-    fun selected_payment_method_is_used_for_payment() {
-        var paymentMethod: ConsumerPaymentDetails.PaymentDetails? = null
+    fun when_no_payment_option_is_selected_then_list_is_expanded() {
+        setContent(selectedItem = null)
+        assertExpanded()
+    }
+
+    @Test
+    fun when_no_payment_option_is_selected_then_primary_button_is_disabled() {
+        var payButtonClickCount = 0
+
         setContent(
+            selectedItem = null,
             onPayButtonClick = {
-                paymentMethod = it
+                payButtonClickCount++
             }
         )
 
-        val secondPaymentMethod = paymentDetails[1]
-
-        toggleListExpanded()
-        onPaymentDetailsItem(secondPaymentMethod).performClick()
+        onPrimaryButton().assertIsNotEnabled()
         onPrimaryButton().performClick()
+        assertThat(payButtonClickCount).isEqualTo(0)
+    }
 
-        assertThat(paymentMethod).isEqualTo(secondPaymentMethod)
+    @Test
+    fun when_card_is_not_supported_then_cards_cannot_be_selected() {
+        var selectedItem: ConsumerPaymentDetails.PaymentDetails? = null
+        setContent(
+            supportedTypes = setOf(ConsumerPaymentDetails.BankAccount.type),
+            selectedItem = paymentDetails.first(),
+            onItemSelected = {
+                selectedItem = it
+            }
+        )
+
+        assertExpanded()
+        assertThat(selectedItem).isNull()
+        onPrimaryButton().assertIsNotEnabled()
+
+        onPaymentDetailsItem(paymentDetails[1]).assertIsNotEnabled().performClick()
+
+        assertThat(selectedItem).isNull()
+        onPrimaryButton().assertIsNotEnabled()
+
+        onPaymentDetailsItem(paymentDetails[2]).assertIsNotEnabled().performClick()
+
+        assertThat(selectedItem).isNull()
+        onPrimaryButton().assertIsNotEnabled()
+    }
+
+    @Test
+    fun when_bank_account_is_not_supported_then_bank_accounts_cannot_be_selected() {
+        var selectedItem: ConsumerPaymentDetails.PaymentDetails? = null
+        setContent(
+            supportedTypes = setOf(ConsumerPaymentDetails.Card.type),
+            selectedItem = paymentDetails[3],
+            onItemSelected = {
+                selectedItem = it
+            }
+        )
+
+        assertExpanded()
+        assertThat(selectedItem).isNull()
+        onPrimaryButton().assertIsNotEnabled()
+
+        onPaymentDetailsItem(paymentDetails[4]).assertIsNotEnabled().performClick()
+
+        assertThat(selectedItem).isNull()
+        onPrimaryButton().assertIsNotEnabled()
+    }
+
+    @Test
+    fun when_payment_method_is_not_supported_then_error_message_is_shown() {
+        var selectedItem: ConsumerPaymentDetails.PaymentDetails? = null
+        setContent(
+            supportedTypes = emptySet(),
+            selectedItem = paymentDetails.first(),
+            onItemSelected = {
+                selectedItem = it
+            }
+        )
+
+        assertExpanded()
+        assertThat(selectedItem).isNull()
+        onPrimaryButton().assertIsNotEnabled()
+
+        composeTestRule.onAllNodesWithText("Unavailable for this purchase")
+            .assertCountEquals(5)
     }
 
     @Test
@@ -169,17 +240,49 @@ internal class WalletScreenTest {
     }
 
     @Test
-    fun delete_item_shows_dialog_confirmation() {
+    fun card_options_menu_shows_correct_options() {
+        setContent()
+        toggleListExpanded()
+        onOptionsForPaymentMethod(paymentDetails.first()).performClick()
+        onRemoveCardButton().assertExists()
+        onUpdateCardButton().assertExists()
+        onCancelButton().assertExists()
+        onRemoveAccountButton().assertDoesNotExist()
+    }
+
+    @Test
+    fun bank_account_options_menu_shows_correct_options() {
+        setContent()
+        toggleListExpanded()
+        onOptionsForPaymentMethod(paymentDetails[3]).performClick()
+        onRemoveAccountButton().assertExists()
+        onCancelButton().assertExists()
+        onRemoveCardButton().assertDoesNotExist()
+        onUpdateCardButton().assertDoesNotExist()
+    }
+
+    @Test
+    fun delete_card_shows_dialog_confirmation() {
         setContent()
         toggleListExpanded()
         onOptionsForPaymentMethod(paymentDetails.first()).performClick()
         onRemoveCardButton().assertExists()
         onRemoveCardButton().performClick()
-        onRemoveConfirmationDialog().assertExists()
+        onRemoveCardConfirmationDialog().assertExists()
     }
 
     @Test
-    fun update_item_triggers_callback() {
+    fun delete_bank_account_shows_dialog_confirmation() {
+        setContent()
+        toggleListExpanded()
+        onOptionsForPaymentMethod(paymentDetails[3]).performClick()
+        onRemoveAccountButton().assertExists()
+        onRemoveAccountButton().performClick()
+        onRemoveBankAccountConfirmationDialog().assertExists()
+    }
+
+    @Test
+    fun update_card_triggers_callback() {
         var paymentMethod: ConsumerPaymentDetails.PaymentDetails? = null
         setContent(
             onEditPaymentMethod = {
@@ -241,7 +344,7 @@ internal class WalletScreenTest {
         onCancelButton().performClick()
         onOptionsForPaymentMethod(paymentDetails.first()).performClick()
         onRemoveCardButton().performClick()
-        onRemoveConfirmationDialog().assertExists()
+        onRemoveCardConfirmationDialog().assertExists()
     }
 
     @Test
@@ -251,39 +354,23 @@ internal class WalletScreenTest {
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
 
-    @Test
-    fun when_selected_item_is_removed_then_default_is_selected() {
-        setContent()
-
-        val secondPaymentMethod = paymentDetails[1]
-
-        toggleListExpanded()
-        onPaymentDetailsItem(secondPaymentMethod).performClick()
-
-        composeTestRule.onNodeWithText("Payment").onParent().onChildren()
-            .filter(hasText(secondPaymentMethod.last4, substring = true)).assertCountEquals(1)
-
-        val defaultPaymentDetails = paymentDetails.first()
-        paymentDetailsFlow.tryEmit(listOf(paymentDetails[2], defaultPaymentDetails))
-
-        composeTestRule.onNodeWithText("Payment").onParent().onChildren()
-            .filter(hasText(defaultPaymentDetails.last4, substring = true)).assertCountEquals(1)
-    }
-
     private fun setContent(
+        supportedTypes: Set<String> = SupportedPaymentMethod.allTypes,
+        selectedItem: ConsumerPaymentDetails.PaymentDetails? = paymentDetails.first(),
         primaryButtonState: PrimaryButtonState = PrimaryButtonState.Enabled,
         errorMessage: ErrorMessage? = null,
+        onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onAddNewPaymentMethodClick: () -> Unit = {},
         onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
-        onPayButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
+        onPayButtonClick: () -> Unit = {},
         onPayAnotherWayClick: () -> Unit = {},
         showBottomSheetContent: ((BottomSheetContent?) -> Unit)? = null
     ) = composeTestRule.setContent {
         var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
         val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
         val coroutineScope = rememberCoroutineScope()
-        val paymentDetails by paymentDetailsFlow.collectAsState()
+        val paymentDetailsList by paymentDetailsFlow.collectAsState()
 
         if (bottomSheetContent != null) {
             DisposableEffect(bottomSheetContent) {
@@ -305,11 +392,13 @@ internal class WalletScreenTest {
         ) {
             DefaultLinkTheme {
                 WalletBody(
-                    paymentDetails = paymentDetails,
-                    initiallySelectedId = null,
+                    paymentDetailsList = paymentDetailsList,
+                    supportedTypes = supportedTypes,
+                    selectedItem = selectedItem,
                     primaryButtonLabel = primaryButtonLabel,
                     primaryButtonState = primaryButtonState,
                     errorMessage = errorMessage,
+                    onItemSelected = onItemSelected,
                     onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
                     onEditPaymentMethod = onEditPaymentMethod,
                     onDeletePaymentMethod = onDeletePaymentMethod,
@@ -329,21 +418,34 @@ internal class WalletScreenTest {
     private fun toggleListExpanded() =
         composeTestRule.onNodeWithTag("ChevronIcon", useUnmergedTree = true).performClick()
 
-    private fun onPaymentDetailsItem(paymentDetails: ConsumerPaymentDetails.Card) =
-        composeTestRule.onNodeWithText(paymentDetails.last4, substring = true)
+    private fun onPaymentDetailsItem(paymentDetails: ConsumerPaymentDetails.PaymentDetails) =
+        composeTestRule.onNodeWithText(paymentDetails.label, substring = true)
 
-    private fun onOptionsForPaymentMethod(paymentDetails: ConsumerPaymentDetails.Card) =
+    private fun onOptionsForPaymentMethod(paymentDetails: ConsumerPaymentDetails.PaymentDetails) =
         onPaymentDetailsItem(paymentDetails).onChildren().filterToOne(hasContentDescription("Edit"))
+
+    // Assert list is expanded or collapsed based on the header text
+    private fun assertCollapsed() = composeTestRule.onNodeWithText("Payment").assertExists()
+    private fun assertExpanded() = composeTestRule.onNodeWithText("Payment methods").assertExists()
 
     private fun onPrimaryButton() = composeTestRule.onNodeWithText(primaryButtonLabel)
 
     private fun onRemoveCardButton() = composeTestRule.onNodeWithText("Remove card")
-
     private fun onUpdateCardButton() = composeTestRule.onNodeWithText("Update card")
+    private fun onRemoveAccountButton() = composeTestRule.onNodeWithText("Remove linked account")
 
-    private fun onRemoveConfirmationDialog() =
+    private fun onRemoveCardConfirmationDialog() =
         composeTestRule.onNodeWithText("Are you sure you want to remove this card?")
+
+    private fun onRemoveBankAccountConfirmationDialog() =
+        composeTestRule.onNodeWithText("Are you sure you want to remove this account?")
 
     private fun onCancelButton() = composeTestRule.onNodeWithText("Cancel")
     private fun onRemoveButton() = composeTestRule.onNodeWithText("Remove")
+
+    private val ConsumerPaymentDetails.PaymentDetails.label
+        get() = when (this) {
+            is ConsumerPaymentDetails.Card -> last4
+            is ConsumerPaymentDetails.BankAccount -> last4
+        }
 }

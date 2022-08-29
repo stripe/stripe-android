@@ -64,6 +64,11 @@ sealed interface StripeIntent : StripeModel {
      */
     val unactivatedPaymentMethods: List<String>
 
+    /**
+     * Payment types that are accepted when paying with Link.
+     */
+    val linkFundingSources: List<String>
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean

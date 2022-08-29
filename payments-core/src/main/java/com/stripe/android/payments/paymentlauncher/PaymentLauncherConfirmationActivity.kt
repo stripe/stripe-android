@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
 
 /**
@@ -35,7 +36,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        disableAnimations()
+        setFadeAnimations()
 
         val args = runCatching {
             requireNotNull(starterArgs) {
@@ -73,12 +74,11 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        disableAnimations()
+        setFadeAnimations()
     }
 
-    private fun disableAnimations() {
-        // this is a transparent Activity so we want to disable animations
-        overridePendingTransition(0, 0)
+    private fun setFadeAnimations() {
+        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 
     /**

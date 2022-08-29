@@ -21,15 +21,27 @@ sealed class FormItemSpec {
     internal fun createSectionElement(
         sectionFieldElement: SectionFieldElement,
         label: Int? = null
-    ) =
-        SectionElement(
-            IdentifierSpec.Generic("${sectionFieldElement.identifier.v1}_section"),
-            sectionFieldElement,
+    ) = createSectionElement(
+        listOf(sectionFieldElement),
+        label
+    )
+
+    internal fun createSectionElement(
+        sectionFieldElements: List<SectionFieldElement>,
+        label: Int? = null
+    ): SectionElement {
+        val errorControllers = sectionFieldElements.map {
+            it.sectionFieldErrorController()
+        }
+        return SectionElement(
+            IdentifierSpec.Generic("${sectionFieldElements.first().identifier.v1}_section"),
+            sectionFieldElements,
             SectionController(
                 label,
-                listOf(sectionFieldElement.sectionFieldErrorController())
+                errorControllers
             )
         )
+    }
 }
 
 object FormItemSpecSerializer :

@@ -25,7 +25,8 @@ class FinancialConnectionsApiRepositoryTest {
     private val financialConnectionsApiRepository = FinancialConnectionsApiRepository(
         publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
         stripeNetworkClient = mockStripeNetworkClient,
-        apiRequestFactory = apiRequestFactory
+        apiRequestFactory = apiRequestFactory,
+        stripeAccountId = null
     )
 
     @Test

@@ -106,4 +106,29 @@ class FieldValuesToParamsMapConverterTest {
                 "}"
         )
     }
+
+    @Test
+    fun `test ignored fields`() {
+        val paymentMethodParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodCreateParams(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry(
+                        "joe",
+                        true
+                    ),
+                    IdentifierSpec.SameAsShipping to FormFieldEntry(
+                        "true",
+                        true
+                    )
+                ),
+                "some code",
+                false
+            )
+
+        assertThat(
+            paymentMethodParams.toParamMap().toString()
+        ).isEqualTo(
+            "{type=some code, billing_details={name=joe}}"
+        )
+    }
 }

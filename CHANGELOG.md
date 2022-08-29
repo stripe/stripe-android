@@ -1,6 +1,25 @@
 # CHANGELOG
 
-## X.X.X
+## X.X.X - 2022-XX-XX
+
+### PaymentSheet
+
+* [ADDED][5456](https://github.com/stripe/stripe-android/pull/5456) Added postal code validation
+
+## 20.10.0 - 2022-08-22
+This release contains several bug fixes for PaymentSheet and binary size optimization for Identity.
+
+### PaymentSheet
+
+* [FIXED][5422](https://github.com/stripe/stripe-android/pull/5422) Card expiration dates with a single-digit month are now preserved correctly when closing and re-opening the `PaymentSheet` via the `FlowController`.
+
+### Identity
+* [FIXED][5404](https://github.com/stripe/stripe-android/pull/5404) Remove Flex OP dependency from 
+  Identity SDK and reduce its binary size.
+
+## 20.9.0 - 2022-08-16
+This release contains several bug fixes for Payments, PaymentSheet and Financial Connections. 
+Adds `IdentityVerificationSheet#rememberIdentityVerificationSheet` for Identity. 
 
 ### PaymentSheet
 
@@ -8,6 +27,21 @@
   `PaymentSheet`, that clears any persisted authentication state.
 * [FIXED][5388](https://github.com/stripe/stripe-android/pull/5388) Fixed issue with Appearance API
   not working with `FlowController`
+* [FIXED][5399](https://github.com/stripe/stripe-android/pull/5399) Bank Account Payments that pass 
+  stripeAccountId for connected accounts will now succeed.
+
+### Payments
+
+* [FIXED][5399](https://github.com/stripe/stripe-android/pull/5399) `CollectBankAccountLauncher` now 
+  accepts `stripeAccountId` for Connect merchants.
+
+### Financial Connections
+
+* [FIXED][5408](https://github.com/stripe/stripe-android/pull/5408) `FinancialConnectionsSheet#Configuration`
+  now accepts `stripeAccountId` for Connect merchants.
+
+### Identity
+* [ADDED][5370](https://github.com/stripe/stripe-android/pull/5370) Add factory method for Compose.
 
 ## 20.8.0 - 2022-08-01
 
@@ -32,9 +66,6 @@ and adds new `rememberLauncher` features for Payments
   Compose.
 * [DEPRECATED][5274](https://github.com/stripe/stripe-android/pull/5274)
   Deprecate `PaymentLauncher.createForCompose` in favor of  `PaymentLauncher.rememberLauncher`.
-
-### Identity
-* [ADDED][5370](https://github.com/stripe/stripe-android/pull/5370) Add factory method for Compose
 
 ## 20.7.0 - 2022-07-06
 

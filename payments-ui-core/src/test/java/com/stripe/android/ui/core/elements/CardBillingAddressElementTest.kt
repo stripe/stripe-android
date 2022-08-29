@@ -22,7 +22,8 @@ internal class CardBillingAddressElementTest {
         rawValuesMap = emptyMap(),
         addressRepository,
         emptySet(),
-        dropdownFieldController
+        dropdownFieldController,
+        null
     )
 
     init {

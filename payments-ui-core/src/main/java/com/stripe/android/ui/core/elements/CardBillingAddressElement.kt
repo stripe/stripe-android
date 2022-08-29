@@ -20,16 +20,19 @@ class CardBillingAddressElement(
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
         rawValuesMap[IdentifierSpec.Country]
-    )
+    ),
+    sameAsShippingController: SameAsShippingController?
 ) : AddressElement(
     identifier,
     addressRepository,
     rawValuesMap,
     AddressType.Normal(),
     countryCodes,
-    countryDropdownFieldController
+    countryDropdownFieldController,
+    sameAsShippingController
 ) {
     // Save for future use puts this in the controller rather than element
+    // card and achv2 uses save for future use
     val hiddenIdentifiers: Flow<List<IdentifierSpec>> =
         countryDropdownFieldController.rawFieldValue.map { countryCode ->
             when (countryCode) {

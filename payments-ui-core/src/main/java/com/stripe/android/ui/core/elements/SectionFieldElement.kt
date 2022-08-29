@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.Flow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface SectionFieldElement {
     val identifier: IdentifierSpec
+    val shouldRenderOutsideCard: Boolean
+        get() = false
 
     fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>>
     fun sectionFieldErrorController(): SectionFieldErrorController

@@ -31,6 +31,8 @@ import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -183,11 +185,25 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     var usBankAccountSavedScreenState: USBankAccountFormScreenState? = null
 
-    val linkLauncher = linkPaymentLauncherFactory.create(
-        merchantName = merchantName,
-        customerEmail = config?.defaultBillingDetails?.email,
-        customerPhone = config?.defaultBillingDetails?.phone
-    )
+    val linkLauncher = linkPaymentLauncherFactory.let {
+        val shippingDetails: AddressDetails? = config?.shippingDetails
+        val customerPhone = if (shippingDetails?.isCheckboxSelected == true) {
+            shippingDetails.phoneNumber
+        } else {
+            config?.defaultBillingDetails?.phone
+        }
+        val initialValuesMap = if (shippingDetails?.isCheckboxSelected == true) {
+            shippingDetails.toIdentifierMap(config?.defaultBillingDetails)
+        } else {
+            emptyMap()
+        }
+        it.create(
+            merchantName = merchantName,
+            customerEmail = config?.defaultBillingDetails?.email,
+            customerPhone = customerPhone,
+            initialFormValuesMap = initialValuesMap
+        )
+    }
 
     protected val _showLinkVerificationDialog = MutableLiveData(false)
     val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog

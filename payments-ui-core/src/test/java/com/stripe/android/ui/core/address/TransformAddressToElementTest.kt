@@ -22,7 +22,7 @@ class TransformAddressToElementTest {
     @Test
     fun `Read US Json`() = runBlocking {
         val addressSchema = readFile("src/main/assets/addressinfo/US.json")!!
-        val simpleTextList = addressSchema.transformToElementList()
+        val simpleTextList = addressSchema.transformToElementList("US")
 
         val addressLine1 = SimpleTextSpec(
             IdentifierSpec.Line1,
