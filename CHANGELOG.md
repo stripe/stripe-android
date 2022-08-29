@@ -4,6 +4,7 @@
 
 ## 20.11.0 - 2022-08-29
 This release adds postal code validation for PaymentSheet and fixed a fileprovider naming bug for Identity.
+
 ### PaymentSheet
 
 * [ADDED][5456](https://github.com/stripe/stripe-android/pull/5456) Added postal code validation
