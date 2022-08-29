@@ -15,6 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -34,14 +35,19 @@ internal fun InputAddressScreen(
     formContent: @Composable ColumnScope.() -> Unit,
     checkboxContent: @Composable ColumnScope.() -> Unit
 ) {
-    Column(
+    val focusManager = LocalFocusManager.current
+
+    ScrollableColumn(
         modifier = Modifier
             .fillMaxHeight()
             .background(MaterialTheme.colors.surface)
     ) {
         AddressOptionsAppBar(
             isRootScreen = true,
-            onButtonClick = { onCloseClick() }
+            onButtonClick = {
+                focusManager.clearFocus()
+                onCloseClick()
+            }
         )
         Column(
             Modifier
@@ -58,6 +64,7 @@ internal fun InputAddressScreen(
                 isEnabled = primaryButtonEnabled,
                 text = primaryButtonText
             ) {
+                focusManager.clearFocus()
                 onPrimaryButtonClick()
             }
         }
@@ -120,7 +127,7 @@ internal fun InputAddressScreen(
                     }
                 },
                 checkboxContent = {
-                    viewModel.args.config?.checkboxLabel?.let { label ->
+                    viewModel.args.config?.additionalFields?.checkboxLabel?.let { label ->
                         CheckboxElementUI(
                             isChecked = checkboxChecked,
                             label = label,

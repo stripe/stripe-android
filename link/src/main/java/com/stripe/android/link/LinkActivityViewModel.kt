@@ -49,6 +49,15 @@ internal class LinkActivityViewModel @Inject internal constructor(
         confirmationManager.setupPaymentLauncher(activityResultCaller)
     }
 
+    fun onBackPressed() {
+        navigator.onBack(userInitiated = true)
+    }
+
+    fun logout() {
+        navigator.dismiss()
+        linkAccountManager.logout()
+    }
+
     fun unregisterFromActivity() {
         confirmationManager.invalidatePaymentLauncher()
     }

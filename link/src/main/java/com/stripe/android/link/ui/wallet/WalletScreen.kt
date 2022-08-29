@@ -22,7 +22,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +41,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
@@ -49,13 +49,12 @@ import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
+import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
-import com.stripe.android.link.ui.primaryButtonLabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.injection.NonFallbackInjector
-import com.stripe.android.ui.core.paymentsColors
 
 @Preview
 @Composable
@@ -83,9 +82,11 @@ private fun WalletBodyPreview() {
                 ),
                 supportedTypes = SupportedPaymentMethod.allTypes,
                 selectedItem = null,
+                isExpanded = true,
                 primaryButtonLabel = "Pay $10.99",
                 primaryButtonState = PrimaryButtonState.Enabled,
                 errorMessage = null,
+                setExpanded = {},
                 onItemSelected = {},
                 onAddNewPaymentMethodClick = {},
                 onEditPaymentMethod = {},
@@ -115,6 +116,7 @@ internal fun WalletBody(
     val primaryButtonState by viewModel.primaryButtonState.collectAsState()
     val selectedItem by viewModel.selectedItem.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val isExpanded by viewModel.isExpanded.collectAsState()
 
     if (paymentDetailsList.isEmpty()) {
         Box(
@@ -130,9 +132,14 @@ internal fun WalletBody(
             paymentDetailsList = paymentDetailsList,
             supportedTypes = viewModel.supportedTypes,
             selectedItem = selectedItem,
-            primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
+            isExpanded = isExpanded,
+            primaryButtonLabel = completePaymentButtonLabel(
+                viewModel.args.stripeIntent,
+                LocalContext.current.resources
+            ),
             primaryButtonState = primaryButtonState,
             errorMessage = errorMessage,
+            setExpanded = viewModel::setExpanded,
             onItemSelected = viewModel::onItemSelected,
             onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
             onEditPaymentMethod = viewModel::editPaymentMethod,
@@ -149,9 +156,11 @@ internal fun WalletBody(
     paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
     supportedTypes: Set<String>,
     selectedItem: ConsumerPaymentDetails.PaymentDetails?,
+    isExpanded: Boolean,
     primaryButtonLabel: String,
     primaryButtonState: PrimaryButtonState,
     errorMessage: ErrorMessage?,
+    setExpanded: (Boolean) -> Unit,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onAddNewPaymentMethodClick: () -> Unit,
     onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -161,7 +170,6 @@ internal fun WalletBody(
     showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
     val selectedItemIsValid = selectedItem?.let { supportedTypes.contains(it.type) } ?: false
-    var isWalletExpanded by rememberSaveable { mutableStateOf(!selectedItemIsValid) }
     var itemBeingRemoved by remember {
         mutableStateOf<ConsumerPaymentDetails.PaymentDetails?>(null)
     }
@@ -189,8 +197,8 @@ internal fun WalletBody(
     ScrollableTopLevelColumn {
         Spacer(modifier = Modifier.height(12.dp))
 
-        if (isWalletExpanded || !selectedItemIsValid) {
-            isWalletExpanded = true
+        if (isExpanded || !selectedItemIsValid) {
+            setExpanded(true)
             ExpandedPaymentDetails(
                 paymentDetailsList = paymentDetailsList,
                 supportedTypes = supportedTypes,
@@ -198,29 +206,29 @@ internal fun WalletBody(
                 enabled = !primaryButtonState.isBlocking,
                 onItemSelected = {
                     onItemSelected(it)
-                    isWalletExpanded = false
+                    setExpanded(false)
                 },
                 onMenuButtonClick = {
                     showBottomSheetContent {
-                        WalletBottomSheetContent(
+                        WalletPaymentMethodMenu(
                             paymentDetails = it,
+                            onEditClick = {
+                                showBottomSheetContent(null)
+                                onEditPaymentMethod(it)
+                            },
                             onRemoveClick = {
                                 showBottomSheetContent(null)
                                 itemBeingRemoved = it
                             },
                             onCancelClick = {
                                 showBottomSheetContent(null)
-                            },
-                            onEditClick = {
-                                showBottomSheetContent(null)
-                                onEditPaymentMethod(it)
                             }
                         )
                     }
                 },
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
                 onCollapse = {
-                    isWalletExpanded = false
+                    setExpanded(false)
                 }
             )
         } else {
@@ -228,7 +236,7 @@ internal fun WalletBody(
                 selectedPaymentMethod = selectedItem!!,
                 enabled = !primaryButtonState.isBlocking,
                 onClick = {
-                    isWalletExpanded = true
+                    setExpanded(true)
                 }
             )
         }
@@ -236,7 +244,7 @@ internal fun WalletBody(
             Html(
                 html = stringResource(R.string.wallet_bank_account_terms),
                 imageGetter = emptyMap(),
-                color = MaterialTheme.paymentsColors.placeholderText,
+                color = MaterialTheme.colors.onSecondary,
                 style = MaterialTheme.typography.caption,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -260,8 +268,8 @@ internal fun WalletBody(
             } else {
                 PrimaryButtonState.Disabled
             },
-            icon = R.drawable.stripe_ic_lock,
-            onButtonClick = onPrimaryButtonClick
+            onButtonClick = onPrimaryButtonClick,
+            iconEnd = R.drawable.stripe_ic_lock
         )
         SecondaryButton(
             enabled = !primaryButtonState.isBlocking,
@@ -284,11 +292,11 @@ internal fun CollapsedPaymentDetails(
             .border(
                 width = 1.dp,
                 color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
             .background(
                 color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
             .clickable(
                 enabled = enabled,
@@ -336,11 +344,11 @@ private fun ExpandedPaymentDetails(
             .border(
                 width = 1.dp,
                 color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
             .background(
                 color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
     ) {
         Row(
@@ -372,7 +380,7 @@ private fun ExpandedPaymentDetails(
 
         // TODO(brnunes-stripe): Use LazyColumn, will need to write custom shape for the border
         // https://juliensalvi.medium.com/custom-shape-with-jetpack-compose-1cb48a991d42
-        paymentDetailsList.forEachIndexed { index, item ->
+        paymentDetailsList.forEach { item ->
             PaymentDetailsListItem(
                 paymentDetails = item,
                 enabled = enabled,
@@ -395,13 +403,13 @@ private fun ExpandedPaymentDetails(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_link_add),
+                painter = painterResource(id = R.drawable.ic_link_add_green),
                 contentDescription = null,
                 modifier = Modifier.padding(start = HorizontalPadding, end = 12.dp),
                 tint = Color.Unspecified
             )
             Text(
-                text = stringResource(id = R.string.wallet_add_payment_method),
+                text = stringResource(id = R.string.add_payment_method),
                 modifier = Modifier.padding(end = HorizontalPadding, bottom = 4.dp),
                 color = MaterialTheme.linkColors.actionLabel,
                 style = MaterialTheme.typography.button

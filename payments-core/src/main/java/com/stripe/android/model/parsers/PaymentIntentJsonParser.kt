@@ -90,6 +90,8 @@ class PaymentIntentJsonParser(
         val linkFundingSources = jsonArrayToList(json.optJSONArray(FIELD_LINK_FUNDING_SOURCES))
             .map { it.lowercase() }
 
+        val countryCode = optString(json, FIELD_COUNTRY_CODE)
+
         return PaymentIntent(
             id = id,
             paymentMethodTypes = paymentMethodTypes,
@@ -99,6 +101,7 @@ class PaymentIntentJsonParser(
             captureMethod = captureMethod,
             clientSecret = clientSecret,
             confirmationMethod = confirmationMethod,
+            countryCode = countryCode,
             created = created,
             currency = currency,
             description = description,
@@ -181,6 +184,7 @@ class PaymentIntentJsonParser(
         private const val FIELD_CAPTURE_METHOD = "capture_method"
         private const val FIELD_CLIENT_SECRET = "client_secret"
         private const val FIELD_CONFIRMATION_METHOD = "confirmation_method"
+        private const val FIELD_COUNTRY_CODE = "country_code"
         private const val FIELD_CURRENCY = "currency"
         private const val FIELD_DESCRIPTION = "description"
         private const val FIELD_LAST_PAYMENT_ERROR = "last_payment_error"

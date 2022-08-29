@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -144,15 +145,18 @@ internal fun PaymentMethodUI(
                     )
                 )
                 .padding(horizontal = CARD_HORIZONTAL_PADDING.dp)
-                .selectable(
-                    selected = isSelected,
-                    enabled = isEnabled,
-                    onClick = {
-                        onItemSelectedListener(itemIndex)
-                    }
-                )
         ) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .selectable(
+                        selected = isSelected,
+                        enabled = isEnabled,
+                        onClick = {
+                            onItemSelectedListener(itemIndex)
+                        }
+                    )
+            ) {
                 val colorFilter = if (tintOnSelected) ColorFilter.tint(color) else null
                 Image(
                     painter = painterResource(iconRes),

@@ -2,6 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="link">Link</string>
     <string name="back">Back</string>
+    <string name="menu">Menu</string>
 
     <string name="inline_sign_up_header">Save my info for secure 1-click checkout</string>
 
@@ -9,6 +10,7 @@
     <string name="sign_up_message">Pay faster at %1$s and thousands of merchants.</string>
     <string name="sign_up_terms">By joining Link, you agree to the &lt;a href=\"https://link.co/terms\"&gt;Terms&lt;/a&gt; and &lt;a href=\"https://link.co/privacy\"&gt;Privacy Policy&lt;/a&gt;.</string>
     <string name="sign_up">Join Link</string>
+    <string name="log_out">Log out of Link</string>
 
     <string name="verification_header">Enter your verification code</string>
     <string name="verification_message">Enter the code sent to %1$s to use Link to pay by default.</string>
@@ -31,10 +33,10 @@
     <string name="wallet_remove_account_confirmation">Are you sure you want to remove this account?</string>
     <string name="wallet_bank_account_terms">By continuing, you agree to authorize payments pursuant to &lt;a href=\"https://stripe.com/legal/ach-payments/authorization\"&gt;these terms&lt;/a&gt;.</string>
 
-    <string name="wallet_add_payment_method">Add a payment method</string>
+    <string name="add_payment_method">Add a payment method</string>
+    <string name="add_bank_account">Add bank account</string>
     <string name="wallet_pay_another_way">Pay another way</string>
 
-    <string name="pm_add_new_card">Add a new card</string>
     <string name="pm_your_default">This is your default</string>
     <string name="pm_set_as_default">Set as default payment</string>
 </resources>

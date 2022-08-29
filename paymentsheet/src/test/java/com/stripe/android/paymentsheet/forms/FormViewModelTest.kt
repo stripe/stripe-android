@@ -470,7 +470,7 @@ internal class FormViewModelTest {
 
         val addressControllers = AddressControllers.create(formViewModel)
         addressControllers.controllers.forEachIndexed { index, textFieldController ->
-            textFieldController.onValueChange("1234")
+            textFieldController.onValueChange("12345")
             if (index == addressControllers.controllers.size - 1) {
                 assertThat(
                     formViewModel
@@ -561,7 +561,7 @@ internal class FormViewModelTest {
             .filter { it.label.first() != R.string.address_label_address_line2 }
         populateAddressControllers
             .forEachIndexed { index, textFieldController ->
-                textFieldController.onValueChange("1234")
+                textFieldController.onValueChange("12345")
 
                 if (index == populateAddressControllers.size - 1) {
                     assertThat(

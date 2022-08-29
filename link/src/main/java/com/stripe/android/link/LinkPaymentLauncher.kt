@@ -183,8 +183,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     suspend fun attachNewCardToAccount(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.New> =
-        linkAccountManager.createPaymentDetails(
-            SupportedPaymentMethod.Card,
+        linkAccountManager.createCardPaymentDetails(
             paymentMethodCreateParams
         )
 
@@ -238,7 +237,9 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         WeakMapInjectorRegistry.register(injector, injectorKey)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        const val LINK_ENABLED = false
+        val LINK_ENABLED = BuildConfig.DEBUG
+        val supportedFundingSources = SupportedPaymentMethod.allTypes
     }
 }

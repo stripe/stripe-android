@@ -19,7 +19,6 @@ import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
-import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -82,7 +81,7 @@ class WalletViewModelTest {
     fun `On initialization start collecting CardEdit result`() = runTest {
         createViewModel()
 
-        verify(navigator).getResultFlow<CardEditViewModel.Result>(any())
+        verify(navigator).getResultFlow<PaymentDetailsResult>(any())
     }
 
     @Test
@@ -320,26 +319,26 @@ class WalletViewModelTest {
 
     @Test
     fun `On CardEdit result successful then it reloads payment details`() = runTest {
-        val flow = MutableStateFlow<CardEditViewModel.Result?>(null)
-        whenever(navigator.getResultFlow<CardEditViewModel.Result>(any())).thenReturn(flow)
+        val flow = MutableStateFlow<PaymentDetailsResult?>(null)
+        whenever(navigator.getResultFlow<PaymentDetailsResult>(any())).thenReturn(flow)
 
         createViewModel()
         verify(linkAccountManager).listPaymentDetails()
         clearInvocations(linkAccountManager)
 
-        flow.emit(CardEditViewModel.Result.Success)
+        flow.emit(PaymentDetailsResult.Success(""))
         verify(linkAccountManager).listPaymentDetails()
     }
 
     @Test
     fun `On CardEdit result failure then it shows error`() = runTest {
-        val flow = MutableStateFlow<CardEditViewModel.Result?>(null)
-        whenever(navigator.getResultFlow<CardEditViewModel.Result>(any())).thenReturn(flow)
+        val flow = MutableStateFlow<PaymentDetailsResult?>(null)
+        whenever(navigator.getResultFlow<PaymentDetailsResult>(any())).thenReturn(flow)
 
         val viewModel = createViewModel()
 
         val error = ErrorMessage.Raw("Error message")
-        flow.emit(CardEditViewModel.Result.Failure(error))
+        flow.emit(PaymentDetailsResult.Failure(error))
 
         assertThat(viewModel.errorMessage.value).isEqualTo(error)
     }

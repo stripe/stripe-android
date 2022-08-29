@@ -7,9 +7,12 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLinkResult
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
@@ -21,11 +24,15 @@ import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.ui.wallet.PaymentDetailsResult
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import com.stripe.android.ui.core.injection.NonFallbackInjector
@@ -45,6 +52,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -90,8 +98,14 @@ class PaymentMethodViewModelTest {
     @Before
     fun before() {
         Dispatchers.setMain(UnconfinedTestDispatcher())
-        linkAccountManager = mock()
-        whenever(args.stripeIntent).thenReturn(StripeIntentFixtures.PI_SUCCEEDED)
+        linkAccountManager = mock<LinkAccountManager>().apply {
+            whenever(consumerPublishableKey).thenReturn("consumerPublishableKey")
+        }
+        whenever(args.stripeIntent).thenReturn(
+            StripeIntentFixtures.PI_SUCCEEDED.copy(
+                linkFundingSources = listOf("card", "bank_account")
+            )
+        )
     }
 
     @After
@@ -100,21 +114,26 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `startPayment creates PaymentDetails`() = runTest {
+    fun `onPaymentMethodSelected updates form`() {
+        val viewModel = createViewModel()
+        assertThat(viewModel.paymentMethod.value).isEqualTo(SupportedPaymentMethod.Card)
+        verify(formControllerSubcomponentBuilder).formSpec(eq(LayoutSpec(SupportedPaymentMethod.Card.formSpec)))
+
+        viewModel.onPaymentMethodSelected(SupportedPaymentMethod.BankAccount)
+        assertThat(viewModel.paymentMethod.value).isEqualTo(SupportedPaymentMethod.BankAccount)
+        verify(formControllerSubcomponentBuilder).formSpec(eq(LayoutSpec(SupportedPaymentMethod.BankAccount.formSpec)))
+    }
+
+    @Test
+    fun `startPayment for card creates PaymentDetails`() = runTest {
         whenever(
-            linkAccountManager.createPaymentDetails(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
+            linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
         ).thenReturn(Result.success(createLinkPaymentDetails()))
 
         createViewModel().startPayment(cardFormFieldValues)
 
         val paramsCaptor = argumentCaptor<PaymentMethodCreateParams>()
-        verify(linkAccountManager).createPaymentDetails(
-            any(),
+        verify(linkAccountManager).createCardPaymentDetails(
             paramsCaptor.capture(),
             any(),
             anyOrNull()
@@ -140,16 +159,11 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `startPayment completes payment when PaymentDetails creation succeeds and completePayment is true`() =
+    fun `startPayment for card completes payment when PaymentDetails creation succeeds and completePayment is true`() =
         runTest {
             val value = createLinkPaymentDetails()
             whenever(
-                linkAccountManager.createPaymentDetails(
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull()
-                )
+                linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
             ).thenReturn(Result.success(value))
 
             createViewModel().startPayment(cardFormFieldValues)
@@ -186,14 +200,9 @@ class PaymentMethodViewModelTest {
         }
 
     @Test
-    fun `startPayment dismisses Link on success`() = runTest {
+    fun `startPayment for card dismisses Link on success`() = runTest {
         whenever(
-            linkAccountManager.createPaymentDetails(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
+            linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
         ).thenReturn(Result.success(createLinkPaymentDetails()))
 
         var callback: PaymentConfirmationCallback? = null
@@ -220,14 +229,9 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `startPayment starts processing`() = runTest {
+    fun `startPayment for card starts processing`() = runTest {
         whenever(
-            linkAccountManager.createPaymentDetails(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
+            linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
         ).thenReturn(Result.success(createLinkPaymentDetails()))
 
         val viewModel = createViewModel()
@@ -243,14 +247,9 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `startPayment stops processing on error`() = runTest {
+    fun `startPayment for card stops processing on error`() = runTest {
         whenever(
-            linkAccountManager.createPaymentDetails(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
+            linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
         ).thenReturn(Result.success(createLinkPaymentDetails()))
 
         var callback: PaymentConfirmationCallback? = null
@@ -282,12 +281,7 @@ class PaymentMethodViewModelTest {
     fun `when startPayment fails then an error message is shown`() = runTest {
         val errorMessage = "Error message"
         whenever(
-            linkAccountManager.createPaymentDetails(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
+            linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
         ).thenReturn(Result.failure(RuntimeException(errorMessage)))
 
         val viewModel = createViewModel()
@@ -295,6 +289,78 @@ class PaymentMethodViewModelTest {
         viewModel.startPayment(cardFormFieldValues)
 
         assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorMessage))
+    }
+
+    @Test
+    fun `startPayment for bank account creates FinancialConnectionsSession`() = runTest {
+        val clientSecret = "secret"
+        whenever(linkAccountManager.createFinancialConnectionsSession()).thenReturn(
+            Result.success(FinancialConnectionsSession(clientSecret, "id"))
+        )
+        val viewModel = createViewModel()
+        viewModel.onPaymentMethodSelected(SupportedPaymentMethod.BankAccount)
+        viewModel.startPayment(emptyMap())
+
+        assertThat(viewModel.financialConnectionsSessionClientSecret.value).isEqualTo(clientSecret)
+    }
+
+    @Test
+    fun `onFinancialConnectionsAccountLinked cancelled then state is reset`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.onFinancialConnectionsAccountLinked(
+            FinancialConnectionsSheetLinkResult.Canceled
+        )
+
+        assertThat(viewModel.primaryButtonState.value).isEqualTo(PrimaryButtonState.Enabled)
+    }
+
+    @Test
+    fun `onFinancialConnectionsAccountLinked error then shows error message`() = runTest {
+        val errorMessage = "error"
+
+        val viewModel = createViewModel()
+        viewModel.onFinancialConnectionsAccountLinked(
+            FinancialConnectionsSheetLinkResult.Failed(Exception(errorMessage))
+        )
+
+        assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorMessage))
+    }
+
+    @Test
+    fun `when account linked at root screen then it navigates to wallet`() = runTest {
+        val sessionId = "session_id"
+        val account = mock<ConsumerPaymentDetails.BankAccount>()
+        whenever(linkAccountManager.createBankAccountPaymentDetails(any())).thenReturn(Result.success(account))
+        whenever(navigator.isOnRootScreen()).thenReturn(true)
+
+        val viewModel = createViewModel()
+        viewModel.onFinancialConnectionsAccountLinked(
+            FinancialConnectionsSheetLinkResult.Completed(sessionId)
+        )
+
+        verify(navigator).navigateTo(LinkScreen.Wallet, true)
+    }
+
+    @Test
+    fun `when account linked not at root screen then result is set`() = runTest {
+        val sessionId = "session_id"
+        val accountId = "account_id"
+        val account = mock<ConsumerPaymentDetails.BankAccount>().apply {
+            whenever(id).thenReturn(accountId)
+        }
+        whenever(linkAccountManager.createBankAccountPaymentDetails(any())).thenReturn(Result.success(account))
+        whenever(navigator.isOnRootScreen()).thenReturn(false)
+
+        val viewModel = createViewModel()
+        viewModel.onFinancialConnectionsAccountLinked(
+            FinancialConnectionsSheetLinkResult.Completed(sessionId)
+        )
+
+        verify(navigator).setResult(
+            eq(PaymentDetailsResult.KEY),
+            argWhere { it is PaymentDetailsResult.Success && it.itemId == accountId }
+        )
+        verify(navigator).onBack(any())
     }
 
     @Test
@@ -338,7 +404,7 @@ class PaymentMethodViewModelTest {
 
         createViewModel().onSecondaryButtonClick()
 
-        verify(navigator).onBack()
+        verify(navigator).onBack(userInitiated = true)
     }
 
     @Test
@@ -413,6 +479,14 @@ class PaymentMethodViewModelTest {
                 )
             )
         }
+
+    private fun createFinancialConnectionsAccount(id: String = "id") = FinancialConnectionsAccount(
+        created = 1,
+        id = id,
+        institutionName = "name",
+        livemode = false,
+        supportedPaymentMethodTypes = listOf()
+    )
 
     companion object {
         const val CLIENT_SECRET = "client_secret"
