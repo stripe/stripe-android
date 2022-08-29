@@ -26,10 +26,4 @@ class RowElement constructor(
 
     override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> =
         fields.map { it.getTextFieldIdentifiers() }.last()
-
-    override fun setTextFieldOnChangeListener(listener: (IdentifierSpec, String) -> Unit) {
-        fields.forEach {
-            it.setTextFieldOnChangeListener(listener)
-        }
-    }
 }

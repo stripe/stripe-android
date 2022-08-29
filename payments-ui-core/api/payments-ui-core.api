@@ -261,7 +261,6 @@ public abstract class com/stripe/android/ui/core/elements/CardNumberController :
 	public abstract fun getCardScanEnabled ()Z
 	public fun getEnabled ()Z
 	public final fun onCardScanResult (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetResult;)V
-	public fun setOnChangeListener (Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class com/stripe/android/ui/core/elements/CheckboxElementUIKt {
@@ -457,10 +456,6 @@ public final class com/stripe/android/ui/core/elements/IdentifierSpec$Creator : 
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/ui/core/elements/InputController$DefaultImpls {
-	public static fun setOnChangeListener (Lcom/stripe/android/ui/core/elements/InputController;Lkotlin/jvm/functions/Function1;)V
-}
-
 public final class com/stripe/android/ui/core/elements/KeyboardType : java/lang/Enum {
 	public static final field Ascii Lcom/stripe/android/ui/core/elements/KeyboardType;
 	public static final field Companion Lcom/stripe/android/ui/core/elements/KeyboardType$Companion;
@@ -601,7 +596,6 @@ public final class com/stripe/android/ui/core/elements/SameAsShippingController 
 	public fun isComplete ()Lkotlinx/coroutines/flow/Flow;
 	public fun onRawValueChange (Ljava/lang/String;)V
 	public final fun onValueChange (Z)V
-	public fun setOnChangeListener (Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class com/stripe/android/ui/core/elements/SameAsShippingElementUIKt {
@@ -634,7 +628,6 @@ public final class com/stripe/android/ui/core/elements/SectionElementUIKt {
 
 public final class com/stripe/android/ui/core/elements/SectionFieldElement$DefaultImpls {
 	public static fun getShouldRenderOutsideCard (Lcom/stripe/android/ui/core/elements/SectionFieldElement;)Z
-	public static fun setTextFieldOnChangeListener (Lcom/stripe/android/ui/core/elements/SectionFieldElement;Lkotlin/jvm/functions/Function2;)V
 }
 
 public final class com/stripe/android/ui/core/elements/SectionUIKt {
@@ -674,7 +667,6 @@ public final class com/stripe/android/ui/core/elements/StaticTextElementUIKt {
 
 public final class com/stripe/android/ui/core/elements/TextFieldController$DefaultImpls {
 	public static fun getEnabled (Lcom/stripe/android/ui/core/elements/TextFieldController;)Z
-	public static fun setOnChangeListener (Lcom/stripe/android/ui/core/elements/TextFieldController;Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class com/stripe/android/ui/core/elements/TextFieldUIKt {

@@ -17,5 +17,4 @@ sealed interface InputController : SectionFieldErrorController {
     val formFieldValue: Flow<FormFieldEntry>
 
     fun onRawValueChange(rawValue: String)
-    fun setOnChangeListener(listener: (String) -> Unit) {}
 }

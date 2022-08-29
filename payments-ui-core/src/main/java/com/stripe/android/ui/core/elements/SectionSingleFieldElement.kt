@@ -38,11 +38,4 @@ sealed class SectionSingleFieldElement(
             listOf(identifier).takeIf { controller is TextFieldController }
                 ?: emptyList()
         )
-
-    override fun setTextFieldOnChangeListener(listener: (IdentifierSpec, String) -> Unit) {
-        val onChangeListener: (String) -> Unit = { value ->
-            listener(identifier, value)
-        }
-        controller.setOnChangeListener(onChangeListener)
-    }
 }
