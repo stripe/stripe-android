@@ -134,9 +134,7 @@ internal class FormViewModel @Inject internal constructor(
         resourceRepositories.forEach {
             println("Got here 12: isLoaded: ${it.isLoaded()} repo: ${it.getRepository()}")
         }
-        val allLoaded = resourceRepositories.filter { it.getRepository() != null }
-            .map { it.isLoaded() }
-        return !allLoaded.contains(false) // resourceRepositories.all { it.isLoaded() }
+        return resourceRepositories.all { it.isLoaded() }
     }
 
     private fun getLpmItems(paymentMethodCode: PaymentMethodCode): List<FormItemSpec> {
