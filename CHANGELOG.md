@@ -2,6 +2,7 @@
 
 ## X.X.X - 2022-XX-XX
 
+## 20.11.0 - 2022-08-29
 ### PaymentSheet
 
 * [ADDED][5456](https://github.com/stripe/stripe-android/pull/5456) Added postal code validation
