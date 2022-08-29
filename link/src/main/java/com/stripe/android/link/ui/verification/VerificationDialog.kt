@@ -86,7 +86,13 @@ fun LinkVerificationDialog(
 
                                     LinkAppBar(
                                         state = appBarState,
-                                        onButtonClick = onDismiss
+                                        onBackPressed = onDismiss,
+                                        onLogout = {
+                                            // This can't be invoked from the verification dialog
+                                        },
+                                        showBottomSheetContent = {
+                                            // This can't be invoked from the verification dialog
+                                        }
                                     )
 
                                     VerificationBody(

@@ -125,7 +125,18 @@ internal class LinkActivity : ComponentActivity() {
 
                         LinkAppBar(
                             state = appBarState,
-                            onButtonClick = { viewModel.navigator.onBack(userInitiated = true) }
+                            onBackPressed = viewModel::onBackPressed,
+                            onLogout = viewModel::logout,
+                            showBottomSheetContent = {
+                                if (it == null) {
+                                    coroutineScope.launch {
+                                        sheetState.hide()
+                                        bottomSheetContent = null
+                                    }
+                                } else {
+                                    bottomSheetContent = it
+                                }
+                            }
                         )
 
                         NavHost(navController, LinkScreen.Loading.route) {
