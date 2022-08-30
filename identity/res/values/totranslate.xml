@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <!-- Content description for plus icon -->
     <string name="description_plus">plus icon</string>
+    <!-- Content description for stripe logo -->
     <string name="description_stripe_logo">stripe logo</string>
+    <!-- Content description for the icon for estimated time to complete verification -->
     <string name="description_time_estimate">estimated time to complete verification icon</string>
+    <!-- Content description for the icon for privacy policy -->
     <string name="description_privacy_policy">privacy policy icon</string>
 </resources>
