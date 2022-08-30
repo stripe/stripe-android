@@ -106,17 +106,12 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             emptyList()
         }
 
-        val savedSelection = prefsRepository.getSavedSelection(isGooglePayReady, isLinkReady)
-        if (savedSelection == SavedSelection.None) {
-            // No saved selection has been set yet, so we'll initialize it with a default
-            // value based on which payment methods are available.
-            setLastSavedPaymentMethod(
-                prefsRepository,
-                isGooglePayReady,
-                isLinkReady,
-                paymentMethods
-            )
-        }
+        val savedSelection = retrieveSavedPaymentSelection(
+            prefsRepository,
+            isGooglePayReady,
+            isLinkReady,
+            paymentMethods
+        )
 
         return FlowControllerInitializer.InitResult.Success(
             InitData(
@@ -124,10 +119,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
                 clientSecret = clientSecret,
                 stripeIntent = stripeIntent,
                 paymentMethods = paymentMethods,
-                savedSelection = prefsRepository.getSavedSelection(
-                    isGooglePayReady,
-                    isLinkReady
-                ),
+                savedSelection = savedSelection,
                 isGooglePayReady = isGooglePayReady
             )
         )
@@ -156,19 +148,40 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
         }
     }
 
-    private fun setLastSavedPaymentMethod(
+    private suspend fun retrieveSavedPaymentSelection(
         prefsRepository: PrefsRepository,
         isGooglePayReady: Boolean,
         isLinkReady: Boolean,
         paymentMethods: List<PaymentMethod>
-    ) {
-        when {
+    ): SavedSelection {
+        val savedSelection = prefsRepository.getSavedSelection(isGooglePayReady, isLinkReady)
+        if (savedSelection != SavedSelection.None) {
+            return savedSelection
+        }
+
+        // No saved selection has been set yet, so we'll initialize it with a default
+        // value based on which payment methods are available.
+        val paymentSelection = determineDefaultPaymentSelection(
+            isGooglePayReady,
+            isLinkReady,
+            paymentMethods
+        )
+
+        prefsRepository.savePaymentSelection(paymentSelection)
+
+        return prefsRepository.getSavedSelection(isGooglePayReady, isLinkReady)
+    }
+
+    private fun determineDefaultPaymentSelection(
+        isGooglePayReady: Boolean,
+        isLinkReady: Boolean,
+        paymentMethods: List<PaymentMethod>
+    ): PaymentSelection? {
+        return when {
             paymentMethods.isNotEmpty() -> PaymentSelection.Saved(paymentMethods.first())
             isLinkReady -> PaymentSelection.Link
             isGooglePayReady -> PaymentSelection.GooglePay
             else -> null
-        }?.let {
-            prefsRepository.savePaymentSelection(it)
         }
     }
 
