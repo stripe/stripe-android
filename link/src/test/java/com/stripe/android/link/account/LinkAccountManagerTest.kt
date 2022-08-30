@@ -183,7 +183,7 @@ class LinkAccountManagerTest {
             val accountManager = accountManager()
             val phone = "phone"
             val country = "country"
-            val name = listOf("name", null).random()
+            val name = "name"
 
             accountManager.signInWithUserInput(UserInput.SignUp(EMAIL, phone, country, name))
 

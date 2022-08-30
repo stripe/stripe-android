@@ -88,7 +88,7 @@ class LinkApiRepositoryTest {
         val email = "email@example.com"
         val phone = "phone"
         val country = "US"
-        val name = listOf("name", null).random()
+        val name = "name"
         val cookie = "cookie2"
         linkRepository.consumerSignUp(email, phone, country, name, cookie)
 
