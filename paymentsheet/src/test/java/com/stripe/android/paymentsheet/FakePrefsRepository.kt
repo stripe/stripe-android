@@ -15,13 +15,20 @@ internal class FakePrefsRepository : PrefsRepository {
         paymentSelectionArgs.add(paymentSelection)
 
         when (paymentSelection) {
+            is PaymentSelection.Link -> {
+                SavedSelection.Link
+            }
             PaymentSelection.GooglePay -> {
                 SavedSelection.GooglePay
             }
             is PaymentSelection.Saved -> {
                 SavedSelection.PaymentMethod(paymentSelection.paymentMethod.id.orEmpty())
             }
-            else -> SavedSelection.None
+            is PaymentSelection.New.Card,
+            is PaymentSelection.New.GenericPaymentMethod,
+            is PaymentSelection.New.LinkInline,
+            is PaymentSelection.New.USBankAccount,
+            null -> SavedSelection.None
         }.let {
             savedSelection = it
         }

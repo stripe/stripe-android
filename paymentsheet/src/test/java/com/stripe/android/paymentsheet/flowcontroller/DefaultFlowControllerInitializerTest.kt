@@ -397,7 +397,7 @@ internal class DefaultFlowControllerInitializerTest {
         }
 
     @Test
-    fun `Defaults to Google Play for guests without existing payment methods`() = runTest {
+    fun `Defaults to Google Play for guests if Link is not enabled`() = runTest {
         val result = createInitializer(
             stripeIntentRepo = StripeIntentRepository.Static(
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
@@ -408,6 +408,23 @@ internal class DefaultFlowControllerInitializerTest {
         ) as FlowControllerInitializer.InitResult.Success
 
         assertThat(result.initData.savedSelection).isEqualTo(SavedSelection.GooglePay)
+    }
+
+    @Test
+    fun `Defaults to Link for guests if available`() = runTest {
+        val result = createInitializer(
+            stripeIntentRepo = StripeIntentRepository.Static(
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+            ),
+            isLinkEnabled = true
+        ).init(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+            // The mock configuration is necessary to enable Google Pay. We want to do that,
+            // so that we can check that Link is preferred.
+            paymentSheetConfiguration = mockConfiguration()
+        ) as FlowControllerInitializer.InitResult.Success
+
+        assertThat(result.initData.savedSelection).isEqualTo(SavedSelection.Link)
     }
 
     @Test
@@ -433,6 +450,7 @@ internal class DefaultFlowControllerInitializerTest {
 
     private fun createInitializer(
         isGooglePayReady: Boolean = true,
+        isLinkEnabled: Boolean = false,
         stripeIntentRepo: StripeIntentRepository = stripeIntentRepository,
         customerRepo: CustomerRepository = customerRepository
     ): FlowControllerInitializer {
@@ -445,7 +463,8 @@ internal class DefaultFlowControllerInitializerTest {
             lpmResourceRepository,
             Logger.noop(),
             eventReporter,
-            testDispatcher
+            testDispatcher,
+            isLinkEnabled
         )
     }
 
