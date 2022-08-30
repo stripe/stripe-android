@@ -67,7 +67,7 @@ class FormControllerTest {
         )
 
         val nameElement =
-            getSectionFieldTextControllerWithLabel(formController, R.string.address_label_name)
+            getSectionFieldTextControllerWithLabel(formController, R.string.address_label_full_name)
         val emailElement =
             getSectionFieldTextControllerWithLabel(formController, R.string.email)
 

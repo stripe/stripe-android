@@ -148,7 +148,7 @@ internal class TransformSpecToElementTest {
             as SimpleTextElement
 
         // Verify the correct config is setup for the controller
-        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_name)
+        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_full_name)
         assertThat(nameElement.identifier.v1).isEqualTo("simple")
         assertThat(nameElement.controller.showOptionalLabel).isTrue()
     }

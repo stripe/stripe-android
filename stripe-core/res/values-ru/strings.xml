@@ -10,6 +10,8 @@
   <string name="address_label_country_or_region">Страна или регион</string>
   <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
   <string name="address_label_county">Графство</string>
+  <!-- Placeholder string for name entry field. -->
+  <string name="address_label_full_name">Имя, фамилия</string>
   <!-- Caption for Name field on address form -->
   <string name="address_label_name">Имя</string>
   <!-- Short string for postal code (text used in non-US countries) -->
