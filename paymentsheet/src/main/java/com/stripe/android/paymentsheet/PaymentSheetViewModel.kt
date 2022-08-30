@@ -29,6 +29,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.model.AccountStatus
@@ -430,7 +431,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun setupLink(stripeIntent: StripeIntent) {
         if (LINK_ENABLED &&
-            stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
+            stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code) &&
+            stripeIntent.linkFundingSources.intersect(LinkPaymentLauncher.supportedFundingSources)
+                .isNotEmpty()
         ) {
             viewModelScope.launch {
                 val accountStatus = linkLauncher.setup(stripeIntent, this)

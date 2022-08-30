@@ -59,7 +59,7 @@ internal abstract class LinkPaymentLauncherComponent {
         fun stripeIntent(@Named(LINK_INTENT) stripeIntent: StripeIntent): Builder
 
         @BindsInstance
-        fun initialFormValuesMap(@Named(INITIAL_FORM_VALUES_MAP) initialFormValuesMap: Map<IdentifierSpec, String?>?): Builder
+        fun shippingValues(@Named(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?): Builder
 
         @BindsInstance
         fun context(context: Context): Builder

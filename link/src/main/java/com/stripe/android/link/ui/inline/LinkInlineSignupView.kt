@@ -37,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.EmailCollectionSection
 import com.stripe.android.link.ui.signup.SignUpState
@@ -131,11 +132,11 @@ internal fun LinkInlineSignup(
                     .fillMaxWidth()
                     .border(
                         border = MaterialTheme.getBorderStroke(isSelected = false),
-                        shape = MaterialTheme.shapes.medium
+                        shape = MaterialTheme.linkShapes.medium
                     )
                     .background(
                         color = MaterialTheme.paymentsColors.component,
-                        shape = MaterialTheme.shapes.medium
+                        shape = MaterialTheme.linkShapes.medium
                     )
             ) {
                 Row(

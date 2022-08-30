@@ -27,26 +27,42 @@ internal class LinkAppBarTest {
     }
 
     @Test
-    fun on_button_click_button_callback_is_called() {
+    fun on_back_button_click_callback_is_called() {
         var count = 0
-        setContent(onButtonClick = { count++ })
+        setContent(onBackPress = { count++ })
 
         composeTestRule.onNodeWithContentDescription("Back").performClick()
+
+        assertThat(count).isEqualTo(1)
+    }
+
+    @Test
+    fun on_overflow_button_click_callback_is_called() {
+        var count = 0
+        setContent(showBottomSheetContent = { count++ })
+
+        composeTestRule.onNodeWithContentDescription("Menu").performClick()
+
         assertThat(count).isEqualTo(1)
     }
 
     private fun setContent(
         email: String? = null,
-        onButtonClick: () -> Unit = {}
+        onBackPress: () -> Unit = {},
+        onLogout: () -> Unit = {},
+        showBottomSheetContent: (BottomSheetContent?) -> Unit = {}
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             LinkAppBar(
                 state = LinkAppBarState(
                     navigationIcon = R.drawable.ic_link_close,
-                    hideHeader = false,
+                    showHeader = true,
+                    showOverflowMenu = true,
                     email = email
                 ),
-                onButtonClick = onButtonClick
+                onBackPress = onBackPress,
+                onLogout = onLogout,
+                showBottomSheetContent = showBottomSheetContent
             )
         }
     }

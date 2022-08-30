@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.app.Application
 import androidx.lifecycle.Lifecycle
+import androidx.navigation.NavHostController
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
@@ -20,7 +21,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.times
@@ -132,6 +135,49 @@ class LinkActivityViewModelTest {
         )
     }
 
+    @Test
+    fun `Navigating back on root screen dismisses Link, but doesn't log out user`() {
+        val viewModel = createViewModel()
+        setupNavigation(hasBackStack = false)
+
+        viewModel.onBackPressed()
+
+        spy(navigator).dismiss()
+        verify(linkAccountManager, never()).logout()
+    }
+
+    @Test
+    fun `Navigating back on child screen navigates back, but doesn't dismiss Link`() {
+        val viewModel = createViewModel()
+        setupNavigation(hasBackStack = true)
+
+        viewModel.onBackPressed()
+
+        verify(navigator, never()).dismiss()
+        verify(linkAccountManager, never()).logout()
+    }
+
+    @Test
+    fun `Navigating back is prevented when back navigation is disabled`() {
+        val viewModel = createViewModel()
+        setupNavigation(userNavigationEnabled = false)
+
+        viewModel.onBackPressed()
+
+        verify(navigator, never()).dismiss()
+        verify(linkAccountManager, never()).logout()
+    }
+
+    @Test
+    fun `Logging out logs out the user and dismisses Link`() {
+        val viewModel = createViewModel()
+
+        viewModel.logout()
+
+        verify(navigator).dismiss()
+        verify(linkAccountManager).logout()
+    }
+
     private fun createViewModel(args: LinkActivityContract.Args = defaultArgs) =
         LinkActivityViewModel(
             args,
@@ -139,6 +185,17 @@ class LinkActivityViewModelTest {
             navigator,
             confirmationManager
         )
+
+    private fun setupNavigation(
+        hasBackStack: Boolean = false,
+        userNavigationEnabled: Boolean = true
+    ) {
+        val mockNavController = mock<NavHostController> {
+            on { popBackStack() } doReturn hasBackStack
+        }
+        whenever(navigator.userNavigationEnabled).thenReturn(userNavigationEnabled)
+        whenever(navigator.navigationController).thenReturn(mockNavController)
+    }
 
     private companion object {
         const val INJECTOR_KEY = "injectorKey"

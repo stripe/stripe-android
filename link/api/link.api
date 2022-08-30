@@ -178,10 +178,6 @@ public final class com/stripe/android/link/LinkPaymentDetails$Saved$Creator : an
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/link/LinkPaymentLauncher$Companion {
-	public final fun getLINK_ENABLED ()Z
-}
-
 public final class com/stripe/android/link/LinkPaymentLauncher_Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/LinkPaymentLauncher_Factory;
@@ -253,20 +249,20 @@ public final class com/stripe/android/link/injection/LinkActivityContractArgsMod
 	public static fun provideCustomerPhone (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/lang/String;
 }
 
-public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideInitialFormValuesMapFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideInitialFormValuesMapFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/util/Map;
-	public static fun provideInitialFormValuesMap (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/util/Map;
-}
-
 public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideMerchantNameFactory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideMerchantNameFactory;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Ljava/lang/String;
 	public static fun provideMerchantName (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/lang/String;
+}
+
+public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideShippingValuesFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideShippingValuesFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Ljava/util/Map;
+	public static fun provideShippingValues (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/util/Map;
 }
 
 public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideStripeIntentFactory : dagger/internal/Factory {
@@ -324,6 +320,7 @@ public final class com/stripe/android/link/ui/ComposableSingletons$LinkAppBarKt 
 	public static field lambda-6 Lkotlin/jvm/functions/Function2;
 	public static field lambda-7 Lkotlin/jvm/functions/Function2;
 	public static field lambda-8 Lkotlin/jvm/functions/Function2;
+	public static field lambda-9 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-2$link_release ()Lkotlin/jvm/functions/Function2;
@@ -333,6 +330,7 @@ public final class com/stripe/android/link/ui/ComposableSingletons$LinkAppBarKt 
 	public final fun getLambda-6$link_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-7$link_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-8$link_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-9$link_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/ComposableSingletons$PrimaryButtonKt {

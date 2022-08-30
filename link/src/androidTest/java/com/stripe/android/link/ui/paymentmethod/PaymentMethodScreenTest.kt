@@ -25,6 +25,37 @@ internal class PaymentMethodScreenTest {
     private val secondaryButtonLabel = "Cancel"
 
     @Test
+    fun when_multiple_payment_methods_supported_then_shows_them_in_cells() {
+        setContent()
+
+        onCard().assertExists()
+        onBank().assertExists()
+    }
+
+    @Test
+    fun when_single_payment_method_supported_then_shows_no_cells() {
+        setContent(supportedPaymentMethods = listOf(SupportedPaymentMethod.Card))
+
+        onCard().assertDoesNotExist()
+        onBank().assertDoesNotExist()
+    }
+
+    @Test
+    fun selecting_payment_method_triggers_callback() {
+        var selectedPaymentMethod: SupportedPaymentMethod? = null
+        setContent(
+            onPaymentMethodSelected = {
+                selectedPaymentMethod = it
+            }
+        )
+
+        onBank().performClick()
+        assertThat(selectedPaymentMethod).isEqualTo(SupportedPaymentMethod.BankAccount)
+        onCard().performClick()
+        assertThat(selectedPaymentMethod).isEqualTo(SupportedPaymentMethod.Card)
+    }
+
+    @Test
     fun primary_button_shows_progress_indicator_when_processing() {
         setContent(primaryButtonState = PrimaryButtonState.Processing)
         onProgressIndicator().assertExists()
@@ -92,17 +123,23 @@ internal class PaymentMethodScreenTest {
     }
 
     private fun setContent(
+        supportedPaymentMethods: List<SupportedPaymentMethod> = SupportedPaymentMethod.allValues,
+        selectedPaymentMethod: SupportedPaymentMethod = SupportedPaymentMethod.Card,
         primaryButtonState: PrimaryButtonState = PrimaryButtonState.Enabled,
         errorMessage: ErrorMessage? = null,
+        onPaymentMethodSelected: (SupportedPaymentMethod) -> Unit = {},
         onPayButtonClick: () -> Unit = {},
         onSecondaryButtonClick: () -> Unit = {}
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             PaymentMethodBody(
+                supportedPaymentMethods = supportedPaymentMethods,
+                selectedPaymentMethod = selectedPaymentMethod,
                 primaryButtonLabel = primaryButtonLabel,
                 primaryButtonState = primaryButtonState,
                 secondaryButtonLabel = secondaryButtonLabel,
                 errorMessage = errorMessage,
+                onPaymentMethodSelected = onPaymentMethodSelected,
                 onPrimaryButtonClick = onPayButtonClick,
                 onSecondaryButtonClick = onSecondaryButtonClick,
                 formContent = {}
@@ -114,4 +151,6 @@ internal class PaymentMethodScreenTest {
     private fun onSecondaryButton() = composeTestRule.onNodeWithText(secondaryButtonLabel)
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(progressIndicatorTestTag)
     private fun onCompletedIcon() = composeTestRule.onNodeWithTag(completedIconTestTag, true)
+    private fun onCard() = composeTestRule.onNodeWithText("Card")
+    private fun onBank() = composeTestRule.onNodeWithText("Bank")
 }

@@ -32,6 +32,7 @@ import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -104,7 +105,7 @@ internal fun PrimaryButton(
                     .fillMaxWidth(),
                 enabled = state == PrimaryButtonState.Enabled,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
-                shape = MaterialTheme.shapes.medium,
+                shape = MaterialTheme.linkShapes.medium,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = MaterialTheme.colors.primary,
                     disabledBackgroundColor = MaterialTheme.colors.primary
@@ -185,7 +186,7 @@ internal fun SecondaryButton(
             .fillMaxWidth()
             .height(PrimaryButtonHeight),
         enabled = enabled,
-        shape = MaterialTheme.shapes.medium,
+        shape = MaterialTheme.linkShapes.medium,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = MaterialTheme.colors.secondary,
             disabledBackgroundColor = MaterialTheme.colors.secondary

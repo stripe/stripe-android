@@ -43,6 +43,7 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 class TransformSpecToElements(
     private val addressResourceRepository: ResourceRepository<AddressRepository>,
     private val initialValues: Map<IdentifierSpec, String?>,
+    private val shippingValues: Map<IdentifierSpec, String?>?,
     private val amount: Amount?,
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
@@ -76,11 +77,13 @@ class TransformSpecToElements(
                 is CountrySpec -> it.transform(initialValues)
                 is AddressSpec -> it.transform(
                     initialValues,
-                    addressResourceRepository.getRepository()
+                    addressResourceRepository.getRepository(),
+                    shippingValues
                 )
                 is CardBillingSpec -> it.transform(
                     initialValues,
-                    addressResourceRepository.getRepository()
+                    addressResourceRepository.getRepository(),
+                    shippingValues
                 )
                 is SepaMandateTextSpec -> it.transform(merchantName)
             }
