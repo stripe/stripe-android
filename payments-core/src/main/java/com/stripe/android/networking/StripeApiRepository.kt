@@ -1202,6 +1202,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         email: String,
         phoneNumber: String,
         country: String,
+        name: String?,
         locale: Locale?,
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
@@ -1225,6 +1226,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ).plus(
                     locale?.let {
                         mapOf("locale" to it.toLanguageTag())
+                    } ?: emptyMap()
+                ).plus(
+                    name?.let {
+                        mapOf("legal_name" to it)
                     } ?: emptyMap()
                 )
             ),
