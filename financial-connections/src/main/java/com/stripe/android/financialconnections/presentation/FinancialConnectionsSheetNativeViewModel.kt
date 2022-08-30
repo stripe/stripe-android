@@ -20,6 +20,7 @@ import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledExc
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
+import com.stripe.android.financialconnections.utils.UriComparator
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,6 +33,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     val activityRetainedComponent: FinancialConnectionsSheetNativeComponent,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
+    private val uriComparator: UriComparator,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
@@ -57,9 +59,17 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      */
     fun handleOnNewIntent(intent: Intent?) {
         viewModelScope.launch {
-            when (val data = intent?.data.toString()) {
-                SUCCESS_URL -> setState { copy(webAuthFlow = Success(data)) }
-                else -> setState { copy(webAuthFlow = Fail(WebAuthFlowFailedException(data))) }
+            val receivedUrl: String? = intent?.data?.toString()
+            when {
+                receivedUrl == null -> setState {
+                    copy(webAuthFlow = Fail(WebAuthFlowFailedException(receivedUrl)))
+                }
+                uriComparator.compareSchemeAuthorityAndPath(receivedUrl, SUCCESS_URL) -> setState {
+                    copy(webAuthFlow = Success(receivedUrl))
+                }
+                else -> setState {
+                    copy(webAuthFlow = Fail(WebAuthFlowFailedException(receivedUrl)))
+                }
             }
         }
     }
