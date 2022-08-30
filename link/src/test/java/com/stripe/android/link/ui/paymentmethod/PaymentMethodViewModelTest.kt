@@ -207,7 +207,6 @@ class PaymentMethodViewModelTest {
         whenever(
             linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
         ).thenReturn(Result.success(value))
-        whenever(navigator.isOnRootScreen()).thenReturn(false)
         whenever(args.shippingValues).thenReturn(
             mapOf(
                 IdentifierSpec.Name to "Test Name",
@@ -215,41 +214,17 @@ class PaymentMethodViewModelTest {
             )
         )
 
-        createViewModel().startPayment(cardFormFieldValues)
+        createViewModel().startPayment(mapOf())
 
         val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
         verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
 
-        assertThat(paramsCaptor.firstValue.toParamMap()).isEqualTo(
+        assertThat(paramsCaptor.firstValue.toParamMap()["shipping"]).isEqualTo(
             mapOf(
-                "client_secret" to args.stripeIntent.clientSecret,
-                "use_stripe_sdk" to false,
-                "mandate_data" to mapOf(
-                    "customer_acceptance" to mapOf(
-                        "type" to "online",
-                        "online" to mapOf(
-                            "infer_from_client" to true
-                        )
-                    )
+                "address" to mapOf(
+                    "country" to "US"
                 ),
-                "shipping" to mapOf(
-                    "address" to mapOf(
-                        "country" to "US"
-                    ),
-                    "name" to "Test Name"
-                ),
-                "payment_method_data" to mapOf(
-                    "type" to "link",
-                    "link" to mapOf(
-                        "payment_details_id" to "QAAAKJ6",
-                        "credentials" to mapOf(
-                            "consumer_session_client_secret" to CLIENT_SECRET
-                        ),
-                        "card" to mapOf(
-                            "cvc" to "123"
-                        )
-                    )
-                )
+                "name" to "Test Name"
             )
         )
     }

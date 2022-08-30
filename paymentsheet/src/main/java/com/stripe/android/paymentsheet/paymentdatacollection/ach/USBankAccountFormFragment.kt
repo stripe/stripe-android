@@ -135,12 +135,12 @@ internal class USBankAccountFormFragment : Fragment() {
             { requireActivity().application },
             {
                 USBankAccountFormViewModel.Args(
-                    sheetViewModel,
                     formArgs,
                     sheetViewModel is PaymentSheetViewModel,
                     clientSecret,
                     sheetViewModel?.usBankAccountSavedScreenState,
-                    (sheetViewModel?.newPaymentSelection as? PaymentSelection.New.USBankAccount)
+                    (sheetViewModel?.newPaymentSelection as? PaymentSelection.New.USBankAccount),
+                    sheetViewModel?.config?.shippingDetails
                 )
             },
             this

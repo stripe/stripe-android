@@ -19,7 +19,6 @@ import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
-import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -160,7 +159,6 @@ class WalletViewModelTest {
 
     @Test
     fun `when shippingValues are passed ConfirmPaymentIntentParams has shipping`() = runTest {
-        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
         whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
         whenever(args.shippingValues).thenReturn(
@@ -172,25 +170,17 @@ class WalletViewModelTest {
 
         val viewModel = createViewModel()
 
-        viewModel.onItemSelected(paymentDetails)
         viewModel.onConfirmPayment()
 
         val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
         verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
 
-        assertThat(paramsCaptor.firstValue).isEqualTo(
-            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                PaymentMethodCreateParams.createLink(
-                    paymentDetails.id,
-                    CLIENT_SECRET
+        assertThat(paramsCaptor.firstValue.toParamMap()["shipping"]).isEqualTo(
+            mapOf(
+                "address" to mapOf(
+                    "country" to "US"
                 ),
-                StripeIntentFixtures.PI_SUCCEEDED.clientSecret!!,
-                shipping = ConfirmPaymentIntentParams.Shipping(
-                    address = Address(
-                        country = "US"
-                    ),
-                    name = "Test Name"
-                )
+                "name" to "Test Name"
             )
         )
     }

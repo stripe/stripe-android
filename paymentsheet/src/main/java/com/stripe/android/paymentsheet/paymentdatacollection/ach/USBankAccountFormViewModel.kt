@@ -25,6 +25,7 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
@@ -34,7 +35,6 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
@@ -413,7 +413,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         viewModelScope.launch {
             val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
                 clientSecret,
-                args.sheetViewModel?.config?.shippingDetails?.toConfirmPaymentIntentShipping()
+                args.shippingDetails?.toConfirmPaymentIntentShipping()
             )
             val confirmIntent = confirmParamsFactory.create(paymentSelection)
             _currentScreenState.update {
@@ -499,12 +499,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
      * @param clientSecret The client secret for the Stripe Intent being processed
      */
     data class Args(
-        val sheetViewModel: BaseSheetViewModel<*>?,
         val formArgs: FormFragmentArguments,
         val completePayment: Boolean,
         val clientSecret: ClientSecret?,
         val savedScreenState: USBankAccountFormScreenState?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
+        val shippingDetails: AddressDetails?,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     )
 

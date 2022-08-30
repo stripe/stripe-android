@@ -101,16 +101,9 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 paymentSelection = PaymentSelection.Saved(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
-            )
+            ).shipping
         ).isEqualTo(
-            ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                paymentMethodId = "pm_123456789",
-                clientSecret = CLIENT_SECRET,
-                paymentMethodOptions = PaymentMethodOptionsParams.Card(
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                ),
-                shipping = shippingDetails.toConfirmPaymentIntentShipping()
-            )
+            shippingDetails.toConfirmPaymentIntentShipping()
         )
     }
 
@@ -136,15 +129,9 @@ class ConfirmPaymentIntentParamsFactoryTest {
                     CardBrand.Visa,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
                 )
-            )
+            ).shipping
         ).isEqualTo(
-            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                clientSecret = CLIENT_SECRET,
-                setupFutureUsage = null,
-                paymentMethodOptions = PaymentMethodOptionsParams.Card(),
-                shipping = shippingDetails.toConfirmPaymentIntentShipping()
-            )
+            shippingDetails.toConfirmPaymentIntentShipping()
         )
     }
 
