@@ -16,6 +16,7 @@ class UriComparatorTest(
 
     companion object {
         @JvmStatic
+        @Suppress("MaxLineLength")
         @ParameterizedRobolectricTestRunner.Parameters
         fun data() = listOf(
             parameters(
