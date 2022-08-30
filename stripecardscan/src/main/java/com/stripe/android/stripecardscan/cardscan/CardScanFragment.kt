@@ -59,7 +59,8 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
     override val previewFrame: ViewGroup by lazy { viewBinding.previewFrame }
 
     private val params: CardScanSheetParams by lazy {
-        arguments?.getParcelable(CARD_SCAN_FRAGMENT_PARAMS_KEY) ?: CardScanSheetParams("")
+        arguments?.getParcelable(CARD_SCAN_FRAGMENT_PARAMS_KEY)
+            ?: CardScanSheetParams("", CardScanSheet.Configuration())
     }
 
     private val hasPreviousValidResult = AtomicBoolean(false)

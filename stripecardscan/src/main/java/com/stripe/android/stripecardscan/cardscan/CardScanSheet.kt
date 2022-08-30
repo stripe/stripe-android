@@ -76,6 +76,7 @@ class CardScanSheet private constructor(
          * called before the [ComponentActivity] is created (in the onCreate method).
          */
         @JvmStatic
+        @JvmOverloads
         fun create(
             from: ComponentActivity,
             stripePublishableKey: String,
@@ -99,6 +100,7 @@ class CardScanSheet private constructor(
          * created (in the onCreate method).
          */
         @JvmStatic
+        @JvmOverloads
         fun create(
             from: Fragment,
             stripePublishableKey: String,

@@ -80,7 +80,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
 
     private val params: CardScanSheetParams by lazy {
         intent.getParcelableExtra(INTENT_PARAM_REQUEST)
-            ?: CardScanSheetParams("")
+            ?: CardScanSheetParams("", CardScanSheet.Configuration())
     }
 
     private val hasPreviousValidResult = AtomicBoolean(false)

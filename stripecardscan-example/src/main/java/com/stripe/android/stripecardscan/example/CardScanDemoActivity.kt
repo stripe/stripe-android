@@ -17,7 +17,11 @@ class CardScanDemoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        val cardScanSheet = CardScanSheet.create(this, settings.publishableKey, ::onScanFinished)
+        val cardScanSheet = CardScanSheet.create(
+            this,
+            settings.publishableKey,
+            cardScanSheetResultCallback = ::onScanFinished,
+        )
 
         viewBinding.launchScanButton.setOnClickListener {
             cardScanSheet.present()
