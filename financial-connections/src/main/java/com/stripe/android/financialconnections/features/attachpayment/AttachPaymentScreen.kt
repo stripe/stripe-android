@@ -37,10 +37,17 @@ private fun AttachPaymentContent(payload: Async<AttachPaymentState.Payload>) {
                     id = R.plurals.stripe_attachlinkedpaymentaccount_title,
                     count = payload().accountsCount
                 ),
-                content = pluralStringResource(
-                    id = R.plurals.stripe_attachlinkedpaymentaccount_desc,
-                    count = payload().accountsCount
-                ),
+                content = when (val businessName = payload().businessName) {
+                    null -> pluralStringResource(
+                        id = R.plurals.stripe_attachlinkedpaymentaccount_desc,
+                        count = payload().accountsCount
+                    )
+                    else -> pluralStringResource(
+                        id = R.plurals.stripe_attachlinkedpaymentaccount_desc,
+                        count = payload().accountsCount,
+                        businessName
+                    )
+                },
             )
             is Fail -> UnclassifiedErrorContent()
         }

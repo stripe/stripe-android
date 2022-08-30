@@ -37,11 +37,14 @@ internal class GoNext @Inject constructor(
         NextPane.MANUAL_ENTRY -> NavigationDirections.manualEntry
         NextPane.MANUAL_ENTRY_SUCCESS -> NavigationDirections.ManualEntrySuccess(args)
         NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT -> NavigationDirections.attachLinkedPaymentAccount
+        NextPane.NETWORKING_LINK_SIGNUP_PANE -> {
+            logger.error("Link not supported on native flows yet. Navigating to Success.")
+            NavigationDirections.success
+        }
         NextPane.AUTH_OPTIONS,
         NextPane.LINK_CONSENT,
         NextPane.LINK_LOGIN,
         NextPane.NETWORKING_LINK_LOGIN_WARMUP,
-        NextPane.NETWORKING_LINK_SIGNUP_PANE,
         NextPane.NETWORKING_LINK_VERIFICATION,
         NextPane.UNEXPECTED_ERROR -> {
             TODO("Unimplemented navigation command: ${this.value}")
