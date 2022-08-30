@@ -6,6 +6,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
@@ -17,6 +18,8 @@ import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.signup.SignUpViewModel.Companion.LOOKUP_DEBOUNCE_MS
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -141,7 +144,7 @@ class SignUpViewModelTest {
     fun `When email is provided it should not trigger lookup and should collect phone number`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
 
             verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
         }
@@ -263,6 +266,35 @@ class SignUpViewModelTest {
         }
 
     @Test
+    fun `Doesn't require name for US consumers`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            countryCode = CountryCode.US
+        )
+        assertThat(viewModel.isReadyToSignUp.value).isFalse()
+
+        viewModel.emailController.onRawValueChange("me@myself.com")
+        viewModel.phoneController.onRawValueChange("1234567890")
+        assertThat(viewModel.isReadyToSignUp.value).isTrue()
+    }
+
+    @Test
+    fun `Requires name for non-US consumers`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            prefilledEmail = null,
+            countryCode = CountryCode.CA
+        )
+        assertThat(viewModel.isReadyToSignUp.value).isFalse()
+
+        viewModel.emailController.onRawValueChange("me@myself.com")
+        viewModel.phoneController.onRawValueChange("1234567890")
+        assertThat(viewModel.isReadyToSignUp.value).isFalse()
+
+        viewModel.nameController.onRawValueChange("Someone from Canada")
+        assertThat(viewModel.isReadyToSignUp.value).isTrue()
+    }
+
+    @Test
     fun `Factory gets initialized by Injector when Injector is available`() {
         val mockBuilder = mock<SignUpViewModelSubcomponent.Builder>()
         val mockSubComponent = mock<SignUpViewModelSubcomponent>()
@@ -298,15 +330,24 @@ class SignUpViewModelTest {
 
     private fun createViewModel(
         prefilledEmail: String? = CUSTOMER_EMAIL,
-        args: LinkActivityContract.Args = defaultArgs
-    ) = SignUpViewModel(
-        args = args,
-        customerEmail = prefilledEmail,
-        linkAccountManager = linkAccountManager,
-        linkEventsReporter = linkEventsReporter,
-        logger = Logger.noop(),
-        navigator = navigator
-    )
+        args: LinkActivityContract.Args = defaultArgs,
+        countryCode: CountryCode = CountryCode.US
+    ): SignUpViewModel {
+        val argsWithCountryCode = args.copy(
+            stripeIntent = when (val intent = args.stripeIntent) {
+                is PaymentIntent -> intent.copy(countryCode = countryCode.value)
+                is SetupIntent -> intent.copy(countryCode = countryCode.value)
+            }
+        )
+        return SignUpViewModel(
+            args = argsWithCountryCode,
+            customerEmail = prefilledEmail,
+            linkAccountManager = linkAccountManager,
+            linkEventsReporter = linkEventsReporter,
+            logger = Logger.noop(),
+            navigator = navigator
+        )
+    }
 
     private fun SignUpViewModel.performValidSignup() {
         emailController.onRawValueChange("email@valid.co")

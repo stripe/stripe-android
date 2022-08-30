@@ -30,7 +30,8 @@ fun PhoneNumberCollectionSection(
     enabled: Boolean,
     phoneNumberController: PhoneNumberController,
     @StringRes sectionTitle: Int? = null,
-    requestFocusWhenShown: Boolean = false
+    requestFocusWhenShown: Boolean = false,
+    imeAction: ImeAction = ImeAction.Done
 ) {
     val error by phoneNumberController.error.collectAsState(null)
 
@@ -44,7 +45,7 @@ fun PhoneNumberCollectionSection(
     }
 
     Section(sectionTitle, sectionErrorString) {
-        PhoneNumberElementUI(enabled, phoneNumberController, requestFocusWhenShown)
+        PhoneNumberElementUI(enabled, phoneNumberController, requestFocusWhenShown, imeAction)
     }
 }
 
@@ -52,7 +53,8 @@ fun PhoneNumberCollectionSection(
 internal fun PhoneNumberElementUI(
     enabled: Boolean,
     controller: PhoneNumberController,
-    requestFocusWhenShown: Boolean = false
+    requestFocusWhenShown: Boolean = false,
+    imeAction: ImeAction = ImeAction.Done
 ) {
     val focusManager = LocalFocusManager.current
     val selectedIndex by controller.countryDropdownController.selectedIndex.collectAsState(0)
@@ -97,7 +99,7 @@ internal fun PhoneNumberElementUI(
         visualTransformation = visualTransformation,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Phone,
-            imeAction = ImeAction.Done
+            imeAction = imeAction
         ),
         keyboardActions = KeyboardActions(
             onNext = {
