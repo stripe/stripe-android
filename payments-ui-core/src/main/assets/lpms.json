@@ -489,13 +489,10 @@
   },
   {
     "type": "card",
-    "async": false,
-    "fields": [
-    ]
+    "async": false
   },
   {
     "type": "us_bank_account",
-    "async": true,
-    "fields": []
+    "async": true
   }
 ]
