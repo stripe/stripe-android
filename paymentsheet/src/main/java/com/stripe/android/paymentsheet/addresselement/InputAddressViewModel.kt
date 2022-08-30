@@ -67,14 +67,14 @@ internal class InputAddressViewModel @Inject constructor(
         viewModelScope.launch {
             collectedAddress.collect { addressDetails ->
                 val initialValues: Map<IdentifierSpec, String?> = addressDetails
-                    ?.toIdentifierMap(billingSameAsShipping = false)
+                    ?.toIdentifierMap()
                     ?: emptyMap()
-
                 _formController.value = formControllerProvider.get()
                     .viewOnlyFields(emptySet())
                     .viewModelScope(viewModelScope)
                     .stripeIntent(null)
                     .merchantName("")
+                    .shippingValues(null)
                     .formSpec(buildFormSpec(addressDetails?.address?.line1 == null))
                     .initialValues(initialValues)
                     .build().formController

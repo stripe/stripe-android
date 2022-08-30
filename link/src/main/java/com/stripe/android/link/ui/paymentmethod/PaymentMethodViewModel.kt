@@ -95,9 +95,7 @@ internal class PaymentMethodViewModel @Inject constructor(
             ?.takeIf { loadFromArgs }
             ?.let { convertToFormValuesMap(it) }
             ?: emptyMap()
-        val initialValuesMap = args.initialFormValuesMap
-            ?: emptyMap()
-        updateFormController(cardMap + initialValuesMap)
+        updateFormController(cardMap)
     }
 
     fun onPaymentMethodSelected(paymentMethod: SupportedPaymentMethod) {
@@ -179,6 +177,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                 .initialValues(initialValues)
                 .stripeIntent(args.stripeIntent)
                 .merchantName(args.merchantName)
+                .shippingValues(args.shippingValues)
                 .build()
                 .formController
                 .also { formControllersCache[paymentMethod.value] = it }

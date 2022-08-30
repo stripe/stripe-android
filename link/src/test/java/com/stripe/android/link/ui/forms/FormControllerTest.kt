@@ -46,7 +46,8 @@ class FormControllerTest {
         amount = null,
         saveForFutureUseInitialValue = false,
         merchantName = "Merchant",
-        context = context
+        context = context,
+        shippingValues = null
     )
 
     @ExperimentalCoroutinesApi

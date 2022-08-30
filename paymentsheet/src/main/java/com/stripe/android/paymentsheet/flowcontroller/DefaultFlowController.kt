@@ -457,7 +457,7 @@ internal class DefaultFlowController @Inject internal constructor(
             } else {
                 config.defaultBillingDetails?.phone
             }
-            val initialValuesMap = if (shippingDetails?.isCheckboxSelected == true) {
+            val shippingAddress = if (shippingDetails?.isCheckboxSelected == true) {
                 shippingDetails.toIdentifierMap(config.defaultBillingDetails)
             } else {
                 emptyMap()
@@ -466,7 +466,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 merchantName = config.merchantDisplayName,
                 customerEmail = config.defaultBillingDetails?.email,
                 customerPhone = customerPhone,
-                initialFormValuesMap = initialValuesMap
+                shippingValues = shippingAddress
             )
             val accountStatus = linkLauncher.setup(
                 stripeIntent = initData.stripeIntent,
