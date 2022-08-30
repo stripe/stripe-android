@@ -7,7 +7,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.domain.AttachPaymentAccount
+import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 internal class AttachPaymentViewModel @Inject constructor(
     initialState: AttachPaymentState,
-    private val attachPaymentAccount: AttachPaymentAccount,
+    private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
@@ -42,7 +42,7 @@ internal class AttachPaymentViewModel @Inject constructor(
             val accounts = getAuthorizationSessionAccounts(authSessionId).data
             require(accounts.size == 1)
             val id = accounts.first().linkedAccountId
-            attachPaymentAccount(PaymentAccountParams.LinkedAccount(requireNotNull(id)))
+            pollAttachPaymentAccount(PaymentAccountParams.LinkedAccount(requireNotNull(id)))
                 .also { goNext(it.nextPane ?: NextPane.SUCCESS) }
         }.execute { copy(linkPaymentAccount = it) }
     }
