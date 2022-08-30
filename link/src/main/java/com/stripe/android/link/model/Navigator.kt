@@ -62,7 +62,7 @@ internal class Navigator @Inject constructor() {
     fun dismiss(result: LinkActivityResult) = onDismiss?.invoke(result)
 
     /**
-     * Dismisses the Link Activity with the given [result].
+     * Cancels the Link Activity with the given [reason].
      */
     fun cancel(reason: LinkActivityResult.Canceled.Reason) {
         dismiss(LinkActivityResult.Canceled(reason))

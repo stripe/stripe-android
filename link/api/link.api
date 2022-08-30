@@ -82,8 +82,15 @@ public abstract class com/stripe/android/link/LinkActivityResult : android/os/Pa
 public final class com/stripe/android/link/LinkActivityResult$Canceled : com/stripe/android/link/LinkActivityResult {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/link/LinkActivityResult$Canceled;
+	public fun <init> (Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;)V
+	public final fun component1 ()Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
+	public final fun copy (Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;)Lcom/stripe/android/link/LinkActivityResult$Canceled;
+	public static synthetic fun copy$default (Lcom/stripe/android/link/LinkActivityResult$Canceled;Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;ILjava/lang/Object;)Lcom/stripe/android/link/LinkActivityResult$Canceled;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -93,6 +100,14 @@ public final class com/stripe/android/link/LinkActivityResult$Canceled$Creator :
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/link/LinkActivityResult$Canceled;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/link/LinkActivityResult$Canceled$Reason : java/lang/Enum {
+	public static final field BackPressed Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
+	public static final field LoggedOut Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
+	public static final field PayAnotherWay Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
+	public static fun values ()[Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
 }
 
 public final class com/stripe/android/link/LinkActivityResult$Completed : com/stripe/android/link/LinkActivityResult {

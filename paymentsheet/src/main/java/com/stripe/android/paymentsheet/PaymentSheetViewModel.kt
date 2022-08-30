@@ -512,7 +512,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             prefsRepository.savePaymentSelection(PaymentSelection.Link)
             _paymentSheetResult.value = PaymentSheetResult.Completed
         } else if (cancelPaymentFlow) {
-            // We launched the user straight into link, but they decided to exit out of it.
+            // We launched the user straight into Link, but they decided to exit out of it.
             _paymentSheetResult.value = PaymentSheetResult.Canceled
         } else {
             setContentVisible(true)
