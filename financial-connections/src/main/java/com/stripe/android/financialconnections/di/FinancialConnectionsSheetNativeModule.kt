@@ -4,6 +4,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
+import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
 import com.stripe.android.financialconnections.features.manualentry.ManualEntrySubcomponent
@@ -30,7 +31,8 @@ import javax.inject.Singleton
         InstitutionPickerSubcomponent::class,
         PartnerAuthSubcomponent::class,
         SuccessSubcomponent::class,
-        AccountPickerSubcomponent::class
+        AccountPickerSubcomponent::class,
+        AttachPaymentSubcomponent::class,
     ]
 )
 internal class FinancialConnectionsSheetNativeModule {

@@ -148,7 +148,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun onNativeAuthFlowResult(activityResult: ActivityResult) {
         if (activityResult.resultCode == Activity.RESULT_OK) {
             setState { copy(authFlowActive = false) }
-            withState { fetchFinancialConnectionsSession(it) }
+            withState { state ->
+                when (state.initialArgs) {
+                    is ForData -> fetchFinancialConnectionsSession(state)
+                    is ForToken -> fetchFinancialConnectionsSessionForToken(state)
+                    is ForLink -> TODO("Native does not yet support Link flows.")
+                }
+            }
         } else {
             setState {
                 copy(viewEffect = FinishWithResult(Canceled))

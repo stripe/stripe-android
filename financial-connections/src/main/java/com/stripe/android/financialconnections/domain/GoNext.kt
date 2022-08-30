@@ -36,7 +36,7 @@ internal class GoNext @Inject constructor(
         NextPane.SUCCESS -> NavigationDirections.success
         NextPane.MANUAL_ENTRY -> NavigationDirections.manualEntry
         NextPane.MANUAL_ENTRY_SUCCESS -> NavigationDirections.ManualEntrySuccess(args)
-        NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT,
+        NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT -> NavigationDirections.attachLinkedPaymentAccount
         NextPane.AUTH_OPTIONS,
         NextPane.LINK_CONSENT,
         NextPane.LINK_LOGIN,
