@@ -60,7 +60,7 @@ internal class LinkAppBarTest {
                     showOverflowMenu = true,
                     email = email
                 ),
-                onBackPress = onBackPress,
+                onBackPressed = onBackPress,
                 onLogout = onLogout,
                 showBottomSheetContent = showBottomSheetContent
             )
