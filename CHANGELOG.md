@@ -2,6 +2,10 @@
 
 ## X.X.X - 2022-XX-XX
 
+### PaymentSheet
+
+* [CHANGED][5487](https://github.com/stripe/stripe-android/pull/5487) Updated Google Pay button to match new brand guidelines.
+
 ## 20.11.0 - 2022-08-29
 This release adds postal code validation for PaymentSheet and fixed a fileprovider naming bug for Identity.
 

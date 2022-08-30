@@ -96,7 +96,7 @@
                         android:layout_marginTop="6dp"
                         android:padding="2dp"
                         android:layout_width="match_parent"
-                        android:layout_height="53dp" />
+                        android:layout_height="51dp" />
 
                     <TextView
                         android:id="@+id/top_message"
