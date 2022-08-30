@@ -68,9 +68,7 @@ public final class com/stripe/android/ui/core/address/AddressRepository_Factory 
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/address/AddressRepository;
 }
 
-public final class com/stripe/android/ui/core/address/AddressUtil {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/ui/core/address/AddressUtil;
+public final class com/stripe/android/ui/core/address/AddressUtilKt {
 }
 
 public final class com/stripe/android/ui/core/databinding/ActivityCardScanBinding : androidx/viewbinding/ViewBinding {
