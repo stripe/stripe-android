@@ -88,13 +88,15 @@ class LinkApiRepositoryTest {
         val email = "email@example.com"
         val phone = "phone"
         val country = "US"
+        val name = listOf("name", null).random()
         val cookie = "cookie2"
-        linkRepository.consumerSignUp(email, phone, country, cookie)
+        linkRepository.consumerSignUp(email, phone, country, name, cookie)
 
         verify(stripeRepository).consumerSignUp(
             eq(email),
             eq(phone),
             eq(country),
+            eq(name),
             eq(Locale.US),
             eq(cookie),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
@@ -104,10 +106,19 @@ class LinkApiRepositoryTest {
     @Test
     fun `consumerSignUp returns successful result`() = runTest {
         val consumerSession = mock<ConsumerSession>()
-        whenever(stripeRepository.consumerSignUp(any(), any(), any(), any(), anyOrNull(), any()))
-            .thenReturn(consumerSession)
+        whenever(
+            stripeRepository.consumerSignUp(
+                email = any(),
+                phoneNumber = any(),
+                country = any(),
+                name = anyOrNull(),
+                locale = anyOrNull(),
+                authSessionCookie = anyOrNull(),
+                requestOptions = any()
+            )
+        ).thenReturn(consumerSession)
 
-        val result = linkRepository.consumerSignUp("email", "phone", "country", "cookie")
+        val result = linkRepository.consumerSignUp("email", "phone", "name", "country", "cookie")
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(consumerSession)
@@ -115,10 +126,19 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `consumerSignUp catches exception and returns failure`() = runTest {
-        whenever(stripeRepository.consumerSignUp(any(), any(), any(), any(), anyOrNull(), any()))
-            .thenThrow(RuntimeException("error"))
+        whenever(
+            stripeRepository.consumerSignUp(
+                email = any(),
+                phoneNumber = any(),
+                country = any(),
+                name = anyOrNull(),
+                locale = anyOrNull(),
+                authSessionCookie = anyOrNull(),
+                requestOptions = any()
+            )
+        ).thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.consumerSignUp("email", "phone", "country", "cookie")
+        val result = linkRepository.consumerSignUp("email", "phone", "name", "country", "cookie")
 
         assertThat(result.isFailure).isTrue()
     }

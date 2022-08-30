@@ -183,17 +183,31 @@ class LinkAccountManagerTest {
             val accountManager = accountManager()
             val phone = "phone"
             val country = "country"
+            val name = listOf("name", null).random()
 
-            accountManager.signInWithUserInput(UserInput.SignUp(EMAIL, phone, country))
+            accountManager.signInWithUserInput(UserInput.SignUp(EMAIL, phone, country, name))
 
-            verify(linkRepository).consumerSignUp(eq(EMAIL), eq(phone), eq(country), anyOrNull())
+            verify(linkRepository).consumerSignUp(
+                email = eq(EMAIL),
+                phone = eq(phone),
+                country = eq(country),
+                name = eq(name),
+                authSessionCookie = anyOrNull()
+            )
             assertThat(accountManager.linkAccount.value).isNotNull()
         }
 
     @Test
     fun `signInWithUserInput for new user sends analytics event when call succeeds`() =
         runSuspendTest {
-            accountManager().signInWithUserInput(UserInput.SignUp(EMAIL, "phone", "country"))
+            accountManager().signInWithUserInput(
+                UserInput.SignUp(
+                    email = EMAIL,
+                    phone = "phone",
+                    country = "country",
+                    name = "name"
+                )
+            )
 
             verify(linkEventsReporter).onSignupCompleted(true)
         }
@@ -203,15 +217,22 @@ class LinkAccountManagerTest {
         runSuspendTest {
             whenever(
                 linkRepository.consumerSignUp(
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull(),
-                    anyOrNull()
+                    email = anyOrNull(),
+                    phone = anyOrNull(),
+                    country = anyOrNull(),
+                    name = anyOrNull(),
+                    authSessionCookie = anyOrNull()
+                )
+            ).thenReturn(Result.failure(Exception()))
+
+            accountManager().signInWithUserInput(
+                UserInput.SignUp(
+                    email = EMAIL,
+                    phone = "phone",
+                    country = "country",
+                    name = "name"
                 )
             )
-                .thenReturn(Result.failure(Exception()))
-
-            accountManager().signInWithUserInput(UserInput.SignUp(EMAIL, "phone", "country"))
 
             verify(linkEventsReporter).onSignupFailure(true)
         }
@@ -220,7 +241,7 @@ class LinkAccountManagerTest {
     fun `signUp stores email when successfully signed up`() = runSuspendTest {
         val accountManager = accountManager()
 
-        accountManager.signUp(EMAIL, "phone", "US")
+        accountManager.signUp(EMAIL, "phone", "US", "name")
 
         verify(cookieStore).storeNewUserEmail(EMAIL)
     }
@@ -621,8 +642,15 @@ class LinkAccountManagerTest {
             .thenReturn(Result.success(consumerSessionLookup))
         whenever(linkRepository.startVerification(anyOrNull(), anyOrNull(), anyOrNull()))
             .thenReturn(Result.success(mockConsumerSession))
-        whenever(linkRepository.consumerSignUp(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull()))
-            .thenReturn(Result.success(mockConsumerSession))
+        whenever(
+            linkRepository.consumerSignUp(
+                email = anyOrNull(),
+                phone = anyOrNull(),
+                country = anyOrNull(),
+                name = anyOrNull(),
+                authSessionCookie = anyOrNull()
+            )
+        ).thenReturn(Result.success(mockConsumerSession))
     }
 
     private suspend fun mockUnverifiedAccountLookup() {
