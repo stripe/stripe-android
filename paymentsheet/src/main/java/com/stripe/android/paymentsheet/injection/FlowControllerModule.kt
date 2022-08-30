@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.injection.LINK_ENABLED
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -69,6 +71,11 @@ internal abstract class FlowControllerModule {
         @Singleton
         @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens() = setOf("PaymentSheet.FlowController")
+
+        @Provides
+        @Singleton
+        @Named(LINK_ENABLED)
+        fun provideLinkEnabled() = LinkPaymentLauncher.LINK_ENABLED
 
         @Provides
         @Singleton

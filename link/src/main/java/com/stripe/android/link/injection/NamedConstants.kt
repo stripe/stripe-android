@@ -33,6 +33,12 @@ const val CUSTOMER_NAME = "customerName"
 const val SHIPPING_VALUES = "shippingValues"
 
 /**
+ * Identifies whether Link is enabled.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val LINK_ENABLED = "linkEnabled"
+
+/**
  * Identifies the Stripe Intent being processed by Link.
  */
 internal const val LINK_INTENT = "linkIntent"

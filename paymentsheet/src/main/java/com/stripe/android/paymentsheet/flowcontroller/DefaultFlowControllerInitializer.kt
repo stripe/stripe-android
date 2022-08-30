@@ -5,6 +5,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.injection.LINK_ENABLED
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -23,6 +24,7 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -38,7 +40,8 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     private val lpmResourceRepository: ResourceRepository<LpmRepository>,
     private val logger: Logger,
     val eventReporter: EventReporter,
-    @IOContext private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext,
+    @Named(LINK_ENABLED) private val isLinkEnabled: Boolean
 ) : FlowControllerInitializer {
 
     override suspend fun init(
@@ -50,7 +53,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val isLinkReady = LinkPaymentLauncher.LINK_ENABLED &&
+                val isLinkReady = isLinkEnabled &&
                     stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
 
                 create(
