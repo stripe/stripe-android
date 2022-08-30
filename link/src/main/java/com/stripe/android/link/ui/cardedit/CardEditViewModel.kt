@@ -141,7 +141,7 @@ internal class CardEditViewModel @Inject constructor(
     private fun ConsumerPaymentDetails.Card.buildInitialFormValues() = mapOf(
         IdentifierSpec.CardNumber to "•••• $last4",
         IdentifierSpec.CardBrand to brand.code,
-        IdentifierSpec.CardExpMonth to expiryMonth.toString(),
+        IdentifierSpec.CardExpMonth to expiryMonth.toString().padStart(length = 2, padChar = '0'),
         IdentifierSpec.CardExpYear to expiryYear.toString()
     )
 
