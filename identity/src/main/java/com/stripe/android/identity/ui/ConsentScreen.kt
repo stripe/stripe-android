@@ -56,30 +56,31 @@ internal fun ConsentScreen(
     MdcTheme {
         when (verificationState.status) {
             Status.SUCCESS -> {
-                requireNotNull(verificationState.data).let { verificationPage ->
+                val verificationPage = remember { requireNotNull(verificationState.data) }
+                LaunchedEffect(Unit) {
+                    onSuccess(verificationPage)
+                }
+                if (verificationPage.isUnsupportedClient()) {
                     LaunchedEffect(Unit) {
-                        onSuccess(verificationPage)
-                    }
-
-                    if (verificationPage.isUnsupportedClient()) {
                         onFallbackUrl(verificationPage.fallbackUrl)
-                    } else {
-                        SuccessUI(
-                            verificationPage,
-                            onMerchantViewCreated,
-                            onConsentAgreed,
-                            onConsentDeclined
-
-                        )
                     }
+                } else {
+                    SuccessUI(
+                        verificationPage,
+                        onMerchantViewCreated,
+                        onConsentAgreed,
+                        onConsentDeclined
+                    )
                 }
             }
 
             Status.ERROR -> {
-                onError(
-                    verificationState.throwable
-                        ?: IllegalStateException("Failed to get verificationPage")
-                )
+                LaunchedEffect(Unit) {
+                    onError(
+                        verificationState.throwable
+                            ?: IllegalStateException("Failed to get verificationPage")
+                    )
+                }
             }
 
             Status.LOADING -> {

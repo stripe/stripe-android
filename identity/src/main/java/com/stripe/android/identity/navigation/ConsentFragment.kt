@@ -54,6 +54,7 @@ internal class ConsentFragment(
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             val verificationState by identityViewModel.verificationPage.observeAsState(Resource.loading())
+
             ConsentScreen(
                 verificationState = verificationState,
                 onMerchantViewCreated = {
@@ -69,33 +70,10 @@ internal class ConsentFragment(
                         )
                     }
                 },
-                onFallbackUrl = { url ->
-                    Log.e(TAG, "Unsupported client, launching fallback url")
-                    fallbackUrlLauncher.launchFallbackUrl(url)
-                },
-                onError = { throwable ->
-                    Log.e(
-                        TAG,
-                        "Failed to get verificationPage: $throwable"
-                    )
-                    navigateToErrorFragmentWithFailedReason(throwable)
-                },
-                onConsentAgreed = { requireSelfie ->
-                    postVerificationPageDataAndNavigate(
-                        CollectedDataParam(
-                            biometricConsent = true
-                        ),
-                        requireSelfie
-                    )
-                },
-                onConsentDeclined = { requireSelfie ->
-                    postVerificationPageDataAndNavigate(
-                        CollectedDataParam(
-                            biometricConsent = false
-                        ),
-                        requireSelfie
-                    )
-                }
+                onFallbackUrl = this@ConsentFragment::logErrorAndLaunchFallback,
+                onError = this@ConsentFragment::logErrorAndNavigateToError,
+                onConsentAgreed = this@ConsentFragment::agreeConsentAndPost,
+                onConsentDeclined = this@ConsentFragment::declineConsentAndPost
             )
         }
     }
@@ -111,6 +89,37 @@ internal class ConsentFragment(
             identityViewModel.identityAnalyticsRequestFactory.screenPresented(
                 screenName = SCREEN_NAME_CONSENT
             )
+        )
+    }
+
+    private fun logErrorAndLaunchFallback(fallbackUrl: String) {
+        Log.e(TAG, "Unsupported client, launching fallback url")
+        fallbackUrlLauncher.launchFallbackUrl(fallbackUrl)
+    }
+
+    private fun logErrorAndNavigateToError(throwable: Throwable) {
+        Log.e(
+            TAG,
+            "Failed to get verificationPage: $throwable"
+        )
+        navigateToErrorFragmentWithFailedReason(throwable)
+    }
+
+    private fun agreeConsentAndPost(requireSelfie: Boolean) {
+        postVerificationPageDataAndNavigate(
+            CollectedDataParam(
+                biometricConsent = true
+            ),
+            requireSelfie
+        )
+    }
+
+    private fun declineConsentAndPost(requireSelfie: Boolean) {
+        postVerificationPageDataAndNavigate(
+            CollectedDataParam(
+                false
+            ),
+            requireSelfie
         )
     }
 
