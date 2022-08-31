@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.injection
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.injection.SHIPPING_VALUES
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.Amount
@@ -11,6 +12,7 @@ import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Module
 import dagger.Provides
+import javax.inject.Named
 
 @Module
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -25,7 +27,7 @@ abstract class FormControllerModule {
             merchantName: String,
             stripeIntent: StripeIntent?,
             initialValues: Map<IdentifierSpec, String?>,
-            shippingValues: Map<IdentifierSpec, String?>?,
+            @Named(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?,
             viewOnlyFields: Set<IdentifierSpec>
         ) = TransformSpecToElements(
             addressResourceRepository = addressResourceRepository,
