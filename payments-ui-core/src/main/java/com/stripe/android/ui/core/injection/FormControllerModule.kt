@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.injection
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.injection.INITIAL_VALUES
 import com.stripe.android.core.injection.SHIPPING_VALUES
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
@@ -26,7 +27,7 @@ abstract class FormControllerModule {
             context: Context,
             merchantName: String,
             stripeIntent: StripeIntent?,
-            initialValues: Map<IdentifierSpec, String?>,
+            @Named(INITIAL_VALUES) initialValues: Map<IdentifierSpec, String?>,
             @Named(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?,
             viewOnlyFields: Set<IdentifierSpec>
         ) = TransformSpecToElements(
