@@ -26,6 +26,8 @@ class PhoneNumberController internal constructor(
      */
     override val fieldValue: Flow<String> = _fieldValue
 
+    private val _hasFocus = MutableStateFlow(false)
+
     private val countryConfig = CountryConfig(
         overrideCountryCodes,
         tinyMode = true,
@@ -49,11 +51,11 @@ class PhoneNumberController internal constructor(
         )
     )
 
-    private val phoneNumberMinimumLength = MutableStateFlow(
+    private val phoneNumberMinimumLength = countryDropdownController.selectedIndex.map {
         PhoneNumberFormatter.lengthForCountry(
-            countryConfig.countries[countryDropdownController.selectedIndex.value].code.value
+            countryConfig.countries[it].code.value
         )
-    )
+    }
 
     /**
      * Flow of the phone number in the E.164 format.
@@ -61,15 +63,19 @@ class PhoneNumberController internal constructor(
     override val rawFieldValue = combine(fieldValue, phoneNumberFormatter) { value, formatter ->
         formatter.toE164Format(value)
     }
-    override val isComplete = fieldValue.map {
-        it.length >= (phoneNumberMinimumLength.value ?: 0) || showOptionalLabel
+    override val isComplete = combine(fieldValue, phoneNumberMinimumLength) { value, minLength ->
+        value.length >= (minLength ?: 0) || showOptionalLabel
     }
     override val formFieldValue = fieldValue.combine(isComplete) { fieldValue, isComplete ->
         FormFieldEntry(fieldValue, isComplete)
     }
 
-    override val error: Flow<FieldError?> = combine(fieldValue, isComplete) { value, complete ->
-        if (value.isNotBlank() && !complete) {
+    override val error: Flow<FieldError?> = combine(
+        fieldValue,
+        isComplete,
+        _hasFocus
+    ) { value, complete, hasFocus ->
+        if (value.isNotBlank() && !complete && !hasFocus) {
             FieldError(R.string.incomplete_phone_number)
         } else {
             null
@@ -98,6 +104,10 @@ class PhoneNumberController internal constructor(
     override fun onRawValueChange(rawValue: String) {
         // any value can be treated the same way since it goes through clean up and formatting
         onValueChange(rawValue)
+    }
+
+    fun onFocusChange(newHasFocus: Boolean) {
+        _hasFocus.value = newHasFocus
     }
 
     companion object {

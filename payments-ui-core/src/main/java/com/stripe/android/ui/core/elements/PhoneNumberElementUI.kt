@@ -11,11 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -66,13 +70,20 @@ internal fun PhoneNumberElementUI(
     val visualTransformation by controller.visualTransformation.collectAsState(VisualTransformation.None)
     val colors = TextFieldColors(shouldShowError != null)
     val focusRequester = remember { FocusRequester() }
+    var hasFocus by rememberSaveable { mutableStateOf(false) }
 
     androidx.compose.material.TextField(
         value = value,
         onValueChange = controller::onValueChange,
         modifier = Modifier
             .fillMaxWidth()
-            .focusRequester(focusRequester),
+            .focusRequester(focusRequester)
+            .onFocusChanged {
+                if (hasFocus != it.isFocused) {
+                    controller.onFocusChange(it.isFocused)
+                }
+                hasFocus = it.isFocused
+            },
         enabled = enabled,
         label = {
             FormLabel(
