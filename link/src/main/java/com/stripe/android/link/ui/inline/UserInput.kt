@@ -18,6 +18,6 @@ sealed class UserInput {
         val email: String,
         val phone: String,
         val country: String,
-        val name: String? = null
+        val name: String?
     ) : UserInput()
 }

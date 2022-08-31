@@ -57,6 +57,7 @@ internal class LinkApiRepository @Inject constructor(
         email: String,
         phone: String,
         country: String,
+        name: String?,
         authSessionCookie: String?
     ): Result<ConsumerSession> = withContext(workContext) {
         runCatching {
@@ -65,6 +66,7 @@ internal class LinkApiRepository @Inject constructor(
                     email,
                     phone,
                     country,
+                    name,
                     locale,
                     authSessionCookie,
                     ApiRequest.Options(

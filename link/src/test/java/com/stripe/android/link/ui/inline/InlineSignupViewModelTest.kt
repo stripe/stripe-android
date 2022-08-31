@@ -116,31 +116,6 @@ class InlineSignupViewModelTest {
         }
 
     @Test
-    fun `When entered all fields for new account then it emits user input`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val email = "valid@email.com"
-            val viewModel = createViewModel()
-            viewModel.toggleExpanded()
-            viewModel.emailController.onRawValueChange(email)
-
-            assertThat(viewModel.userInput.value).isNull()
-
-            whenever(linkAccountManager.lookupConsumer(any(), any()))
-                .thenReturn(Result.success(null))
-
-            // Advance past lookup debounce delay
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
-
-            assertThat(viewModel.userInput.value).isNull()
-
-            val phone = "1234567890"
-            viewModel.phoneController.onRawValueChange(phone)
-
-            assertThat(viewModel.userInput.value)
-                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US"))
-        }
-
-    @Test
     fun `When user input becomes invalid then it emits null user input`() =
         runTest(UnconfinedTestDispatcher()) {
             val email = "valid@email.com"
@@ -162,7 +137,7 @@ class InlineSignupViewModelTest {
             viewModel.phoneController.onRawValueChange(phone)
 
             assertThat(viewModel.userInput.value)
-                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US"))
+                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US", name = null))
 
             viewModel.phoneController.onRawValueChange("")
 
@@ -207,7 +182,8 @@ class InlineSignupViewModelTest {
             UserInput.SignUp(
                 email = "valid@email.com",
                 phone = "+11234567890",
-                country = CountryCode.US.value
+                country = CountryCode.US.value,
+                name = null
             )
         )
     }

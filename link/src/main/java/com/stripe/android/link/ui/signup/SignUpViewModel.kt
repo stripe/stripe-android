@@ -141,8 +141,9 @@ internal class SignUpViewModel @Inject constructor(
         val email = requireNotNull(consumerEmail.value)
         val phone = phoneController.getE164PhoneNumber(requireNotNull(consumerPhoneNumber.value))
         val country = phoneController.getCountryCode()
+        val name = consumerName.value
         viewModelScope.launch {
-            linkAccountManager.signUp(email, phone, country).fold(
+            linkAccountManager.signUp(email, phone, country, name).fold(
                 onSuccess = {
                     onAccountFetched(it)
                     linkEventsReporter.onSignupCompleted()

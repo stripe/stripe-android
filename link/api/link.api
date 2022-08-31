@@ -438,7 +438,6 @@ public final class com/stripe/android/link/ui/inline/UserInput$SignIn : com/stri
 public final class com/stripe/android/link/ui/inline/UserInput$SignUp : com/stripe/android/link/ui/inline/UserInput {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
