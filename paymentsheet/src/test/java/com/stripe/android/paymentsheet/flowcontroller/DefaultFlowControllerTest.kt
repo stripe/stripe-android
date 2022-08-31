@@ -1027,7 +1027,7 @@ internal class DefaultFlowControllerTest {
                 @Assisted(MERCHANT_NAME) merchantName: String,
                 @Assisted(CUSTOMER_EMAIL) customerEmail: String?,
                 @Assisted(CUSTOMER_PHONE) customerPhone: String?,
-                @Assisted(SHIPPING_VALUES) initialFormValuesMap: Map<IdentifierSpec, String?>?
+                @Assisted(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?
             ): LinkPaymentLauncher {
                 return linkPaymentLauncher
             }
