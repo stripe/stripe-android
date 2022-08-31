@@ -15,11 +15,9 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
         { financialConnectionsSessionWithNoMoreAccounts }
     var getAccountsResultProvider: () -> FinancialConnectionsAccountList =
         { moreFinancialConnectionsAccountList }
-    var getAuthorizationSessionAccounts: () -> PartnerAccountsList =
-        { TODO() }
     var postAuthorizationSessionOAuthResults: () -> MixedOAuthParams =
         { TODO() }
-    var postAuthorizationSessionSelectedAccounts: () -> PartnerAccountsList =
+    var postCompleteFinancialConnectionsSessionsResultProvider: () -> FinancialConnectionsSession =
         { TODO() }
 
     override suspend fun getFinancialConnectionsAccounts(
@@ -29,6 +27,10 @@ internal class FakeFinancialConnectionsRepository : FinancialConnectionsReposito
     override suspend fun getFinancialConnectionsSession(
         clientSecret: String
     ): FinancialConnectionsSession = getFinancialConnectionsSessionResultProvider()
+
+    override suspend fun postCompleteFinancialConnectionsSessions(
+        clientSecret: String
+    ): FinancialConnectionsSession = postCompleteFinancialConnectionsSessionsResultProvider()
 
     override suspend fun postAuthorizationSessionOAuthResults(
         clientSecret: String,
