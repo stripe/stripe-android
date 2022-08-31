@@ -11,7 +11,7 @@
   <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
   <string name="address_label_county">Kreis/Bezirk</string>
   <!-- Placeholder string for name entry field. -->
-  <string name="address_label_full_name">Nachname</string>
+  <string name="address_label_full_name">Vollständiger Name</string>
   <!-- Caption for Name field on address form -->
   <string name="address_label_name">Name</string>
   <!-- Short string for postal code (text used in non-US countries) -->
