@@ -56,7 +56,7 @@ allprojects {
 
 ext {
     buildToolsVersion = "30.0.3"
-    compileSdkVersion = 32
+    compileSdkVersion = 33
 
     androidxActivityVersion = '1.5.1'
     androidxAnnotationVersion = '1.4.0'
