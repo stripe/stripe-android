@@ -10,6 +10,8 @@
   <string name="address_label_country_or_region">국가 또는 지역</string>
   <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
   <string name="address_label_county">구/군</string>
+  <!-- Placeholder string for name entry field. -->
+  <string name="address_label_full_name">성명</string>
   <!-- Caption for Name field on address form -->
   <string name="address_label_name">이름</string>
   <!-- Short string for postal code (text used in non-US countries) -->

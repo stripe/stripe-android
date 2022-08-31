@@ -41,7 +41,7 @@ open class AddressElement constructor(
         IdentifierSpec.Name,
         SimpleTextFieldController(
             textFieldConfig = SimpleTextFieldConfig(
-                label = R.string.address_label_name
+                label = R.string.address_label_full_name
             ),
             initialValue = rawValuesMap[IdentifierSpec.Name]
         )

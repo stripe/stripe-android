@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Instructional text during selfie is being captured -->
-  <string name="capturing">Fiksuojama...</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">Programos nustatymai</string>
   <!-- Description of back of driver's license image -->
@@ -15,6 +13,8 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="camera_permission">Fotoaparato leidimas</string>
   <string name="camera_permission_rationale">Ši programa, naudodama fotoaparatą, nuskaito jūsų tapatybės dokumentus ir daro nuotraukas, kad patvirtintų jūsų tapatybę.</string>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Fiksuojama...</string>
   <!-- Description of the check mark, used for A11Y -->
   <string name="check_mark">Varnelė, nurodanti, kad dokumentas sėkmingai užfiksuotas</string>
   <!-- Text for choosing a photo from gallery -->
