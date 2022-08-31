@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason.PayAnotherWay
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
@@ -125,8 +126,7 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun payAnotherWay() {
-        navigator.dismiss()
-        linkAccountManager.logout()
+        navigator.cancel(reason = PayAnotherWay)
     }
 
     fun addNewPaymentMethod(clearBackStack: Boolean = false) {

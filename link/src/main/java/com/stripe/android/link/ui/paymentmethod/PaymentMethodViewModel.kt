@@ -7,6 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLinkResult
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason.PayAnotherWay
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.R
@@ -198,8 +199,7 @@ internal class PaymentMethodViewModel @Inject constructor(
 
     private fun payAnotherWay() {
         clearError()
-        navigator.dismiss()
-        linkAccountManager.logout()
+        navigator.cancel(reason = PayAnotherWay)
     }
 
     private fun completePayment(linkPaymentDetails: LinkPaymentDetails) {

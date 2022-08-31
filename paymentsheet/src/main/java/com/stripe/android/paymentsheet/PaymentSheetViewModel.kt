@@ -28,6 +28,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
@@ -150,6 +151,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
+
+    private var launchedLinkDirectly: Boolean = false
 
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
@@ -440,7 +443,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             viewModelScope.launch {
                 val accountStatus = linkLauncher.setup(stripeIntent, this)
                 when (accountStatus) {
-                    AccountStatus.Verified -> launchLink()
+                    AccountStatus.Verified -> launchLink(launchedDirectly = true)
                     AccountStatus.VerificationStarted,
                     AccountStatus.NeedsVerification -> {
                         linkVerificationCallback = { success ->
@@ -448,7 +451,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             _showLinkVerificationDialog.value = false
 
                             if (success) {
-                                launchLink()
+                                launchLink(launchedDirectly = true)
                             }
                         }
                         _showLinkVerificationDialog.value = true
@@ -468,13 +471,17 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         isReturningUser: Boolean
     ) {
         if (isReturningUser) {
-            launchLink(paymentMethodCreateParams)
+            launchLink(launchedDirectly = false, paymentMethodCreateParams)
         } else {
             super.completeLinkInlinePayment(paymentMethodCreateParams, isReturningUser)
         }
     }
 
-    fun launchLink(paymentMethodCreateParams: PaymentMethodCreateParams? = null) {
+    fun launchLink(
+        launchedDirectly: Boolean,
+        paymentMethodCreateParams: PaymentMethodCreateParams? = null
+    ) {
+        launchedLinkDirectly = launchedDirectly
         linkActivityResultLauncher?.let { activityResultLauncher ->
             linkLauncher.present(
                 activityResultLauncher,
@@ -497,15 +504,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * Method called with the result of launching the Link UI to collect a payment.
      */
     private fun onLinkActivityResult(result: LinkActivityResult) {
-        val paymentResult = result.convertToPaymentResult()
-        if (paymentResult is PaymentResult.Completed) {
+        val completePaymentFlow = result is LinkActivityResult.Completed
+        val cancelPaymentFlow = launchedLinkDirectly &&
+            result is LinkActivityResult.Canceled && result.reason == Reason.BackPressed
+
+        if (completePaymentFlow) {
             // If payment was completed inside the Link UI, dismiss immediately.
             eventReporter.onPaymentSuccess(PaymentSelection.Link)
             prefsRepository.savePaymentSelection(PaymentSelection.Link)
             _paymentSheetResult.value = PaymentSheetResult.Completed
+        } else if (cancelPaymentFlow) {
+            // We launched the user straight into Link, but they decided to exit out of it.
+            _paymentSheetResult.value = PaymentSheetResult.Canceled
         } else {
             setContentVisible(true)
-            onPaymentResult(paymentResult)
+            onPaymentResult(result.convertToPaymentResult())
         }
     }
 
