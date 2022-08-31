@@ -2,6 +2,9 @@
 
 ## X.X.X - 2022-XX-XX
 
+* [CHANGED] [5495](https://github.com/stripe/stripe-android/pull/5495) Upgrade `compileSdkVersion`
+  to 33.
+
 ### PaymentSheet
 
 * [CHANGED][5487](https://github.com/stripe/stripe-android/pull/5487) Updated Google Pay button to match new brand guidelines.

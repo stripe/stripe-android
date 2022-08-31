@@ -62,7 +62,7 @@ fun SectionElementUI(
                         hiddenIdentifiers = hiddenIdentifiers,
                         lastTextFieldIdentifier = lastTextFieldIdentifier
                     )
-                    if (index != element.fields.lastIndex) {
+                    if (index != elementsInsideCard.lastIndex) {
                         Divider(
                             color = MaterialTheme.paymentsColors.componentDivider,
                             thickness = MaterialTheme.paymentsShapes.borderStrokeWidth.dp,

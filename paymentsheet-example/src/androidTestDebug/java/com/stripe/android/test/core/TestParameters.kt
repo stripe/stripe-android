@@ -9,6 +9,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPayment
 data class TestParameters(
     val paymentMethod: SupportedPaymentMethod,
     val customer: Customer,
+    val linkState: LinkState,
     val googlePayState: GooglePayState,
     val currency: Currency,
     val intentType: IntentType,
@@ -100,6 +101,14 @@ enum class Currency {
     EUR,
     AUD,
     GBP
+}
+
+/**
+ * Indicates the state of Link in the PaymentSheet Configuration
+ */
+enum class LinkState {
+    On,
+    Off
 }
 
 /**

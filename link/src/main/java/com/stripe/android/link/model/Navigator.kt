@@ -3,6 +3,7 @@ package com.stripe.android.link.model
 import androidx.lifecycle.asFlow
 import androidx.navigation.NavHostController
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason.BackPressed
 import com.stripe.android.link.LinkScreen
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -49,7 +50,7 @@ internal class Navigator @Inject constructor() {
         if (!userInitiated || userNavigationEnabled) {
             navigationController?.let { navController ->
                 if (!navController.popBackStack()) {
-                    dismiss()
+                    cancel(reason = BackPressed)
                 }
             }
         }
@@ -58,10 +59,14 @@ internal class Navigator @Inject constructor() {
     /**
      * Dismisses the Link Activity with the given [result].
      */
-    fun dismiss(result: LinkActivityResult = LinkActivityResult.Canceled) =
-        onDismiss?.let {
-            it(result)
-        }
+    fun dismiss(result: LinkActivityResult) = onDismiss?.invoke(result)
+
+    /**
+     * Cancels the Link Activity with the given [reason].
+     */
+    fun cancel(reason: LinkActivityResult.Canceled.Reason) {
+        dismiss(LinkActivityResult.Canceled(reason))
+    }
 
     fun isOnRootScreen() = navigationController?.isOnRootScreen()
 }

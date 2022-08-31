@@ -6,5 +6,5 @@ package com.stripe.android.link.ui.signup
 internal enum class SignUpState {
     InputtingEmail,
     VerifyingEmail,
-    InputtingPhone
+    InputtingPhoneOrName
 }

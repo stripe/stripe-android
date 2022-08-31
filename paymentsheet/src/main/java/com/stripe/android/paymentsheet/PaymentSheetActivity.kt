@@ -137,7 +137,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupTopContainer()
 
         linkButton.apply {
-            onClick = { viewModel.launchLink() }
+            onClick = { viewModel.launchLink(launchedDirectly = false) }
             linkPaymentLauncher = viewModel.linkLauncher
         }
 

@@ -13,6 +13,6 @@ interface LinkPaymentLauncherFactory {
         @Assisted(MERCHANT_NAME) merchantName: String,
         @Assisted(CUSTOMER_EMAIL) customerEmail: String?,
         @Assisted(CUSTOMER_PHONE) customerPhone: String?,
-        @Assisted(INITIAL_FORM_VALUES_MAP) initialFormValuesMap: Map<IdentifierSpec, String?>?
+        @Assisted(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?
     ): LinkPaymentLauncher
 }

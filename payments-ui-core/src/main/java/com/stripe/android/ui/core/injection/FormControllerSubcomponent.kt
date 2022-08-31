@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.injection
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.injection.SHIPPING_VALUES
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.elements.IdentifierSpec
@@ -8,6 +9,7 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import dagger.BindsInstance
 import dagger.Subcomponent
 import kotlinx.coroutines.CoroutineScope
+import javax.inject.Named
 
 /**
  * Subcomponent used to instantiate [FormController].
@@ -27,6 +29,11 @@ interface FormControllerSubcomponent {
 
         @BindsInstance
         fun initialValues(initialValues: Map<IdentifierSpec, String?>): Builder
+
+        @BindsInstance
+        fun shippingValues(
+            @Named(SHIPPING_VALUES) shippingAddress: Map<IdentifierSpec, String?>?
+        ): Builder
 
         @BindsInstance
         fun viewOnlyFields(viewOnlyFields: Set<IdentifierSpec>): Builder
