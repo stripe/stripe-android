@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.success
 
-import android.app.Activity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,12 +12,12 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
@@ -36,13 +35,15 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 @Composable
 internal fun SuccessScreen() {
     val viewModel: SuccessViewModel = mavericksViewModel()
-    val state = viewModel.collectAsState { it.payload }
+    val state = viewModel.collectAsState()
     BackHandler(enabled = true) {}
-    state.value()?.let { (accessibleDataModel, accounts, disconnectUrl) ->
+    state.value.payload()?.let { (accessibleDataModel, accounts, disconnectUrl) ->
         SuccessContent(
             accessibleDataModel = accessibleDataModel,
+            disconnectUrl = disconnectUrl,
             accounts = accounts.data,
-            disconnectUrl = disconnectUrl
+            loading = state.value.completeSession is Loading,
+            onDoneClick = viewModel::onDoneClick,
         )
     }
 }
@@ -52,8 +53,9 @@ private fun SuccessContent(
     accessibleDataModel: AccessibleDataCalloutModel,
     disconnectUrl: String,
     accounts: List<PartnerAccount>,
+    loading: Boolean,
+    onDoneClick: () -> Unit,
 ) {
-    val localContext = LocalContext.current
     val uriHandler = LocalUriHandler.current
     FinancialConnectionsScaffold {
         Column(
@@ -92,12 +94,9 @@ private fun SuccessContent(
             )
             Spacer(modifier = Modifier.weight(1f))
             FinancialConnectionsButton(
-                loading = false,
-                onClick = {
-                    val activity = (localContext as? Activity)
-                    activity?.setResult(Activity.RESULT_OK)
-                    activity?.finish()
-                },
+                loading = loading,
+                enabled = loading.not(),
+                onClick = onDoneClick,
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
@@ -123,6 +122,7 @@ internal fun SuccessScreenPreview() {
                 isStripeDirect = true,
                 dataPolicyUrl = ""
             ),
+            disconnectUrl = "",
             accounts = listOf(
                 PartnerAccount(
                     authorization = "Authorization",
@@ -151,7 +151,7 @@ internal fun SuccessScreenPreview() {
                     supportedPaymentMethodTypes = emptyList()
                 ),
             ),
-            disconnectUrl = ""
-        )
+            loading = false
+        ) {}
     }
 }

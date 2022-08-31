@@ -34,6 +34,16 @@ internal interface FinancialConnectionsRepository {
         clientSecret: String
     ): FinancialConnectionsSession
 
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun postCompleteFinancialConnectionsSessions(
+        clientSecret: String
+    ): FinancialConnectionsSession
+
     suspend fun postAuthorizationSessionOAuthResults(
         clientSecret: String,
         sessionId: String
@@ -76,6 +86,22 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun postCompleteFinancialConnectionsSessions(
+        clientSecret: String
+    ): FinancialConnectionsSession {
+        val financialConnectionsRequest = apiRequestFactory.createPost(
+            url = completeUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
+            )
+        )
+        return requestExecutor.execute(
+            financialConnectionsRequest,
+            FinancialConnectionsSession.serializer()
+        )
+    }
+
     override suspend fun postAuthorizationSessionOAuthResults(
         clientSecret: String,
         sessionId: String
@@ -104,6 +130,9 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
 
         internal const val authorizationSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions"
+
+        internal const val completeUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/complete"
 
         internal const val authorizationSessionOAuthResultsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/oauth_results"

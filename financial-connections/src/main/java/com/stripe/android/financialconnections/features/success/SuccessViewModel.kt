@@ -6,11 +6,14 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
@@ -19,10 +22,13 @@ internal class SuccessViewModel @Inject constructor(
     initialState: SuccessState,
     getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
     getManifest: GetManifest,
+    val logger: com.stripe.android.core.Logger,
+    val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
 ) : MavericksViewModel<SuccessState>(initialState) {
 
     init {
+        logErrors()
         suspend {
             val manifest = getManifest()
             SuccessState.Payload(
@@ -33,6 +39,23 @@ internal class SuccessViewModel @Inject constructor(
         }.execute {
             copy(payload = it)
         }
+    }
+
+    private fun logErrors() {
+        onAsync(SuccessState::payload, onFail = {
+            logger.error("Error retrieving payload", it)
+        })
+        onAsync(SuccessState::completeSession, onFail = {
+            logger.error("Error completing session", it)
+        })
+    }
+
+    fun onDoneClick() {
+        suspend {
+            completeFinancialConnectionsSession().also {
+                nativeAuthFlowCoordinator().emit(Message.Finish)
+            }
+        }.execute { copy(completeSession = it) }
     }
 
     companion object : MavericksViewModelFactory<SuccessViewModel, SuccessState> {
@@ -53,7 +76,8 @@ internal class SuccessViewModel @Inject constructor(
 }
 
 internal data class SuccessState(
-    val payload: Async<Payload> = Uninitialized
+    val payload: Async<Payload> = Uninitialized,
+    val completeSession: Async<FinancialConnectionsSession> = Uninitialized
 ) : MavericksState {
     data class Payload(
         val accessibleData: AccessibleDataCalloutModel,

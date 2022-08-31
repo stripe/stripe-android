@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.ui
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -30,6 +31,7 @@ import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
@@ -68,6 +70,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                             uri = Uri.parse(viewEffect.url)
                         )
                     )
+                    Finish -> {
+                        setResult(Activity.RESULT_OK)
+                        finish()
+                    }
                 }
                 viewModel.onViewEffectLaunched()
             }
