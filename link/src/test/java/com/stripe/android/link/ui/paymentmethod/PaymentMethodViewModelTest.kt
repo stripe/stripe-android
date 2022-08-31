@@ -166,6 +166,7 @@ class PaymentMethodViewModelTest {
             whenever(
                 linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
             ).thenReturn(Result.success(value))
+            whenever(args.shippingValues).thenReturn(null)
 
             createViewModel().startPayment(cardFormFieldValues)
 
@@ -199,6 +200,34 @@ class PaymentMethodViewModelTest {
                 )
             )
         }
+
+    @Test
+    fun `when shippingValues are passed ConfirmStripeIntentParams has shipping`() = runTest {
+        val value = createLinkPaymentDetails()
+        whenever(
+            linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+        ).thenReturn(Result.success(value))
+        whenever(args.shippingValues).thenReturn(
+            mapOf(
+                IdentifierSpec.Name to "Test Name",
+                IdentifierSpec.Country to "US"
+            )
+        )
+
+        createViewModel().startPayment(mapOf())
+
+        val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
+        verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
+
+        assertThat(paramsCaptor.firstValue.toParamMap()["shipping"]).isEqualTo(
+            mapOf(
+                "address" to mapOf(
+                    "country" to "US"
+                ),
+                "name" to "Test Name"
+            )
+        )
+    }
 
     @Test
     fun `startPayment for card dismisses Link on success`() = runTest {

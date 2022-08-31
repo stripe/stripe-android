@@ -19,6 +19,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.ui.core.address.toConfirmPaymentIntentShipping
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.delay
@@ -81,7 +82,10 @@ internal class WalletViewModel @Inject constructor(
 
         runCatching { requireNotNull(linkAccountManager.linkAccount.value) }.fold(
             onSuccess = { linkAccount ->
-                val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
+                val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
+                    stripeIntent,
+                    args.shippingValues?.toConfirmPaymentIntentShipping()
+                )
                 val params = paramsFactory.createPaymentMethodCreateParams(
                     linkAccount.clientSecret,
                     selectedPaymentDetails
