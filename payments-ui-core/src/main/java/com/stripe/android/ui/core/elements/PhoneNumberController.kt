@@ -49,21 +49,35 @@ class PhoneNumberController internal constructor(
         )
     )
 
+    private val phoneNumberMinimumLength = MutableStateFlow(
+        PhoneNumberFormatter.lengthForCountry(
+            countryConfig.countries[countryDropdownController.selectedIndex.value].code.value
+        )
+    )
+
     /**
      * Flow of the phone number in the E.164 format.
      */
     override val rawFieldValue = combine(fieldValue, phoneNumberFormatter) { value, formatter ->
         formatter.toE164Format(value)
     }
-    override val isComplete = fieldValue.map { it.isNotBlank() || showOptionalLabel }
+    override val isComplete = fieldValue.map {
+        it.length >= (phoneNumberMinimumLength.value ?: 0) || showOptionalLabel
+    }
     override val formFieldValue = fieldValue.combine(isComplete) { fieldValue, isComplete ->
         FormFieldEntry(fieldValue, isComplete)
     }
 
-    override val error: Flow<FieldError?> = flowOf(null)
+    override val error: Flow<FieldError?> = combine(fieldValue, isComplete) { value, complete ->
+        if (value.isNotBlank() && !complete) {
+            FieldError(R.string.incomplete_phone_number)
+        } else {
+            null
+        }
+    }
 
     internal val placeholder = phoneNumberFormatter.map { it.placeholder }
-    internal val prefix = phoneNumberFormatter.map { it.prefix }
+
     internal val visualTransformation = phoneNumberFormatter.map { it.visualTransformation }
 
     fun getCountryCode() = phoneNumberFormatter.value.countryCode
