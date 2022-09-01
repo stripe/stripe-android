@@ -257,7 +257,7 @@ object ConsumerFixtures {
                     "checks": {
                       "address_line1_check": "STATE_INVALID",
                       "address_postal_code_check": "PASS",
-                      "cvc_check": "PASS"
+                      "cvc_check": "FAIL"
                     },
                     "exp_month": 4,
                     "exp_year": 2024,
