@@ -227,10 +227,17 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val receivedUrl: Uri? = intent?.data?.toString()?.toUriOrNull()
         setState {
             logger.debug("STATE: entering onNewIntent, status = ${authFlowStatus}")
-            if (receivedUrl?.host == "native-redirect") copy(
-                authFlowStatus = AuthFlowStatus.APP2APP,
-                viewEffect = OpenAuthFlowWithUrl(receivedUrl.path!!.replaceFirst("/", ""))
-            )
+            if (receivedUrl?.host == "native-redirect") {
+                copy(
+                    authFlowStatus = AuthFlowStatus.APP2APP,
+                    viewEffect = OpenAuthFlowWithUrl(receivedUrl.path!!.replaceFirst("/", ""))
+                )
+            } else if (receivedUrl?.host == "link-accounts" && receivedUrl.path == "login") {
+                copy(
+                    authFlowStatus = AuthFlowStatus.APP2APP,
+                    viewEffect = OpenAuthFlowWithUrl(receivedUrl.path!!.replaceFirst("/", ""))
+                )
+            }
             else copy(authFlowStatus = AuthFlowStatus.NONE)
         }
         withState { state ->

@@ -14,11 +14,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <!-- Accepts success and cancel URIs that begin with "stripe-auth://link-accounts” -->
-                <data
-                    android:host="native-redirect"
-                    android:pathPrefix="/"
-                    android:scheme="stripe-auth" />
+                <!-- End of web AuthFlow success and cancel URIs that begin with "stripe-auth://link-accounts” -->
                 <data
                     android:host="link-accounts"
                     android:scheme="stripe-auth"
@@ -27,7 +23,18 @@
                     android:host="link-accounts"
                     android:scheme="stripe-auth"
                     android:path="/${applicationId}/cancel" />
-                <!-- Accepts App2App flows with stripe-auth://native-redirect-->
+
+                <!-- Opening app2app: Web flow triggers stripe-auth://native-redirect/http://web-that-redirects-to-native -->
+                <data
+                    android:host="native-redirect"
+                    android:pathPrefix="/"
+                    android:scheme="stripe-auth" />
+
+                <!-- Returning from app2app: returl_url is triggered to reopen the web flow and poll accounts. -->
+                <data
+                    android:host="link-accounts"
+                    android:scheme="stripe-auth"
+                    android:path="/login" />
             </intent-filter>
         </activity>
         <activity
