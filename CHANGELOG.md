@@ -7,6 +7,7 @@
 
 ### PaymentSheet
 
+* [CHANGED][5487](https://github.com/stripe/stripe-android/pull/5487) Updated Google Pay button to match new brand guidelines.
 * [ADDED][5502](https://github.com/stripe/stripe-android/pull/5502) Added phone number minimum length
   validation
 

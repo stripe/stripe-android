@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.res.painterResource
@@ -39,6 +41,7 @@ import com.stripe.android.link.theme.linkShapes
 
 private val LinkButtonVerticalPadding = 6.dp
 private val LinkButtonHorizontalPadding = 10.dp
+private val LinkButtonShape = RoundedCornerShape(22.dp)
 
 @Preview
 @Composable
@@ -77,7 +80,10 @@ private fun LinkButton(
         DefaultLinkTheme {
             Button(
                 onClick = onClick,
+                modifier = Modifier.clip(LinkButtonShape),
                 enabled = enabled,
+                elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
+                shape = LinkButtonShape,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = MaterialTheme.colors.primary,
                     disabledBackgroundColor = MaterialTheme.colors.primary
