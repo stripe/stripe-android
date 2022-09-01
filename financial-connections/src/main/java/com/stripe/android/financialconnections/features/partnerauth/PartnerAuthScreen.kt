@@ -72,8 +72,8 @@ private fun PartnerAuthScreenContent(
                 onContinueClick = onContinueClick
             )
             is Loading, is Success -> LoadingContent(
-                titleResId = R.string.stripe_picker_loading_title,
-                contentResId = R.string.stripe_picker_loading_desc
+                stringResource(id = R.string.stripe_picker_loading_title),
+                stringResource(id = R.string.stripe_picker_loading_desc)
             )
             is Fail -> {
                 // TODO@carlosmuvi translate error type to specific error screen.

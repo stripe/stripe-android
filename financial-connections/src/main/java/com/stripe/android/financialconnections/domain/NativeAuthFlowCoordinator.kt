@@ -21,5 +21,6 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
 
     internal sealed interface Message {
         object OpenWebAuthFlow : Message
+        object Finish : Message
     }
 }

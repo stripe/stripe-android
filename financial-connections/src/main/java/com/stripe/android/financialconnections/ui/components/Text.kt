@@ -29,9 +29,10 @@ internal fun AnnotatedText(
     val resource = annotatedStringResource(
         resource = text
     ) { annotation ->
-        val annotation: StringAnnotation? = StringAnnotation.values()
-            .firstOrNull { it.value == annotation.key }
-        annotationStyles[annotation]
+        annotationStyles[
+            StringAnnotation.values()
+                .firstOrNull { it.value == annotation.key }
+        ]
     }
     ClickableText(
         text = resource,

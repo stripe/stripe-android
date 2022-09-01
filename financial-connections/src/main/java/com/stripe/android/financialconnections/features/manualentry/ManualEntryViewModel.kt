@@ -7,9 +7,9 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.domain.AttachPaymentAccount
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
@@ -20,7 +20,7 @@ import javax.inject.Inject
 @Suppress("LongParameterList")
 internal class ManualEntryViewModel @Inject constructor(
     initialState: ManualEntryState,
-    val attachPaymentAccount: AttachPaymentAccount,
+    val pollAttachPaymentAccount: PollAttachPaymentAccount,
     val getManifest: GetManifest,
     val goNext: GoNext,
     val logger: Logger
@@ -78,7 +78,7 @@ internal class ManualEntryViewModel @Inject constructor(
     fun onSubmit() {
         suspend {
             val state = awaitState()
-            attachPaymentAccount(
+            pollAttachPaymentAccount(
                 PaymentAccountParams.BankAccount(
                     routingNumber = requireNotNull(state.routing.first),
                     accountNumber = requireNotNull(state.account.first),

@@ -86,8 +86,8 @@ private fun AccountPickerContent(
     FinancialConnectionsScaffold {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> LoadingContent(
-                R.string.stripe_account_picker_loading_title,
-                R.string.stripe_account_picker_loading_desc
+                stringResource(R.string.stripe_account_picker_loading_title),
+                stringResource(R.string.stripe_account_picker_loading_desc)
             )
             is Success -> AccountPickerLoaded(
                 loading = state.isLoading,

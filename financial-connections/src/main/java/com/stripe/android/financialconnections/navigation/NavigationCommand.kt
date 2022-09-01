@@ -48,6 +48,11 @@ internal object NavigationDirections {
         override val destination = "manual_entry"
     }
 
+    val attachLinkedPaymentAccount = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "attach_linked_payment_account"
+    }
+
     object ManualEntrySuccess {
 
         private const val KEY_MICRODEPOSITS = "microdeposits"

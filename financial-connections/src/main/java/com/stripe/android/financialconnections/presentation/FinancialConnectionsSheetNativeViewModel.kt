@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.utils.UriComparator
 import kotlinx.coroutines.launch
@@ -44,6 +45,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     Message.OpenWebAuthFlow -> {
                         val manifest = getManifest()
                         setState { copy(viewEffect = OpenUrl(manifest.hostedAuthUrl)) }
+                    }
+                    Message.Finish -> {
+                        setState { copy(viewEffect = Finish) }
                     }
                 }
             }
@@ -147,4 +151,9 @@ internal sealed interface FinancialConnectionsSheetNativeViewEffect {
     data class OpenUrl(
         val url: String
     ) : FinancialConnectionsSheetNativeViewEffect
+
+    /**
+     * Finish the container activity.
+     */
+    object Finish : FinancialConnectionsSheetNativeViewEffect
 }

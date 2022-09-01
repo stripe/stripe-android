@@ -121,8 +121,8 @@ private fun InstitutionPickerContent(
             }
             is Loading -> {
                 LoadingContent(
-                    R.string.stripe_picker_loading_title,
-                    R.string.stripe_picker_loading_desc
+                    stringResource(id = R.string.stripe_picker_loading_title),
+                    stringResource(id = R.string.stripe_picker_loading_desc)
                 )
             }
             is Fail -> {
