@@ -65,7 +65,7 @@ dependencies {
     // Material Design
     implementation "androidx.compose.material:material:$androidxComposeVersion"
     // MdcTheme
-    implementation "com.google.android.material:compose-theme-adapter:1.1.16"
+    implementation "com.google.android.material:compose-theme-adapter:1.1.17"
     // Test rules and transitive dependencies:
     testImplementation("androidx.compose.ui:ui-test-junit4:$androidxComposeVersion")
     // Needed for createComposeRule, but not createAndroidComposeRule:
