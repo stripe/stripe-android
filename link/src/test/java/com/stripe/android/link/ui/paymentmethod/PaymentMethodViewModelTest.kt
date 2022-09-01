@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.R
@@ -54,6 +55,7 @@ import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -91,6 +93,7 @@ class PaymentMethodViewModelTest {
             whenever(viewModelScope(anyOrNull())).thenReturn(this)
             whenever(merchantName(anyOrNull())).thenReturn(this)
             whenever(stripeIntent(anyOrNull())).thenReturn(this)
+            whenever(shippingValues(anyOrNull())).thenReturn(this)
             whenever(build()).thenReturn(formControllerSubcomponent)
         }
     private val formControllerProvider = Provider { formControllerSubcomponentBuilder }
@@ -165,6 +168,7 @@ class PaymentMethodViewModelTest {
             whenever(
                 linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
             ).thenReturn(Result.success(value))
+            whenever(args.shippingValues).thenReturn(null)
 
             createViewModel().startPayment(cardFormFieldValues)
 
@@ -198,6 +202,34 @@ class PaymentMethodViewModelTest {
                 )
             )
         }
+
+    @Test
+    fun `when shippingValues are passed ConfirmStripeIntentParams has shipping`() = runTest {
+        val value = createLinkPaymentDetails()
+        whenever(
+            linkAccountManager.createCardPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull())
+        ).thenReturn(Result.success(value))
+        whenever(args.shippingValues).thenReturn(
+            mapOf(
+                IdentifierSpec.Name to "Test Name",
+                IdentifierSpec.Country to "US"
+            )
+        )
+
+        createViewModel().startPayment(mapOf())
+
+        val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
+        verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
+
+        assertThat(paramsCaptor.firstValue.toParamMap()["shipping"]).isEqualTo(
+            mapOf(
+                "address" to mapOf(
+                    "country" to "US"
+                ),
+                "name" to "Test Name"
+            )
+        )
+    }
 
     @Test
     fun `startPayment for card dismisses Link on success`() = runTest {
@@ -408,13 +440,13 @@ class PaymentMethodViewModelTest {
     }
 
     @Test
-    fun `payAnotherWay dismisses and logs out`() = runTest {
+    fun `payAnotherWay dismisses, but doesn't log out`() = runTest {
         whenever(navigator.isOnRootScreen()).thenReturn(true)
 
         createViewModel().onSecondaryButtonClick()
 
-        verify(navigator).dismiss()
-        verify(linkAccountManager).logout()
+        verify(navigator).cancel(reason = eq(Reason.PayAnotherWay))
+        verify(linkAccountManager, never()).logout()
     }
 
     @Test

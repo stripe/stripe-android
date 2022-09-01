@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.os.Parcelable
+import com.stripe.android.model.Address
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
@@ -34,8 +36,7 @@ data class AddressDetails(
 }
 
 internal fun AddressDetails.toIdentifierMap(
-    billingDetails: PaymentSheet.BillingDetails? = null,
-    billingSameAsShipping: Boolean = true
+    billingDetails: PaymentSheet.BillingDetails? = null
 ): Map<IdentifierSpec, String?> {
     return if (billingDetails == null) {
         mapOf(
@@ -50,9 +51,24 @@ internal fun AddressDetails.toIdentifierMap(
         ).plus(
             mapOf(
                 IdentifierSpec.SameAsShipping to isCheckboxSelected?.toString()
-            ).takeIf { isCheckboxSelected != null && billingSameAsShipping } ?: emptyMap()
+            ).takeIf { isCheckboxSelected != null } ?: emptyMap()
         )
     } else {
         emptyMap()
     }
+}
+
+internal fun AddressDetails.toConfirmPaymentIntentShipping(): ConfirmPaymentIntentParams.Shipping {
+    return ConfirmPaymentIntentParams.Shipping(
+        name = this.name ?: "",
+        address = Address.Builder()
+            .setLine1(this.address?.line1)
+            .setLine2(this.address?.line2)
+            .setCity(this.address?.city)
+            .setState(this.address?.state)
+            .setCountry(this.address?.country)
+            .setPostalCode(this.address?.postalCode)
+            .build(),
+        phone = this.phoneNumber
+    )
 }

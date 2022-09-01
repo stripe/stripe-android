@@ -45,7 +45,7 @@ class SimpleTextFieldConfig(
 
     companion object {
         val NAME = SimpleTextFieldConfig(
-            label = com.stripe.android.ui.core.R.string.address_label_name,
+            label = com.stripe.android.ui.core.R.string.address_label_full_name,
             capitalization = KeyboardCapitalization.Words,
             keyboard = KeyboardType.Text
         )

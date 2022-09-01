@@ -7,6 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLinkResult
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason.PayAnotherWay
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.R
@@ -25,6 +26,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.FormController
+import com.stripe.android.ui.core.address.toConfirmPaymentIntentShipping
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -95,9 +97,7 @@ internal class PaymentMethodViewModel @Inject constructor(
             ?.takeIf { loadFromArgs }
             ?.let { convertToFormValuesMap(it) }
             ?: emptyMap()
-        val initialValuesMap = args.initialFormValuesMap
-            ?: emptyMap()
-        updateFormController(cardMap + initialValuesMap)
+        updateFormController(cardMap)
     }
 
     fun onPaymentMethodSelected(paymentMethod: SupportedPaymentMethod) {
@@ -179,6 +179,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                 .initialValues(initialValues)
                 .stripeIntent(args.stripeIntent)
                 .merchantName(args.merchantName)
+                .shippingValues(args.shippingValues)
                 .build()
                 .formController
                 .also { formControllersCache[paymentMethod.value] = it }
@@ -198,12 +199,14 @@ internal class PaymentMethodViewModel @Inject constructor(
 
     private fun payAnotherWay() {
         clearError()
-        navigator.dismiss()
-        linkAccountManager.logout()
+        navigator.cancel(reason = PayAnotherWay)
     }
 
     private fun completePayment(linkPaymentDetails: LinkPaymentDetails) {
-        val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
+        val params = ConfirmStripeIntentParamsFactory.createFactory(
+            stripeIntent,
+            args.shippingValues?.toConfirmPaymentIntentShipping()
+        )
             .createConfirmStripeIntentParams(linkPaymentDetails.paymentMethodCreateParams)
 
         confirmationManager.confirmStripeIntent(params) { result ->

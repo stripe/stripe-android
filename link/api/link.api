@@ -82,8 +82,15 @@ public abstract class com/stripe/android/link/LinkActivityResult : android/os/Pa
 public final class com/stripe/android/link/LinkActivityResult$Canceled : com/stripe/android/link/LinkActivityResult {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/link/LinkActivityResult$Canceled;
+	public fun <init> (Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;)V
+	public final fun component1 ()Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
+	public final fun copy (Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;)Lcom/stripe/android/link/LinkActivityResult$Canceled;
+	public static synthetic fun copy$default (Lcom/stripe/android/link/LinkActivityResult$Canceled;Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;ILjava/lang/Object;)Lcom/stripe/android/link/LinkActivityResult$Canceled;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -93,6 +100,14 @@ public final class com/stripe/android/link/LinkActivityResult$Canceled$Creator :
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/link/LinkActivityResult$Canceled;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/link/LinkActivityResult$Canceled$Reason : java/lang/Enum {
+	public static final field BackPressed Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
+	public static final field LoggedOut Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
+	public static final field PayAnotherWay Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
+	public static fun values ()[Lcom/stripe/android/link/LinkActivityResult$Canceled$Reason;
 }
 
 public final class com/stripe/android/link/LinkActivityResult$Completed : com/stripe/android/link/LinkActivityResult {
@@ -249,14 +264,6 @@ public final class com/stripe/android/link/injection/LinkActivityContractArgsMod
 	public static fun provideCustomerPhone (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/lang/String;
 }
 
-public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideInitialFormValuesMapFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideInitialFormValuesMapFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/util/Map;
-	public static fun provideInitialFormValuesMap (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/util/Map;
-}
-
 public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideMerchantNameFactory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideMerchantNameFactory;
@@ -404,11 +411,11 @@ public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkIn
 }
 
 public final class com/stripe/android/link/ui/inline/InlineSignupViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/ui/inline/InlineSignupViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/link/ui/inline/InlineSignupViewModel_Factory;
 	public fun get ()Lcom/stripe/android/link/ui/inline/InlineSignupViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/link/account/LinkAccountManager;Lcom/stripe/android/link/analytics/LinkEventsReporter;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/link/ui/inline/InlineSignupViewModel;
+	public static fun newInstance (Lcom/stripe/android/model/StripeIntent;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/link/account/LinkAccountManager;Lcom/stripe/android/link/analytics/LinkEventsReporter;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/link/ui/inline/InlineSignupViewModel;
 }
 
 public final class com/stripe/android/link/ui/inline/InlineSignupViewModel_Factory_MembersInjector : dagger/MembersInjector {
@@ -437,15 +444,17 @@ public final class com/stripe/android/link/ui/inline/UserInput$SignIn : com/stri
 
 public final class com/stripe/android/link/ui/inline/UserInput$SignUp : com/stripe/android/link/ui/inline/UserInput {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/link/ui/inline/UserInput$SignUp;
-	public static synthetic fun copy$default (Lcom/stripe/android/link/ui/inline/UserInput$SignUp;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/link/ui/inline/UserInput$SignUp;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/link/ui/inline/UserInput$SignUp;
+	public static synthetic fun copy$default (Lcom/stripe/android/link/ui/inline/UserInput$SignUp;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/link/ui/inline/UserInput$SignUp;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getCountry ()Ljava/lang/String;
 	public final fun getEmail ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
 	public final fun getPhone ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

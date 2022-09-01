@@ -244,7 +244,7 @@ internal class TextFieldControllerTest {
             on { determineState("") } doReturn Blank
             on { filter("") } doReturn ""
 
-            on { label } doReturn R.string.address_label_name
+            on { label } doReturn R.string.address_label_full_name
         }
 
         return SimpleTextFieldController(config, showOptionalLabel)

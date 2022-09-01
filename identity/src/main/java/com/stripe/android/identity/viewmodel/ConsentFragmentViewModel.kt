@@ -3,11 +3,15 @@ package com.stripe.android.identity.viewmodel
 import android.net.Uri
 import android.util.Log
 import android.widget.ImageView
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.identity.networking.IdentityRepository
+import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,6 +22,9 @@ internal class ConsentFragmentViewModel(
     private val identityRepository: IdentityRepository,
     @IOContext private val workContext: CoroutineContext
 ) : ViewModel() {
+
+    private val _logoImage = MutableLiveData<Resource<ImageBitmap>>()
+    val logoImage: LiveData<Resource<ImageBitmap>> = _logoImage
 
     private fun Uri.isRemote() = this.scheme == "https" || this.scheme == "http"
 
