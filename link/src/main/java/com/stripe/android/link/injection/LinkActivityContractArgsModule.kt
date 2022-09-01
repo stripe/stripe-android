@@ -38,10 +38,5 @@ internal interface LinkActivityContractArgsModule {
         @Singleton
         @Named(CUSTOMER_PHONE)
         fun provideCustomerPhone(args: LinkActivityContract.Args) = args.customerPhone
-
-        @Provides
-        @Singleton
-        @Named(SHIPPING_VALUES)
-        fun provideShippingValues(args: LinkActivityContract.Args) = args.shippingValues
     }
 }

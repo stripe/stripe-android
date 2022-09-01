@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Instructional text during selfie is being captured -->
-  <string name="capturing">Καταγραφή…</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">Ρυθμίσεις εφαρμογής</string>
   <!-- Description of back of driver's license image -->
@@ -15,6 +13,8 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="camera_permission">Άδεια κάμερας</string>
   <string name="camera_permission_rationale">Αυτή η εφαρμογή χρησιμοποιεί την κάμερα για να σαρώσει τα έγγραφα ταυτοποίησής σας και παίρνει φωτογραφίες για να επαληθεύσει την ταυτότητά σας.</string>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Καταγραφή…</string>
   <!-- Description of the check mark, used for A11Y -->
   <string name="check_mark">Σημείο επιλογής που υποδεικνύει την επιτυχή καταγραφή του εγγράφου</string>
   <!-- Text for choosing a photo from gallery -->

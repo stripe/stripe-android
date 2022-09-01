@@ -170,6 +170,7 @@ class TestMultiStepFieldsReloaded {
                 paymentMethod = lpmRepository.fromCode("affirm")!!,
                 merchantCountryCode = "US",
                 currency = Currency.USD,
+                shipping = Shipping.On
             )
         )
     }

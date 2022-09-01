@@ -272,14 +272,6 @@ public final class com/stripe/android/link/injection/LinkActivityContractArgsMod
 	public static fun provideMerchantName (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/lang/String;
 }
 
-public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideShippingValuesFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideShippingValuesFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/util/Map;
-	public static fun provideShippingValues (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/util/Map;
-}
-
 public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideStripeIntentFactory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideStripeIntentFactory;

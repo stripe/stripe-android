@@ -83,7 +83,7 @@ internal enum class FieldType(
     Name(
         "name",
         IdentifierSpec.Name,
-        R.string.address_label_name
+        R.string.address_label_full_name
     );
 
     open fun capitalization() = KeyboardCapitalization.Words

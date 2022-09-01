@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Instructional text during selfie is being captured -->
-  <string name="capturing">Uzņem attēlu…</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">Lietotnes iestatījumi</string>
   <!-- Description of back of driver's license image -->
@@ -15,6 +13,8 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="camera_permission">Kameras atļauja</string>
   <string name="camera_permission_rationale">Šī lietotne izmanto kameru, lai skenētu jūsu identifikācijas dokumentus, un uzņem fotoattēlus, lai pārbaudītu jūsu identitāti.</string>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Uzņem attēlu…</string>
   <!-- Description of the check mark, used for A11Y -->
   <string name="check_mark">Atzīme, lai norādītu dokumenta uzņemšanas izdošanos</string>
   <!-- Text for choosing a photo from gallery -->
