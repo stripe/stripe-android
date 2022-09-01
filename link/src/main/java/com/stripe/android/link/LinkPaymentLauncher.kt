@@ -74,7 +74,6 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         .merchantName(merchantName)
         .customerEmail(customerEmail)
         .customerPhone(customerPhone)
-        .shippingValues(shippingValues)
         .context(context)
         .ioContext(ioContext)
         .uiContext(uiContext)

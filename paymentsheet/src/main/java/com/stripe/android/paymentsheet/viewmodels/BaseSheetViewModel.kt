@@ -195,7 +195,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         val shippingAddress = if (shippingDetails?.isCheckboxSelected == true) {
             shippingDetails.toIdentifierMap(config?.defaultBillingDetails)
         } else {
-            emptyMap()
+            null
         }
         it.create(
             merchantName = merchantName,

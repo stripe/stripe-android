@@ -464,7 +464,7 @@ internal class DefaultFlowController @Inject internal constructor(
             val shippingAddress = if (shippingDetails?.isCheckboxSelected == true) {
                 shippingDetails.toIdentifierMap(config.defaultBillingDetails)
             } else {
-                emptyMap()
+                null
             }
             val linkLauncher = linkPaymentLauncherFactory.create(
                 merchantName = config.merchantDisplayName,

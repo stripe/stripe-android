@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.injection
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.injection.INITIAL_VALUES
 import com.stripe.android.core.injection.SHIPPING_VALUES
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.FormController
@@ -28,7 +29,9 @@ interface FormControllerSubcomponent {
         fun formSpec(formSpec: LayoutSpec): Builder
 
         @BindsInstance
-        fun initialValues(initialValues: Map<IdentifierSpec, String?>): Builder
+        fun initialValues(
+            @Named(INITIAL_VALUES) initialValues: Map<IdentifierSpec, String?>
+        ): Builder
 
         @BindsInstance
         fun shippingValues(
