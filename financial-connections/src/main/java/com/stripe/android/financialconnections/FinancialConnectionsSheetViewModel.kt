@@ -6,6 +6,7 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
@@ -43,6 +44,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         if (initialState.manifest == null) {
             fetchManifest()
         }
+        viewModelScope.launch {
+            stateFlow.collect { logger.debug("STATE: ${it.authFlowStatus}, recreated: ${it.activityRecreated}") }
+        }
     }
 
     /**
@@ -78,7 +82,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         setState {
             copy(
                 manifest = manifest,
-                authFlowActive = true,
+                authFlowStatus = AuthFlowStatus.WEB,
                 viewEffect = OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
             )
         }
@@ -117,8 +121,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      */
     internal fun onResume() {
         setState {
-            if (authFlowActive && activityRecreated.not()) {
-                copy(viewEffect = FinishWithResult(Canceled))
+            logger.debug("STATE: entering onResume, status = $authFlowStatus")
+            if (activityRecreated.not()) {
+                when (authFlowStatus) {
+                    AuthFlowStatus.WEB -> copy(viewEffect = FinishWithResult(Canceled))
+                    AuthFlowStatus.APP2APP -> copy(authFlowStatus = AuthFlowStatus.WEB)
+                    AuthFlowStatus.NONE -> this
+                }
             } else this
         }
     }
@@ -130,8 +139,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      */
     internal fun onActivityResult() {
         setState {
-            if (authFlowActive && activityRecreated) {
-                copy(viewEffect = FinishWithResult(Canceled))
+            logger.debug("STATE: entering onActivityResult, status = $authFlowStatus")
+            if (activityRecreated) {
+                when (authFlowStatus) {
+                    AuthFlowStatus.WEB -> copy(viewEffect = FinishWithResult(Canceled))
+                    AuthFlowStatus.APP2APP -> copy(authFlowStatus = AuthFlowStatus.WEB)
+                    AuthFlowStatus.NONE -> this
+                }
             } else this
         }
     }
@@ -210,20 +224,33 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @param intent the new intent with the redirect URL in the intent data
      */
     internal fun handleOnNewIntent(intent: Intent?) {
-        setState { copy(authFlowActive = false) }
+        val receivedUrl: Uri? = intent?.data?.toString()?.toUriOrNull()
+        setState {
+            logger.debug("STATE: entering onNewIntent, status = ${authFlowStatus}")
+            if (receivedUrl?.host == "native-redirect") copy(
+                authFlowStatus = AuthFlowStatus.APP2APP,
+                viewEffect = OpenAuthFlowWithUrl(receivedUrl.path!!.replaceFirst("/", ""))
+            )
+            else copy(authFlowStatus = AuthFlowStatus.NONE)
+        }
         withState { state ->
-            val receivedUrl: Uri? = intent?.data?.toString()?.toUriOrNull()
             if (receivedUrl == null) {
                 onFatal(state, Exception("Intent url received from web flow is null"))
-            } else when (receivedUrl.buildUpon().clearQuery().toString()) {
-                state.manifest?.successUrl -> when (state.initialArgs) {
-                    is ForData -> fetchFinancialConnectionsSession(state)
-                    is ForToken -> fetchFinancialConnectionsSessionForToken(state)
-                    is ForLink -> onSuccessFromLinkFlow(receivedUrl)
+            } else when {
+                receivedUrl.host == "native-redirect" -> Unit
+                receivedUrl.buildUpon().clearQuery().toString() == state.manifest?.successUrl -> {
+                    when (state.initialArgs) {
+                        is ForData -> fetchFinancialConnectionsSession(state)
+                        is ForToken -> fetchFinancialConnectionsSessionForToken(state)
+                        is ForLink -> onSuccessFromLinkFlow(receivedUrl)
+                    }
                 }
-                state.manifest?.cancelUrl -> onUserCancel(state)
-                else ->
+                receivedUrl.buildUpon().clearQuery().toString() == state.manifest?.cancelUrl -> {
+                    onUserCancel(state)
+                }
+                else -> {
                     onFatal(state, Exception("Error processing FinancialConnectionsSheet intent"))
+                }
             }
         }
     }

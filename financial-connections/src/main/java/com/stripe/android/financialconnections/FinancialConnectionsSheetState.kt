@@ -14,12 +14,16 @@ internal data class FinancialConnectionsSheetState(
     val initialArgs: FinancialConnectionsSheetActivityArgs,
     val activityRecreated: Boolean = false,
     @PersistState val manifest: FinancialConnectionsSessionManifest? = null,
-    @PersistState val authFlowActive: Boolean = false,
+    @PersistState val authFlowStatus: AuthFlowStatus = AuthFlowStatus.NONE,
     val viewEffect: FinancialConnectionsSheetViewEffect? = null
 ) : MavericksState {
 
     val sessionSecret: String
         get() = initialArgs.configuration.financialConnectionsSessionClientSecret
+
+    enum class AuthFlowStatus {
+        WEB, APP2APP, NONE
+    }
 
     /**
      * Constructor used by Mavericks to build the initial state.

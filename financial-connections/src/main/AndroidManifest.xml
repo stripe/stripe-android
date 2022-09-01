@@ -16,6 +16,10 @@
 
                 <!-- Accepts success and cancel URIs that begin with "stripe-auth://link-accounts” -->
                 <data
+                    android:host="native-redirect"
+                    android:pathPrefix="/"
+                    android:scheme="stripe-auth" />
+                <data
                     android:host="link-accounts"
                     android:scheme="stripe-auth"
                     android:path="/${applicationId}/success" />
@@ -23,6 +27,7 @@
                     android:host="link-accounts"
                     android:scheme="stripe-auth"
                     android:path="/${applicationId}/cancel" />
+                <!-- Accepts App2App flows with stripe-auth://native-redirect-->
             </intent-filter>
         </activity>
         <activity
