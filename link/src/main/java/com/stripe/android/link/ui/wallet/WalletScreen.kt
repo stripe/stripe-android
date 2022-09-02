@@ -96,13 +96,14 @@ private fun WalletBodyPreview() {
     DefaultLinkTheme {
         Surface {
             WalletBody(
-                paymentDetailsList = paymentDetailsList,
-                supportedTypes = SupportedPaymentMethod.allTypes,
-                selectedItem = paymentDetailsList.first(),
-                isExpanded = true,
+                uiState = WalletUiState(
+                    paymentDetailsList = paymentDetailsList,
+                    supportedTypes = SupportedPaymentMethod.allTypes,
+                    selectedItem = paymentDetailsList.first(),
+                    isExpanded = true,
+                    errorMessage = ErrorMessage.Raw("Something went wrong"),
+                ),
                 primaryButtonLabel = "Pay $10.99",
-                primaryButtonState = PrimaryButtonState.Enabled,
-                errorMessage = ErrorMessage.Raw("Something went wrong"),
                 expiryDateController = SimpleTextFieldController(textFieldConfig = DateConfig()),
                 cvcController = CvcController(cardBrandFlow = flowOf(CardBrand.Visa)),
                 setExpanded = {},
@@ -131,13 +132,9 @@ internal fun WalletBody(
         )
     )
 
-    val paymentDetailsList by viewModel.paymentDetailsList.collectAsState()
-    val primaryButtonState by viewModel.primaryButtonState.collectAsState()
-    val selectedItem by viewModel.selectedItem.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
-    val isExpanded by viewModel.isExpanded.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
-    if (paymentDetailsList.isEmpty()) {
+    if (uiState.paymentDetailsList.isEmpty()) {
         Box(
             modifier = Modifier
                 .fillMaxHeight()
@@ -148,16 +145,11 @@ internal fun WalletBody(
         }
     } else {
         WalletBody(
-            paymentDetailsList = paymentDetailsList,
-            supportedTypes = viewModel.supportedTypes,
-            selectedItem = selectedItem,
-            isExpanded = isExpanded,
+            uiState = uiState,
             primaryButtonLabel = completePaymentButtonLabel(
                 viewModel.args.stripeIntent,
                 LocalContext.current.resources
             ),
-            primaryButtonState = primaryButtonState,
-            errorMessage = errorMessage,
             expiryDateController = viewModel.expiryDateController,
             cvcController = viewModel.cvcController,
             setExpanded = viewModel::setExpanded,
@@ -174,13 +166,8 @@ internal fun WalletBody(
 
 @Composable
 internal fun WalletBody(
-    paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
-    supportedTypes: Set<String>,
-    selectedItem: ConsumerPaymentDetails.PaymentDetails?,
-    isExpanded: Boolean,
+    uiState: WalletUiState,
     primaryButtonLabel: String,
-    primaryButtonState: PrimaryButtonState,
-    errorMessage: ErrorMessage?,
     expiryDateController: TextFieldController,
     cvcController: CvcController,
     setExpanded: (Boolean) -> Unit,
@@ -192,7 +179,6 @@ internal fun WalletBody(
     onPayAnotherWayClick: () -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
-    val selectedItemIsValid = selectedItem?.let { supportedTypes.contains(it.type) } ?: false
     var itemBeingRemoved by remember {
         mutableStateOf<ConsumerPaymentDetails.PaymentDetails?>(null)
     }
@@ -220,13 +206,13 @@ internal fun WalletBody(
     ScrollableTopLevelColumn {
         Spacer(modifier = Modifier.height(12.dp))
 
-        if (isExpanded || !selectedItemIsValid) {
+        if (uiState.isExpanded || !uiState.isSelectedItemValid) {
             setExpanded(true)
             ExpandedPaymentDetails(
-                paymentDetailsList = paymentDetailsList,
-                supportedTypes = supportedTypes,
-                selectedItem = selectedItem?.takeIf { selectedItemIsValid },
-                enabled = !primaryButtonState.isBlocking,
+                paymentDetailsList = uiState.paymentDetailsList,
+                supportedTypes = uiState.supportedTypes,
+                selectedItem = uiState.selectedItem?.takeIf { uiState.isSelectedItemValid },
+                enabled = !uiState.primaryButtonState.isBlocking,
                 onItemSelected = {
                     onItemSelected(it)
                     setExpanded(false)
@@ -256,15 +242,15 @@ internal fun WalletBody(
             )
         } else {
             CollapsedPaymentDetails(
-                selectedPaymentMethod = selectedItem!!,
-                enabled = !primaryButtonState.isBlocking,
+                selectedPaymentMethod = uiState.selectedItem!!,
+                enabled = !uiState.primaryButtonState.isBlocking,
                 onClick = {
                     setExpanded(true)
                 }
             )
         }
 
-        if (selectedItem is ConsumerPaymentDetails.BankAccount) {
+        if (uiState.selectedItem is ConsumerPaymentDetails.BankAccount) {
             Html(
                 html = stringResource(R.string.wallet_bank_account_terms),
                 imageGetter = emptyMap(),
@@ -281,14 +267,14 @@ internal fun WalletBody(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        errorMessage?.let {
+        uiState.errorMessage?.let {
             ErrorText(
                 text = it.getMessage(LocalContext.current.resources),
                 modifier = Modifier.fillMaxWidth()
             )
         }
 
-        val card = selectedItem as? ConsumerPaymentDetails.Card
+        val card = uiState.selectedItem as? ConsumerPaymentDetails.Card
         if (card != null && card.isExpired) {
             ExpiryDateAndCvcForm(
                 expiryDateController = expiryDateController,
@@ -298,8 +284,8 @@ internal fun WalletBody(
 
         PrimaryButton(
             label = primaryButtonLabel,
-            state = if (selectedItemIsValid) {
-                primaryButtonState
+            state = if (uiState.isSelectedItemValid) {
+                uiState.primaryButtonState
             } else {
                 PrimaryButtonState.Disabled
             },
@@ -308,7 +294,7 @@ internal fun WalletBody(
         )
 
         SecondaryButton(
-            enabled = !primaryButtonState.isBlocking,
+            enabled = !uiState.primaryButtonState.isBlocking,
             label = stringResource(id = R.string.wallet_pay_another_way),
             onClick = onPayAnotherWayClick
         )
