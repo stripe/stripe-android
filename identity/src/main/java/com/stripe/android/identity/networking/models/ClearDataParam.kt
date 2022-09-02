@@ -60,6 +60,21 @@ internal data class ClearDataParam(
             face = true
         )
 
+        internal val UPLOAD_FRONT = ClearDataParam(
+            biometricConsent = false,
+            idDocumentType = false,
+            idDocumentFront = false,
+            idDocumentBack = true
+        )
+
+        internal val UPLOAD_FRONT_SELFIE = ClearDataParam(
+            biometricConsent = false,
+            idDocumentType = false,
+            idDocumentFront = false,
+            idDocumentBack = true,
+            face = true
+        )
+
         internal val UPLOAD_TO_CONFIRM = ClearDataParam(
             biometricConsent = false,
             idDocumentType = false,
