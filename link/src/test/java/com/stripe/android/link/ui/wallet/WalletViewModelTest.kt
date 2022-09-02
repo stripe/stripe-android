@@ -99,7 +99,7 @@ class WalletViewModelTest {
 
         val viewModel = createViewModel()
 
-        assertThat(viewModel.paymentDetailsList.value).containsExactly(card1, card2)
+        assertThat(viewModel.uiState.value.paymentDetailsList).containsExactly(card1, card2)
     }
 
     @Test
@@ -194,7 +194,7 @@ class WalletViewModelTest {
 
         viewModel.onItemSelected(paymentDetails)
 
-        assertThat(viewModel.selectedItem.value).isEqualTo(paymentDetails)
+        assertThat(viewModel.uiState.value.selectedItem).isEqualTo(paymentDetails)
     }
 
     @Test
@@ -204,7 +204,7 @@ class WalletViewModelTest {
         val viewModel = createViewModel()
         viewModel.onItemSelected(deletedPaymentDetails)
 
-        assertThat(viewModel.selectedItem.value).isEqualTo(deletedPaymentDetails)
+        assertThat(viewModel.uiState.value.selectedItem).isEqualTo(deletedPaymentDetails)
 
         whenever(linkAccountManager.deletePaymentDetails(anyOrNull()))
             .thenReturn(Result.success(Unit))
@@ -220,7 +220,7 @@ class WalletViewModelTest {
 
         viewModel.deletePaymentMethod(deletedPaymentDetails)
 
-        assertThat(viewModel.selectedItem.value)
+        assertThat(viewModel.uiState.value.selectedItem)
             .isEqualTo(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first())
     }
 
@@ -237,7 +237,7 @@ class WalletViewModelTest {
         val viewModel = createViewModel()
 
         val bankAccount = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails[2]
-        assertThat(viewModel.selectedItem.value).isEqualTo(bankAccount)
+        assertThat(viewModel.uiState.value.selectedItem).isEqualTo(bankAccount)
     }
 
     @Test
@@ -253,7 +253,7 @@ class WalletViewModelTest {
 
         callbackCaptor.firstValue(Result.success(PaymentResult.Failed(RuntimeException(errorThrown))))
 
-        assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorThrown))
+        assertThat(viewModel.uiState.value.errorMessage).isEqualTo(ErrorMessage.Raw(errorThrown))
     }
 
     @Test
@@ -267,7 +267,7 @@ class WalletViewModelTest {
         clearInvocations(linkAccountManager)
 
         // Initially has two elements
-        assertThat(viewModel.paymentDetailsList.value)
+        assertThat(viewModel.uiState.value.paymentDetailsList)
             .containsExactlyElementsIn(paymentDetails.paymentDetails)
 
         whenever(linkAccountManager.deletePaymentDetails(anyOrNull()))
@@ -293,7 +293,7 @@ class WalletViewModelTest {
 
         viewModel.deletePaymentMethod(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first())
 
-        assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorThrown))
+        assertThat(viewModel.uiState.value.errorMessage).isEqualTo(ErrorMessage.Raw(errorThrown))
     }
 
     @Test
@@ -306,11 +306,10 @@ class WalletViewModelTest {
         whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
 
-        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
         val viewModel = createViewModel()
         viewModel.onConfirmPayment()
 
-        assertThat(viewModel.primaryButtonState.value).isEqualTo(PrimaryButtonState.Completed)
+        assertThat(viewModel.uiState.value.primaryButtonState).isEqualTo(PrimaryButtonState.Completed)
 
         advanceTimeBy(PrimaryButtonState.COMPLETED_DELAY_MS + 1)
 
@@ -377,7 +376,7 @@ class WalletViewModelTest {
         val error = ErrorMessage.Raw("Error message")
         flow.emit(PaymentDetailsResult.Failure(error))
 
-        assertThat(viewModel.errorMessage.value).isEqualTo(error)
+        assertThat(viewModel.uiState.value.errorMessage).isEqualTo(error)
     }
 
     @Test
