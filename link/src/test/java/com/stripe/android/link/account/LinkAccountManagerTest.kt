@@ -17,6 +17,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.Mockito.times
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
@@ -664,7 +665,7 @@ class LinkAccountManagerTest {
                 country = anyOrNull(),
                 name = anyOrNull(),
                 authSessionCookie = anyOrNull(),
-                anyOrNull()
+                consentAction = any()
             )
         ).thenReturn(Result.success(mockConsumerSession))
     }

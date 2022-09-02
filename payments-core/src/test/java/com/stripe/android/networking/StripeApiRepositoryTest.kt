@@ -1737,7 +1737,7 @@ internal class StripeApiRepositoryTest {
                 assertEquals(this["country"], country)
                 assertEquals(this["legal_name"], name)
                 assertEquals(this["locale"], locale.toLanguageTag())
-                assertEquals(this["consent_action"], "button_mobile")
+                assertEquals(this["consent_action"], "clicked_button_mobile")
                 withNestedParams("cookies") {
                     assertEquals(this["verification_session_client_secrets"], listOf(cookie))
                 }

@@ -136,7 +136,7 @@ internal class LinkAccountManager @Inject constructor(
                 phone = userInput.phone,
                 country = userInput.country,
                 name = userInput.name,
-                ConsumerSignUpConsentAction.Checkbox
+                consentAction = ConsumerSignUpConsentAction.Checkbox
             ).also {
                 if (it.isSuccess) {
                     linkEventsReporter.onSignupCompleted(true)
