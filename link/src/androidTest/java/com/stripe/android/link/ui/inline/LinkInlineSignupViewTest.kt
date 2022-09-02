@@ -112,6 +112,6 @@ internal class LinkInlineSignupViewTest {
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(progressIndicatorTestTag)
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
-    private fun onNameField() = composeTestRule.onNodeWithText("Name")
+    private fun onNameField() = composeTestRule.onNodeWithText("Full name")
     private fun onSaveMyInfo() = composeTestRule.onNodeWithText("Save my info", substring = true)
 }
