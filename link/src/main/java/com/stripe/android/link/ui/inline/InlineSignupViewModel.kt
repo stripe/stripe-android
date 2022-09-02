@@ -8,6 +8,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
+import com.stripe.android.link.injection.CUSTOMER_NAME
 import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.LINK_INTENT
 import com.stripe.android.link.injection.MERCHANT_NAME
@@ -35,6 +36,7 @@ internal class InlineSignupViewModel @Inject constructor(
     @Named(MERCHANT_NAME) val merchantName: String,
     @Named(CUSTOMER_EMAIL) customerEmail: String?,
     @Named(CUSTOMER_PHONE) customerPhone: String?,
+    @Named(CUSTOMER_NAME) customerName: String?,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger
@@ -43,10 +45,12 @@ internal class InlineSignupViewModel @Inject constructor(
         if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
     private val prefilledPhone =
         customerPhone?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) } ?: ""
+    private val prefilledName =
+        customerName?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) }
 
     val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
     val phoneController = PhoneNumberController.createPhoneNumberController(prefilledPhone)
-    val nameController = SimpleTextFieldController.createNameSectionController(null) // TODO
+    val nameController = SimpleTextFieldController.createNameSectionController(prefilledName)
 
     /**
      * Emits the email entered in the form if valid, null otherwise.

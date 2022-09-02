@@ -251,7 +251,7 @@ internal class LinkActivity : ComponentActivity() {
                                 AccountStatus.VerificationStarted ->
                                     LinkScreen.Verification
                                 AccountStatus.SignedOut ->
-                                    LinkScreen.SignUp(starterArgs.customerEmail)
+                                    LinkScreen.SignUp(starterArgs.customerEmail, starterArgs.customerName)
                             },
                             clearBackStack = true
                         )

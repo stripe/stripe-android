@@ -54,6 +54,7 @@ class SignUpViewModelTest {
         MERCHANT_NAME,
         CUSTOMER_EMAIL,
         CUSTOMER_PHONE,
+        CUSTOMER_NAME,
         null,
         null,
         LinkActivityContract.Args.InjectionParams(
@@ -143,7 +144,7 @@ class SignUpViewModelTest {
     @Test
     fun `When email is provided it should not trigger lookup and should collect phone number`() =
         runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel()
+            val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL)
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
 
             verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
@@ -288,9 +289,19 @@ class SignUpViewModelTest {
 
         viewModel.emailController.onRawValueChange("me@myself.com")
         viewModel.phoneController.onRawValueChange("1234567890")
+        viewModel.nameController.onRawValueChange("")
         assertThat(viewModel.isReadyToSignUp.value).isFalse()
 
         viewModel.nameController.onRawValueChange("Someone from Canada")
+        assertThat(viewModel.isReadyToSignUp.value).isTrue()
+    }
+
+    @Test
+    fun `Prefilled values are handled correctly`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            prefilledEmail = CUSTOMER_EMAIL,
+            countryCode = CountryCode.US
+        )
         assertThat(viewModel.isReadyToSignUp.value).isTrue()
     }
 
@@ -321,7 +332,7 @@ class SignUpViewModelTest {
 
         val factory = SignUpViewModel.Factory(
             injector,
-            null
+            email = null
         )
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(SignUpViewModel::class.java)
@@ -329,7 +340,7 @@ class SignUpViewModelTest {
     }
 
     private fun createViewModel(
-        prefilledEmail: String? = CUSTOMER_EMAIL,
+        prefilledEmail: String? = null,
         args: LinkActivityContract.Args = defaultArgs,
         countryCode: CountryCode = CountryCode.US
     ): SignUpViewModel {
@@ -380,5 +391,6 @@ class SignUpViewModelTest {
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "customer@email.com"
         const val CUSTOMER_PHONE = "1234567890"
+        const val CUSTOMER_NAME = "Customer"
     }
 }
