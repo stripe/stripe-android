@@ -42,6 +42,7 @@ class LinkActivityViewModelTest {
         MERCHANT_NAME,
         CUSTOMER_EMAIL,
         CUSTOMER_PHONE,
+        CUSTOMER_NAME,
         null,
         null,
         LinkActivityContract.Args.InjectionParams(
@@ -207,6 +208,7 @@ class LinkActivityViewModelTest {
 
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "customer@email.com"
+        const val CUSTOMER_NAME = "Customer"
         const val CUSTOMER_PHONE = "1234567890"
     }
 }
