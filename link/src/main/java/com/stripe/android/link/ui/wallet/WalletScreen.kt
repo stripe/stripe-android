@@ -53,6 +53,7 @@ import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.CvcCheck
 import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 
@@ -69,7 +70,8 @@ private fun WalletBodyPreview() {
                         2022,
                         12,
                         CardBrand.Visa,
-                        "4242"
+                        "4242",
+                        CvcCheck.Pass
                     ),
                     ConsumerPaymentDetails.Card(
                         "id2",
@@ -77,7 +79,8 @@ private fun WalletBodyPreview() {
                         2023,
                         11,
                         CardBrand.MasterCard,
-                        "4444"
+                        "4444",
+                        CvcCheck.Fail
                     )
                 ),
                 supportedTypes = SupportedPaymentMethod.allTypes,
