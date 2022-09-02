@@ -100,7 +100,25 @@ internal class LinkAppBarStateTest {
     }
 
     @Test
-    fun paymentMethodScreenShowsCorrectAppBarState() {
+    fun paymentMethodScreenShowsCorrectAppBarStateWhenAddingFirstPaymentMethod() {
+        val state = buildLinkAppBarState(
+            isRootScreen = true,
+            currentRoute = LinkScreen.PaymentMethod.route,
+            email = "someone@stripe.com"
+        )
+
+        val expected = LinkAppBarState(
+            navigationIcon = R.drawable.ic_link_close,
+            showHeader = true,
+            showOverflowMenu = true,
+            email = "someone@stripe.com"
+        )
+
+        assertThat(state).isEqualTo(expected)
+    }
+
+    @Test
+    fun paymentMethodScreenShowsCorrectAppBarStateWhenThereAreExistingPaymentMethods() {
         val state = buildLinkAppBarState(
             isRootScreen = false,
             currentRoute = LinkScreen.PaymentMethod.route,
