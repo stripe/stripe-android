@@ -14,6 +14,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.ui.core.elements.PhoneNumberController
@@ -26,7 +27,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -143,7 +143,13 @@ internal class SignUpViewModel @Inject constructor(
         val country = phoneController.getCountryCode()
         val name = consumerName.value
         viewModelScope.launch {
-            linkAccountManager.signUp(email, phone, country, name).fold(
+            linkAccountManager.signUp(
+                email,
+                phone,
+                country,
+                name,
+                ConsumerSignUpConsentAction.Button
+            ).fold(
                 onSuccess = {
                     onAccountFetched(it)
                     linkEventsReporter.onSignupCompleted()
