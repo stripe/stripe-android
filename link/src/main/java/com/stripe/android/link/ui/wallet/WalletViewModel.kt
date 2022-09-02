@@ -130,10 +130,16 @@ internal class WalletViewModel @Inject constructor(
                                 it.updateWithPaymentResult(paymentResult)
                             }
 
-                            if (paymentResult is PaymentResult.Completed) {
-                                viewModelScope.launch {
-                                    delay(PrimaryButtonState.COMPLETED_DELAY_MS)
-                                    navigator.dismiss(LinkActivityResult.Completed)
+                            when (paymentResult) {
+                                is PaymentResult.Canceled -> Unit
+                                is PaymentResult.Failed -> {
+                                    logger.error("Error: ", paymentResult.throwable)
+                                }
+                                is PaymentResult.Completed -> {
+                                    viewModelScope.launch {
+                                        delay(PrimaryButtonState.COMPLETED_DELAY_MS)
+                                        navigator.dismiss(LinkActivityResult.Completed)
+                                    }
                                 }
                             }
                         },

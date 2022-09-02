@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.wallet
 
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -64,6 +65,7 @@ internal data class WalletUiState(
     fun updateWithPaymentResult(paymentResult: PaymentResult): WalletUiState {
         return copy(
             hasCompleted = paymentResult is PaymentResult.Completed,
+            errorMessage = (paymentResult as? PaymentResult.Failed)?.throwable?.getErrorMessage(),
             isProcessing = false
         )
     }
