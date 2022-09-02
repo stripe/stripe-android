@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason.BackPressed
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.IdentifierSpec
@@ -21,8 +22,10 @@ class LinkActivityContract :
         Intent(context, LinkActivity::class.java)
             .putExtra(EXTRA_ARGS, input)
 
-    override fun parseResult(resultCode: Int, intent: Intent?) =
-        intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.linkResult ?: LinkActivityResult.Canceled
+    override fun parseResult(resultCode: Int, intent: Intent?): LinkActivityResult {
+        val linkResult = intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.linkResult
+        return linkResult ?: LinkActivityResult.Canceled(reason = BackPressed)
+    }
 
     /**
      * Arguments for launching [LinkActivity] to confirm a payment with Link.
@@ -31,7 +34,7 @@ class LinkActivityContract :
      * @param merchantName The customer-facing business name.
      * @param customerEmail Email of the customer, used to pre-fill the form.
      * @param customerPhone Phone number of the customer, used to pre-fill the form.
-     * @param initialFormValuesMap The initial form values for [FormController]
+     * @param shippingValues The initial shipping values for [FormController]
      * @param prefilledCardParams The payment method information prefilled by the user.
      * @param injectionParams Parameters needed to perform dependency injection.
      *                        If null, a new dependency graph will be created.
@@ -42,7 +45,7 @@ class LinkActivityContract :
         internal val merchantName: String,
         internal val customerEmail: String? = null,
         internal val customerPhone: String? = null,
-        internal val initialFormValuesMap: Map<IdentifierSpec, String?>? = null,
+        internal val shippingValues: Map<IdentifierSpec, String?>? = null,
         internal val prefilledCardParams: PaymentMethodCreateParams? = null,
         internal val injectionParams: InjectionParams? = null
     ) : ActivityStarter.Args {

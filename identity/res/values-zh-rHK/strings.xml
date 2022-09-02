@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Instructional text during selfie is being captured -->
-  <string name="capturing">正在拍攝...</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">應用設定</string>
   <!-- Description of back of driver's license image -->
@@ -15,6 +13,8 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="camera_permission">相機許可</string>
   <string name="camera_permission_rationale">該應用將使用相機來掃描您的身份證件並拍照來驗證您的身份。</string>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">正在拍攝...</string>
   <!-- Description of the check mark, used for A11Y -->
   <string name="check_mark">選中標記，表示證件捕獲成功</string>
   <!-- Text for choosing a photo from gallery -->

@@ -103,15 +103,22 @@ internal class ErrorFragment(
             navigate(
                 R.id.action_global_errorFragment,
                 bundleOf(
-                    ARG_ERROR_TITLE to requirementError.title,
-                    ARG_ERROR_CONTENT to requirementError.body,
+                    ARG_ERROR_TITLE to (
+                        requirementError.title ?: context.getString(R.string.error)
+                        ),
+                    ARG_ERROR_CONTENT to (
+                        requirementError.body
+                            ?: context.getString(R.string.unexpected_error_try_again)
+                        ),
                     ARG_GO_BACK_BUTTON_DESTINATION to
                         if (requirementError.requirement.matchesFromFragment(fromFragment)) {
                             fromFragment
                         } else {
                             UNEXPECTED_DESTINATION
                         },
-                    ARG_GO_BACK_BUTTON_TEXT to requirementError.backButtonText,
+                    ARG_GO_BACK_BUTTON_TEXT to (
+                        requirementError.backButtonText ?: context.getString(R.string.go_back)
+                        ),
                     ARG_SHOULD_FAIL to false,
                     ARG_CAUSE to IllegalStateException("VerificationPageDataRequirementError: $requirementError")
                 )

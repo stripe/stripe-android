@@ -8,6 +8,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
@@ -57,6 +58,7 @@ internal class LinkApiRepository @Inject constructor(
         email: String,
         phone: String,
         country: String,
+        name: String?,
         authSessionCookie: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSession> = withContext(workContext) {
@@ -66,6 +68,7 @@ internal class LinkApiRepository @Inject constructor(
                     email,
                     phone,
                     country,
+                    name,
                     locale,
                     authSessionCookie,
                     consentAction,
@@ -183,7 +186,7 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
-    override suspend fun createPaymentDetails(
+    override suspend fun createBankAccountPaymentDetails(
         financialConnectionsAccountId: String,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
@@ -206,8 +209,7 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
-    override suspend fun createPaymentDetails(
-        paymentMethod: SupportedPaymentMethod,
+    override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         userEmail: String,
         stripeIntent: StripeIntent,
@@ -218,7 +220,10 @@ internal class LinkApiRepository @Inject constructor(
             requireNotNull(
                 stripeRepository.createPaymentDetails(
                     consumerSessionClientSecret,
-                    paymentMethod.createParams(paymentMethodCreateParams, userEmail),
+                    ConsumerPaymentDetailsCreateParams.Card(
+                        paymentMethodCreateParams.toParamMap(),
+                        userEmail
+                    ),
                     consumerPublishableKey?.let {
                         ApiRequest.Options(it)
                     } ?: ApiRequest.Options(
@@ -232,7 +237,9 @@ internal class LinkApiRepository @Inject constructor(
                             .createPaymentMethodCreateParams(
                                 consumerSessionClientSecret,
                                 it,
-                                paymentMethod.extraConfirmationParams(paymentMethodCreateParams)
+                                ConsumerPaymentDetailsCreateParams.Card.extraConfirmationParams(
+                                    paymentMethodCreateParams
+                                )
                             ),
                         paymentMethodCreateParams
                     )

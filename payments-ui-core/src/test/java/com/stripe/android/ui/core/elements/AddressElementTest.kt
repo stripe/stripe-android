@@ -55,7 +55,8 @@ class AddressElementTest {
                 IdentifierSpec.Generic("address"),
                 addressRepository,
                 countryDropdownFieldController = countryDropdownFieldController,
-                sameAsShippingController = null
+                sameAsShippingElement = null,
+                shippingValuesMap = null
             )
             var emailController =
                 (
@@ -96,7 +97,8 @@ class AddressElementTest {
             IdentifierSpec.Generic("address"),
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
-            sameAsShippingController = null
+            sameAsShippingElement = null,
+            shippingValuesMap = null
         )
         val formFieldValueFlow = addressElement.getFormFieldValueFlow()
         var emailController =
@@ -144,7 +146,8 @@ class AddressElementTest {
             IdentifierSpec.Generic("address"),
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
-            sameAsShippingController = null
+            sameAsShippingElement = null,
+            shippingValuesMap = null
         )
 
         val country = suspend {
@@ -170,7 +173,8 @@ class AddressElementTest {
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingCondensed(null, PhoneNumberState.REQUIRED) { },
-            sameAsShippingController = null
+            sameAsShippingElement = null,
+            shippingValuesMap = null
         )
 
         val identifierSpecs = addressElement.fields.first().map {
@@ -187,7 +191,8 @@ class AddressElementTest {
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingCondensed(null, PhoneNumberState.HIDDEN) { },
-            sameAsShippingController = null
+            sameAsShippingElement = null,
+            shippingValuesMap = null
         )
 
         val identifierSpecs = addressElement.fields.first().map {
@@ -203,7 +208,8 @@ class AddressElementTest {
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingCondensed(null, PhoneNumberState.OPTIONAL) { },
-            sameAsShippingController = null
+            sameAsShippingElement = null,
+            shippingValuesMap = null
         )
 
         val identifierSpecs = addressElement.fields.first().map {
@@ -221,7 +227,8 @@ class AddressElementTest {
             addressType = AddressType.ShippingExpanded(
                 PhoneNumberState.REQUIRED
             ),
-            sameAsShippingController = null
+            sameAsShippingElement = null,
+            shippingValuesMap = null
         )
 
         val identifierSpecs = addressElement.fields.first().map {
@@ -240,7 +247,8 @@ class AddressElementTest {
             addressType = AddressType.ShippingExpanded(
                 PhoneNumberState.HIDDEN
             ),
-            sameAsShippingController = null
+            sameAsShippingElement = null,
+            shippingValuesMap = null
         )
 
         val identifierSpecs = addressElement.fields.first().map {
@@ -258,7 +266,8 @@ class AddressElementTest {
             addressType = AddressType.ShippingExpanded(
                 PhoneNumberState.OPTIONAL
             ),
-            sameAsShippingController = null
+            sameAsShippingElement = null,
+            shippingValuesMap = null
         )
 
         val identifierSpecs = addressElement.fields.first().map {
@@ -274,7 +283,8 @@ class AddressElementTest {
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.Normal(),
-            sameAsShippingController = null
+            sameAsShippingElement = null,
+            shippingValuesMap = null
         )
 
         val identifierSpecs = addressElement.fields.first().map {
@@ -291,7 +301,8 @@ class AddressElementTest {
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.Normal(),
-            sameAsShippingController = null
+            sameAsShippingElement = null,
+            shippingValuesMap = null
         )
 
         val identifierSpecs = addressElement.fields.first().map {
@@ -310,7 +321,8 @@ class AddressElementTest {
                 "some key",
                 PhoneNumberState.OPTIONAL
             ) { },
-            sameAsShippingController = null
+            sameAsShippingElement = null,
+            shippingValuesMap = null
         )
 
         val identifierSpecs = addressElement.fields.first().map {
@@ -329,7 +341,8 @@ class AddressElementTest {
                 null,
                 PhoneNumberState.OPTIONAL
             ) { },
-            sameAsShippingController = null
+            sameAsShippingElement = null,
+            shippingValuesMap = null
         )
 
         val identifierSpecs = addressElement.fields.first().map {
@@ -347,7 +360,8 @@ class AddressElementTest {
             addressType = AddressType.ShippingExpanded(
                 PhoneNumberState.OPTIONAL
             ),
-            sameAsShippingController = null
+            sameAsShippingElement = null,
+            shippingValuesMap = null
         )
 
         val identifierSpecs = addressElement.fields.first().map {
@@ -358,29 +372,37 @@ class AddressElementTest {
 
     @Test
     fun `when same as shipping is enabled billing address is the same as shipping`() = runTest {
-        val sameAsShippingController = SameAsShippingController(false)
+        val sameAsShippingElement = SameAsShippingElement(
+            IdentifierSpec.SameAsShipping,
+            SameAsShippingController(false)
+        )
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             addressRepository,
             mapOf(
-                IdentifierSpec.SameAsShipping to "true",
                 IdentifierSpec.Country to "JP"
             ),
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.Normal(),
-            sameAsShippingController = sameAsShippingController
+            sameAsShippingElement = sameAsShippingElement,
+            shippingValuesMap = mapOf(
+                IdentifierSpec.Country to "US"
+            )
         )
 
         val country = suspend {
-            addressElement.fields.first().map {
-                it.getFormFieldValueFlow().first()[0].second.value
-            }.first()
+            addressElement.fields
+                .first()[0]
+                .getFormFieldValueFlow()
+                .first()[0].second.value
         }
 
-        assertThat(country()).isEqualTo("US")
-
-        sameAsShippingController.onValueChange(true)
+        countryDropdownFieldController.onValueChange(1)
 
         assertThat(country()).isEqualTo("JP")
+
+        sameAsShippingElement.setRawValue(mapOf(IdentifierSpec.SameAsShipping to "true"))
+
+        assertThat(country()).isEqualTo("US")
     }
 }

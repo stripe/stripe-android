@@ -412,6 +412,7 @@ abstract class StripeRepository {
         email: String,
         phoneNumber: String,
         country: String,
+        name: String?,
         locale: Locale?,
         authSessionCookie: String?,
         consentAction: ConsumerSignUpConsentAction,

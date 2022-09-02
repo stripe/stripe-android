@@ -19,3 +19,15 @@ const val PUBLISHABLE_KEY = "publishableKey"
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val STRIPE_ACCOUNT_ID = "stripeAccountId"
+
+/**
+ * Name for form initial values
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val INITIAL_VALUES = "initialValues"
+
+/**
+ * Name for user's shipping address
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val SHIPPING_VALUES = "shippingValues"

@@ -39,6 +39,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.CvcCheck
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.junit.Rule
@@ -59,7 +60,8 @@ internal class WalletScreenTest {
             expiryYear = 2022,
             expiryMonth = 12,
             brand = CardBrand.Visa,
-            last4 = "4242"
+            last4 = "4242",
+            cvcCheck = CvcCheck.Pass
         ),
         ConsumerPaymentDetails.Card(
             id = "id2",
@@ -67,7 +69,8 @@ internal class WalletScreenTest {
             expiryYear = 2023,
             expiryMonth = 11,
             brand = CardBrand.MasterCard,
-            last4 = "4444"
+            last4 = "4444",
+            cvcCheck = CvcCheck.Fail
         ),
         ConsumerPaymentDetails.Card(
             id = "id3",
@@ -75,7 +78,8 @@ internal class WalletScreenTest {
             expiryYear = 2023,
             expiryMonth = 11,
             brand = CardBrand.AmericanExpress,
-            last4 = "0005"
+            last4 = "0005",
+            cvcCheck = CvcCheck.Unchecked
         ),
         ConsumerPaymentDetails.BankAccount(
             id = "id4",
@@ -97,7 +101,10 @@ internal class WalletScreenTest {
     @Test
     fun selected_payment_method_is_shown_when_collapsed() {
         val initiallySelectedItem = paymentDetails[4]
-        setContent(selectedItem = initiallySelectedItem)
+        setContent(
+            isExpanded = false,
+            selectedItem = initiallySelectedItem
+        )
 
         composeTestRule.onNodeWithText("Payment").onParent().onChildren()
             .filter(hasText(initiallySelectedItem.label, substring = true))
@@ -105,9 +112,31 @@ internal class WalletScreenTest {
     }
 
     @Test
-    fun when_no_payment_option_is_selected_then_list_is_expanded() {
-        setContent(selectedItem = null)
+    fun expand_list_triggers_callback() {
+        var expanded: Boolean? = null
+        setContent(
+            isExpanded = false,
+            setExpanded = {
+                expanded = it
+            }
+        )
+        assertCollapsed()
+        composeTestRule.onNodeWithText("Payment").performClick()
+        assertThat(expanded).isTrue()
+    }
+
+    @Test
+    fun collapse_list_triggers_callback() {
+        var expanded: Boolean? = null
+        setContent(
+            isExpanded = true,
+            setExpanded = {
+                expanded = it
+            }
+        )
         assertExpanded()
+        composeTestRule.onNodeWithText("Payment methods").performClick()
+        assertThat(expanded).isFalse()
     }
 
     @Test
@@ -357,8 +386,10 @@ internal class WalletScreenTest {
     private fun setContent(
         supportedTypes: Set<String> = SupportedPaymentMethod.allTypes,
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = paymentDetails.first(),
+        isExpanded: Boolean = true,
         primaryButtonState: PrimaryButtonState = PrimaryButtonState.Enabled,
         errorMessage: ErrorMessage? = null,
+        setExpanded: (Boolean) -> Unit = {},
         onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onAddNewPaymentMethodClick: () -> Unit = {},
         onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
@@ -395,9 +426,11 @@ internal class WalletScreenTest {
                     paymentDetailsList = paymentDetailsList,
                     supportedTypes = supportedTypes,
                     selectedItem = selectedItem,
+                    isExpanded = isExpanded,
                     primaryButtonLabel = primaryButtonLabel,
                     primaryButtonState = primaryButtonState,
                     errorMessage = errorMessage,
+                    setExpanded = setExpanded,
                     onItemSelected = onItemSelected,
                     onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
                     onEditPaymentMethod = onEditPaymentMethod,

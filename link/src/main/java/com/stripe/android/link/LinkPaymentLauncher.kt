@@ -17,10 +17,10 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
 import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
-import com.stripe.android.link.injection.INITIAL_FORM_VALUES_MAP
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkPaymentLauncherComponent
 import com.stripe.android.link.injection.MERCHANT_NAME
+import com.stripe.android.link.injection.SHIPPING_VALUES
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
@@ -56,7 +56,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     @Assisted(MERCHANT_NAME) private val merchantName: String,
     @Assisted(CUSTOMER_EMAIL) private val customerEmail: String?,
     @Assisted(CUSTOMER_PHONE) private val customerPhone: String?,
-    @Assisted(INITIAL_FORM_VALUES_MAP) private val initialFormValuesMap: Map<IdentifierSpec, String?>?,
+    @Assisted(SHIPPING_VALUES) private val shippingValues: Map<IdentifierSpec, String?>?,
     context: Context,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
@@ -74,7 +74,6 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         .merchantName(merchantName)
         .customerEmail(customerEmail)
         .customerPhone(customerPhone)
-        .initialFormValuesMap(initialFormValuesMap)
         .context(context)
         .ioContext(ioContext)
         .uiContext(uiContext)
@@ -153,7 +152,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
             merchantName,
             customerEmail,
             customerPhone,
-            initialFormValuesMap,
+            shippingValues,
             prefilledNewCardParams,
             LinkActivityContract.Args.InjectionParams(
                 injectorKey,
@@ -183,8 +182,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     suspend fun attachNewCardToAccount(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.New> =
-        linkAccountManager.createPaymentDetails(
-            SupportedPaymentMethod.Card,
+        linkAccountManager.createCardPaymentDetails(
             paymentMethodCreateParams
         )
 
@@ -238,7 +236,9 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         WeakMapInjectorRegistry.register(injector, injectorKey)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        const val LINK_ENABLED = false
+        val LINK_ENABLED = BuildConfig.DEBUG
+        val supportedFundingSources = SupportedPaymentMethod.allTypes
     }
 }

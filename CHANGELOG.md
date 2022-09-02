@@ -2,6 +2,26 @@
 
 ## X.X.X - 2022-XX-XX
 
+* [CHANGED] [5495](https://github.com/stripe/stripe-android/pull/5495) Upgrade `compileSdkVersion`
+  to 33.
+
+### PaymentSheet
+
+* [CHANGED][5487](https://github.com/stripe/stripe-android/pull/5487) Updated Google Pay button to match new brand guidelines.
+* [ADDED][5502](https://github.com/stripe/stripe-android/pull/5502) Added phone number minimum length
+  validation
+
+## 20.11.0 - 2022-08-29
+This release adds postal code validation for PaymentSheet and fixed a fileprovider naming bug for Identity.
+
+### PaymentSheet
+
+* [ADDED][5456](https://github.com/stripe/stripe-android/pull/5456) Added postal code validation.
+
+### Identity 
+
+* [FIXED][5474](https://github.com/stripe/stripe-android/pull/5474) Update fileprovider name.
+
 ## 20.10.0 - 2022-08-22
 This release contains several bug fixes for PaymentSheet and binary size optimization for Identity.
 

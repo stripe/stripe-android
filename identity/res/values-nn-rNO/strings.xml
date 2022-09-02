@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Instructional text during selfie is being captured -->
-  <string name="capturing">Tar bilete ...</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">Appinnstillingar</string>
   <!-- Description of back of driver's license image -->
@@ -15,6 +13,8 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="camera_permission">Kameraløyve</string>
   <string name="camera_permission_rationale">Denne appen bruker kameraet til å scanne ID-dokumenta dine og tek bilder for å verifisere identiten din.</string>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Tar bilete ...</string>
   <!-- Description of the check mark, used for A11Y -->
   <string name="check_mark">Huk av for å indikere at innfanginga av dokumentet var vellykka</string>
   <!-- Text for choosing a photo from gallery -->

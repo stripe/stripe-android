@@ -30,7 +30,7 @@ internal class InputAddressViewModel @Inject constructor(
     private val eventReporter: AddressLauncherEventReporter,
     formControllerProvider: Provider<FormControllerSubcomponent.Builder>
 ) : ViewModel() {
-    private val _collectedAddress = MutableStateFlow(args.config?.defaultValues?.toAddressDetails())
+    private val _collectedAddress = MutableStateFlow(args.config?.address)
     val collectedAddress: StateFlow<AddressDetails?> = _collectedAddress
 
     private val _formController = MutableStateFlow<FormController?>(null)
@@ -67,14 +67,14 @@ internal class InputAddressViewModel @Inject constructor(
         viewModelScope.launch {
             collectedAddress.collect { addressDetails ->
                 val initialValues: Map<IdentifierSpec, String?> = addressDetails
-                    ?.toIdentifierMap(billingSameAsShipping = false)
+                    ?.toIdentifierMap()
                     ?: emptyMap()
-
                 _formController.value = formControllerProvider.get()
                     .viewOnlyFields(emptySet())
                     .viewModelScope(viewModelScope)
                     .stripeIntent(null)
                     .merchantName("")
+                    .shippingValues(null)
                     .formSpec(buildFormSpec(addressDetails?.address?.line1 == null))
                     .initialValues(initialValues)
                     .build().formController
@@ -82,7 +82,7 @@ internal class InputAddressViewModel @Inject constructor(
         }
 
         // allows merchants to check the box by default and to restore the value later.
-        args.config?.defaultValues?.isCheckboxSelected?.let {
+        args.config?.address?.isCheckboxSelected?.let {
             _checkboxChecked.value = it
         }
     }

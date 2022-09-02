@@ -41,14 +41,15 @@ class InputAddressViewModelTest {
             whenever(viewModelScope(anyOrNull())).thenReturn(this)
             whenever(merchantName(anyOrNull())).thenReturn(this)
             whenever(stripeIntent(anyOrNull())).thenReturn(this)
+            whenever(shippingValues(anyOrNull())).thenReturn(this)
             whenever(build()).thenReturn(formControllerSubcomponent)
         }
     }
     private val eventReporter = mock<AddressLauncherEventReporter>()
 
-    private fun createViewModel(defaultAddress: AddressLauncher.DefaultAddressDetails? = null): InputAddressViewModel {
-        defaultAddress?.let {
-            whenever(config.defaultValues).thenReturn(defaultAddress)
+    private fun createViewModel(address: AddressDetails? = null): InputAddressViewModel {
+        address?.let {
+            whenever(config.address).thenReturn(address)
         }
         whenever(args.config).thenReturn(config)
         return InputAddressViewModel(
@@ -90,16 +91,16 @@ class InputAddressViewModelTest {
 
     @Test
     fun `default address from merchant is parsed`() = runTest(UnconfinedTestDispatcher()) {
-        val expectedAddress = AddressLauncher.DefaultAddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
+        val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
 
         val viewModel = createViewModel(expectedAddress)
-        assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress.toAddressDetails())
+        assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
     }
 
     @Test
     fun `viewModel emits onComplete event`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel(
-            AddressLauncher.DefaultAddressDetails(
+            AddressDetails(
                 address = PaymentSheet.Address(
                     line1 = "99 Broadway St",
                     city = "Seattle",
@@ -126,7 +127,7 @@ class InputAddressViewModelTest {
     @Test
     fun `default checkbox should emit true to start if passed by merchant`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel(
-            AddressLauncher.DefaultAddressDetails(
+            AddressDetails(
                 isCheckboxSelected = true
             )
         )
@@ -136,7 +137,7 @@ class InputAddressViewModelTest {
     @Test
     fun `default checkbox should emit false to start if passed by merchant`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel(
-            AddressLauncher.DefaultAddressDetails(
+            AddressDetails(
                 isCheckboxSelected = false
             )
         )

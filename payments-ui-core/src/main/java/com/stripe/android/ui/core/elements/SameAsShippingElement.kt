@@ -20,4 +20,10 @@ data class SameAsShippingElement(
             )
         }
     }
+
+    override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
+        rawValuesMap[identifier]?.let {
+            controller.onRawValueChange(it)
+        }
+    }
 }

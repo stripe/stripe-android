@@ -24,7 +24,8 @@ data class ConsumerPaymentDetails internal constructor(
         val expiryYear: Int,
         val expiryMonth: Int,
         val brand: CardBrand,
-        val last4: String
+        val last4: String,
+        val cvcCheck: CvcCheck
     ) : PaymentDetails(id, isDefault, Companion.type) {
         companion object {
             const val type = "card"

@@ -53,8 +53,10 @@ private fun SignUpBodyPreview() {
                 merchantName = "Example, Inc.",
                 emailController = SimpleTextFieldController.createEmailSectionController("email"),
                 phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
-                signUpState = SignUpState.InputtingPhone,
+                nameController = SimpleTextFieldController.createNameSectionController("My Name"),
+                signUpState = SignUpState.InputtingPhoneOrName,
                 isReadyToSignUp = false,
+                requiresNameCollection = true,
                 errorMessage = null,
                 onSignUpClick = {}
             )
@@ -75,15 +77,17 @@ internal fun SignUpBody(
     )
 
     val signUpState by signUpViewModel.signUpState.collectAsState()
-    val isReadyToSignUp by signUpViewModel.isReadyToSignUp.collectAsState(false)
+    val isReadyToSignUp by signUpViewModel.isReadyToSignUp.collectAsState()
     val errorMessage by signUpViewModel.errorMessage.collectAsState()
 
     SignUpBody(
         merchantName = signUpViewModel.merchantName,
         emailController = signUpViewModel.emailController,
         phoneNumberController = signUpViewModel.phoneController,
+        nameController = signUpViewModel.nameController,
         signUpState = signUpState,
         isReadyToSignUp = isReadyToSignUp,
+        requiresNameCollection = signUpViewModel.requiresNameCollection,
         errorMessage = errorMessage,
         onSignUpClick = signUpViewModel::onSignUpClick
     )
@@ -95,8 +99,10 @@ internal fun SignUpBody(
     merchantName: String,
     emailController: TextFieldController,
     phoneNumberController: PhoneNumberController,
+    nameController: TextFieldController,
     signUpState: SignUpState,
     isReadyToSignUp: Boolean,
+    requiresNameCollection: Boolean,
     errorMessage: ErrorMessage?,
     onSignUpClick: () -> Unit
 ) {
@@ -128,15 +134,29 @@ internal fun SignUpBody(
             )
         }
         AnimatedVisibility(
-            visible = signUpState == SignUpState.InputtingPhone
+            visible = signUpState == SignUpState.InputtingPhoneOrName
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 PaymentsThemeForLink {
                     PhoneNumberCollectionSection(
                         enabled = true,
                         phoneNumberController = phoneNumberController,
-                        requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty()
+                        requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
+                        imeAction = if (requiresNameCollection) {
+                            ImeAction.Next
+                        } else {
+                            ImeAction.Done
+                        }
                     )
+
+                    if (requiresNameCollection) {
+                        TextFieldSection(
+                            textFieldController = nameController,
+                            imeAction = ImeAction.Done,
+                            enabled = true
+                        )
+                    }
+
                     LinkTerms(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -156,11 +176,12 @@ internal fun SignUpBody(
                         PrimaryButtonState.Enabled
                     } else {
                         PrimaryButtonState.Disabled
+                    },
+                    onButtonClick = {
+                        onSignUpClick()
+                        keyboardController?.hide()
                     }
-                ) {
-                    onSignUpClick()
-                    keyboardController?.hide()
-                }
+                )
             }
         }
     }
@@ -180,7 +201,7 @@ internal fun EmailCollectionSection(
     ) {
         TextFieldSection(
             textFieldController = emailController,
-            imeAction = if (signUpState == SignUpState.InputtingPhone) {
+            imeAction = if (signUpState == SignUpState.InputtingPhoneOrName) {
                 ImeAction.Next
             } else {
                 ImeAction.Done

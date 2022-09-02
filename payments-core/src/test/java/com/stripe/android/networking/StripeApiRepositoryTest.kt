@@ -1713,6 +1713,7 @@ internal class StripeApiRepositoryTest {
             val email = "email@example.com"
             val phoneNumber = "phone number"
             val country = "US"
+            val name = "name"
             val locale = Locale.US
             val cookie = "cookie1"
             val consentAction = ConsumerSignUpConsentAction.Button
@@ -1720,6 +1721,7 @@ internal class StripeApiRepositoryTest {
                 email,
                 phoneNumber,
                 country,
+                name,
                 locale,
                 cookie,
                 consentAction,
@@ -1733,6 +1735,7 @@ internal class StripeApiRepositoryTest {
                 assertEquals(this["email_address"], email)
                 assertEquals(this["phone_number"], phoneNumber)
                 assertEquals(this["country"], country)
+                assertEquals(this["legal_name"], name)
                 assertEquals(this["locale"], locale.toLanguageTag())
                 assertEquals(this["consent_action"], "button_mobile")
                 withNestedParams("cookies") {

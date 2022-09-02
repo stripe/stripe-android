@@ -89,12 +89,13 @@ class LinkApiRepositoryTest {
         val email = "email@example.com"
         val phone = "phone"
         val country = "US"
+        val name = "name"
         val cookie = "cookie2"
         linkRepository.consumerSignUp(
             email,
             phone,
             country,
-            cookie,
+           name, cookie,
             ConsumerSignUpConsentAction.Checkbox
         )
 
@@ -102,6 +103,7 @@ class LinkApiRepositoryTest {
             eq(email),
             eq(phone),
             eq(country),
+            eq(name),
             eq(Locale.US),
             eq(cookie),
             eq(ConsumerSignUpConsentAction.Checkbox),
@@ -114,21 +116,21 @@ class LinkApiRepositoryTest {
         val consumerSession = mock<ConsumerSession>()
         whenever(
             stripeRepository.consumerSignUp(
+                email = any(),
+                phoneNumber = any(),
+                country = any(),
+                name = anyOrNull(),
+                locale = anyOrNull(),
+                authSessionCookie = anyOrNull(),
                 any(),
-                any(),
-                any(),
-                any(),
-                anyOrNull(),
-                any(),
-                any()
+                requestOptions = any()
             )
-        )
-            .thenReturn(consumerSession)
+        ).thenReturn(consumerSession)
 
         val result = linkRepository.consumerSignUp(
             "email",
             "phone",
-            "country",
+            "name", "country",
             "cookie",
             ConsumerSignUpConsentAction.Checkbox
         )
@@ -141,21 +143,21 @@ class LinkApiRepositoryTest {
     fun `consumerSignUp catches exception and returns failure`() = runTest {
         whenever(
             stripeRepository.consumerSignUp(
+                email = any(),
+                phoneNumber = any(),
+                country = any(),
+                name = anyOrNull(),
+                locale = anyOrNull(),
+                authSessionCookie = anyOrNull(),
                 any(),
-                any(),
-                any(),
-                any(),
-                anyOrNull(),
-                any(),
-                any()
+                requestOptions = any()
             )
-        )
-            .thenThrow(RuntimeException("error"))
+        ).thenThrow(RuntimeException("error"))
 
         val result = linkRepository.consumerSignUp(
             "email",
             "phone",
-            "country",
+            "name", "country",
             "cookie",
             ConsumerSignUpConsentAction.Button
         )
@@ -449,7 +451,7 @@ class LinkApiRepositoryTest {
         val secret = "secret"
         val consumerKey = "key"
 
-        linkRepository.createPaymentDetails(
+        linkRepository.createBankAccountPaymentDetails(
             financialConnectionsAccountId = accountId,
             consumerSessionClientSecret = secret,
             consumerPublishableKey = consumerKey
@@ -473,7 +475,7 @@ class LinkApiRepositoryTest {
             whenever(stripeRepository.createPaymentDetails(any(), any<String>(), any()))
                 .thenReturn(paymentDetails)
 
-            val result = linkRepository.createPaymentDetails(
+            val result = linkRepository.createBankAccountPaymentDetails(
                 financialConnectionsAccountId = accountId,
                 consumerSessionClientSecret = secret,
                 consumerPublishableKey = consumerKey
@@ -492,7 +494,7 @@ class LinkApiRepositoryTest {
             whenever(stripeRepository.createPaymentDetails(any(), any<String>(), any()))
                 .thenThrow(RuntimeException("error"))
 
-            val result = linkRepository.createPaymentDetails(
+            val result = linkRepository.createBankAccountPaymentDetails(
                 financialConnectionsAccountId = accountId,
                 consumerSessionClientSecret = secret,
                 consumerPublishableKey = consumerKey
@@ -507,8 +509,7 @@ class LinkApiRepositoryTest {
         val email = "email@stripe.com"
         val consumerKey = "key"
 
-        linkRepository.createPaymentDetails(
-            paymentMethod = SupportedPaymentMethod.Card,
+        linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             userEmail = email,
             stripeIntent = paymentIntent,
@@ -543,8 +544,7 @@ class LinkApiRepositoryTest {
             val secret = "secret"
             val email = "email@stripe.com"
 
-            linkRepository.createPaymentDetails(
-                paymentMethod = SupportedPaymentMethod.Card,
+            linkRepository.createCardPaymentDetails(
                 paymentMethodCreateParams = cardPaymentMethodCreateParams,
                 userEmail = email,
                 stripeIntent = paymentIntent,
@@ -587,8 +587,7 @@ class LinkApiRepositoryTest {
         )
             .thenReturn(paymentDetails)
 
-        val result = linkRepository.createPaymentDetails(
-            paymentMethod = SupportedPaymentMethod.Card,
+        val result = linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             userEmail = email,
             stripeIntent = paymentIntent,
@@ -634,8 +633,7 @@ class LinkApiRepositoryTest {
         )
             .thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.createPaymentDetails(
-            paymentMethod = SupportedPaymentMethod.Card,
+        val result = linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             userEmail = "email@stripe.com",
             stripeIntent = paymentIntent,

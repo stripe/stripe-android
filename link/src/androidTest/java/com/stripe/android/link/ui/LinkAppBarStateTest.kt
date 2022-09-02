@@ -37,7 +37,8 @@ internal class LinkAppBarStateTest {
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_close,
-            hideHeader = false,
+            showHeader = true,
+            showOverflowMenu = false,
             email = null
         )
 
@@ -54,7 +55,8 @@ internal class LinkAppBarStateTest {
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_close,
-            hideHeader = false,
+            showHeader = true,
+            showOverflowMenu = false,
             email = null
         )
 
@@ -71,7 +73,8 @@ internal class LinkAppBarStateTest {
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_close,
-            hideHeader = false,
+            showHeader = true,
+            showOverflowMenu = false,
             email = "someone@stripe.com"
         )
 
@@ -88,7 +91,8 @@ internal class LinkAppBarStateTest {
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_close,
-            hideHeader = false,
+            showHeader = true,
+            showOverflowMenu = true,
             email = "someone@stripe.com"
         )
 
@@ -105,7 +109,8 @@ internal class LinkAppBarStateTest {
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_back,
-            hideHeader = true,
+            showHeader = false,
+            showOverflowMenu = false,
             email = null
         )
 
@@ -122,7 +127,8 @@ internal class LinkAppBarStateTest {
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_back,
-            hideHeader = true,
+            showHeader = false,
+            showOverflowMenu = false,
             email = null
         )
 
@@ -139,7 +145,8 @@ internal class LinkAppBarStateTest {
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_close,
-            hideHeader = false,
+            showHeader = true,
+            showOverflowMenu = false,
             email = null
         )
 

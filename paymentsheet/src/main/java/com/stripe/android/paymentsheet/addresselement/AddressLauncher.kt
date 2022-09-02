@@ -78,7 +78,7 @@ internal class AddressLauncher internal constructor(
         /**
          * The values to pre-populate shipping address fields with.
          */
-        val defaultValues: DefaultAddressDetails? = null,
+        val address: AddressDetails? = null,
 
         /**
          * A list of two-letter country codes representing countries the customers can select.
@@ -107,32 +107,25 @@ internal class AddressLauncher internal constructor(
          * Google Places api key used to provide autocomplete suggestions
          * When null, autocomplete is disabled.
          */
-        val googlePlacesApiKey: String? = null,
-
-        /**
-         * The label of a checkbox displayed below other fields. If null, the checkbox is not displayed.
-         * Defaults to null
-         */
-        val checkboxLabel: String? = null
+        val googlePlacesApiKey: String? = null
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
         class Builder {
-            var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
-            var defaultValues: DefaultAddressDetails? = null
-            var allowedCountries: Set<String> = emptySet()
-            var buttonTitle: String? = null
-            var additionalFields: AdditionalFieldsConfiguration? = null
-            var title: String? = null
-            var googlePlacesApiKey: String? = null
-            var checkboxLabel: String? = null
+            private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
+            private var address: AddressDetails? = null
+            private var allowedCountries: Set<String> = emptySet()
+            private var buttonTitle: String? = null
+            private var additionalFields: AdditionalFieldsConfiguration? = null
+            private var title: String? = null
+            private var googlePlacesApiKey: String? = null
 
             fun appearance(appearance: PaymentSheet.Appearance) =
                 apply { this.appearance = appearance }
 
-            fun defaultValues(defaultValues: DefaultAddressDetails?) =
-                apply { this.defaultValues = defaultValues }
+            fun address(address: AddressDetails?) =
+                apply { this.address = address }
 
             fun allowedCountries(allowedCountries: Set<String>) =
                 apply { this.allowedCountries = allowedCountries }
@@ -149,18 +142,14 @@ internal class AddressLauncher internal constructor(
             fun googlePlacesApiKey(googlePlacesApiKey: String?) =
                 apply { this.googlePlacesApiKey = googlePlacesApiKey }
 
-            fun checkBoxLabel(checkboxLabel: String?) =
-                apply { this.checkboxLabel = checkboxLabel }
-
             fun build() = Configuration(
                 appearance,
-                defaultValues,
+                address,
                 allowedCountries,
                 buttonTitle,
                 additionalFields,
                 title,
-                googlePlacesApiKey,
-                checkboxLabel
+                googlePlacesApiKey
             )
         }
     }
@@ -194,28 +183,4 @@ internal class AddressLauncher internal constructor(
             REQUIRED
         }
     }
-
-    @Parcelize
-    data class DefaultAddressDetails(
-        /**
-         * The customer's full name
-         */
-        val name: String? = null,
-
-        /**
-         * The customer's address
-         */
-        val address: PaymentSheet.Address? = null,
-
-        /**
-         * The customer's phone number, without formatting e.g. "5551234567"
-         */
-        val phoneNumber: String? = null,
-
-        /**
-         * Whether or not your custom checkbox is intially selected.
-         * Note: The checkbox is displayed below the other fields when AdditionalFieldsConfiguration.checkboxLabel is set.
-         */
-        val isCheckboxSelected: Boolean? = null
-    ) : Parcelable
 }

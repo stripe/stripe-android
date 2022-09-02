@@ -7,6 +7,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.PaymentDetailsFixtures
+import com.stripe.android.link.ui.wallet.PaymentDetailsResult
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -47,6 +48,7 @@ class CardEditViewModelTest {
             whenever(viewModelScope(anyOrNull())).thenReturn(this)
             whenever(merchantName(anyOrNull())).thenReturn(this)
             whenever(stripeIntent(anyOrNull())).thenReturn(this)
+            whenever(shippingValues(anyOrNull())).thenReturn(this)
             whenever(build()).thenReturn(formControllerSubcomponent)
         }
     }
@@ -85,7 +87,7 @@ class CardEditViewModelTest {
         val viewModel = createViewModel()
         viewModel.initWithPaymentDetailsId("UNKNOWN_ID")
 
-        verify(navigator).setResult(any(), argWhere { it is CardEditViewModel.Result.Failure })
+        verify(navigator).setResult(any(), argWhere { it is PaymentDetailsResult.Failure })
     }
 
     @Test
@@ -96,7 +98,7 @@ class CardEditViewModelTest {
         val viewModel = createViewModel()
         viewModel.initWithPaymentDetailsId("any")
 
-        verify(navigator).setResult(any(), argWhere { it is CardEditViewModel.Result.Failure })
+        verify(navigator).setResult(any(), argWhere { it is PaymentDetailsResult.Failure })
     }
 
     @Test
@@ -171,12 +173,12 @@ class CardEditViewModelTest {
     @Test
     fun `dismiss navigates back`() = runTest {
         val viewModel = createAndInitViewModel()
-        viewModel.dismiss()
+        viewModel.dismiss(PaymentDetailsResult.Cancelled, userInitiated = true)
         verify(navigator).setResult(
-            eq(CardEditViewModel.Result.KEY),
-            argWhere { it is CardEditViewModel.Result.Cancelled }
+            eq(PaymentDetailsResult.KEY),
+            argWhere { it is PaymentDetailsResult.Cancelled }
         )
-        verify(navigator).onBack()
+        verify(navigator).onBack(userInitiated = true)
     }
 
     private fun createViewModel() =

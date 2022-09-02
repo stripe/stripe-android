@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Instructional text during selfie is being captured -->
-  <string name="capturing">Aufnahme läuft ...</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">App-Einstellungen</string>
   <!-- Description of back of driver's license image -->
@@ -15,6 +13,8 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="camera_permission">Kameraberechtigung</string>
   <string name="camera_permission_rationale">Diese App verwendet die Kamera, um Ihre Ausweisunterlagen zu scannen, und macht Fotos, um Ihre Identität zu bestätigen.</string>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Aufnahme läuft ...</string>
   <!-- Description of the check mark, used for A11Y -->
   <string name="check_mark">Das Häkchen gibt an, dass die Dokumentenerfassung erfolgreich war</string>
   <!-- Text for choosing a photo from gallery -->

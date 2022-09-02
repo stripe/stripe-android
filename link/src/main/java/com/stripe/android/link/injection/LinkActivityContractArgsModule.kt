@@ -38,10 +38,5 @@ internal interface LinkActivityContractArgsModule {
         @Singleton
         @Named(CUSTOMER_PHONE)
         fun provideCustomerPhone(args: LinkActivityContract.Args) = args.customerPhone
-
-        @Provides
-        @Singleton
-        @Named(INITIAL_FORM_VALUES_MAP)
-        fun provideInitialFormValuesMap(args: LinkActivityContract.Args) = args.initialFormValuesMap
     }
 }

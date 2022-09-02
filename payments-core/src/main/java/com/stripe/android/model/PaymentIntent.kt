@@ -82,6 +82,12 @@ data class PaymentIntent internal constructor(
     val confirmationMethod: ConfirmationMethod = ConfirmationMethod.Automatic,
 
     /**
+     * Country code of the user.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val countryCode: String?,
+
+    /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     override val created: Long,

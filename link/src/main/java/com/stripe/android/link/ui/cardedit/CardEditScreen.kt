@@ -38,6 +38,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.ui.forms.Form
+import com.stripe.android.link.ui.wallet.PaymentDetailsResult
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 @Preview
@@ -100,7 +101,9 @@ internal fun CardEditBody(
                         viewModel.updateCard(it)
                     }
                 },
-                onCancelClick = viewModel::dismiss
+                onCancelClick = {
+                    viewModel.dismiss(PaymentDetailsResult.Cancelled, userInitiated = true)
+                }
             ) {
                 Form(
                     it,

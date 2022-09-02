@@ -23,6 +23,7 @@ internal class CardBillingAddressElementTest {
         addressRepository,
         emptySet(),
         dropdownFieldController,
+        null,
         null
     )
 

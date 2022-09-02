@@ -17,7 +17,15 @@ sealed class LinkActivityResult(
      * The user cancelled the Link flow without completing it.
      */
     @Parcelize
-    object Canceled : LinkActivityResult(Activity.RESULT_CANCELED)
+    data class Canceled(
+        val reason: Reason
+    ) : LinkActivityResult(Activity.RESULT_CANCELED) {
+        enum class Reason {
+            BackPressed,
+            PayAnotherWay,
+            LoggedOut
+        }
+    }
 
     /**
      * Something went wrong. See [error] for more information.

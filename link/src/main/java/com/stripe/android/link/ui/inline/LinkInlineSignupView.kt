@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,6 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.EmailCollectionSection
 import com.stripe.android.link.ui.signup.SignUpState
@@ -45,6 +47,7 @@ import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.ui.core.elements.TextFieldSection
 import com.stripe.android.ui.core.elements.menu.Checkbox
 import com.stripe.android.ui.core.getBorderStroke
 import com.stripe.android.ui.core.injection.NonFallbackInjector
@@ -60,9 +63,11 @@ private fun Preview() {
                 merchantName = "Example, Inc.",
                 emailController = SimpleTextFieldController.createEmailSectionController("email@me.co"),
                 phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
+                nameController = SimpleTextFieldController.createNameSectionController("My Name"),
                 signUpState = SignUpState.InputtingEmail,
                 enabled = true,
                 expanded = true,
+                requiresNameCollection = true,
                 toggleExpanded = {},
                 onUserInteracted = {}
             )
@@ -103,9 +108,11 @@ private fun LinkInlineSignup(
         merchantName = viewModel.merchantName,
         emailController = viewModel.emailController,
         phoneNumberController = viewModel.phoneController,
+        nameController = viewModel.nameController,
         signUpState = signUpState,
         enabled = enabled,
         expanded = isExpanded,
+        requiresNameCollection = viewModel.requiresNameCollection,
         toggleExpanded = viewModel::toggleExpanded,
         onUserInteracted = onUserInteracted
     )
@@ -116,9 +123,11 @@ internal fun LinkInlineSignup(
     merchantName: String,
     emailController: TextFieldController,
     phoneNumberController: PhoneNumberController,
+    nameController: TextFieldController,
     signUpState: SignUpState,
     enabled: Boolean,
     expanded: Boolean,
+    requiresNameCollection: Boolean,
     toggleExpanded: () -> Unit,
     onUserInteracted: () -> Unit
 ) {
@@ -131,11 +140,11 @@ internal fun LinkInlineSignup(
                     .fillMaxWidth()
                     .border(
                         border = MaterialTheme.getBorderStroke(isSelected = false),
-                        shape = MaterialTheme.shapes.medium
+                        shape = MaterialTheme.linkShapes.medium
                     )
                     .background(
                         color = MaterialTheme.paymentsColors.component,
-                        shape = MaterialTheme.shapes.medium
+                        shape = MaterialTheme.linkShapes.medium
                     )
             ) {
                 Row(
@@ -187,15 +196,29 @@ internal fun LinkInlineSignup(
                         )
 
                         AnimatedVisibility(
-                            visible = signUpState == SignUpState.InputtingPhone
+                            visible = signUpState == SignUpState.InputtingPhoneOrName
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 PhoneNumberCollectionSection(
                                     enabled = enabled,
                                     phoneNumberController = phoneNumberController,
                                     requestFocusWhenShown =
-                                    phoneNumberController.initialPhoneNumber.isEmpty()
+                                    phoneNumberController.initialPhoneNumber.isEmpty(),
+                                    imeAction = if (requiresNameCollection) {
+                                        ImeAction.Next
+                                    } else {
+                                        ImeAction.Done
+                                    }
                                 )
+
+                                if (requiresNameCollection) {
+                                    TextFieldSection(
+                                        textFieldController = nameController,
+                                        imeAction = ImeAction.Done,
+                                        enabled = enabled
+                                    )
+                                }
+
                                 LinkTerms(
                                     modifier = Modifier.padding(top = 8.dp),
                                     textAlign = TextAlign.Left
