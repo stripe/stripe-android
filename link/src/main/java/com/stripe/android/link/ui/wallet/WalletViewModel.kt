@@ -18,14 +18,20 @@ import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.address.toConfirmPaymentIntentShipping
+import com.stripe.android.ui.core.elements.CvcConfig
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.DateConfig
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -53,6 +59,19 @@ internal class WalletViewModel @Inject constructor(
 
     private val _selectedItem = MutableStateFlow<ConsumerPaymentDetails.PaymentDetails?>(null)
     val selectedItem: StateFlow<ConsumerPaymentDetails.PaymentDetails?> = _selectedItem
+
+    val expiryDateController = SimpleTextFieldController(
+        textFieldConfig = DateConfig(),
+        initialValue = null
+    )
+
+    val cvcController = CvcController(
+        cvcTextFieldConfig = CvcConfig(),
+        cardBrandFlow = selectedItem.map {
+            (it as? ConsumerPaymentDetails.Card)?.brand ?: CardBrand.Unknown
+        },
+        initialValue = null
+    )
 
     private val _primaryButtonState = MutableStateFlow(PrimaryButtonState.Disabled)
     val primaryButtonState: StateFlow<PrimaryButtonState> = _primaryButtonState

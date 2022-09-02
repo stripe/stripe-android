@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.wallet
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,6 +41,7 @@ import com.stripe.android.link.R
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.HorizontalPadding
+import com.stripe.android.link.theme.PaymentsThemeForLink
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.BottomSheetContent
@@ -54,41 +56,55 @@ import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.CvcElement
+import com.stripe.android.ui.core.elements.DateConfig
 import com.stripe.android.ui.core.elements.Html
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.ui.core.elements.SectionElementUI
+import com.stripe.android.ui.core.elements.SimpleTextElement
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.injection.NonFallbackInjector
+import kotlinx.coroutines.flow.flowOf
 
 @Preview
 @Composable
 private fun WalletBodyPreview() {
+    val paymentDetailsList = listOf(
+        ConsumerPaymentDetails.Card(
+            "id1",
+            true,
+            2022,
+            1,
+            CardBrand.Visa,
+            "4242",
+            CvcCheck.Pass
+        ),
+        ConsumerPaymentDetails.Card(
+            "id2",
+            false,
+            2023,
+            11,
+            CardBrand.MasterCard,
+            "4444",
+            CvcCheck.Fail
+        )
+    )
+
     DefaultLinkTheme {
         Surface {
             WalletBody(
-                paymentDetailsList = listOf(
-                    ConsumerPaymentDetails.Card(
-                        "id1",
-                        true,
-                        2022,
-                        12,
-                        CardBrand.Visa,
-                        "4242",
-                        CvcCheck.Pass
-                    ),
-                    ConsumerPaymentDetails.Card(
-                        "id2",
-                        false,
-                        2023,
-                        11,
-                        CardBrand.MasterCard,
-                        "4444",
-                        CvcCheck.Fail
-                    )
-                ),
+                paymentDetailsList = paymentDetailsList,
                 supportedTypes = SupportedPaymentMethod.allTypes,
-                selectedItem = null,
+                selectedItem = paymentDetailsList.first(),
                 isExpanded = true,
                 primaryButtonLabel = "Pay $10.99",
                 primaryButtonState = PrimaryButtonState.Enabled,
-                errorMessage = null,
+                errorMessage = ErrorMessage.Raw("Something went wrong"),
+                expiryDateController = SimpleTextFieldController(textFieldConfig = DateConfig()),
+                cvcController = CvcController(cardBrandFlow = flowOf(CardBrand.Visa)),
                 setExpanded = {},
                 onItemSelected = {},
                 onAddNewPaymentMethodClick = {},
@@ -142,6 +158,8 @@ internal fun WalletBody(
             ),
             primaryButtonState = primaryButtonState,
             errorMessage = errorMessage,
+            expiryDateController = viewModel.expiryDateController,
+            cvcController = viewModel.cvcController,
             setExpanded = viewModel::setExpanded,
             onItemSelected = viewModel::onItemSelected,
             onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
@@ -163,6 +181,8 @@ internal fun WalletBody(
     primaryButtonLabel: String,
     primaryButtonState: PrimaryButtonState,
     errorMessage: ErrorMessage?,
+    expiryDateController: TextFieldController,
+    cvcController: CvcController,
     setExpanded: (Boolean) -> Unit,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onAddNewPaymentMethodClick: () -> Unit,
@@ -243,6 +263,7 @@ internal fun WalletBody(
                 }
             )
         }
+
         if (selectedItem is ConsumerPaymentDetails.BankAccount) {
             Html(
                 html = stringResource(R.string.wallet_bank_account_terms),
@@ -257,13 +278,24 @@ internal fun WalletBody(
                 )
             )
         }
+
         Spacer(modifier = Modifier.height(20.dp))
+
         errorMessage?.let {
             ErrorText(
                 text = it.getMessage(LocalContext.current.resources),
                 modifier = Modifier.fillMaxWidth()
             )
         }
+
+        val card = selectedItem as? ConsumerPaymentDetails.Card
+        if (card != null && card.isExpired) {
+            ExpiryDateAndCvcForm(
+                expiryDateController = expiryDateController,
+                cvcController = cvcController
+            )
+        }
+
         PrimaryButton(
             label = primaryButtonLabel,
             state = if (selectedItemIsValid) {
@@ -274,11 +306,54 @@ internal fun WalletBody(
             onButtonClick = onPrimaryButtonClick,
             iconEnd = R.drawable.stripe_ic_lock
         )
+
         SecondaryButton(
             enabled = !primaryButtonState.isBlocking,
             label = stringResource(id = R.string.wallet_pay_another_way),
             onClick = onPayAnotherWayClick
         )
+    }
+}
+
+@Composable
+fun ExpiryDateAndCvcForm(
+    expiryDateController: TextFieldController,
+    cvcController: CvcController
+) {
+    val expiryDateElement = remember(expiryDateController) {
+        SimpleTextElement(
+            identifier = IdentifierSpec.Generic("date"),
+            controller = expiryDateController
+        )
+    }
+
+    val cvcElement = remember(cvcController) {
+        CvcElement(
+            _identifier = IdentifierSpec.CardCvc,
+            controller = cvcController
+        )
+    }
+
+    PaymentsThemeForLink {
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Box(modifier = Modifier.weight(0.5f)) {
+                SectionElementUI(
+                    enabled = true,
+                    element = SectionElement.wrap(expiryDateElement),
+                    hiddenIdentifiers = emptyList(),
+                    lastTextFieldIdentifier = cvcElement.identifier
+                )
+            }
+
+            Box(modifier = Modifier.weight(0.5f)) {
+                SectionElementUI(
+                    enabled = true,
+                    element = SectionElement.wrap(cvcElement),
+                    hiddenIdentifiers = emptyList(),
+                    lastTextFieldIdentifier = cvcElement.identifier
+                )
+            }
+        }
     }
 }
 
