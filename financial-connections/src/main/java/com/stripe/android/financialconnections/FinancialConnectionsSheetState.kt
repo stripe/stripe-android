@@ -43,6 +43,11 @@ internal sealed class FinancialConnectionsSheetViewEffect {
     /**
      * Open the AuthFlow.
      */
+
+    data class OpenUrl(
+        val url: String
+    ) : FinancialConnectionsSheetViewEffect()
+
     data class OpenAuthFlowWithUrl(
         val url: String
     ) : FinancialConnectionsSheetViewEffect()

@@ -14,6 +14,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+                <!-- Returning from app2app: returl_url is triggered to reopen the web flow and poll accounts. -->
+                <data
+                    android:host="link-accounts"
+                    android:scheme="stripe-auth"
+                    android:pathPrefix="/login" />
+
                 <!-- End of web AuthFlow success and cancel URIs that begin with "stripe-auth://link-accounts” -->
                 <data
                     android:host="link-accounts"
@@ -29,12 +35,6 @@
                     android:host="native-redirect"
                     android:pathPrefix="/"
                     android:scheme="stripe-auth" />
-
-                <!-- Returning from app2app: returl_url is triggered to reopen the web flow and poll accounts. -->
-                <data
-                    android:host="link-accounts"
-                    android:scheme="stripe-auth"
-                    android:path="/login" />
             </intent-filter>
         </activity>
         <activity

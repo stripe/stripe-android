@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections
 
 import android.content.Intent
 import android.net.Uri
+import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
@@ -9,6 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenUrl
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
@@ -230,12 +232,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             if (receivedUrl?.host == "native-redirect") {
                 copy(
                     authFlowStatus = AuthFlowStatus.APP2APP,
-                    viewEffect = OpenAuthFlowWithUrl(receivedUrl.path!!.replaceFirst("/", ""))
+                    viewEffect = OpenUrl(receivedUrl.toString().replaceFirst("stripe-auth://native-redirect/", ""))
                 )
-            } else if (receivedUrl?.host == "link-accounts" && receivedUrl.path == "login") {
+            } else if (receivedUrl?.host == "link-accounts" && receivedUrl.path == "/login") {
                 copy(
                     authFlowStatus = AuthFlowStatus.APP2APP,
-                    viewEffect = OpenAuthFlowWithUrl(receivedUrl.path!!.replaceFirst("/", ""))
+                    viewEffect = OpenAuthFlowWithUrl(manifest!!.hostedAuthUrl + "&startPolling=true&" + receivedUrl.fragment)
                 )
             }
             else copy(authFlowStatus = AuthFlowStatus.NONE)
@@ -245,6 +247,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 onFatal(state, Exception("Intent url received from web flow is null"))
             } else when {
                 receivedUrl.host == "native-redirect" -> Unit
+                receivedUrl.host == "link-accounts" && receivedUrl.path == "/login" -> Unit
                 receivedUrl.buildUpon().clearQuery().toString() == state.manifest?.successUrl -> {
                     when (state.initialArgs) {
                         is ForData -> fetchFinancialConnectionsSession(state)
@@ -260,6 +263,14 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun setStateWithSideEffect(
+        reducer: FinancialConnectionsSheetState.() -> FinancialConnectionsSheetState,
+        sideEffect: (FinancialConnectionsSheetState) -> Unit = {}
+    ) {
+        setState(reducer)
+        withState { sideEffect(it) }
     }
 
     /**
