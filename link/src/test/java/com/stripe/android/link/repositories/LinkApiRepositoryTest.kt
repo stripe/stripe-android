@@ -95,7 +95,8 @@ class LinkApiRepositoryTest {
             email,
             phone,
             country,
-           name, cookie,
+            name,
+            cookie,
             ConsumerSignUpConsentAction.Checkbox
         )
 
@@ -122,7 +123,7 @@ class LinkApiRepositoryTest {
                 name = anyOrNull(),
                 locale = anyOrNull(),
                 authSessionCookie = anyOrNull(),
-                any(),
+                consentAction = any(),
                 requestOptions = any()
             )
         ).thenReturn(consumerSession)
@@ -130,7 +131,8 @@ class LinkApiRepositoryTest {
         val result = linkRepository.consumerSignUp(
             "email",
             "phone",
-            "name", "country",
+            "country",
+            "name",
             "cookie",
             ConsumerSignUpConsentAction.Checkbox
         )
@@ -149,7 +151,7 @@ class LinkApiRepositoryTest {
                 name = anyOrNull(),
                 locale = anyOrNull(),
                 authSessionCookie = anyOrNull(),
-                any(),
+                consentAction = any(),
                 requestOptions = any()
             )
         ).thenThrow(RuntimeException("error"))
@@ -157,7 +159,8 @@ class LinkApiRepositoryTest {
         val result = linkRepository.consumerSignUp(
             "email",
             "phone",
-            "name", "country",
+            "country",
+            "name",
             "cookie",
             ConsumerSignUpConsentAction.Button
         )

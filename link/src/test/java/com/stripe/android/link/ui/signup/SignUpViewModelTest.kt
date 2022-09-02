@@ -18,9 +18,9 @@ import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.signup.SignUpViewModel.Companion.LOOKUP_DEBOUNCE_MS
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -190,6 +190,7 @@ class SignUpViewModelTest {
                 any(),
                 any(),
                 any(),
+                anyOrNull(),
                 eq(ConsumerSignUpConsentAction.Button)
             )
         }

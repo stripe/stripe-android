@@ -189,13 +189,12 @@ class LinkAccountManagerTest {
             accountManager.signInWithUserInput(UserInput.SignUp(EMAIL, phone, country, name))
 
             verify(linkRepository).consumerSignUp(
-                email =eq(EMAIL),
-               phone = eq(phone),
-               country = eq(country),
-               name = eq(name),
-                authSessionCookie = anyOrNull()
-            ,
-                eq(ConsumerSignUpConsentAction.Checkbox)
+                email = eq(EMAIL),
+                phone = eq(phone),
+                country = eq(country),
+                name = eq(name),
+                authSessionCookie = anyOrNull(),
+                consentAction = eq(ConsumerSignUpConsentAction.Checkbox)
             )
             assertThat(accountManager.linkAccount.value).isNotNull()
         }
@@ -225,7 +224,7 @@ class LinkAccountManagerTest {
                     country = anyOrNull(),
                     name = anyOrNull(),
                     authSessionCookie = anyOrNull(),
-                    anyOrNull()
+                    consentAction = anyOrNull()
                 )
             ).thenReturn(Result.failure(Exception()))
 
@@ -454,7 +453,13 @@ class LinkAccountManagerTest {
         val accountManager = accountManager()
         accountManager.setAccountNullable(mockConsumerSession)
 
-        whenever(linkRepository.createBankAccountPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
+        whenever(
+            linkRepository.createBankAccountPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        )
             .thenReturn(
                 Result.failure(AuthenticationException(StripeError())),
                 Result.success(mock())
@@ -476,7 +481,13 @@ class LinkAccountManagerTest {
             val accountManager = accountManager()
             accountManager.setAccountNullable(mockConsumerSession)
 
-            whenever(linkRepository.createBankAccountPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
+            whenever(
+                linkRepository.createBankAccountPaymentDetails(
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull()
+                )
+            )
                 .thenReturn(
                     Result.failure(AuthenticationException(StripeError())),
                     Result.success(mock())
