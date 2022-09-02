@@ -7,7 +7,7 @@ internal object ApiKeyFixtures {
     const val DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET = "las_client_secret_asdf1234"
 
     const val HOSTED_AUTH_URL = "https://stripe.com/auth/flow/start"
-    const val SUCCESS_URL = "stripe-auth://link-accounts/success"
-    const val CANCEL_URL = "stripe-auth://link-accounts/cancel"
+    const val SUCCESS_URL = "stripe-auth://com.example.app/link-accounts/success"
+    const val CANCEL_URL = "stripe-auth://com.example.app/link-accounts/cancel"
     val MANIFEST = FinancialConnectionsSessionManifest(HOSTED_AUTH_URL, SUCCESS_URL, CANCEL_URL)
 }

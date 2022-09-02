@@ -39,15 +39,9 @@ internal data class FinancialConnectionsSheetState(
  *  Mostly one-off actions to be executed by the view will be instances of ViewEffect.
  */
 internal sealed class FinancialConnectionsSheetViewEffect {
-
     /**
      * Open the AuthFlow.
      */
-
-    data class OpenUrl(
-        val url: String
-    ) : FinancialConnectionsSheetViewEffect()
-
     data class OpenAuthFlowWithUrl(
         val url: String
     ) : FinancialConnectionsSheetViewEffect()

@@ -10,7 +10,6 @@ import com.airbnb.mvrx.viewModel
 import com.airbnb.mvrx.withState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
-import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenUrl
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 
@@ -62,12 +61,6 @@ internal class FinancialConnectionsSheetActivity :
                     )
                     is FinishWithResult -> finishWithResult(
                         viewEffect.result
-                    )
-                    is OpenUrl -> startActivity(
-                        CreateBrowserIntentForUrl(
-                            context = this,
-                            uri = Uri.parse(viewEffect.url)
-                        )
                     )
                 }
                 viewModel.onViewEffectLaunched()
