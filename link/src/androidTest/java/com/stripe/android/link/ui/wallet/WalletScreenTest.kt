@@ -39,6 +39,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.CvcCheck
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.junit.Rule
@@ -59,7 +60,8 @@ internal class WalletScreenTest {
             expiryYear = 2022,
             expiryMonth = 12,
             brand = CardBrand.Visa,
-            last4 = "4242"
+            last4 = "4242",
+            cvcCheck = CvcCheck.Pass
         ),
         ConsumerPaymentDetails.Card(
             id = "id2",
@@ -67,7 +69,8 @@ internal class WalletScreenTest {
             expiryYear = 2023,
             expiryMonth = 11,
             brand = CardBrand.MasterCard,
-            last4 = "4444"
+            last4 = "4444",
+            cvcCheck = CvcCheck.Fail
         ),
         ConsumerPaymentDetails.Card(
             id = "id3",
@@ -75,7 +78,8 @@ internal class WalletScreenTest {
             expiryYear = 2023,
             expiryMonth = 11,
             brand = CardBrand.AmericanExpress,
-            last4 = "0005"
+            last4 = "0005",
+            cvcCheck = CvcCheck.Unchecked
         ),
         ConsumerPaymentDetails.BankAccount(
             id = "id4",
