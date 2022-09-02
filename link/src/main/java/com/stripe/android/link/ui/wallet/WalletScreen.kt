@@ -316,7 +316,7 @@ internal fun WalletBody(
 }
 
 @Composable
-fun ExpiryDateAndCvcForm(
+internal fun ExpiryDateAndCvcForm(
     expiryDateController: TextFieldController,
     cvcController: CvcController
 ) {

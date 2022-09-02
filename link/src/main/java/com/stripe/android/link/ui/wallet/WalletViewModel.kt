@@ -66,11 +66,9 @@ internal class WalletViewModel @Inject constructor(
     )
 
     val cvcController = CvcController(
-        cvcTextFieldConfig = CvcConfig(),
         cardBrandFlow = selectedItem.map {
             (it as? ConsumerPaymentDetails.Card)?.brand ?: CardBrand.Unknown
-        },
-        initialValue = null
+        }
     )
 
     private val _primaryButtonState = MutableStateFlow(PrimaryButtonState.Disabled)
