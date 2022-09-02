@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -40,6 +41,7 @@ internal fun InputAddressScreen(
     ScrollableColumn(
         modifier = Modifier
             .fillMaxHeight()
+            .imePadding()
             .background(MaterialTheme.colors.surface)
     ) {
         AddressOptionsAppBar(
