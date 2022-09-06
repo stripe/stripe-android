@@ -139,7 +139,7 @@ internal class WalletViewModel @Inject constructor(
             shipping = args.shippingValues?.toConfirmPaymentIntentShipping()
         )
 
-        val cvc = uiState.value.cvcInput.value
+        val cvc = uiState.value.cvcInput.takeIf { it.isComplete }?.value
         val extraParams = if (cvc != null) {
             mapOf("card" to mapOf("cvc" to cvc))
         } else {
