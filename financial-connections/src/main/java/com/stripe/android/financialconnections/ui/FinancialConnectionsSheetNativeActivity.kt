@@ -27,6 +27,7 @@ import com.stripe.android.financialconnections.features.institutionpicker.Instit
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
 import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessScreen
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
+import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -114,6 +115,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             }
             composable(NavigationDirections.success.destination) {
                 SuccessScreen()
+            }
+            composable(NavigationDirections.reset.destination) {
+                ResetScreen()
             }
             composable(NavigationDirections.attachLinkedPaymentAccount.destination) {
                 AttachPaymentScreen()

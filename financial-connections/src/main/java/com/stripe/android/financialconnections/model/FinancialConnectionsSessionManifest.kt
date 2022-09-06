@@ -202,7 +202,7 @@ internal data class FinancialConnectionsSessionManifest(
         SUCCESS("success"),
 
         @SerialName(value = "unexpected_error")
-        UNEXPECTED_ERROR("unexpected_error");
+        UNEXPECTED_ERROR("unexpected_error"),
     }
 
     /**

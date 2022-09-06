@@ -85,6 +85,16 @@ internal interface FinancialConnectionsManifestRepository {
         publicToken: String? = null
     ): FinancialConnectionsAuthorizationSession
 
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun postMarkLinkingMoreAccounts(
+        clientSecret: String
+    ): FinancialConnectionsSessionManifest
+
     companion object {
         operator fun invoke(
             requestExecutor: FinancialConnectionsRequestExecutor,
@@ -220,6 +230,24 @@ private class FinancialConnectionsManifestRepositoryImpl(
         }
     }
 
+    override suspend fun postMarkLinkingMoreAccounts(
+        clientSecret: String,
+    ): FinancialConnectionsSessionManifest {
+        val request = apiRequestFactory.createPost(
+            url = linkMoreAccountsUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsSessionManifest.serializer()
+        ).also {
+            updateCachedManifest("postMarkLinkingMoreAccounts", it)
+        }
+    }
+
     private fun updateActiveInstitution(
         source: String,
         institution: FinancialConnectionsInstitution
@@ -259,5 +287,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal const val consentAcquiredUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/consent_acquired"
+
+        internal const val linkMoreAccountsUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/link_more_accounts"
     }
 }

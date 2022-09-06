@@ -88,6 +88,7 @@
     <string name="stripe_manualentrysuccess_desc_descriptorcode">Expect a $0.01 deposit to the account ending in ••••%1$s in 1–2 business days and an email with additional instructions to verify your bank account.</string>
     <string name="stripe_manualentrysuccess_desc_noaccount_descriptorcode">Expect a $0.01 deposit to your account in 1–2 business days and an email with additional instructions to verify your bank account.</string>
     <string name="stripe_manualentrysuccess_table_title">••••%1$s BANK STATEMENT</string>
+    <string name="success_pane_link_more_accounts">Link another account</string>
     <plurals name="stripe_attachlinkedpaymentaccount_title">
         <item quantity="one">Linking account</item>
         <item quantity="other">Linking accounts</item>

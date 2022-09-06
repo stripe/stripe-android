@@ -28,6 +28,7 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButtonType
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
@@ -37,13 +38,15 @@ internal fun SuccessScreen() {
     val viewModel: SuccessViewModel = mavericksViewModel()
     val state = viewModel.collectAsState()
     BackHandler(enabled = true) {}
-    state.value.payload()?.let { (accessibleDataModel, accounts, disconnectUrl) ->
+    state.value.payload()?.let { payload ->
         SuccessContent(
-            accessibleDataModel = accessibleDataModel,
-            disconnectUrl = disconnectUrl,
-            accounts = accounts.data,
+            accessibleDataModel = payload.accessibleData,
+            disconnectUrl = payload.disconnectUrl,
+            accounts = payload.accounts.data,
+            showLinkAnotherAccount = payload.showLinkAnotherAccount,
             loading = state.value.completeSession is Loading,
             onDoneClick = viewModel::onDoneClick,
+            onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
         )
     }
 }
@@ -55,6 +58,8 @@ private fun SuccessContent(
     accounts: List<PartnerAccount>,
     loading: Boolean,
     onDoneClick: () -> Unit,
+    onLinkAnotherAccountClick: () -> Unit,
+    showLinkAnotherAccount: Boolean,
 ) {
     val uriHandler = LocalUriHandler.current
     FinancialConnectionsScaffold {
@@ -93,6 +98,18 @@ private fun SuccessContent(
                 )
             )
             Spacer(modifier = Modifier.weight(1f))
+            if (showLinkAnotherAccount) {
+                FinancialConnectionsButton(
+                    loading = loading,
+                    type = FinancialConnectionsButtonType.Secondary,
+                    enabled = loading.not(),
+                    onClick = onLinkAnotherAccountClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(text = stringResource(R.string.success_pane_link_more_accounts))
+                }
+            }
             FinancialConnectionsButton(
                 loading = loading,
                 enabled = loading.not(),
@@ -151,7 +168,10 @@ internal fun SuccessScreenPreview() {
                     supportedPaymentMethodTypes = emptyList()
                 ),
             ),
-            loading = false
-        ) {}
+            loading = false,
+            onDoneClick = {},
+            onLinkAnotherAccountClick = {},
+            showLinkAnotherAccount = true
+        )
     }
 }

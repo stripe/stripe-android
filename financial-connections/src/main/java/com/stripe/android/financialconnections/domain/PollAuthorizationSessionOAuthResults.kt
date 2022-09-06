@@ -6,6 +6,7 @@ import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.utils.retryOnException
 import com.stripe.android.financialconnections.utils.shouldRetry
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 /**
@@ -24,13 +25,14 @@ internal class PollAuthorizationSessionOAuthResults @Inject constructor(
         return retryOnException(
             times = MAX_TRIES,
             delayMilliseconds = POLLING_TIME_MS,
-            retryCondition = { exception -> exception.shouldRetry }
-        ) {
-            repository.postAuthorizationSessionOAuthResults(
-                clientSecret = configuration.financialConnectionsSessionClientSecret,
-                sessionId = session.id
-            )
-        }
+            retryCondition = { exception -> exception.shouldRetry },
+            {
+                repository.postAuthorizationSessionOAuthResults(
+                    clientSecret = configuration.financialConnectionsSessionClientSecret,
+                    sessionId = session.id
+                )
+            },
+        )
     }
 
     private companion object {
