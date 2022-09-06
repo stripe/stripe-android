@@ -15,6 +15,7 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
+import com.stripe.android.link.injection.CUSTOMER_NAME
 import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
 import com.stripe.android.link.injection.LinkComponent
@@ -56,6 +57,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     @Assisted(MERCHANT_NAME) private val merchantName: String,
     @Assisted(CUSTOMER_EMAIL) private val customerEmail: String?,
     @Assisted(CUSTOMER_PHONE) private val customerPhone: String?,
+    @Assisted(CUSTOMER_NAME) private val customerName: String?,
     @Assisted(SHIPPING_VALUES) private val shippingValues: Map<IdentifierSpec, String?>?,
     context: Context,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
@@ -74,6 +76,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         .merchantName(merchantName)
         .customerEmail(customerEmail)
         .customerPhone(customerPhone)
+        .customerName(customerName)
         .context(context)
         .ioContext(ioContext)
         .uiContext(uiContext)
@@ -152,6 +155,7 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
             merchantName,
             customerEmail,
             customerPhone,
+            customerName,
             shippingValues,
             prefilledNewCardParams,
             LinkActivityContract.Args.InjectionParams(

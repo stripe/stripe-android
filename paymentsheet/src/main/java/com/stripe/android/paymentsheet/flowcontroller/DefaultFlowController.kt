@@ -470,6 +470,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 merchantName = config.merchantDisplayName,
                 customerEmail = config.defaultBillingDetails?.email,
                 customerPhone = customerPhone,
+                customerName = config.defaultBillingDetails?.name,
                 shippingValues = shippingAddress
             )
             val accountStatus = linkLauncher.setup(

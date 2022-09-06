@@ -51,12 +51,14 @@ internal class SignUpViewModel @Inject constructor(
         if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
     private val prefilledPhone =
         args.customerPhone?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) } ?: ""
+    private val prefilledName =
+        args.customerName?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) } ?: ""
 
     val merchantName: String = args.merchantName
 
     val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
     val phoneController = PhoneNumberController.createPhoneNumberController(prefilledPhone)
-    val nameController = SimpleTextFieldController.createNameSectionController(null) // TODO
+    val nameController = SimpleTextFieldController.createNameSectionController(prefilledName)
 
     /**
      * Emits the email entered in the form if valid, null otherwise.

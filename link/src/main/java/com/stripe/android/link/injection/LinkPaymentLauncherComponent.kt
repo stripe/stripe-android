@@ -55,6 +55,9 @@ internal abstract class LinkPaymentLauncherComponent {
         fun customerPhone(@Named(CUSTOMER_PHONE) customerPhone: String?): Builder
 
         @BindsInstance
+        fun customerName(@Named(CUSTOMER_NAME) customerName: String?): Builder
+
+        @BindsInstance
         fun stripeIntent(@Named(LINK_INTENT) stripeIntent: StripeIntent): Builder
 
         @BindsInstance
