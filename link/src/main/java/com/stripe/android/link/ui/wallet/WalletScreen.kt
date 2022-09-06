@@ -277,6 +277,10 @@ internal fun WalletBody(
             )
         }
 
+        if (card != null && card.cvcCheck.requiresRecollection) {
+            CvcForm(cvcController = cvcController)
+        }
+
         PrimaryButton(
             label = primaryButtonLabel,
             state = uiState.primaryButtonState,
@@ -330,6 +334,27 @@ internal fun ExpiryDateAndCvcForm(
                     lastTextFieldIdentifier = cvcElement.identifier
                 )
             }
+        }
+    }
+}
+
+@Composable
+internal fun CvcForm(cvcController: CvcController) {
+    val cvcElement = remember(cvcController) {
+        CvcElement(
+            _identifier = IdentifierSpec.CardCvc,
+            controller = cvcController
+        )
+    }
+
+    PaymentsThemeForLink {
+        Box {
+            SectionElementUI(
+                enabled = true,
+                element = SectionElement.wrap(cvcElement),
+                hiddenIdentifiers = emptyList(),
+                lastTextFieldIdentifier = cvcElement.identifier
+            )
         }
     }
 }

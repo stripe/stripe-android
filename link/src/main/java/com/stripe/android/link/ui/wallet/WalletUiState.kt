@@ -4,6 +4,7 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.forms.FormFieldEntry
 
@@ -21,11 +22,17 @@ internal data class WalletUiState(
 
     val primaryButtonState: PrimaryButtonState
         get() {
-            val isExpired = (selectedItem as? ConsumerPaymentDetails.Card)?.isExpired ?: false
+            val card = selectedItem as? Card
+            val isExpired = card?.isExpired ?: false
             val hasRequiredExpiryInput = expiryDateInput.isComplete && cvcInput.isComplete
 
+            val requiresCvcRecollection = card?.cvcCheck?.requiresRecollection ?: false
+            val hasRequiredCvcInput = cvcInput.isComplete
+
             val isSelectedItemValid = selectedItem?.isValid ?: false
-            val disableButton = !isSelectedItemValid || (isExpired && !hasRequiredExpiryInput)
+            val disableButton = !isSelectedItemValid ||
+                (isExpired && !hasRequiredExpiryInput) ||
+                (requiresCvcRecollection && !hasRequiredCvcInput)
 
             return if (hasCompleted) {
                 PrimaryButtonState.Completed
