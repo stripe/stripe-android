@@ -2506,6 +2506,7 @@ public final class com/stripe/android/model/ConsumerPaymentDetails$Card : com/st
 	public final fun getLast4 ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun isDefault ()Z
+	public final fun isExpired ()Z
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
