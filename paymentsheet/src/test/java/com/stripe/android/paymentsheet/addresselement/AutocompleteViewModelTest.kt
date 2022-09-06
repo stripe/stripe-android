@@ -257,4 +257,35 @@ class AutocompleteViewModelTest {
         createViewModel()
         verify(mockEventReporter).onShow(eq("US"))
     }
+
+    @Test
+    fun `clearQuery clears textfield and predictions`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+
+        viewModel.textFieldController.onRawValueChange("Some valid query")
+
+        whenever(mockClient.findAutocompletePredictions(any(), any(), any())).thenReturn(
+            Result.success(
+                FindAutocompletePredictionsResponse(
+                    listOf(
+                        AutocompletePrediction(
+                            SpannableString("primaryText"),
+                            SpannableString("secondaryText"),
+                            "placeId"
+                        )
+                    )
+                )
+            )
+        )
+
+        // Advance past search debounce delay
+        advanceTimeBy(AutocompleteViewModel.SEARCH_DEBOUNCE_MS + 1)
+
+        assertThat(viewModel.predictions.value?.size).isEqualTo(1)
+
+        viewModel.clearQuery()
+
+        assertThat(viewModel.predictions.value).isEqualTo(null)
+        assertThat(viewModel.textFieldController.rawFieldValue.stateIn(viewModel.viewModelScope).value).isEqualTo("")
+    }
 }

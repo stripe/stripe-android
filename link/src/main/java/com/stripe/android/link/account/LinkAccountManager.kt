@@ -12,6 +12,7 @@ import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.GlobalScope
@@ -130,14 +131,19 @@ internal class LinkAccountManager @Inject constructor(
             is UserInput.SignIn -> lookupConsumer(userInput.email).mapCatching {
                 requireNotNull(it) { "Error fetching user account" }
             }
-            is UserInput.SignUp -> signUp(userInput.email, userInput.phone, userInput.country)
-                .also {
-                    if (it.isSuccess) {
-                        linkEventsReporter.onSignupCompleted(true)
-                    } else {
-                        linkEventsReporter.onSignupFailure(true)
-                    }
+            is UserInput.SignUp -> signUp(
+                email = userInput.email,
+                phone = userInput.phone,
+                country = userInput.country,
+                name = userInput.name,
+                consentAction = ConsumerSignUpConsentAction.Checkbox
+            ).also {
+                if (it.isSuccess) {
+                    linkEventsReporter.onSignupCompleted(true)
+                } else {
+                    linkEventsReporter.onSignupFailure(true)
                 }
+            }
         }
 
     /**
@@ -146,9 +152,11 @@ internal class LinkAccountManager @Inject constructor(
     suspend fun signUp(
         email: String,
         phone: String,
-        country: String
+        country: String,
+        name: String?,
+        consentAction: ConsumerSignUpConsentAction
     ): Result<LinkAccount> =
-        linkRepository.consumerSignUp(email, phone, country, cookie())
+        linkRepository.consumerSignUp(email, phone, country, name, cookie(), consentAction)
             .map { consumerSession ->
                 cookieStore.storeNewUserEmail(email)
                 setAccount(consumerSession)

@@ -1,11 +1,13 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 
-internal class ExpiryDateVisualTransformation : VisualTransformation {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class ExpiryDateVisualTransformation : VisualTransformation {
     private val separator = " / "
 
     override fun filter(text: AnnotatedString): TransformedText {

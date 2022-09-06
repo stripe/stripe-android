@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.model.Navigator
@@ -22,6 +23,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.reset
@@ -40,6 +42,7 @@ class LinkActivityViewModelTest {
         MERCHANT_NAME,
         CUSTOMER_EMAIL,
         CUSTOMER_PHONE,
+        CUSTOMER_NAME,
         null,
         null,
         LinkActivityContract.Args.InjectionParams(
@@ -142,7 +145,7 @@ class LinkActivityViewModelTest {
 
         viewModel.onBackPressed()
 
-        spy(navigator).dismiss()
+        verify(navigator).onBack(userInitiated = eq(true))
         verify(linkAccountManager, never()).logout()
     }
 
@@ -153,7 +156,7 @@ class LinkActivityViewModelTest {
 
         viewModel.onBackPressed()
 
-        verify(navigator, never()).dismiss()
+        verify(navigator, never()).dismiss(any())
         verify(linkAccountManager, never()).logout()
     }
 
@@ -164,7 +167,7 @@ class LinkActivityViewModelTest {
 
         viewModel.onBackPressed()
 
-        verify(navigator, never()).dismiss()
+        verify(navigator, never()).dismiss(any())
         verify(linkAccountManager, never()).logout()
     }
 
@@ -174,7 +177,7 @@ class LinkActivityViewModelTest {
 
         viewModel.logout()
 
-        verify(navigator).dismiss()
+        verify(navigator).cancel(eq(Reason.LoggedOut))
         verify(linkAccountManager).logout()
     }
 
@@ -205,6 +208,7 @@ class LinkActivityViewModelTest {
 
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "customer@email.com"
+        const val CUSTOMER_NAME = "Customer"
         const val CUSTOMER_PHONE = "1234567890"
     }
 }

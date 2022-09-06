@@ -123,7 +123,7 @@ internal fun LinkAppBar(
 
 @Preview
 @Composable
-private fun LinkAppBar() {
+private fun LinkAppBarPreview() {
     DefaultLinkTheme {
         Surface {
             LinkAppBar(

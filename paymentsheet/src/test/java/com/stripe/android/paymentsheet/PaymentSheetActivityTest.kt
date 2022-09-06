@@ -366,9 +366,8 @@ internal class PaymentSheetActivityTest {
 
             val googlePayButton =
                 StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
-            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
             assertThat(googlePayButton.primaryButton.isVisible).isTrue()
-            assertThat(googlePayIconComponent.isVisible).isFalse()
+            assertThat(googlePayButton.googlePayButtonContent.isVisible).isFalse()
             assertThat(googlePayButton.primaryButton.externalLabel)
                 .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
         }
@@ -394,9 +393,8 @@ internal class PaymentSheetActivityTest {
 
             val googlePayButton =
                 StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
-            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
             assertThat(googlePayButton.primaryButton.isVisible).isTrue()
-            assertThat(googlePayIconComponent.isVisible).isFalse()
+            assertThat(googlePayButton.googlePayButtonContent.isVisible).isFalse()
             assertThat(finishProcessingCalled).isTrue()
         }
     }

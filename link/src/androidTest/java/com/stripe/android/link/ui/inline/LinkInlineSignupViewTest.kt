@@ -52,25 +52,44 @@ internal class LinkInlineSignupViewTest {
     }
 
     @Test
-    fun status_inputting_phone_shows_all_fields() {
-        setContent(signUpState = SignUpState.InputtingPhone)
+    fun status_inputting_phone_or_name_shows_all_fields_if_name_required() {
+        setContent(
+            signUpState = SignUpState.InputtingPhoneOrName,
+            requiresNameCollection = true
+        )
 
         onEmailField().assertExists()
         onEmailField().assertIsEnabled()
         onProgressIndicator().assertDoesNotExist()
         onPhoneField().assertExists()
         onPhoneField().assertIsEnabled()
+        onNameField().assertExists()
+        onNameField().assertIsEnabled()
+    }
+
+    @Test
+    fun status_inputting_phone_shows_only_phone_field_if_name_not_required() {
+        setContent(signUpState = SignUpState.InputtingPhoneOrName)
+
+        onEmailField().assertExists()
+        onEmailField().assertIsEnabled()
+        onProgressIndicator().assertDoesNotExist()
+        onPhoneField().assertExists()
+        onPhoneField().assertIsEnabled()
+        onNameField().assertDoesNotExist()
     }
 
     private fun setContent(
         merchantName: String = "Example, Inc.",
-        emailElement: SimpleTextFieldController = SimpleTextFieldController.createEmailSectionController(
-            "email@me.co"
-        ),
+        emailElement: SimpleTextFieldController =
+            SimpleTextFieldController.createEmailSectionController("email@me.co"),
         phoneController: PhoneNumberController = PhoneNumberController.createPhoneNumberController(),
+        nameController: SimpleTextFieldController =
+            SimpleTextFieldController.createNameSectionController(null),
         signUpState: SignUpState = SignUpState.InputtingEmail,
         enabled: Boolean = true,
         expanded: Boolean = true,
+        requiresNameCollection: Boolean = false,
         toggleExpanded: () -> Unit = {},
         onUserInteracted: () -> Unit = {}
     ) = composeTestRule.setContent {
@@ -79,9 +98,11 @@ internal class LinkInlineSignupViewTest {
                 merchantName,
                 emailElement,
                 phoneController,
+                nameController,
                 signUpState,
                 enabled,
                 expanded,
+                requiresNameCollection,
                 toggleExpanded,
                 onUserInteracted
             )
@@ -91,5 +112,6 @@ internal class LinkInlineSignupViewTest {
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(progressIndicatorTestTag)
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
+    private fun onNameField() = composeTestRule.onNodeWithText("Full name")
     private fun onSaveMyInfo() = composeTestRule.onNodeWithText("Save my info", substring = true)
 }

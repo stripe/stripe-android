@@ -202,6 +202,9 @@ internal sealed class PhoneNumberFormatter {
                 it.first()
             }
 
+        fun lengthForCountry(countryCode: String) =
+            allMetadata[countryCode.uppercase()]?.pattern?.count { it == '#' }
+
         private fun countryCodesForPrefix(prefix: String) =
             allMetadata.filter { it.value.prefix == prefix }.map { it.value.regionCode }
 

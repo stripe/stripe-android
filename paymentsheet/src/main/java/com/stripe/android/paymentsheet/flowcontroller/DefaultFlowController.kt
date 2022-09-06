@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -280,7 +281,10 @@ internal class DefaultFlowController @Inject internal constructor(
         initData: InitData
     ) {
         val confirmParamsFactory =
-            ConfirmStripeIntentParamsFactory.createFactory(initData.clientSecret)
+            ConfirmStripeIntentParamsFactory.createFactory(
+                initData.clientSecret,
+                initData.config?.shippingDetails?.toConfirmPaymentIntentShipping()
+            )
 
         when (paymentSelection) {
             is PaymentSelection.Saved -> {
@@ -460,12 +464,13 @@ internal class DefaultFlowController @Inject internal constructor(
             val shippingAddress = if (shippingDetails?.isCheckboxSelected == true) {
                 shippingDetails.toIdentifierMap(config.defaultBillingDetails)
             } else {
-                emptyMap()
+                null
             }
             val linkLauncher = linkPaymentLauncherFactory.create(
                 merchantName = config.merchantDisplayName,
                 customerEmail = config.defaultBillingDetails?.email,
                 customerPhone = customerPhone,
+                customerName = config.defaultBillingDetails?.name,
                 shippingValues = shippingAddress
             )
             val accountStatus = linkLauncher.setup(

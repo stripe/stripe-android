@@ -78,7 +78,9 @@ internal fun PaymentsThemeForLink(
                 primary = ActionGreen
             )
         ),
-        shapes = PaymentsThemeDefaults.shapes,
+        shapes = PaymentsThemeDefaults.shapes.copy(
+            cornerRadius = 9f
+        ),
         typography = PaymentsThemeDefaults.typography
     ) {
         content()

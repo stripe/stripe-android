@@ -29,6 +29,7 @@ import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
@@ -56,6 +57,12 @@ class Selectors(
         Customer.New -> EspressoLabelIdButton(R.string.customer_new)
         Customer.Returning -> EspressoLabelIdButton(R.string.customer_returning)
     }
+
+    val linkState = when (testParameters.linkState) {
+        LinkState.Off -> EspressoIdButton(R.id.link_off_button)
+        LinkState.On -> EspressoIdButton(R.id.link_on_button)
+    }
+
     val googlePayState = when (testParameters.googlePayState) {
         GooglePayState.Off -> EspressoIdButton(R.id.google_pay_off_button)
         GooglePayState.On -> EspressoIdButton(R.id.google_pay_on_button)

@@ -123,7 +123,8 @@ internal class PaymentMethodScreenTest {
     }
 
     private fun setContent(
-        supportedPaymentMethods: List<SupportedPaymentMethod> = SupportedPaymentMethod.allValues,
+        supportedPaymentMethods: List<SupportedPaymentMethod> =
+            SupportedPaymentMethod.values().toList(),
         selectedPaymentMethod: SupportedPaymentMethod = SupportedPaymentMethod.Card,
         primaryButtonState: PrimaryButtonState = PrimaryButtonState.Enabled,
         errorMessage: ErrorMessage? = null,

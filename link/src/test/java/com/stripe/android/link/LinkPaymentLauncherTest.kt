@@ -28,6 +28,7 @@ class LinkPaymentLauncherTest {
         null,
         null,
         null,
+        null,
         context,
         setOf(PRODUCT_USAGE),
         { PUBLISHABLE_KEY },

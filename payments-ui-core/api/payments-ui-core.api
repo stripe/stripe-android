@@ -68,6 +68,9 @@ public final class com/stripe/android/ui/core/address/AddressRepository_Factory 
 	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/address/AddressRepository;
 }
 
+public final class com/stripe/android/ui/core/address/AddressUtilKt {
+}
+
 public final class com/stripe/android/ui/core/databinding/ActivityCardScanBinding : androidx/viewbinding/ViewBinding {
 	public final field fragmentContainer Landroidx/fragment/app/FragmentContainerView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/ui/core/databinding/ActivityCardScanBinding;
@@ -398,6 +401,10 @@ public final class com/stripe/android/ui/core/elements/CountrySpec$$serializer :
 
 public final class com/stripe/android/ui/core/elements/CountrySpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class com/stripe/android/ui/core/elements/DateConfig$Companion {
+	public final fun determineTextFieldState (IIII)Lcom/stripe/android/ui/core/elements/TextFieldState;
 }
 
 public final class com/stripe/android/ui/core/elements/DisplayField : java/lang/Enum {
