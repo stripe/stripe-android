@@ -34,8 +34,9 @@ internal fun rememberLinkAppBarState(
             else -> false
         }
 
-        val showOverflowMenu = currentRoute == LinkScreen.Wallet.route ||
-            (currentRoute == LinkScreen.PaymentMethod.route && isRootScreen)
+        // If there's an email address, we want to allow the user to log
+        // out of the existing account.
+        val showOverflowMenu = isRootScreen && email != null
 
         LinkAppBarState(
             navigationIcon = if (isRootScreen) {
