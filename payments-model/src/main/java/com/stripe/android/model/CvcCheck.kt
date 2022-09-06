@@ -10,10 +10,10 @@ enum class CvcCheck(
     Fail("FAIL"),
     Unavailable("UNAVAILABLE"),
     Unchecked("UNCHECKED"),
-    Unknown("UNKNOWN"),;
+    Unknown("UNKNOWN");
 
     val requiresRecollection: Boolean
-        get() = true // this in setOf(Fail, Unavailable, Unchecked)
+        get() = this in setOf(Fail, Unavailable, Unchecked)
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
