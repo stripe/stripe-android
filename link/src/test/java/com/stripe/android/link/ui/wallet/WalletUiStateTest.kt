@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui.wallet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
@@ -12,6 +13,27 @@ import java.util.Calendar
 import kotlin.random.Random
 
 class WalletUiStateTest {
+
+    @Test
+    fun `Encountering an error stops processing`() {
+        val validCard = mockCard()
+
+        val initialState = WalletUiState(
+            supportedTypes = SupportedPaymentMethod.allTypes,
+            paymentDetailsList = listOf(validCard),
+            selectedItem = validCard,
+            isProcessing = false,
+            hasCompleted = false
+        )
+
+        val processingState = initialState.setProcessing()
+
+        val errorMessage = ErrorMessage.Raw("Something went wrong")
+        val finalState = processingState.updateWithError(errorMessage)
+
+        assertThat(finalState.errorMessage).isEqualTo(errorMessage)
+        assertThat(finalState.isProcessing).isFalse()
+    }
 
     @Test
     fun `Primary button is enabled correctly`() {
@@ -26,6 +48,23 @@ class WalletUiStateTest {
         )
 
         assertThat(uiState.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
+    }
+
+    @Test
+    fun `Primary button is disabled if selected payment details aren't valid`() {
+        val bankAccount = mockBankAccount()
+
+        val uiState = WalletUiState(
+            supportedTypes = setOf(SupportedPaymentMethod.Card.type),
+            paymentDetailsList = listOf(bankAccount),
+            selectedItem = bankAccount,
+            isProcessing = false,
+            hasCompleted = false,
+            expiryDateInput = FormFieldEntry(value = null),
+            cvcInput = FormFieldEntry(value = null)
+        )
+
+        assertThat(uiState.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
     }
 
     @Test
@@ -106,6 +145,17 @@ class WalletUiStateTest {
             brand = CardBrand.Visa,
             last4 = "4242",
             cvcCheck = cvcCheck
+        )
+    }
+
+    private fun mockBankAccount(): ConsumerPaymentDetails.BankAccount {
+        val id = Random.nextInt()
+        return ConsumerPaymentDetails.BankAccount(
+            id = "id$id",
+            isDefault = false,
+            bankName = "Stripe Test Bank",
+            bankIconCode = null,
+            last4 = "4242"
         )
     }
 }

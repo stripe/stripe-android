@@ -21,11 +21,11 @@ internal data class WalletUiState(
 
     val primaryButtonState: PrimaryButtonState
         get() {
-            val hasPaymentDetails = paymentDetailsList.isNotEmpty()
             val isExpired = (selectedItem as? ConsumerPaymentDetails.Card)?.isExpired ?: false
             val hasRequiredExpiryInput = expiryDateInput.isComplete && cvcInput.isComplete
 
-            val disableButton = !hasPaymentDetails || (isExpired && !hasRequiredExpiryInput)
+            val isSelectedItemValid = selectedItem?.isValid ?: false
+            val disableButton = !isSelectedItemValid || (isExpired && !hasRequiredExpiryInput)
 
             return if (hasCompleted) {
                 PrimaryButtonState.Completed
@@ -38,28 +38,30 @@ internal data class WalletUiState(
             }
         }
 
-    val isSelectedItemValid: Boolean
-        get() = selectedItem?.let { supportedTypes.contains(it.type) } ?: false
-
     fun updateWithResponse(
         response: ConsumerPaymentDetails,
         initialSelectedItemId: String?
     ): WalletUiState {
-        // Select selectedItem if provided, otherwise the previously selected item
+        // Select initialSelectedItemId if provided, otherwise the previously selected item
         val selectedItem = (initialSelectedItemId ?: selectedItem?.id)?.let { itemId ->
             response.paymentDetails.firstOrNull { it.id == itemId }
         } ?: getDefaultItemSelection(response.paymentDetails)
 
+        val isSelectedItemValid = selectedItem?.isValid ?: false
+
         return copy(
             paymentDetailsList = response.paymentDetails,
             selectedItem = selectedItem,
-            isExpanded = false,
+            isExpanded = !isSelectedItemValid,
             isProcessing = false
         )
     }
 
     fun updateWithError(errorMessage: ErrorMessage): WalletUiState {
-        return copy(errorMessage = errorMessage)
+        return copy(
+            errorMessage = errorMessage,
+            isProcessing = false
+        )
     }
 
     fun updateWithPaymentResult(paymentResult: PaymentResult): WalletUiState {
@@ -87,4 +89,7 @@ internal data class WalletUiState(
     ) = paymentDetailsList.filter { supportedTypes.contains(it.type) }.let { filteredItems ->
         filteredItems.firstOrNull { it.isDefault } ?: filteredItems.firstOrNull()
     }
+
+    private val ConsumerPaymentDetails.PaymentDetails.isValid: Boolean
+        get() = supportedTypes.contains(type)
 }

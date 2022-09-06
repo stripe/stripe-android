@@ -233,9 +233,9 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    private fun onError(error: Throwable) = error.getErrorMessage().let {
+    private fun onError(error: Throwable) {
         logger.error("Error: ", error)
-        onError(it)
+        onError(error.getErrorMessage())
     }
 
     private fun onError(error: ErrorMessage) {

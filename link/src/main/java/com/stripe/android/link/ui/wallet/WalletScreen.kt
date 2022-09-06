@@ -48,7 +48,6 @@ import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
-import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.ui.completePaymentButtonLabel
@@ -206,13 +205,9 @@ internal fun WalletBody(
     ScrollableTopLevelColumn {
         Spacer(modifier = Modifier.height(12.dp))
 
-        if (uiState.isExpanded || !uiState.isSelectedItemValid) {
-            setExpanded(true)
+        if (uiState.isExpanded) {
             ExpandedPaymentDetails(
-                paymentDetailsList = uiState.paymentDetailsList,
-                supportedTypes = uiState.supportedTypes,
-                selectedItem = uiState.selectedItem?.takeIf { uiState.isSelectedItemValid },
-                enabled = !uiState.primaryButtonState.isBlocking,
+                uiState = uiState,
                 onItemSelected = {
                     onItemSelected(it)
                     setExpanded(false)
@@ -284,11 +279,7 @@ internal fun WalletBody(
 
         PrimaryButton(
             label = primaryButtonLabel,
-            state = if (uiState.isSelectedItemValid) {
-                uiState.primaryButtonState
-            } else {
-                PrimaryButtonState.Disabled
-            },
+            state = uiState.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
             iconEnd = R.drawable.stripe_ic_lock
         )
@@ -393,15 +384,14 @@ internal fun CollapsedPaymentDetails(
 
 @Composable
 private fun ExpandedPaymentDetails(
-    paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
-    supportedTypes: Set<String>,
-    selectedItem: ConsumerPaymentDetails.PaymentDetails?,
-    enabled: Boolean,
+    uiState: WalletUiState,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onMenuButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onAddNewPaymentMethodClick: () -> Unit,
     onCollapse: () -> Unit
 ) {
+    val isEnabled = !uiState.primaryButtonState.isBlocking
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -418,7 +408,7 @@ private fun ExpandedPaymentDetails(
         Row(
             modifier = Modifier
                 .height(44.dp)
-                .clickable(enabled = enabled, onClick = onCollapse),
+                .clickable(enabled = isEnabled, onClick = onCollapse),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -444,12 +434,12 @@ private fun ExpandedPaymentDetails(
 
         // TODO(brnunes-stripe): Use LazyColumn, will need to write custom shape for the border
         // https://juliensalvi.medium.com/custom-shape-with-jetpack-compose-1cb48a991d42
-        paymentDetailsList.forEach { item ->
+        uiState.paymentDetailsList.forEach { item ->
             PaymentDetailsListItem(
                 paymentDetails = item,
-                enabled = enabled,
-                isSupported = supportedTypes.contains(item.type),
-                isSelected = selectedItem?.id == item.id,
+                enabled = isEnabled,
+                isSupported = uiState.supportedTypes.contains(item.type),
+                isSelected = uiState.selectedItem?.id == item.id,
                 onClick = {
                     onItemSelected(item)
                 },
@@ -463,7 +453,7 @@ private fun ExpandedPaymentDetails(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .clickable(enabled = enabled, onClick = onAddNewPaymentMethodClick),
+                .clickable(enabled = isEnabled, onClick = onAddNewPaymentMethodClick),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
