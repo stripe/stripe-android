@@ -101,7 +101,7 @@ private fun WalletBodyPreview() {
                     supportedTypes = SupportedPaymentMethod.allTypes,
                     selectedItem = paymentDetailsList.first(),
                     isExpanded = true,
-                    errorMessage = ErrorMessage.Raw("Something went wrong"),
+                    errorMessage = ErrorMessage.Raw("Something went wrong")
                 ),
                 primaryButtonLabel = "Pay $10.99",
                 expiryDateController = SimpleTextFieldController(textFieldConfig = DateConfig()),

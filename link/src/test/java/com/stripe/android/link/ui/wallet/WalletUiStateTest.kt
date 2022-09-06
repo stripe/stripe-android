@@ -8,15 +8,19 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import org.junit.Test
+import java.util.Calendar
+import kotlin.random.Random
 
 class WalletUiStateTest {
 
     @Test
     fun `Primary button is enabled correctly`() {
+        val validCard = mockCard()
+
         val uiState = WalletUiState(
             supportedTypes = SupportedPaymentMethod.allTypes,
-            paymentDetailsList = mockPaymentDetailsList(),
-            selectedItem = mockPaymentDetailsList().last(),
+            paymentDetailsList = listOf(validCard),
+            selectedItem = validCard,
             isProcessing = false,
             hasCompleted = false
         )
@@ -26,10 +30,12 @@ class WalletUiStateTest {
 
     @Test
     fun `Primary button state is correct when the payment has completed`() {
+        val validCard = mockCard()
+
         val uiState = WalletUiState(
             supportedTypes = SupportedPaymentMethod.allTypes,
-            paymentDetailsList = mockPaymentDetailsList(),
-            selectedItem = mockPaymentDetailsList().last(),
+            paymentDetailsList = listOf(validCard),
+            selectedItem = validCard,
             isProcessing = false,
             hasCompleted = true
         )
@@ -39,10 +45,12 @@ class WalletUiStateTest {
 
     @Test
     fun `Primary button state is correct when the payment is processing`() {
+        val validCard = mockCard()
+
         val uiState = WalletUiState(
             supportedTypes = SupportedPaymentMethod.allTypes,
-            paymentDetailsList = mockPaymentDetailsList(),
-            selectedItem = mockPaymentDetailsList().last(),
+            paymentDetailsList = listOf(validCard),
+            selectedItem = validCard,
             isProcessing = true,
             hasCompleted = false
         )
@@ -52,10 +60,12 @@ class WalletUiStateTest {
 
     @Test
     fun `Primary button is disabled if selected card is expired and form hasn't been filled out`() {
+        val validCard = mockCard(isExpired = true)
+
         val uiState = WalletUiState(
             supportedTypes = SupportedPaymentMethod.allTypes,
-            paymentDetailsList = mockPaymentDetailsList(),
-            selectedItem = mockPaymentDetailsList().first(),
+            paymentDetailsList = listOf(validCard),
+            selectedItem = validCard,
             isProcessing = false,
             hasCompleted = false
         )
@@ -65,10 +75,12 @@ class WalletUiStateTest {
 
     @Test
     fun `Primary button is enabled if selected card is expired, but the form has been filled out`() {
+        val validCard = mockCard(isExpired = true)
+
         val uiState = WalletUiState(
             supportedTypes = SupportedPaymentMethod.allTypes,
-            paymentDetailsList = mockPaymentDetailsList(),
-            selectedItem = mockPaymentDetailsList().first(),
+            paymentDetailsList = listOf(validCard),
+            selectedItem = validCard,
             isProcessing = false,
             hasCompleted = false,
             expiryDateInput = FormFieldEntry("1226", isComplete = true),
@@ -78,24 +90,22 @@ class WalletUiStateTest {
         assertThat(uiState.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
     }
 
-    private fun mockPaymentDetailsList() = listOf(
-        ConsumerPaymentDetails.Card(
-            "id1",
-            true,
-            2022,
-            1,
-            CardBrand.Visa,
-            "4242",
-            CvcCheck.Pass
-        ),
-        ConsumerPaymentDetails.Card(
-            "id2",
-            false,
-            2026,
-            12,
-            CardBrand.MasterCard,
-            "4444",
-            CvcCheck.Fail
+    private fun mockCard(
+        isExpired: Boolean = false,
+        cvcCheck: CvcCheck = CvcCheck.Pass
+    ): ConsumerPaymentDetails.Card {
+        val id = Random.nextInt()
+        val year = Calendar.getInstance().get(Calendar.YEAR)
+        val expiryYear = if (isExpired) year - 1 else year + 1
+
+        return ConsumerPaymentDetails.Card(
+            id = "id$id",
+            isDefault = true,
+            expiryYear = expiryYear,
+            expiryMonth = 1,
+            brand = CardBrand.Visa,
+            last4 = "4242",
+            cvcCheck = cvcCheck
         )
-    )
+    }
 }
