@@ -4,6 +4,8 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressRepository.Companion.supportedCountries
+import com.stripe.android.ui.core.elements.AdministrativeAreaConfig
+import com.stripe.android.ui.core.elements.AdministrativeAreaElement
 import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KeyboardType
@@ -48,14 +50,6 @@ class TransformAddressToElementTest {
             showOptionalLabel = false
         )
 
-        val state = SimpleTextSpec(
-            IdentifierSpec.State,
-            R.string.address_label_state,
-            Capitalization.Words,
-            KeyboardType.Text,
-            showOptionalLabel = false
-        )
-
         val zip = SimpleTextSpec(
             IdentifierSpec.PostalCode,
             R.string.address_label_zip_code,
@@ -82,9 +76,15 @@ class TransformAddressToElementTest {
             cityZipRow.fields[1],
             zip
         )
-        verifySimpleTextSpecInTextFieldController(
-            simpleTextList[3] as SectionSingleFieldElement,
-            state
+
+        // US has state dropdown
+        val stateDropdownElement = simpleTextList[3] as AdministrativeAreaElement
+        val stateDropdownController = stateDropdownElement.controller
+        assertThat(stateDropdownController.displayItems).isEqualTo(
+            AdministrativeAreaConfig.Country.US().administrativeAreas.map { it.second }
+        )
+        assertThat(stateDropdownController.label.first()).isEqualTo(
+            R.string.address_label_state
         )
     }
 
