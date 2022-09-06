@@ -10,7 +10,6 @@ import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.utils.retryOnException
 import com.stripe.android.financialconnections.utils.shouldRetry
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 /**
@@ -29,21 +28,20 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
         return retryOnException(
             times = MAX_TRIES,
             delayMilliseconds = POLLING_TIME_MS,
-            retryCondition = { exception -> exception.shouldRetry },
-            {
-                try {
-                    repository.postAuthorizationSessionAccounts(
-                        clientSecret = configuration.financialConnectionsSessionClientSecret,
-                        sessionId = manifest.activeAuthSession!!.id
-                    )
-                } catch (@Suppress("SwallowedException") e: StripeException) {
-                    throw e.toDomainException(
-                        requireNotNull(manifest.activeInstitution),
-                        ConsentTextBuilder.getBusinessName(manifest)
-                    )
-                }
-            },
-        )
+            retryCondition = { exception -> exception.shouldRetry }
+        ) {
+            try {
+                repository.postAuthorizationSessionAccounts(
+                    clientSecret = configuration.financialConnectionsSessionClientSecret,
+                    sessionId = manifest.activeAuthSession!!.id
+                )
+            } catch (@Suppress("SwallowedException") e: StripeException) {
+                throw e.toDomainException(
+                    requireNotNull(manifest.activeInstitution),
+                    ConsentTextBuilder.getBusinessName(manifest)
+                )
+            }
+        }
     }
 
     private fun StripeException.toDomainException(
