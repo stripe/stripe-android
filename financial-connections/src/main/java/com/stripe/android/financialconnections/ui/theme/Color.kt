@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 
 internal val Neutral50 = Color(0xffF6F8FA)
 internal val Neutral150 = Color(0xffE0E6EB)
+internal val Neutral200 = Color(0xffC0C8D2)
 internal val Neutral300 = Color(0xffA3ACBA)
 internal val Neutral500 = Color(0xff6A7383)
 internal val Neutral800 = Color(0xff30313D)
@@ -28,6 +29,7 @@ internal data class FinancialConnectionsColors(
     // backgrounds
     val backgroundSurface: Color,
     val backgroundContainer: Color,
+    val backgroundBackdrop: Color,
     // borders
     val borderDefault: Color,
     val borderFocus: Color,
@@ -41,5 +43,5 @@ internal data class FinancialConnectionsColors(
     val textInfo: Color,
     val textSuccess: Color,
     val textAttention: Color,
-    val textCritical: Color
+    val textCritical: Color,
 )
