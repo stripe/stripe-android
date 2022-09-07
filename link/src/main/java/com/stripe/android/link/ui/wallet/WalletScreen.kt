@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -349,6 +350,7 @@ internal fun CollapsedPaymentDetails(
                 color = MaterialTheme.linkColors.componentBorder,
                 shape = MaterialTheme.linkShapes.large
             )
+            .clip(MaterialTheme.linkShapes.large)
             .background(
                 color = MaterialTheme.linkColors.componentBackground,
                 shape = MaterialTheme.linkShapes.large
@@ -400,6 +402,7 @@ private fun ExpandedPaymentDetails(
                 color = MaterialTheme.linkColors.componentBorder,
                 shape = MaterialTheme.linkShapes.large
             )
+            .clip(MaterialTheme.linkShapes.large)
             .background(
                 color = MaterialTheme.linkColors.componentBackground,
                 shape = MaterialTheme.linkShapes.large
