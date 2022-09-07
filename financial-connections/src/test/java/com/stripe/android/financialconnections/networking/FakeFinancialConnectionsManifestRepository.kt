@@ -44,5 +44,7 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         publicToken: String?
     ): FinancialConnectionsAuthorizationSession = postAuthorizationSessionProvider()
 
-    override suspend fun postMarkLinkingMoreAccounts(clientSecret: String): FinancialConnectionsSessionManifest = postMarkLinkingMoreAccountsProvider()
+    override suspend fun postMarkLinkingMoreAccounts(
+        clientSecret: String
+    ): FinancialConnectionsSessionManifest = postMarkLinkingMoreAccountsProvider()
 }

@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
+@Suppress("LongParameterList")
 internal class SuccessViewModel @Inject constructor(
     initialState: SuccessState,
     getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,

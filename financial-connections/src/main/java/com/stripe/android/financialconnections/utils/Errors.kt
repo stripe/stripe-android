@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.utils
 
 import com.stripe.android.core.exception.StripeException
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
@@ -30,7 +29,8 @@ internal suspend fun <T> retryOnException(
                     retryCondition(exception).not() -> throw exception
                 }
             },
-            onSuccess = { send(it) })
+            onSuccess = { send(it) }
+        )
         remainingTimes--
     }
 }.first()

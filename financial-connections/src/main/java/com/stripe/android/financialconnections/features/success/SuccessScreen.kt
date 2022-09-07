@@ -52,6 +52,7 @@ internal fun SuccessScreen() {
 }
 
 @Composable
+@Suppress("LongMethod")
 private fun SuccessContent(
     accessibleDataModel: AccessibleDataCalloutModel,
     disconnectUrl: String,

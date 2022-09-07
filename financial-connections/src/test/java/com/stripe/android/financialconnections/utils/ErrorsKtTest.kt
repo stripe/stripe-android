@@ -7,7 +7,6 @@ import org.junit.Test
 import java.net.HttpURLConnection
 import java.util.concurrent.TimeoutException
 
-
 internal class ErrorsKtTest {
 
     @Test
@@ -70,5 +69,4 @@ internal class ErrorsKtTest {
         }
         assertThat(testResult.exceptionOrNull()!!).isInstanceOf(TimeoutException::class.java)
     }
-
 }
