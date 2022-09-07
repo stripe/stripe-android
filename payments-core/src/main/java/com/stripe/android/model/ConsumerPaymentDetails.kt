@@ -29,6 +29,9 @@ data class ConsumerPaymentDetails internal constructor(
         val cvcCheck: CvcCheck
     ) : PaymentDetails(id, isDefault, Companion.type) {
 
+        val requiresCardDetailsRecollection: Boolean
+            get() = isExpired || cvcCheck.requiresRecollection
+
         val isExpired: Boolean
             get() = !DateUtils.isExpiryDataValid(
                 expiryMonth = expiryMonth,

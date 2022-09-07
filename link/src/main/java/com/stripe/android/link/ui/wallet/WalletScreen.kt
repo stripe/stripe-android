@@ -269,16 +269,14 @@ internal fun WalletBody(
             )
         }
 
-        val card = uiState.selectedItem as? ConsumerPaymentDetails.Card
-        if (card != null && card.isExpired) {
-            ExpiryDateAndCvcForm(
-                expiryDateController = expiryDateController,
-                cvcController = cvcController
-            )
-        }
-
-        if (card != null && card.cvcCheck.requiresRecollection) {
-            CvcForm(cvcController = cvcController)
+        uiState.selectedCard?.let { selectedCard ->
+            if (selectedCard.requiresCardDetailsRecollection) {
+                CardDetailsRecollectionForm(
+                    expiryDateController = expiryDateController,
+                    cvcController = cvcController,
+                    isCardExpired = selectedCard.isExpired
+                )
+            }
         }
 
         PrimaryButton(
@@ -297,17 +295,11 @@ internal fun WalletBody(
 }
 
 @Composable
-internal fun ExpiryDateAndCvcForm(
+internal fun CardDetailsRecollectionForm(
     expiryDateController: TextFieldController,
-    cvcController: CvcController
+    cvcController: CvcController,
+    isCardExpired: Boolean
 ) {
-    val expiryDateElement = remember(expiryDateController) {
-        SimpleTextElement(
-            identifier = IdentifierSpec.Generic("date"),
-            controller = expiryDateController
-        )
-    }
-
     val cvcElement = remember(cvcController) {
         CvcElement(
             _identifier = IdentifierSpec.CardCvc,
@@ -315,15 +307,35 @@ internal fun ExpiryDateAndCvcForm(
         )
     }
 
+    val errorTextResId = if (isCardExpired) {
+        R.string.wallet_update_expired_card_error
+    } else {
+        R.string.wallet_recollect_cvc_error
+    }
+
     PaymentsThemeForLink {
+        ErrorText(
+            text = stringResource(errorTextResId),
+            modifier = Modifier.fillMaxWidth()
+        )
+
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Box(modifier = Modifier.weight(0.5f)) {
-                SectionElementUI(
-                    enabled = true,
-                    element = SectionElement.wrap(expiryDateElement),
-                    hiddenIdentifiers = emptyList(),
-                    lastTextFieldIdentifier = cvcElement.identifier
-                )
+            if (isCardExpired) {
+                val expiryDateElement = remember(expiryDateController) {
+                    SimpleTextElement(
+                        identifier = IdentifierSpec.Generic("date"),
+                        controller = expiryDateController
+                    )
+                }
+
+                Box(modifier = Modifier.weight(0.5f)) {
+                    SectionElementUI(
+                        enabled = true,
+                        element = SectionElement.wrap(expiryDateElement),
+                        hiddenIdentifiers = emptyList(),
+                        lastTextFieldIdentifier = cvcElement.identifier
+                    )
+                }
             }
 
             Box(modifier = Modifier.weight(0.5f)) {
@@ -334,27 +346,6 @@ internal fun ExpiryDateAndCvcForm(
                     lastTextFieldIdentifier = cvcElement.identifier
                 )
             }
-        }
-    }
-}
-
-@Composable
-internal fun CvcForm(cvcController: CvcController) {
-    val cvcElement = remember(cvcController) {
-        CvcElement(
-            _identifier = IdentifierSpec.CardCvc,
-            controller = cvcController
-        )
-    }
-
-    PaymentsThemeForLink {
-        Box {
-            SectionElementUI(
-                enabled = true,
-                element = SectionElement.wrap(cvcElement),
-                hiddenIdentifiers = emptyList(),
-                lastTextFieldIdentifier = cvcElement.identifier
-            )
         }
     }
 }
