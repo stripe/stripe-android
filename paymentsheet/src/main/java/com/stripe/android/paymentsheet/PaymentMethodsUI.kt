@@ -48,7 +48,7 @@ internal fun PaymentMethodsUI(
     val state = rememberLazyListState()
 
     LaunchedEffect(selectedIndex) {
-        state.animateScrollToItem(selectedIndex, 0) // Klarana still didn't scroll
+        state.animateScrollToItem(selectedIndex)
     }
 
     PaymentsTheme {
