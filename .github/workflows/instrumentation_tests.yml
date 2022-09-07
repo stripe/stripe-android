@@ -2,14 +2,7 @@ name: Instrumentation tests
 on:
   pull_request:
     paths:
-      - 'payments/**'
-      - 'payments-core/**'
-      - 'payments-model/**'
-      - 'stripe-core/**'
-      - 'payments-model/**'
-      - 'payments-ui-core/**'
-      - 'link/**'
-      - 'dependencies.gradle'
+      - '**'
 jobs:
   instrumentation-tests:
     name: Instrumentation tests
