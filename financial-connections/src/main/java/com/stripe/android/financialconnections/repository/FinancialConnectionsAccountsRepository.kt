@@ -138,10 +138,10 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         }
     }
 
-    private suspend fun updateCachedAccounts(
+    private fun updateCachedAccounts(
         source: String,
         accounts: PartnerAccountsList
-    ) = mutex.withLock {
+    ) {
         logger.debug("updating local partner accounts from $source")
         cachedAccounts = accounts
     }
