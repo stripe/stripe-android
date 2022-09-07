@@ -211,6 +211,13 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun onItemSelected(item: ConsumerPaymentDetails.PaymentDetails) {
+        if (item == uiState.value.selectedItem) {
+            return
+        }
+
+        expiryDateController.onRawValueChange("")
+        cvcController.onRawValueChange("")
+
         _uiState.update {
             it.copy(selectedItem = item)
         }

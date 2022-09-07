@@ -28,6 +28,7 @@ import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -424,6 +425,42 @@ class WalletViewModelTest {
 
         val link = paramsMap["link"] as Map<*, *>
         assertThat(link).doesNotContainKey("card")
+    }
+
+    @Test
+    fun `Resets expiry date and CVC controllers when new payment method is selected`() = runTest {
+        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails[1]
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+
+        val viewModel = createViewModel().apply {
+            expiryDateController.onRawValueChange("1230")
+            cvcController.onRawValueChange("123")
+        }
+
+        viewModel.onItemSelected(paymentDetails)
+
+        val uiState = viewModel.uiState.value
+        assertThat(uiState.expiryDateInput).isEqualTo(FormFieldEntry(value = ""))
+        assertThat(uiState.cvcInput).isEqualTo(FormFieldEntry(value = ""))
+    }
+
+    @Test
+    fun `Expiry date and CVC values are kept when existing payment method is selected`() = runTest {
+        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+
+        val viewModel = createViewModel().apply {
+            expiryDateController.onRawValueChange("1230")
+            cvcController.onRawValueChange("123")
+        }
+
+        viewModel.onItemSelected(paymentDetails)
+
+        val uiState = viewModel.uiState.value
+        assertThat(uiState.expiryDateInput.value).isEqualTo("1230")
+        assertThat(uiState.cvcInput.value).isEqualTo("123")
     }
 
     @Test
