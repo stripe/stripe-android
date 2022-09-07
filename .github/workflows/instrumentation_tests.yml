@@ -1,8 +1,15 @@
 name: Instrumentation tests
 on:
-  schedule:
-    # every 12 hours
-    - cron: '0 */12 * * *'
+  pull_request:
+    paths:
+      - 'payments/**'
+      - 'payments-core/**'
+      - 'payments-model/**'
+      - 'stripe-core/**'
+      - 'payments-model/**'
+      - 'payments-ui-core/**'
+      - 'link/**'
+      - 'dependencies.gradle'
 jobs:
   instrumentation-tests:
     name: Instrumentation tests
