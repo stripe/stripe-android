@@ -75,20 +75,20 @@ private fun WalletBodyPreview() {
         ConsumerPaymentDetails.Card(
             "id1",
             true,
-            2022,
-            1,
+            2030,
+            12,
             CardBrand.Visa,
             "4242",
-            CvcCheck.Pass
+            CvcCheck.Fail
         ),
         ConsumerPaymentDetails.Card(
             "id2",
             false,
-            2023,
-            11,
+            2022,
+            1,
             CardBrand.MasterCard,
             "4444",
-            CvcCheck.Fail
+            CvcCheck.Pass
         )
     )
 
@@ -260,12 +260,12 @@ internal fun WalletBody(
             )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
-
         uiState.errorMessage?.let {
             ErrorText(
                 text = it.getMessage(LocalContext.current.resources),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
             )
         }
 
@@ -274,10 +274,13 @@ internal fun WalletBody(
                 CardDetailsRecollectionForm(
                     expiryDateController = expiryDateController,
                     cvcController = cvcController,
-                    isCardExpired = selectedCard.isExpired
+                    isCardExpired = selectedCard.isExpired,
+                    modifier = Modifier.padding(top = 16.dp)
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         PrimaryButton(
             label = primaryButtonLabel,
@@ -298,7 +301,8 @@ internal fun WalletBody(
 internal fun CardDetailsRecollectionForm(
     expiryDateController: TextFieldController,
     cvcController: CvcController,
-    isCardExpired: Boolean
+    isCardExpired: Boolean,
+    modifier: Modifier = Modifier
 ) {
     val cvcElement = remember(cvcController) {
         CvcElement(
@@ -314,37 +318,41 @@ internal fun CardDetailsRecollectionForm(
     }
 
     PaymentsThemeForLink {
-        ErrorText(
-            text = stringResource(errorTextResId),
-            modifier = Modifier.fillMaxWidth()
-        )
+        Column(modifier) {
+            ErrorText(
+                text = stringResource(errorTextResId),
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            if (isCardExpired) {
-                val expiryDateElement = remember(expiryDateController) {
-                    SimpleTextElement(
-                        identifier = IdentifierSpec.Generic("date"),
-                        controller = expiryDateController
-                    )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                if (isCardExpired) {
+                    val expiryDateElement = remember(expiryDateController) {
+                        SimpleTextElement(
+                            identifier = IdentifierSpec.Generic("date"),
+                            controller = expiryDateController
+                        )
+                    }
+
+                    Box(modifier = Modifier.weight(0.5f)) {
+                        SectionElementUI(
+                            enabled = true,
+                            element = SectionElement.wrap(expiryDateElement),
+                            hiddenIdentifiers = emptyList(),
+                            lastTextFieldIdentifier = cvcElement.identifier
+                        )
+                    }
                 }
 
                 Box(modifier = Modifier.weight(0.5f)) {
                     SectionElementUI(
                         enabled = true,
-                        element = SectionElement.wrap(expiryDateElement),
+                        element = SectionElement.wrap(cvcElement),
                         hiddenIdentifiers = emptyList(),
                         lastTextFieldIdentifier = cvcElement.identifier
                     )
                 }
-            }
-
-            Box(modifier = Modifier.weight(0.5f)) {
-                SectionElementUI(
-                    enabled = true,
-                    element = SectionElement.wrap(cvcElement),
-                    hiddenIdentifiers = emptyList(),
-                    lastTextFieldIdentifier = cvcElement.identifier
-                )
             }
         }
     }
