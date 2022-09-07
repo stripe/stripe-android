@@ -85,19 +85,21 @@ private fun AccountPickerContent(
 ) {
     FinancialConnectionsScaffold {
         when (val payload = state.payload) {
-            Uninitialized, is Loading -> LoadingContent(
-                stringResource(R.string.stripe_account_picker_loading_title),
-                stringResource(R.string.stripe_account_picker_loading_desc)
-            )
-            is Success -> AccountPickerLoaded(
-                loading = state.isLoading,
-                accounts = payload().accounts,
-                selectedIds = state.selectedIds,
-                onAccountClicked = onAccountClicked,
-                onSelectAccounts = onSelectAccounts,
-                selectionMode = payload().selectionMode,
-                accessibleDataCalloutModel = payload().accessibleData
-            )
+            Uninitialized, is Loading -> AccountPickerLoading()
+            is Success -> when(payload().skipAccountSelection) {
+                // ensures account picker is not shown momentarily
+                // if account selection should be skipped.
+                true -> AccountPickerLoading()
+                false -> AccountPickerLoaded(
+                    loading = state.isLoading,
+                    accounts = payload().accounts,
+                    selectedIds = state.selectedIds,
+                    onAccountClicked = onAccountClicked,
+                    onSelectAccounts = onSelectAccounts,
+                    selectionMode = payload().selectionMode,
+                    accessibleDataCalloutModel = payload().accessibleData
+                )
+            }
             is Fail -> when (val error = payload.error) {
                 is NoSupportedPaymentMethodTypeAccountsException ->
                     NoSupportedPaymentMethodTypeAccountsErrorContent(
@@ -108,6 +110,14 @@ private fun AccountPickerContent(
             }
         }
     }
+}
+
+@Composable
+private fun AccountPickerLoading() {
+    LoadingContent(
+        stringResource(R.string.stripe_account_picker_loading_title),
+        stringResource(R.string.stripe_account_picker_loading_desc)
+    )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)

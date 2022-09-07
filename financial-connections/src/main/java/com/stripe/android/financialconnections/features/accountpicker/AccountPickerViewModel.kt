@@ -171,10 +171,7 @@ internal data class AccountPickerState(
 ) : MavericksState {
 
     val isLoading: Boolean
-        get() = payload is Loading ||
-            // ensures account picker is not shown momentarily if account selection should be skipped.
-            payload()?.skipAccountSelection == true ||
-            selectAccounts is Loading
+        get() = payload is Loading || selectAccounts is Loading
 
     data class Payload(
         val skipAccountSelection: Boolean,
