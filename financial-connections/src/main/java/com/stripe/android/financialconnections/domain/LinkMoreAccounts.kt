@@ -6,8 +6,9 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsMa
 import javax.inject.Inject
 
 /**
- * Gets cached partner accounts. If they're not found, they'll be fetched from backend (this
- * can happen on process kills).
+ * Resets the current session allowing to link more accounts.
+ *
+ * Returns a refreshed manifest instance.
  */
 internal class LinkMoreAccounts @Inject constructor(
     val repository: FinancialConnectionsManifestRepository,
