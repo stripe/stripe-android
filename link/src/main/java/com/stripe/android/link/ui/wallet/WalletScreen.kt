@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -206,44 +207,46 @@ internal fun WalletBody(
     ScrollableTopLevelColumn {
         Spacer(modifier = Modifier.height(12.dp))
 
-        if (uiState.isExpanded) {
-            ExpandedPaymentDetails(
-                uiState = uiState,
-                onItemSelected = {
-                    onItemSelected(it)
-                    setExpanded(false)
-                },
-                onMenuButtonClick = {
-                    showBottomSheetContent {
-                        WalletPaymentMethodMenu(
-                            paymentDetails = it,
-                            onEditClick = {
-                                showBottomSheetContent(null)
-                                onEditPaymentMethod(it)
-                            },
-                            onRemoveClick = {
-                                showBottomSheetContent(null)
-                                itemBeingRemoved = it
-                            },
-                            onCancelClick = {
-                                showBottomSheetContent(null)
-                            }
-                        )
+        Box(modifier = Modifier.animateContentSize()) {
+            if (uiState.isExpanded) {
+                ExpandedPaymentDetails(
+                    uiState = uiState,
+                    onItemSelected = {
+                        onItemSelected(it)
+                        setExpanded(false)
+                    },
+                    onMenuButtonClick = {
+                        showBottomSheetContent {
+                            WalletPaymentMethodMenu(
+                                paymentDetails = it,
+                                onEditClick = {
+                                    showBottomSheetContent(null)
+                                    onEditPaymentMethod(it)
+                                },
+                                onRemoveClick = {
+                                    showBottomSheetContent(null)
+                                    itemBeingRemoved = it
+                                },
+                                onCancelClick = {
+                                    showBottomSheetContent(null)
+                                }
+                            )
+                        }
+                    },
+                    onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
+                    onCollapse = {
+                        setExpanded(false)
                     }
-                },
-                onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
-                onCollapse = {
-                    setExpanded(false)
-                }
-            )
-        } else {
-            CollapsedPaymentDetails(
-                selectedPaymentMethod = uiState.selectedItem!!,
-                enabled = !uiState.primaryButtonState.isBlocking,
-                onClick = {
-                    setExpanded(true)
-                }
-            )
+                )
+            } else {
+                CollapsedPaymentDetails(
+                    selectedPaymentMethod = uiState.selectedItem!!,
+                    enabled = !uiState.primaryButtonState.isBlocking,
+                    onClick = {
+                        setExpanded(true)
+                    }
+                )
+            }
         }
 
         if (uiState.selectedItem is ConsumerPaymentDetails.BankAccount) {
