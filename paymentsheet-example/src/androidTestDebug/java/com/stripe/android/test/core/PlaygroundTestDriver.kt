@@ -298,7 +298,7 @@ class PlaygroundTestDriver(
                 val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
 
                 // If there are multiple browser there is a browser selector window
-                selectBrowserPrompt.wait(2000)
+                selectBrowserPrompt.wait(4000)
                 if (selectBrowserPrompt.exists()) {
                     browserIconAtPrompt(selectedBrowser).click()
                 }
