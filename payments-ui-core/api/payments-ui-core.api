@@ -145,6 +145,45 @@ public final class com/stripe/android/ui/core/elements/AddressType$ShippingExpan
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract class com/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country {
+	public static final field $stable I
+	public synthetic fun <init> (ILjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getAdministrativeAreas ()Ljava/util/List;
+	public fun getLabel ()I
+}
+
+public final class com/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$Canada : com/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (ILjava/util/List;)V
+	public synthetic fun <init> (ILjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (ILjava/util/List;)Lcom/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$Canada;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$Canada;ILjava/util/List;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$Canada;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAdministrativeAreas ()Ljava/util/List;
+	public fun getLabel ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$US : com/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country {
+	public static final field $stable I
+	public fun <init> ()V
+	public fun <init> (ILjava/util/List;)V
+	public synthetic fun <init> (ILjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (ILjava/util/List;)Lcom/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$US;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$US;ILjava/util/List;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country$US;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getAdministrativeAreas ()Ljava/util/List;
+	public fun getLabel ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/stripe/android/ui/core/elements/AffirmElementUIKt {
 }
 
