@@ -25,7 +25,8 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
                     accounts = partnerAccountList(),
                     accessibleData = accessibleCallout(),
-                    selectedIds = setOf("id1")
+                    selectedIds = setOf("id1"),
+                    skipAccountSelection = false
                 )
             )
         )
@@ -36,7 +37,8 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     selectionMode = AccountPickerState.SelectionMode.RADIO,
                     accounts = partnerAccountList(),
                     accessibleData = accessibleCallout(),
-                    selectedIds = setOf("id1")
+                    selectedIds = setOf("id1"),
+                    skipAccountSelection = false
                 )
             )
         )
@@ -47,7 +49,8 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     selectionMode = AccountPickerState.SelectionMode.DROPDOWN,
                     accounts = partnerAccountList(),
                     accessibleData = accessibleCallout(),
-                    selectedIds = setOf("id1")
+                    selectedIds = setOf("id1"),
+                    skipAccountSelection = false
                 )
             )
         )

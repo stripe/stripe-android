@@ -138,12 +138,12 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         }
     }
 
-    private fun updateCachedAccounts(
+    private suspend fun updateCachedAccounts(
         source: String,
-        manifest: PartnerAccountsList
-    ) {
+        accounts: PartnerAccountsList
+    ) = mutex.withLock {
         logger.debug("updating local partner accounts from $source")
-        cachedAccounts = manifest
+        cachedAccounts = accounts
     }
 
     companion object {
