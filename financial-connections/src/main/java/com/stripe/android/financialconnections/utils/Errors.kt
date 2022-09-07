@@ -1,10 +1,12 @@
 package com.stripe.android.financialconnections.utils
 
 import com.stripe.android.core.exception.StripeException
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.first
 import java.net.HttpURLConnection
+import java.util.concurrent.TimeoutException
 
 /**
  * Executes and returns the result of the given [block].
@@ -17,21 +19,21 @@ internal suspend fun <T> retryOnException(
     retryCondition: suspend (Throwable) -> Boolean,
     block: suspend () -> T,
 ): T = channelFlow {
+    var remainingTimes = times - 1
     while (!isClosedForSend) {
         delay(delayMilliseconds)
         val either = runCatching { block() }
-        either.fold(onFailure = { exception ->
-            if (retryCondition(exception)) {
-                delay(delayMilliseconds)
-            } else {
-                throw exception
-            }
-        }, onSuccess = {
-            send(it)
-        })
+        either.fold(
+            onFailure = { exception ->
+                when {
+                    remainingTimes == 0 -> throw TimeoutException("reached max number of retries")
+                    retryCondition(exception).not() -> throw exception
+                }
+            },
+            onSuccess = { send(it) })
+        remainingTimes--
     }
 }.first()
-
 
 /**
  * returns true if exception represents a [HttpURLConnection.HTTP_ACCEPTED] API response.
