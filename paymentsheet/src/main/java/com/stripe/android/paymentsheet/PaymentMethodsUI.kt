@@ -16,6 +16,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.ColorFilter
@@ -30,6 +31,7 @@ import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.paymentsColors
+import kotlinx.coroutines.launch
 
 internal const val ADD_PM_DEFAULT_PADDING = 12.0f
 internal const val CARD_HORIZONTAL_PADDING = 6.0f
@@ -48,7 +50,7 @@ internal fun PaymentMethodsUI(
     val state = rememberLazyListState()
 
     LaunchedEffect(selectedIndex) {
-        state.scrollToItem(selectedIndex, 0)
+        state.animateScrollToItem(selectedIndex, 0) // Klarana still didn't scroll
     }
 
     PaymentsTheme {
