@@ -18,7 +18,7 @@ import java.util.regex.Pattern
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun LinkifiedText(
+fun HyperlinkedText(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = Color.Unspecified,
@@ -28,7 +28,10 @@ fun LinkifiedText(
     val layoutResult = remember {
         mutableStateOf<TextLayoutResult?>(null)
     }
-    val linksList = extractUrls(text)
+    val linksList = remember(text) {
+        extractLinkAnnotations(text)
+    }
+
     val annotatedString = buildAnnotatedString {
         append(text)
         linksList.forEach {
@@ -68,11 +71,11 @@ private val urlPattern: Pattern = Pattern.compile(
     Pattern.CASE_INSENSITIVE or Pattern.MULTILINE or Pattern.DOTALL
 )
 
-private fun extractUrls(text: String): List<LinkInfos> {
+private fun extractLinkAnnotations(text: String): List<LinkAnnotation> {
     val matcher = urlPattern.matcher(text)
     var matchStart: Int
     var matchEnd: Int
-    val links = arrayListOf<LinkInfos>()
+    val links = arrayListOf<LinkAnnotation>()
 
     while (matcher.find()) {
         matchStart = matcher.start(1)
@@ -83,12 +86,12 @@ private fun extractUrls(text: String): List<LinkInfos> {
             url = "https://$url"
         }
 
-        links.add(LinkInfos(url, matchStart, matchEnd))
+        links.add(LinkAnnotation(url, matchStart, matchEnd))
     }
     return links
 }
 
-private data class LinkInfos(
+private data class LinkAnnotation(
     val url: String,
     val start: Int,
     val end: Int

@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.linkColors
-import com.stripe.android.ui.core.elements.LinkifiedText
+import com.stripe.android.ui.core.elements.HyperlinkedText
 
 internal sealed class ErrorTextStyle {
     abstract val shape: Shape
@@ -84,7 +84,7 @@ internal fun ErrorText(
             modifier = style.iconModifier,
             tint = MaterialTheme.linkColors.errorText
         )
-        LinkifiedText(
+        HyperlinkedText(
             text = text,
             modifier = style.textModifier,
             color = MaterialTheme.linkColors.errorText,
