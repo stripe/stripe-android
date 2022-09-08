@@ -112,7 +112,7 @@ jobs:
         with:
           if: success() || failure()
           name: screenshot-test-report-paymentsheet-example
-          path: /Users/runner/work/stripe-android/stripe-android/paymentsheet-example/build/reports/shot/debug/verification/
+          path: /Users/runner/work/stripe-android/stripe-android/paymentsheet-example/build/reports/shot/debug/verification/ |  /Users/runner/work/stripe-android/stripe-android/paymentsheet/build/reports/shot/debug/verification/
       - uses: actions/upload-artifact@v2
         with:
           if: success() || failure()

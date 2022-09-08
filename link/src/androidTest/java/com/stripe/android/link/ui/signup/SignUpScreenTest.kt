@@ -101,9 +101,16 @@ internal class SignUpScreenTest {
     }
 
     @Test
-    fun when_error_message_is_not_null_then_it_is_visible() {
+    fun when_error_message_not_null_in_state_InputtingPhoneOrName_then_it_is_visible() {
         val errorMessage = "Error message"
         setContent(SignUpState.InputtingPhoneOrName, errorMessage = ErrorMessage.Raw(errorMessage))
+        composeTestRule.onNodeWithText(errorMessage).assertExists()
+    }
+
+    @Test
+    fun when_error_message_not_null_in_state_InputtingEmail_then_it_is_visible() {
+        val errorMessage = "Error message"
+        setContent(SignUpState.InputtingEmail, errorMessage = ErrorMessage.Raw(errorMessage))
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
 
@@ -112,24 +119,23 @@ internal class SignUpScreenTest {
         isReadyToSignUp: Boolean = true,
         requiresNameCollection: Boolean = false,
         errorMessage: ErrorMessage? = null
-    ) =
-        composeTestRule.setContent {
-            DefaultLinkTheme {
-                SignUpBody(
-                    merchantName = "Example, Inc.",
-                    emailController = SimpleTextFieldController
-                        .createEmailSectionController(""),
-                    phoneNumberController = PhoneNumberController.createPhoneNumberController(),
-                    nameController = SimpleTextFieldController
-                        .createNameSectionController(null),
-                    signUpState = signUpState,
-                    isReadyToSignUp = isReadyToSignUp,
-                    requiresNameCollection = requiresNameCollection,
-                    errorMessage = errorMessage,
-                    onSignUpClick = {}
-                )
-            }
+    ) = composeTestRule.setContent {
+        DefaultLinkTheme {
+            SignUpBody(
+                merchantName = "Example, Inc.",
+                emailController = SimpleTextFieldController
+                    .createEmailSectionController(""),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController(),
+                nameController = SimpleTextFieldController
+                    .createNameSectionController(null),
+                signUpState = signUpState,
+                isReadyToSignUp = isReadyToSignUp,
+                requiresNameCollection = requiresNameCollection,
+                errorMessage = errorMessage,
+                onSignUpClick = {}
+            )
         }
+    }
 
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(progressIndicatorTestTag)

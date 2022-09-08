@@ -208,7 +208,7 @@ internal fun WalletBody(
         Spacer(modifier = Modifier.height(12.dp))
 
         Box(modifier = Modifier.animateContentSize()) {
-            if (uiState.isExpanded) {
+            if (uiState.isExpanded || uiState.selectedItem == null) {
                 ExpandedPaymentDetails(
                     uiState = uiState,
                     onItemSelected = {
@@ -240,7 +240,7 @@ internal fun WalletBody(
                 )
             } else {
                 CollapsedPaymentDetails(
-                    selectedPaymentMethod = uiState.selectedItem!!,
+                    selectedPaymentMethod = uiState.selectedItem,
                     enabled = !uiState.primaryButtonState.isBlocking,
                     onClick = {
                         setExpanded(true)

@@ -7,22 +7,14 @@
         "type": "afterpay_header"
       },
       {
-        "type": "name",
-        "api_path": {
-          "v1": "billing_details[name]"
-        }
+        "type": "name"
       },
       {
-        "type": "email",
-        "api_path": {
-          "v1": "billing_details[email]"
-        }
+        "type": "email"
       },
       {
         "type": "billing_address",
-        "api_path": {
-          "v1": "billing_details[address]"
-        }
+        "allowed_country_codes": null
       }
     ],
     "next_action_spec": {
@@ -73,16 +65,10 @@
         "type": "klarna_header"
       },
       {
-        "type": "email",
-        "api_path": {
-          "v1": "billing_details[email]"
-        }
+        "type": "email"
       },
       {
-        "type": "klarna_country",
-        "api_path": {
-          "v1": "billing_details[address][country]"
-        }
+        "type": "klarna_country"
       }
     ],
     "next_action_spec": {
@@ -106,10 +92,7 @@
     "async": false,
     "fields": [
       {
-        "type": "name",
-        "api_path": {
-          "v1": "billing_details[name]"
-        }
+        "type": "name"
       },
       {
         "type": "selector",
@@ -196,10 +179,7 @@
     "async": false,
     "fields": [
       {
-        "type": "name",
-        "api_path": {
-          "v1": "billing_details[name]"
-        }
+        "type": "name"
       }
     ],
     "next_action_spec": {
@@ -223,28 +203,17 @@
     "async": true,
     "fields": [
       {
-        "type": "name",
-        "api_path": {
-          "v1": "billing_details[name]"
-        }
+        "type": "name"
       },
       {
-        "type": "email",
-        "api_path": {
-          "v1": "billing_details[email]"
-        }
+        "type": "email"
       },
       {
-        "type": "iban",
-        "api_path": {
-          "v1": "sepa_debit[iban]"
-        }
+        "type": "iban"
       },
       {
         "type": "billing_address",
-        "api_path": {
-          "v1": "billing_details[address]"
-        }
+        "allowed_country_codes": null
       },
       {
         "type": "sepa_mandate"
@@ -266,10 +235,7 @@
     "async": false,
     "fields": [
       {
-        "type": "name",
-        "api_path": {
-          "v1": "billing_details[name]"
-        }
+        "type": "name"
       },
       {
         "type": "selector",
@@ -333,10 +299,7 @@
     "async": false,
     "fields": [
       {
-        "type": "name",
-        "api_path": {
-          "v1": "billing_details[name]"
-        }
+        "type": "name"
       }
     ],
     "next_action_spec": {
@@ -360,16 +323,10 @@
     "async": false,
     "fields": [
       {
-        "type": "name",
-        "api_path": {
-          "v1": "billing_details[name]"
-        }
+        "type": "name"
       },
       {
-        "type": "email",
-        "api_path": {
-          "v1": "billing_details[email]"
-        }
+        "type": "email"
       },
       {
         "type": "selector",
@@ -449,31 +406,20 @@
     "fields": [
       {
         "type": "name",
-        "api_path": {
-          "v1": "billing_details[name]"
-        },
         "translation_id": "upe.labels.name.onAccount"
       },
       {
-        "type": "email",
-        "api_path": {
-          "v1": "billing_details[email]"
-        }
+        "type": "email"
       },
       {
-        "type": "au_becs_bsb_number",
-        "api_path": {
-          "v1": "au_becs_debit[bsb_number]"
-        }
+        "type": "au_becs_bsb_number"
       },
       {
-        "type": "au_becs_account_number",
-        "api_path": {
-          "v1": "au_becs_debit[account_number]"
-        }
+        "type": "au_becs_account_number"
       },
       {
-        "type": "au_becs_mandate"
+        "type": "au_becs_mandate",
+        "api_path": null
       }
     ],
     "next_action_spec": {

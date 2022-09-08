@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -32,6 +33,7 @@ import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
+import com.stripe.android.ui.core.elements.AdministrativeAreaConfig
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import java.util.Locale
 
@@ -243,6 +245,13 @@ class Selectors(
     fun getState() = composeTestRule.onNodeWithText(
         getResourceString(R.string.address_label_state)
     )
+
+    fun selectState(value: String) {
+        composeTestRule.onNodeWithText(getResourceString(R.string.address_label_state))
+            .performClick()
+        composeTestRule.onNodeWithText(value)
+            .performClick()
+    }
 
     fun getZip() = composeTestRule.onNodeWithText(
         getResourceString(R.string.address_label_zip_code)

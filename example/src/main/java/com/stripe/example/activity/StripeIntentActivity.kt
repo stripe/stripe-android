@@ -204,13 +204,13 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
     protected open fun onConfirmCanceled() {
         viewModel.status.value +=
-            "\n\nif (isPaymentIntent)\"Payment\" else \"Setup\"}Intent confirmation cancelled\n\n"
+            "\n\n${if (isPaymentIntent)"Payment" else "Setup"}Intent confirmation canceled\n\n"
         viewModel.inProgress.value = false
     }
 
     protected open fun onConfirmError(failedResult: PaymentResult.Failed) {
         viewModel.status.value +=
-            "\n\nif (isPaymentIntent)\"Payment\" else \"Setup\"}Intent confirmation failed with " +
+            "\n\n${if (isPaymentIntent)"Payment" else "Setup"}Intent confirmation failed with " +
             "throwable ${failedResult.throwable} \n\n"
         viewModel.inProgress.value = false
     }
