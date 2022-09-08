@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AbstractComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -39,6 +40,8 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.EmailCollectionSection
 import com.stripe.android.link.ui.signup.SignUpState
@@ -68,6 +71,7 @@ private fun Preview() {
                 enabled = true,
                 expanded = true,
                 requiresNameCollection = true,
+                errorMessage = null,
                 toggleExpanded = {},
                 onUserInteracted = {}
             )
@@ -91,6 +95,7 @@ private fun LinkInlineSignup(
     val signUpState by viewModel.signUpState.collectAsState(SignUpState.InputtingEmail)
     val isExpanded by viewModel.isExpanded.collectAsState(false)
     val userInput by viewModel.userInput.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
 
     onSelected(isExpanded)
     onUserInput(userInput)
@@ -113,6 +118,7 @@ private fun LinkInlineSignup(
         enabled = enabled,
         expanded = isExpanded,
         requiresNameCollection = viewModel.requiresNameCollection,
+        errorMessage = errorMessage,
         toggleExpanded = viewModel::toggleExpanded,
         onUserInteracted = onUserInteracted
     )
@@ -128,6 +134,7 @@ internal fun LinkInlineSignup(
     enabled: Boolean,
     expanded: Boolean,
     requiresNameCollection: Boolean,
+    errorMessage: ErrorMessage?,
     toggleExpanded: () -> Unit,
     onUserInteracted: () -> Unit
 ) {
@@ -196,6 +203,16 @@ internal fun LinkInlineSignup(
                         )
 
                         AnimatedVisibility(
+                            visible = signUpState != SignUpState.InputtingPhoneOrName &&
+                                errorMessage != null
+                        ) {
+                            ErrorText(
+                                text = errorMessage!!.getMessage(LocalContext.current.resources),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+
+                        AnimatedVisibility(
                             visible = signUpState == SignUpState.InputtingPhoneOrName
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
@@ -216,6 +233,13 @@ internal fun LinkInlineSignup(
                                         textFieldController = nameController,
                                         imeAction = ImeAction.Done,
                                         enabled = enabled
+                                    )
+                                }
+
+                                AnimatedVisibility(visible = errorMessage != null) {
+                                    ErrorText(
+                                        text = errorMessage!!.getMessage(LocalContext.current.resources),
+                                        modifier = Modifier.fillMaxWidth()
                                     )
                                 }
 
