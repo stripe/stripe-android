@@ -8,6 +8,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
@@ -24,6 +25,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,6 +46,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.clearInvocations
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -130,8 +133,13 @@ class WalletViewModelTest {
         }
 
     @Test
-    fun `onSelectedPaymentDetails starts payment confirmation`() {
+    fun `onSelectedPaymentDetails starts payment confirmation`() = runTest {
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+        whenever(args.shippingValues)
+            .thenReturn(null)
+
         val viewModel = createViewModel()
 
         viewModel.onItemSelected(paymentDetails)
@@ -147,6 +155,34 @@ class WalletViewModelTest {
                     CLIENT_SECRET
                 ),
                 StripeIntentFixtures.PI_SUCCEEDED.clientSecret!!
+            )
+        )
+    }
+
+    @Test
+    fun `when shippingValues are passed ConfirmPaymentIntentParams has shipping`() = runTest {
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+        whenever(args.shippingValues).thenReturn(
+            mapOf(
+                IdentifierSpec.Name to "Test Name",
+                IdentifierSpec.Country to "US"
+            )
+        )
+
+        val viewModel = createViewModel()
+
+        viewModel.onConfirmPayment()
+
+        val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
+        verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
+
+        assertThat(paramsCaptor.firstValue.toParamMap()["shipping"]).isEqualTo(
+            mapOf(
+                "address" to mapOf(
+                    "country" to "US"
+                ),
+                "name" to "Test Name"
             )
         )
     }
@@ -287,7 +323,8 @@ class WalletViewModelTest {
 
         viewModel.payAnotherWay()
 
-        verify(navigator).dismiss()
+        verify(navigator).cancel(reason = eq(Reason.PayAnotherWay))
+        verify(linkAccountManager, never()).logout()
     }
 
     @Test

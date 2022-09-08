@@ -92,7 +92,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeVersion"
+        kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
     }
 }
 

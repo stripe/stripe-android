@@ -11,11 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -30,7 +34,8 @@ fun PhoneNumberCollectionSection(
     enabled: Boolean,
     phoneNumberController: PhoneNumberController,
     @StringRes sectionTitle: Int? = null,
-    requestFocusWhenShown: Boolean = false
+    requestFocusWhenShown: Boolean = false,
+    imeAction: ImeAction = ImeAction.Done
 ) {
     val error by phoneNumberController.error.collectAsState(null)
 
@@ -44,7 +49,7 @@ fun PhoneNumberCollectionSection(
     }
 
     Section(sectionTitle, sectionErrorString) {
-        PhoneNumberElementUI(enabled, phoneNumberController, requestFocusWhenShown)
+        PhoneNumberElementUI(enabled, phoneNumberController, requestFocusWhenShown, imeAction)
     }
 }
 
@@ -52,7 +57,8 @@ fun PhoneNumberCollectionSection(
 internal fun PhoneNumberElementUI(
     enabled: Boolean,
     controller: PhoneNumberController,
-    requestFocusWhenShown: Boolean = false
+    requestFocusWhenShown: Boolean = false,
+    imeAction: ImeAction = ImeAction.Done
 ) {
     val focusManager = LocalFocusManager.current
     val selectedIndex by controller.countryDropdownController.selectedIndex.collectAsState(0)
@@ -64,13 +70,20 @@ internal fun PhoneNumberElementUI(
     val visualTransformation by controller.visualTransformation.collectAsState(VisualTransformation.None)
     val colors = TextFieldColors(shouldShowError != null)
     val focusRequester = remember { FocusRequester() }
+    var hasFocus by rememberSaveable { mutableStateOf(false) }
 
     androidx.compose.material.TextField(
         value = value,
         onValueChange = controller::onValueChange,
         modifier = Modifier
             .fillMaxWidth()
-            .focusRequester(focusRequester),
+            .focusRequester(focusRequester)
+            .onFocusChanged {
+                if (hasFocus != it.isFocused) {
+                    controller.onFocusChange(it.isFocused)
+                }
+                hasFocus = it.isFocused
+            },
         enabled = enabled,
         label = {
             FormLabel(
@@ -97,7 +110,7 @@ internal fun PhoneNumberElementUI(
         visualTransformation = visualTransformation,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Phone,
-            imeAction = ImeAction.Done
+            imeAction = imeAction
         ),
         keyboardActions = KeyboardActions(
             onNext = {

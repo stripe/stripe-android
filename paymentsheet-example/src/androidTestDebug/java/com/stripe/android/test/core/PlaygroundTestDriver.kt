@@ -253,8 +253,11 @@ class PlaygroundTestDriver(
         selectors.setMerchantCountry(testParameters.merchantCountryCode)
         selectors.setCurrency(testParameters.currency)
 
+        selectors.linkState.click()
+
         selectors.checkout.click()
         selectors.delayed.click()
+        selectors.shipping.click()
 
         // billing is not saved to preferences
         selectors.billing.click()

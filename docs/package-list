@@ -12,6 +12,7 @@ com.stripe.android.camera.scanui
 com.stripe.android.camera.scanui.util
 module:financial-connections
 com.stripe.android.financialconnections
+com.stripe.android.financialconnections.launcher
 com.stripe.android.financialconnections.model
 module:identity
 com.stripe.android.identity
@@ -43,6 +44,7 @@ com.stripe.android.payments.core.authentication
 com.stripe.android.payments.core.injection
 com.stripe.android.payments.financialconnections
 com.stripe.android.payments.paymentlauncher
+com.stripe.android.utils
 com.stripe.android.view
 com.stripe.android.view.i18n
 module:payments-model

@@ -43,6 +43,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.isOnRootScreen
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.cardedit.CardEditBody
@@ -101,7 +102,7 @@ internal class LinkActivity : ComponentActivity() {
                     },
                     modifier = Modifier.fillMaxHeight(),
                     sheetState = sheetState,
-                    sheetShape = MaterialTheme.shapes.large.copy(
+                    sheetShape = MaterialTheme.linkShapes.large.copy(
                         bottomStart = CornerSize(0.dp),
                         bottomEnd = CornerSize(0.dp)
                     ),
@@ -124,7 +125,18 @@ internal class LinkActivity : ComponentActivity() {
 
                         LinkAppBar(
                             state = appBarState,
-                            onButtonClick = { viewModel.navigator.onBack(userInitiated = true) }
+                            onBackPressed = viewModel::onBackPressed,
+                            onLogout = viewModel::logout,
+                            showBottomSheetContent = {
+                                if (it == null) {
+                                    coroutineScope.launch {
+                                        sheetState.hide()
+                                        bottomSheetContent = null
+                                    }
+                                } else {
+                                    bottomSheetContent = it
+                                }
+                            }
                         )
 
                         NavHost(navController, LinkScreen.Loading.route) {
@@ -255,7 +267,7 @@ internal class LinkActivity : ComponentActivity() {
         viewModel.unregisterFromActivity()
     }
 
-    private fun dismiss(result: LinkActivityResult = LinkActivityResult.Canceled) {
+    private fun dismiss(result: LinkActivityResult) {
         setResult(
             result.resultCode,
             Intent().putExtras(LinkActivityContract.Result(result).toBundle())

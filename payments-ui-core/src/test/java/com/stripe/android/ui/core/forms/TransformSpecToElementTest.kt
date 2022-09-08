@@ -63,7 +63,8 @@ internal class TransformSpecToElementTest {
                 amount = null,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
-                context
+                context = context,
+                shippingValues = null
             )
     }
 
@@ -147,7 +148,7 @@ internal class TransformSpecToElementTest {
             as SimpleTextElement
 
         // Verify the correct config is setup for the controller
-        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_name)
+        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_full_name)
         assertThat(nameElement.identifier.v1).isEqualTo("simple")
         assertThat(nameElement.controller.showOptionalLabel).isTrue()
     }
@@ -194,8 +195,9 @@ internal class TransformSpecToElementTest {
                 amount = null,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
-                context,
-                viewOnlyFields = setOf(IdentifierSpec.CardNumber)
+                context = context,
+                viewOnlyFields = setOf(IdentifierSpec.CardNumber),
+                shippingValues = null
             )
 
         val formElements = transformSpecToElements.transform(

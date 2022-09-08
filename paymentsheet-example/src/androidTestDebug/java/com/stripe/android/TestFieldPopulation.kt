@@ -14,6 +14,7 @@ import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
@@ -56,6 +57,7 @@ class TestFieldPopulation {
     private val sepaDebit = TestParameters(
         paymentMethod = lpmRepository.fromCode("sepa_debit")!!,
         customer = Customer.New,
+        linkState = LinkState.Off,
         googlePayState = GooglePayState.On,
         currency = Currency.EUR,
         intentType = IntentType.Pay,
@@ -73,6 +75,7 @@ class TestFieldPopulation {
     private val card = TestParameters(
         paymentMethod = LpmRepository.HardcodedCard,
         customer = Customer.New,
+        linkState = LinkState.Off,
         googlePayState = GooglePayState.On,
         currency = Currency.EUR,
         merchantCountryCode = "GB",

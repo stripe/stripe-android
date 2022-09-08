@@ -48,6 +48,15 @@ class PostalCodeConfigTest {
         }
     }
 
+    @Test
+    fun `invalid postal codes emit error`() {
+        with(createConfigForCountry("US")) {
+            Truth.assertThat(determineStateForInput("").getError()).isNull()
+            Truth.assertThat(determineStateForInput("1234").getError()).isNotNull()
+            Truth.assertThat(determineStateForInput("12345").getError()).isNull()
+        }
+    }
+
     private fun createConfigForCountry(country: String): PostalCodeConfig {
         return PostalCodeConfig(
             label = R.string.address_label_postal_code,

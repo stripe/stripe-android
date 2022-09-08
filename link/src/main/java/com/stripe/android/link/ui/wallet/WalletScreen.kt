@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.wallet
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,7 +23,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,7 +41,9 @@ import com.stripe.android.link.R
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.HorizontalPadding
+import com.stripe.android.link.theme.PaymentsThemeForLink
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
@@ -53,39 +55,57 @@ import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.CvcCheck
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.CvcElement
+import com.stripe.android.ui.core.elements.DateConfig
 import com.stripe.android.ui.core.elements.Html
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.ui.core.elements.SectionElementUI
+import com.stripe.android.ui.core.elements.SimpleTextElement
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.injection.NonFallbackInjector
-import com.stripe.android.ui.core.paymentsColors
+import kotlinx.coroutines.flow.flowOf
 
 @Preview
 @Composable
 private fun WalletBodyPreview() {
+    val paymentDetailsList = listOf(
+        ConsumerPaymentDetails.Card(
+            "id1",
+            true,
+            2022,
+            1,
+            CardBrand.Visa,
+            "4242",
+            CvcCheck.Pass
+        ),
+        ConsumerPaymentDetails.Card(
+            "id2",
+            false,
+            2023,
+            11,
+            CardBrand.MasterCard,
+            "4444",
+            CvcCheck.Fail
+        )
+    )
+
     DefaultLinkTheme {
         Surface {
             WalletBody(
-                paymentDetailsList = listOf(
-                    ConsumerPaymentDetails.Card(
-                        "id1",
-                        true,
-                        2022,
-                        12,
-                        CardBrand.Visa,
-                        "4242"
-                    ),
-                    ConsumerPaymentDetails.Card(
-                        "id2",
-                        false,
-                        2023,
-                        11,
-                        CardBrand.MasterCard,
-                        "4444"
-                    )
-                ),
+                paymentDetailsList = paymentDetailsList,
                 supportedTypes = SupportedPaymentMethod.allTypes,
-                selectedItem = null,
+                selectedItem = paymentDetailsList.first(),
+                isExpanded = true,
                 primaryButtonLabel = "Pay $10.99",
                 primaryButtonState = PrimaryButtonState.Enabled,
-                errorMessage = null,
+                errorMessage = ErrorMessage.Raw("Something went wrong"),
+                expiryDateController = SimpleTextFieldController(textFieldConfig = DateConfig()),
+                cvcController = CvcController(cardBrandFlow = flowOf(CardBrand.Visa)),
+                setExpanded = {},
                 onItemSelected = {},
                 onAddNewPaymentMethodClick = {},
                 onEditPaymentMethod = {},
@@ -115,6 +135,7 @@ internal fun WalletBody(
     val primaryButtonState by viewModel.primaryButtonState.collectAsState()
     val selectedItem by viewModel.selectedItem.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val isExpanded by viewModel.isExpanded.collectAsState()
 
     if (paymentDetailsList.isEmpty()) {
         Box(
@@ -130,12 +151,16 @@ internal fun WalletBody(
             paymentDetailsList = paymentDetailsList,
             supportedTypes = viewModel.supportedTypes,
             selectedItem = selectedItem,
+            isExpanded = isExpanded,
             primaryButtonLabel = completePaymentButtonLabel(
                 viewModel.args.stripeIntent,
                 LocalContext.current.resources
             ),
             primaryButtonState = primaryButtonState,
             errorMessage = errorMessage,
+            expiryDateController = viewModel.expiryDateController,
+            cvcController = viewModel.cvcController,
+            setExpanded = viewModel::setExpanded,
             onItemSelected = viewModel::onItemSelected,
             onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
             onEditPaymentMethod = viewModel::editPaymentMethod,
@@ -152,9 +177,13 @@ internal fun WalletBody(
     paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
     supportedTypes: Set<String>,
     selectedItem: ConsumerPaymentDetails.PaymentDetails?,
+    isExpanded: Boolean,
     primaryButtonLabel: String,
     primaryButtonState: PrimaryButtonState,
     errorMessage: ErrorMessage?,
+    expiryDateController: TextFieldController,
+    cvcController: CvcController,
+    setExpanded: (Boolean) -> Unit,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onAddNewPaymentMethodClick: () -> Unit,
     onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -164,7 +193,6 @@ internal fun WalletBody(
     showBottomSheetContent: (BottomSheetContent?) -> Unit
 ) {
     val selectedItemIsValid = selectedItem?.let { supportedTypes.contains(it.type) } ?: false
-    var isWalletExpanded by rememberSaveable { mutableStateOf(!selectedItemIsValid) }
     var itemBeingRemoved by remember {
         mutableStateOf<ConsumerPaymentDetails.PaymentDetails?>(null)
     }
@@ -192,8 +220,8 @@ internal fun WalletBody(
     ScrollableTopLevelColumn {
         Spacer(modifier = Modifier.height(12.dp))
 
-        if (isWalletExpanded || !selectedItemIsValid) {
-            isWalletExpanded = true
+        if (isExpanded || !selectedItemIsValid) {
+            setExpanded(true)
             ExpandedPaymentDetails(
                 paymentDetailsList = paymentDetailsList,
                 supportedTypes = supportedTypes,
@@ -201,7 +229,7 @@ internal fun WalletBody(
                 enabled = !primaryButtonState.isBlocking,
                 onItemSelected = {
                     onItemSelected(it)
-                    isWalletExpanded = false
+                    setExpanded(false)
                 },
                 onMenuButtonClick = {
                     showBottomSheetContent {
@@ -223,7 +251,7 @@ internal fun WalletBody(
                 },
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
                 onCollapse = {
-                    isWalletExpanded = false
+                    setExpanded(false)
                 }
             )
         } else {
@@ -231,15 +259,16 @@ internal fun WalletBody(
                 selectedPaymentMethod = selectedItem!!,
                 enabled = !primaryButtonState.isBlocking,
                 onClick = {
-                    isWalletExpanded = true
+                    setExpanded(true)
                 }
             )
         }
+
         if (selectedItem is ConsumerPaymentDetails.BankAccount) {
             Html(
                 html = stringResource(R.string.wallet_bank_account_terms),
                 imageGetter = emptyMap(),
-                color = MaterialTheme.paymentsColors.placeholderText,
+                color = MaterialTheme.colors.onSecondary,
                 style = MaterialTheme.typography.caption,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -249,13 +278,24 @@ internal fun WalletBody(
                 )
             )
         }
+
         Spacer(modifier = Modifier.height(20.dp))
+
         errorMessage?.let {
             ErrorText(
                 text = it.getMessage(LocalContext.current.resources),
                 modifier = Modifier.fillMaxWidth()
             )
         }
+
+        val card = selectedItem as? ConsumerPaymentDetails.Card
+        if (card != null && card.isExpired) {
+            ExpiryDateAndCvcForm(
+                expiryDateController = expiryDateController,
+                cvcController = cvcController
+            )
+        }
+
         PrimaryButton(
             label = primaryButtonLabel,
             state = if (selectedItemIsValid) {
@@ -266,11 +306,54 @@ internal fun WalletBody(
             onButtonClick = onPrimaryButtonClick,
             iconEnd = R.drawable.stripe_ic_lock
         )
+
         SecondaryButton(
             enabled = !primaryButtonState.isBlocking,
             label = stringResource(id = R.string.wallet_pay_another_way),
             onClick = onPayAnotherWayClick
         )
+    }
+}
+
+@Composable
+internal fun ExpiryDateAndCvcForm(
+    expiryDateController: TextFieldController,
+    cvcController: CvcController
+) {
+    val expiryDateElement = remember(expiryDateController) {
+        SimpleTextElement(
+            identifier = IdentifierSpec.Generic("date"),
+            controller = expiryDateController
+        )
+    }
+
+    val cvcElement = remember(cvcController) {
+        CvcElement(
+            _identifier = IdentifierSpec.CardCvc,
+            controller = cvcController
+        )
+    }
+
+    PaymentsThemeForLink {
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Box(modifier = Modifier.weight(0.5f)) {
+                SectionElementUI(
+                    enabled = true,
+                    element = SectionElement.wrap(expiryDateElement),
+                    hiddenIdentifiers = emptyList(),
+                    lastTextFieldIdentifier = cvcElement.identifier
+                )
+            }
+
+            Box(modifier = Modifier.weight(0.5f)) {
+                SectionElementUI(
+                    enabled = true,
+                    element = SectionElement.wrap(cvcElement),
+                    hiddenIdentifiers = emptyList(),
+                    lastTextFieldIdentifier = cvcElement.identifier
+                )
+            }
+        }
     }
 }
 
@@ -287,11 +370,11 @@ internal fun CollapsedPaymentDetails(
             .border(
                 width = 1.dp,
                 color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
             .background(
                 color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
             .clickable(
                 enabled = enabled,
@@ -339,11 +422,11 @@ private fun ExpandedPaymentDetails(
             .border(
                 width = 1.dp,
                 color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
             .background(
                 color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
     ) {
         Row(
@@ -375,7 +458,7 @@ private fun ExpandedPaymentDetails(
 
         // TODO(brnunes-stripe): Use LazyColumn, will need to write custom shape for the border
         // https://juliensalvi.medium.com/custom-shape-with-jetpack-compose-1cb48a991d42
-        paymentDetailsList.forEachIndexed { index, item ->
+        paymentDetailsList.forEach { item ->
             PaymentDetailsListItem(
                 paymentDetails = item,
                 enabled = enabled,
@@ -398,7 +481,7 @@ private fun ExpandedPaymentDetails(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_link_add),
+                painter = painterResource(id = R.drawable.ic_link_add_green),
                 contentDescription = null,
                 modifier = Modifier.padding(start = HorizontalPadding, end = 12.dp),
                 tint = Color.Unspecified

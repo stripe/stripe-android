@@ -35,6 +35,7 @@ import com.stripe.android.link.R
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
@@ -209,7 +210,7 @@ internal fun VerificationBody(
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.linkColors.componentBorder,
-                    shape = MaterialTheme.shapes.small
+                    shape = MaterialTheme.linkShapes.extraSmall
                 )
                 .clickable(
                     enabled = !isProcessing,

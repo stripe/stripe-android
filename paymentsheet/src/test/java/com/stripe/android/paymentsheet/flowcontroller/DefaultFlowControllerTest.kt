@@ -20,10 +20,11 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
+import com.stripe.android.link.injection.CUSTOMER_NAME
 import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.injection.MERCHANT_NAME
-import com.stripe.android.link.injection.INITIAL_FORM_VALUES_MAP
+import com.stripe.android.link.injection.SHIPPING_VALUES
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -47,6 +48,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.ClientSecret
@@ -71,6 +73,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
@@ -726,6 +729,89 @@ internal class DefaultFlowControllerTest {
         verify(paymentLauncher).confirm(any<ConfirmPaymentIntentParams>())
     }
 
+    @Test
+    fun `confirmPaymentSelection() with Link and shipping should have shipping details in confirm params`() = runTest {
+        whenever(linkPaymentLauncher.setup(any(), any())).thenReturn(AccountStatus.SignedOut)
+
+        val flowController = createFlowController(
+            savedSelection = SavedSelection.Link,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
+            )
+        )
+
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
+                shippingDetails = AddressDetails(
+                    name = "Test"
+                )
+            )
+        ) { _, _ -> }
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(
+                PaymentSelection.New.LinkInline(
+                    LinkPaymentDetails.New(
+                        PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
+                        mock(),
+                        PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                    )
+                )
+            )
+        )
+
+        flowController.confirm()
+
+        val paramsCaptor = argumentCaptor<ConfirmPaymentIntentParams>()
+
+        verify(paymentLauncher).confirm(paramsCaptor.capture())
+
+        assertThat(paramsCaptor.firstValue.toParamMap()["shipping"]).isEqualTo(
+            mapOf(
+                "address" to emptyMap<String, String>(),
+                "name" to "Test"
+            )
+        )
+    }
+
+    @Test
+    fun `confirmPaymentSelection() with Link and no shipping should not have shipping details in confirm params`() = runTest {
+        whenever(linkPaymentLauncher.setup(any(), any())).thenReturn(AccountStatus.SignedOut)
+
+        val flowController = createFlowController(
+            savedSelection = SavedSelection.Link,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes.plus("link")
+            )
+        )
+
+        flowController.configureWithPaymentIntent(
+            PaymentSheetFixtures.CLIENT_SECRET,
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        ) { _, _ -> }
+
+        flowController.onPaymentOptionResult(
+            PaymentOptionResult.Succeeded(
+                PaymentSelection.New.LinkInline(
+                    LinkPaymentDetails.New(
+                        PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
+                        mock(),
+                        PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+                    )
+                )
+            )
+        )
+
+        flowController.confirm()
+
+        val paramsCaptor = argumentCaptor<ConfirmPaymentIntentParams>()
+
+        verify(paymentLauncher).confirm(paramsCaptor.capture())
+
+        assertThat(paramsCaptor.firstValue.toParamMap()["shipping"]).isNull()
+    }
+
     private fun verifyPaymentSelection(
         clientSecret: String,
         paymentMethodCreateParams: PaymentMethodCreateParams,
@@ -942,7 +1028,8 @@ internal class DefaultFlowControllerTest {
                 @Assisted(MERCHANT_NAME) merchantName: String,
                 @Assisted(CUSTOMER_EMAIL) customerEmail: String?,
                 @Assisted(CUSTOMER_PHONE) customerPhone: String?,
-                @Assisted(INITIAL_FORM_VALUES_MAP) initialFormValuesMap: Map<IdentifierSpec, String?>?
+                @Assisted(CUSTOMER_NAME) customerName: String?,
+                @Assisted(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?
             ): LinkPaymentLauncher {
                 return linkPaymentLauncher
             }

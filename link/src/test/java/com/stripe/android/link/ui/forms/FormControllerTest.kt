@@ -46,7 +46,8 @@ class FormControllerTest {
         amount = null,
         saveForFutureUseInitialValue = false,
         merchantName = "Merchant",
-        context = context
+        context = context,
+        shippingValues = null
     )
 
     @ExperimentalCoroutinesApi
@@ -66,7 +67,7 @@ class FormControllerTest {
         )
 
         val nameElement =
-            getSectionFieldTextControllerWithLabel(formController, R.string.address_label_name)
+            getSectionFieldTextControllerWithLabel(formController, R.string.address_label_full_name)
         val emailElement =
             getSectionFieldTextControllerWithLabel(formController, R.string.email)
 

@@ -5,6 +5,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
@@ -29,7 +30,9 @@ internal interface LinkRepository {
         email: String,
         phone: String,
         country: String,
-        authSessionCookie: String?
+        name: String?,
+        authSessionCookie: String?,
+        consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSession>
 
     /**

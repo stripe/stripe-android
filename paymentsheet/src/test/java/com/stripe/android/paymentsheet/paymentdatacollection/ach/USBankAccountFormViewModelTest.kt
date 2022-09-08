@@ -63,7 +63,8 @@ class USBankAccountFormViewModelTest {
         completePayment = true,
         clientSecret = PaymentIntentClientSecret("pi_12345"),
         savedScreenState = null,
-        savedPaymentMethod = null
+        savedPaymentMethod = null,
+        shippingDetails = null
     )
 
     private val stripeRepository = mock<StripeRepository>()

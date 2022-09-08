@@ -71,6 +71,7 @@ internal class CardEditViewModel @Inject constructor(
                                 .viewOnlyFields(setOf(IdentifierSpec.CardNumber))
                                 .viewModelScope(viewModelScope)
                                 .stripeIntent(args.stripeIntent)
+                                .shippingValues(null)
                                 .merchantName(args.merchantName)
                                 .build().formController
                         } ?: dismiss(
@@ -140,7 +141,7 @@ internal class CardEditViewModel @Inject constructor(
     private fun ConsumerPaymentDetails.Card.buildInitialFormValues() = mapOf(
         IdentifierSpec.CardNumber to "•••• $last4",
         IdentifierSpec.CardBrand to brand.code,
-        IdentifierSpec.CardExpMonth to expiryMonth.toString(),
+        IdentifierSpec.CardExpMonth to expiryMonth.toString().padStart(length = 2, padChar = '0'),
         IdentifierSpec.CardExpYear to expiryYear.toString()
     )
 

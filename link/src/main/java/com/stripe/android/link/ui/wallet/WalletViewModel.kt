@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason.PayAnotherWay
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
@@ -17,13 +18,20 @@ import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.ui.core.address.toConfirmPaymentIntentShipping
+import com.stripe.android.ui.core.elements.CvcConfig
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.DateConfig
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -46,8 +54,22 @@ internal class WalletViewModel @Inject constructor(
         requireNotNull(linkAccountManager.linkAccount.value)
     )
 
+    private val _isExpanded = MutableStateFlow(false)
+    val isExpanded: StateFlow<Boolean> = _isExpanded
+
     private val _selectedItem = MutableStateFlow<ConsumerPaymentDetails.PaymentDetails?>(null)
     val selectedItem: StateFlow<ConsumerPaymentDetails.PaymentDetails?> = _selectedItem
+
+    val expiryDateController = SimpleTextFieldController(
+        textFieldConfig = DateConfig(),
+        initialValue = null
+    )
+
+    val cvcController = CvcController(
+        cardBrandFlow = selectedItem.map {
+            (it as? ConsumerPaymentDetails.Card)?.brand ?: CardBrand.Unknown
+        }
+    )
 
     private val _primaryButtonState = MutableStateFlow(PrimaryButtonState.Disabled)
     val primaryButtonState: StateFlow<PrimaryButtonState> = _primaryButtonState
@@ -59,14 +81,14 @@ internal class WalletViewModel @Inject constructor(
         loadPaymentDetails(true)
 
         viewModelScope.launch {
-            navigator.getResultFlow<PaymentDetailsResult>(PaymentDetailsResult.KEY)
-                ?.collect {
-                    when (it) {
-                        is PaymentDetailsResult.Success -> loadPaymentDetails()
-                        PaymentDetailsResult.Cancelled -> {}
-                        is PaymentDetailsResult.Failure -> onError(it.error)
-                    }
+            navigator.getResultFlow<PaymentDetailsResult>(PaymentDetailsResult.KEY)?.collect {
+                when (it) {
+                    is PaymentDetailsResult.Success ->
+                        loadPaymentDetails(selectedItem = it.itemId)
+                    PaymentDetailsResult.Cancelled -> {}
+                    is PaymentDetailsResult.Failure -> onError(it.error)
                 }
+            }
         }
     }
 
@@ -78,7 +100,10 @@ internal class WalletViewModel @Inject constructor(
 
         runCatching { requireNotNull(linkAccountManager.linkAccount.value) }.fold(
             onSuccess = { linkAccount ->
-                val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
+                val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
+                    stripeIntent,
+                    args.shippingValues?.toConfirmPaymentIntentShipping()
+                )
                 val params = paramsFactory.createPaymentMethodCreateParams(
                     linkAccount.clientSecret,
                     selectedPaymentDetails
@@ -113,9 +138,12 @@ internal class WalletViewModel @Inject constructor(
         )
     }
 
+    fun setExpanded(expanded: Boolean) {
+        _isExpanded.value = expanded
+    }
+
     fun payAnotherWay() {
-        navigator.dismiss()
-        linkAccountManager.logout()
+        navigator.cancel(reason = PayAnotherWay)
     }
 
     fun addNewPaymentMethod(clearBackStack: Boolean = false) {
@@ -147,7 +175,10 @@ internal class WalletViewModel @Inject constructor(
         _selectedItem.value = item
     }
 
-    private fun loadPaymentDetails(initialSetup: Boolean = false) {
+    private fun loadPaymentDetails(
+        initialSetup: Boolean = false,
+        selectedItem: String? = null
+    ) {
         setState(PrimaryButtonState.Processing)
         viewModelScope.launch {
             linkAccountManager.listPaymentDetails().fold(
@@ -155,10 +186,14 @@ internal class WalletViewModel @Inject constructor(
                     setState(PrimaryButtonState.Enabled)
                     _paymentDetailsList.value = response.paymentDetails
 
-                    _selectedItem.value = _selectedItem.value?.let { previouslySelectedItem ->
-                        // If currently selected item is still available, keep it selected
-                        response.paymentDetails.firstOrNull { it.id == previouslySelectedItem.id }
+                    // Select selectedItem if provided, otherwise the previously selected item
+                    _selectedItem.value = (selectedItem ?: _selectedItem.value?.id)?.let { itemId ->
+                        response.paymentDetails.firstOrNull { it.id == itemId }
                     } ?: getDefaultItemSelection(response.paymentDetails)
+
+                    if (_selectedItem.value?.id == selectedItem) {
+                        _isExpanded.value = false
+                    }
 
                     if (initialSetup && args.prefilledCardParams != null) {
                         // User has already pre-filled the payment details

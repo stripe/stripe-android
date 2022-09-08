@@ -183,8 +183,9 @@ internal class AutocompleteViewModel @Inject constructor(
         navigator.onBack()
     }
 
-    private fun clearQuery() {
+    fun clearQuery() {
         textFieldController.onRawValueChange("")
+        _predictions.value = null
     }
 
     internal class Debouncer {

@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -11,7 +12,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.Calendar
 
-internal class DateConfig : TextFieldConfig {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DateConfig : TextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel = "date"
 
