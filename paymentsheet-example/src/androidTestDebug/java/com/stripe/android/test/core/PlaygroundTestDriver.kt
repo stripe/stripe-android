@@ -170,6 +170,7 @@ class PlaygroundTestDriver(
         setup(testParameters)
         launchComplete()
 
+        composeTestRule.waitForIdle()
         customOperations()
 
         currentActivity[0]?.let {
