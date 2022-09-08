@@ -31,21 +31,6 @@
           "type": "canceled"
         }
       }
-    ],
-    "next_action_spec": {
-      "confirm_response_status_specs": {
-        "requires_action": {
-          "type": "redirect_to_url"
-        }
-      },
-      "post_confirm_handling_pi_status_specs": {
-        "succeeded": {
-          "type": "finished"
-        },
-        "requires_action": {
-          "type": "canceled"
-        }
-      }
     }
   },
   {
@@ -84,21 +69,6 @@
       },
       {
         "type": "klarna_country"
-      }
-    ],
-    "next_action_spec": {
-      "confirm_response_status_specs": {
-        "requires_action": {
-          "type": "redirect_to_url"
-        }
-      },
-      "post_confirm_handling_pi_status_specs": {
-        "succeeded": {
-          "type": "finished"
-        },
-        "requires_action": {
-          "type": "canceled"
-        }
       }
     ],
     "next_action_spec": {
@@ -210,21 +180,6 @@
     "fields": [
       {
         "type": "name"
-      }
-    ],
-    "next_action_spec": {
-      "confirm_response_status_specs": {
-        "requires_action": {
-          "type": "redirect_to_url"
-        }
-      },
-      "post_confirm_handling_pi_status_specs": {
-        "succeeded": {
-          "type": "finished"
-        },
-        "requires_action": {
-          "type": "canceled"
-        }
       }
     ],
     "next_action_spec": {
@@ -361,21 +316,6 @@
           "type": "canceled"
         }
       }
-    ],
-    "next_action_spec": {
-      "confirm_response_status_specs": {
-        "requires_action": {
-          "type": "redirect_to_url"
-        }
-      },
-      "post_confirm_handling_pi_status_specs": {
-        "succeeded": {
-          "type": "finished"
-        },
-        "requires_action": {
-          "type": "canceled"
-        }
-      }
     }
   },
   {
@@ -480,16 +420,6 @@
       {
         "type": "au_becs_mandate",
         "api_path": null
-      }
-    ],
-    "next_action_spec": {
-      "confirm_response_status_specs": {
-        "succeeded": {
-          "type": "finished"
-        },
-        "processing": {
-          "type": "finished"
-        }
       }
     ],
     "next_action_spec": {
