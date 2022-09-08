@@ -6,6 +6,7 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -15,14 +16,18 @@ import com.stripe.android.financialconnections.features.common.AccessibleDataCal
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PartnerAccountsList
+import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
+@Suppress("LongParameterList")
 internal class SuccessViewModel @Inject constructor(
     initialState: SuccessState,
     getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
     getManifest: GetManifest,
-    val logger: com.stripe.android.core.Logger,
+    val logger: Logger,
+    val navigationManager: NavigationManager,
     val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
 ) : MavericksViewModel<SuccessState>(initialState) {
@@ -34,7 +39,10 @@ internal class SuccessViewModel @Inject constructor(
             SuccessState.Payload(
                 accessibleData = AccessibleDataCalloutModel.fromManifest(manifest),
                 accounts = getAuthorizationSessionAccounts(manifest.activeAuthSession!!.id),
-                disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest)
+                disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest),
+                showLinkAnotherAccount = manifest.singleAccount.not() &&
+                    manifest.disableLinkMoreAccounts.not() &&
+                    manifest.isNetworkingUserFlow?.not() == true
             )
         }.execute {
             copy(payload = it)
@@ -56,6 +64,10 @@ internal class SuccessViewModel @Inject constructor(
                 nativeAuthFlowCoordinator().emit(Message.Finish)
             }
         }.execute { copy(completeSession = it) }
+    }
+
+    fun onLinkAnotherAccountClick() {
+        navigationManager.navigate(NavigationDirections.reset)
     }
 
     companion object : MavericksViewModelFactory<SuccessViewModel, SuccessState> {
@@ -81,6 +93,7 @@ internal data class SuccessState(
 ) : MavericksState {
     data class Payload(
         val accessibleData: AccessibleDataCalloutModel,
+        val showLinkAnotherAccount: Boolean,
         val accounts: PartnerAccountsList,
         val disconnectUrl: String
     )

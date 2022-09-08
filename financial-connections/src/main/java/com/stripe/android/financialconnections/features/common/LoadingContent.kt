@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.features.institutionpicker
+package com.stripe.android.financialconnections.features.common
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,8 +13,8 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 
 @Composable
 internal fun LoadingContent(
-    title: String,
-    content: String
+    title: String? = null,
+    content: String? = null
 ) {
     Column(
         modifier = Modifier
@@ -25,15 +25,19 @@ internal fun LoadingContent(
             modifier = Modifier
                 .size(36.dp)
         )
-        Spacer(modifier = Modifier.size(16.dp))
-        Text(
-            text = title,
-            style = FinancialConnectionsTheme.typography.subtitle
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        Text(
-            text = content,
-            style = FinancialConnectionsTheme.typography.body
-        )
+        if (title != null) {
+            Spacer(modifier = Modifier.size(16.dp))
+            Text(
+                text = title,
+                style = FinancialConnectionsTheme.typography.subtitle
+            )
+        }
+        if (content != null) {
+            Spacer(modifier = Modifier.size(16.dp))
+            Text(
+                text = content,
+                style = FinancialConnectionsTheme.typography.body
+            )
+        }
     }
 }

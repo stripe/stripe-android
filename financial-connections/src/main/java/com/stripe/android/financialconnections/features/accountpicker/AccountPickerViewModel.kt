@@ -38,6 +38,7 @@ internal class AccountPickerViewModel @Inject constructor(
 
     init {
         logErrors()
+        navigateIfSkipAccountSelection()
         suspend {
             val manifest = getManifest()
             val partnerAccountList = pollAuthorizationSessionAccounts(manifest)
@@ -57,9 +58,16 @@ internal class AccountPickerViewModel @Inject constructor(
                     isStripeDirect = manifest.isStripeDirect ?: false,
                     dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
                 ),
-                selectedIds = preselectedIds
+                selectedIds = preselectedIds,
+                skipAccountSelection = manifest.activeAuthSession?.skipAccountSelection == true
             )
         }.execute { copy(payload = it) }
+    }
+
+    private fun navigateIfSkipAccountSelection() {
+        onAsync(AccountPickerState::payload, onSuccess = {
+            if (it.skipAccountSelection) navigationManager.navigate(NavigationDirections.success)
+        })
     }
 
     private fun logErrors() {
@@ -166,6 +174,7 @@ internal data class AccountPickerState(
         get() = payload is Loading || selectAccounts is Loading
 
     data class Payload(
+        val skipAccountSelection: Boolean,
         val accounts: List<PartnerAccountUI>,
         val selectionMode: SelectionMode,
         val accessibleData: AccessibleDataCalloutModel,

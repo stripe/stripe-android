@@ -53,6 +53,11 @@ internal object NavigationDirections {
         override val destination = "attach_linked_payment_account"
     }
 
+    val reset = object : NavigationCommand {
+        override val arguments = emptyList<NamedNavArgument>()
+        override val destination = "reset"
+    }
+
     object ManualEntrySuccess {
 
         private const val KEY_MICRODEPOSITS = "microdeposits"

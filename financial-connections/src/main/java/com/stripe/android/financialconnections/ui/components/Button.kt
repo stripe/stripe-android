@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
+import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ProvideTextStyle
@@ -24,6 +25,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun FinancialConnectionsButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    type: FinancialConnectionsButtonType = FinancialConnectionsButtonType.Primary,
     enabled: Boolean = true,
     loading: Boolean = false,
     content: @Composable (RowScope.() -> Unit)
@@ -39,12 +41,7 @@ internal fun FinancialConnectionsButton(
             end = 16.dp,
             bottom = 16.dp
         ),
-        colors = buttonColors(
-            backgroundColor = colors.textBrand,
-            contentColor = colors.textWhite,
-            disabledBackgroundColor = colors.textBrand.copy(alpha = 0.12f),
-            disabledContentColor = colors.textWhite,
-        ),
+        colors = type.buttonColors(),
         content = {
             ProvideTextStyle(
                 value = FinancialConnectionsTheme.typography.bodyEmphasized
@@ -65,9 +62,52 @@ internal fun FinancialConnectionsButton(
     )
 }
 
+internal sealed class FinancialConnectionsButtonType {
+
+    @Composable
+    abstract fun buttonColors(): ButtonColors
+
+    object Primary : FinancialConnectionsButtonType() {
+        @Composable
+        override fun buttonColors(): ButtonColors {
+            return buttonColors(
+                backgroundColor = colors.textBrand,
+                contentColor = colors.textWhite,
+                disabledBackgroundColor = colors.textBrand.copy(alpha = 0.12f),
+                disabledContentColor = colors.textWhite,
+            )
+        }
+    }
+
+    object Secondary : FinancialConnectionsButtonType() {
+        @Composable
+        override fun buttonColors(): ButtonColors {
+            return buttonColors(
+                backgroundColor = colors.textWhite,
+                contentColor = colors.textPrimary,
+                disabledBackgroundColor = colors.textWhite,
+                disabledContentColor = colors.textPrimary.copy(alpha = 0.12f),
+            )
+        }
+    }
+}
+
 @Composable
-@Preview(group = "Components", name = "Button - loading")
-internal fun FinancialConnectionsButtonDisabledPreview() {
+@Preview(group = "Components", name = "Button - primary - idle")
+internal fun FinancialConnectionsButtonPreview() {
+    FinancialConnectionsTheme {
+        FinancialConnectionsButton(
+            loading = false,
+            onClick = { }
+        ) {
+            Text(text = "Sample text")
+        }
+    }
+}
+
+@Composable
+@Preview(group = "Components", name = "Button - primary - loading")
+internal fun FinancialConnectionsButtonLoadingPreview() {
     FinancialConnectionsTheme {
         FinancialConnectionsButton(
             loading = true,
@@ -79,11 +119,27 @@ internal fun FinancialConnectionsButtonDisabledPreview() {
 }
 
 @Composable
-@Preview(group = "Components", name = "Button - idle")
-internal fun FinancialConnectionsButtonPreview() {
+@Preview(group = "Components", name = "Button - secondary - idle")
+internal fun FinancialConnectionsButtonSecondaryPreview() {
     FinancialConnectionsTheme {
         FinancialConnectionsButton(
+            type = FinancialConnectionsButtonType.Secondary,
             loading = false,
+            onClick = { }
+        ) {
+            Text(text = "Sample text")
+        }
+    }
+}
+
+@Composable
+@Preview(group = "Components", name = "Button - secondary - disabled")
+internal fun FinancialConnectionsButtonSecondaryDisabledPreview() {
+    FinancialConnectionsTheme {
+        FinancialConnectionsButton(
+            type = FinancialConnectionsButtonType.Secondary,
+            loading = false,
+            enabled = false,
             onClick = { }
         ) {
             Text(text = "Sample text")

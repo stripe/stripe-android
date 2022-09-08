@@ -37,7 +37,7 @@ internal fun PartnerCallout(
             painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
             contentDescription = null,
             modifier = Modifier
-                .size(16.dp)
+                .size(24.dp)
                 .clip(RoundedCornerShape(6.dp))
         )
         Spacer(modifier = Modifier.size(16.dp))
@@ -46,7 +46,7 @@ internal fun PartnerCallout(
                 R.string.stripe_prepane_partner_callout,
                 listOf(stringResource(id = flow.partnerName()))
             ),
-            defaultStyle = FinancialConnectionsTheme.typography.captionTight.copy(
+            defaultStyle = FinancialConnectionsTheme.typography.captionTightEmphasized.copy(
                 color = FinancialConnectionsTheme.colors.textSecondary
             ),
             annotationStyles = mapOf(

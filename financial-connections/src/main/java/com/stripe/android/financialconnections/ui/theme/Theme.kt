@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 private val LightColorPalette = FinancialConnectionsColors(
     backgroundSurface = Color.White,
     backgroundContainer = Neutral50,
+    backgroundBackdrop = Neutral200.copy(alpha = .70f),
     borderDefault = Neutral150,
     borderFocus = Blue400.copy(alpha = .36f),
     borderInvalid = Red500,

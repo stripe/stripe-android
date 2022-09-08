@@ -140,10 +140,10 @@ private class FinancialConnectionsAccountsRepositoryImpl(
 
     private fun updateCachedAccounts(
         source: String,
-        manifest: PartnerAccountsList
+        accounts: PartnerAccountsList
     ) {
         logger.debug("updating local partner accounts from $source")
-        cachedAccounts = manifest
+        cachedAccounts = accounts
     }
 
     companion object {

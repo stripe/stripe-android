@@ -13,8 +13,8 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.features.institutionpicker.LoadingContent
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 

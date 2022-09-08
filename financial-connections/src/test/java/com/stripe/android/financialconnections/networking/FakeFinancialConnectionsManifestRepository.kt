@@ -16,6 +16,8 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         { ApiKeyFixtures.sessionManifest() }
     var postAuthorizationSessionProvider: () -> FinancialConnectionsAuthorizationSession =
         { ApiKeyFixtures.authorizationSession() }
+    var postMarkLinkingMoreAccountsProvider: () -> FinancialConnectionsSessionManifest =
+        { ApiKeyFixtures.sessionManifest() }
 
     override suspend fun generateFinancialConnectionsSessionManifest(
         clientSecret: String,
@@ -41,4 +43,8 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         sessionId: String,
         publicToken: String?
     ): FinancialConnectionsAuthorizationSession = postAuthorizationSessionProvider()
+
+    override suspend fun postMarkLinkingMoreAccounts(
+        clientSecret: String
+    ): FinancialConnectionsSessionManifest = postMarkLinkingMoreAccountsProvider()
 }

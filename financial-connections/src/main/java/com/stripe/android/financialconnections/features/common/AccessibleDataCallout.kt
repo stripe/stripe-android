@@ -61,17 +61,17 @@ internal fun AccessibleDataCalloutWithAccounts(
                         painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
                         contentDescription = null,
                         modifier = Modifier
-                            .size(16.dp)
+                            .size(24.dp)
                             .clip(RoundedCornerShape(4.dp))
                     )
                     Text(
                         it.fullName,
-                        style = FinancialConnectionsTheme.typography.captionEmphasized,
+                        style = FinancialConnectionsTheme.typography.captionTightEmphasized,
                         color = FinancialConnectionsTheme.colors.textSecondary
                     )
                 }
             }
-            Divider()
+            Divider(color = FinancialConnectionsTheme.colors.backgroundBackdrop)
             AccessibleDataText(model)
         }
     }
