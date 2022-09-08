@@ -60,14 +60,14 @@ class LpmRepository constructor(
         DefaultIsFinancialConnectionsAvailable(),
     private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData(),
     private val lpmPostConfirmData: LuxePostConfirmActionRepository =
-        LuxePostConfirmActionRepository()
+        LuxePostConfirmActionRepository.Instance
 ) {
     @Inject
     constructor(resources: Resources?) : this(
         resources,
         DefaultIsFinancialConnectionsAvailable(),
         LpmInitialFormData(),
-        LuxePostConfirmActionRepository()
+        LuxePostConfirmActionRepository.Instance
     )
 
     private val lpmSerializer = LpmSerializer()
