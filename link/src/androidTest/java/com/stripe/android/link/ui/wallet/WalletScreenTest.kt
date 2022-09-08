@@ -36,7 +36,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
-import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -444,7 +443,6 @@ internal class WalletScreenTest {
         supportedTypes: Set<String> = SupportedPaymentMethod.allTypes,
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = paymentDetails.first(),
         isExpanded: Boolean = true,
-        primaryButtonState: PrimaryButtonState = PrimaryButtonState.Enabled,
         errorMessage: ErrorMessage? = null,
         expiryDateController: TextFieldController = SimpleTextFieldController(DateConfig()),
         cvcController: CvcController = CvcController(cardBrandFlow = flowOf(CardBrand.Visa)),
@@ -482,13 +480,14 @@ internal class WalletScreenTest {
         ) {
             DefaultLinkTheme {
                 WalletBody(
-                    paymentDetailsList = paymentDetailsList,
-                    supportedTypes = supportedTypes,
-                    selectedItem = selectedItem,
-                    isExpanded = isExpanded,
+                    uiState = WalletUiState(
+                        paymentDetailsList = paymentDetailsList,
+                        supportedTypes = supportedTypes,
+                        selectedItem = selectedItem,
+                        isExpanded = isExpanded,
+                        errorMessage = errorMessage
+                    ),
                     primaryButtonLabel = primaryButtonLabel,
-                    primaryButtonState = primaryButtonState,
-                    errorMessage = errorMessage,
                     expiryDateController = expiryDateController,
                     cvcController = cvcController,
                     setExpanded = setExpanded,

@@ -106,6 +106,7 @@ internal class SignUpViewModel @Inject constructor(
             coroutineScope = viewModelScope,
             emailFlow = consumerEmail,
             onStateChanged = {
+                clearError()
                 _signUpStatus.value = it
             },
             onValidEmailEntered = {
@@ -175,7 +176,10 @@ internal class SignUpViewModel @Inject constructor(
                     linkEventsReporter.onSignupStarted()
                 }
             },
-            onFailure = ::onError
+            onFailure = {
+                _signUpStatus.value = SignUpState.InputtingEmail
+                onError(it)
+            }
         )
     }
 

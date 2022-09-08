@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.ui.core.elements.PhoneNumberController
@@ -79,6 +80,26 @@ internal class LinkInlineSignupViewTest {
         onNameField().assertDoesNotExist()
     }
 
+    @Test
+    fun when_error_message_not_null_in_state_InputtingPhoneOrName_then_it_is_visible() {
+        val errorMessage = "Error message"
+        setContent(
+            signUpState = SignUpState.InputtingPhoneOrName,
+            errorMessage = ErrorMessage.Raw(errorMessage)
+        )
+        composeTestRule.onNodeWithText(errorMessage).assertExists()
+    }
+
+    @Test
+    fun when_error_message_not_null_in_state_InputtingEmail_then_it_is_visible() {
+        val errorMessage = "Error message"
+        setContent(
+            signUpState = SignUpState.InputtingEmail,
+            errorMessage = ErrorMessage.Raw(errorMessage)
+        )
+        composeTestRule.onNodeWithText(errorMessage).assertExists()
+    }
+
     private fun setContent(
         merchantName: String = "Example, Inc.",
         emailElement: SimpleTextFieldController =
@@ -90,6 +111,7 @@ internal class LinkInlineSignupViewTest {
         enabled: Boolean = true,
         expanded: Boolean = true,
         requiresNameCollection: Boolean = false,
+        errorMessage: ErrorMessage? = null,
         toggleExpanded: () -> Unit = {},
         onUserInteracted: () -> Unit = {}
     ) = composeTestRule.setContent {
@@ -103,6 +125,7 @@ internal class LinkInlineSignupViewTest {
                 enabled,
                 expanded,
                 requiresNameCollection,
+                errorMessage,
                 toggleExpanded,
                 onUserInteracted
             )
