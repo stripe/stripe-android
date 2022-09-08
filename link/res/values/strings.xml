@@ -34,7 +34,6 @@
     <string name="wallet_bank_account_terms">By continuing, you agree to authorize payments pursuant to &lt;a href=\"https://stripe.com/legal/ach-payments/authorization\"&gt;these terms&lt;/a&gt;.</string>
     <string name="wallet_update_expired_card_error">This card has expired. Update your card info or choose a different payment method.</string>
     <string name="wallet_recollect_cvc_error">For security, please re-enter your card’s security code.</string>
-    <string name="wallet_something_went_wrong_error">Something went wrong. Please try again in a few seconds.</string>
 
     <string name="add_payment_method">Add a payment method</string>
     <string name="add_bank_account">Add bank account</string>

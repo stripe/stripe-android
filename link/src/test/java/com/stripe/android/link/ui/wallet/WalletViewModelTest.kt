@@ -4,6 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.injection.Injectable
@@ -11,7 +12,6 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.confirmation.PaymentConfirmationCallback
@@ -465,7 +465,7 @@ class WalletViewModelTest {
         viewModel.onConfirmPayment()
 
         assertThat(viewModel.uiState.value.alertMessage).isEqualTo(
-            ErrorMessage.FromResources(R.string.wallet_something_went_wrong_error)
+            ErrorMessage.FromResources(R.string.stripe_failure_connection_error)
         )
     }
 

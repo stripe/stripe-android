@@ -8,7 +8,6 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason.PayAnotherWay
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
 import com.stripe.android.link.confirmation.ConfirmationManager
@@ -173,12 +172,10 @@ internal class WalletViewModel @Inject constructor(
 
                 performPaymentConfirmation(updatedPaymentDetails, linkAccount)
             },
-            onFailure = {
+            onFailure = { error ->
                 _uiState.update {
                     it.copy(
-                        alertMessage = ErrorMessage.FromResources(
-                            stringResId = R.string.wallet_something_went_wrong_error
-                        ),
+                        alertMessage = error.getErrorMessage(),
                         isProcessing = false
                     )
                 }
