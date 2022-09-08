@@ -139,7 +139,7 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify no fields in the default json are ignored the lpms fields should be correct`() {
+    fun `Verify no fields in the default json are ignored the lpms package should be correct`() {
         val lpmRepository = LpmRepository(
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
             object : IsFinancialConnectionsAvailable {
@@ -149,13 +149,18 @@ class LpmRepositoryTest {
             }
         )
         lpmRepository.updateFromDisk()
+
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
         LpmRepository.exposedPaymentMethods.forEach { code ->
-            if ((code == "paypal" || code == "us_bank_account")) {
+            if (!hasEmptyForm(lpmRepository, code)) {
                 assertThat(
-                    hasEmptyForm(lpmRepository, code)
-                ).isTrue()
+                    lpmRepository.fromCode(code)!!.formSpec.items
+                        .filter {
+                            it is EmptyFormSpec && !hasEmptyForm(lpmRepository, code)
+                        }
+
+                ).isEmpty()
             }
         }
     }
