@@ -35,6 +35,6 @@ internal class PollAuthorizationSessionOAuthResults @Inject constructor(
 
     private companion object {
         private const val POLLING_TIME_MS = 2000L
-        private const val MAX_TRIES = 10
+        private const val MAX_TRIES = 300
     }
 }

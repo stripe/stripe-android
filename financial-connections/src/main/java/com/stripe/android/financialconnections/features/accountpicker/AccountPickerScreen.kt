@@ -86,7 +86,7 @@ private fun AccountPickerContent(
     FinancialConnectionsScaffold {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> AccountPickerLoading()
-            is Success -> when(payload().skipAccountSelection) {
+            is Success -> when (payload().skipAccountSelection) {
                 // ensures account picker is not shown momentarily
                 // if account selection should be skipped.
                 true -> AccountPickerLoading()
