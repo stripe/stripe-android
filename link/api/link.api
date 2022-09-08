@@ -559,6 +559,13 @@ public final class com/stripe/android/link/ui/wallet/ComposableSingletons$Paymen
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/link/ui/wallet/ComposableSingletons$WalletScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/wallet/ComposableSingletons$WalletScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function3;
+}
+
 public final class com/stripe/android/link/ui/wallet/PaymentDetailsResult$Cancelled$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/ui/wallet/PaymentDetailsResult$Cancelled;
