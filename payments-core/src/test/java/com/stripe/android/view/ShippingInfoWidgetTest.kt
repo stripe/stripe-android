@@ -251,14 +251,14 @@ class ShippingInfoWidgetTest {
         assertThat(postalCodeTextInputLayout.hint.toString())
             .isEqualTo(res.getString(R.string.address_label_zip_code))
         assertThat(nameTextInputLayout.hint.toString())
-            .isEqualTo(res.getString(R.string.address_label_name))
+            .isEqualTo(res.getString(R.string.address_label_full_name))
         shippingInfoWidget.optionalFields = listOf(
             ShippingInfoWidget.CustomizableShippingField.PostalCode
         )
         assertThat(postalCodeTextInputLayout.hint.toString())
             .isEqualTo(res.getString(R.string.address_label_zip_code_optional))
         assertThat(nameTextInputLayout.hint.toString())
-            .isEqualTo(res.getString(R.string.address_label_name))
+            .isEqualTo(res.getString(R.string.address_label_full_name))
         countryTextInputLayout.updateUiForCountryEntered(Locale.CANADA.getCountryCode())
         assertThat(stateTextInputLayout.hint.toString())
             .isEqualTo(res.getString(R.string.address_label_province))

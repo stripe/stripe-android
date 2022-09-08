@@ -40,7 +40,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.getOrAwaitValue
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -366,9 +366,8 @@ internal class PaymentSheetActivityTest {
 
             val googlePayButton =
                 StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
-            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
             assertThat(googlePayButton.primaryButton.isVisible).isTrue()
-            assertThat(googlePayIconComponent.isVisible).isFalse()
+            assertThat(googlePayButton.googlePayButtonContent.isVisible).isFalse()
             assertThat(googlePayButton.primaryButton.externalLabel)
                 .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
         }
@@ -394,9 +393,8 @@ internal class PaymentSheetActivityTest {
 
             val googlePayButton =
                 StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
-            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
             assertThat(googlePayButton.primaryButton.isVisible).isTrue()
-            assertThat(googlePayIconComponent.isVisible).isFalse()
+            assertThat(googlePayButton.googlePayButtonContent.isVisible).isFalse()
             assertThat(finishProcessingCalled).isTrue()
         }
     }
@@ -995,7 +993,8 @@ internal class PaymentSheetActivityTest {
             StripeIntentValidator(),
             FakeCustomerRepository(paymentMethods),
             FakePrefsRepository(),
-            StaticResourceRepository(mock(), lpmRepository),
+            StaticLpmResourceRepository(lpmRepository),
+            mock(),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),

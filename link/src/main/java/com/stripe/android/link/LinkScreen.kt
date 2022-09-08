@@ -11,6 +11,7 @@ internal sealed class LinkScreen(
 ) {
     object Loading : LinkScreen("Loading")
     object Verification : LinkScreen("Verification")
+    object VerificationDialog : LinkScreen("VerificationDialog")
     object Wallet : LinkScreen("Wallet")
 
     class PaymentMethod(loadFromArgs: Boolean = false) :
@@ -44,5 +45,4 @@ internal sealed class LinkScreen(
     }
 }
 
-private fun String.urlEncode(): String =
-    URLEncoder.encode(this, StandardCharsets.UTF_8.toString())
+private fun String.urlEncode(): String = URLEncoder.encode(this, StandardCharsets.UTF_8.name())

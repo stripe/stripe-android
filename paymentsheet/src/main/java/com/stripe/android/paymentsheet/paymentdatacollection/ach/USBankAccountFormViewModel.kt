@@ -25,6 +25,8 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -298,9 +300,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         when (clientSecret) {
             is PaymentIntentClientSecret -> {
                 collectBankAccountLauncher?.presentWithPaymentIntent(
-                    lazyPaymentConfig.get().publishableKey,
-                    clientSecret.value,
-                    CollectBankAccountConfiguration.USBankAccount(
+                    publishableKey = lazyPaymentConfig.get().publishableKey,
+                    stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                    clientSecret = clientSecret.value,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
                         name.value,
                         email.value
                     )
@@ -308,9 +311,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
             is SetupIntentClientSecret -> {
                 collectBankAccountLauncher?.presentWithSetupIntent(
-                    lazyPaymentConfig.get().publishableKey,
-                    clientSecret.value,
-                    CollectBankAccountConfiguration.USBankAccount(
+                    publishableKey = lazyPaymentConfig.get().publishableKey,
+                    stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                    clientSecret = clientSecret.value,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
                         name.value,
                         email.value
                     )
@@ -408,7 +412,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun confirm(clientSecret: ClientSecret, paymentSelection: PaymentSelection.New) {
         viewModelScope.launch {
             val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-                clientSecret
+                clientSecret,
+                args.shippingDetails?.toConfirmPaymentIntentShipping()
             )
             val confirmIntent = confirmParamsFactory.create(paymentSelection)
             _currentScreenState.update {
@@ -499,6 +504,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val clientSecret: ClientSecret?,
         val savedScreenState: USBankAccountFormScreenState?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
+        val shippingDetails: AddressDetails?,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     )
 

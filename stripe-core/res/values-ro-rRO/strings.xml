@@ -10,6 +10,8 @@
   <string name="address_label_country_or_region">Țară sau regiune</string>
   <!-- Caption for County field on address form (only countries that use county, like United Kingdom) -->
   <string name="address_label_county">Județ</string>
+  <!-- Placeholder string for name entry field. -->
+  <string name="address_label_full_name">Nume complet</string>
   <!-- Caption for Name field on address form -->
   <string name="address_label_name">Nume</string>
   <!-- Short string for postal code (text used in non-US countries) -->

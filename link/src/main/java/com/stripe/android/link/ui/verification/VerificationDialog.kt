@@ -18,11 +18,15 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.LinkAppBar
+import com.stripe.android.link.ui.rememberLinkAppBarState
 
 /**
  * Function called when the Link verification dialog has been dismissed. The boolean returned
@@ -43,9 +47,9 @@ fun LinkVerificationDialog(
 
     NavHost(
         navController = navController,
-        startDestination = "dialog"
+        startDestination = LinkScreen.VerificationDialog.route
     ) {
-        composable("dialog") {
+        composable(LinkScreen.VerificationDialog.route) {
             var openDialog by remember { mutableStateOf(true) }
 
             val injector = requireNotNull(linkLauncher.injector)
@@ -58,6 +62,8 @@ fun LinkVerificationDialog(
                 verificationCallback(false)
             }
 
+            val backStackEntry by navController.currentBackStackEntryAsState()
+
             linkAccount.value?.let { account ->
                 if (openDialog) {
                     Dialog(
@@ -69,14 +75,26 @@ fun LinkVerificationDialog(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(16.dp),
-                                shape = MaterialTheme.shapes.medium
+                                shape = MaterialTheme.linkShapes.medium
                             ) {
                                 Column {
-                                    LinkAppBar(
-                                        email = account.email,
+                                    val appBarState = rememberLinkAppBarState(
                                         isRootScreen = true,
-                                        onButtonClick = onDismiss
+                                        currentRoute = backStackEntry?.destination?.route,
+                                        email = account.email
                                     )
+
+                                    LinkAppBar(
+                                        state = appBarState,
+                                        onBackPressed = onDismiss,
+                                        onLogout = {
+                                            // This can't be invoked from the verification dialog
+                                        },
+                                        showBottomSheetContent = {
+                                            // This can't be invoked from the verification dialog
+                                        }
+                                    )
+
                                     VerificationBody(
                                         headerStringResId = R.string.verification_header_prefilled,
                                         messageStringResId = R.string.verification_message,

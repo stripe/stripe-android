@@ -70,7 +70,9 @@ class DefaultConnectionsEventReportTest {
     fun `onResult() should fire analytics request with expected event value for success`() {
         eventReporter.onResult(
             configuration,
-            FinancialConnectionsSheetActivityResult.Completed(financialConnectionsSession)
+            FinancialConnectionsSheetActivityResult.Completed(
+                financialConnectionsSession = financialConnectionsSession
+            )
         )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->

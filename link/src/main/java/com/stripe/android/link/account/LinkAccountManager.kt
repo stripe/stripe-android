@@ -2,16 +2,17 @@ package com.stripe.android.link.account
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.exception.AuthenticationException
-import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.injection.CUSTOMER_EMAIL
+import com.stripe.android.link.injection.LINK_INTENT
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.GlobalScope
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -27,7 +29,8 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class LinkAccountManager @Inject constructor(
-    private val args: LinkActivityContract.Args,
+    @Named(CUSTOMER_EMAIL) private val customerEmail: String?,
+    @Named(LINK_INTENT) private val stripeIntent: StripeIntent,
     private val linkRepository: LinkRepository,
     private val cookieStore: CookieStore,
     private val linkEventsReporter: LinkEventsReporter
@@ -38,7 +41,6 @@ internal class LinkAccountManager @Inject constructor(
     /**
      * The publishable key for the signed in Link account.
      */
-    @VisibleForTesting
     var consumerPublishableKey: String? = null
 
     val accountStatus = linkAccount.transform { value ->
@@ -56,11 +58,11 @@ internal class LinkAccountManager @Inject constructor(
                         }
                         // If a customer email was passed in, lookup the account,
                         // unless the user has logged out of this account
-                        ?: args.customerEmail?.let {
+                        ?: customerEmail?.let {
                             if (hasUserLoggedOut(it)) {
                                 AccountStatus.SignedOut
                             } else {
-                                lookupConsumer(args.customerEmail).getOrNull()?.accountStatus
+                                lookupConsumer(customerEmail).getOrNull()?.accountStatus
                             }
                         } ?: AccountStatus.SignedOut
                     )
@@ -129,14 +131,19 @@ internal class LinkAccountManager @Inject constructor(
             is UserInput.SignIn -> lookupConsumer(userInput.email).mapCatching {
                 requireNotNull(it) { "Error fetching user account" }
             }
-            is UserInput.SignUp -> signUp(userInput.email, userInput.phone, userInput.country)
-                .also {
-                    if (it.isSuccess) {
-                        linkEventsReporter.onSignupCompleted(true)
-                    } else {
-                        linkEventsReporter.onSignupFailure(true)
-                    }
+            is UserInput.SignUp -> signUp(
+                email = userInput.email,
+                phone = userInput.phone,
+                country = userInput.country,
+                name = userInput.name,
+                consentAction = ConsumerSignUpConsentAction.Checkbox
+            ).also {
+                if (it.isSuccess) {
+                    linkEventsReporter.onSignupCompleted(true)
+                } else {
+                    linkEventsReporter.onSignupFailure(true)
                 }
+            }
         }
 
     /**
@@ -145,9 +152,11 @@ internal class LinkAccountManager @Inject constructor(
     suspend fun signUp(
         email: String,
         phone: String,
-        country: String
+        country: String,
+        name: String?,
+        consentAction: ConsumerSignUpConsentAction
     ): Result<LinkAccount> =
-        linkRepository.consumerSignUp(email, phone, country, cookie())
+        linkRepository.consumerSignUp(email, phone, country, name, cookie(), consentAction)
             .map { consumerSession ->
                 cookieStore.storeNewUserEmail(email)
                 setAccount(consumerSession)
@@ -198,37 +207,56 @@ internal class LinkAccountManager @Inject constructor(
     }
 
     /**
-     * Creates a new PaymentDetails attached to the current account.
+     * Creates a new PaymentDetails.Card attached to the current account.
      *
      * @return The parameters needed to confirm the current Stripe Intent using the newly created
      *          Payment Details.
      */
-    suspend fun createPaymentDetails(
-        paymentMethod: SupportedPaymentMethod,
+    suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails> =
+    ): Result<LinkPaymentDetails.New> =
         linkAccount.value?.let { account ->
-            createPaymentDetails(
-                paymentMethod,
+            createCardPaymentDetails(
                 paymentMethodCreateParams,
                 account.email,
-                args.stripeIntent
+                stripeIntent
             )
         } ?: Result.failure(
             IllegalStateException("A non-null Link account is needed to create payment details")
         )
 
     /**
-     * Create a new payment method in the signed in consumer account.
+     * Create a session used to connect a bank account through Financial Connections.
      */
-    suspend fun createPaymentDetails(
-        paymentMethod: SupportedPaymentMethod,
+    suspend fun createFinancialConnectionsSession() = retryingOnAuthError { clientSecret ->
+        linkRepository.createFinancialConnectionsSession(
+            clientSecret,
+            consumerPublishableKey
+        )
+    }
+
+    /**
+     * Create a new Bank Account payment method attached to the consumer account.
+     */
+    suspend fun createBankAccountPaymentDetails(
+        financialConnectionsAccountId: String
+    ) = retryingOnAuthError { clientSecret ->
+        linkRepository.createBankAccountPaymentDetails(
+            financialConnectionsAccountId,
+            clientSecret,
+            consumerPublishableKey
+        )
+    }
+
+    /**
+     * Create a new Card payment method attached to the consumer account.
+     */
+    suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         userEmail: String,
         stripeIntent: StripeIntent
     ) = retryingOnAuthError { clientSecret ->
-        linkRepository.createPaymentDetails(
-            paymentMethod,
+        linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams,
             userEmail,
             stripeIntent,

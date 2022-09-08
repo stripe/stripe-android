@@ -173,6 +173,18 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify the repository only shows card if in lpms json`() {
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                ApplicationProvider.getApplicationContext<Application>().resources,
+                object : IsFinancialConnectionsAvailable {
+                    override fun invoke(): Boolean {
+                        return true
+                    }
+                }
+            )
+        )
+
         assertThat(lpmRepository.fromCode("card")).isNull()
         lpmRepository.forceUpdate(
             emptyList(),
@@ -193,8 +205,6 @@ class LpmRepositoryTest {
         assertThat(lpmRepository.fromCode("card")).isNull()
     }
 
-    // TODO(michelleb): Once we have the server implemented in production we can do filtering there instead
-    // of in code here.
     @Test
     fun `Verify that unknown LPMs are not shown because not listed as exposed`() {
         lpmRepository.forceUpdate(
@@ -244,7 +254,8 @@ class LpmRepositoryTest {
     @Test
     fun `Verify that us_bank_account not supported when financial connections sdk not available`() {
         val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
                 ApplicationProvider.getApplicationContext<Application>().resources,
                 object : IsFinancialConnectionsAvailable {
                     override fun invoke(): Boolean {

@@ -1,8 +1,10 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,25 +15,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RadioButton
-import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Surface
-import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -39,56 +35,80 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.R
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.HorizontalPadding
+import com.stripe.android.link.theme.PaymentsThemeForLink
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
-import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
-import com.stripe.android.link.ui.primaryButtonLabel
+import com.stripe.android.link.ui.completePaymentButtonLabel
+import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.CvcCheck
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.CvcElement
+import com.stripe.android.ui.core.elements.DateConfig
+import com.stripe.android.ui.core.elements.Html
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.ui.core.elements.SectionElementUI
+import com.stripe.android.ui.core.elements.SimpleTextElement
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.injection.NonFallbackInjector
+import kotlinx.coroutines.flow.flowOf
 
 @Preview
 @Composable
 private fun WalletBodyPreview() {
+    val paymentDetailsList = listOf(
+        ConsumerPaymentDetails.Card(
+            "id1",
+            true,
+            2030,
+            12,
+            CardBrand.Visa,
+            "4242",
+            CvcCheck.Fail
+        ),
+        ConsumerPaymentDetails.Card(
+            "id2",
+            false,
+            2022,
+            1,
+            CardBrand.MasterCard,
+            "4444",
+            CvcCheck.Pass
+        )
+    )
+
     DefaultLinkTheme {
         Surface {
             WalletBody(
-                paymentDetails = listOf(
-                    ConsumerPaymentDetails.Card(
-                        "id1",
-                        true,
-                        2022,
-                        12,
-                        CardBrand.Visa,
-                        "4242"
-                    ),
-                    ConsumerPaymentDetails.Card(
-                        "id2",
-                        false,
-                        2023,
-                        11,
-                        CardBrand.MasterCard,
-                        "4444"
-                    )
+                uiState = WalletUiState(
+                    paymentDetailsList = paymentDetailsList,
+                    supportedTypes = SupportedPaymentMethod.allTypes,
+                    selectedItem = paymentDetailsList.first(),
+                    isExpanded = true,
+                    errorMessage = ErrorMessage.Raw("Something went wrong")
                 ),
-                initiallySelectedId = null,
                 primaryButtonLabel = "Pay $10.99",
-                primaryButtonState = PrimaryButtonState.Enabled,
-                errorMessage = null,
+                expiryDateController = SimpleTextFieldController(textFieldConfig = DateConfig()),
+                cvcController = CvcController(cardBrandFlow = flowOf(CardBrand.Visa)),
+                setExpanded = {},
+                onItemSelected = {},
                 onAddNewPaymentMethodClick = {},
                 onEditPaymentMethod = {},
                 onDeletePaymentMethod = {},
@@ -113,61 +133,9 @@ internal fun WalletBody(
         )
     )
 
-    val paymentDetails by viewModel.paymentDetails.collectAsState()
-    val primaryButtonState by viewModel.primaryButtonState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
-    val errorMessage by viewModel.errorMessage.collectAsState()
-
-    WalletBody(
-        paymentDetails = paymentDetails,
-        initiallySelectedId = viewModel.initiallySelectedId,
-        primaryButtonLabel = primaryButtonLabel(viewModel.args, LocalContext.current.resources),
-        primaryButtonState = primaryButtonState,
-        errorMessage = errorMessage,
-        onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
-        onEditPaymentMethod = viewModel::editPaymentMethod,
-        onDeletePaymentMethod = viewModel::deletePaymentMethod,
-        onPrimaryButtonClick = viewModel::onSelectedPaymentDetails,
-        onPayAnotherWayClick = viewModel::payAnotherWay,
-        showBottomSheetContent = showBottomSheetContent
-    )
-}
-
-@Composable
-internal fun WalletBody(
-    paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
-    initiallySelectedId: String?,
-    primaryButtonLabel: String,
-    primaryButtonState: PrimaryButtonState,
-    errorMessage: ErrorMessage?,
-    onAddNewPaymentMethodClick: () -> Unit,
-    onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-    onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-    onPrimaryButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-    onPayAnotherWayClick: () -> Unit,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit
-) {
-    var isWalletExpanded by rememberSaveable { mutableStateOf(false) }
-    var cardBeingRemoved by remember { mutableStateOf<ConsumerPaymentDetails.Card?>(null) }
-    var openDialog by remember { mutableStateOf(false) }
-
-    cardBeingRemoved?.let {
-        // Launch dialog when the value of [cardBeingRemoved] changes.
-        LaunchedEffect(it) {
-            openDialog = true
-        }
-
-        ConfirmRemoveDialog(openDialog) { confirmed ->
-            if (confirmed) {
-                onDeletePaymentMethod(it)
-            }
-
-            openDialog = false
-            cardBeingRemoved = null
-        }
-    }
-
-    if (paymentDetails.isEmpty()) {
+    if (uiState.paymentDetailsList.isEmpty()) {
         Box(
             modifier = Modifier
                 .fillMaxHeight()
@@ -177,74 +145,219 @@ internal fun WalletBody(
             CircularProgressIndicator()
         }
     } else {
-        ScrollableTopLevelColumn {
-            Spacer(modifier = Modifier.height(12.dp))
+        WalletBody(
+            uiState = uiState,
+            primaryButtonLabel = completePaymentButtonLabel(
+                viewModel.args.stripeIntent,
+                LocalContext.current.resources
+            ),
+            expiryDateController = viewModel.expiryDateController,
+            cvcController = viewModel.cvcController,
+            setExpanded = viewModel::setExpanded,
+            onItemSelected = viewModel::onItemSelected,
+            onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
+            onEditPaymentMethod = viewModel::editPaymentMethod,
+            onDeletePaymentMethod = viewModel::deletePaymentMethod,
+            onPrimaryButtonClick = viewModel::onConfirmPayment,
+            onPayAnotherWayClick = viewModel::payAnotherWay,
+            showBottomSheetContent = showBottomSheetContent
+        )
+    }
+}
 
-            var selectedItemId by rememberSaveable {
-                mutableStateOf(initiallySelectedId ?: getDefaultSelectedCard(paymentDetails))
+@Composable
+internal fun WalletBody(
+    uiState: WalletUiState,
+    primaryButtonLabel: String,
+    expiryDateController: TextFieldController,
+    cvcController: CvcController,
+    setExpanded: (Boolean) -> Unit,
+    onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onAddNewPaymentMethodClick: () -> Unit,
+    onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onPrimaryButtonClick: () -> Unit,
+    onPayAnotherWayClick: () -> Unit,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit
+) {
+    var itemBeingRemoved by remember {
+        mutableStateOf<ConsumerPaymentDetails.PaymentDetails?>(null)
+    }
+    var openDialog by remember { mutableStateOf(false) }
+
+    itemBeingRemoved?.let {
+        // Launch confirmation dialog at the first recomposition after marking item for deletion
+        LaunchedEffect(it) {
+            openDialog = true
+        }
+
+        ConfirmRemoveDialog(
+            paymentDetails = it,
+            showDialog = openDialog
+        ) { confirmed ->
+            if (confirmed) {
+                onDeletePaymentMethod(it)
             }
 
-            // Update selected item if it's not on the list anymore
-            if (paymentDetails.firstOrNull { it.id == selectedItemId } == null) {
-                selectedItemId = getDefaultSelectedCard(paymentDetails)
-            }
+            openDialog = false
+            itemBeingRemoved = null
+        }
+    }
 
-            if (isWalletExpanded) {
+    ScrollableTopLevelColumn {
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Box(modifier = Modifier.animateContentSize()) {
+            if (uiState.isExpanded) {
                 ExpandedPaymentDetails(
-                    paymentDetails = paymentDetails,
-                    selectedItemId = selectedItemId,
-                    enabled = !primaryButtonState.isBlocking,
-                    onIndexSelected = {
-                        selectedItemId = paymentDetails[it].id
-                        isWalletExpanded = false
+                    uiState = uiState,
+                    onItemSelected = {
+                        onItemSelected(it)
+                        setExpanded(false)
                     },
                     onMenuButtonClick = {
                         showBottomSheetContent {
-                            WalletBottomSheetContent(
-                                onCancelClick = {
-                                    showBottomSheetContent(null)
-                                },
+                            WalletPaymentMethodMenu(
+                                paymentDetails = it,
                                 onEditClick = {
                                     showBottomSheetContent(null)
                                     onEditPaymentMethod(it)
                                 },
                                 onRemoveClick = {
                                     showBottomSheetContent(null)
-                                    cardBeingRemoved = it
+                                    itemBeingRemoved = it
+                                },
+                                onCancelClick = {
+                                    showBottomSheetContent(null)
                                 }
                             )
                         }
                     },
                     onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
                     onCollapse = {
-                        isWalletExpanded = false
+                        setExpanded(false)
                     }
                 )
             } else {
                 CollapsedPaymentDetails(
-                    selectedPaymentMethod = paymentDetails.first { it.id == selectedItemId },
-                    enabled = !primaryButtonState.isBlocking,
+                    selectedPaymentMethod = uiState.selectedItem!!,
+                    enabled = !uiState.primaryButtonState.isBlocking,
                     onClick = {
-                        isWalletExpanded = true
+                        setExpanded(true)
                     }
                 )
             }
-            Spacer(modifier = Modifier.height(20.dp))
-            errorMessage?.let {
-                ErrorText(text = it.getMessage(LocalContext.current.resources))
-            }
-            PrimaryButton(
-                label = primaryButtonLabel,
-                state = primaryButtonState,
-                icon = R.drawable.stripe_ic_lock
-            ) {
-                onPrimaryButtonClick(paymentDetails.first { it.id == selectedItemId })
-            }
-            SecondaryButton(
-                enabled = !primaryButtonState.isBlocking,
-                label = stringResource(id = R.string.wallet_pay_another_way),
-                onClick = onPayAnotherWayClick
+        }
+
+        if (uiState.selectedItem is ConsumerPaymentDetails.BankAccount) {
+            Html(
+                html = stringResource(R.string.wallet_bank_account_terms),
+                imageGetter = emptyMap(),
+                color = MaterialTheme.colors.onSecondary,
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
+                urlSpanStyle = SpanStyle(
+                    color = MaterialTheme.colors.primary
+                )
             )
+        }
+
+        uiState.errorMessage?.let {
+            ErrorText(
+                text = it.getMessage(LocalContext.current.resources),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            )
+        }
+
+        uiState.selectedCard?.let { selectedCard ->
+            if (selectedCard.requiresCardDetailsRecollection) {
+                CardDetailsRecollectionForm(
+                    expiryDateController = expiryDateController,
+                    cvcController = cvcController,
+                    isCardExpired = selectedCard.isExpired,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        PrimaryButton(
+            label = primaryButtonLabel,
+            state = uiState.primaryButtonState,
+            onButtonClick = onPrimaryButtonClick,
+            iconEnd = R.drawable.stripe_ic_lock
+        )
+
+        SecondaryButton(
+            enabled = !uiState.primaryButtonState.isBlocking,
+            label = stringResource(id = R.string.wallet_pay_another_way),
+            onClick = onPayAnotherWayClick
+        )
+    }
+}
+
+@Composable
+internal fun CardDetailsRecollectionForm(
+    expiryDateController: TextFieldController,
+    cvcController: CvcController,
+    isCardExpired: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val cvcElement = remember(cvcController) {
+        CvcElement(
+            _identifier = IdentifierSpec.CardCvc,
+            controller = cvcController
+        )
+    }
+
+    val errorTextResId = if (isCardExpired) {
+        R.string.wallet_update_expired_card_error
+    } else {
+        R.string.wallet_recollect_cvc_error
+    }
+
+    PaymentsThemeForLink {
+        Column(modifier) {
+            ErrorText(
+                text = stringResource(errorTextResId),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                if (isCardExpired) {
+                    val expiryDateElement = remember(expiryDateController) {
+                        SimpleTextElement(
+                            identifier = IdentifierSpec.Generic("date"),
+                            controller = expiryDateController
+                        )
+                    }
+
+                    Box(modifier = Modifier.weight(0.5f)) {
+                        SectionElementUI(
+                            enabled = true,
+                            element = SectionElement.wrap(expiryDateElement),
+                            hiddenIdentifiers = emptyList(),
+                            lastTextFieldIdentifier = cvcElement.identifier
+                        )
+                    }
+                }
+
+                Box(modifier = Modifier.weight(0.5f)) {
+                    SectionElementUI(
+                        enabled = true,
+                        element = SectionElement.wrap(cvcElement),
+                        hiddenIdentifiers = emptyList(),
+                        lastTextFieldIdentifier = cvcElement.identifier
+                    )
+                }
+            }
         }
     }
 }
@@ -262,11 +375,12 @@ internal fun CollapsedPaymentDetails(
             .border(
                 width = 1.dp,
                 color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
+            .clip(MaterialTheme.linkShapes.large)
             .background(
                 color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
             .clickable(
                 enabled = enabled,
@@ -276,12 +390,13 @@ internal fun CollapsedPaymentDetails(
     ) {
         Text(
             text = stringResource(id = R.string.wallet_collapsed_payment),
-            modifier = Modifier.padding(horizontal = HorizontalPadding),
+            modifier = Modifier.padding(
+                start = HorizontalPadding,
+                end = 8.dp
+            ),
             color = MaterialTheme.linkColors.disabledText
         )
-        if (selectedPaymentMethod is ConsumerPaymentDetails.Card) {
-            CardDetails(card = selectedPaymentMethod)
-        }
+        PaymentDetails(paymentDetails = selectedPaymentMethod, enabled = true)
         Spacer(modifier = Modifier.weight(1f))
         Icon(
             painter = painterResource(id = R.drawable.ic_link_chevron),
@@ -298,31 +413,32 @@ internal fun CollapsedPaymentDetails(
 
 @Composable
 private fun ExpandedPaymentDetails(
-    paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
-    selectedItemId: String,
-    enabled: Boolean,
-    onIndexSelected: (Int) -> Unit,
-    onMenuButtonClick: (ConsumerPaymentDetails.Card) -> Unit,
+    uiState: WalletUiState,
+    onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onMenuButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onAddNewPaymentMethodClick: () -> Unit,
     onCollapse: () -> Unit
 ) {
+    val isEnabled = !uiState.primaryButtonState.isBlocking
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .border(
                 width = 1.dp,
                 color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
+            .clip(MaterialTheme.linkShapes.large)
             .background(
                 color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.linkShapes.large
             )
     ) {
         Row(
             modifier = Modifier
                 .height(44.dp)
-                .clickable(enabled = enabled, onClick = onCollapse),
+                .clickable(enabled = isEnabled, onClick = onCollapse),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -346,40 +462,38 @@ private fun ExpandedPaymentDetails(
             )
         }
 
-        // TODO(brnunes-stripe): Use LazyColumn.
-        paymentDetails.forEachIndexed { index, item ->
-            when (item) {
-                is ConsumerPaymentDetails.Card -> {
-                    CardPaymentMethodItem(
-                        cardDetails = item,
-                        enabled = enabled,
-                        isSelected = selectedItemId == item.id,
-                        onClick = {
-                            onIndexSelected(index)
-                        },
-                        onMenuButtonClick = {
-                            onMenuButtonClick(item)
-                        }
-                    )
+        // TODO(brnunes-stripe): Use LazyColumn, will need to write custom shape for the border
+        // https://juliensalvi.medium.com/custom-shape-with-jetpack-compose-1cb48a991d42
+        uiState.paymentDetailsList.forEach { item ->
+            PaymentDetailsListItem(
+                paymentDetails = item,
+                enabled = isEnabled,
+                isSupported = uiState.supportedTypes.contains(item.type),
+                isSelected = uiState.selectedItem?.id == item.id,
+                onClick = {
+                    onItemSelected(item)
+                },
+                onMenuButtonClick = {
+                    onMenuButtonClick(item)
                 }
-            }
+            )
         }
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .clickable(enabled = enabled, onClick = onAddNewPaymentMethodClick),
+                .clickable(enabled = isEnabled, onClick = onAddNewPaymentMethodClick),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_link_add),
+                painter = painterResource(id = R.drawable.ic_link_add_green),
                 contentDescription = null,
                 modifier = Modifier.padding(start = HorizontalPadding, end = 12.dp),
                 tint = Color.Unspecified
             )
             Text(
-                text = stringResource(id = R.string.wallet_add_payment_method),
+                text = stringResource(id = R.string.add_payment_method),
                 modifier = Modifier.padding(end = HorizontalPadding, bottom = 4.dp),
                 color = MaterialTheme.linkColors.actionLabel,
                 style = MaterialTheme.typography.button
@@ -387,88 +501,3 @@ private fun ExpandedPaymentDetails(
         }
     }
 }
-
-@Composable
-private fun CardPaymentMethodItem(
-    cardDetails: ConsumerPaymentDetails.Card,
-    enabled: Boolean,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    onMenuButtonClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-            .clickable(enabled = enabled, onClick = onClick),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        RadioButton(
-            selected = isSelected,
-            onClick = null,
-            modifier = Modifier.padding(start = 20.dp, end = 6.dp),
-            colors = RadioButtonDefaults.colors(
-                selectedColor = MaterialTheme.linkColors.actionLabelLight,
-                unselectedColor = MaterialTheme.linkColors.disabledText
-            )
-        )
-        CardDetails(card = cardDetails)
-        Spacer(modifier = Modifier.weight(1f))
-        if (cardDetails.isDefault) {
-            Box(
-                modifier = Modifier
-                    .height(20.dp)
-                    .background(
-                        color = MaterialTheme.colors.secondary,
-                        shape = MaterialTheme.shapes.small
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(id = R.string.wallet_default),
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-                    color = MaterialTheme.linkColors.disabledText,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-        }
-        IconButton(
-            onClick = onMenuButtonClick,
-            modifier = Modifier.padding(end = 6.dp),
-            enabled = enabled
-        ) {
-            Icon(
-                imageVector = Icons.Filled.MoreVert,
-                contentDescription = stringResource(R.string.edit),
-                tint = MaterialTheme.linkColors.actionLabelLight
-            )
-        }
-    }
-    Divider(color = MaterialTheme.linkColors.componentDivider, thickness = 1.dp)
-}
-
-@Composable
-internal fun CardDetails(
-    card: ConsumerPaymentDetails.Card
-) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(
-            painter = painterResource(id = card.brand.icon),
-            contentDescription = card.brand.displayName,
-            modifier = Modifier.padding(horizontal = 6.dp),
-            tint = Color.Unspecified
-        )
-        Text(
-            text = "•••• ",
-            color = MaterialTheme.colors.onPrimary
-        )
-        Text(
-            text = card.last4,
-            color = MaterialTheme.colors.onPrimary
-        )
-    }
-}
-
-private fun getDefaultSelectedCard(paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>) =
-    paymentDetails.firstOrNull { it.isDefault }?.id ?: paymentDetails.first().id

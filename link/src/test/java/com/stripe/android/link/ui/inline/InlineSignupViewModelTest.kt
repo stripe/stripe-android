@@ -2,12 +2,15 @@ package com.stripe.android.link.ui.inline
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.ui.core.elements.PhoneNumberController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -18,6 +21,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -45,9 +49,9 @@ class InlineSignupViewModelTest {
     @Test
     fun `When email is provided it should not trigger lookup and should collect phone number`() =
         runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel()
+            val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL)
             viewModel.toggleExpanded()
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
 
             verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
         }
@@ -56,15 +60,17 @@ class InlineSignupViewModelTest {
     fun `When email and phone are provided it should prefill all values`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = InlineSignupViewModel(
+                stripeIntent = mockStripeIntent(),
                 merchantName = MERCHANT_NAME,
                 customerEmail = CUSTOMER_EMAIL,
                 customerPhone = CUSTOMER_PHONE,
+                customerName = CUSTOMER_NAME,
                 linkAccountManager = linkAccountManager,
                 linkEventsReporter = linkEventsReporter,
                 logger = Logger.noop()
             )
             viewModel.toggleExpanded()
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
             assertThat(viewModel.phoneController.initialPhoneNumber).isEqualTo(CUSTOMER_PHONE)
 
             verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
@@ -107,32 +113,7 @@ class InlineSignupViewModelTest {
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.userInput.value).isNull()
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
-        }
-
-    @Test
-    fun `When entered all fields for new account then it emits user input`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val email = "valid@email.com"
-            val viewModel = createViewModel()
-            viewModel.toggleExpanded()
-            viewModel.emailController.onRawValueChange(email)
-
-            assertThat(viewModel.userInput.value).isNull()
-
-            whenever(linkAccountManager.lookupConsumer(any(), any()))
-                .thenReturn(Result.success(null))
-
-            // Advance past lookup debounce delay
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
-
-            assertThat(viewModel.userInput.value).isNull()
-
-            val phone = "1234567890"
-            viewModel.phoneController.onRawValueChange(phone)
-
-            assertThat(viewModel.userInput.value)
-                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US"))
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
         }
 
     @Test
@@ -157,7 +138,7 @@ class InlineSignupViewModelTest {
             viewModel.phoneController.onRawValueChange(phone)
 
             assertThat(viewModel.userInput.value)
-                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US"))
+                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US", name = null))
 
             viewModel.phoneController.onRawValueChange("")
 
@@ -186,14 +167,84 @@ class InlineSignupViewModelTest {
             // Advance past lookup debounce delay
             advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE_MS + 100)
 
-            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhone)
+            assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
             verify(linkEventsReporter).onSignupStarted(true)
         }
 
-    private fun createViewModel() = InlineSignupViewModel(
+    @Test
+    fun `User input is valid without name for US users`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(countryCode = CountryCode.US)
+
+        viewModel.toggleExpanded()
+        viewModel.emailController.onRawValueChange("valid@email.com")
+        viewModel.phoneController.onRawValueChange("1234567890")
+
+        assertThat(viewModel.userInput.value).isEqualTo(
+            UserInput.SignUp(
+                email = "valid@email.com",
+                phone = "+11234567890",
+                country = CountryCode.US.value,
+                name = null
+            )
+        )
+    }
+
+    @Test
+    fun `User input is only valid with name for non-US users`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(countryCode = CountryCode.CA)
+
+            viewModel.toggleExpanded()
+            viewModel.emailController.onRawValueChange("valid@email.com")
+            viewModel.phoneController.selectCanadianPhoneNumber()
+            viewModel.phoneController.onRawValueChange("1234567890")
+
+            assertThat(viewModel.userInput.value).isNull()
+
+            viewModel.nameController.onRawValueChange("Someone from Canada")
+
+            assertThat(viewModel.userInput.value).isEqualTo(
+                UserInput.SignUp(
+                    email = "valid@email.com",
+                    phone = "+11234567890",
+                    country = CountryCode.CA.value,
+                    name = "Someone from Canada"
+                )
+            )
+        }
+
+    @Test
+    fun `Prefilled values are handled correctly`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            countryCode = CountryCode.GB,
+            prefilledEmail = CUSTOMER_EMAIL,
+            prefilledName = CUSTOMER_NAME,
+            prefilledPhone = "+44$CUSTOMER_PHONE"
+        )
+
+        viewModel.toggleExpanded()
+
+        val expectedInput = UserInput.SignUp(
+            email = CUSTOMER_EMAIL,
+            phone = "+44$CUSTOMER_PHONE",
+            country = CountryCode.GB.value,
+            name = CUSTOMER_NAME
+        )
+
+        assertThat(viewModel.userInput.value).isEqualTo(expectedInput)
+    }
+
+    private fun createViewModel(
+        countryCode: CountryCode = CountryCode.US,
+        prefilledEmail: String? = null,
+        prefilledName: String? = null,
+        prefilledPhone: String? = null
+    ) = InlineSignupViewModel(
+        stripeIntent = mockStripeIntent(countryCode),
         merchantName = MERCHANT_NAME,
-        customerEmail = CUSTOMER_EMAIL,
-        customerPhone = null,
+        customerEmail = prefilledEmail,
+        customerName = prefilledName,
+        customerPhone = prefilledPhone,
         linkAccountManager = linkAccountManager,
         linkEventsReporter = linkEventsReporter,
         logger = Logger.noop()
@@ -215,9 +266,23 @@ class InlineSignupViewModelTest {
         return consumerSession
     }
 
+    private fun mockStripeIntent(
+        countryCode: CountryCode = CountryCode.US
+    ): PaymentIntent = mock {
+        on { this.countryCode } doReturn countryCode.value
+    }
+
+    private fun PhoneNumberController.selectCanadianPhoneNumber() {
+        val canada = countryDropdownController.displayItems.indexOfFirst {
+            it.contains("Canada")
+        }
+        onSelectedCountryIndex(canada)
+    }
+
     private companion object {
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "customer@email.com"
         const val CUSTOMER_PHONE = "1234567890"
+        const val CUSTOMER_NAME = "Customer"
     }
 }

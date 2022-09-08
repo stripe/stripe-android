@@ -9,6 +9,7 @@ import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason.LoggedOut
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
@@ -47,6 +48,15 @@ internal class LinkActivityViewModel @Inject internal constructor(
 
     fun setupPaymentLauncher(activityResultCaller: ActivityResultCaller) {
         confirmationManager.setupPaymentLauncher(activityResultCaller)
+    }
+
+    fun onBackPressed() {
+        navigator.onBack(userInitiated = true)
+    }
+
+    fun logout() {
+        navigator.cancel(reason = LoggedOut)
+        linkAccountManager.logout()
     }
 
     fun unregisterFromActivity() {

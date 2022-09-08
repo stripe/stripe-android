@@ -198,7 +198,7 @@ internal class StripeEndToEndTest {
                 CardNumberFixtures.VISA_NO_SPACES to CardBrand.Visa,
                 CardNumberFixtures.MASTERCARD_NO_SPACES to CardBrand.MasterCard,
                 CardNumberFixtures.JCB_NO_SPACES to CardBrand.JCB,
-                CardNumberFixtures.UNIONPAY_NO_SPACES to CardBrand.UnionPay,
+                CardNumberFixtures.UNIONPAY_16_NO_SPACES to CardBrand.UnionPay,
                 CardNumberFixtures.DISCOVER_NO_SPACES to CardBrand.Discover,
                 CardNumberFixtures.DINERS_CLUB_14_NO_SPACES to CardBrand.DinersClub
             ).all { (cardNumber, cardBrand) ->

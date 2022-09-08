@@ -8,9 +8,9 @@ internal interface EventReporter {
 
     fun onDismiss()
 
-    fun onShowExistingPaymentOptions()
+    fun onShowExistingPaymentOptions(linkEnabled: Boolean, activeLinkSession: Boolean)
 
-    fun onShowNewPaymentOptionForm()
+    fun onShowNewPaymentOptionForm(linkEnabled: Boolean, activeLinkSession: Boolean)
 
     fun onSelectPaymentOption(paymentSelection: PaymentSelection)
 

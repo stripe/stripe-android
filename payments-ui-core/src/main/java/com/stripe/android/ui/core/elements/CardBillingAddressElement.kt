@@ -1,7 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.address.FieldType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -15,21 +15,26 @@ import kotlinx.coroutines.flow.map
 class CardBillingAddressElement(
     identifier: IdentifierSpec,
     rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
-    addressFieldRepository: AddressFieldElementRepository,
+    addressRepository: AddressRepository,
     countryCodes: Set<String> = emptySet(),
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
         rawValuesMap[IdentifierSpec.Country]
-    )
+    ),
+    sameAsShippingElement: SameAsShippingElement?,
+    shippingValuesMap: Map<IdentifierSpec, String?>?
 ) : AddressElement(
     identifier,
-    addressFieldRepository,
+    addressRepository,
     rawValuesMap,
     AddressType.Normal(),
     countryCodes,
-    countryDropdownFieldController
+    countryDropdownFieldController,
+    sameAsShippingElement,
+    shippingValuesMap
 ) {
     // Save for future use puts this in the controller rather than element
+    // card and achv2 uses save for future use
     val hiddenIdentifiers: Flow<List<IdentifierSpec>> =
         countryDropdownFieldController.rawFieldValue.map { countryCode ->
             when (countryCode) {

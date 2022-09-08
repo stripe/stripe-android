@@ -248,7 +248,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
     }
 
     private fun renderLabels() {
-        nameTextInputLayout.hint = resources.getString(R.string.address_label_name)
+        nameTextInputLayout.hint = resources.getString(R.string.address_label_full_name)
         cityTextInputLayout.hint =
             if (isFieldOptional(CustomizableShippingField.City)) {
                 resources.getString(R.string.address_label_city_optional)

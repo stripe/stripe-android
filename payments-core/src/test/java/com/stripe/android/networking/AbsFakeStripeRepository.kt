@@ -15,6 +15,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
 import com.stripe.android.model.FinancialConnectionsSession
@@ -298,7 +299,10 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         email: String,
         phoneNumber: String,
         country: String,
+        name: String?,
+        locale: Locale?,
         authSessionCookie: String?,
+        consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
         return null
@@ -327,6 +331,21 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession? {
+        return null
+    }
+
+    override suspend fun createLinkFinancialConnectionsSession(
+        consumerSessionClientSecret: String,
+        requestOptions: ApiRequest.Options
+    ): FinancialConnectionsSession? {
+        return null
+    }
+
+    override suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        financialConnectionsAccountId: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails? {
         return null
     }
 

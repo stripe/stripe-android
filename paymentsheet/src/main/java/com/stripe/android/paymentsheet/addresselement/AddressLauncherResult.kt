@@ -12,14 +12,8 @@ internal sealed class AddressLauncherResult(
 ) : Parcelable {
     @Parcelize
     data class Succeeded(
-        // TODO add the real return type here once we iron it out.
         val address: AddressDetails
     ) : AddressLauncherResult(Activity.RESULT_OK)
-
-    @Parcelize
-    data class Failed(
-        val error: Throwable
-    ) : AddressLauncherResult(Activity.RESULT_CANCELED)
 
     @Parcelize
     object Canceled : AddressLauncherResult(Activity.RESULT_CANCELED)

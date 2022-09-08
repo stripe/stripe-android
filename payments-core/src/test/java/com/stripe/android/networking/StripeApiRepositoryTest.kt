@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.FakeFraudDetectionDataRepository
 import com.stripe.android.FileFactory
+import com.stripe.android.FinancialConnectionsFixtures
 import com.stripe.android.FraudDetectionDataFixtures
 import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
@@ -32,6 +33,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
@@ -269,6 +271,14 @@ internal class StripeApiRepositoryTest {
         assertEquals(
             "https://api.stripe.com/v1/consumers/sessions/log_out",
             StripeApiRepository.logoutConsumerUrl
+        )
+    }
+
+    @Test
+    fun testLinkFinancialConnectionsSessionUrlUrl() {
+        assertEquals(
+            "https://api.stripe.com/v1/consumers/link_account_sessions",
+            StripeApiRepository.linkFinancialConnectionsSessionUrl
         )
     }
 
@@ -1121,7 +1131,7 @@ internal class StripeApiRepositoryTest {
             ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
         )
         assertThat(fpxBankStatuses.size())
-            .isEqualTo(25)
+            .isEqualTo(26)
     }
 
     @Test
@@ -1133,7 +1143,7 @@ internal class StripeApiRepositoryTest {
             )
         )
         assertThat(fpxBankStatuses.size())
-            .isEqualTo(25)
+            .isEqualTo(26)
     }
 
     @Test
@@ -1684,10 +1694,13 @@ internal class StripeApiRepositoryTest {
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
             val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-            assertEquals(params["email_address"], email)
-            val cookies = params["cookies"] as Map<*, *>
-            val secret = cookies["verification_session_client_secrets"] as Collection<*>
-            assertThat(secret).containsExactly(cookie)
+
+            with(params) {
+                assertEquals(this["email_address"], email)
+                withNestedParams("cookies") {
+                    assertEquals(this["verification_session_client_secrets"], listOf(cookie))
+                }
+            }
         }
 
     @Test
@@ -1704,23 +1717,35 @@ internal class StripeApiRepositoryTest {
             val email = "email@example.com"
             val phoneNumber = "phone number"
             val country = "US"
+            val name = "name"
+            val locale = Locale.US
             val cookie = "cookie1"
+            val consentAction = ConsumerSignUpConsentAction.Button
             create().consumerSignUp(
                 email,
                 phoneNumber,
                 country,
+                name,
+                locale,
                 cookie,
+                consentAction,
                 DEFAULT_OPTIONS
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
             val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-            assertEquals(params["email_address"], email)
-            assertEquals(params["phone_number"], phoneNumber)
-            assertEquals(params["country"], country)
-            val cookies = params["cookies"] as Map<*, *>
-            val secret = cookies["verification_session_client_secrets"] as Collection<*>
-            assertThat(secret).containsExactly(cookie)
+
+            with(params) {
+                assertEquals(this["email_address"], email)
+                assertEquals(this["phone_number"], phoneNumber)
+                assertEquals(this["country"], country)
+                assertEquals(this["legal_name"], name)
+                assertEquals(this["locale"], locale.toLanguageTag())
+                assertEquals(this["consent_action"], "clicked_button_mobile")
+                withNestedParams("cookies") {
+                    assertEquals(this["verification_session_client_secrets"], listOf(cookie))
+                }
+            }
         }
 
     @Test
@@ -1746,13 +1771,18 @@ internal class StripeApiRepositoryTest {
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
             val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-            val credentials = params["credentials"] as Map<*, *>
-            assertEquals(credentials["consumer_session_client_secret"], clientSecret)
-            assertEquals(params["type"], "SMS")
-            assertEquals(params["locale"], locale.toLanguageTag())
-            val cookies = params["cookies"] as Map<*, *>
-            val secret = cookies["verification_session_client_secrets"] as Collection<*>
-            assertThat(secret).containsExactly(cookie)
+
+            with(params) {
+                assertEquals(this["request_surface"], "android_payment_element")
+                assertEquals(this["type"], "SMS")
+                assertEquals(this["locale"], locale.toLanguageTag())
+                withNestedParams("credentials") {
+                    assertEquals(this["consumer_session_client_secret"], clientSecret)
+                }
+                withNestedParams("cookies") {
+                    assertEquals(this["verification_session_client_secrets"], listOf(cookie))
+                }
+            }
         }
 
     @Test
@@ -1778,13 +1808,18 @@ internal class StripeApiRepositoryTest {
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
             val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-            val credentials = params["credentials"] as Map<*, *>
-            assertEquals(credentials["consumer_session_client_secret"], clientSecret)
-            assertEquals(params["type"], "SMS")
-            assertEquals(params["code"], verificationCode)
-            val cookies = params["cookies"] as Map<*, *>
-            val secret = cookies["verification_session_client_secrets"] as Collection<*>
-            assertThat(secret).containsExactly(cookie)
+
+            with(params) {
+                assertEquals(this["request_surface"], "android_payment_element")
+                assertEquals(this["type"], "SMS")
+                assertEquals(this["code"], verificationCode)
+                withNestedParams("credentials") {
+                    assertEquals(this["consumer_session_client_secret"], clientSecret)
+                }
+                withNestedParams("cookies") {
+                    assertEquals(this["verification_session_client_secrets"], listOf(cookie))
+                }
+            }
         }
 
     @Test
@@ -1808,19 +1843,87 @@ internal class StripeApiRepositoryTest {
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
             val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
-            val credentials = params["credentials"] as Map<*, *>
-            assertEquals(credentials["consumer_session_client_secret"], clientSecret)
-            val cookies = params["cookies"] as Map<*, *>
-            val secret = cookies["verification_session_client_secrets"] as Collection<*>
-            assertThat(secret).containsExactly(cookie)
+
+            with(params) {
+                assertEquals(this["request_surface"], "android_payment_element")
+                withNestedParams("credentials") {
+                    assertEquals(this["consumer_session_client_secret"], clientSecret)
+                }
+                withNestedParams("cookies") {
+                    assertEquals(this["verification_session_client_secrets"], listOf(cookie))
+                }
+            }
         }
 
     @Test
-    fun `createPaymentDetails() sends all parameters`() =
+    fun `createLinkFinancialConnectionsSession() sends all parameters`() =
         runTest {
             val stripeResponse = StripeResponse(
                 200,
-                ConsumerFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS_JSON.toString(),
+                FinancialConnectionsFixtures.SESSION.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "secret"
+            create().createLinkFinancialConnectionsSession(
+                clientSecret,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+            with(params) {
+                assertEquals(this["request_surface"], "android_payment_element")
+                withNestedParams("credentials") {
+                    assertEquals(this["consumer_session_client_secret"], clientSecret)
+                }
+            }
+        }
+
+    @Test
+    fun `createPaymentDetails() for financial connections sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "secret"
+            val accountId = "account"
+            create().createPaymentDetails(
+                clientSecret,
+                accountId,
+                DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+            with(params) {
+                assertEquals(this["request_surface"], "android_payment_element")
+                withNestedParams("credentials") {
+                    assertEquals(this["consumer_session_client_secret"], clientSecret)
+                }
+                assertEquals(this["is_default"], true)
+                assertEquals(this["type"], "bank_account")
+                withNestedParams("bank_account") {
+                    assertEquals(this["account"], accountId)
+                }
+            }
+        }
+
+    @Test
+    fun `createPaymentDetails() for card sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString(),
                 emptyMap()
             )
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
@@ -1842,6 +1945,7 @@ internal class StripeApiRepositoryTest {
             val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
 
             with(params) {
+                assertEquals(this["request_surface"], "android_payment_element")
                 withNestedParams("credentials") {
                     assertEquals(this["consumer_session_client_secret"], clientSecret)
                 }
@@ -1865,7 +1969,7 @@ internal class StripeApiRepositoryTest {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
-                ConsumerFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS_JSON.toString(),
+                ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString(),
                 emptyMap()
             )
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
@@ -1889,6 +1993,7 @@ internal class StripeApiRepositoryTest {
             val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
 
             with(params) {
+                assertEquals(this["request_surface"], "android_payment_element")
                 withNestedParams("credentials") {
                     assertEquals(this["consumer_session_client_secret"], clientSecret)
                 }
@@ -1931,6 +2036,7 @@ internal class StripeApiRepositoryTest {
             )
             assertThat(request.method).isEqualTo(StripeRequest.Method.POST)
 
+            assertEquals(params["request_surface"], "android_payment_element")
             val credentials = params["credentials"] as Map<*, *>
             assertEquals(credentials["consumer_session_client_secret"], clientSecret)
             assertContentEquals(params["types"] as? List<*>, paymentMethodTypes.toList())
@@ -1964,6 +2070,7 @@ internal class StripeApiRepositoryTest {
                 request.baseUrl
             )
 
+            assertEquals(params["request_surface"], "android_payment_element")
             val credentials = params["credentials"] as Map<*, *>
             assertEquals(credentials["consumer_session_client_secret"], clientSecret)
         }

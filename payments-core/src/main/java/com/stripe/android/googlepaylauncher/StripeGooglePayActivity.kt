@@ -13,6 +13,7 @@ import com.stripe.android.model.GooglePayResult
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.ShippingInformation
+import com.stripe.android.utils.AnimationConstants
 import org.json.JSONObject
 
 /**
@@ -48,7 +49,7 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        overridePendingTransition(0, 0)
+        setFadeAnimations()
         setResult(
             RESULT_OK,
             Intent().putExtras(
@@ -88,7 +89,11 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(0, 0)
+        setFadeAnimations()
+    }
+
+    private fun setFadeAnimations() {
+        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 
     /**
@@ -124,6 +129,7 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
         )
     }
 
+    @Deprecated("Deprecated in Java")
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == LOAD_PAYMENT_DATA_REQUEST_CODE) {

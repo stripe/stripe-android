@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
@@ -35,7 +36,8 @@ internal class PrimaryButton @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
-    private var defaultTintList: ColorStateList? = null
+    @VisibleForTesting
+    internal var defaultTintList: ColorStateList? = null
     private var state: State? = null
     private val animator = PrimaryButtonAnimator(context)
 
@@ -65,6 +67,12 @@ internal class PrimaryButton @JvmOverloads constructor(
     private var borderStrokeColor =
         PaymentsThemeDefaults.primaryButtonStyle.getBorderStrokeColor(context)
 
+    internal var finishedBackgroundColor =
+        ContextCompat.getColor(
+            context,
+            R.color.stripe_paymentsheet_primary_button_success_background
+        )
+
     init {
         // This is only needed if the button is inside a fragment
         viewBinding.label.setViewCompositionStrategy(
@@ -88,8 +96,8 @@ internal class PrimaryButton @JvmOverloads constructor(
         viewBinding.lockIcon.imageTintList = ColorStateList.valueOf(
             primaryButtonStyle.getOnBackgroundColor(context)
         )
-        backgroundTintList = tintList
         defaultTintList = tintList
+        backgroundTintList = tintList
     }
 
     override fun setBackgroundTintList(tintList: ColorStateList?) {
@@ -153,9 +161,7 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
         isClickable = false
-        backgroundTintList = ColorStateList.valueOf(
-            resources.getColor(R.color.stripe_paymentsheet_primary_button_success_background)
-        )
+        backgroundTintList = ColorStateList.valueOf(finishedBackgroundColor)
 
         animator.fadeOut(viewBinding.label)
         animator.fadeOut(viewBinding.confirmingIcon)
@@ -184,6 +190,7 @@ internal class PrimaryButton @JvmOverloads constructor(
             is State.FinishProcessing -> {
                 onFinishProcessing(state.onComplete)
             }
+            null -> {}
         }
     }
 

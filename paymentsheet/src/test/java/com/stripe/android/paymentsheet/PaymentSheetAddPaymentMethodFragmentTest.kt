@@ -42,6 +42,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -213,7 +214,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
     fun `started fragment should report onShowNewPaymentOptionForm() event`() {
         createFragment { _, _, _ ->
             idleLooper()
-            verify(eventReporter).onShowNewPaymentOptionForm()
+            verify(eventReporter).onShowNewPaymentOptionForm(any(), any())
         }
     }
 
@@ -501,7 +502,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 idleLooper()
                 registerViewModel(args.injectorKey, viewModel, lpmRepository)
             } else {
-                it.sheetViewModel.resourceRepository.getLpmRepository().forceUpdate(
+                it.sheetViewModel.lpmResourceRepository.getRepository().forceUpdate(
                     stripeIntent.paymentMethodTypes,
                     null
                 )

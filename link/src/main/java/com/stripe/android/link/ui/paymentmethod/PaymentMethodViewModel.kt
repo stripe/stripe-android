@@ -4,9 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLinkResult
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason.PayAnotherWay
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.R
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmStripeIntentParamsFactory
@@ -14,15 +17,20 @@ import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
+import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
+import com.stripe.android.link.ui.wallet.PaymentDetailsResult
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.FormController
+import com.stripe.android.ui.core.address.toConfirmPaymentIntentShipping
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.ui.core.forms.convertToFormValuesMap
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
@@ -66,46 +74,73 @@ internal class PaymentMethodViewModel @Inject constructor(
         R.string.cancel
     }
 
-    val paymentMethod = SupportedPaymentMethod.Card
+    val supportedTypes = args.stripeIntent.supportedPaymentMethodTypes(linkAccount)
+        .let { supportedTypes ->
+            SupportedPaymentMethod.values().filter { supportedTypes.contains(it.type) }
+        }
+
+    private val _paymentMethod = MutableStateFlow(supportedTypes.first())
+    val paymentMethod: StateFlow<SupportedPaymentMethod> = _paymentMethod
 
     val formController = MutableStateFlow<FormController?>(null)
+    private val formControllersCache = mutableMapOf<SupportedPaymentMethod, FormController>()
+
+    private val _financialConnectionsSessionClientSecret = MutableStateFlow<String?>(null)
+    val financialConnectionsSessionClientSecret: StateFlow<String?> =
+        _financialConnectionsSessionClientSecret
+
+    // User must be signed in when Wallet Screen is loaded, so [consumerPublishableKey] is not null
+    val publishableKey = requireNotNull(linkAccountManager.consumerPublishableKey)
 
     fun init(loadFromArgs: Boolean) {
-        formController.value =
-            formControllerProvider.get()
-                .formSpec(LayoutSpec(paymentMethod.formSpec))
-                .viewOnlyFields(emptySet())
-                .viewModelScope(viewModelScope)
-                .initialValues(
-                    (args.selectedPaymentDetails as? LinkPaymentDetails.New)
-                        ?.takeIf { loadFromArgs }?.buildFormValues() ?: emptyMap()
-                )
-                .stripeIntent(args.stripeIntent)
-                .merchantName(args.merchantName)
-                .build().formController
+        val cardMap = args.prefilledCardParams?.toParamMap()
+            ?.takeIf { loadFromArgs }
+            ?.let { convertToFormValuesMap(it) }
+            ?: emptyMap()
+        updateFormController(cardMap)
+    }
+
+    fun onPaymentMethodSelected(paymentMethod: SupportedPaymentMethod) {
+        _paymentMethod.value = paymentMethod
+        updateFormController()
     }
 
     fun startPayment(formValues: Map<IdentifierSpec, FormFieldEntry>) {
         clearError()
         setState(PrimaryButtonState.Processing)
 
-        val paymentMethodCreateParams =
-            FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
-                formValues,
-                paymentMethod.type.code,
-                paymentMethod.requiresMandate
-            )
+        when (paymentMethod.value) {
+            SupportedPaymentMethod.Card -> {
+                val paymentMethodCreateParams =
+                    FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
+                        formValues,
+                        paymentMethod.value.type,
+                        false
+                    )
 
-        viewModelScope.launch {
-            linkAccountManager.createPaymentDetails(
-                paymentMethod,
-                paymentMethodCreateParams,
-                linkAccount.email,
-                args.stripeIntent
-            ).fold(
-                onSuccess = ::completePayment,
-                onFailure = ::onError
-            )
+                viewModelScope.launch {
+                    linkAccountManager.createCardPaymentDetails(
+                        paymentMethodCreateParams,
+                        linkAccount.email,
+                        args.stripeIntent
+                    ).fold(
+                        onSuccess = ::completePayment,
+                        onFailure = ::onError
+                    )
+                }
+            }
+            SupportedPaymentMethod.BankAccount -> {
+                viewModelScope.launch {
+                    linkAccountManager.createFinancialConnectionsSession()
+                        .mapCatching { requireNotNull(it.clientSecret) }
+                        .fold(
+                            onSuccess = {
+                                _financialConnectionsSessionClientSecret.value = it
+                            },
+                            onFailure = ::onError
+                        )
+                }
+            }
         }
     }
 
@@ -113,18 +148,65 @@ internal class PaymentMethodViewModel @Inject constructor(
         if (isRootScreen) {
             payAnotherWay()
         } else {
-            navigator.onBack()
+            navigator.onBack(userInitiated = true)
+        }
+    }
+
+    fun onFinancialConnectionsAccountLinked(result: FinancialConnectionsSheetLinkResult) {
+        when (result) {
+            is FinancialConnectionsSheetLinkResult.Canceled -> setState(PrimaryButtonState.Enabled)
+            is FinancialConnectionsSheetLinkResult.Failed -> onError(result.error)
+            is FinancialConnectionsSheetLinkResult.Completed -> {
+                viewModelScope.launch {
+                    linkAccountManager.createBankAccountPaymentDetails(result.linkedAccountId)
+                        .fold(
+                            onSuccess = ::navigateToWallet,
+                            onFailure = ::onError
+                        )
+                }
+            }
+        }
+    }
+
+    private fun updateFormController(
+        initialValues: Map<IdentifierSpec, String?> = emptyMap()
+    ) {
+        formController.value =
+            formControllersCache[paymentMethod.value] ?: formControllerProvider.get()
+                .formSpec(LayoutSpec(paymentMethod.value.formSpec))
+                .viewOnlyFields(emptySet())
+                .viewModelScope(viewModelScope)
+                .initialValues(initialValues)
+                .stripeIntent(args.stripeIntent)
+                .merchantName(args.merchantName)
+                .shippingValues(args.shippingValues)
+                .build()
+                .formController
+                .also { formControllersCache[paymentMethod.value] = it }
+    }
+
+    private fun navigateToWallet(selectedAccount: ConsumerPaymentDetails.BankAccount) {
+        if (navigator.isOnRootScreen() == false) {
+            navigator.setResult(
+                PaymentDetailsResult.KEY,
+                PaymentDetailsResult.Success(selectedAccount.id)
+            )
+            navigator.onBack(userInitiated = false)
+        } else {
+            navigator.navigateTo(LinkScreen.Wallet, clearBackStack = true)
         }
     }
 
     private fun payAnotherWay() {
         clearError()
-        navigator.dismiss()
-        linkAccountManager.logout()
+        navigator.cancel(reason = PayAnotherWay)
     }
 
     private fun completePayment(linkPaymentDetails: LinkPaymentDetails) {
-        val params = ConfirmStripeIntentParamsFactory.createFactory(stripeIntent)
+        val params = ConfirmStripeIntentParamsFactory.createFactory(
+            stripeIntent,
+            args.shippingValues?.toConfirmPaymentIntentShipping()
+        )
             .createConfirmStripeIntentParams(linkPaymentDetails.paymentMethodCreateParams)
 
         confirmationManager.confirmStripeIntent(params) { result ->
@@ -164,7 +246,7 @@ internal class PaymentMethodViewModel @Inject constructor(
 
     private fun setState(state: PrimaryButtonState) {
         _primaryButtonState.value = state
-        navigator.backNavigationEnabled = !state.isBlocking
+        navigator.userNavigationEnabled = !state.isBlocking
     }
 
     internal class Factory(

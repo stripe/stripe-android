@@ -48,7 +48,6 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
 
     val formViewModel: FormViewModel by viewModels {
         FormViewModel.Factory(
-            resource = resources,
             paymentMethodCode = paymentMethodCode,
             config = requireNotNull(
                 requireArguments().getParcelable(
@@ -124,9 +123,9 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
 
         sheetViewModel.isResourceRepositoryReady.observe(viewLifecycleOwner) { isReady ->
             if (isReady == true) {
-                if (!formViewModel.resourceRepository.isLoaded()) {
+                if (!formViewModel.lpmResourceRepository.isLoaded()) {
                     sheetViewModel.stripeIntent.value?.paymentMethodTypes?.let {
-                        formViewModel.resourceRepository.getLpmRepository().update(
+                        formViewModel.lpmResourceRepository.getRepository().update(
                             it,
                             sheetViewModel.lpmServerSpec
                         )

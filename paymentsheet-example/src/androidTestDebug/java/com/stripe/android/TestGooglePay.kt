@@ -17,6 +17,7 @@ import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
@@ -59,6 +60,7 @@ class TestGooglePay {
     private val testParameters = TestParameters(
         lpmRepository.fromCode("bancontact")!!,
         Customer.New,
+        LinkState.Off,
         GooglePayState.On,
         Currency.EUR,
         IntentType.Pay,

@@ -9,8 +9,10 @@ import androidx.annotation.FontRes
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.ui.core.PaymentsThemeDefaults
@@ -125,6 +127,15 @@ class PaymentSheet internal constructor(
         val defaultBillingDetails: BillingDetails? = null,
 
         /**
+         * 🏗 Under construction
+         * The shipping information for the customer.
+         * If set, PaymentSheet will pre-populate the form fields with the values provided.
+         * This is used to display a "Billing address is same as shipping" checkbox if `defaultBillingDetails` is not provided.
+         * If `name` and `line1` are populated, it's also [attached to the PaymentIntent](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping) during payment.
+         */
+        val shippingDetails: AddressDetails? = null,
+
+        /**
          * If true, allows payment methods that do not move money at the end of the checkout.
          * Defaults to false.
          *
@@ -153,6 +164,7 @@ class PaymentSheet internal constructor(
             private var googlePay: GooglePayConfiguration? = null
             private var primaryButtonColor: ColorStateList? = null
             private var defaultBillingDetails: BillingDetails? = null
+            private var shippingDetails: AddressDetails? = null
             private var allowsDelayedPaymentMethods: Boolean = false
             private var appearance: Appearance = Appearance()
 
@@ -178,6 +190,9 @@ class PaymentSheet internal constructor(
             fun defaultBillingDetails(defaultBillingDetails: BillingDetails?) =
                 apply { this.defaultBillingDetails = defaultBillingDetails }
 
+            fun shippingDetails(shippingDetails: AddressDetails?) =
+                apply { this.shippingDetails = shippingDetails }
+
             fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) =
                 apply { this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods }
 
@@ -190,6 +205,7 @@ class PaymentSheet internal constructor(
                 googlePay,
                 primaryButtonColor,
                 defaultBillingDetails,
+                shippingDetails,
                 allowsDelayedPaymentMethods,
                 appearance
             )
@@ -779,6 +795,21 @@ class PaymentSheet internal constructor(
                     paymentResultCallback
                 ).create()
             }
+        }
+    }
+
+    companion object {
+        /**
+         * Deletes all persisted authentication state associated with a customer.
+         *
+         * You must call this method when the user logs out from your app.
+         * This will ensure that any persisted authentication state in PaymentSheet, such as
+         * authentication cookies, is also cleared during logout.
+         *
+         * @param context the Application [Context].
+         */
+        fun resetCustomer(context: Context) {
+            CookieStore(context).clear()
         }
     }
 }

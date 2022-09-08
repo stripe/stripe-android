@@ -1,10 +1,12 @@
 package com.stripe.android.model.parsers
 
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS
 import com.stripe.android.model.PaymentIntentFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS_NO_ORDERED_LPMS
 import com.stripe.android.model.PaymentMethodPreferenceFixtures
+import com.stripe.android.model.SetupIntent
 import org.json.JSONObject
 import org.junit.Test
 
@@ -21,9 +23,9 @@ class PaymentMethodPreferenceJsonParserTest {
                     .optJSONArray("ordered_payment_method_types")
             )
 
-        Truth.assertThat(paymentMethodPreference?.intent?.id)
+        assertThat(paymentMethodPreference?.intent?.id)
             .isEqualTo("pi_3JTDhYIyGgrkZxL71IDUGKps")
-        Truth.assertThat(paymentMethodPreference?.intent?.paymentMethodTypes)
+        assertThat(paymentMethodPreference?.intent?.paymentMethodTypes)
             .containsExactlyElementsIn(orderedPaymentMethods)
             .inOrder()
     }
@@ -40,11 +42,31 @@ class PaymentMethodPreferenceJsonParserTest {
                     .optJSONArray("ordered_payment_method_types")
             )
 
-        Truth.assertThat(paymentMethodPreference?.intent?.id)
+        assertThat(paymentMethodPreference?.intent?.id)
             .isEqualTo("seti_1JTDqGIyGgrkZxL7reCXkpr5")
-        Truth.assertThat(paymentMethodPreference?.intent?.paymentMethodTypes)
+        assertThat(paymentMethodPreference?.intent?.paymentMethodTypes)
             .containsExactlyElementsIn(orderedPaymentMethods)
             .inOrder()
+    }
+
+    @Test
+    fun parsePaymentIntent_shouldCreateObjectLinkFundingSources() {
+        val paymentMethodPreference = PaymentMethodPreferenceForPaymentIntentJsonParser().parse(
+            PaymentMethodPreferenceFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
+        )!!
+
+        assertThat(paymentMethodPreference.intent.linkFundingSources)
+            .containsExactly("card", "bank_account")
+    }
+
+    @Test
+    fun parseSetupIntent_shouldCreateObjectLinkFundingSources() {
+        val paymentMethodPreference = PaymentMethodPreferenceForSetupIntentJsonParser().parse(
+            PaymentMethodPreferenceFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
+        )!!
+
+        assertThat(paymentMethodPreference.intent.linkFundingSources)
+            .containsExactly("card", "bank_account")
     }
 
     @Test
@@ -54,7 +76,7 @@ class PaymentMethodPreferenceJsonParserTest {
                 PI_WITH_CARD_AFTERPAY_AU_BECS
             )
         )
-        Truth.assertThat(parsedData?.intent?.paymentMethodTypes).isEqualTo(
+        assertThat(parsedData?.intent?.paymentMethodTypes).isEqualTo(
             listOf(
                 "au_becs_debit",
                 "afterpay_clearpay",
@@ -71,7 +93,7 @@ class PaymentMethodPreferenceJsonParserTest {
             )
         )
         // This is the order in the original payment intent
-        Truth.assertThat(parsedData?.intent?.paymentMethodTypes).isEqualTo(
+        assertThat(parsedData?.intent?.paymentMethodTypes).isEqualTo(
             listOf(
                 "card",
                 "afterpay_clearpay",
@@ -95,7 +117,7 @@ class PaymentMethodPreferenceJsonParserTest {
                 """.trimIndent()
             )
         )
-        Truth.assertThat(parsedData).isNull()
+        assertThat(parsedData).isNull()
     }
 
     @Test
@@ -113,7 +135,7 @@ class PaymentMethodPreferenceJsonParserTest {
                 """.trimIndent()
             )
         )
-        Truth.assertThat(parsedData).isNull()
+        assertThat(parsedData).isNull()
     }
 
     @Test
@@ -129,6 +151,36 @@ class PaymentMethodPreferenceJsonParserTest {
                 """.trimIndent()
             )
         )
-        Truth.assertThat(parsedData).isNull()
+        assertThat(parsedData).isNull()
+    }
+
+    @Test
+    fun `Test PI with country code`() {
+        val parsedData = PaymentMethodPreferenceForPaymentIntentJsonParser().parse(
+            PaymentMethodPreferenceFixtures.EXPANDED_PAYMENT_INTENT_JSON
+        )
+
+        val countryCode = when (val intent = parsedData?.intent) {
+            is PaymentIntent -> intent.countryCode
+            is SetupIntent -> intent.countryCode
+            null -> null
+        }
+
+        assertThat(countryCode).isEqualTo("US")
+    }
+
+    @Test
+    fun `Test SI with country code`() {
+        val parsedData = PaymentMethodPreferenceForSetupIntentJsonParser().parse(
+            PaymentMethodPreferenceFixtures.EXPANDED_SETUP_INTENT_JSON
+        )
+
+        val countryCode = when (val intent = parsedData?.intent) {
+            is PaymentIntent -> intent.countryCode
+            is SetupIntent -> intent.countryCode
+            null -> null
+        }
+
+        assertThat(countryCode).isEqualTo("US")
     }
 }

@@ -26,7 +26,7 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -90,8 +90,7 @@ internal open class PaymentSheetViewModelTestInjection {
             StripeIntentValidator(),
             FakeCustomerRepository(customerRepositoryPMs),
             FakePrefsRepository(),
-            resourceRepository = StaticResourceRepository(
-                mock(),
+            lpmResourceRepository = StaticLpmResourceRepository(
                 LpmRepository(
                     LpmRepository.LpmRepositoryArguments(
                         ApplicationProvider.getApplicationContext<Application>().resources
@@ -100,6 +99,7 @@ internal open class PaymentSheetViewModelTestInjection {
                     this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
                 }
             ),
+            mock(),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),
@@ -120,7 +120,8 @@ internal open class PaymentSheetViewModelTestInjection {
         formViewModel: FormViewModel = FormViewModel(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             config = mock(),
-            resourceRepository = StaticResourceRepository(mock(), lpmRepository),
+            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
+            addressResourceRepository = mock(),
             transformSpecToElement = mock()
         )
     ) {

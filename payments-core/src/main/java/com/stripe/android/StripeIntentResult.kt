@@ -1,7 +1,9 @@
 package com.stripe.android
 
 import androidx.annotation.IntDef
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.StripeIntent
 
 /**
@@ -16,60 +18,74 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     abstract val intent: T
     abstract val failureMessage: String?
 
+    @VisibleForTesting
+    internal var luxePostConfirmActionRepository: LuxePostConfirmActionRepository =
+        LuxePostConfirmActionRepository.Instance
+
     @Outcome
     @get:Outcome
     val outcome: Int
-        get() = determineOutcome(intent.status, outcomeFromFlow)
+        get() = determineOutcome(intent, outcomeFromFlow)
 
     @StripeIntentResult.Outcome
     private fun determineOutcome(
-        stripeIntentStatus: StripeIntent.Status?,
+        stripeIntent: StripeIntent,
         @StripeIntentResult.Outcome outcome: Int
     ): Int {
         if (outcome != Outcome.UNKNOWN) {
             return outcome
         }
 
-        return when (stripeIntentStatus) {
-            StripeIntent.Status.RequiresAction -> {
-                if (isNextActionSuccessState(intent)) {
-                    Outcome.SUCCEEDED
-                } else {
+        return getOutcome(stripeIntent)
+    }
+
+    private fun getOutcome(stripeIntent: StripeIntent): Int {
+        return luxePostConfirmActionRepository.getPostAuthorizeIntentOutcome(
+            stripeIntent
+        ) ?: run {
+            when (stripeIntent.status) {
+                StripeIntent.Status.RequiresAction -> {
+                    if (stripeIntent.nextActionData == null) {
+                        Outcome.FAILED
+                    } else if (isRequireActionSuccessState(intent)) {
+                        Outcome.SUCCEEDED
+                    } else {
+                        Outcome.CANCELED
+                    }
+                }
+                StripeIntent.Status.Canceled -> {
                     Outcome.CANCELED
                 }
-            }
-            StripeIntent.Status.Canceled -> {
-                Outcome.CANCELED
-            }
-            StripeIntent.Status.RequiresPaymentMethod -> {
-                Outcome.FAILED
-            }
-            StripeIntent.Status.Succeeded,
-            StripeIntent.Status.RequiresCapture,
-            StripeIntent.Status.RequiresConfirmation -> {
-                Outcome.SUCCEEDED
-            }
-            StripeIntent.Status.Processing -> {
-                if (intent.paymentMethod?.type?.hasDelayedSettlement() == true) {
+                StripeIntent.Status.RequiresPaymentMethod -> {
+                    Outcome.FAILED
+                }
+                StripeIntent.Status.Succeeded,
+                StripeIntent.Status.RequiresCapture,
+                StripeIntent.Status.RequiresConfirmation -> {
                     Outcome.SUCCEEDED
-                } else {
+                }
+                StripeIntent.Status.Processing -> {
+                    if (intent.paymentMethod?.type?.hasDelayedSettlement() == true) {
+                        Outcome.SUCCEEDED
+                    } else {
+                        Outcome.UNKNOWN
+                    }
+                }
+                else -> {
                     Outcome.UNKNOWN
                 }
-            }
-            else -> {
-                Outcome.UNKNOWN
             }
         }
     }
 
     /**
-     * Check if the [nextAction] is expected state after a successful on-session transaction
+     * Check if the [stripeIntent] is in expected state after a successful on-session transaction
      * e.g. for voucher-based payment methods like OXXO that require out-of-band payment and
      * ACHv2 payments which requires verification of the customers bank details before
      * confirming payment.
      */
-    private fun isNextActionSuccessState(nextAction: StripeIntent): Boolean {
-        return when (nextAction.nextActionType) {
+    private fun isRequireActionSuccessState(stripeIntent: StripeIntent): Boolean {
+        return when (stripeIntent.nextActionType) {
             StripeIntent.NextActionType.RedirectToUrl,
             StripeIntent.NextActionType.UseStripeSdk,
             StripeIntent.NextActionType.AlipayRedirect,

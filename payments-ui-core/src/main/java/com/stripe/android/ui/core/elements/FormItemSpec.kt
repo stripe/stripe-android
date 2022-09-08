@@ -21,15 +21,12 @@ sealed class FormItemSpec {
     internal fun createSectionElement(
         sectionFieldElement: SectionFieldElement,
         label: Int? = null
-    ) =
-        SectionElement(
-            IdentifierSpec.Generic("${sectionFieldElement.identifier.v1}_section"),
-            sectionFieldElement,
-            SectionController(
-                label,
-                listOf(sectionFieldElement.sectionFieldErrorController())
-            )
-        )
+    ): SectionElement = SectionElement.wrap(sectionFieldElement, label)
+
+    internal fun createSectionElement(
+        sectionFieldElements: List<SectionFieldElement>,
+        label: Int? = null
+    ): SectionElement = SectionElement.wrap(sectionFieldElements, label)
 }
 
 object FormItemSpecSerializer :

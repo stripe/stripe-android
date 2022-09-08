@@ -13,6 +13,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -29,6 +30,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -44,7 +46,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -97,7 +99,7 @@ internal class PaymentSheetViewModelTest {
         )
     }
     private val prefsRepository = FakePrefsRepository()
-    private val resourceRepository = StaticResourceRepository(mock(), lpmRepository)
+    private val lpmResourceRepository = StaticLpmResourceRepository(lpmRepository)
 
     private val primaryButtonUIState = PrimaryButton.UIState(
         label = "Test",
@@ -362,6 +364,54 @@ internal class PaymentSheetViewModelTest {
                     CLIENT_SECRET,
                     paymentMethodOptions = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun `checkout() with shipping should confirm new payment methods`() = runTest {
+        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
+
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                    shippingDetails = AddressDetails(
+                        address = PaymentSheet.Address(
+                            country = "US"
+                        ),
+                        name = "Test Name"
+                    )
+                )
+            )
+        )
+
+        viewModel.startConfirm.observeForever {
+            confirmParams.add(it)
+        }
+
+        val paymentSelection = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+        )
+        viewModel.updateSelection(paymentSelection)
+        viewModel.checkout(CheckoutIdentifier.None)
+
+        assertThat(confirmParams).hasSize(1)
+        assertThat(confirmParams[0].peekContent())
+            .isEqualTo(
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    CLIENT_SECRET,
+                    paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    ),
+                    shipping = ConfirmPaymentIntentParams.Shipping(
+                        address = Address(
+                            country = "US"
+                        ),
+                        name = "Test Name"
                     )
                 )
             )
@@ -966,7 +1016,8 @@ internal class PaymentSheetViewModelTest {
             StripeIntentValidator(),
             customerRepository,
             prefsRepository,
-            resourceRepository,
+            lpmResourceRepository,
+            mock(),
             mock(),
             mock(),
             Logger.noop(),

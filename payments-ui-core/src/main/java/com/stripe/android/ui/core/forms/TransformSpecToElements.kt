@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.forms
 
 import android.content.Context
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
@@ -40,8 +41,9 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
  * Currently only [IdentifierSpec.CardNumber] is supported and any other identifier is ignored.
  */
 class TransformSpecToElements(
-    private val resourceRepository: ResourceRepository,
+    private val addressResourceRepository: ResourceRepository<AddressRepository>,
     private val initialValues: Map<IdentifierSpec, String?>,
+    private val shippingValues: Map<IdentifierSpec, String?>?,
     private val amount: Amount?,
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
@@ -75,14 +77,15 @@ class TransformSpecToElements(
                 is CountrySpec -> it.transform(initialValues)
                 is AddressSpec -> it.transform(
                     initialValues,
-                    resourceRepository.getAddressRepository()
+                    addressResourceRepository.getRepository(),
+                    shippingValues
                 )
                 is CardBillingSpec -> it.transform(
-                    resourceRepository.getAddressRepository(),
-                    initialValues
+                    initialValues,
+                    addressResourceRepository.getRepository(),
+                    shippingValues
                 )
                 is SepaMandateTextSpec -> it.transform(merchantName)
-                else -> EmptyFormElement()
             }
-        }
+        }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
 }

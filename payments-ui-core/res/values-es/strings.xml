@@ -64,6 +64,8 @@
   <string name="iban_invalid_start">El IBAN debe empezar con un código de país de dos letras.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">Banco iDEAL</string>
+  <!-- Error description for incomplete phone number -->
+  <string name="incomplete_phone_number">Número de teléfono incompleto</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Compra ahora y paga después con Klarna.</string>
   <!-- Klarna pay later copy -->

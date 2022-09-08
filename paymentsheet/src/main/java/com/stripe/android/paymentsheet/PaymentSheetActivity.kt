@@ -11,7 +11,6 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
@@ -27,14 +26,12 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.isSystemDarkTheme
-import com.stripe.android.ui.core.shouldUseDarkDynamicColor
+import com.stripe.android.utils.AnimationConstants
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
 
@@ -140,7 +137,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupTopContainer()
 
         linkButton.apply {
-            onClick = viewModel::launchLink
+            onClick = { viewModel.launchLink(launchedDirectly = false) }
             linkPaymentLauncher = viewModel.linkLauncher
         }
 
@@ -315,10 +312,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun setupGooglePayButton() {
-        viewModel.config?.appearance?.getColors(isSystemDarkTheme())?.surface?.let {
-            googlePayButton.setBackgroundColor(Color(it).shouldUseDarkDynamicColor())
-        }
-
         googlePayButton.setOnClickListener {
             // The scroll will be made visible onResume of the activity
             viewModel.setContentVisible(false)
@@ -360,6 +353,20 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.unregisterFromActivity()
+    }
+
+    /**
+     * Convert a [PaymentSheetViewState] to a [PrimaryButton.State]
+     */
+    private fun PaymentSheetViewState.convert(): PrimaryButton.State {
+        return when (this) {
+            is PaymentSheetViewState.Reset ->
+                PrimaryButton.State.Ready
+            is PaymentSheetViewState.StartProcessing ->
+                PrimaryButton.State.StartProcessing
+            is PaymentSheetViewState.FinishProcessing ->
+                PrimaryButton.State.FinishProcessing(this.onComplete)
+        }
     }
 
     internal companion object {

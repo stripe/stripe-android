@@ -55,9 +55,11 @@ class InputAddressScreenTest {
                 InputAddressScreen(
                     primaryButtonEnabled = primaryButtonEnabled,
                     primaryButtonText = "Save Address",
+                    title = "Address",
                     onPrimaryButtonClick = primaryButtonCallback,
                     onCloseClick = onCloseCallback,
-                    formContent = {}
+                    formContent = {},
+                    checkboxContent = {}
                 )
             }
         }

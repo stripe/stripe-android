@@ -7,7 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
@@ -18,7 +18,7 @@ import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.forms.TransformSpecToElements
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -33,20 +33,21 @@ class FormControllerTest {
         R.style.StripeDefaultTheme
     )
 
-    private val resourceRepository =
-        StaticResourceRepository(
-            AddressFieldElementRepository(
+    private val addressResourceRepository =
+        StaticAddressResourceRepository(
+            AddressRepository(
                 ApplicationProvider.getApplicationContext<Context>().resources
             )
         )
 
     private val transformSpecToElements = TransformSpecToElements(
-        resourceRepository = resourceRepository,
+        addressResourceRepository = addressResourceRepository,
         initialValues = emptyMap(),
         amount = null,
         saveForFutureUseInitialValue = false,
         merchantName = "Merchant",
-        context = context
+        context = context,
+        shippingValues = null
     )
 
     @ExperimentalCoroutinesApi
@@ -60,13 +61,13 @@ class FormControllerTest {
                 CountrySpec(allowedCountryCodes = setOf("AT", "BE", "DE", "ES", "IT", "NL")),
                 SaveForFutureUseSpec()
             ),
-            resourceRepository = resourceRepository,
+            addressResourceRepository = addressResourceRepository,
             transformSpecToElement = transformSpecToElements,
             this
         )
 
         val nameElement =
-            getSectionFieldTextControllerWithLabel(formController, R.string.address_label_name)
+            getSectionFieldTextControllerWithLabel(formController, R.string.address_label_full_name)
         val emailElement =
             getSectionFieldTextControllerWithLabel(formController, R.string.email)
 

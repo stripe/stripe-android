@@ -27,6 +27,8 @@ class LinkPaymentLauncherTest {
         MERCHANT_NAME,
         null,
         null,
+        null,
+        null,
         context,
         setOf(PRODUCT_USAGE),
         { PUBLISHABLE_KEY },
@@ -37,7 +39,7 @@ class LinkPaymentLauncherTest {
         paymentAnalyticsRequestFactory = mock(),
         analyticsRequestExecutor = mock(),
         stripeRepository = mock(),
-        resourceRepository = mock()
+        addressResourceRepository = mock()
     )
 
     init {
@@ -49,7 +51,7 @@ class LinkPaymentLauncherTest {
         runTest {
             launch {
                 val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED
-                linkPaymentLauncher.setup(stripeIntent, null, this)
+                linkPaymentLauncher.setup(stripeIntent, this)
                 linkPaymentLauncher.present(mockHostActivityLauncher)
 
                 verify(mockHostActivityLauncher).launch(

@@ -64,6 +64,8 @@
   <string name="iban_invalid_start">Jūsų IBAN turėtų prasidėti šalies kodu iš dviejų raidžių.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL bankas</string>
+  <!-- Error description for incomplete phone number -->
+  <string name="incomplete_phone_number">Ne visas telefono numeris</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Pirkite dabar arba mokėkite vėliau naudodami \"Klarna\".</string>
   <!-- Klarna pay later copy -->

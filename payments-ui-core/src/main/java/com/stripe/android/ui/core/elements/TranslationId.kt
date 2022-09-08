@@ -19,7 +19,7 @@ enum class TranslationId(val resourceId: Int) {
     EpsBank(R.string.eps_bank),
 
     @SerialName("address.label.name")
-    AddressName(R.string.address_label_name),
+    AddressName(R.string.address_label_full_name),
 
     @SerialName("upe.labels.name.onAccount")
     AuBecsAccountName(R.string.au_becs_account_name)

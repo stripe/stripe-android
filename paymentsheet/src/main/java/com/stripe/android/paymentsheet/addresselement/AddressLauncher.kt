@@ -54,9 +54,13 @@ internal class AddressLauncher internal constructor(
     )
 
     @JvmOverloads
-    fun present(configuration: Configuration = Configuration()) {
+    fun present(
+        publishableKey: String,
+        configuration: Configuration = Configuration()
+    ) {
         activityResultLauncher.launch(
             AddressElementActivityContract.Args(
+                publishableKey,
                 configuration,
                 injectorKey
             )
@@ -74,7 +78,7 @@ internal class AddressLauncher internal constructor(
         /**
          * The values to pre-populate shipping address fields with.
          */
-        val defaultValues: AddressDetails? = null,
+        val address: AddressDetails? = null,
 
         /**
          * A list of two-letter country codes representing countries the customers can select.
@@ -89,46 +93,39 @@ internal class AddressLauncher internal constructor(
         val buttonTitle: String? = null,
 
         /**
-         * Configuration for the field that collects a phone number.
-         * Defaults to HIDDEN
+         * Configuration for fields to collect in addition to the physical shipping address
          */
-        val phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.OPTIONAL,
-
-        /**
-         * Configuration for a "Remember this shipping destination" checkbox.
-         * Defaults to false
-         */
-        val shouldShowCheckBox: Boolean = false,
+        val additionalFields: AdditionalFieldsConfiguration? = null,
 
         /**
          * Configuration for the title displayed at the top of the screen.
          * Defaults to "Address"
          */
         val title: String? = null,
+
         /**
          * Google Places api key used to provide autocomplete suggestions
          * When null, autocomplete is disabled.
          */
-        val googlePlacesApiKey: String? = ""
+        val googlePlacesApiKey: String? = null
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
         class Builder {
-            var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
-            var defaultValues: AddressDetails? = null
-            var allowedCountries: Set<String> = emptySet()
-            var buttonTitle: String? = null
-            var phone: AdditionalFieldsConfiguration = AdditionalFieldsConfiguration.OPTIONAL
-            var shouldShowCheckBox: Boolean = false
-            var title: String? = null
-            var googlePlacesApiKey: String? = null
+            private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
+            private var address: AddressDetails? = null
+            private var allowedCountries: Set<String> = emptySet()
+            private var buttonTitle: String? = null
+            private var additionalFields: AdditionalFieldsConfiguration? = null
+            private var title: String? = null
+            private var googlePlacesApiKey: String? = null
 
             fun appearance(appearance: PaymentSheet.Appearance) =
                 apply { this.appearance = appearance }
 
-            fun defaultValues(defaultValues: AddressDetails?) =
-                apply { this.defaultValues = defaultValues }
+            fun address(address: AddressDetails?) =
+                apply { this.address = address }
 
             fun allowedCountries(allowedCountries: Set<String>) =
                 apply { this.allowedCountries = allowedCountries }
@@ -136,11 +133,8 @@ internal class AddressLauncher internal constructor(
             fun buttonTitle(buttonTitle: String?) =
                 apply { this.buttonTitle = buttonTitle }
 
-            fun phone(phone: AdditionalFieldsConfiguration) =
-                apply { this.phone = phone }
-
-            fun shouldShowCheckBox(shouldShowCheckBox: Boolean) =
-                apply { this.shouldShowCheckBox = shouldShowCheckBox }
+            fun additionalFields(additionalFields: AdditionalFieldsConfiguration) =
+                apply { this.additionalFields = additionalFields }
 
             fun title(title: String?) =
                 apply { this.title = title }
@@ -150,32 +144,43 @@ internal class AddressLauncher internal constructor(
 
             fun build() = Configuration(
                 appearance,
-                defaultValues,
+                address,
                 allowedCountries,
                 buttonTitle,
-                phone,
-                shouldShowCheckBox,
+                additionalFields,
                 title,
                 googlePlacesApiKey
             )
         }
     }
 
+    /**
+     * @param phone Configuration for the field that collects a phone number. Defaults to
+     * [FieldConfiguration.OPTIONAL]
+     * @param checkboxLabel The label of a checkbox displayed below other fields. If null, the
+     * checkbox is not displayed. Defaults to null
+     */
     @Parcelize
-    enum class AdditionalFieldsConfiguration : Parcelable {
-        /**
-         * The field is not displayed.
-         */
-        HIDDEN,
+    data class AdditionalFieldsConfiguration @JvmOverloads constructor(
+        val phone: FieldConfiguration = FieldConfiguration.OPTIONAL,
+        val checkboxLabel: String? = null
+    ) : Parcelable {
+        @Parcelize
+        enum class FieldConfiguration : Parcelable {
+            /**
+             * The field is not displayed.
+             */
+            HIDDEN,
 
-        /**
-         * The field is displayed but the customer can leave it blank.
-         */
-        OPTIONAL,
+            /**
+             * The field is displayed but the customer can leave it blank.
+             */
+            OPTIONAL,
 
-        /**
-         * The field is displayed and the customer is required to fill it in.
-         */
-        REQUIRED
+            /**
+             * The field is displayed and the customer is required to fill it in.
+             */
+            REQUIRED
+        }
     }
 }

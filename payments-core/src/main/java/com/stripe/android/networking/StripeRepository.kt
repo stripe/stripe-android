@@ -20,6 +20,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
 import com.stripe.android.model.FinancialConnectionsSession
@@ -408,11 +409,15 @@ abstract class StripeRepository {
     ): ConsumerSessionLookup?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Suppress("LongParameterList")
     abstract suspend fun consumerSignUp(
         email: String,
         phoneNumber: String,
         country: String,
+        name: String?,
+        locale: Locale?,
         authSessionCookie: String?,
+        consentAction: ConsumerSignUpConsentAction,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?
 
@@ -438,6 +443,19 @@ abstract class StripeRepository {
         authSessionCookie: String?,
         requestOptions: ApiRequest.Options
     ): ConsumerSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun createLinkFinancialConnectionsSession(
+        consumerSessionClientSecret: String,
+        requestOptions: ApiRequest.Options
+    ): FinancialConnectionsSession?
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        financialConnectionsAccountId: String,
+        requestOptions: ApiRequest.Options
+    ): ConsumerPaymentDetails?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract suspend fun createPaymentDetails(

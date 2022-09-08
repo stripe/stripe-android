@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -15,12 +16,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.FormUI
+import com.stripe.android.ui.core.elements.CheckboxElementUI
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 @Composable
@@ -30,16 +33,23 @@ internal fun InputAddressScreen(
     title: String,
     onPrimaryButtonClick: () -> Unit,
     onCloseClick: () -> Unit,
-    formContent: @Composable ColumnScope.() -> Unit
+    formContent: @Composable ColumnScope.() -> Unit,
+    checkboxContent: @Composable ColumnScope.() -> Unit
 ) {
-    Column(
+    val focusManager = LocalFocusManager.current
+
+    ScrollableColumn(
         modifier = Modifier
             .fillMaxHeight()
+            .imePadding()
             .background(MaterialTheme.colors.surface)
     ) {
         AddressOptionsAppBar(
             isRootScreen = true,
-            onButtonClick = { onCloseClick() }
+            onButtonClick = {
+                focusManager.clearFocus()
+                onCloseClick()
+            }
         )
         Column(
             Modifier
@@ -51,10 +61,12 @@ internal fun InputAddressScreen(
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             formContent()
+            checkboxContent()
             AddressElementPrimaryButton(
                 isEnabled = primaryButtonEnabled,
                 text = primaryButtonText
             ) {
+                focusManager.clearFocus()
                 onPrimaryButtonClick()
             }
         }
@@ -87,11 +99,19 @@ internal fun InputAddressScreen(
             val titleText = viewModel.args.config?.title ?: stringResource(
                 R.string.stripe_paymentsheet_address_element_shipping_address
             )
+            val formEnabled by viewModel.formEnabled.collectAsState(initial = true)
+            val checkboxChecked by viewModel.checkboxChecked.collectAsState(false)
+
             InputAddressScreen(
                 primaryButtonEnabled = completeValues != null,
                 primaryButtonText = buttonText,
                 title = titleText,
-                onPrimaryButtonClick = { viewModel.clickPrimaryButton() },
+                onPrimaryButtonClick = {
+                    viewModel.clickPrimaryButton(
+                        completeValues,
+                        checkboxChecked
+                    )
+                },
                 onCloseClick = { viewModel.navigator.dismiss() },
                 formContent = {
                     FormUI(
@@ -106,6 +126,18 @@ internal fun InputAddressScreen(
                         ) {
                             CircularProgressIndicator()
                         }
+                    }
+                },
+                checkboxContent = {
+                    viewModel.args.config?.additionalFields?.checkboxLabel?.let { label ->
+                        CheckboxElementUI(
+                            isChecked = checkboxChecked,
+                            label = label,
+                            isEnabled = formEnabled,
+                            onValueChange = {
+                                viewModel.clickCheckbox(!checkboxChecked)
+                            }
+                        )
                     }
                 }
             )

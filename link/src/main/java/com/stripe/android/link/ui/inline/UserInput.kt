@@ -17,6 +17,7 @@ sealed class UserInput {
     data class SignUp(
         val email: String,
         val phone: String,
-        val country: String
+        val country: String,
+        val name: String?
     ) : UserInput()
 }

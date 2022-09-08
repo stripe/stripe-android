@@ -54,7 +54,10 @@ internal abstract class BasePaymentMethodsListFragment(
         this.config = nullableConfig
 
         setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
-        sheetViewModel.eventReporter.onShowExistingPaymentOptions()
+        sheetViewModel.eventReporter.onShowExistingPaymentOptions(
+            linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
+            activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -70,6 +73,7 @@ internal abstract class BasePaymentMethodsListFragment(
             getString(R.string.stripe_paymentsheet_select_payment_method)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.paymentsheet_payment_methods_list, menu)
         // Menu is created after view state is restored, so we need to update the title here
@@ -95,6 +99,7 @@ internal abstract class BasePaymentMethodsListFragment(
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.edit -> {
@@ -126,7 +131,7 @@ internal abstract class BasePaymentMethodsListFragment(
         }
 
         adapter = PaymentOptionsAdapter(
-            sheetViewModel.resourceRepository.getLpmRepository(),
+            sheetViewModel.lpmResourceRepository.getRepository(),
             canClickSelectedItem,
             paymentOptionSelectedListener = ::onPaymentOptionSelected,
             paymentMethodDeleteListener = ::deletePaymentMethod,

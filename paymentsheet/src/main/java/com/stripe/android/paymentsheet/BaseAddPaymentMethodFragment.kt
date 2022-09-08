@@ -29,7 +29,7 @@ import com.stripe.android.paymentsheet.model.getPMAddForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormFragment
-import com.stripe.android.paymentsheet.ui.AnimationConstants
+import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
@@ -138,7 +138,10 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             }
         }
 
-        sheetViewModel.eventReporter.onShowNewPaymentOptionForm()
+        sheetViewModel.eventReporter.onShowNewPaymentOptionForm(
+            linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
+            activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
+        )
     }
 
     private fun setupRecyclerView(
@@ -216,6 +219,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
     private fun updateLinkInlineSignupVisibility(selectedPaymentMethod: SupportedPaymentMethod) {
         showLinkInlineSignup = sheetViewModel.isLinkEnabled.value == true &&
+            sheetViewModel.stripeIntent.value
+                ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) ?: false &&
             selectedPaymentMethod.code == PaymentMethod.Type.Card.code &&
             sheetViewModel.linkLauncher.accountStatus.value == AccountStatus.SignedOut
 
@@ -253,6 +258,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 merchantName = merchantName,
                 amount = amount,
                 billingDetails = config?.defaultBillingDetails,
+                shippingDetails = config?.shippingDetails,
                 injectorKey = injectorKey,
                 initialPaymentMethodCreateParams =
                 newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {

@@ -25,10 +25,8 @@ dependencies {
 
     // vanilla tflite library
     implementation "org.tensorflow:tensorflow-lite:2.9.0"
-    // flex ops
-    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.9.0'
     // support library to reshape image to the input model shape
-    implementation 'org.tensorflow:tensorflow-lite-support:0.4.1'
+    implementation 'org.tensorflow:tensorflow-lite-support:0.4.2'
 
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
@@ -52,6 +50,29 @@ dependencies {
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
     implementation "androidx.browser:browser:$androidxBrowserVersion"
+
+    // Compose
+    implementation "androidx.compose.runtime:runtime:$androidxComposeVersion"
+    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
+    // Integration with activities
+    implementation "androidx.activity:activity-compose:$androidxComposeVersion"
+    // Integration with ViewModels
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$androidxLifecycleVersion"
+    // Integration with Navigation
+    implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
+    // Integration with observables
+    implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
+    // Material Design
+    implementation "androidx.compose.material:material:$androidxComposeVersion"
+    // MdcTheme
+    implementation "com.google.android.material:compose-theme-adapter:1.1.16"
+    // Test rules and transitive dependencies:
+    testImplementation("androidx.compose.ui:ui-test-junit4:$androidxComposeVersion")
+    // Needed for createComposeRule, but not createAndroidComposeRule:
+    debugImplementation("androidx.compose.ui:ui-test-manifest:$androidxComposeVersion")
+    // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
+    testImplementation "androidx.test.espresso:espresso-core:3.5.0-alpha07"
+
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
@@ -119,6 +140,11 @@ android {
 
     buildFeatures {
         viewBinding true
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
     }
 }
 

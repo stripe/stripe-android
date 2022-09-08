@@ -2,7 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.address.AddressRepository
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -15,15 +15,34 @@ data class CardBillingSpec(
     val allowedCountryCodes: Set<String> = supportedBillingCountries
 ) : FormItemSpec() {
     fun transform(
-        addressRepository: AddressFieldElementRepository,
-        initialValues: Map<IdentifierSpec, String?>
-    ) = createSectionElement(
-        CardBillingAddressElement(
+        initialValues: Map<IdentifierSpec, String?>,
+        addressRepository: AddressRepository,
+        shippingValues: Map<IdentifierSpec, String?>?
+    ): SectionElement {
+        val sameAsShippingElement =
+            shippingValues?.get(IdentifierSpec.SameAsShipping)
+                ?.toBooleanStrictOrNull()
+                ?.let {
+                    SameAsShippingElement(
+                        identifier = IdentifierSpec.SameAsShipping,
+                        controller = SameAsShippingController(it)
+                    )
+                }
+        val addressElement = CardBillingAddressElement(
             IdentifierSpec.Generic("credit_billing"),
-            addressFieldRepository = addressRepository,
+            addressRepository = addressRepository,
             countryCodes = allowedCountryCodes,
-            rawValuesMap = initialValues
-        ),
-        label = R.string.billing_details
-    )
+            rawValuesMap = initialValues,
+            sameAsShippingElement = sameAsShippingElement,
+            shippingValuesMap = shippingValues
+        )
+
+        return createSectionElement(
+            listOfNotNull(
+                addressElement,
+                sameAsShippingElement
+            ),
+            R.string.billing_details
+        )
+    }
 }

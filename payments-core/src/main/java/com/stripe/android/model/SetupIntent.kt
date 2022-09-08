@@ -1,5 +1,6 @@
 package com.stripe.android.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import kotlinx.parcelize.Parcelize
@@ -29,6 +30,12 @@ data class SetupIntent internal constructor(
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     override val created: Long,
+
+    /**
+     * Country code of the user.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val countryCode: String?,
 
     /**
      * The client secret of this SetupIntent. Used for client-side retrieval using a
@@ -90,6 +97,11 @@ data class SetupIntent internal constructor(
      * Payment types that have not been activated in livemode, but have been activated in testmode.
      */
     override val unactivatedPaymentMethods: List<String>,
+
+    /**
+     * Payment types that are accepted when paying with Link.
+     */
+    override val linkFundingSources: List<String>,
 
     override val nextActionData: StripeIntent.NextActionData?
 ) : StripeIntent {
