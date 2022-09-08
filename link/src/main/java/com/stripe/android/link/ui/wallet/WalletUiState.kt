@@ -59,20 +59,20 @@ internal data class WalletUiState(
 
         val isSelectedItemValid = selectedItem?.isValid ?: false
 
-        // TODO: For testing only!
-        val details = response.paymentDetails.map { pd ->
-            if (pd is Card && pd.last4 == "4242") {
-                pd.copy(
-                    expiryMonth = 1,
-                    expiryYear = 2022
-                )
-            } else {
-                pd
-            }
-        }
+//        // TODO: For testing only!
+//        val details = response.paymentDetails.map { pd ->
+//            if (pd is Card && pd.last4 == "4242") {
+//                pd.copy(
+//                    expiryMonth = 1,
+//                    expiryYear = 2022
+//                )
+//            } else {
+//                pd
+//            }
+//        }
 
         return copy(
-            paymentDetailsList = details,
+            paymentDetailsList = response.paymentDetails,
             selectedItem = selectedItem,
             isExpanded = !isSelectedItemValid,
             isProcessing = false
