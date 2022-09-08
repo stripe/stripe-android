@@ -38,7 +38,6 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.ui.core.elements.transform
 import java.io.InputStream
-import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -63,7 +62,6 @@ class LpmRepository constructor(
     private val lpmPostConfirmData: LuxePostConfirmActionRepository =
         LuxePostConfirmActionRepository()
 ) {
-
     @Inject
     constructor(resources: Resources?) : this(
         resources,
@@ -111,8 +109,6 @@ class LpmRepository constructor(
         serverLpmSpecs: String?
     ) = internalUpdate(expectedLpms, serverLpmSpecs, true)
 
-    private val uuid = UUID.randomUUID().leastSignificantBits
-
     /**
      * Will add the server specs to the repository and load the ones from disk if
      * server is not parseable.
@@ -122,8 +118,6 @@ class LpmRepository constructor(
         serverLpmSpecs: String?,
         force: Boolean = false
     ) {
-        Log.e("MLB", "internal update: $uuid")
-
         val newSpecsToLoad =
             expectedLpms.firstOrNull { !lpmInitialFormData.containsKey(it) } != null
 
@@ -175,20 +169,31 @@ class LpmRepository constructor(
         parseLpms(resources?.assets?.open("lpms.json"))
 
     private fun update(lpms: List<SharedDataSpec>?) {
-        // By mapNotNull we will not accept any LPMs that are not known by the platform.
-        val parsedSupportedPaymentMethod = lpms
+        val parsedSharedData = lpms
             ?.filter { exposedPaymentMethods.contains(it.type) }
+            ?.filterNot {
+                !isFinancialConnectionsAvailable() &&
+                    it.type == PaymentMethod.Type.USBankAccount.code
+            }
+
+        // By mapNotNull we will not accept any LPMs that are not known by the platform.
+        parsedSharedData
             ?.mapNotNull { convertToSupportedPaymentMethod(it) }
             ?.toMutableList()
+            ?.let {
+                lpmInitialFormData.putAll(
+                    it.associateBy { it.code }
+                )
+            }
 
-        parsedSupportedPaymentMethod?.removeAll {
-            !isFinancialConnectionsAvailable() &&
-                it.code == PaymentMethod.Type.USBankAccount.code
-        }
-
-        lpmInitialFormData.putAll(
-            parsedSupportedPaymentMethod?.associateBy { it.code } ?: emptyMap()
-        )
+        // Here nextActionSpec if null will convert to an explicit internal next action and status.
+        parsedSharedData
+            ?.associate { it.type to it.nextActionSpec.transform() }
+            ?.let {
+                lpmPostConfirmData.update(
+                    it
+                )
+            }
     }
 
     private fun parseLpms(inputStream: InputStream?) =

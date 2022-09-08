@@ -4,6 +4,9 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.AdministrativeAreaConfig
+import com.stripe.android.ui.core.elements.AdministrativeAreaElement
+import com.stripe.android.ui.core.elements.DropdownFieldController
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.PostalCodeConfig
 import com.stripe.android.ui.core.elements.RowController
@@ -13,6 +16,7 @@ import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldConfig
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.TextFieldConfig
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -213,44 +217,95 @@ internal fun parseAddressesSchema(inputStream: InputStream?) =
 private fun getJsonStringFromInputStream(inputStream: InputStream?) =
     inputStream?.bufferedReader().use { it?.readText() }
 
-internal fun List<CountryAddressSchema>.transformToElementList(countryCode: String): List<SectionFieldElement> {
+internal fun List<CountryAddressSchema>.transformToElementList(
+    countryCode: String
+): List<SectionFieldElement> {
     val countryAddressElements = this
         .filterNot {
             it.type == FieldType.SortingCode ||
                 it.type == FieldType.DependentLocality
         }
         .mapNotNull { addressField ->
-            addressField.type?.let {
-                val textFieldConfig = when (it) {
-                    FieldType.PostalCode -> {
-                        PostalCodeConfig(
-                            label = addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
-                            capitalization = it.capitalization(),
-                            keyboard = getKeyboard(addressField.schema),
-                            country = countryCode
-                        )
-                    }
-                    else -> {
-                        SimpleTextFieldConfig(
-                            label = addressField.schema?.nameType?.stringResId ?: it.defaultLabel,
-                            capitalization = it.capitalization(),
-                            keyboard = getKeyboard(addressField.schema)
-                        )
-                    }
-                }
-
-                SimpleTextElement(
-                    addressField.type.identifierSpec,
-                    SimpleTextFieldController(
-                        textFieldConfig = textFieldConfig,
-                        showOptionalLabel = !addressField.required
-                    )
-                )
-            }
+            addressField.type?.toElement(
+                identifierSpec = addressField.type.identifierSpec,
+                label = addressField.schema?.nameType?.stringResId
+                    ?: addressField.type.defaultLabel,
+                capitalization = addressField.type.capitalization(),
+                keyboardType = getKeyboard(addressField.schema),
+                countryCode = countryCode,
+                showOptionalLabel = !addressField.required
+            )
         }
 
     // Put it in a single row
     return combineCityAndPostal(countryAddressElements)
+}
+
+private fun FieldType.toElement(
+    identifierSpec: IdentifierSpec,
+    label: Int,
+    capitalization: KeyboardCapitalization,
+    keyboardType: KeyboardType,
+    countryCode: String,
+    showOptionalLabel: Boolean
+): SectionSingleFieldElement {
+    val simpleTextElement = SimpleTextElement(
+        identifierSpec,
+        SimpleTextFieldController(
+            textFieldConfig = toConfig(
+                label = label,
+                capitalization = capitalization,
+                keyboardType = keyboardType,
+                countryCode = countryCode
+            ),
+            showOptionalLabel = showOptionalLabel
+        )
+    )
+    return when (this) {
+        FieldType.AdministrativeArea -> {
+            val supportsAdministrativeAreaDropdown = listOf(
+                "CA",
+                "US"
+            ).contains(countryCode)
+            if (supportsAdministrativeAreaDropdown) {
+                val country = when (countryCode) {
+                    "CA" -> AdministrativeAreaConfig.Country.Canada()
+                    "US" -> AdministrativeAreaConfig.Country.US()
+                    else -> throw IllegalArgumentException()
+                }
+                AdministrativeAreaElement(
+                    identifierSpec,
+                    DropdownFieldController(
+                        AdministrativeAreaConfig(country)
+                    )
+                )
+            } else {
+                simpleTextElement
+            }
+        }
+        else -> simpleTextElement
+    }
+}
+
+private fun FieldType.toConfig(
+    label: Int,
+    capitalization: KeyboardCapitalization,
+    keyboardType: KeyboardType,
+    countryCode: String
+): TextFieldConfig {
+    return when (this) {
+        FieldType.PostalCode -> PostalCodeConfig(
+            label = label,
+            capitalization = capitalization,
+            keyboard = keyboardType,
+            country = countryCode
+        )
+        else -> SimpleTextFieldConfig(
+            label = label,
+            capitalization = capitalization,
+            keyboard = keyboardType
+        )
+    }
 }
 
 private fun combineCityAndPostal(countryAddressElements: List<SectionSingleFieldElement>) =

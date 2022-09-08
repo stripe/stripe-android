@@ -9,12 +9,16 @@ enum class CvcCheck(
     Pass("PASS"),
     Fail("FAIL"),
     Unavailable("UNAVAILABLE"),
-    Unchecked("UNCHECKED");
+    Unchecked("UNCHECKED"),
+    Unknown("UNKNOWN");
+
+    val requiresRecollection: Boolean
+        get() = this in setOf(Fail, Unavailable, Unchecked)
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun fromCode(code: String?): CvcCheck {
-            return values().firstOrNull { it.code.equals(code, ignoreCase = true) } ?: Unavailable
+            return values().firstOrNull { it.code.equals(code, ignoreCase = true) } ?: Unknown
         }
     }
 }

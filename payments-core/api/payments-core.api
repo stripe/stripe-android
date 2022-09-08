@@ -2504,6 +2504,7 @@ public final class com/stripe/android/model/ConsumerPaymentDetails$Card : com/st
 	public final fun getExpiryYear ()I
 	public fun getId ()Ljava/lang/String;
 	public final fun getLast4 ()Ljava/lang/String;
+	public final fun getRequiresCardDetailsRecollection ()Z
 	public fun hashCode ()I
 	public fun isDefault ()Z
 	public final fun isExpired ()Z
