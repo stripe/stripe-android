@@ -20,12 +20,15 @@ import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -380,6 +383,87 @@ class WalletViewModelTest {
     }
 
     @Test
+    fun `Sends CVC if paying with card that requires CVC recollection`() = runTest {
+        val paymentDetails = mockCard(cvcCheck = CvcCheck.Fail)
+        val viewModel = createViewModel()
+
+        val cvcInput = "123"
+
+        viewModel.onItemSelected(paymentDetails)
+        viewModel.cvcController.onRawValueChange(cvcInput)
+        viewModel.onConfirmPayment()
+
+        val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
+        verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
+
+        val paymentIntentParams = paramsCaptor.firstValue as ConfirmPaymentIntentParams
+        val paramsMap = paymentIntentParams.paymentMethodCreateParams!!.toParamMap()
+
+        val link = paramsMap["link"] as Map<*, *>
+        val card = link["card"] as Map<*, *>
+        val cvc = card["cvc"]
+
+        assertThat(cvc).isEqualTo(cvcInput)
+    }
+
+    @Test
+    fun `Does not send CVC if paying with card that does not require CVC recollection`() = runTest {
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+
+        val paymentDetails = mockCard(cvcCheck = CvcCheck.Pass)
+        val viewModel = createViewModel()
+
+        viewModel.onItemSelected(paymentDetails)
+        viewModel.onConfirmPayment()
+
+        val paramsCaptor = argumentCaptor<ConfirmStripeIntentParams>()
+        verify(confirmationManager).confirmStripeIntent(paramsCaptor.capture(), any())
+
+        val paymentIntentParams = paramsCaptor.firstValue as ConfirmPaymentIntentParams
+        val paramsMap = paymentIntentParams.paymentMethodCreateParams!!.toParamMap()
+
+        val link = paramsMap["link"] as Map<*, *>
+        assertThat(link).doesNotContainKey("card")
+    }
+
+    @Test
+    fun `Resets expiry date and CVC controllers when new payment method is selected`() = runTest {
+        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails[1]
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+
+        val viewModel = createViewModel().apply {
+            expiryDateController.onRawValueChange("1230")
+            cvcController.onRawValueChange("123")
+        }
+
+        viewModel.onItemSelected(paymentDetails)
+
+        val uiState = viewModel.uiState.value
+        assertThat(uiState.expiryDateInput).isEqualTo(FormFieldEntry(value = ""))
+        assertThat(uiState.cvcInput).isEqualTo(FormFieldEntry(value = ""))
+    }
+
+    @Test
+    fun `Expiry date and CVC values are kept when existing payment method is selected`() = runTest {
+        val paymentDetails = PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS.paymentDetails.first()
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(Result.success(PaymentDetailsFixtures.CONSUMER_PAYMENT_DETAILS))
+
+        val viewModel = createViewModel().apply {
+            expiryDateController.onRawValueChange("1230")
+            cvcController.onRawValueChange("123")
+        }
+
+        viewModel.onItemSelected(paymentDetails)
+
+        val uiState = viewModel.uiState.value
+        assertThat(uiState.expiryDateInput.value).isEqualTo("1230")
+        assertThat(uiState.cvcInput.value).isEqualTo("123")
+    }
+
+    @Test
     fun `Factory gets initialized by Injector`() {
         val mockBuilder = mock<SignedInViewModelSubcomponent.Builder>()
         val mockSubComponent = mock<SignedInViewModelSubcomponent>()
@@ -421,6 +505,18 @@ class WalletViewModelTest {
             confirmationManager,
             logger
         )
+
+    private fun mockCard(cvcCheck: CvcCheck): ConsumerPaymentDetails.Card {
+        return ConsumerPaymentDetails.Card(
+            id = "id_123",
+            isDefault = true,
+            expiryYear = 2022,
+            expiryMonth = 12,
+            brand = CardBrand.Visa,
+            last4 = "4242",
+            cvcCheck = cvcCheck
+        )
+    }
 
     companion object {
         const val CLIENT_SECRET = "client_secret"

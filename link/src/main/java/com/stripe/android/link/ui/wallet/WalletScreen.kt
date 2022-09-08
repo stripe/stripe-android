@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -75,20 +77,20 @@ private fun WalletBodyPreview() {
         ConsumerPaymentDetails.Card(
             "id1",
             true,
-            2022,
-            1,
+            2030,
+            12,
             CardBrand.Visa,
             "4242",
-            CvcCheck.Pass
+            CvcCheck.Fail
         ),
         ConsumerPaymentDetails.Card(
             "id2",
             false,
-            2023,
-            11,
+            2022,
+            1,
             CardBrand.MasterCard,
             "4444",
-            CvcCheck.Fail
+            CvcCheck.Pass
         )
     )
 
@@ -205,44 +207,46 @@ internal fun WalletBody(
     ScrollableTopLevelColumn {
         Spacer(modifier = Modifier.height(12.dp))
 
-        if (uiState.isExpanded) {
-            ExpandedPaymentDetails(
-                uiState = uiState,
-                onItemSelected = {
-                    onItemSelected(it)
-                    setExpanded(false)
-                },
-                onMenuButtonClick = {
-                    showBottomSheetContent {
-                        WalletPaymentMethodMenu(
-                            paymentDetails = it,
-                            onEditClick = {
-                                showBottomSheetContent(null)
-                                onEditPaymentMethod(it)
-                            },
-                            onRemoveClick = {
-                                showBottomSheetContent(null)
-                                itemBeingRemoved = it
-                            },
-                            onCancelClick = {
-                                showBottomSheetContent(null)
-                            }
-                        )
+        Box(modifier = Modifier.animateContentSize()) {
+            if (uiState.isExpanded) {
+                ExpandedPaymentDetails(
+                    uiState = uiState,
+                    onItemSelected = {
+                        onItemSelected(it)
+                        setExpanded(false)
+                    },
+                    onMenuButtonClick = {
+                        showBottomSheetContent {
+                            WalletPaymentMethodMenu(
+                                paymentDetails = it,
+                                onEditClick = {
+                                    showBottomSheetContent(null)
+                                    onEditPaymentMethod(it)
+                                },
+                                onRemoveClick = {
+                                    showBottomSheetContent(null)
+                                    itemBeingRemoved = it
+                                },
+                                onCancelClick = {
+                                    showBottomSheetContent(null)
+                                }
+                            )
+                        }
+                    },
+                    onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
+                    onCollapse = {
+                        setExpanded(false)
                     }
-                },
-                onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
-                onCollapse = {
-                    setExpanded(false)
-                }
-            )
-        } else {
-            CollapsedPaymentDetails(
-                selectedPaymentMethod = uiState.selectedItem!!,
-                enabled = !uiState.primaryButtonState.isBlocking,
-                onClick = {
-                    setExpanded(true)
-                }
-            )
+                )
+            } else {
+                CollapsedPaymentDetails(
+                    selectedPaymentMethod = uiState.selectedItem!!,
+                    enabled = !uiState.primaryButtonState.isBlocking,
+                    onClick = {
+                        setExpanded(true)
+                    }
+                )
+            }
         }
 
         if (uiState.selectedItem is ConsumerPaymentDetails.BankAccount) {
@@ -260,22 +264,27 @@ internal fun WalletBody(
             )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
-
         uiState.errorMessage?.let {
             ErrorText(
                 text = it.getMessage(LocalContext.current.resources),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
             )
         }
 
-        val card = uiState.selectedItem as? ConsumerPaymentDetails.Card
-        if (card != null && card.isExpired) {
-            ExpiryDateAndCvcForm(
-                expiryDateController = expiryDateController,
-                cvcController = cvcController
-            )
+        uiState.selectedCard?.let { selectedCard ->
+            if (selectedCard.requiresCardDetailsRecollection) {
+                CardDetailsRecollectionForm(
+                    expiryDateController = expiryDateController,
+                    cvcController = cvcController,
+                    isCardExpired = selectedCard.isExpired,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
+            }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         PrimaryButton(
             label = primaryButtonLabel,
@@ -293,17 +302,12 @@ internal fun WalletBody(
 }
 
 @Composable
-internal fun ExpiryDateAndCvcForm(
+internal fun CardDetailsRecollectionForm(
     expiryDateController: TextFieldController,
-    cvcController: CvcController
+    cvcController: CvcController,
+    isCardExpired: Boolean,
+    modifier: Modifier = Modifier
 ) {
-    val expiryDateElement = remember(expiryDateController) {
-        SimpleTextElement(
-            identifier = IdentifierSpec.Generic("date"),
-            controller = expiryDateController
-        )
-    }
-
     val cvcElement = remember(cvcController) {
         CvcElement(
             _identifier = IdentifierSpec.CardCvc,
@@ -311,24 +315,48 @@ internal fun ExpiryDateAndCvcForm(
         )
     }
 
-    PaymentsThemeForLink {
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Box(modifier = Modifier.weight(0.5f)) {
-                SectionElementUI(
-                    enabled = true,
-                    element = SectionElement.wrap(expiryDateElement),
-                    hiddenIdentifiers = emptyList(),
-                    lastTextFieldIdentifier = cvcElement.identifier
-                )
-            }
+    val errorTextResId = if (isCardExpired) {
+        R.string.wallet_update_expired_card_error
+    } else {
+        R.string.wallet_recollect_cvc_error
+    }
 
-            Box(modifier = Modifier.weight(0.5f)) {
-                SectionElementUI(
-                    enabled = true,
-                    element = SectionElement.wrap(cvcElement),
-                    hiddenIdentifiers = emptyList(),
-                    lastTextFieldIdentifier = cvcElement.identifier
-                )
+    PaymentsThemeForLink {
+        Column(modifier) {
+            ErrorText(
+                text = stringResource(errorTextResId),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                if (isCardExpired) {
+                    val expiryDateElement = remember(expiryDateController) {
+                        SimpleTextElement(
+                            identifier = IdentifierSpec.Generic("date"),
+                            controller = expiryDateController
+                        )
+                    }
+
+                    Box(modifier = Modifier.weight(0.5f)) {
+                        SectionElementUI(
+                            enabled = true,
+                            element = SectionElement.wrap(expiryDateElement),
+                            hiddenIdentifiers = emptyList(),
+                            lastTextFieldIdentifier = cvcElement.identifier
+                        )
+                    }
+                }
+
+                Box(modifier = Modifier.weight(0.5f)) {
+                    SectionElementUI(
+                        enabled = true,
+                        element = SectionElement.wrap(cvcElement),
+                        hiddenIdentifiers = emptyList(),
+                        lastTextFieldIdentifier = cvcElement.identifier
+                    )
+                }
             }
         }
     }
@@ -349,6 +377,7 @@ internal fun CollapsedPaymentDetails(
                 color = MaterialTheme.linkColors.componentBorder,
                 shape = MaterialTheme.linkShapes.large
             )
+            .clip(MaterialTheme.linkShapes.large)
             .background(
                 color = MaterialTheme.linkColors.componentBackground,
                 shape = MaterialTheme.linkShapes.large
@@ -400,6 +429,7 @@ private fun ExpandedPaymentDetails(
                 color = MaterialTheme.linkColors.componentBorder,
                 shape = MaterialTheme.linkShapes.large
             )
+            .clip(MaterialTheme.linkShapes.large)
             .background(
                 color = MaterialTheme.linkColors.componentBackground,
                 shape = MaterialTheme.linkShapes.large

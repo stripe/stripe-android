@@ -99,12 +99,12 @@ class WalletUiStateTest {
 
     @Test
     fun `Primary button is disabled if selected card is expired and form hasn't been filled out`() {
-        val validCard = mockCard(isExpired = true)
+        val expiredCard = mockCard(isExpired = true)
 
         val uiState = WalletUiState(
             supportedTypes = SupportedPaymentMethod.allTypes,
-            paymentDetailsList = listOf(validCard),
-            selectedItem = validCard,
+            paymentDetailsList = listOf(expiredCard),
+            selectedItem = expiredCard,
             isProcessing = false,
             hasCompleted = false
         )
@@ -114,16 +114,48 @@ class WalletUiStateTest {
 
     @Test
     fun `Primary button is enabled if selected card is expired, but the form has been filled out`() {
-        val validCard = mockCard(isExpired = true)
+        val expiredCard = mockCard(isExpired = true)
 
         val uiState = WalletUiState(
             supportedTypes = SupportedPaymentMethod.allTypes,
-            paymentDetailsList = listOf(validCard),
-            selectedItem = validCard,
+            paymentDetailsList = listOf(expiredCard),
+            selectedItem = expiredCard,
             isProcessing = false,
             hasCompleted = false,
             expiryDateInput = FormFieldEntry("1226", isComplete = true),
             cvcInput = FormFieldEntry("123", isComplete = true)
+        )
+
+        assertThat(uiState.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
+    }
+
+    @Test
+    fun `Primary button is disabled if required CVC check hasn't been filled out`() {
+        val uncheckedCard = mockCard(cvcCheck = CvcCheck.Fail)
+
+        val uiState = WalletUiState(
+            supportedTypes = SupportedPaymentMethod.allTypes,
+            paymentDetailsList = listOf(uncheckedCard),
+            selectedItem = uncheckedCard,
+            isProcessing = false,
+            hasCompleted = false,
+            cvcInput = FormFieldEntry(value = null)
+        )
+
+        assertThat(uiState.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
+    }
+
+    @Test
+    fun `Primary button is enabled if required CVC check has been filled out`() {
+        val uncheckedCard = mockCard(cvcCheck = CvcCheck.Fail)
+
+        val uiState = WalletUiState(
+            supportedTypes = SupportedPaymentMethod.allTypes,
+            paymentDetailsList = listOf(uncheckedCard),
+            selectedItem = uncheckedCard,
+            isProcessing = false,
+            hasCompleted = false,
+            cvcInput = FormFieldEntry(value = "123", isComplete = true)
         )
 
         assertThat(uiState.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)

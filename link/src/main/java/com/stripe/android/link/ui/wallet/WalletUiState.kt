@@ -4,6 +4,7 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.forms.FormFieldEntry
 
@@ -19,13 +20,22 @@ internal data class WalletUiState(
     val cvcInput: FormFieldEntry = FormFieldEntry(value = null)
 ) {
 
+    val selectedCard: Card?
+        get() = selectedItem as? Card
+
     val primaryButtonState: PrimaryButtonState
         get() {
-            val isExpired = (selectedItem as? ConsumerPaymentDetails.Card)?.isExpired ?: false
-            val hasRequiredExpiryInput = expiryDateInput.isComplete && cvcInput.isComplete
+            val card = selectedItem as? Card
+            val isExpired = card?.isExpired ?: false
+            val requiresCvcRecollection = card?.cvcCheck?.requiresRecollection ?: false
+
+            val isMissingExpiryDateInput = !(expiryDateInput.isComplete && cvcInput.isComplete)
+            val isMissingCvcInput = !cvcInput.isComplete
 
             val isSelectedItemValid = selectedItem?.isValid ?: false
-            val disableButton = !isSelectedItemValid || (isExpired && !hasRequiredExpiryInput)
+            val disableButton = !isSelectedItemValid ||
+                (isExpired && isMissingExpiryDateInput) ||
+                (requiresCvcRecollection && isMissingCvcInput)
 
             return if (hasCompleted) {
                 PrimaryButtonState.Completed
@@ -42,7 +52,6 @@ internal data class WalletUiState(
         response: ConsumerPaymentDetails,
         initialSelectedItemId: String?
     ): WalletUiState {
-        // Select initialSelectedItemId if provided, otherwise the previously selected item
         val selectedItem = (initialSelectedItemId ?: selectedItem?.id)?.let { itemId ->
             response.paymentDetails.firstOrNull { it.id == itemId }
         } ?: getDefaultItemSelection(response.paymentDetails)
