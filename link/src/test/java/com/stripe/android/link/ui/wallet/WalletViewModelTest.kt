@@ -470,41 +470,6 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `Updates UI state if updating expired card info succeeds`() = runTest {
-        val expiredCard = mockCard(isExpired = true)
-        val updatedCard = expiredCard.copy(
-            expiryMonth = 12,
-            expiryYear = 2030
-        )
-
-        val originalResponse = CONSUMER_PAYMENT_DETAILS.copy(
-            paymentDetails = listOf(expiredCard) + CONSUMER_PAYMENT_DETAILS.paymentDetails
-        )
-
-        val mockUpdateResponse = CONSUMER_PAYMENT_DETAILS.copy(
-            paymentDetails = listOf(updatedCard) + CONSUMER_PAYMENT_DETAILS.paymentDetails
-        )
-
-        whenever(linkAccountManager.listPaymentDetails())
-            .thenReturn(Result.success(originalResponse))
-
-        whenever(linkAccountManager.updatePaymentDetails(any()))
-            .thenReturn(Result.success(mockUpdateResponse))
-
-        val viewModel = createViewModel()
-
-        viewModel.onItemSelected(expiredCard)
-        viewModel.expiryDateController.onRawValueChange("1230")
-        viewModel.cvcController.onRawValueChange("123")
-
-        viewModel.onConfirmPayment()
-
-        assertThat(viewModel.uiState.value.alertMessage).isNull()
-        assertThat(viewModel.uiState.value.paymentDetailsList).isEqualTo(mockUpdateResponse.paymentDetails)
-        assertThat(viewModel.uiState.value.selectedItem).isEqualTo(updatedCard)
-    }
-
-    @Test
     fun `Resets expiry date and CVC controllers when new payment method is selected`() = runTest {
         val paymentDetails = CONSUMER_PAYMENT_DETAILS.paymentDetails[1]
         whenever(linkAccountManager.listPaymentDetails())

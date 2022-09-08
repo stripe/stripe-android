@@ -67,25 +67,6 @@ internal data class WalletUiState(
         )
     }
 
-    fun updatePaymentDetails(
-        updatedPaymentDetails: ConsumerPaymentDetails.PaymentDetails
-    ): WalletUiState {
-        return copy(
-            paymentDetailsList = paymentDetailsList.map { paymentDetails ->
-                if (paymentDetails.id == updatedPaymentDetails.id) {
-                    updatedPaymentDetails
-                } else {
-                    paymentDetails
-                }
-            },
-            selectedItem = if (selectedItem?.id == updatedPaymentDetails.id) {
-                updatedPaymentDetails
-            } else {
-                selectedItem
-            }
-        )
-    }
-
     fun updateWithError(errorMessage: ErrorMessage): WalletUiState {
         return copy(
             errorMessage = errorMessage,

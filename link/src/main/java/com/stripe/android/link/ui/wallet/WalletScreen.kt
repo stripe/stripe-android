@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.wallet
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -292,7 +291,7 @@ internal fun WalletBody(
         }
 
         uiState.selectedCard?.let { selectedCard ->
-            AnimatedVisibility(visible = selectedCard.requiresCardDetailsRecollection) {
+            if (selectedCard.requiresCardDetailsRecollection) {
                 CardDetailsRecollectionForm(
                     expiryDateController = expiryDateController,
                     cvcController = cvcController,

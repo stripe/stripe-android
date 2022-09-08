@@ -29,7 +29,6 @@ import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.address.toConfirmPaymentIntentShipping
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.DateConfig
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.createExpiryDateFormFieldValues
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
@@ -39,7 +38,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -139,15 +137,7 @@ internal class WalletViewModel @Inject constructor(
                         it.id == selectedPaymentDetails.id
                     }
 
-                    val state = _uiState.updateAndGet {
-                        it.updatePaymentDetails(updatedPaymentDetails)
-                    }
-
-                    if (state.primaryButtonState == PrimaryButtonState.Enabled) {
-                        // Retry with the updated payment details, but only if there's no issue
-                        // with the newly entered information
-                        performPaymentConfirmation(updatedPaymentDetails, linkAccount)
-                    }
+                    performPaymentConfirmation(updatedPaymentDetails, linkAccount)
                 },
                 onFailure = { error ->
                     _uiState.update {
@@ -363,10 +353,8 @@ internal class WalletViewModel @Inject constructor(
 
 private fun WalletUiState.toPaymentMethodCreateParams(): PaymentMethodCreateParams {
     val expiryDateValues = createExpiryDateFormFieldValues(expiryDateInput)
-    val fieldValuePairs = mapOf(IdentifierSpec.CardCvc to cvcInput) + expiryDateValues
-
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
-        fieldValuePairs = fieldValuePairs,
+        fieldValuePairs = expiryDateValues,
         code = PaymentMethod.Type.Card.code,
         requiresMandate = false
     )
