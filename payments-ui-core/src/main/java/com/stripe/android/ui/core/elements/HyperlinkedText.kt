@@ -28,21 +28,21 @@ fun HyperlinkedText(
     val layoutResult = remember {
         mutableStateOf<TextLayoutResult?>(null)
     }
-    val linksList = remember(text) {
-        extractLinkAnnotations(text)
-    }
 
-    val annotatedString = buildAnnotatedString {
-        append(text)
-        linksList.forEach {
-            addStringAnnotation(
-                tag = "URL",
-                annotation = it.url,
-                start = it.start,
-                end = it.end
-            )
+    val annotatedString = remember(text) {
+        buildAnnotatedString {
+            append(text)
+            extractLinkAnnotations(text).forEach {
+                addStringAnnotation(
+                    tag = "URL",
+                    annotation = it.url,
+                    start = it.start,
+                    end = it.end
+                )
+            }
         }
     }
+
     Text(
         text = annotatedString,
         modifier = modifier.pointerInput(Unit) {
@@ -65,9 +65,7 @@ fun HyperlinkedText(
 }
 
 private val urlPattern: Pattern = Pattern.compile(
-    "(?:^|[\\W])((ht|f)tp(s?):\\/\\/|www\\.)" +
-        "(([\\w\\-]+\\.){1,}?([\\w\\-.~]+\\/?)*" +
-        "[\\p{Alnum}.,%_=?&#\\-+()\\[\\]\\*$~@!:/{};']*)",
+    "(https?://[a-z0-9.-]+\\.[a-z]{2,3}(?:/\\S*?(?=\\.*(?:\\s|\$)))?)",
     Pattern.CASE_INSENSITIVE or Pattern.MULTILINE or Pattern.DOTALL
 )
 
