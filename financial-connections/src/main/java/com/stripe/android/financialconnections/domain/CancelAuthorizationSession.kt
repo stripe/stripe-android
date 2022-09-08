@@ -6,7 +6,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import javax.inject.Inject
 
-internal class CompleteAuthorizationSession @Inject constructor(
+internal class CancelAuthorizationSession @Inject constructor(
     private val coordinator: NativeAuthFlowCoordinator,
     private val repository: FinancialConnectionsManifestRepository,
     private val configuration: FinancialConnectionsSheet.Configuration
@@ -14,12 +14,10 @@ internal class CompleteAuthorizationSession @Inject constructor(
 
     suspend operator fun invoke(
         authorizationSessionId: String,
-        publicToken: String?
     ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession {
-        return repository.completeAuthorizationSession(
+        return repository.cancelAuthorizationSession(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
             sessionId = authorizationSessionId,
-            publicToken = publicToken
         ).also { coordinator().emit(Message.ClearPartnerWebAuth) }
     }
 }

@@ -11,16 +11,15 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
-import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.MixedOAuthParams
-import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,10 +27,10 @@ import javax.inject.Inject
 @Suppress("LongParameterList")
 internal class PartnerAuthViewModel @Inject constructor(
     val completeAuthorizationSession: CompleteAuthorizationSession,
+    val cancelAuthorizationSession: CancelAuthorizationSession,
     val configuration: FinancialConnectionsSheet.Configuration,
     val getManifest: GetManifest,
     val goNext: GoNext,
-    val repository: FinancialConnectionsRepository,
     val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     val logger: Logger,
     initialState: PartnerAuthState
@@ -58,9 +57,17 @@ internal class PartnerAuthViewModel @Inject constructor(
         }
     }
 
+    fun onSelectAnotherBank() {
+        viewModelScope.launch {
+            val authSession = getManifest().activeAuthSession!!
+            goNext(authSession.nextPane)
+        }
+    }
+
     fun onWebAuthFlowFinished(
         webStatus: Async<String>
     ) {
+        logger.debug("Web AuthFlow status received $webStatus")
         viewModelScope.launch {
             val authSession = getManifest().activeAuthSession!!
             when (webStatus) {
@@ -76,17 +83,41 @@ internal class PartnerAuthViewModel @Inject constructor(
                     )
                 }
                 is Fail -> {
-                    setState { copy(authenticationStatus = webStatus) }
                     when (val error = webStatus.error) {
-                        is WebAuthFlowCancelledException ->
-                            logger.debug("Web flow was cancelled")
-                        is WebAuthFlowFailedException ->
-                            logger.debug("Web flow failed! received url: ${error.url}")
-                        else ->
-                            logger.error("error finishing web flow", error)
+                        is WebAuthFlowCancelledException -> onAuthCancelled(authSession)
+                        else -> onAuthFailed(error, authSession)
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun onAuthFailed(
+        error: Throwable,
+        authSession: FinancialConnectionsAuthorizationSession
+    ) {
+        kotlin.runCatching {
+            logger.error("Auth failed, cancelling AuthSession", error)
+            cancelAuthorizationSession(authSession.id)
+            setState { copy(authenticationStatus = Fail(error)) }
+        }.onFailure {
+            logger.error("failed cancelling session after failed web flow", it)
+        }
+    }
+
+    private suspend fun onAuthCancelled(
+        authSession: FinancialConnectionsAuthorizationSession
+    ) {
+        setState { copy(authenticationStatus = Loading()) }
+        kotlin.runCatching {
+            logger.debug("Auth cancelled, cancelling AuthSession")
+            val updatedSession = cancelAuthorizationSession(
+                authorizationSessionId = authSession.id,
+            )
+            goNext(updatedSession.nextPane)
+        }.onFailure {
+            logger.error("failed cancelling session after cancelled web flow", it)
+            setState { copy(authenticationStatus = Fail(it)) }
         }
     }
 

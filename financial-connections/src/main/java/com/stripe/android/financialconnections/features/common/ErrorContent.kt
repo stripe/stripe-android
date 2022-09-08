@@ -38,6 +38,19 @@ internal fun UnclassifiedErrorContent() {
 }
 
 @Composable
+internal fun InstitutionUnknownErrorContent(
+    onSelectAnotherBank: () -> Unit
+) {
+    ErrorContent(
+        iconPainter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        title = stringResource(R.string.stripe_error_generic_title),
+        content = stringResource(R.string.stripe_error_unplanned_downtime_desc),
+        ctaText = stringResource(R.string.stripe_error_cta_select_another_bank),
+        onCtaClick = onSelectAnotherBank
+    )
+}
+
+@Composable
 internal fun InstitutionUnplannedDowntimeErrorContent(
     exception: InstitutionUnplannedException,
     onSelectAnotherBank: () -> Unit
