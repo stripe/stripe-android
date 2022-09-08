@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.forms.resources
 
 import android.content.res.Resources
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
