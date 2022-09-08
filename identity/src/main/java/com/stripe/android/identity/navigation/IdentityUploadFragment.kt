@@ -316,7 +316,7 @@ internal abstract class IdentityUploadFragment(
                         identityViewModel = identityViewModel,
                         collectedDataParam =
                         collectedDataParam,
-                        clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_TO_SELFIE else ClearDataParam.UPLOAD_TO_CONFIRM,
+                        clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_FRONT_SELFIE else ClearDataParam.UPLOAD_FRONT,
                         fromFragment = fragmentId
                     ) { verificationPageDataWithNoError ->
                         showFrontDone()

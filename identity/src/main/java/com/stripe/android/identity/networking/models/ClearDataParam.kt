@@ -63,7 +63,7 @@ internal data class ClearDataParam(
         internal val UPLOAD_FRONT = ClearDataParam(
             biometricConsent = false,
             idDocumentType = false,
-            idDocumentFront = false,
+            idDocumentFront = true,
             idDocumentBack = true
         )
 
