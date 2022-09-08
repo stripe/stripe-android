@@ -134,8 +134,15 @@ internal fun SignUpBody(
             )
         }
         AnimatedVisibility(
-            visible = signUpState == SignUpState.InputtingPhoneOrName
+            visible = signUpState != SignUpState.InputtingPhoneOrName &&
+                errorMessage != null
         ) {
+            ErrorText(
+                text = errorMessage!!.getMessage(LocalContext.current.resources),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        AnimatedVisibility(visible = signUpState == SignUpState.InputtingPhoneOrName) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 PaymentsThemeForLink {
                     PhoneNumberCollectionSection(
@@ -164,9 +171,9 @@ internal fun SignUpBody(
                         textAlign = TextAlign.Center
                     )
                 }
-                errorMessage?.let {
+                AnimatedVisibility(visible = errorMessage != null) {
                     ErrorText(
-                        text = it.getMessage(LocalContext.current.resources),
+                        text = errorMessage!!.getMessage(LocalContext.current.resources),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }

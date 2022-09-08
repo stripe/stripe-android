@@ -18,6 +18,7 @@ import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.signup.SignUpViewModel.Companion.LOOKUP_DEBOUNCE_MS
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.ui.core.injection.NonFallbackInjector
@@ -35,6 +36,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doSuspendableAnswer
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.stub
@@ -54,6 +56,7 @@ class SignUpViewModelTest {
         MERCHANT_NAME,
         CUSTOMER_EMAIL,
         CUSTOMER_PHONE,
+        CUSTOMER_NAME,
         null,
         null,
         LinkActivityContract.Args.InjectionParams(
@@ -143,7 +146,7 @@ class SignUpViewModelTest {
     @Test
     fun `When email is provided it should not trigger lookup and should collect phone number`() =
         runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel()
+            val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL)
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
 
             verify(linkAccountManager, times(0)).lookupConsumer(any(), any())
@@ -179,10 +182,25 @@ class SignUpViewModelTest {
         }
 
     @Test
+    fun `signUp sends correct ConsumerSignUpConsentAction`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel()
+            viewModel.performValidSignup()
+
+            verify(linkAccountManager).signUp(
+                any(),
+                any(),
+                any(),
+                anyOrNull(),
+                eq(ConsumerSignUpConsentAction.Button)
+            )
+        }
+
+    @Test
     fun `When signUp fails then an error message is shown`() =
         runTest(UnconfinedTestDispatcher()) {
             val errorMessage = "Error message"
-            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull(), any()))
                 .thenReturn(Result.failure(RuntimeException(errorMessage)))
 
             val viewModel = createViewModel()
@@ -203,7 +221,7 @@ class SignUpViewModelTest {
                 )
             )
 
-            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull(), any()))
                 .thenReturn(Result.success(linkAccount))
 
             viewModel.performValidSignup()
@@ -224,7 +242,7 @@ class SignUpViewModelTest {
                 )
             )
 
-            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull(), any()))
                 .thenReturn(Result.success(linkAccount))
 
             viewModel.performValidSignup()
@@ -244,7 +262,7 @@ class SignUpViewModelTest {
                 )
             )
 
-            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull(), any()))
                 .thenReturn(Result.success(linkAccount))
 
             viewModel.performValidSignup()
@@ -257,7 +275,7 @@ class SignUpViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
 
-            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull()))
+            whenever(linkAccountManager.signUp(any(), any(), any(), anyOrNull(), any()))
                 .thenReturn(Result.failure(Exception()))
 
             viewModel.performValidSignup()
@@ -288,9 +306,19 @@ class SignUpViewModelTest {
 
         viewModel.emailController.onRawValueChange("me@myself.com")
         viewModel.phoneController.onRawValueChange("1234567890")
+        viewModel.nameController.onRawValueChange("")
         assertThat(viewModel.isReadyToSignUp.value).isFalse()
 
         viewModel.nameController.onRawValueChange("Someone from Canada")
+        assertThat(viewModel.isReadyToSignUp.value).isTrue()
+    }
+
+    @Test
+    fun `Prefilled values are handled correctly`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            prefilledEmail = CUSTOMER_EMAIL,
+            countryCode = CountryCode.US
+        )
         assertThat(viewModel.isReadyToSignUp.value).isTrue()
     }
 
@@ -321,7 +349,7 @@ class SignUpViewModelTest {
 
         val factory = SignUpViewModel.Factory(
             injector,
-            null
+            email = null
         )
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(SignUpViewModel::class.java)
@@ -329,7 +357,7 @@ class SignUpViewModelTest {
     }
 
     private fun createViewModel(
-        prefilledEmail: String? = CUSTOMER_EMAIL,
+        prefilledEmail: String? = null,
         args: LinkActivityContract.Args = defaultArgs,
         countryCode: CountryCode = CountryCode.US
     ): SignUpViewModel {
@@ -380,5 +408,6 @@ class SignUpViewModelTest {
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "customer@email.com"
         const val CUSTOMER_PHONE = "1234567890"
+        const val CUSTOMER_NAME = "Customer"
     }
 }

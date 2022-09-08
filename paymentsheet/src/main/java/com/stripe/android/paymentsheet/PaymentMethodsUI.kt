@@ -48,7 +48,7 @@ internal fun PaymentMethodsUI(
     val state = rememberLazyListState()
 
     LaunchedEffect(selectedIndex) {
-        state.scrollToItem(selectedIndex, 0)
+        state.animateScrollToItem(selectedIndex)
     }
 
     PaymentsTheme {

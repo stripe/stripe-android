@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.ui.core.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.math.max
 
@@ -12,7 +13,7 @@ internal class PostalCodeConfig(
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.Words,
     override val keyboard: KeyboardType = KeyboardType.Text,
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null),
-    country: String
+    private val country: String
 ) : TextFieldConfig {
     private val format = CountryPostalFormat.forCountry(country)
 
@@ -22,7 +23,7 @@ internal class PostalCodeConfig(
     override val loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
-        override fun shouldShowError(hasFocus: Boolean) = false
+        override fun shouldShowError(hasFocus: Boolean) = getError() != null && !hasFocus
 
         override fun isValid(): Boolean {
             return when (format) {
@@ -34,7 +35,17 @@ internal class PostalCodeConfig(
             }
         }
 
-        override fun getError(): FieldError? = null
+        override fun getError(): FieldError? {
+            return when {
+                input.isNotBlank() && !isFull() && country == "US" -> {
+                    FieldError(R.string.address_zip_invalid)
+                }
+                input.isNotBlank() && !isFull() -> {
+                    FieldError(R.string.address_zip_postal_invalid)
+                }
+                else -> null
+            }
+        }
 
         override fun isFull(): Boolean = input.length >= format.minimumLength
 

@@ -49,7 +49,7 @@ class InlineSignupViewModelTest {
     @Test
     fun `When email is provided it should not trigger lookup and should collect phone number`() =
         runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel()
+            val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL)
             viewModel.toggleExpanded()
             assertThat(viewModel.signUpState.value).isEqualTo(SignUpState.InputtingPhoneOrName)
 
@@ -64,6 +64,7 @@ class InlineSignupViewModelTest {
                 merchantName = MERCHANT_NAME,
                 customerEmail = CUSTOMER_EMAIL,
                 customerPhone = CUSTOMER_PHONE,
+                customerName = CUSTOMER_NAME,
                 linkAccountManager = linkAccountManager,
                 linkEventsReporter = linkEventsReporter,
                 logger = Logger.noop()
@@ -212,13 +213,38 @@ class InlineSignupViewModelTest {
             )
         }
 
+    @Test
+    fun `Prefilled values are handled correctly`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            countryCode = CountryCode.GB,
+            prefilledEmail = CUSTOMER_EMAIL,
+            prefilledName = CUSTOMER_NAME,
+            prefilledPhone = "+44$CUSTOMER_PHONE"
+        )
+
+        viewModel.toggleExpanded()
+
+        val expectedInput = UserInput.SignUp(
+            email = CUSTOMER_EMAIL,
+            phone = "+44$CUSTOMER_PHONE",
+            country = CountryCode.GB.value,
+            name = CUSTOMER_NAME
+        )
+
+        assertThat(viewModel.userInput.value).isEqualTo(expectedInput)
+    }
+
     private fun createViewModel(
-        countryCode: CountryCode = CountryCode.US
+        countryCode: CountryCode = CountryCode.US,
+        prefilledEmail: String? = null,
+        prefilledName: String? = null,
+        prefilledPhone: String? = null
     ) = InlineSignupViewModel(
         stripeIntent = mockStripeIntent(countryCode),
         merchantName = MERCHANT_NAME,
-        customerEmail = CUSTOMER_EMAIL,
-        customerPhone = null,
+        customerEmail = prefilledEmail,
+        customerName = prefilledName,
+        customerPhone = prefilledPhone,
         linkAccountManager = linkAccountManager,
         linkEventsReporter = linkEventsReporter,
         logger = Logger.noop()
@@ -257,5 +283,6 @@ class InlineSignupViewModelTest {
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "customer@email.com"
         const val CUSTOMER_PHONE = "1234567890"
+        const val CUSTOMER_NAME = "Customer"
     }
 }

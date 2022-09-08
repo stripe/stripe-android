@@ -9,6 +9,7 @@ import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.StripeIntent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -16,6 +17,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.Mockito.times
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
@@ -192,7 +194,8 @@ class LinkAccountManagerTest {
                 phone = eq(phone),
                 country = eq(country),
                 name = eq(name),
-                authSessionCookie = anyOrNull()
+                authSessionCookie = anyOrNull(),
+                consentAction = eq(ConsumerSignUpConsentAction.Checkbox)
             )
             assertThat(accountManager.linkAccount.value).isNotNull()
         }
@@ -221,7 +224,8 @@ class LinkAccountManagerTest {
                     phone = anyOrNull(),
                     country = anyOrNull(),
                     name = anyOrNull(),
-                    authSessionCookie = anyOrNull()
+                    authSessionCookie = anyOrNull(),
+                    consentAction = anyOrNull()
                 )
             ).thenReturn(Result.failure(Exception()))
 
@@ -241,7 +245,7 @@ class LinkAccountManagerTest {
     fun `signUp stores email when successfully signed up`() = runSuspendTest {
         val accountManager = accountManager()
 
-        accountManager.signUp(EMAIL, "phone", "US", "name")
+        accountManager.signUp(EMAIL, "phone", "US", "name", ConsumerSignUpConsentAction.Checkbox)
 
         verify(cookieStore).storeNewUserEmail(EMAIL)
     }
@@ -450,7 +454,13 @@ class LinkAccountManagerTest {
         val accountManager = accountManager()
         accountManager.setAccountNullable(mockConsumerSession)
 
-        whenever(linkRepository.createBankAccountPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
+        whenever(
+            linkRepository.createBankAccountPaymentDetails(
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull()
+            )
+        )
             .thenReturn(
                 Result.failure(AuthenticationException(StripeError())),
                 Result.success(mock())
@@ -472,7 +482,13 @@ class LinkAccountManagerTest {
             val accountManager = accountManager()
             accountManager.setAccountNullable(mockConsumerSession)
 
-            whenever(linkRepository.createBankAccountPaymentDetails(anyOrNull(), anyOrNull(), anyOrNull()))
+            whenever(
+                linkRepository.createBankAccountPaymentDetails(
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull()
+                )
+            )
                 .thenReturn(
                     Result.failure(AuthenticationException(StripeError())),
                     Result.success(mock())
@@ -648,7 +664,8 @@ class LinkAccountManagerTest {
                 phone = anyOrNull(),
                 country = anyOrNull(),
                 name = anyOrNull(),
-                authSessionCookie = anyOrNull()
+                authSessionCookie = anyOrNull(),
+                consentAction = any()
             )
         ).thenReturn(Result.success(mockConsumerSession))
     }

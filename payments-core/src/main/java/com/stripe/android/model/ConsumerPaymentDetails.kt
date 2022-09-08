@@ -3,6 +3,7 @@ package com.stripe.android.model
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.view.DateUtils
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -27,6 +28,16 @@ data class ConsumerPaymentDetails internal constructor(
         val last4: String,
         val cvcCheck: CvcCheck
     ) : PaymentDetails(id, isDefault, Companion.type) {
+
+        val requiresCardDetailsRecollection: Boolean
+            get() = isExpired || cvcCheck.requiresRecollection
+
+        val isExpired: Boolean
+            get() = !DateUtils.isExpiryDataValid(
+                expiryMonth = expiryMonth,
+                expiryYear = expiryYear
+            )
+
         companion object {
             const val type = "card"
 

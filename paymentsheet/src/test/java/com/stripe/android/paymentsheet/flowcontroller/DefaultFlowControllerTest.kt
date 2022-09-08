@@ -20,6 +20,7 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
+import com.stripe.android.link.injection.CUSTOMER_NAME
 import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.injection.MERCHANT_NAME
@@ -1027,6 +1028,7 @@ internal class DefaultFlowControllerTest {
                 @Assisted(MERCHANT_NAME) merchantName: String,
                 @Assisted(CUSTOMER_EMAIL) customerEmail: String?,
                 @Assisted(CUSTOMER_PHONE) customerPhone: String?,
+                @Assisted(CUSTOMER_NAME) customerName: String?,
                 @Assisted(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?
             ): LinkPaymentLauncher {
                 return linkPaymentLauncher

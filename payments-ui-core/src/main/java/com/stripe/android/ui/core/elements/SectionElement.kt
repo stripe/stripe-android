@@ -31,4 +31,35 @@ data class SectionElement(
         ) {
             it.toList().flatten()
         }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+
+        fun wrap(
+            sectionFieldElement: SectionFieldElement,
+            label: Int? = null
+        ): SectionElement {
+            return wrap(
+                sectionFieldElements = listOf(sectionFieldElement),
+                label = label
+            )
+        }
+
+        fun wrap(
+            sectionFieldElements: List<SectionFieldElement>,
+            label: Int? = null
+        ): SectionElement {
+            val errorControllers = sectionFieldElements.map {
+                it.sectionFieldErrorController()
+            }
+            return SectionElement(
+                IdentifierSpec.Generic("${sectionFieldElements.first().identifier.v1}_section"),
+                sectionFieldElements,
+                SectionController(
+                    label,
+                    errorControllers
+                )
+            )
+        }
+    }
 }

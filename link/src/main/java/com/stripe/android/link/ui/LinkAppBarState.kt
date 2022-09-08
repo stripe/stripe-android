@@ -20,20 +20,23 @@ internal fun rememberLinkAppBarState(
     email: String?
 ): LinkAppBarState {
     return remember(currentRoute, email) {
-        val routesWithoutHeader = setOf(
+        val showHeader = when (currentRoute) {
+            LinkScreen.CardEdit.route -> false
+            LinkScreen.PaymentMethod.route -> isRootScreen
+            else -> true
+        }
+
+        val hideEmail = when (currentRoute) {
             LinkScreen.CardEdit.route,
-            LinkScreen.PaymentMethod.route
-        )
-
-        val routesWithoutEmail = setOf(
             LinkScreen.Verification.route,
-            LinkScreen.SignUp.route
-        ) + routesWithoutHeader
+            LinkScreen.SignUp.route -> true
+            LinkScreen.PaymentMethod.route -> !isRootScreen
+            else -> false
+        }
 
-        val hideHeader = currentRoute in routesWithoutHeader
-        val hideEmail = email.isNullOrBlank() || currentRoute in routesWithoutEmail
-
-        val showOverflowMenu = currentRoute == LinkScreen.Wallet.route
+        // If there's an email address, we want to allow the user to log
+        // out of the existing account.
+        val showOverflowMenu = isRootScreen && email != null
 
         LinkAppBarState(
             navigationIcon = if (isRootScreen) {
@@ -41,9 +44,9 @@ internal fun rememberLinkAppBarState(
             } else {
                 R.drawable.ic_link_back
             },
-            showHeader = !hideHeader,
+            showHeader = showHeader,
             showOverflowMenu = showOverflowMenu,
-            email = email?.takeIf { it.isNotBlank() && !hideEmail }
+            email = email?.takeUnless { it.isBlank() || hideEmail }
         )
     }
 }

@@ -9,6 +9,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -90,7 +91,14 @@ class LinkApiRepositoryTest {
         val country = "US"
         val name = "name"
         val cookie = "cookie2"
-        linkRepository.consumerSignUp(email, phone, country, name, cookie)
+        linkRepository.consumerSignUp(
+            email,
+            phone,
+            country,
+            name,
+            cookie,
+            ConsumerSignUpConsentAction.Checkbox
+        )
 
         verify(stripeRepository).consumerSignUp(
             eq(email),
@@ -99,6 +107,7 @@ class LinkApiRepositoryTest {
             eq(name),
             eq(Locale.US),
             eq(cookie),
+            eq(ConsumerSignUpConsentAction.Checkbox),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
         )
     }
@@ -114,11 +123,19 @@ class LinkApiRepositoryTest {
                 name = anyOrNull(),
                 locale = anyOrNull(),
                 authSessionCookie = anyOrNull(),
+                consentAction = any(),
                 requestOptions = any()
             )
         ).thenReturn(consumerSession)
 
-        val result = linkRepository.consumerSignUp("email", "phone", "name", "country", "cookie")
+        val result = linkRepository.consumerSignUp(
+            "email",
+            "phone",
+            "country",
+            "name",
+            "cookie",
+            ConsumerSignUpConsentAction.Checkbox
+        )
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()).isEqualTo(consumerSession)
@@ -134,11 +151,19 @@ class LinkApiRepositoryTest {
                 name = anyOrNull(),
                 locale = anyOrNull(),
                 authSessionCookie = anyOrNull(),
+                consentAction = any(),
                 requestOptions = any()
             )
         ).thenThrow(RuntimeException("error"))
 
-        val result = linkRepository.consumerSignUp("email", "phone", "name", "country", "cookie")
+        val result = linkRepository.consumerSignUp(
+            "email",
+            "phone",
+            "country",
+            "name",
+            "cookie",
+            ConsumerSignUpConsentAction.Button
+        )
 
         assertThat(result.isFailure).isTrue()
     }
