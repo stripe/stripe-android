@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
+import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
@@ -95,8 +96,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     fun onResume() {
         setState {
             if (webAuthFlow is Loading) {
-                // copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
-                copy(webAuthFlow = Fail(WebAuthFlowFailedException(null)))
+                copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
             } else this
         }
     }
