@@ -17,7 +17,8 @@ internal data class WalletUiState(
     val hasCompleted: Boolean = false,
     val errorMessage: ErrorMessage? = null,
     val expiryDateInput: FormFieldEntry = FormFieldEntry(value = null),
-    val cvcInput: FormFieldEntry = FormFieldEntry(value = null)
+    val cvcInput: FormFieldEntry = FormFieldEntry(value = null),
+    val alertMessage: ErrorMessage? = null
 ) {
 
     val selectedCard: Card?
@@ -58,11 +59,42 @@ internal data class WalletUiState(
 
         val isSelectedItemValid = selectedItem?.isValid ?: false
 
+        // TODO: For testing only!
+        val details = response.paymentDetails.map { pd ->
+            if (pd is Card && pd.last4 == "4242") {
+                pd.copy(
+                    expiryMonth = 1,
+                    expiryYear = 2022
+                )
+            } else {
+                pd
+            }
+        }
+
         return copy(
-            paymentDetailsList = response.paymentDetails,
+            paymentDetailsList = details,
             selectedItem = selectedItem,
             isExpanded = !isSelectedItemValid,
             isProcessing = false
+        )
+    }
+
+    fun updatePaymentDetails(
+        updatedPaymentDetails: ConsumerPaymentDetails.PaymentDetails
+    ): WalletUiState {
+        return copy(
+            paymentDetailsList = paymentDetailsList.map { paymentDetails ->
+                if (paymentDetails.id == updatedPaymentDetails.id) {
+                    updatedPaymentDetails
+                } else {
+                    paymentDetails
+                }
+            },
+            selectedItem = if (selectedItem?.id == updatedPaymentDetails.id) {
+                updatedPaymentDetails
+            } else {
+                selectedItem
+            }
         )
     }
 

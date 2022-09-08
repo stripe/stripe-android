@@ -80,16 +80,6 @@ internal fun PaymentDetailsListItem(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                val showWarning = (paymentDetails as? Card)?.isExpired ?: false
-                if (showWarning && !isSelected) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_link_error),
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.linkColors.errorText
-                    )
-                }
-
                 if (paymentDetails.isDefault) {
                     Box(
                         modifier = Modifier
@@ -108,6 +98,16 @@ internal fun PaymentDetailsListItem(
                             fontWeight = FontWeight.Medium
                         )
                     }
+                }
+
+                val showWarning = (paymentDetails as? Card)?.isExpired ?: false
+                if (showWarning && !isSelected) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_link_error),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.linkColors.errorText
+                    )
                 }
             }
             if (!isSupported) {
