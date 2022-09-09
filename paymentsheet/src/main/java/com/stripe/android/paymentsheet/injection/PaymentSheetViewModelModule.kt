@@ -22,12 +22,10 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
         appContext: Context,
         @IOContext workContext: CoroutineContext
     ): PrefsRepository {
-        return starterArgs.config?.customer?.let { (id) ->
-            DefaultPrefsRepository(
-                appContext,
-                customerId = id,
-                workContext = workContext
-            )
-        } ?: PrefsRepository.Noop()
+        return DefaultPrefsRepository(
+            appContext,
+            customerId = starterArgs.config?.customer?.id,
+            workContext = workContext
+        )
     }
 }

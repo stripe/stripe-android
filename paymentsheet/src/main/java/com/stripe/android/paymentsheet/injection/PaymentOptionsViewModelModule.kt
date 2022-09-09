@@ -29,13 +29,11 @@ internal class PaymentOptionsViewModelModule {
         appContext: Context,
         @IOContext workContext: CoroutineContext
     ): (PaymentSheet.CustomerConfiguration?) -> PrefsRepository = { customerConfig ->
-        customerConfig?.let {
-            DefaultPrefsRepository(
-                appContext,
-                it.id,
-                workContext
-            )
-        } ?: PrefsRepository.Noop()
+        DefaultPrefsRepository(
+            appContext,
+            customerConfig?.id,
+            workContext
+        )
     }
 
     /**

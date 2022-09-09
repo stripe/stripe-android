@@ -312,7 +312,8 @@ internal object PaymentIntentFixtures {
             "next_action": null,
             "payment_method": null,
             "payment_method_types": [
-                "card"
+                "card",
+                "link"
             ],
             "receipt_email": null,
             "setup_future_usage": null,
