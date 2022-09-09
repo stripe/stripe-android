@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.verification
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,9 +20,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -59,6 +62,7 @@ private fun VerificationBodyPreview() {
                 otpElement = OTPSpec.transform(),
                 isProcessing = false,
                 errorMessage = null,
+                focusRequester = remember { FocusRequester() },
                 onBack = { },
                 onChangeEmailClick = { },
                 onResendCodeClick = { }
@@ -100,17 +104,27 @@ internal fun VerificationBody(
 
     val isProcessing by viewModel.isProcessing.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val requestFocus by viewModel.requestFocus.collectAsState()
 
     onVerificationCompleted?.let {
         viewModel.onVerificationCompleted = it
     }
 
     val focusManager = LocalFocusManager.current
+    val focusRequester: FocusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+
     LaunchedEffect(isProcessing) {
         if (isProcessing) {
             focusManager.clearFocus(true)
             keyboardController?.hide()
+        }
+    }
+
+    LaunchedEffect(requestFocus) {
+        if (requestFocus) {
+            focusRequester.requestFocus()
+            keyboardController?.show()
         }
     }
 
@@ -123,6 +137,7 @@ internal fun VerificationBody(
         otpElement = viewModel.otpElement,
         isProcessing = isProcessing,
         errorMessage = errorMessage,
+        focusRequester = focusRequester,
         onBack = viewModel::onBack,
         onChangeEmailClick = viewModel::onChangeEmailClicked,
         onResendCodeClick = viewModel::startVerification
@@ -139,6 +154,7 @@ internal fun VerificationBody(
     otpElement: OTPElement,
     isProcessing: Boolean,
     errorMessage: ErrorMessage?,
+    focusRequester: FocusRequester,
     onBack: () -> Unit,
     onChangeEmailClick: () -> Unit,
     onResendCodeClick: () -> Unit
@@ -168,7 +184,8 @@ internal fun VerificationBody(
                 enabled = !isProcessing,
                 element = otpElement,
                 modifier = Modifier.padding(vertical = 10.dp),
-                colors = MaterialTheme.linkColors.otpElementColors
+                colors = MaterialTheme.linkColors.otpElementColors,
+                focusRequester = focusRequester
             )
         }
         if (showChangeEmailMessage) {
@@ -198,9 +215,9 @@ internal fun VerificationBody(
                 )
             }
         }
-        errorMessage?.let {
+        AnimatedVisibility(visible = errorMessage != null) {
             ErrorText(
-                text = it.getMessage(LocalContext.current.resources),
+                text = errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
                 modifier = Modifier.fillMaxWidth()
             )
         }

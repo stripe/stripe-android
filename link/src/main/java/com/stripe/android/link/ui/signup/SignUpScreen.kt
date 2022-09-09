@@ -138,7 +138,7 @@ internal fun SignUpBody(
                 errorMessage != null
         ) {
             ErrorText(
-                text = errorMessage!!.getMessage(LocalContext.current.resources),
+                text = errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -173,7 +173,7 @@ internal fun SignUpBody(
                 }
                 AnimatedVisibility(visible = errorMessage != null) {
                     ErrorText(
-                        text = errorMessage!!.getMessage(LocalContext.current.resources),
+                        text = errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }

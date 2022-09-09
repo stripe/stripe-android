@@ -59,11 +59,10 @@ fun OTPElementUI(
     colors: OTPElementColors = OTPElementColors(
         selectedBorder = MaterialTheme.colors.primary,
         placeholder = MaterialTheme.paymentsColors.placeholderText
-    )
+    ),
+    focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
     val focusManager = LocalFocusManager.current
-    val focusRequester = remember { FocusRequester() }
-    val keyboardController = LocalSoftwareKeyboardController.current
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -195,11 +194,6 @@ fun OTPElementUI(
                     }
                 )
             }
-        }
-
-        LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
-            keyboardController?.show()
         }
     }
 }

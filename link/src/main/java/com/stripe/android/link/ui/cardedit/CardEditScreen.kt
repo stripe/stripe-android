@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.cardedit
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
@@ -172,9 +173,9 @@ internal fun CardEditBody(
                 )
             }
         }
-        errorMessage?.let {
+        AnimatedVisibility(visible = errorMessage != null) {
             ErrorText(
-                text = it.getMessage(LocalContext.current.resources),
+                text = errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
                 modifier = Modifier.fillMaxWidth()
             )
         }
