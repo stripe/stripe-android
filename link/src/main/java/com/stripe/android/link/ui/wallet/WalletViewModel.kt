@@ -21,11 +21,16 @@ import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.address.toConfirmPaymentIntentShipping
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.DateConfig
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.createExpiryDateFormFieldValues
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.delay
@@ -107,27 +112,69 @@ internal class WalletViewModel @Inject constructor(
 
     fun onConfirmPayment() {
         val selectedPaymentDetails = uiState.value.selectedItem ?: return
+        val linkAccount = linkAccountManager.linkAccount.value ?: return
 
         _uiState.update {
             it.setProcessing()
         }
 
-        runCatching { requireNotNull(linkAccountManager.linkAccount.value) }.fold(
-            onSuccess = { linkAccount ->
-                val params = createConfirmStripeIntentParams(
-                    selectedPaymentDetails = selectedPaymentDetails,
-                    linkAccount = linkAccount
-                )
+        viewModelScope.launch {
+            performPaymentConfirmation(selectedPaymentDetails, linkAccount)
+        }
+    }
 
-                confirmationManager.confirmStripeIntent(params) { result ->
-                    result.fold(
-                        onSuccess = ::handleConfirmPaymentSuccess,
-                        onFailure = ::onError
-                    )
+    private suspend fun performPaymentConfirmation(
+        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        linkAccount: LinkAccount
+    ) {
+        val card = selectedPaymentDetails as? ConsumerPaymentDetails.Card
+        val isExpired = card != null && card.isExpired
+
+        if (isExpired) {
+            performPaymentDetailsUpdate(selectedPaymentDetails).fold(
+                onSuccess = { result ->
+                    val updatedPaymentDetails = result.paymentDetails.single {
+                        it.id == selectedPaymentDetails.id
+                    }
+
+                    performPaymentConfirmation(updatedPaymentDetails, linkAccount)
+                },
+                onFailure = { error ->
+                    _uiState.update {
+                        it.copy(
+                            alertMessage = error.getErrorMessage(),
+                            isProcessing = false
+                        )
+                    }
                 }
-            },
-            onFailure = ::onError
+            )
+        } else {
+            val params = createConfirmStripeIntentParams(
+                selectedPaymentDetails = selectedPaymentDetails,
+                linkAccount = linkAccount
+            )
+
+            confirmationManager.confirmStripeIntent(params) { result ->
+                result.fold(
+                    onSuccess = ::handleConfirmPaymentSuccess,
+                    onFailure = ::onError
+                )
+            }
+        }
+    }
+
+    private suspend fun performPaymentDetailsUpdate(
+        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails
+    ): Result<ConsumerPaymentDetails> {
+        val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams()
+
+        val updateParams = ConsumerPaymentDetailsUpdateParams.Card(
+            id = selectedPaymentDetails.id,
+            isDefault = selectedPaymentDetails.isDefault,
+            cardPaymentMethodCreateParams = paymentMethodCreateParams
         )
+
+        return linkAccountManager.updatePaymentDetails(updateParams)
     }
 
     private fun createConfirmStripeIntentParams(
@@ -223,6 +270,12 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
+    fun onAlertDismissed() {
+        _uiState.update {
+            it.copy(alertMessage = null)
+        }
+    }
+
     private fun loadPaymentDetails(
         initialSetup: Boolean = false,
         selectedItem: String? = null
@@ -296,4 +349,13 @@ internal class WalletViewModel @Inject constructor(
                 .build().walletViewModel as T
         }
     }
+}
+
+private fun WalletUiState.toPaymentMethodCreateParams(): PaymentMethodCreateParams {
+    val expiryDateValues = createExpiryDateFormFieldValues(expiryDateInput)
+    return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
+        fieldValuePairs = expiryDateValues,
+        code = PaymentMethod.Type.Card.code,
+        requiresMandate = false
+    )
 }
