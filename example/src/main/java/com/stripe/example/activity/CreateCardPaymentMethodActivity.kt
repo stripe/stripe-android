@@ -59,8 +59,11 @@ class CreateCardPaymentMethodActivity : AppCompatActivity() {
         viewBinding.toggleCardFormView.setOnClickListener {
             viewBinding.cardFormView.isEnabled = !viewBinding.cardFormView.isEnabled
             showSnackbar(
-                if (viewBinding.cardFormView.isEnabled) "CardFormView Enabled"
-                else "CardFormView Disabled"
+                if (viewBinding.cardFormView.isEnabled) {
+                    "CardFormView Enabled"
+                } else {
+                    "CardFormView Disabled"
+                }
             )
         }
     }

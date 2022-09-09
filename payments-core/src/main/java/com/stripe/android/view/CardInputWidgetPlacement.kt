@@ -73,7 +73,9 @@ internal data class CardInputWidgetPlacement(
 
     private fun toMinimalValueIfNegative(value: Int) = if (value >= 0) {
         value
-    } else MIN_SEPARATION_IN_PX
+    } else {
+        MIN_SEPARATION_IN_PX
+    }
 
     @JvmSynthetic
     internal fun updateSpacing(
