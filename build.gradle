@@ -20,6 +20,7 @@ buildscript {
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
         classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.11.1"
         classpath 'com.karumi:shot:5.14.1'
+        classpath 'app.cash.paparazzi:paparazzi-gradle-plugin:1.0.0'
         classpath buildLibs.detektGradlePlugin
     }
 }
@@ -97,6 +98,7 @@ ext {
     espressoVersion = '3.4.0'
     jsonVersion = '20220320'
     uiautomator = '2.2.0'
+    testParameterInjectorVersion = '1.8'
 
     group_name = GROUP
     version_name = VERSION_NAME
