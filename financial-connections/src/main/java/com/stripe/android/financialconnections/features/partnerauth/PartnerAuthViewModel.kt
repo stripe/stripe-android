@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.domain.CompleteAuthorizationSessi
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
+import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
@@ -27,6 +28,7 @@ import javax.inject.Inject
 @Suppress("LongParameterList")
 internal class PartnerAuthViewModel @Inject constructor(
     val completeAuthorizationSession: CompleteAuthorizationSession,
+    val createAuthorizationSession: PostAuthorizationSession,
     val cancelAuthorizationSession: CancelAuthorizationSession,
     val configuration: FinancialConnectionsSheet.Configuration,
     val getManifest: GetManifest,
@@ -111,10 +113,10 @@ internal class PartnerAuthViewModel @Inject constructor(
         setState { copy(authenticationStatus = Loading()) }
         kotlin.runCatching {
             logger.debug("Auth cancelled, cancelling AuthSession")
-            val updatedSession = cancelAuthorizationSession(
-                authorizationSessionId = authSession.id,
-            )
-            goNext(updatedSession.nextPane)
+            cancelAuthorizationSession(authSession.id)
+            logger.debug("Session cancelled, creating a new one for same institution")
+            val newSession = createAuthorizationSession(getManifest().activeInstitution!!)
+            goNext(newSession.nextPane)
         }.onFailure {
             logger.error("failed cancelling session after cancelled web flow", it)
             setState { copy(authenticationStatus = Fail(it)) }
