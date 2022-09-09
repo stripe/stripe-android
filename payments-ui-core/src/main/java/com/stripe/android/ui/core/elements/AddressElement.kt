@@ -103,8 +103,11 @@ open class AddressElement constructor(
                 shippingValuesMap ?: emptyMap()
             } else {
                 currentValuesMap.mapValues {
-                    if (it.key == IdentifierSpec.Country) it.value
-                    else rawValuesMap[it.key] ?: ""
+                    if (it.key == IdentifierSpec.Country) {
+                        it.value
+                    } else {
+                        rawValuesMap[it.key] ?: ""
+                    }
                 }
             }
             allFields.forEach { field ->

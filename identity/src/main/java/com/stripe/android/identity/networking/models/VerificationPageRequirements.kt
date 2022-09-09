@@ -23,6 +23,6 @@ internal data class VerificationPageRequirements(
         IDDOCUMENTTYPE,
 
         @SerialName("face")
-        FACE,
+        FACE
     }
 }
