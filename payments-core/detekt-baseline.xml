@@ -231,9 +231,6 @@
     <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb"</ID>
     <ID>MaximumLineLength:com.stripe.android.PaymentRelayContract.kt:9</ID>
     <ID>MaximumLineLength:com.stripe.android.payments.PaymentFlowFailureMessageFactory.kt:39</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.CardInputWidgetPlacement.kt:101</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.CardInputWidgetPlacement.kt:171</ID>
-    <ID>MaximumLineLength:com.stripe.android.view.CardInputWidgetPlacement.kt:196</ID>
     <ID>ReturnCount:DateUtils.kt$DateUtils$@VisibleForTesting @JvmStatic fun isExpiryDataValid(expiryMonth: Int, expiryYear: Int, calendar: Calendar): Boolean</ID>
     <ID>ReturnCount:DefaultPaymentAuthenticatorRegistry.kt$DefaultPaymentAuthenticatorRegistry$@Suppress("UNCHECKED_CAST") override fun &lt;Authenticatable> getAuthenticator( authenticatable: Authenticatable ): PaymentAuthenticator&lt;Authenticatable></ID>
     <ID>ReturnCount:FraudDetectionDataJsonParser.kt$FraudDetectionDataJsonParser$override fun parse(json: JSONObject): FraudDetectionData?</ID>

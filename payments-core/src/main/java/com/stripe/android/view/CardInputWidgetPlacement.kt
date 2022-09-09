@@ -6,7 +6,6 @@ import com.stripe.android.view.CardInputWidget.Field
 /**
  * A class for tracking the placement and layout of fields in [CardInputWidget].
  */
-@Suppress("MaximumLineLength")
 internal data class CardInputWidgetPlacement(
     internal var totalLengthInPixels: Int = 0,
 
@@ -101,7 +100,8 @@ internal data class CardInputWidgetPlacement(
                 )
                 this.cvcPostalCodeSeparation =
                     toMinimalValueIfNegative(
-                        frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth - dateCvcSeparation - postalCodeWidth
+                        frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth - dateCvcSeparation -
+                            postalCodeWidth
                     )
 
                 val dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
@@ -171,7 +171,8 @@ internal data class CardInputWidgetPlacement(
             // Our view is
             // |peek card||space||date||space||cvc||space||postal code|
             when {
-                touchX < frameStart + peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
+                // This was a touch on the card number editor, so we don't need to handle it.
+                touchX < frameStart + peekCardWidth ->
                     null
                 touchX < cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
                     Field.Number
@@ -196,7 +197,8 @@ internal data class CardInputWidgetPlacement(
             // Our view is
             // |peek card||space||date||space||cvc|
             when {
-                touchX < frameStart + peekCardWidth -> // This was a touch on the card number editor, so we don't need to handle it.
+                // This was a touch on the card number editor, so we don't need to handle it.
+                touchX < frameStart + peekCardWidth ->
                     null
                 touchX < cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
                     Field.Number
