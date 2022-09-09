@@ -550,6 +550,9 @@ public final class com/stripe/android/ui/core/elements/H6TextKt {
 public final class com/stripe/android/ui/core/elements/HtmlKt {
 }
 
+public final class com/stripe/android/ui/core/elements/HyperlinkedTextKt {
+}
+
 public final class com/stripe/android/ui/core/elements/IbanSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IbanSpec$$serializer;
