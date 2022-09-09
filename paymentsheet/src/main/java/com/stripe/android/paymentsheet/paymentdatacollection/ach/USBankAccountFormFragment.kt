@@ -550,7 +550,9 @@ internal class USBankAccountFormFragment : Fragment() {
                     R.string.stripe_paymentsheet_microdeposit,
                     viewModel.formattedMerchantName()
                 )
-            } else ""
+            } else {
+                ""
+            }
         val updatedText = mandateText?.let {
             """
                 $microdepositsText

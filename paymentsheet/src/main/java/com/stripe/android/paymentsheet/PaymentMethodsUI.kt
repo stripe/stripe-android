@@ -118,8 +118,11 @@ internal fun PaymentMethodUI(
     modifier: Modifier = Modifier,
     onItemSelectedListener: (Int) -> Unit
 ) {
-    val color = if (isSelected) MaterialTheme.colors.primary
-    else MaterialTheme.paymentsColors.onComponent
+    val color = if (isSelected) {
+        MaterialTheme.colors.primary
+    } else {
+        MaterialTheme.paymentsColors.onComponent
+    }
 
     val lpmTextSelector: @Composable () -> Unit = {
         LpmSelectorText(

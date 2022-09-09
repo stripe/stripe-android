@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -134,6 +136,21 @@ internal fun WalletBody(
     )
 
     val uiState by viewModel.uiState.collectAsState()
+
+    uiState.alertMessage?.let { alertMessage ->
+        AlertDialog(
+            text = { Text(alertMessage.getMessage(LocalContext.current.resources)) },
+            onDismissRequest = viewModel::onAlertDismissed,
+            confirmButton = {
+                TextButton(onClick = viewModel::onAlertDismissed) {
+                    Text(
+                        text = stringResource(android.R.string.ok),
+                        color = MaterialTheme.linkColors.actionLabel
+                    )
+                }
+            }
+        )
+    }
 
     if (uiState.paymentDetailsList.isEmpty()) {
         Box(

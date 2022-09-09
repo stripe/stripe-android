@@ -7,12 +7,14 @@
 
 ### PaymentSheet
 
-* [CHANGED][5487](https://github.com/stripe/stripe-android/pull/5487) Updated Google Pay button to 
-  match new brand guidelines.
-* [ADDED][5502](https://github.com/stripe/stripe-android/pull/5502) Added phone number minimum 
+* [ADDED][5502](https://github.com/stripe/stripe-android/pull/5502) Added phone number minimum
   length validation
-* [ADDED][5518](https://github.com/stripe/stripe-android/pull/5518) Added state/province dropdown 
+* [ADDED][5518](https://github.com/stripe/stripe-android/pull/5518) Added state/province dropdown
   for US and Canada.
+* [CHANGED][5487](https://github.com/stripe/stripe-android/pull/5487) Updated Google Pay button to
+  match new brand guidelines.
+* [FIXED][5480](https://github.com/stripe/stripe-android/pull/5480) `FlowController` now correctly
+  preserves the previously selected payment method for guests.
 
 ## 20.11.0 - 2022-08-29
 This release adds postal code validation for PaymentSheet and fixed a fileprovider naming bug for Identity.
