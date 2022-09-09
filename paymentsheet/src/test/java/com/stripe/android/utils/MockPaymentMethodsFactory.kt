@@ -29,7 +29,7 @@ object MockPaymentMethodsFactory {
                 code = "paypal",
                 displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
                 iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal
-            ),
+            )
         )
     }
 
@@ -37,7 +37,7 @@ object MockPaymentMethodsFactory {
         code: String,
         displayNameResource: Int,
         iconResource: Int,
-        tintIconOnSelection: Boolean = false,
+        tintIconOnSelection: Boolean = false
     ): LpmRepository.SupportedPaymentMethod {
         return LpmRepository.SupportedPaymentMethod(
             code = code,
