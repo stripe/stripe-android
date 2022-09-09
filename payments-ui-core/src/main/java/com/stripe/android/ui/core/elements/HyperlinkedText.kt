@@ -64,6 +64,10 @@ fun HyperlinkedText(
     )
 }
 
+/**
+ * Custom URL pattern that doesn't include a period at the end of the URL, in case the URL is found
+ * at the end of the sentence.
+ */
 private val urlPattern: Pattern = Pattern.compile(
     "(https?://[a-z0-9.-]+\\.[a-z]{2,3}(?:/\\S*?(?=\\.*(?:\\s|\$)))?)",
     Pattern.CASE_INSENSITIVE or Pattern.MULTILINE or Pattern.DOTALL
