@@ -125,6 +125,7 @@ internal fun VerificationBody(
         if (requestFocus) {
             focusRequester.requestFocus()
             keyboardController?.show()
+            viewModel.onFocusRequested()
         }
     }
 

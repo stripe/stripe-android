@@ -90,7 +90,6 @@ internal class VerificationViewModel @Inject constructor(
                     onVerificationCompleted()
                 },
                 onFailure = {
-                    _requestFocus.value = false
                     onError(it)
                     linkEventsReporter.on2FAFailure()
                     viewModelScope.launch {
@@ -130,6 +129,10 @@ internal class VerificationViewModel @Inject constructor(
         clearError()
         navigator.navigateTo(LinkScreen.SignUp(), clearBackStack = true)
         linkAccountManager.logout()
+    }
+
+    fun onFocusRequested() {
+        _requestFocus.value = false
     }
 
     private fun clearError() {
