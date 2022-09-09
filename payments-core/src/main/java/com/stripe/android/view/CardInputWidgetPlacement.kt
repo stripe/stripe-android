@@ -6,6 +6,7 @@ import com.stripe.android.view.CardInputWidget.Field
 /**
  * A class for tracking the placement and layout of fields in [CardInputWidget].
  */
+@Suppress("MaximumLineLength")
 internal data class CardInputWidgetPlacement(
     internal var totalLengthInPixels: Int = 0,
 
