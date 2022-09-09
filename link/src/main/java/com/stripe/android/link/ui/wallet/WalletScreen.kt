@@ -4,7 +4,6 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -64,13 +63,17 @@ import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.ui.core.elements.DateConfig
 import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.RowController
+import com.stripe.android.ui.core.elements.RowElement
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionElementUI
+import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.flowOf
+import java.util.UUID
 
 @Preview
 @Composable
@@ -325,10 +328,25 @@ internal fun CardDetailsRecollectionForm(
     isCardExpired: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val cvcElement = remember(cvcController) {
-        CvcElement(
-            _identifier = IdentifierSpec.CardCvc,
-            controller = cvcController
+    val rowElement = remember(expiryDateController, cvcController) {
+        val rowFields: List<SectionSingleFieldElement> = buildList {
+            if (isCardExpired) {
+                this += SimpleTextElement(
+                    identifier = IdentifierSpec.Generic("date"),
+                    controller = expiryDateController
+                )
+            }
+
+            this += CvcElement(
+                _identifier = IdentifierSpec.CardCvc,
+                controller = cvcController
+            )
+        }
+
+        RowElement(
+            _identifier = IdentifierSpec.Generic("row_" + UUID.randomUUID().leastSignificantBits),
+            fields = rowFields,
+            controller = RowController(rowFields)
         )
     }
 
@@ -347,34 +365,12 @@ internal fun CardDetailsRecollectionForm(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                if (isCardExpired) {
-                    val expiryDateElement = remember(expiryDateController) {
-                        SimpleTextElement(
-                            identifier = IdentifierSpec.Generic("date"),
-                            controller = expiryDateController
-                        )
-                    }
-
-                    Box(modifier = Modifier.weight(0.5f)) {
-                        SectionElementUI(
-                            enabled = true,
-                            element = SectionElement.wrap(expiryDateElement),
-                            hiddenIdentifiers = emptyList(),
-                            lastTextFieldIdentifier = cvcElement.identifier
-                        )
-                    }
-                }
-
-                Box(modifier = Modifier.weight(0.5f)) {
-                    SectionElementUI(
-                        enabled = true,
-                        element = SectionElement.wrap(cvcElement),
-                        hiddenIdentifiers = emptyList(),
-                        lastTextFieldIdentifier = cvcElement.identifier
-                    )
-                }
-            }
+            SectionElementUI(
+                enabled = true,
+                element = SectionElement.wrap(rowElement),
+                hiddenIdentifiers = emptyList(),
+                lastTextFieldIdentifier = rowElement.fields.last().identifier
+            )
         }
     }
 }
