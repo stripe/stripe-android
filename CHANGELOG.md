@@ -15,6 +15,8 @@
   match new brand guidelines.
 * [FIXED][5480](https://github.com/stripe/stripe-android/pull/5480) `FlowController` now correctly
   preserves the previously selected payment method for guests.
+* [FIXED][5545](https://github.com/stripe/stripe-android/pull/5545) Fix an issue where custom flow 
+  PaymentSheet UI would have the bottom of the form cut off
 
 ## 20.11.0 - 2022-08-29
 This release adds postal code validation for PaymentSheet and fixed a fileprovider naming bug for Identity.

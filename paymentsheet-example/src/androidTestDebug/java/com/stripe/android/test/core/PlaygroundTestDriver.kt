@@ -120,7 +120,9 @@ class PlaygroundTestDriver(
         setup(testParameters)
         launchComplete()
 
-        selectors.paymentSelection.click()
+        if (testParameters.supportedPaymentMethods.size > 1) {
+            selectors.paymentSelection.click()
+        }
 
         // This takes a screenshot so that translation strings of placeholders
         // and labels and design can all be verified
@@ -404,6 +406,10 @@ class PlaygroundTestDriver(
         intent.putExtra(
             PaymentSheetPlaygroundActivity.USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA,
             testParameters.snapshotReturningCustomer
+        )
+        intent.putExtra(
+            PaymentSheetPlaygroundActivity.SUPPORTED_PAYMENT_METHODS_EXTRA,
+            testParameters.supportedPaymentMethods.toTypedArray()
         )
         val scenario = ActivityScenario.launch<PaymentSheetPlaygroundActivity>(intent)
         scenario.onActivity { activity ->
