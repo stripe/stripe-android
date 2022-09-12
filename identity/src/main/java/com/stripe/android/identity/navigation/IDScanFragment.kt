@@ -37,11 +37,12 @@ internal class IDScanFragment(
         continueButton.setOnClickListener {
             when (identityScanViewModel.targetScanType) {
                 ID_FRONT -> {
-                    startScanning(ID_BACK)
+                    collectFrontUploadStateAndPost(CollectedDataParam.Type.IDCARD) {
+                        startScanning(ID_BACK)
+                    }
                 }
                 ID_BACK -> {
-                    continueButton.toggleToLoading()
-                    collectUploadedStateAndUploadForBothSides(CollectedDataParam.Type.IDCARD)
+                    collectBackUploadStateAndPost(CollectedDataParam.Type.IDCARD)
                 }
                 else -> {
                     Log.e(

@@ -37,11 +37,12 @@ internal class DriverLicenseScanFragment(
         continueButton.setOnClickListener {
             when (identityScanViewModel.targetScanType) {
                 DL_FRONT -> {
-                    startScanning(DL_BACK)
+                    collectFrontUploadStateAndPost(CollectedDataParam.Type.DRIVINGLICENSE) {
+                        startScanning(DL_BACK)
+                    }
                 }
                 DL_BACK -> {
-                    continueButton.toggleToLoading()
-                    collectUploadedStateAndUploadForBothSides(CollectedDataParam.Type.DRIVINGLICENSE)
+                    collectBackUploadStateAndPost(CollectedDataParam.Type.DRIVINGLICENSE)
                 }
                 else -> {
                     Log.e(

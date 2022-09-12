@@ -14,19 +14,18 @@ import androidx.appcompat.app.AppCompatDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavArgument
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
-import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
+import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBack
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.ARG_IS_NAVIGATED_UP_TO
@@ -36,7 +35,8 @@ import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.fragmentIdToScreenName
 import com.stripe.android.identity.utils.isNavigatedUpTo
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
-import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
+import com.stripe.android.identity.utils.navigateToSelfieOrSubmit
+import com.stripe.android.identity.utils.postVerificationPageData
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -75,6 +75,8 @@ internal abstract class IdentityUploadFragment(
     abstract val frontScanType: IdentityScanState.ScanType
 
     open var backScanType: IdentityScanState.ScanType? = null
+
+    abstract val collectedDataParamType: CollectedDataParam.Type
 
     lateinit var binding: IdentityUploadFragmentBinding
 
@@ -184,22 +186,10 @@ internal abstract class IdentityUploadFragment(
             buildDialog(frontScanType).show()
         }
 
-        checkBackFields(
-            nonNullBlock = { backText, backCheckMarkContentDescriptionText, backScanType ->
-                binding.labelBack.text = backText
-                binding.finishedCheckMarkBack.contentDescription =
-                    backCheckMarkContentDescriptionText
-                binding.selectBack.setOnClickListener {
-                    buildDialog(backScanType).show()
-                }
-            },
-            nullBlock = {
-                binding.separator.visibility = View.GONE
-                binding.backUpload.visibility = View.GONE
-            }
-        )
+        binding.separator.visibility = View.GONE
+        binding.backUpload.visibility = View.GONE
 
-        binding.kontinue.isEnabled = false
+        binding.kontinue.toggleToDisabled()
         binding.kontinue.setText(getString(R.string.kontinue))
         return binding.root
     }
@@ -259,26 +249,127 @@ internal abstract class IdentityUploadFragment(
 
     private fun collectUploadedStateAndUpdateUI() {
         lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                identityViewModel.documentUploadState.collectLatest { latestState ->
-                    if (latestState.hasError()) {
-                        Log.e(TAG, "Fail to upload files: ${latestState.getError()}")
-                        navigateToDefaultErrorFragment(latestState.getError())
-                    } else {
-                        if (latestState.isFrontHighResUploaded()) {
-                            showFrontDone(latestState)
-                        }
-                        if (latestState.isBackHighResUploaded()) {
-                            showBackDone()
-                        }
-                        if (latestState.isHighResUploaded()) {
-                            showBothDone(latestState)
-                        }
-                    }
+            identityViewModel.documentFrontUploadedState.collectLatest { latestState ->
+                if (latestState.hasError()) {
+                    navigateToDefaultErrorFragment(latestState.getError())
+                } else if (latestState.isHighResUploaded()) {
+                    showFrontUploading()
+                    val front = requireNotNull(latestState.highResResult.data)
+                    postFrontCollectedDataParam(
+                        CollectedDataParam(
+                            idDocumentFront = DocumentUploadParam(
+                                highResImage = requireNotNull(front.uploadedStripeFile.id) {
+                                    "front uploaded file id is null"
+                                },
+                                uploadMethod = requireNotNull(front.uploadMethod)
+                            ),
+                            idDocumentType = collectedDataParamType
+                        )
+                    )
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            identityViewModel.documentBackUploadedState.collectLatest { latestState ->
+                if (latestState.hasError()) {
+                    navigateToDefaultErrorFragment(latestState.getError())
+                } else if (latestState.isHighResUploaded()) {
+                    showBackUploading()
+                    val back = requireNotNull(latestState.highResResult.data)
+                    postBackCollectedDataParam(
+                        CollectedDataParam(
+                            idDocumentBack = DocumentUploadParam(
+                                highResImage = requireNotNull(back.uploadedStripeFile.id) {
+                                    "front uploaded file id is null"
+                                },
+                                uploadMethod = requireNotNull(back.uploadMethod)
+                            ),
+                            idDocumentType = collectedDataParamType
+                        )
+                    )
                 }
             }
         }
     }
+
+    private fun turnOnBackUploadingUI() {
+        binding.separator.visibility = View.VISIBLE
+        binding.backUpload.visibility = View.VISIBLE
+
+        binding.labelBack.text = getString(requireNotNull(backTextRes))
+        binding.finishedCheckMarkBack.contentDescription =
+            getString(requireNotNull(backCheckMarkContentDescription))
+        binding.selectBack.setOnClickListener {
+            buildDialog(requireNotNull(backScanType)).show()
+        }
+    }
+
+    private fun postFrontCollectedDataParam(
+        collectedDataParam: CollectedDataParam
+    ) = identityViewModel.observeForVerificationPage(
+        viewLifecycleOwner,
+        onSuccess = { verificationPage ->
+            lifecycleScope.launch {
+                runCatching {
+                    postVerificationPageData(
+                        identityViewModel = identityViewModel,
+                        collectedDataParam =
+                        collectedDataParam,
+                        clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_FRONT_SELFIE else ClearDataParam.UPLOAD_FRONT,
+                        fromFragment = fragmentId
+                    ) { verificationPageDataWithNoError ->
+                        showFrontDone()
+                        if (collectedDataParamType == CollectedDataParam.Type.PASSPORT) {
+                            enableContinueButton(verificationPage)
+                        } else {
+                            if (verificationPageDataWithNoError.isMissingBack()) {
+                                turnOnBackUploadingUI()
+                            } else {
+                                enableContinueButton(verificationPage)
+                            }
+                        }
+                    }
+                }.onFailure {
+                    Log.e(TAG, "Fail to observeForVerificationPage: $it")
+                    navigateToDefaultErrorFragment(it)
+                }
+            }
+        },
+        onFailure = { throwable ->
+            Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
+            navigateToDefaultErrorFragment(throwable)
+        }
+    )
+
+    private fun postBackCollectedDataParam(
+        collectedDataParam: CollectedDataParam
+    ) = identityViewModel.observeForVerificationPage(
+        viewLifecycleOwner,
+        onSuccess = { verificationPage ->
+            lifecycleScope.launch {
+                runCatching {
+                    postVerificationPageData(
+                        identityViewModel = identityViewModel,
+                        collectedDataParam =
+                        collectedDataParam,
+                        clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_TO_SELFIE else ClearDataParam.UPLOAD_TO_CONFIRM,
+                        fromFragment = fragmentId
+                    ) {
+                        showBackDone()
+                        enableContinueButton(verificationPage)
+                    }
+                }.onFailure {
+                    Log.e(TAG, "Fail to observeForVerificationPage: $it")
+                    navigateToDefaultErrorFragment(it)
+                }
+            }
+        },
+        onFailure = { throwable ->
+            Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
+            navigateToDefaultErrorFragment(throwable)
+        }
+    )
 
     private fun getTitleFromScanType(scanType: IdentityScanState.ScanType): String {
         return when (scanType) {
@@ -377,7 +468,7 @@ internal abstract class IdentityUploadFragment(
         binding.finishedCheckMarkFront.visibility = View.GONE
     }
 
-    protected open fun showFrontDone(latestState: DocumentUploadState) {
+    private fun showFrontDone() {
         binding.selectFront.visibility = View.GONE
         binding.progressCircularFront.visibility = View.GONE
         binding.finishedCheckMarkFront.visibility = View.VISIBLE
@@ -395,68 +486,18 @@ internal abstract class IdentityUploadFragment(
         binding.finishedCheckMarkBack.visibility = View.VISIBLE
     }
 
-    private fun showBothDone(latestState: DocumentUploadState) {
-        binding.kontinue.isEnabled = true
+    private fun enableContinueButton(verificationPage: VerificationPage) {
+        binding.kontinue.toggleToButton()
         binding.kontinue.setOnClickListener {
             binding.kontinue.toggleToLoading()
-            runCatching {
-                val front =
-                    requireNotNull(latestState.frontHighResResult.data)
-                val back =
-                    requireNotNull(latestState.backHighResResult.data)
-                trySubmit(
-                    CollectedDataParam(
-                        idDocumentFront = DocumentUploadParam(
-                            highResImage = requireNotNull(front.uploadedStripeFile.id) {
-                                "front uploaded file id is null"
-                            },
-                            uploadMethod = requireNotNull(front.uploadMethod)
-                        ),
-                        idDocumentBack = DocumentUploadParam(
-                            highResImage = requireNotNull(back.uploadedStripeFile.id) {
-                                "back uploaded file id is null"
-                            },
-                            uploadMethod = requireNotNull(back.uploadMethod)
-                        ),
-                        idDocumentType = frontScanType.toType()
-                    )
+            lifecycleScope.launch {
+                navigateToSelfieOrSubmit(
+                    verificationPage,
+                    identityViewModel,
+                    fragmentId
                 )
-            }.onFailure {
-                Log.d(TAG, "fail to submit uploaded files: $it")
-                navigateToDefaultErrorFragment(it)
             }
         }
-    }
-
-    protected fun trySubmit(collectedDataParam: CollectedDataParam) {
-        identityViewModel.observeForVerificationPage(
-            viewLifecycleOwner,
-            onSuccess = { verificationPage ->
-                lifecycleScope.launch {
-                    if (verificationPage.requireSelfie()) {
-                        postVerificationPageDataAndMaybeSubmit(
-                            identityViewModel = identityViewModel,
-                            collectedDataParam = collectedDataParam,
-                            clearDataParam = ClearDataParam.UPLOAD_TO_SELFIE,
-                            fromFragment = fragmentId
-                        ) {
-                            findNavController().navigate(R.id.action_global_selfieFragment)
-                        }
-                    } else {
-                        postVerificationPageDataAndMaybeSubmit(
-                            identityViewModel = identityViewModel,
-                            collectedDataParam = collectedDataParam,
-                            clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                            fromFragment = fragmentId
-                        )
-                    }
-                }
-            },
-            onFailure = {
-                Log.e(TAG, "Fail to observeForVerificationPage: $it")
-                navigateToDefaultErrorFragment(it)
-            }
-        )
     }
 
     companion object {
