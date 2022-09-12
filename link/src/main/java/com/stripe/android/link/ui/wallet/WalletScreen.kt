@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -284,9 +285,9 @@ internal fun WalletBody(
             )
         }
 
-        uiState.errorMessage?.let {
+        AnimatedVisibility(visible = uiState.errorMessage != null) {
             ErrorText(
-                text = it.getMessage(LocalContext.current.resources),
+                text = uiState.errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)

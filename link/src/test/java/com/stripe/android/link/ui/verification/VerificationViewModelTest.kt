@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui.verification
 
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.asLiveData
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
 import com.google.common.truth.Truth.assertThat
@@ -15,8 +16,13 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.ui.core.injection.NonFallbackInjector
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -25,6 +31,8 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -35,6 +43,16 @@ class VerificationViewModelTest {
     private val logger = Logger.noop()
     private val linkAccount = mock<LinkAccount>().apply {
         whenever(accountStatus).thenReturn(AccountStatus.VerificationStarted)
+    }
+
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+    }
+
+    @AfterTest
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -67,7 +85,7 @@ class VerificationViewModelTest {
     }
 
     @Test
-    fun `When onVerificationCodeEntered succeeds then it navigates to Wallet and analytics event is sent`() =
+    fun `When confirmVerification succeeds then it navigates to Wallet and analytics event is sent`() =
         runTest {
             whenever(linkAccountManager.confirmVerification(any()))
                 .thenReturn(Result.success(mock()))
@@ -80,7 +98,7 @@ class VerificationViewModelTest {
         }
 
     @Test
-    fun `When onVerificationCodeEntered fails then an error message is shown and analytics event is sent`() =
+    fun `When confirmVerification fails then an error message is shown and analytics event is sent`() =
         runTest {
             val errorMessage = "Error message"
             whenever(linkAccountManager.confirmVerification(any()))
@@ -91,6 +109,34 @@ class VerificationViewModelTest {
 
             assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorMessage))
             verify(linkEventsReporter).on2FAFailure()
+        }
+
+    @Test
+    fun `When confirmVerification fails then code is cleared and focus requested`() =
+        runTest {
+            whenever(linkAccountManager.confirmVerification(any()))
+                .thenReturn(Result.failure(RuntimeException("Error")))
+            val viewModel = createViewModel()
+
+            var otp = ""
+            viewModel.otpElement.controller.fieldValue.asLiveData().observeForever {
+                otp = it
+            }
+
+            for (i in 0 until viewModel.otpElement.controller.otpLength) {
+                viewModel.otpElement.controller.onValueChanged(i, i.toString())
+            }
+            assertThat(otp).isEqualTo("012345")
+
+            viewModel.onFocusRequested()
+            assertThat(viewModel.requestFocus.value).isFalse()
+            viewModel.onVerificationCodeEntered("code")
+
+            // Advance past animation
+            advanceTimeBy(1000)
+
+            assertThat(viewModel.requestFocus.value).isTrue()
+            assertThat(otp).isEqualTo("")
         }
 
     @Test

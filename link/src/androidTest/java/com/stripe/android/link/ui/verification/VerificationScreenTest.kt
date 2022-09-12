@@ -5,6 +5,8 @@ import android.view.KeyEvent.KEYCODE_DEL
 import androidx.activity.ComponentActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.test.assertIsFocused
@@ -197,6 +199,7 @@ internal class VerificationScreenTest {
                 otpElement = otpElement,
                 isProcessing = isProcessing,
                 errorMessage = errorMessage,
+                focusRequester = remember { FocusRequester() },
                 onBack = onBack,
                 onChangeEmailClick = onChangeEmailClick,
                 onResendCodeClick = onResendCodeClick
