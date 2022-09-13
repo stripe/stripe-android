@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.animation.LayoutTransition
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -960,6 +961,28 @@ internal class PaymentSheetActivityTest {
 
             viewModel.updateBelowButtonText(null)
             assertThat(activity.viewBinding.notes.isVisible).isFalse()
+        }
+    }
+
+    @Test
+    fun `verify animation is enabled for layout transition changes`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            assertThat(
+                activity.viewBinding.bottomSheet.layoutTransition.isTransitionTypeEnabled(
+                    LayoutTransition.CHANGING
+                )
+            ).isTrue()
+
+            assertThat(
+                activity.viewBinding.fragmentContainerParent.layoutTransition
+                    .isTransitionTypeEnabled(
+                        LayoutTransition.CHANGING
+                    )
+            ).isTrue()
         }
     }
 
