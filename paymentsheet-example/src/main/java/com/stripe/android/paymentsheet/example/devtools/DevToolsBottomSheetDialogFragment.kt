@@ -14,7 +14,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -22,12 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.stripe.android.core.networking.StripeNetworkClientInterceptor
-import java.time.format.TextStyle
-import kotlin.reflect.KProperty1
-import kotlin.reflect.full.companionObjectInstance
-import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.jvm.javaGetter
 
 class DevToolsBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
@@ -50,7 +43,7 @@ class DevToolsBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
 @Composable
 private fun DevTools() {
-    val endpoints = remember { stripeApiEndpoints() }
+    val endpoints = remember { DevToolsStore.endpoints }
 
     Column {
         Text(
@@ -63,12 +56,12 @@ private fun DevTools() {
 
         for (endpoint in endpoints) {
             val text = endpoint.removePrefix("https://api.stripe.com/v1/")
-            val isTurnedOn = endpoint in ApiStore.failingEndpoints
+            val isTurnedOn = endpoint in DevToolsStore.failingEndpoints
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .clickable { ApiStore.toggle(endpoint) }
+                    .clickable { DevToolsStore.toggle(endpoint) }
             ) {
                 Text(
                     text = text,
@@ -83,40 +76,4 @@ private fun DevTools() {
             }
         }
     }
-}
-
-object ApiStore {
-    val failingEndpoints = mutableStateListOf<String>()
-
-    fun toggle(endpoint: String) {
-        if (endpoint in failingEndpoints) {
-            failingEndpoints.remove(endpoint)
-        } else {
-            failingEndpoints.add(endpoint)
-        }
-
-        StripeNetworkClientInterceptor.evaluator = { requestUrl ->
-            failingEndpoints.any { requestUrl.startsWith(it) }
-        }
-    }
-}
-
-fun stripeApiEndpoints(): List<String> {
-    val repoClass = Class.forName("com.stripe.android.networking.StripeApiRepository").kotlin
-    val companionObject = repoClass.companionObjectInstance ?: return emptyList()
-
-    return try {
-        companionObject::class.declaredMemberProperties.mapNotNull { property ->
-            property.getEndpointUrl(companionObject)
-        }
-    } catch (t: Throwable) {
-        println(t)
-        emptyList()
-    }
-}
-
-private fun KProperty1<out Any, *>.getEndpointUrl(obj: Any): String? {
-    val isEndpointUrl = name.endsWith("url", ignoreCase = true)
-    val stringValue = javaGetter?.invoke(obj) as? String ?: return null
-    return stringValue.takeIf { isEndpointUrl }
 }

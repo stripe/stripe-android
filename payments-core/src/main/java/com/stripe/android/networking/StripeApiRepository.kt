@@ -1011,7 +1011,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         return runCatching {
             val fpxBankStatuses = fetchStripeModel(
                 apiRequestFactory.createGet(
-                    getApiUrl("fpx/bank_statuses"),
+                    fpxBankStatusesUrl,
 
                     // don't pass connected account
                     options.copy(stripeAccount = null),
@@ -1057,7 +1057,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): Stripe3ds2AuthResult? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getApiUrl("3ds2/authenticate"),
+                challenge3dsAuthenticateUrl,
                 requestOptions,
                 authParams.toParamMap()
             ),
@@ -1075,7 +1075,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): Stripe3ds2AuthResult? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getApiUrl("3ds2/challenge_complete"),
+                challenge3dsCompleteUrl,
                 requestOptions,
                 mapOf("source" to sourceId)
             ),
@@ -1145,7 +1145,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             val params = it.params.plus(buildPaymentUserAgentPair())
             fetchStripeModel(
                 apiRequestFactory.createPost(
-                    getApiUrl("radar/session"),
+                    radarSessionUrl,
                     requestOptions,
                     params
                 ),
@@ -1721,7 +1721,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         return fetchStripeModel(
             apiRequestFactory.createGet(
-                getApiUrl("elements/sessions"),
+                elementsSessionsUrl,
                 options,
                 params
             ),
@@ -2037,6 +2037,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val linkFinancialConnectionsSessionUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/link_account_sessions")
+
+        internal val elementsSessionsUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("elements/sessions")
+
+        internal val radarSessionUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("radar/session")
+
+        internal val fpxBankStatusesUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("fpx/bank_statuses")
+
+        internal val challenge3dsAuthenticateUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("3ds2/authenticate")
+
+        internal val challenge3dsCompleteUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("3ds2/challenge_complete")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/:id`

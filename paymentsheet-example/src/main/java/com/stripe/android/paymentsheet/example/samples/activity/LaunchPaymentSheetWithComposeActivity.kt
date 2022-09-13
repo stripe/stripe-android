@@ -8,11 +8,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetContract
+import com.stripe.android.paymentsheet.example.devtools.addDevToolsMenu
 
 internal class LaunchPaymentSheetWithComposeActivity :
     BasePaymentSheetActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        addDevToolsMenu()
 
         setContent {
             MaterialTheme {

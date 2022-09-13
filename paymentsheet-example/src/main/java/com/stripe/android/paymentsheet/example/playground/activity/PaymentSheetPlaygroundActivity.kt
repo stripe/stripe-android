@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.databinding.ActivityPaymentSheetPlaygroundBinding
+import com.stripe.android.paymentsheet.example.devtools.addDevToolsMenu
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
@@ -123,6 +124,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
+        addDevToolsMenu()
 
         paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
         flowController = PaymentSheet.FlowController.create(

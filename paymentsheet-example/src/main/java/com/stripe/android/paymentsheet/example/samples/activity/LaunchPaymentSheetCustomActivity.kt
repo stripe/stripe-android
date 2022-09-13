@@ -11,6 +11,7 @@ import androidx.lifecycle.map
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.devtools.addDevToolsMenu
 import com.stripe.android.paymentsheet.model.PaymentOption
 
 internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
@@ -22,6 +23,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        addDevToolsMenu()
 
         flowController = PaymentSheet.FlowController.create(
             this,
