@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.example.samples.activity.LaunchPaymentShe
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
+import com.stripe.android.paymentsheet.example.devtools.DevToolsBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearancePlaygroundActivity
 
 class MainActivity : AppCompatActivity() {
@@ -35,6 +36,11 @@ class MainActivity : AppCompatActivity() {
 
         viewBinding.appearanceButton.setOnClickListener {
             startActivity(Intent(this, AppearancePlaygroundActivity::class.java))
+        }
+
+        viewBinding.devTools.setOnClickListener {
+            val bottomSheet = DevToolsBottomSheetDialogFragment.newInstance()
+            bottomSheet.show(supportFragmentManager, bottomSheet.tag)
         }
 
         viewBinding.version.text = StripeSdkVersion.VERSION_NAME

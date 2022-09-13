@@ -97,6 +97,8 @@ dependencies {
     androidTestImplementation project(path: ':payments-ui-core')
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
+
+    debugImplementation "org.jetbrains.kotlin:kotlin-reflect:1.7.10"
 }
 
 shot {

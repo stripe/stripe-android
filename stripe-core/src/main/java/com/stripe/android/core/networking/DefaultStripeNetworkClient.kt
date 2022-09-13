@@ -11,6 +11,20 @@ import java.io.File
 import java.io.IOException
 import kotlin.coroutines.CoroutineContext
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+object StripeNetworkClientInterceptor {
+
+    var error: Throwable? = null
+    var evaluator: (String) -> Boolean = { false }
+
+    fun throwErrorOrDoNothing(requestUrl: String) {
+        val shouldThrow = evaluator(requestUrl)
+        if (shouldThrow) {
+            error?.let { throw it }
+        }
+    }
+}
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultStripeNetworkClient @JvmOverloads constructor(
     private val workContext: CoroutineContext = Dispatchers.IO,
@@ -62,6 +76,7 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
     private fun makeRequest(
         request: StripeRequest
     ): StripeResponse<String> {
+        StripeNetworkClientInterceptor.throwErrorOrDoNothing(request.url)
         return parseResponse(connectionFactory.create(request), request.url)
     }
 
