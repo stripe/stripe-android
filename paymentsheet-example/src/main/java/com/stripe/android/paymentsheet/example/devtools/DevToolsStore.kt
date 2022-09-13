@@ -2,14 +2,20 @@ package com.stripe.android.paymentsheet.example.devtools
 
 import androidx.compose.runtime.mutableStateListOf
 import com.stripe.android.core.networking.StripeNetworkClientInterceptor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.javaGetter
 
 object DevToolsStore {
-    val endpoints = stripeApiEndpoints()
+    val endpoints = mutableStateListOf<String>()
     val failingEndpoints = mutableStateListOf<String>()
+
+    suspend fun loadEndpoints() = withContext(Dispatchers.IO) {
+        endpoints += stripeApiEndpoints()
+    }
 
     fun toggle(endpoint: String) {
         if (endpoint in failingEndpoints) {

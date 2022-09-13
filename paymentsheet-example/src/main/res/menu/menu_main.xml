@@ -5,7 +5,7 @@
     <item
         android:id="@+id/menu_dev_tools"
         android:title="Dev Tools"
-        android:icon="@drawable/ic_settings"
+        android:icon="@drawable/ic_developer_mode"
         android:orderInCategory="100"
         app:showAsAction="always" />
 

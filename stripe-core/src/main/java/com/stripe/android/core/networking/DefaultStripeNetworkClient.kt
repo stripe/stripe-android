@@ -2,6 +2,7 @@ package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import kotlinx.coroutines.Dispatchers
@@ -14,13 +15,15 @@ import kotlin.coroutines.CoroutineContext
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 object StripeNetworkClientInterceptor {
 
-    var error: Throwable? = null
+    var delay: Long = 1_000L
+    var error: Throwable = IOException("Interceptor error")
     var evaluator: (String) -> Boolean = { false }
 
     fun throwErrorOrDoNothing(requestUrl: String) {
         val shouldThrow = evaluator(requestUrl)
         if (shouldThrow) {
-            error?.let { throw it }
+            Thread.sleep(delay)
+            throw error
         }
     }
 }
@@ -76,7 +79,9 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
     private fun makeRequest(
         request: StripeRequest
     ): StripeResponse<String> {
-        StripeNetworkClientInterceptor.throwErrorOrDoNothing(request.url)
+        if (BuildConfig.DEBUG) {
+            StripeNetworkClientInterceptor.throwErrorOrDoNothing(request.url)
+        }
         return parseResponse(connectionFactory.create(request), request.url)
     }
 
@@ -84,6 +89,9 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
         request: StripeRequest,
         outputFile: File
     ): StripeResponse<File> {
+        if (BuildConfig.DEBUG) {
+            StripeNetworkClientInterceptor.throwErrorOrDoNothing(request.url)
+        }
         return parseResponse(connectionFactory.createForFile(request, outputFile), request.url)
     }
 
