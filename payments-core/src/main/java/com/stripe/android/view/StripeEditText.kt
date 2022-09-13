@@ -196,6 +196,17 @@ open class StripeEditText @JvmOverloads constructor(
     }
 
     private fun listenForDeleteEmpty() {
+        // On some devices, the OnKeyListener isn't invoked for software keyboards. It is invoked on
+        // other devices such as my Pixel. To fix the issue for all devices, we're adding an
+        // additional text watcher to keep isLastKeyDelete in the correct state.
+        val textWatcher = object : StripeTextWatcher() {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                isLastKeyDelete = count == 0
+            }
+        }
+
+        addTextChangedListener(textWatcher)
+
         // This method works for hard keyboards and older phones.
         setOnKeyListener { _, keyCode, event ->
             isLastKeyDelete = isDeleteKey(keyCode, event)
