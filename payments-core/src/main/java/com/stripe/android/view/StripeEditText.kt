@@ -86,6 +86,12 @@ open class StripeEditText @JvmOverloads constructor(
 
     private var errorMessageListener: ErrorMessageListener? = null
 
+    private val isLastKeyDeleteTextWatcher = object : StripeTextWatcher() {
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            isLastKeyDelete = count == 0
+        }
+    }
+
     /**
      * The color used for error text.
      */
@@ -199,13 +205,9 @@ open class StripeEditText @JvmOverloads constructor(
         // On some devices, the OnKeyListener isn't invoked for software keyboards. It is invoked on
         // other devices such as my Pixel. To fix the issue for all devices, we're adding an
         // additional text watcher to keep isLastKeyDelete in the correct state.
-        val textWatcher = object : StripeTextWatcher() {
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                isLastKeyDelete = count == 0
-            }
+        if (isLastKeyDeleteTextWatcher !in textWatchers.orEmpty()) {
+            addTextChangedListener(isLastKeyDeleteTextWatcher)
         }
-
-        addTextChangedListener(textWatcher)
 
         // This method works for hard keyboards and older phones.
         setOnKeyListener { _, keyCode, event ->
