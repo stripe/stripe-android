@@ -6,6 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.R
+import com.stripe.android.link.model.AccountStatus
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,7 +22,8 @@ internal class LinkAppBarStateTest {
         val state = buildLinkAppBarState(
             isRootScreen = true,
             currentRoute = LinkScreen.Wallet.route,
-            email = " "
+            email = " ",
+            accountStatus = AccountStatus.SignedOut
         )
 
         assertThat(state.email).isNull()
@@ -32,14 +34,16 @@ internal class LinkAppBarStateTest {
         val state = buildLinkAppBarState(
             isRootScreen = true,
             currentRoute = LinkScreen.Loading.route,
-            email = null
+            email = null,
+            accountStatus = AccountStatus.SignedOut
         )
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_close,
             showHeader = true,
             showOverflowMenu = false,
-            email = null
+            email = null,
+            accountStatus = AccountStatus.SignedOut
         )
 
         assertThat(state).isEqualTo(expected)
@@ -50,14 +54,16 @@ internal class LinkAppBarStateTest {
         val state = buildLinkAppBarState(
             isRootScreen = true,
             currentRoute = LinkScreen.Verification.route,
-            email = "someone@stripe.com"
+            email = "someone@stripe.com",
+            accountStatus = AccountStatus.VerificationStarted
         )
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_close,
             showHeader = true,
             showOverflowMenu = false,
-            email = null
+            email = null,
+            accountStatus = AccountStatus.VerificationStarted
         )
 
         assertThat(state).isEqualTo(expected)
@@ -68,14 +74,16 @@ internal class LinkAppBarStateTest {
         val state = buildLinkAppBarState(
             isRootScreen = true,
             currentRoute = LinkScreen.VerificationDialog.route,
-            email = "someone@stripe.com"
+            email = "someone@stripe.com",
+            accountStatus = AccountStatus.VerificationStarted
         )
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_close,
             showHeader = true,
             showOverflowMenu = false,
-            email = "someone@stripe.com"
+            email = "someone@stripe.com",
+            accountStatus = AccountStatus.VerificationStarted
         )
 
         assertThat(state).isEqualTo(expected)
@@ -86,14 +94,16 @@ internal class LinkAppBarStateTest {
         val state = buildLinkAppBarState(
             isRootScreen = true,
             currentRoute = LinkScreen.Wallet.route,
-            email = "someone@stripe.com"
+            email = "someone@stripe.com",
+            accountStatus = AccountStatus.Verified
         )
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_close,
             showHeader = true,
             showOverflowMenu = true,
-            email = "someone@stripe.com"
+            email = "someone@stripe.com",
+            accountStatus = AccountStatus.Verified
         )
 
         assertThat(state).isEqualTo(expected)
@@ -104,14 +114,16 @@ internal class LinkAppBarStateTest {
         val state = buildLinkAppBarState(
             isRootScreen = true,
             currentRoute = LinkScreen.PaymentMethod.route,
-            email = "someone@stripe.com"
+            email = "someone@stripe.com",
+            accountStatus = AccountStatus.Verified
         )
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_close,
             showHeader = true,
             showOverflowMenu = true,
-            email = "someone@stripe.com"
+            email = "someone@stripe.com",
+            accountStatus = AccountStatus.Verified
         )
 
         assertThat(state).isEqualTo(expected)
@@ -122,14 +134,16 @@ internal class LinkAppBarStateTest {
         val state = buildLinkAppBarState(
             isRootScreen = false,
             currentRoute = LinkScreen.PaymentMethod.route,
-            email = "someone@stripe.com"
+            email = "someone@stripe.com",
+            accountStatus = AccountStatus.Verified
         )
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_back,
             showHeader = false,
             showOverflowMenu = false,
-            email = null
+            email = null,
+            accountStatus = AccountStatus.Verified
         )
 
         assertThat(state).isEqualTo(expected)
@@ -140,14 +154,16 @@ internal class LinkAppBarStateTest {
         val state = buildLinkAppBarState(
             isRootScreen = false,
             currentRoute = LinkScreen.CardEdit.route,
-            email = "someone@stripe.com"
+            email = "someone@stripe.com",
+            accountStatus = AccountStatus.Verified
         )
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_back,
             showHeader = false,
             showOverflowMenu = false,
-            email = null
+            email = null,
+            accountStatus = AccountStatus.Verified
         )
 
         assertThat(state).isEqualTo(expected)
@@ -158,14 +174,36 @@ internal class LinkAppBarStateTest {
         val state = buildLinkAppBarState(
             isRootScreen = true,
             currentRoute = LinkScreen.SignUp.route,
-            email = null
+            email = null,
+            accountStatus = AccountStatus.SignedOut
         )
 
         val expected = LinkAppBarState(
             navigationIcon = R.drawable.ic_link_close,
             showHeader = true,
             showOverflowMenu = false,
-            email = null
+            email = null,
+            accountStatus = AccountStatus.SignedOut
+        )
+
+        assertThat(state).isEqualTo(expected)
+    }
+
+    @Test
+    fun signupScreenShowsCorrectAppBarStateWithEmail() {
+        val state = buildLinkAppBarState(
+            isRootScreen = true,
+            currentRoute = LinkScreen.SignUp.route,
+            email = "someone@stripe.com",
+            accountStatus = AccountStatus.NeedsVerification
+        )
+
+        val expected = LinkAppBarState(
+            navigationIcon = R.drawable.ic_link_close,
+            showHeader = true,
+            showOverflowMenu = false,
+            email = null,
+            accountStatus = AccountStatus.NeedsVerification
         )
 
         assertThat(state).isEqualTo(expected)
@@ -174,12 +212,13 @@ internal class LinkAppBarStateTest {
     private fun buildLinkAppBarState(
         isRootScreen: Boolean,
         currentRoute: String?,
-        email: String?
+        email: String?,
+        accountStatus: AccountStatus?
     ): LinkAppBarState {
         var state: LinkAppBarState? = null
 
         composeTestRule.setContent {
-            state = rememberLinkAppBarState(isRootScreen, currentRoute, email)
+            state = rememberLinkAppBarState(isRootScreen, currentRoute, email, accountStatus)
         }
 
         return state ?: throw AssertionError(
