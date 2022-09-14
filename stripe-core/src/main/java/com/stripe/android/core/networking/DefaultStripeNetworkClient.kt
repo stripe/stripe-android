@@ -17,10 +17,10 @@ object StripeNetworkClientInterceptor {
 
     var delay: Long = 1_000L
     var error: Throwable = IOException("Interceptor error")
-    var evaluator: (String) -> Boolean = { false }
+    var shouldFailEvaluator: (String) -> Boolean = { false }
 
     fun throwErrorOrDoNothing(requestUrl: String) {
-        val shouldThrow = evaluator(requestUrl)
+        val shouldThrow = shouldFailEvaluator(requestUrl)
         if (shouldThrow) {
             Thread.sleep(delay)
             throw error
