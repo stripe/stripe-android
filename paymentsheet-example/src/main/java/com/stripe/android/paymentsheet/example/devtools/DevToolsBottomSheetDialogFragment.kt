@@ -4,9 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,14 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -60,40 +55,10 @@ class DevToolsBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 }
 
-@Composable
-private fun DevTools() {
-    val context = LocalContext.current
-    val endpoints = remember { DevToolsStore.endpoints }
-
-    LaunchedEffect(DevToolsStore.failed) {
-        val activity = context as? AppCompatActivity
-        activity?.supportFragmentManager?.popBackStack()
-    }
-
-    LaunchedEffect(Unit) {
-        DevToolsStore.loadEndpoints()
-    }
-
-    if (endpoints.isEmpty()) {
-        DevToolsLoading()
-    } else {
-        DevToolsContent(endpoints = endpoints)
-    }
-}
-
-@Composable
-private fun DevToolsLoading() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.padding(16.dp)
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun DevToolsContent(endpoints: List<Endpoint>) {
+private fun DevTools() {
+    val endpoints = remember { DevToolsStore.endpoints }
     val scrollState = rememberLazyListState()
 
     val hasScrolled = remember {
@@ -127,7 +92,7 @@ private fun DevToolsContent(endpoints: List<Endpoint>) {
                 DevToolsEndpointItem(
                     endpoint = endpoint,
                     isLastItem = index == endpoints.lastIndex,
-                    onToggle = { DevToolsStore.toggle(endpoint) }
+                    onToggle = { DevToolsStore.toggleFailureFor(endpoint) }
                 )
             }
         }

@@ -1,11 +1,11 @@
 package com.stripe.android.paymentsheet.example.devtools
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.stripe.android.core.networking.StripeNetworkClientInterceptor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.reflect.KFunction
@@ -23,7 +23,7 @@ internal data class Endpoint(
     val regex: Regex
 ) {
     val name: String
-        get() = url.removePrefix("https://api.stripe.com/v1/")
+        get() = url.removePrefix("https://api.stripe.com/").removePrefix("v1/")
 }
 
 internal object DevToolsStore {
@@ -33,46 +33,38 @@ internal object DevToolsStore {
     var failed by mutableStateOf(false)
         private set
 
-    suspend fun loadEndpoints() = withContext(Dispatchers.IO) {
+    suspend fun loadEndpoints() = withContext(Dispatchers.Default) {
         val apiEndpoints = stripeApiEndpoints()
         if (apiEndpoints != null) {
-            endpoints += apiEndpoints.sortedBy { it.url }
+            endpoints += apiEndpoints.sortedBy { it.name }
         } else {
             failed = true
         }
     }
 
-    fun toggle(endpoint: Endpoint) {
+    fun toggleFailureFor(endpoint: Endpoint) {
         if (endpoint in failingEndpoints) {
             failingEndpoints.remove(endpoint)
         } else {
             failingEndpoints.add(endpoint)
         }
+    }
 
-        StripeNetworkClientInterceptor.shouldFailEvaluator = { requestUrl ->
-            val cleanedUrl = Uri.parse(requestUrl).buildUpon().clearQuery().build().toString()
+    fun shouldFailFor(requestUrl: String): Boolean {
+        val cleanedUrl = Uri.parse(requestUrl).buildUpon().clearQuery().build().toString()
 
-            val matchingUrls = failingEndpoints.filter { endpoint ->
-                endpoint.regex.matches(cleanedUrl)
-            }
-
-            val allMatches = endpoints.filter { endpoint ->
-                endpoint.regex.matches(cleanedUrl)
-            }
-
-            if (allMatches.size > 1) {
-                // We got two matches. This can happen for situations like the following:
-                // - /consumers/payment_details/list
-                // - /consumers/payment_details/{some_id}
-                //
-                // To resolve this, we check that the endpoint's URL (and not its regex) matches the
-                // matching URL. Only if that's the case, can we be sure that we're intercepting the
-                // right one.
-                allMatches.single { it.url == cleanedUrl } == matchingUrls.first()
-            } else {
-                matchingUrls.isNotEmpty()
-            }
+        val matchingEndpoints = endpoints.filter { endpoint ->
+            endpoint.regex.matches(cleanedUrl)
         }
+
+        val matchingEndpoint = if (matchingEndpoints.size > 1) {
+            // If multiple endpoints match, find the one that matches exactly
+            matchingEndpoints.single { it.url == cleanedUrl }
+        } else {
+            matchingEndpoints.firstOrNull()
+        }
+
+        return matchingEndpoint.takeIf { it in failingEndpoints } != null
     }
 }
 
@@ -93,7 +85,7 @@ private fun stripeApiEndpoints(): List<Endpoint>? {
 
         endpointProps + endpointMethods
     } catch (t: Throwable) {
-        println(t)
+        Log.d("DevToolsStore", "Failed to load API endpoints", t)
         null
     }
 }
@@ -110,6 +102,10 @@ private fun KFunction<*>.getEndpoint(obj: Any): Endpoint? {
         return null
     }
 
+    // The results will be:
+    // - urlParams: /consumers/paymentdetails/{paymentId}
+    // - regexParams: /consumers/paymentdetails/(.+)
+    // We use the former in the UI, and the latter to perform the actual matching
     val urlParams = valueParameters.map { "{${it.name}}" }
     val regexParams = valueParameters.map { "(.+)" }
 

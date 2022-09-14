@@ -12,15 +12,15 @@ import java.io.File
 import java.io.IOException
 import kotlin.coroutines.CoroutineContext
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object StripeNetworkClientInterceptor {
 
     var delay: Long = 1_000L
     var error: Throwable = IOException("Interceptor error")
-    var shouldFailEvaluator: (String) -> Boolean = { false }
+    var shouldFail: (String) -> Boolean = { false }
 
     fun throwErrorOrDoNothing(requestUrl: String) {
-        val shouldThrow = shouldFailEvaluator(requestUrl)
+        val shouldThrow = shouldFail(requestUrl)
         if (shouldThrow) {
             Thread.sleep(delay)
             throw error
