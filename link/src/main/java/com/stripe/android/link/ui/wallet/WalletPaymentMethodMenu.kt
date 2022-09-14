@@ -15,7 +15,7 @@ internal sealed class WalletPaymentMethodMenuItem(
 
     data class RemoveItem(
         @StringRes override val textResId: Int
-    ) : WalletPaymentMethodMenuItem(textResId)
+    ) : WalletPaymentMethodMenuItem(textResId, true)
 
     object EditCard : WalletPaymentMethodMenuItem(
         textResId = R.string.wallet_update_card
