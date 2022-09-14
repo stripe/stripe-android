@@ -7,7 +7,6 @@ import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.PermissionException
 import com.stripe.android.core.exception.RateLimitException
-import org.json.JSONException
 import java.io.IOException
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -34,6 +33,7 @@ object StripeNetworkClientInterceptor {
     internal fun throwErrorOrDoNothing(requestUrl: String) {
         val shouldThrow = shouldFail(requestUrl)
         if (shouldThrow) {
+            // TODO: Comment about off main thread
             Thread.sleep(delay)
             throw errorType.asException
         }

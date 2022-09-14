@@ -8,6 +8,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
@@ -55,7 +56,12 @@ internal class DefaultStripeNetworkClientTest {
                 workContext = testDispatcher,
                 connectionFactory = okConnectionFactory
             )
-            assertThat(executor.executeRequest(mock())).isSameInstanceAs(
+
+            val request: StripeRequest = mock {
+                on { url } doReturn "mock_url"
+            }
+
+            assertThat(executor.executeRequest(request = request)).isSameInstanceAs(
                 okResponseWithString
             )
         }
@@ -67,7 +73,17 @@ internal class DefaultStripeNetworkClientTest {
                 workContext = testDispatcher,
                 connectionFactory = okConnectionFactory
             )
-            assertThat(executor.executeRequestForFile(mock(), mock())).isSameInstanceAs(
+
+            val request: StripeRequest = mock {
+                on { url } doReturn "mock_url"
+            }
+
+            assertThat(
+                executor.executeRequestForFile(
+                    request = request,
+                    outputFile = mock()
+                )
+            ).isSameInstanceAs(
                 okResponseWithFile
             )
         }
@@ -84,8 +100,12 @@ internal class DefaultStripeNetworkClientTest {
                 )
             )
 
+            val request: StripeRequest = mock {
+                on { url } doReturn "mock_url"
+            }
+
             val failure = assertFailsWith<IllegalStateException> {
-                client.executeRequest(mock())
+                client.executeRequest(request = request)
             }
             assertThat(failure.message)
                 .isEqualTo("Failure")
