@@ -59,7 +59,7 @@ internal object DevToolsStore {
 
         val matchingEndpoint = if (matchingEndpoints.size > 1) {
             // If multiple endpoints match, find the one that matches exactly
-            matchingEndpoints.single { it.url == cleanedUrl }
+            matchingEndpoints.singleOrNull { it.url == cleanedUrl }
         } else {
             matchingEndpoints.firstOrNull()
         }

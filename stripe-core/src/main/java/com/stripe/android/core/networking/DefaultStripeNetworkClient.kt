@@ -13,22 +13,6 @@ import java.io.IOException
 import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object StripeNetworkClientInterceptor {
-
-    var delay: Long = 1_000L
-    var error: Throwable = IOException("Interceptor error")
-    var shouldFail: (String) -> Boolean = { false }
-
-    fun throwErrorOrDoNothing(requestUrl: String) {
-        val shouldThrow = shouldFail(requestUrl)
-        if (shouldThrow) {
-            Thread.sleep(delay)
-            throw error
-        }
-    }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultStripeNetworkClient @JvmOverloads constructor(
     private val workContext: CoroutineContext = Dispatchers.IO,
     private val connectionFactory: ConnectionFactory = ConnectionFactory.Default,

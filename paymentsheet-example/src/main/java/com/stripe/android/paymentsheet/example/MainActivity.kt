@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 
         viewBinding.version.text = StripeSdkVersion.VERSION_NAME
 
-        StripeNetworkClientInterceptor.shouldFail = { requestUrl ->
+        StripeNetworkClientInterceptor.setFailureEvaluator { requestUrl ->
             DevToolsStore.shouldFailFor(requestUrl)
         }
 
