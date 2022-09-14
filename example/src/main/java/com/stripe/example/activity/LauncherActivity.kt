@@ -110,6 +110,10 @@ class LauncherActivity : AppCompatActivity() {
                 AffirmPaymentActivity::class.java
             ),
             Item(
+                activity.getString(R.string.confirm_with_alipay),
+                AlipayPaymentActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.becs_debit_example),
                 BecsDebitPaymentMethodActivity::class.java
             ),
