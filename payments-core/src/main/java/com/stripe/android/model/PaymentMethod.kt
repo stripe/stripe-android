@@ -677,7 +677,7 @@ constructor(
         @JvmField val wallet: Wallet? = null,
 
         @JvmField
-        internal val networks: Networks? = null
+        val networks: Networks? = null
     ) : TypeData() {
         override val type: Type get() = Type.Card
 
