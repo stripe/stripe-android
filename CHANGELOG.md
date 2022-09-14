@@ -2,6 +2,10 @@
 
 ## X.X.X - 2022-XX-XX
 
+### Payments
+
+* [CHANGED] [5552](https://github.com/stripe/stripe-android/pull/5552) Make `PaymentMethod.Card.networks` field public.
+
 ## 20.12.0 - 2022-09-13
 This release upgrades `compileSdkVersion` to 33, updates Google Pay button to match the new brand 
 guidelines and fixes some bugs in `FlowController`.
