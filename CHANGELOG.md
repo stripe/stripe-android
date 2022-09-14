@@ -2,6 +2,10 @@
 
 ## X.X.X - 2022-XX-XX
 
+### Payments
+
+* [FIXED][5554](https://github.com/stripe/stripe-android/pull/5554) Fix Alipay integration when using the Alipay SDK.
+
 ## 20.12.0 - 2022-09-13
 This release upgrades `compileSdkVersion` to 33, updates Google Pay button to match the new brand 
 guidelines and fixes some bugs in `FlowController`.
