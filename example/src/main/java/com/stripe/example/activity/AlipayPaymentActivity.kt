@@ -77,21 +77,25 @@ class AlipayPaymentActivity : StripeIntentActivity() {
             callback = object : ApiResultCallback<PaymentIntentResult> {
                 override fun onSuccess(result: PaymentIntentResult) {
                     val paymentIntent = result.intent
-                    val status = paymentIntent.status
-                    when (status) {
+                    when (paymentIntent.status) {
                         StripeIntent.Status.Succeeded ->
-                            viewModel.status.value += "\n\nPayment succeeded"
+                            updateStatus("\n\nPayment succeeded")
                         StripeIntent.Status.RequiresAction ->
                             stripe.handleNextActionForPayment(this@AlipayPaymentActivity, secret)
-                        else -> viewModel.status.value += "\n\nPayment failed or canceled"
+                        else -> updateStatus("\n\nPayment failed or canceled")
                     }
                 }
 
                 override fun onError(e: Exception) {
-                    viewModel.status.value += "\n\nError: ${e.message}"
+                    updateStatus("\n\nError: ${e.message}")
                 }
             }
         )
+    }
+
+    private fun updateStatus(appendMessage: String) {
+        viewModel.status.value += appendMessage
+        viewModel.inProgress.postValue(false)
     }
 
     private fun enableUi(enable: Boolean) {
