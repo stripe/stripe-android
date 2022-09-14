@@ -1034,7 +1034,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         return runCatching {
             fetchStripeModel(
                 apiRequestFactory.createGet(
-                    getEdgeUrl("card-metadata"),
+                    cardMetadataUrl,
                     options.copy(stripeAccount = null),
                     mapOf("key" to options.apiKey, "bin_prefix" to bin.value)
                 ),
@@ -2057,6 +2057,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val challenge3dsCompleteUrl: String
             @JvmSynthetic
             get() = getApiUrl("3ds2/challenge_complete")
+
+        internal val cardMetadataUrl: String
+            @JvmSynthetic
+            get() = getEdgeUrl("card-metadata")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/:id`
