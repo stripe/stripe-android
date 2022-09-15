@@ -21,11 +21,12 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
-import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.utils.UriComparator
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -45,7 +46,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
     init {
-        logErrors()
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
                 when (message) {
@@ -62,12 +62,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun logErrors() {
-        onAsync(FinancialConnectionsSheetNativeState::completeFinancialConnectionsSession, onFail = {
-            logger.error("Error completing session before closing", it)
-        })
     }
 
     /**
@@ -120,11 +114,16 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun onCloseClick() {
-        suspend {
-            completeFinancialConnectionsSession()
-            setState { copy(viewEffect = Finish) }
-        }.execute { copy(completeFinancialConnectionsSession = it) }
+        // Asynchronously complete the session while activity is closing.
+        // Using [GlobalScope]
+        GlobalScope.launch {
+            kotlin
+                .runCatching { completeFinancialConnectionsSession() }
+                .onFailure { logger.error("Error completing session before closing", it) }
+        }
+        setState { copy(viewEffect = Finish) }
     }
 
     companion object :
@@ -153,7 +152,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 internal data class FinancialConnectionsSheetNativeState(
     val webAuthFlow: Async<String>,
     val configuration: FinancialConnectionsSheet.Configuration,
-    val completeFinancialConnectionsSession: Async<Unit>,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?
 ) : MavericksState {
 
@@ -164,13 +162,14 @@ internal data class FinancialConnectionsSheetNativeState(
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
         configuration = args.configuration,
-        completeFinancialConnectionsSession = Uninitialized,
         viewEffect = null
     )
 }
 
 @Composable
-internal fun parentViewModel(): FinancialConnectionsSheetNativeViewModel = mavericksActivityViewModel()
+internal fun parentViewModel(): FinancialConnectionsSheetNativeViewModel =
+    mavericksActivityViewModel()
+
 internal sealed interface FinancialConnectionsSheetNativeViewEffect {
     /**
      * Open the Web AuthFlow.

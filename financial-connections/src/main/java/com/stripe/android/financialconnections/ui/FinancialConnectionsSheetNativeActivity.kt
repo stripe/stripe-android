@@ -157,7 +157,12 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
      */
     private fun NavOptionsBuilder.popUpAfterAuth(navController: NavHostController) {
         val destination: String = navController.currentBackStackEntry?.destination?.route ?: return
-        if (navController.currentDestination?.route == NavigationDirections.partnerAuth.destination) {
+        val destinationsToSkipOnBack = listOf(
+            NavigationDirections.partnerAuth.destination,
+            NavigationDirections.reset.destination
+        )
+        if (destinationsToSkipOnBack.contains(navController.currentDestination?.route)
+        ) {
             popUpTo(destination) {
                 inclusive = true
             }
