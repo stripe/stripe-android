@@ -115,12 +115,12 @@ internal class LinkActivity : ComponentActivity() {
                     Column(Modifier.fillMaxWidth()) {
                         val linkAccount by viewModel.linkAccount.collectAsState(null)
                         val isOnRootScreen by isRootScreenFlow().collectAsState(true)
-
                         val backStackEntry by navController.currentBackStackEntryAsState()
                         val appBarState = rememberLinkAppBarState(
                             isRootScreen = isOnRootScreen,
                             currentRoute = backStackEntry?.destination?.route,
-                            email = linkAccount?.email
+                            email = linkAccount?.email,
+                            accountStatus = linkAccount?.accountStatus
                         )
 
                         LinkAppBar(

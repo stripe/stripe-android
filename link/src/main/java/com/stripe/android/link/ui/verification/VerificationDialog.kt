@@ -81,7 +81,8 @@ fun LinkVerificationDialog(
                                     val appBarState = rememberLinkAppBarState(
                                         isRootScreen = true,
                                         currentRoute = backStackEntry?.destination?.route,
-                                        email = account.email
+                                        email = account.email,
+                                        accountStatus = account.accountStatus
                                     )
 
                                     LinkAppBar(
