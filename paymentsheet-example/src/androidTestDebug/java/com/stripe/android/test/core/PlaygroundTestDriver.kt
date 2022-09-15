@@ -120,9 +120,7 @@ class PlaygroundTestDriver(
         setup(testParameters)
         launchComplete()
 
-        if (testParameters.supportedPaymentMethods.size > 1) {
-            selectors.paymentSelection.click()
-        }
+        selectors.paymentSelection.click()
 
         // This takes a screenshot so that translation strings of placeholders
         // and labels and design can all be verified
@@ -191,6 +189,7 @@ class PlaygroundTestDriver(
 
     internal fun pressEdit() {
         selectors.editButton.apply {
+            waitProcessingComplete()
             click()
         }
     }
