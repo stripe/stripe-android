@@ -72,7 +72,8 @@ fun FormUI(
                         is CardDetailsSectionElement -> CardDetailsSectionElementUI(
                             enabled,
                             element.controller,
-                            hiddenIdentifiers
+                            hiddenIdentifiers,
+                            lastTextFieldIdentifier
                         )
                         is BsbElement -> BsbElementUI(enabled, element, lastTextFieldIdentifier)
                         is OTPElement -> OTPElementUI(enabled, element)
