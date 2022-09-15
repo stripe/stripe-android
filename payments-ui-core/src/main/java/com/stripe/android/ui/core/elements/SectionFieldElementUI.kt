@@ -12,8 +12,8 @@ internal fun SectionFieldElementUI(
     modifier: Modifier = Modifier,
     hiddenIdentifiers: List<IdentifierSpec>? = null,
     lastTextFieldIdentifier: IdentifierSpec?,
-    nextFocusDirection: FocusDirection = FocusDirection.Next,
-    previousFocusDirection: FocusDirection = FocusDirection.Previous
+    nextFocusDirection: FocusDirection = FocusDirection.Down,
+    previousFocusDirection: FocusDirection = FocusDirection.Up
 ) {
     if (hiddenIdentifiers?.contains(field.identifier) == false) {
         when (val controller = field.sectionFieldErrorController()) {
