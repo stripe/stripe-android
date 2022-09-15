@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.ViewTreeObserver
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
@@ -123,9 +124,11 @@ internal class LinkActivity : ComponentActivity() {
                             email = linkAccount?.email
                         )
 
+                        BackHandler(onBack = viewModel::onBackPressed)
+
                         LinkAppBar(
                             state = appBarState,
-                            onBackPressed = viewModel::onBackPressed,
+                            onBackPressed = onBackPressedDispatcher::onBackPressed,
                             onLogout = viewModel::logout,
                             showBottomSheetContent = {
                                 if (it == null) {
