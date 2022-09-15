@@ -317,10 +317,11 @@ class WalletViewModelTest {
                 .thenReturn(Result.success(Unit))
 
             // Only the bank account is returned, which is not supported
-            whenever(linkAccountManager.listPaymentDetails())
-                .thenReturn(Result.success(paymentDetails.copy(
-                    paymentDetails = listOf(paymentDetails.paymentDetails[1])
-                )))
+            whenever(linkAccountManager.listPaymentDetails()).thenReturn(
+                Result.success(
+                    paymentDetails.copy(paymentDetails = listOf(paymentDetails.paymentDetails[1]))
+                )
+            )
 
             // Delete the selected item
             viewModel.deletePaymentMethod(defaultItem)
