@@ -250,7 +250,7 @@ internal class WalletViewModel @Inject constructor(
                 paymentDetails.id
             ).fold(
                 onSuccess = {
-                    loadPaymentDetails()
+                    loadPaymentDetails(selectedItem = uiState.value.selectedItem?.id)
                 },
                 onFailure = ::onError
             )

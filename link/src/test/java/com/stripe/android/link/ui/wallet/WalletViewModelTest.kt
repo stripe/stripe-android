@@ -264,28 +264,32 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `deletePaymentMethod fetches payment details when successful`() = runTest {
-        val paymentDetails = CONSUMER_PAYMENT_DETAILS
-        whenever(linkAccountManager.listPaymentDetails())
-            .thenReturn(Result.success(paymentDetails))
+    fun `deletePaymentMethod fetches payment details and stays expanded when successful`() =
+        runTest {
+            val paymentDetails = CONSUMER_PAYMENT_DETAILS
+            whenever(linkAccountManager.listPaymentDetails())
+                .thenReturn(Result.success(paymentDetails))
 
-        val viewModel = createViewModel()
-        verify(linkAccountManager).listPaymentDetails()
-        clearInvocations(linkAccountManager)
+            val viewModel = createViewModel()
+            verify(linkAccountManager).listPaymentDetails()
+            clearInvocations(linkAccountManager)
+            viewModel.setExpanded(true)
 
-        // Initially has two elements
-        assertThat(viewModel.uiState.value.paymentDetailsList)
-            .containsExactlyElementsIn(paymentDetails.paymentDetails)
+            // Initially has two elements
+            assertThat(viewModel.uiState.value.paymentDetailsList)
+                .containsExactlyElementsIn(paymentDetails.paymentDetails)
 
-        whenever(linkAccountManager.deletePaymentDetails(anyOrNull()))
-            .thenReturn(Result.success(Unit))
+            whenever(linkAccountManager.deletePaymentDetails(anyOrNull()))
+                .thenReturn(Result.success(Unit))
 
-        // Delete the first element
-        viewModel.deletePaymentMethod(paymentDetails.paymentDetails.first())
+            // Delete the first element
+            viewModel.deletePaymentMethod(paymentDetails.paymentDetails.first())
 
-        // Fetches payment details again
-        verify(linkAccountManager).listPaymentDetails()
-    }
+            // Fetches payment details again
+            verify(linkAccountManager).listPaymentDetails()
+
+            assertThat(viewModel.uiState.value.isExpanded).isTrue()
+        }
 
     @Test
     fun `when payment method deletion fails then an error message is shown`() = runTest {
