@@ -13,9 +13,12 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -198,7 +201,8 @@ internal fun SignUpBody(
 internal fun EmailCollectionSection(
     enabled: Boolean,
     emailController: TextFieldController,
-    signUpState: SignUpState
+    signUpState: SignUpState,
+    focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
     Box(
         modifier = Modifier
@@ -213,7 +217,9 @@ internal fun EmailCollectionSection(
             } else {
                 ImeAction.Done
             },
-            enabled = enabled && signUpState != SignUpState.VerifyingEmail
+            enabled = enabled && signUpState != SignUpState.VerifyingEmail,
+            modifier = Modifier
+                .focusRequester(focusRequester)
         )
         if (signUpState == SignUpState.VerifyingEmail) {
             CircularProgressIndicator(
