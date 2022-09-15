@@ -292,6 +292,43 @@ class WalletViewModelTest {
         }
 
     @Test
+    fun `when selected payment method is not supported then wallet is expanded`() =
+        runTest {
+            // One card and one bank account
+            val paymentDetails = CONSUMER_PAYMENT_DETAILS.copy(
+                paymentDetails = listOf(
+                    CONSUMER_PAYMENT_DETAILS.paymentDetails[1],
+                    CONSUMER_PAYMENT_DETAILS.paymentDetails[2]
+                )
+            )
+            whenever(linkAccountManager.listPaymentDetails())
+                .thenReturn(Result.success(paymentDetails))
+
+            val viewModel = createViewModel()
+            assertThat(viewModel.uiState.value.paymentDetailsList)
+                .containsExactlyElementsIn(paymentDetails.paymentDetails)
+
+            // First item is default, so it should be selected and the list should be collapsed
+            val defaultItem = paymentDetails.paymentDetails.first()
+            assertThat(viewModel.uiState.value.selectedItem).isEqualTo(defaultItem)
+            assertThat(viewModel.uiState.value.isExpanded).isFalse()
+
+            whenever(linkAccountManager.deletePaymentDetails(anyOrNull()))
+                .thenReturn(Result.success(Unit))
+
+            // Only the bank account is returned, which is not supported
+            whenever(linkAccountManager.listPaymentDetails())
+                .thenReturn(Result.success(paymentDetails.copy(
+                    paymentDetails = listOf(paymentDetails.paymentDetails[1])
+                )))
+
+            // Delete the selected item
+            viewModel.deletePaymentMethod(defaultItem)
+
+            assertThat(viewModel.uiState.value.isExpanded).isTrue()
+        }
+
+    @Test
     fun `when payment method deletion fails then an error message is shown`() = runTest {
         whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.success(CONSUMER_PAYMENT_DETAILS))
