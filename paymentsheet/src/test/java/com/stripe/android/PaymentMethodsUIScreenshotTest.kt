@@ -21,15 +21,11 @@ import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
 class PaymentMethodsUIScreenshotTest(
-    @TestParameter(valuesProvider = StripeTestConfigProvider::class) val testConfig: StripeTestConfig
+    @TestParameter(valuesProvider = PaymentSheetTestConfigProvider::class) val testConfig: PaymentSheetTestConfig
 ) {
 
     @get:Rule
-    val paparazzi = Paparazzi(
-        deviceConfig = testConfig.device.config.copy(softButtons = false),
-        maxPercentDifference = 0.0,
-        environment = stripeTestEnvironment()
-    )
+    val paparazzi: Paparazzi = testConfig.createPaparazzi()
 
     @Test
     fun `Renders correctly when scrolled to the beginning`() {

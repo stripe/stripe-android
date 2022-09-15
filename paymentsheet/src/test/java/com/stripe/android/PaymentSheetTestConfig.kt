@@ -2,27 +2,36 @@ package com.stripe.android
 
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Environment
+import app.cash.paparazzi.Paparazzi
 import app.cash.paparazzi.androidHome
 import app.cash.paparazzi.detectEnvironment
 import com.google.testing.junit.testparameterinjector.TestParameter
 import java.util.Locale
 
-fun stripeTestEnvironment(): Environment = detectEnvironment().copy(
-    // LayoutLib doesn't support SDK 33 yet, so we need to run on 32
-    platformDir = "${androidHome()}/platforms/android-32",
-    compileSdkVersion = 32
-)
-
-data class StripeTestConfig(
+data class PaymentSheetTestConfig(
     val device: Device,
     val appearance: SystemAppearance,
     val cornerRadius: CornerRadius
     // TODO: Add more
 )
 
-object StripeTestConfigProvider : TestParameter.TestParameterValuesProvider {
+fun PaymentSheetTestConfig.createPaparazzi(): Paparazzi {
+    return Paparazzi(
+        deviceConfig = device.config.copy(softButtons = false),
+        maxPercentDifference = 0.0,
+        environment = stripeTestEnvironment()
+    )
+}
+
+private fun stripeTestEnvironment(): Environment = detectEnvironment().copy(
+    // LayoutLib doesn't support SDK 33 yet, so we need to run on 32
+    platformDir = "${androidHome()}/platforms/android-32",
+    compileSdkVersion = 32
+)
+
+object PaymentSheetTestConfigProvider : TestParameter.TestParameterValuesProvider {
     override fun provideValues(): List<*> {
-        return PermutationsFactory.create(StripeTestConfig::class)
+        return PermutationsFactory.create(PaymentSheetTestConfig::class)
     }
 }
 

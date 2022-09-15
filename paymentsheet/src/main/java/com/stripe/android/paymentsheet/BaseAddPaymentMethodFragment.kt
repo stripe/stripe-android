@@ -33,7 +33,6 @@ import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -154,26 +153,22 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         viewBinding.paymentMethodsRecycler.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                PaymentsTheme {
-                    val processing by sheetViewModel.processing
-                        .asFlow()
-                        .collectAsState(initial = false)
-
-                    val selectedItem by sheetViewModel.getAddFragmentSelectedLpm()
-                        .asFlow()
-                        .collectAsState(initial = initialSelectedItem)
-
-                    PaymentMethodsUI(
-                        selectedIndex = paymentMethods.indexOf(selectedItem),
-                        isEnabled = !processing,
-                        paymentMethods = paymentMethods,
-                        onItemSelectedListener = { selectedLpm ->
-                            if (sheetViewModel.addFragmentSelectedLPM != selectedLpm) {
-                                onPaymentMethodSelected(selectedLpm)
-                            }
+                val processing by sheetViewModel.processing
+                    .asFlow()
+                    .collectAsState(initial = false)
+                val selectedItem by sheetViewModel.getAddFragmentSelectedLpm()
+                    .asFlow()
+                    .collectAsState(initial = initialSelectedItem)
+                PaymentMethodsUI(
+                    selectedIndex = paymentMethods.indexOf(selectedItem),
+                    isEnabled = !processing,
+                    paymentMethods = paymentMethods,
+                    onItemSelectedListener = { selectedLpm ->
+                        if (sheetViewModel.addFragmentSelectedLPM != selectedLpm) {
+                            onPaymentMethodSelected(selectedLpm)
                         }
-                    )
-                }
+                    }
+                )
             }
         }
     }
