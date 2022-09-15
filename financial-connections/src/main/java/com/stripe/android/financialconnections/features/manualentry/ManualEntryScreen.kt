@@ -25,14 +25,17 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
+import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun ManualEntryScreen() {
     val viewModel: ManualEntryViewModel = mavericksViewModel()
+    val parentViewModel = parentViewModel()
     val state: State<ManualEntryState> = viewModel.collectAsState()
 
     ManualEntryContent(
@@ -40,12 +43,13 @@ internal fun ManualEntryScreen() {
         account = state.value.account,
         accountConfirm = state.value.accountConfirm,
         isValidForm = state.value.isValidForm,
-        linkPaymentAccountStatus = state.value.linkPaymentAccount,
         verifyWithMicrodeposits = state.value.verifyWithMicrodeposits,
+        linkPaymentAccountStatus = state.value.linkPaymentAccount,
         onRoutingEntered = viewModel::onRoutingEntered,
         onAccountEntered = viewModel::onAccountEntered,
         onAccountConfirmEntered = viewModel::onAccountConfirmEntered,
-        onSubmit = viewModel::onSubmit
+        onSubmit = viewModel::onSubmit,
+        onCloseClick = parentViewModel::onCloseClick,
     )
 }
 
@@ -62,9 +66,12 @@ private fun ManualEntryContent(
     onAccountEntered: (String) -> Unit,
     onAccountConfirmEntered: (String) -> Unit,
     onSubmit: () -> Unit,
+    onCloseClick: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    FinancialConnectionsScaffold {
+    FinancialConnectionsScaffold(
+        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+    ) {
         Column(
             Modifier.fillMaxSize()
         ) {
@@ -183,12 +190,13 @@ internal fun ManualEntryScreenPreview() {
             account = "" to null,
             accountConfirm = "" to null,
             isValidForm = true,
-            linkPaymentAccountStatus = Uninitialized,
             verifyWithMicrodeposits = true,
+            linkPaymentAccountStatus = Uninitialized,
             onRoutingEntered = {},
             onAccountEntered = {},
             onAccountConfirmEntered = {},
             onSubmit = {},
+            onCloseClick = {},
         )
     }
 }

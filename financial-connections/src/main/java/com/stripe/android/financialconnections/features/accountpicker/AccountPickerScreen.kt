@@ -59,20 +59,24 @@ import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun AccountPickerScreen() {
     val viewModel: AccountPickerViewModel = mavericksViewModel()
+    val parentViewModel = parentViewModel()
     val state: State<AccountPickerState> = viewModel.collectAsState()
     AccountPickerContent(
         state = state.value,
         onAccountClicked = viewModel::onAccountClicked,
         onSelectAccounts = viewModel::selectAccounts,
         onSelectAnotherBank = viewModel::selectAnotherBank,
+        onCloseClick = parentViewModel::onCloseClick,
     )
 }
 
@@ -81,9 +85,12 @@ private fun AccountPickerContent(
     state: AccountPickerState,
     onAccountClicked: (PartnerAccount) -> Unit,
     onSelectAccounts: () -> Unit,
-    onSelectAnotherBank: () -> Unit
+    onSelectAnotherBank: () -> Unit,
+    onCloseClick: () -> Unit
 ) {
-    FinancialConnectionsScaffold {
+    FinancialConnectionsScaffold(
+        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+    ) {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> AccountPickerLoading()
             is Success -> when (payload().skipAccountSelection) {
@@ -385,7 +392,8 @@ internal fun AccountPickerPreviewMultiSelect() {
             AccountPickerStates.multiSelect(),
             onAccountClicked = {},
             onSelectAccounts = {},
-            onSelectAnotherBank = {}
+            onSelectAnotherBank = {},
+            onCloseClick = {}
         )
     }
 }
@@ -402,7 +410,8 @@ internal fun AccountPickerPreviewSingleSelect() {
             AccountPickerStates.singleSelect(),
             onAccountClicked = {},
             onSelectAccounts = {},
-            onSelectAnotherBank = {}
+            onSelectAnotherBank = {},
+            onCloseClick = {}
         )
     }
 }
@@ -419,7 +428,8 @@ internal fun AccountPickerPreviewDropdown() {
             AccountPickerStates.dropdown(),
             onAccountClicked = {},
             onSelectAccounts = {},
-            onSelectAnotherBank = {}
+            onSelectAnotherBank = {},
+            onCloseClick = {}
         )
     }
 }

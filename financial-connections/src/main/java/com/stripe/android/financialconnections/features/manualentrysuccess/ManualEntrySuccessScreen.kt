@@ -34,8 +34,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
+import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -43,19 +45,24 @@ internal fun ManualEntrySuccessScreen(
     microdepositVerificationMethod: MicrodepositVerificationMethod,
     last4: String?
 ) {
+    val parentViewModel = parentViewModel()
     ManualEntrySuccessContent(
         microdepositVerificationMethod = microdepositVerificationMethod,
-        last4 = last4
+        last4 = last4,
+        onCloseClick = parentViewModel::onCloseClick
     )
 }
 
 @Composable
 internal fun ManualEntrySuccessContent(
     microdepositVerificationMethod: MicrodepositVerificationMethod,
-    last4: String?
+    last4: String?,
+    onCloseClick: () -> Unit
 ) {
     val localContext = LocalContext.current
-    FinancialConnectionsScaffold {
+    FinancialConnectionsScaffold(
+        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+    ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
@@ -224,7 +231,8 @@ internal fun ManualEntrySuccessScreenPreviewAmount() {
     FinancialConnectionsTheme {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.AMOUNTS,
-            last4 = "1234"
+            last4 = "1234",
+            onCloseClick = {}
         )
     }
 }
@@ -235,7 +243,8 @@ internal fun ManualEntrySuccessScreenPreviewDescriptor() {
     FinancialConnectionsTheme {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.DESCRIPTOR_CODE,
-            last4 = "1234"
+            last4 = "1234",
+            onCloseClick = {}
         )
     }
 }
@@ -246,7 +255,8 @@ internal fun ManualEntrySuccessScreenPreviewAmountNoAccount() {
     FinancialConnectionsTheme {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.AMOUNTS,
-            last4 = null
+            last4 = null,
+            onCloseClick = {}
         )
     }
 }
@@ -257,7 +267,8 @@ internal fun ManualEntrySuccessScreenPreviewDescriptorNoAccount() {
     FinancialConnectionsTheme {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.DESCRIPTOR_CODE,
-            last4 = null
+            last4 = null,
+            onCloseClick = {}
         )
     }
 }

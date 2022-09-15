@@ -34,14 +34,17 @@ import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PartnerCallout
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun PartnerAuthScreen() {
     // activity view model
     val activityViewModel: FinancialConnectionsSheetNativeViewModel = mavericksActivityViewModel()
+    val parentViewModel = parentViewModel()
     val webAuthFlow = activityViewModel.collectAsState { it.webAuthFlow }
 
     // step view model
@@ -56,9 +59,10 @@ internal fun PartnerAuthScreen() {
         viewModel.onWebAuthFlowFinished(webAuthFlow.value)
     }
     PartnerAuthScreenContent(
-        state.value,
-        viewModel::onLaunchAuthClick,
-        viewModel::onSelectAnotherBank
+        state = state.value,
+        onContinueClick = viewModel::onLaunchAuthClick,
+        onSelectAnotherBank = viewModel::onSelectAnotherBank,
+        onCloseClick = parentViewModel::onCloseClick
     )
 }
 
@@ -67,8 +71,11 @@ private fun PartnerAuthScreenContent(
     state: PartnerAuthState,
     onContinueClick: () -> Unit,
     onSelectAnotherBank: () -> Unit,
+    onCloseClick: () -> Unit
 ) {
-    FinancialConnectionsScaffold {
+    FinancialConnectionsScaffold(
+        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+    ) {
         when (state.authenticationStatus) {
             is Uninitialized -> PrePaneContent(
                 institutionName = state.institutionName,
@@ -153,7 +160,8 @@ internal fun PrepaneContentPreview() {
                 flow = Flow.FINICITY_CONNECT_V2_OAUTH
             ),
             onContinueClick = {},
-            onSelectAnotherBank = {}
+            onSelectAnotherBank = {},
+            onCloseClick = {}
         )
     }
 }

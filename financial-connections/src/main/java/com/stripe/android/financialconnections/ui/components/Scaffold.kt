@@ -9,7 +9,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 
 @Composable
 internal fun FinancialConnectionsScaffold(
-    topBar: @Composable () -> Unit = { FinancialConnectionsTopAppBar() },
+    topBar: @Composable () -> Unit,
     content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(

@@ -85,6 +85,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @Composable
     fun NavHost() {
         val navController = rememberNavController()
+        val onCloseClick = { viewModel.onCloseClick() }
         NavigationEffect(navController)
         NavHost(navController, startDestination = NavigationDirections.consent.destination) {
             composable(NavigationDirections.consent.destination) {
@@ -114,7 +115,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 AccountPickerScreen()
             }
             composable(NavigationDirections.success.destination) {
-                SuccessScreen()
+                SuccessScreen(onCloseClick)
             }
             composable(NavigationDirections.reset.destination) {
                 ResetScreen()

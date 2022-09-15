@@ -40,10 +40,12 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
+import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import kotlinx.coroutines.launch
@@ -53,6 +55,7 @@ import kotlinx.coroutines.launch
 internal fun ConsentScreen() {
     // update step state when manifest changes
     val viewModel: ConsentViewModel = mavericksViewModel()
+    val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
 
     // create bottom sheet state.
@@ -77,7 +80,8 @@ internal fun ConsentScreen() {
         bottomSheetState = bottomSheetState,
         onContinueClick = viewModel::onContinueClick,
         onClickableTextClick = viewModel::onClickableTextClick,
-        onConfirmModalClick = { scope.launch { bottomSheetState.hide() } }
+        onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
+        onCloseClick = parentViewModel::onCloseClick
     )
 }
 
@@ -104,13 +108,15 @@ private fun ViewEffect(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ConsentContent(
     state: ConsentState,
     bottomSheetState: ModalBottomSheetState,
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
-    onConfirmModalClick: () -> Unit
+    onConfirmModalClick: () -> Unit,
+    onCloseClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     ModalBottomSheetLayout(
@@ -131,7 +137,8 @@ private fun ConsentContent(
                 scrollState = scrollState,
                 state = state,
                 onClickableTextClick = onClickableTextClick,
-                onContinueClick = onContinueClick
+                onContinueClick = onContinueClick,
+                onCloseClick = onCloseClick
             )
         }
     )
@@ -142,9 +149,12 @@ private fun ConsentMainContent(
     scrollState: ScrollState,
     state: ConsentState,
     onClickableTextClick: (String) -> Unit,
-    onContinueClick: () -> Unit
+    onContinueClick: () -> Unit,
+    onCloseClick: () -> Unit
 ) {
-    FinancialConnectionsScaffold {
+    FinancialConnectionsScaffold(
+        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+    ) {
         Column(
             Modifier.fillMaxSize()
         ) {
@@ -341,14 +351,15 @@ internal fun ContentPreview(
 ) {
     FinancialConnectionsTheme {
         ConsentContent(
+            state = state,
             bottomSheetState = rememberModalBottomSheetState(
                 ModalBottomSheetValue.Hidden,
                 skipHalfExpanded = true
             ),
-            state = state,
             onContinueClick = {},
+            onClickableTextClick = {},
             onConfirmModalClick = {},
-            onClickableTextClick = {}
+            onCloseClick = {}
         )
     }
 }
