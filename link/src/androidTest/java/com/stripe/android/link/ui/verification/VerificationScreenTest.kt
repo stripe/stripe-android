@@ -167,12 +167,6 @@ internal class VerificationScreenTest {
     }
 
     @Test
-    fun focus_on_first_otp_field_at_start() {
-        setContent()
-        onOtpField(0).assertIsFocused()
-    }
-
-    @Test
     fun when_error_message_is_not_null_then_it_is_visible() {
         val errorMessage = "Error message"
         setContent(errorMessage = ErrorMessage.Raw(errorMessage))
