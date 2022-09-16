@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -222,6 +223,14 @@ internal fun WalletBody(
 
             openDialog = false
             itemBeingRemoved = null
+        }
+    }
+
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(uiState.isProcessing) {
+        if (uiState.isProcessing) {
+            focusManager.clearFocus()
         }
     }
 
