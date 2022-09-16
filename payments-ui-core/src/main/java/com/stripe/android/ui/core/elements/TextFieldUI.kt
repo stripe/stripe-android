@@ -17,6 +17,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -114,20 +115,12 @@ fun TextField(
         TextFieldStateConstants.Error.Blank
     )
     val label by textFieldController.label.collectAsState(null)
-    var processedIsFull by rememberSaveable { mutableStateOf(false) }
 
-    /**
-     * This is setup so that when a field is full it still allows more characters
-     * to be entered, it just triggers next focus when the event happens.
-     */
-    @Suppress("UNUSED_VALUE")
-    processedIsFull = if (fieldState == TextFieldStateConstants.Valid.Full) {
-        if (!processedIsFull) {
+    LaunchedEffect(fieldState) {
+        // When field is in focus and full, move to next field so the user can keep typing
+        if (fieldState == TextFieldStateConstants.Valid.Full && hasFocus) {
             focusManager.moveFocus(nextFocusDirection)
         }
-        true
-    } else {
-        false
     }
 
     TextField(
