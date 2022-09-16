@@ -36,6 +36,7 @@ class EntryActivity : AppCompatActivity() {
                     }) {
                         Text(stringResource(id = R.string.compose_example))
                     }
+                    Text(text = "v${BuildConfig.VERSION_NAME} code ${BuildConfig.VERSION_CODE}")
                 }
             }
         }
