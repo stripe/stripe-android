@@ -25,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
@@ -47,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.getBorderStrokeWidth
 import com.stripe.android.ui.core.paymentsColors
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun OTPElementUI(

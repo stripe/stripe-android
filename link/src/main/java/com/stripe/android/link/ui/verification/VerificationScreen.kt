@@ -47,6 +47,7 @@ import com.stripe.android.ui.core.elements.OTPElement
 import com.stripe.android.ui.core.elements.OTPElementUI
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.ui.core.injection.NonFallbackInjector
+import kotlinx.coroutines.delay
 
 @Preview
 @Composable
@@ -123,6 +124,9 @@ internal fun VerificationBody(
 
     LaunchedEffect(requestFocus) {
         if (requestFocus) {
+            // Workaround for keyboard not being shown when focus is requested in a Dialog
+            // https://issuetracker.google.com/issues/204502668
+            delay(200)
             focusRequester.requestFocus()
             keyboardController?.show()
             viewModel.onFocusRequested()
