@@ -117,7 +117,7 @@ fun TextField(
     val label by textFieldController.label.collectAsState(null)
 
     LaunchedEffect(fieldState) {
-        // When field is in focus and just became full, move to next field
+        // When field is in focus and full, move to next field so the user can keep typing
         if (fieldState == TextFieldStateConstants.Valid.Full && hasFocus) {
             focusManager.moveFocus(nextFocusDirection)
         }
