@@ -251,7 +251,9 @@ internal abstract class IdentityDocumentScanFragment(
                                         notSubmitBlock =
                                         if (verificationPage.requireSelfie()) {
                                             ({ findNavController().navigate(R.id.action_global_selfieFragment) })
-                                        } else null
+                                        } else {
+                                            null
+                                        }
                                     )
                                 }.onFailure { throwable ->
                                     Log.e(

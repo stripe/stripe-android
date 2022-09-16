@@ -126,6 +126,8 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
                     changeScanState(CardScanState.Correct)
                     activity?.let { cameraAdapter.unbindFromLifecycle(it) }
                     resultListener.cardScanComplete(ScannedCard(result.pan))
+                    scanStat.trackResult("scan_complete")
+                    closeScanner()
                 }.let { }
             }
 

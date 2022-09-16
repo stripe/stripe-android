@@ -108,7 +108,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                         )
                     )
                 setResult(RESULT_OK, intent)
-                closeScanner()
             }
 
             override fun userCanceled(reason: CancellationReason) {
@@ -145,6 +144,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                     changeScanState(CardScanState.Correct)
                     cameraAdapter.unbindFromLifecycle(this@CardScanActivity)
                     resultListener.cardScanComplete(ScannedCard(result.pan))
+                    scanStat.trackResult("card_scanned")
+                    closeScanner()
                 }.let { }
             }
 
