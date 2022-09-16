@@ -19,10 +19,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.airbnb.mvrx.MavericksView
+import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.viewModel
 import com.airbnb.mvrx.withState
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
+import com.stripe.android.financialconnections.features.common.CloseDialog
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
@@ -54,7 +56,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         setContent {
             FinancialConnectionsTheme {
                 Column {
-                    Box(modifier = Modifier.weight(1f)) { NavHost() }
+                    Box(modifier = Modifier.weight(1f)) {
+                        val showCloseDialog = viewModel.collectAsState { it.showCloseDialog }
+                        if (showCloseDialog.value) CloseDialog(viewModel::onCloseConfirm)
+                        NavHost()
+                    }
                 }
             }
         }
@@ -87,7 +93,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @Composable
     fun NavHost() {
         val navController = rememberNavController()
-        val onCloseClick = { viewModel.onCloseClick() }
         NavigationEffect(navController)
         NavHost(navController, startDestination = NavigationDirections.consent.destination) {
             composable(NavigationDirections.consent.destination) {
@@ -117,7 +122,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 AccountPickerScreen()
             }
             composable(NavigationDirections.success.destination) {
-                SuccessScreen(onCloseClick)
+                SuccessScreen()
             }
             composable(NavigationDirections.reset.destination) {
                 ResetScreen()

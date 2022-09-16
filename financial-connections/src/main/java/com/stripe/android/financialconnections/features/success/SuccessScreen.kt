@@ -29,14 +29,13 @@ import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButtonType
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
-internal fun SuccessScreen(onCloseClick: () -> Unit) {
+internal fun SuccessScreen() {
     val viewModel: SuccessViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
@@ -109,7 +108,7 @@ private fun SuccessContent(
             if (showLinkAnotherAccount) {
                 FinancialConnectionsButton(
                     loading = loading,
-                    type = FinancialConnectionsButtonType.Secondary,
+                    type = FinancialConnectionsButton.Type.Secondary,
                     enabled = loading.not(),
                     onClick = onLinkAnotherAccountClick,
                     modifier = Modifier

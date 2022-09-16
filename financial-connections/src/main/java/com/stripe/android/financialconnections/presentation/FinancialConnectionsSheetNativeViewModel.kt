@@ -115,7 +115,16 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    fun onCloseClick() = close()
+    fun onCloseClick() {
+        // TODO@carlosmuvi: show close dialog instead of directly closing depending on pane.
+        if (false) {
+            setState { copy(showCloseDialog = true) }
+        } else {
+            close()
+        }
+    }
+
+    fun onCloseConfirm() = close()
 
     /**
      * [NavHost] handles back presses except for when backstack is empty, where it delegates
@@ -162,6 +171,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 internal data class FinancialConnectionsSheetNativeState(
     val webAuthFlow: Async<String>,
     val configuration: FinancialConnectionsSheet.Configuration,
+    val showCloseDialog: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?
 ) : MavericksState {
 
@@ -172,6 +182,7 @@ internal data class FinancialConnectionsSheetNativeState(
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
         configuration = args.configuration,
+        showCloseDialog = false,
         viewEffect = null
     )
 }
