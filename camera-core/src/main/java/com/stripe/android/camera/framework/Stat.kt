@@ -53,7 +53,7 @@ object Stats {
         StatTrackerImpl { startedAt, result ->
             taskMutex.withLock {
                 val list = tasks[name]
-                if (list == null) {
+                if (list.isNullOrEmpty()) {
                     tasks[name] = listOf(TaskStats(startedAt, startedAt.elapsedSince(), result))
                 } else {
                     tasks[name] = list + TaskStats(startedAt, startedAt.elapsedSince(), result)
@@ -204,8 +204,7 @@ class StatTrackerImpl(
     private val onComplete: suspend (ClockMark, String?) -> Unit
 ) : StatTracker {
     override val startedAt = Clock.markNow()
-    override suspend fun trackResult(result: String?) =
-        coroutineScope { launch { onComplete(startedAt, result) } }.let { }
+    override suspend fun trackResult(result: String?) = onComplete(startedAt, result)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

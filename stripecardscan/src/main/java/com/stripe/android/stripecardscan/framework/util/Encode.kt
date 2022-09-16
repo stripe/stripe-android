@@ -25,7 +25,7 @@ internal fun b64Encode(b: ByteArray): String =
  * [Map] so that the parameters can be named.
  */
 internal fun <T> encodeToXWWWFormUrl(serializer: SerializationStrategy<T>, value: T): String =
-    QueryStringFactory.create(json.encodeToJsonElement(serializer, value).toMap())
+    QueryStringFactory.createFromParamsWithEmptyValues(json.encodeToJsonElement(serializer, value).toMap())
 
 /**
  * Encode a serializable object to a JSON string
