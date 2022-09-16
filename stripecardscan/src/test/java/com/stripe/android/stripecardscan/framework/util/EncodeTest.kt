@@ -207,10 +207,10 @@ class EncodeTest {
         assertEquals(
             expected = "field_3=true" +
                 "&field_1=aa" +
-                "&field_2%5B%5D%5Bsub_field_1%5D=bb" +
-                "&field_2%5B%5D%5Bsub_field_2%5D=22" +
-                "&field_2%5B%5D%5Bsub_field_1%5D=cc" +
-                "&field_2%5B%5D%5Bsub_field_2%5D=33",
+                "&field_2%5B0%5D%5Bsub_field_1%5D=bb" +
+                "&field_2%5B0%5D%5Bsub_field_2%5D=22" +
+                "&field_2%5B1%5D%5Bsub_field_1%5D=cc" +
+                "&field_2%5B1%5D%5Bsub_field_2%5D=33",
             actual = encodeToXWWWFormUrl(
                 serializer = TestClassArray.serializer(),
                 value = TestClassArray(

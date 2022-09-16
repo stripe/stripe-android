@@ -38,6 +38,7 @@ import com.stripe.android.stripecardscan.scanui.util.getFloatResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -126,6 +127,8 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
                     changeScanState(CardScanState.Correct)
                     activity?.let { cameraAdapter.unbindFromLifecycle(it) }
                     resultListener.cardScanComplete(ScannedCard(result.pan))
+                    scanStat.trackResult("scan_complete")
+                    closeScanner()
                 }.let { }
             }
 

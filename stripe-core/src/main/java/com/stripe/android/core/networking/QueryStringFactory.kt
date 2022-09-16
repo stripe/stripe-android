@@ -59,6 +59,17 @@ object QueryStringFactory {
         return flattenParamsMap(params)
     }
 
+    /**
+     * Determine if a value is a primitive. Primitives in lists can be serialized without indexes.
+     */
+    private fun isPrimitive(value: Any?) =
+        value is String || value is Number || value is Boolean || value is Char
+
+    /**
+     * Determine if all elements in a list are primitives.
+     */
+    private fun isPrimitiveList(l: List<*>) = l.all { isPrimitive(it) }
+
     @Throws(InvalidRequestException::class)
     private fun flattenParamsList(
         params: List<*>,
@@ -70,10 +81,16 @@ object QueryStringFactory {
         // Emptying it would look like `a=`.)
         return if (params.isEmpty()) {
             listOf(Parameter(keyPrefix, ""))
-        } else {
+        } else if (isPrimitiveList(params)) {
+            // Lists of primitives can be serialized as `listName[]=`
             val newPrefix = "$keyPrefix[]"
             params.flatMap {
                 flattenParamsValue(it, newPrefix)
+            }
+        } else {
+            // Lists of objects must include the index like `listName[0]=`
+            params.flatMapIndexed { index, value ->
+                flattenParamsValue(value, "$keyPrefix[$index]")
             }
         }
     }
