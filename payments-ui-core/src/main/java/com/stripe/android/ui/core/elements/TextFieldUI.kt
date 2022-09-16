@@ -54,10 +54,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun TextFieldSection(
     textFieldController: TextFieldController,
-    modifier: Modifier = Modifier,
-    @StringRes sectionTitle: Int? = null,
     imeAction: ImeAction,
     enabled: Boolean,
+    modifier: Modifier = Modifier,
+    @StringRes sectionTitle: Int? = null,
     onTextStateChanged: (TextFieldState?) -> Unit = {}
 ) {
     val error by textFieldController.error.collectAsState(null)

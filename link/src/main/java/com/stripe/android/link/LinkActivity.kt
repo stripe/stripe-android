@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.ViewTreeObserver
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
@@ -115,17 +116,19 @@ internal class LinkActivity : ComponentActivity() {
                     Column(Modifier.fillMaxWidth()) {
                         val linkAccount by viewModel.linkAccount.collectAsState(null)
                         val isOnRootScreen by isRootScreenFlow().collectAsState(true)
-
                         val backStackEntry by navController.currentBackStackEntryAsState()
                         val appBarState = rememberLinkAppBarState(
                             isRootScreen = isOnRootScreen,
                             currentRoute = backStackEntry?.destination?.route,
-                            email = linkAccount?.email
+                            email = linkAccount?.email,
+                            accountStatus = linkAccount?.accountStatus
                         )
+
+                        BackHandler(onBack = viewModel::onBackPressed)
 
                         LinkAppBar(
                             state = appBarState,
-                            onBackPressed = viewModel::onBackPressed,
+                            onBackPressed = onBackPressedDispatcher::onBackPressed,
                             onLogout = viewModel::logout,
                             showBottomSheetContent = {
                                 if (it == null) {

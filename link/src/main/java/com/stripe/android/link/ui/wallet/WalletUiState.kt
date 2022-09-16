@@ -62,7 +62,7 @@ internal data class WalletUiState(
         return copy(
             paymentDetailsList = response.paymentDetails,
             selectedItem = selectedItem,
-            isExpanded = !isSelectedItemValid,
+            isExpanded = if (isSelectedItemValid) isExpanded else true,
             isProcessing = false
         )
     }
