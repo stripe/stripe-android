@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.presentation
 
 import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.navigation.compose.NavHost
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
@@ -114,10 +115,19 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
+    fun onCloseClick() = close()
+
+    /**
+     * [NavHost] handles back presses except for when backstack is empty, where it delegates
+     * to the container activity. [onBackPressed] will be triggered on these empty backstack cases.
+     */
+    fun onBackPressed() = close()
+
     @OptIn(DelicateCoroutinesApi::class)
-    fun onCloseClick() {
+    private fun close() {
         // Asynchronously complete the session while activity is closing.
-        // Using [GlobalScope]
+        // Using [GlobalScope] to prevent the call from cancel while activity finishes.
+        logger.debug("User intentionally closed the AuthFlow.")
         GlobalScope.launch {
             kotlin
                 .runCatching { completeFinancialConnectionsSession() }

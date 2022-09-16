@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
@@ -49,6 +50,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         super.onCreate(savedInstanceState)
         viewModel.activityRetainedComponent.inject(this)
         viewModel.onEach { postInvalidate() }
+        onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
         setContent {
             FinancialConnectionsTheme {
                 Column {
