@@ -21,6 +21,10 @@ internal sealed class WalletPaymentMethodMenuItem(
         textResId = R.string.wallet_update_card
     )
 
+    object SetAsDefault : WalletPaymentMethodMenuItem(
+        textResId = R.string.wallet_set_as_default
+    )
+
     object Cancel : WalletPaymentMethodMenuItem(
         textResId = R.string.cancel
     )
@@ -30,12 +34,17 @@ internal sealed class WalletPaymentMethodMenuItem(
 internal fun WalletPaymentMethodMenu(
     paymentDetails: ConsumerPaymentDetails.PaymentDetails,
     onEditClick: () -> Unit,
+    onSetDefaultClick: () -> Unit,
     onRemoveClick: () -> Unit,
     onCancelClick: () -> Unit
 ) {
     val items = buildList {
         if (paymentDetails is ConsumerPaymentDetails.Card) {
             add(WalletPaymentMethodMenuItem.EditCard)
+        }
+
+        if (!paymentDetails.isDefault) {
+            add(WalletPaymentMethodMenuItem.SetAsDefault)
         }
 
         add(WalletPaymentMethodMenuItem.RemoveItem(textResId = paymentDetails.removeLabel))
@@ -47,6 +56,7 @@ internal fun WalletPaymentMethodMenu(
         onItemPress = { item ->
             when (item) {
                 is WalletPaymentMethodMenuItem.EditCard -> onEditClick()
+                is WalletPaymentMethodMenuItem.SetAsDefault -> onSetDefaultClick()
                 is WalletPaymentMethodMenuItem.RemoveItem -> onRemoveClick()
                 is WalletPaymentMethodMenuItem.Cancel -> onCancelClick()
             }

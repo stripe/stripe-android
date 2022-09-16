@@ -26,6 +26,7 @@
     <string name="wallet_expand_accessibility">Change selection</string>
     <string name="wallet_default">Default</string>
     <string name="wallet_update_card">Update card</string>
+    <string name="wallet_set_as_default">Set as default</string>
     <string name="wallet_remove_card">Remove card</string>
     <string name="wallet_remove_linked_account">Remove linked account</string>
     <string name="wallet_unavailable">Unavailable for this purchase</string>

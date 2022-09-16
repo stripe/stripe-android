@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.link.R
 import com.stripe.android.link.model.icon
+import com.stripe.android.link.theme.MinimumTouchTargetSize
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorText
@@ -48,6 +50,7 @@ internal fun PaymentDetailsListItem(
     enabled: Boolean,
     isSupported: Boolean,
     isSelected: Boolean,
+    isUpdating: Boolean,
     onClick: () -> Unit,
     onMenuButtonClick: () -> Unit
 ) {
@@ -118,16 +121,31 @@ internal fun PaymentDetailsListItem(
                 )
             }
         }
-        IconButton(
-            onClick = onMenuButtonClick,
-            modifier = Modifier.padding(end = 6.dp),
-            enabled = enabled
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(MinimumTouchTargetSize)
+                .padding(end = 12.dp)
         ) {
-            Icon(
-                imageVector = Icons.Filled.MoreVert,
-                contentDescription = stringResource(R.string.edit),
-                tint = MaterialTheme.linkColors.actionLabelLight
-            )
+            if (isUpdating) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                IconButton(
+                    onClick = onMenuButtonClick,
+                    enabled = enabled
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.MoreVert,
+                        contentDescription = stringResource(R.string.edit),
+                        tint = MaterialTheme.linkColors.actionLabelLight,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
         }
     }
     TabRowDefaults.Divider(
