@@ -72,7 +72,8 @@
         <activity android:name=".activity.ComposeExampleActivity" />
         <activity android:name=".activity.KlarnaPaymentActivity"/>
         <activity android:name=".activity.AffirmPaymentActivity"/>
-        <activity android:name=".activity.AlipayPaymentActivity"/>
+        <activity android:name=".activity.AlipayPaymentNativeActivity"/>
+        <activity android:name=".activity.AlipayPaymentWebActivity"/>
         <activity android:name=".activity.ConnectUSBankAccountActivity"/>
         <activity android:name=".activity.ManualUSBankAccountPaymentMethodActivity"/>
     </application>

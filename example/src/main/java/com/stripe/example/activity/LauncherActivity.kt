@@ -110,8 +110,12 @@ class LauncherActivity : AppCompatActivity() {
                 AffirmPaymentActivity::class.java
             ),
             Item(
-                activity.getString(R.string.confirm_with_alipay),
-                AlipayPaymentActivity::class.java
+                activity.getString(R.string.confirm_with_alipay_native),
+                AlipayPaymentNativeActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.confirm_with_alipay_web),
+                AlipayPaymentWebActivity::class.java
             ),
             Item(
                 activity.getString(R.string.becs_debit_example),

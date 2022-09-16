@@ -16,7 +16,7 @@ import com.stripe.example.R
 import com.stripe.example.databinding.PaymentExampleActivityBinding
 import org.json.JSONObject
 
-class AlipayPaymentActivity : StripeIntentActivity() {
+class AlipayPaymentNativeActivity : StripeIntentActivity() {
 
     private val viewBinding: PaymentExampleActivityBinding by lazy {
         PaymentExampleActivityBinding.inflate(layoutInflater)
@@ -28,6 +28,9 @@ class AlipayPaymentActivity : StripeIntentActivity() {
             PaymentConfiguration.getInstance(applicationContext).publishableKey
         )
     }
+
+    private var clientSecret: String? = null
+    private var confirmed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,11 +45,19 @@ class AlipayPaymentActivity : StripeIntentActivity() {
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
 
         viewBinding.confirmWithPaymentButton.setOnClickListener {
-            createAndConfirmPaymentIntent(
-                country = "US",
-                paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
-                supportedPaymentMethods = "alipay"
-            )
+            clientSecret?.let {
+                // If we already loaded the Payment Intent and haven't confirmed, try again
+                if (!confirmed) {
+                    updateStatus("\n\nPayment Intent already created, trying to confirm")
+                    confirmPayment(it)
+                }
+            } ?: run {
+                createAndConfirmPaymentIntent(
+                    country = "US",
+                    paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
+                    supportedPaymentMethods = "alipay"
+                )
+            }
         }
     }
 
@@ -59,8 +70,6 @@ class AlipayPaymentActivity : StripeIntentActivity() {
         mandateDataParams: MandateDataParams?,
         onPaymentIntentCreated: (String) -> Unit
     ) {
-        val secret = responseData.getString("secret")
-        onPaymentIntentCreated(secret)
         viewModel.status.value +=
             "\n\nStarting PaymentIntent confirmation" +
             (
@@ -69,8 +78,14 @@ class AlipayPaymentActivity : StripeIntentActivity() {
                 } ?: ""
                 )
 
+        clientSecret = responseData.getString("secret").also {
+            confirmPayment(it)
+        }
+    }
+
+    private fun confirmPayment(clientSecret: String) {
         stripe.confirmAlipayPayment(
-            confirmPaymentIntentParams = ConfirmPaymentIntentParams.createAlipay(secret),
+            confirmPaymentIntentParams = ConfirmPaymentIntentParams.createAlipay(clientSecret),
             authenticator = { data ->
                 PayTask(this).payV2(data, true)
             },
@@ -78,11 +93,17 @@ class AlipayPaymentActivity : StripeIntentActivity() {
                 override fun onSuccess(result: PaymentIntentResult) {
                     val paymentIntent = result.intent
                     when (paymentIntent.status) {
-                        StripeIntent.Status.Succeeded ->
+                        StripeIntent.Status.Succeeded -> {
+                            confirmed = true
                             updateStatus("\n\nPayment succeeded")
+                        }
                         StripeIntent.Status.RequiresAction ->
-                            stripe.handleNextActionForPayment(this@AlipayPaymentActivity, secret)
-                        else -> updateStatus("\n\nPayment failed or canceled")
+                            updateStatus("\n\nUser canceled confirmation")
+                        else ->
+                            updateStatus(
+                                "\n\nPayment failed or canceled." +
+                                    "\nStatus: ${paymentIntent.status}"
+                            )
                     }
                 }
 
