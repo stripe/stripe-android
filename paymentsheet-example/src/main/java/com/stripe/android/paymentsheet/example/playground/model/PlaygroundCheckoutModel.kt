@@ -39,9 +39,9 @@ enum class Toggle(val key: String, val default: Any) {
     MerchantCountryCode("merchantCountry", "US"),
     Mode("mode", CheckoutMode.Payment.value),
     SetShippingAddress("setShippingAddress", true),
-    SetDefaultBillingAddress("setDefaultBillingAddress", true),
+    SetDefaultBillingAddress("setDefaultBillingAddress", false),
     SetAutomaticPaymentMethods("setAutomaticPaymentMethods", true),
-    SetDelayedPaymentMethods("setDelayedPaymentMethods", false)
+    SetDelayedPaymentMethods("setDelayedPaymentMethods", true)
 }
 
 sealed class CheckoutCustomer(val value: String) {
