@@ -79,6 +79,7 @@ internal class LinkActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // TODO(brnunes-stripe): Migrate to androidx.compose.foundation 1.2.0 when out of beta
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        overridePendingTransition(R.anim.slide_up, 0)
 
         setContent {
             var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
@@ -268,6 +269,11 @@ internal class LinkActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.unregisterFromActivity()
+    }
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(0, R.anim.slide_down)
     }
 
     private fun dismiss(result: LinkActivityResult) {
