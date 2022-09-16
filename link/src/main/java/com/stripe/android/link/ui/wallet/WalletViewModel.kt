@@ -252,8 +252,6 @@ internal class WalletViewModel @Inject constructor(
                 cardPaymentMethodCreateParams = null
             )
 
-            delay(2_000L)
-
             linkAccountManager.updatePaymentDetails(updateParams).fold(
                 onSuccess = { response ->
                     _uiState.update {
