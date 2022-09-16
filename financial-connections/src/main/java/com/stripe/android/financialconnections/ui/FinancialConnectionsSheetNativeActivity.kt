@@ -147,7 +147,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             navigationManager.commands.collect { command ->
                 if (command.destination.isNotEmpty()) {
                     navController.navigate(command.destination) {
-                        popUpAfterAuth(navController)
+                        popUpIfNotBackwardsNavigable(navController)
                     }
                 }
             }
@@ -155,9 +155,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     }
 
     /**
-     * Skips auth screens from back navigation.
+     * Removes screens that are not backwards-navigable from the backstack.
      */
-    private fun NavOptionsBuilder.popUpAfterAuth(navController: NavHostController) {
+    private fun NavOptionsBuilder.popUpIfNotBackwardsNavigable(navController: NavHostController) {
         val destination: String = navController.currentBackStackEntry?.destination?.route ?: return
         val destinationsToSkipOnBack = listOf(
             NavigationDirections.partnerAuth.destination,
