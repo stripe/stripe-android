@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
@@ -294,13 +295,12 @@ private fun InstitutionResultTile(
             .clickable { onInstitutionSelected(institution) }
             .padding(vertical = 8.dp)
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        AsyncImage(
+            model = "https://www.fillmurray.com/108/108",
             contentDescription = null,
             modifier = Modifier
                 .size(36.dp)
                 .clip(RoundedCornerShape(6.dp))
-
         )
         Spacer(modifier = Modifier.size(8.dp))
         Column {

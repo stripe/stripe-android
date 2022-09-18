@@ -42,6 +42,7 @@ dependencies {
     implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
     implementation "com.airbnb.android:showkase-annotation:$showkaseVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
+    implementation "io.coil-kt:coil-compose:2.2.1"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion"
