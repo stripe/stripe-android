@@ -44,56 +44,51 @@ internal fun DocSelectionScreen(
     onDocTypeSelected: (Type, Boolean) -> Unit
 ) {
     MdcTheme {
-        when (verificationPageState.status) {
-            Status.SUCCESS -> {
-                val documentSelect =
-                    remember { requireNotNull(verificationPageState.data).documentSelect }
-                val requireSelfie =
-                    remember { requireNotNull(verificationPageState.data).requireSelfie() }
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(
-                            start = dimensionResource(id = R.dimen.page_horizontal_margin),
-                            end = dimensionResource(id = R.dimen.page_horizontal_margin),
-                            top = dimensionResource(id = R.dimen.page_vertical_margin),
-                            bottom = dimensionResource(id = R.dimen.page_vertical_margin)
-                        )
-                ) {
-                    Text(
-                        text = documentSelect.title,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                top = 58.dp,
-                                bottom = 32.dp
-                            )
-                            .semantics {
-                                testTag = docSelectionTitleTag
-                            },
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
+        require(verificationPageState.status == Status.SUCCESS) {
+            "verificationPageState.status is not SUCCESS"
+        }
+        val documentSelect =
+            remember { requireNotNull(verificationPageState.data).documentSelect }
+        val requireSelfie =
+            remember { requireNotNull(verificationPageState.data).requireSelfie() }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    start = dimensionResource(id = R.dimen.page_horizontal_margin),
+                    end = dimensionResource(id = R.dimen.page_horizontal_margin),
+                    top = dimensionResource(id = R.dimen.page_vertical_margin),
+                    bottom = dimensionResource(id = R.dimen.page_vertical_margin)
+                )
+        ) {
+            Text(
+                text = documentSelect.title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = 58.dp,
+                        bottom = 32.dp
                     )
-                    if (documentSelect.idDocumentTypeAllowlist.count() > 1) {
-                        MultiSelection(
-                            documentSelect.idDocumentTypeAllowlist,
-                            requireSelfie = requireSelfie,
-                            onDocTypeSelected = onDocTypeSelected
-                        )
-                    } else {
-                        SingleSelection(
-                            allowedType = documentSelect.idDocumentTypeAllowlist.entries.first().key,
-                            buttonText = documentSelect.buttonText,
-                            bodyText = documentSelect.body,
-                            requireSelfie = requireSelfie,
-                            onDocTypeSelected = onDocTypeSelected
-                        )
-                    }
-                }
-            }
-            else -> {
-                // Unreachable as DocSelection can only be reached after Consent, at this point
-                // a successful VerificationPage is already saved locally
+                    .semantics {
+                        testTag = docSelectionTitleTag
+                    },
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+            if (documentSelect.idDocumentTypeAllowlist.count() > 1) {
+                MultiSelection(
+                    documentSelect.idDocumentTypeAllowlist,
+                    requireSelfie = requireSelfie,
+                    onDocTypeSelected = onDocTypeSelected
+                )
+            } else {
+                SingleSelection(
+                    allowedType = documentSelect.idDocumentTypeAllowlist.entries.first().key,
+                    buttonText = documentSelect.buttonText,
+                    bodyText = documentSelect.body,
+                    requireSelfie = requireSelfie,
+                    onDocTypeSelected = onDocTypeSelected
+                )
             }
         }
     }
