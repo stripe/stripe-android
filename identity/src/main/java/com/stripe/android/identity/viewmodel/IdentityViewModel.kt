@@ -11,7 +11,6 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.camera.framework.image.longerEdge

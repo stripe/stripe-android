@@ -96,7 +96,6 @@ internal fun DocSelectionScreen(
                 // a successful VerificationPage is already saved locally
             }
         }
-
     }
 }
 
@@ -175,7 +174,6 @@ internal fun MultiSelection(
     }
 }
 
-
 @Composable
 internal fun SingleSelection(
     allowedType: String,
@@ -184,9 +182,11 @@ internal fun SingleSelection(
     requireSelfie: Boolean,
     onDocTypeSelected: (Type, Boolean) -> Unit
 ) {
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .semantics { testTag = singleSelectionTag }) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { testTag = singleSelectionTag }
+    ) {
         Text(text = bodyText ?: "", modifier = Modifier.weight(1f))
 
         var buttonState by remember { mutableStateOf(LoadingButtonState.Idle) }

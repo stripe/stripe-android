@@ -43,9 +43,7 @@ internal data class CollectedDataParam(
                     }
                 }
         }
-
     }
-
 
     internal companion object {
         private const val COLLECTED_DATA_PARAM = "collected_data"

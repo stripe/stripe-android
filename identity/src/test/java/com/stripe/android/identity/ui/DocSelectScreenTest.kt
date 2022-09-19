@@ -77,7 +77,6 @@ class DocSelectScreenTest {
                 CollectedDataParam.Type.PASSPORT,
                 false
             )
-
         }
     }
 

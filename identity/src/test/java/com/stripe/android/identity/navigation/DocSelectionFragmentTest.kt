@@ -80,7 +80,6 @@ internal class DocSelectionFragmentTest {
     private val onCameraReadyCaptor = argumentCaptor<() -> Unit>()
     private val onUserDeniedCameraPermissionCaptor = argumentCaptor<() -> Unit>()
 
-
     private fun setUpSuccessVerificationPage(times: Int = 1) {
         val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
         verify(
@@ -93,7 +92,6 @@ internal class DocSelectionFragmentTest {
         )
         successCaptor.lastValue(verificationPage)
     }
-
 
     @Test
     fun `analytics request is sent when response is valid`() {
@@ -111,7 +109,6 @@ internal class DocSelectionFragmentTest {
             )
         }
     }
-
 
     @Test
     @Ignore(
@@ -440,7 +437,7 @@ internal class DocSelectionFragmentTest {
 
             assertThat(
                 requireNotNull(navController.backStack.last().arguments)
-                    [ARG_SCAN_TYPE]
+                [ARG_SCAN_TYPE]
             ).isEqualTo(CollectedDataParam.Type.DRIVINGLICENSE)
 
             assertThat(navController.currentDestination?.id)
