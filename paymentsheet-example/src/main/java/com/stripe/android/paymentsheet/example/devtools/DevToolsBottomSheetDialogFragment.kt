@@ -16,16 +16,21 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.LeadingIconTab
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Switch
+import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -41,8 +46,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.PagerState
+import com.google.accompanist.pager.rememberPagerState
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.core.networking.StripeNetworkClientInterceptor
+import kotlinx.coroutines.launch
 
 class DevToolsBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
@@ -63,50 +73,102 @@ class DevToolsBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+private enum class DevToolsTab {
+    Network,
+    FeatureFlags;
+}
+
+@Composable
+private fun DevToolsTab.Content() {
+    when (this) {
+        DevToolsTab.Network -> DevToolsNetwork()
+        DevToolsTab.FeatureFlags -> Text("Coming… someday?")
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun DevTools() {
-    val endpoints = remember { DevToolsStore.endpoints }
-    val scrollState = rememberLazyListState()
+    val tabs = DevToolsTab.values()
+    val pagerState = rememberPagerState()
 
-    val hasScrolled = remember {
-        derivedStateOf {
-            scrollState.firstVisibleItemIndex > 1 || scrollState.firstVisibleItemScrollOffset > 0
+    Scaffold(
+        topBar = {
+            Surface(elevation = 4.dp) {
+                Column {
+                    TopAppBar(
+                        title = { Text("DevTools") },
+                        elevation = 0.dp
+                    )
+                    DevToolsTabRow(
+                        tabs = tabs,
+                        pagerState = pagerState
+                    )
+                }
+            }
+        }
+    ) { padding ->
+        HorizontalPager(
+            state = pagerState,
+            count = tabs.size,
+            modifier = Modifier.padding(padding)
+        ) { page ->
+            tabs[page].Content()
         }
     }
+}
 
-    Column(modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection())) {
-        Surface(
-            elevation = if (hasScrolled.value) 8.dp else 0.dp,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+private fun DevToolsTabRow(
+    tabs: Array<DevToolsTab>,
+    pagerState: PagerState,
+) {
+    val scope = rememberCoroutineScope()
+    TabRow(
+        selectedTabIndex = pagerState.currentPage
+    ) {
+        for ((index, tab) in tabs.withIndex()) {
+            LeadingIconTab(
+                text = { Text(tab.name) },
+                icon = {},
+                selected = pagerState.currentPage == index,
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(index)
+                    }
+                }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun DevToolsNetwork() {
+    val endpoints = remember { DevToolsStore.endpoints }
+
+    LazyColumn(
+        modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection())
+    ) {
+        item {
             Text(
-                text = "Dev Tools",
-                style = MaterialTheme.typography.h5,
+                text = "Fail requests to endpoints",
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(16.dp)
             )
         }
 
-        LazyColumn(state = scrollState) {
-            item {
-                Text(
-                    text = "Fail requests to endpoints",
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-            
-            item {
-                ErrorTypeDropdown()
-            }
+        item {
+            ErrorTypeDropdown()
+        }
 
-            itemsIndexed(endpoints) { index, endpoint ->
-                DevToolsEndpointItem(
-                    endpoint = endpoint,
-                    isLastItem = index == endpoints.lastIndex,
-                    onToggle = { DevToolsStore.toggleFailureFor(endpoint) }
-                )
-            }
+        itemsIndexed(endpoints) { index, endpoint ->
+            DevToolsEndpointItem(
+                endpoint = endpoint,
+                isLastItem = index == endpoints.lastIndex,
+                onToggle = { DevToolsStore.toggleFailureFor(endpoint) }
+            )
         }
     }
 }
@@ -126,7 +188,9 @@ private fun ErrorTypeDropdown() {
         DropdownMenu(
             expanded = isExpanded,
             onDismissRequest = { isExpanded = false },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
         ) {
             for (item in items) {
                 DropdownMenuItem(
