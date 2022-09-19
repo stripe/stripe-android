@@ -2,6 +2,9 @@
 
 ## X.X.X - 2022-XX-XX
 
+## 20.13.0 - 2022-09-19
+This release makes the `PaymentMethod.Card.networks` field public, fixes the Alipay integration and the card scan form encoding.
+
 ### Payments
 
 * [CHANGED] [5552](https://github.com/stripe/stripe-android/pull/5552) Make `PaymentMethod.Card.networks` field public.
