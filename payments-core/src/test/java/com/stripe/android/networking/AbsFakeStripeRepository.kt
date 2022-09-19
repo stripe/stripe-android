@@ -5,6 +5,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.CardMetadata
@@ -34,7 +35,6 @@ import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
-import org.json.JSONObject
 import java.util.Locale
 
 internal abstract class AbsFakeStripeRepository : StripeRepository() {
@@ -279,7 +279,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun retrieveObject(
         url: String,
         requestOptions: ApiRequest.Options
-    ) = JSONObject()
+    ) = StripeResponse(1, "response")
 
     override suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
