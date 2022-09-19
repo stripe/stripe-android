@@ -40,11 +40,11 @@ internal const val singleSelectionTag = "SingleSelection"
 
 @Composable
 internal fun DocSelectionScreen(
-    verificationPageState: Resource<VerificationPage>,
+    verificationPageState: Resource<VerificationPage>?,
     onDocTypeSelected: (Type, Boolean) -> Unit
 ) {
     MdcTheme {
-        require(verificationPageState.status == Status.SUCCESS) {
+        require(verificationPageState != null && verificationPageState.status == Status.SUCCESS) {
             "verificationPageState.status is not SUCCESS"
         }
         val documentSelect =
@@ -55,10 +55,8 @@ internal fun DocSelectionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    start = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    end = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    top = dimensionResource(id = R.dimen.page_vertical_margin),
-                    bottom = dimensionResource(id = R.dimen.page_vertical_margin)
+                    horizontal = dimensionResource(id = R.dimen.page_horizontal_margin),
+                    vertical = dimensionResource(id = R.dimen.page_vertical_margin)
                 )
         ) {
             Text(
@@ -103,6 +101,7 @@ internal fun MultiSelection(
     var selectedTypeValue by remember { mutableStateOf(SELECTION_NONE) }
 
     for ((allowedType, allowedTypeValue) in idDocumentTypeAllowlist) {
+        val isSelected = selectedTypeValue == allowedTypeValue
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -114,55 +113,32 @@ internal fun MultiSelection(
                     testTag = allowedType
                 }
         ) {
-            when (selectedTypeValue) {
-                SELECTION_NONE -> { // None selected
-                    TextButton(
-                        onClick = {
-                            onDocTypeSelected(Type.fromName(allowedType), requireSelfie)
-                            selectedTypeValue = allowedTypeValue
-                        },
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = LocalContentColor.current
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = allowedTypeValue.uppercase(),
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Start
-                        )
-                    }
-                }
-                allowedTypeValue -> { // Own selected
-                    TextButton(
-                        onClick = {},
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = LocalContentColor.current
-                        ),
-                        enabled = false
-                    ) {
-                        Text(text = allowedTypeValue.uppercase())
-                    }
+            TextButton(
+                onClick = {
+                    onDocTypeSelected(Type.fromName(allowedType), requireSelfie)
+                    selectedTypeValue = allowedTypeValue
+                },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = LocalContentColor.current
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                enabled = selectedTypeValue == SELECTION_NONE
+            ) {
+                Text(
+                    text = allowedTypeValue.uppercase(),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Start
+                )
+            }
 
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .size(24.dp)
-                            .padding(top = 4.dp, end = 8.dp),
-                        strokeWidth = 3.dp
-                    )
-                }
-                else -> { // Other selected
-                    TextButton(
-                        onClick = {},
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = LocalContentColor.current
-                        ),
-                        enabled = false
-                    ) {
-                        Text(text = allowedTypeValue.uppercase())
-                    }
-                }
+            if (isSelected) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .size(24.dp)
+                        .padding(top = 4.dp, end = 8.dp),
+                    strokeWidth = 3.dp
+                )
             }
         }
         Divider()

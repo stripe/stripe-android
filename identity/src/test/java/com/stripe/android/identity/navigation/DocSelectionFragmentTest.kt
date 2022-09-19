@@ -95,11 +95,12 @@ internal class DocSelectionFragmentTest {
 
     @Test
     fun `analytics request is sent when response is valid`() {
+        whenever(verificationPage.documentSelect).thenReturn(
+            DOC_SELECT_MULTI_CHOICE
+        )
+        verificationPageLiveData.postValue(Resource.success(verificationPage))
+
         launchDocSelectionFragment { _, _ ->
-            whenever(verificationPage.documentSelect).thenReturn(
-                DOC_SELECT_MULTI_CHOICE
-            )
-            verificationPageLiveData.postValue(Resource.success(verificationPage))
 
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {

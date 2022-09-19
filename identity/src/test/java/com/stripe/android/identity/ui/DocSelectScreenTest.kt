@@ -1,5 +1,6 @@
 package com.stripe.android.identity.ui
 
+import android.os.Build
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -24,18 +25,18 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(application = TestApplication::class)
+@Config(application = TestApplication::class, sdk = [Build.VERSION_CODES.Q])
 class DocSelectScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
     private val onDocTypeSelectedMock = mock<(CollectedDataParam.Type, Boolean) -> Unit>()
 
-    private val verificationPageWithMultiChoice = mock<VerificationPage>() {
+    private val verificationPageWithMultiChoice = mock<VerificationPage> {
         on { it.documentSelect } doReturn DOC_SELECT_MULTI_CHOICE
     }
 
-    private val verificationPageWithSingleChoice = mock<VerificationPage>() {
+    private val verificationPageWithSingleChoice = mock<VerificationPage> {
         on { it.documentSelect } doReturn DOC_SELECT_SINGLE_CHOICE
     }
 

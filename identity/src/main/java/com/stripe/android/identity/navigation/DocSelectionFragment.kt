@@ -51,7 +51,7 @@ internal class DocSelectionFragment(
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            val verificationPage by identityViewModel.verificationPage.observeAsState(Resource.loading())
+            val verificationPage by identityViewModel.verificationPage.observeAsState()
             DocSelectionScreen(verificationPage, ::postVerificationPageDataAndNavigate)
         }
     }
