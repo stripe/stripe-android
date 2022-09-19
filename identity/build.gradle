@@ -117,6 +117,8 @@ android {
                 maxHeapSize = "1024m"
             }
         }
+        // Make sure animations are off when we run espresso tests
+        animationsDisabled = true
     }
 
     lintOptions {
