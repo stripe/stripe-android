@@ -54,6 +54,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.validate
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -86,6 +87,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @InjectorKey private val injectorKey: String,
     // Properties provided through injection
     private val flowControllerInitializer: FlowControllerInitializer,
+    private val customerApiRepository: CustomerApiRepository,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
@@ -466,11 +468,17 @@ internal class DefaultFlowController @Inject internal constructor(
             } else {
                 null
             }
+            val customerEmail = config.customer?.let {
+                customerApiRepository.retrieveCustomer(
+                    it.id,
+                    it.ephemeralKeySecret
+                )?.email
+            }
             val accountStatus = linkLauncher.setup(
                 configuration = LinkPaymentLauncher.Configuration(
                     stripeIntent = initData.stripeIntent,
                     merchantName = config.merchantDisplayName,
-                    customerEmail = config.defaultBillingDetails?.email,
+                    customerEmail = customerEmail ?: config.defaultBillingDetails?.email,
                     customerPhone = customerPhone,
                     customerName = config.defaultBillingDetails?.name,
                     shippingValues = shippingAddress

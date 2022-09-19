@@ -330,7 +330,8 @@ abstract class StripeRepository {
         APIException::class,
         CardException::class
     )
-    internal abstract suspend fun retrieveCustomer(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options

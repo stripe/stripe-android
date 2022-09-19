@@ -455,7 +455,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      */
     abstract fun setupLink(stripeIntent: StripeIntent)
 
-    protected fun createLinkConfiguration(
+    protected suspend fun createLinkConfiguration(
         stripeIntent: StripeIntent
     ): LinkPaymentLauncher.Configuration {
         val shippingDetails: AddressDetails? = config?.shippingDetails
@@ -469,10 +469,16 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         } else {
             null
         }
+        val customerEmail = config?.customer?.let {
+            customerRepository.retrieveCustomer(
+                it.id,
+                it.ephemeralKeySecret
+            )
+        }?.email
         return LinkPaymentLauncher.Configuration(
             stripeIntent = stripeIntent,
             merchantName = merchantName,
-            customerEmail = config?.defaultBillingDetails?.email,
+            customerEmail = customerEmail ?: config?.defaultBillingDetails?.email,
             customerPhone = customerPhone,
             customerName = config?.defaultBillingDetails?.name,
             shippingValues = shippingAddress
