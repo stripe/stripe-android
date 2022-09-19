@@ -89,7 +89,6 @@ fun OTPElementUI(
                 )
             ) {
                 val value by element.controller.fieldValues[index].collectAsState("")
-
                 var textFieldModifier = Modifier
                     .height(56.dp)
                     .onFocusChanged { focusState ->
@@ -181,12 +180,8 @@ fun OTPElementUI(
                                 placeholderColor = colors.placeholder,
                                 disabledPlaceholderColor = colors.placeholder
                             ),
-                            contentPadding = PaddingValues(
-                                TextFieldPadding,
-                                TextFieldPadding,
-                                TextFieldPadding,
-                                TextFieldPadding
-                            )
+                            // TextField has a default padding, here we are specifying 0.dp padding
+                            contentPadding = PaddingValues()
                         )
                     }
                 )
@@ -200,5 +195,3 @@ data class OTPElementColors(
     val selectedBorder: Color,
     val placeholder: Color
 )
-
-private val TextFieldPadding = 12.dp
