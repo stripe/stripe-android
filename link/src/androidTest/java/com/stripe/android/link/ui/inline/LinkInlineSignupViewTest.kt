@@ -112,8 +112,7 @@ internal class LinkInlineSignupViewTest {
         expanded: Boolean = true,
         requiresNameCollection: Boolean = false,
         errorMessage: ErrorMessage? = null,
-        toggleExpanded: () -> Unit = {},
-        onUserInteracted: () -> Unit = {}
+        toggleExpanded: () -> Unit = {}
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             LinkInlineSignup(
@@ -126,8 +125,7 @@ internal class LinkInlineSignupViewTest {
                 expanded,
                 requiresNameCollection,
                 errorMessage,
-                toggleExpanded,
-                onUserInteracted
+                toggleExpanded
             )
         }
     }

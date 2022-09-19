@@ -1,7 +1,5 @@
 package com.stripe.android.link.ui.inline
 
-import android.content.Context
-import android.util.AttributeSet
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -21,13 +19,10 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -55,9 +50,7 @@ import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.elements.TextFieldSection
 import com.stripe.android.ui.core.elements.menu.Checkbox
 import com.stripe.android.ui.core.getBorderStroke
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import com.stripe.android.ui.core.paymentsColors
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Preview
 @Composable
@@ -74,38 +67,35 @@ private fun Preview() {
                 expanded = true,
                 requiresNameCollection = true,
                 errorMessage = null,
-                toggleExpanded = {},
-                onUserInteracted = {}
+                toggleExpanded = {}
             )
         }
     }
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun LinkInlineSignup(
-    injector: NonFallbackInjector,
+fun LinkInlineSignup(
+    linkPaymentLauncher: LinkPaymentLauncher,
     enabled: Boolean,
-    onUserInteracted: () -> Unit,
-    onSelected: (Boolean) -> Unit,
-    onUserInput: (UserInput?) -> Unit
+    onStateChanged: (InlineSignupViewState) -> Unit
 ) {
     val viewModel: InlineSignupViewModel = viewModel(
-        factory = InlineSignupViewModel.Factory(injector)
+        factory = InlineSignupViewModel.Factory(linkPaymentLauncher.injector!!)
     )
 
-    val signUpState by viewModel.signUpState.collectAsState(SignUpState.InputtingEmail)
-    val isExpanded by viewModel.isExpanded.collectAsState(false)
-    val userInput by viewModel.userInput.collectAsState()
+    val viewState by viewModel.viewState.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
-    onSelected(isExpanded)
-    onUserInput(userInput)
+    LaunchedEffect(viewState) {
+        onStateChanged(viewState)
+    }
 
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    LaunchedEffect(signUpState) {
-        if (signUpState == SignUpState.InputtingEmail && userInput != null) {
+    LaunchedEffect(viewState.signUpState) {
+        if (viewState.signUpState == SignUpState.InputtingEmail && viewState.userInput != null) {
             focusManager.clearFocus(true)
             keyboardController?.hide()
         }
@@ -116,13 +106,12 @@ private fun LinkInlineSignup(
         emailController = viewModel.emailController,
         phoneNumberController = viewModel.phoneController,
         nameController = viewModel.nameController,
-        signUpState = signUpState,
+        signUpState = viewState.signUpState,
         enabled = enabled,
-        expanded = isExpanded,
+        expanded = viewState.isExpanded,
         requiresNameCollection = viewModel.requiresNameCollection,
         errorMessage = errorMessage,
-        toggleExpanded = viewModel::toggleExpanded,
-        onUserInteracted = onUserInteracted
+        toggleExpanded = viewModel::toggleExpanded
     )
 }
 
@@ -137,8 +126,7 @@ internal fun LinkInlineSignup(
     expanded: Boolean,
     requiresNameCollection: Boolean,
     errorMessage: ErrorMessage?,
-    toggleExpanded: () -> Unit,
-    onUserInteracted: () -> Unit
+    toggleExpanded: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
 
@@ -169,7 +157,6 @@ internal fun LinkInlineSignup(
                         .padding(16.dp)
                         .clickable {
                             toggleExpanded()
-                            onUserInteracted()
                         }
                 ) {
                     Checkbox(
@@ -264,57 +251,6 @@ internal fun LinkInlineSignup(
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkInlineSignupView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyle: Int = 0
-) : AbstractComposeView(context, attrs, defStyle) {
-
-    override var shouldCreateCompositionOnAttachedToWindow: Boolean = false
-        private set
-
-    var linkLauncher: LinkPaymentLauncher? = null
-
-    /**
-     *  Keep track of whether the user has interacted with the inline signup UI, so that it's not
-     *  hidden when the current Link account changes.
-     */
-    var hasUserInteracted = false
-
-    /**
-     * The collected input from the user, always valid unless null.
-     * When not null, enough information has been collected to proceed with the payment flow.
-     * This means that the user has entered an email that already has a link account and just
-     * needs verification, or entered a new email and phone number.
-     */
-    val userInput = MutableStateFlow<UserInput?>(null)
-
-    val isSelected = MutableStateFlow(false)
-
-    private var enabledState by mutableStateOf(isEnabled)
-
-    override fun setEnabled(enabled: Boolean) {
-        super.setEnabled(enabled)
-        enabledState = enabled
-    }
-
-    @Composable
-    override fun Content() {
-        linkLauncher?.injector?.let {
-            PaymentsTheme {
-                LinkInlineSignup(
-                    injector = it,
-                    enabled = enabledState,
-                    onUserInteracted = { hasUserInteracted = true },
-                    onSelected = { isSelected.value = it },
-                    onUserInput = { userInput.value = it }
-                )
             }
         }
     }
