@@ -124,7 +124,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
-        addDevToolsMenu()
+        addDevToolsMenu(showInMenu = true)
 
         paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
         flowController = PaymentSheet.FlowController.create(

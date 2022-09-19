@@ -23,7 +23,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        addDevToolsMenu()
+        addDevToolsMenu(showInMenu = true)
 
         flowController = PaymentSheet.FlowController.create(
             this,

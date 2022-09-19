@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.example.devtools.addDevToolsMenu
 internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        addDevToolsMenu()
+        addDevToolsMenu(showInMenu = true)
 
         val paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
 

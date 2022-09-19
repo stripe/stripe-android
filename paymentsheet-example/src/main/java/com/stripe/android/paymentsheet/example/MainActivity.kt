@@ -7,6 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.networking.StripeNetworkClientInterceptor
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
+import com.stripe.android.paymentsheet.example.devtools.DevToolsActivityLifecycleCallbacks
 import com.stripe.android.paymentsheet.example.devtools.DevToolsStore
 import com.stripe.android.paymentsheet.example.devtools.addDevToolsMenu
 import com.stripe.android.paymentsheet.example.playground.activity.AppearancePlaygroundActivity
@@ -24,7 +25,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
         setSupportActionBar(viewBinding.toolbar)
+
         addDevToolsMenu()
+        application.registerActivityLifecycleCallbacks(DevToolsActivityLifecycleCallbacks())
 
         viewBinding.launchCompleteButton.setOnClickListener {
             startActivity(Intent(this, LaunchPaymentSheetCompleteActivity::class.java))

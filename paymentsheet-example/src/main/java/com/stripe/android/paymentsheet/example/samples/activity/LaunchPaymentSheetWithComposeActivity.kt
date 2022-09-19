@@ -14,7 +14,7 @@ internal class LaunchPaymentSheetWithComposeActivity :
     BasePaymentSheetActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        addDevToolsMenu()
+        addDevToolsMenu(showInMenu = true)
 
         setContent {
             MaterialTheme {
