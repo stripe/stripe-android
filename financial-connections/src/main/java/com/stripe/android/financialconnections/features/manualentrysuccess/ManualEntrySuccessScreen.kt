@@ -2,7 +2,6 @@
 
 package com.stripe.android.financialconnections.features.manualentrysuccess
 
-import android.app.Activity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -27,11 +26,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.Loading
+import com.airbnb.mvrx.compose.collectAsState
+import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -46,10 +47,15 @@ internal fun ManualEntrySuccessScreen(
     last4: String?
 ) {
     val parentViewModel = parentViewModel()
+    val viewModel: ManualEntrySuccessViewModel = mavericksViewModel()
+    val completeAuthSessionAsync = viewModel
+        .collectAsState(ManualEntrySuccessState::completeAuthSession)
     ManualEntrySuccessContent(
         microdepositVerificationMethod = microdepositVerificationMethod,
         last4 = last4,
-        onCloseClick = parentViewModel::onCloseClick
+        loading = completeAuthSessionAsync.value is Loading,
+        onCloseClick = parentViewModel::onCloseClick,
+        onDoneClick = viewModel::onSubmit
     )
 }
 
@@ -57,9 +63,10 @@ internal fun ManualEntrySuccessScreen(
 internal fun ManualEntrySuccessContent(
     microdepositVerificationMethod: MicrodepositVerificationMethod,
     last4: String?,
-    onCloseClick: () -> Unit
+    loading: Boolean,
+    onCloseClick: () -> Unit,
+    onDoneClick: () -> Unit
 ) {
-    val localContext = LocalContext.current
     FinancialConnectionsScaffold(
         topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
     ) {
@@ -96,12 +103,8 @@ internal fun ManualEntrySuccessContent(
             )
             Spacer(modifier = Modifier.weight(1f))
             FinancialConnectionsButton(
-                loading = false,
-                onClick = {
-                    val activity = (localContext as? Activity)
-                    activity?.setResult(Activity.RESULT_OK)
-                    activity?.finish()
-                },
+                loading = loading,
+                onClick = onDoneClick,
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
@@ -110,6 +113,7 @@ internal fun ManualEntrySuccessContent(
         }
     }
 }
+
 @Composable
 internal fun resolveText(
     microdepositVerificationMethod: MicrodepositVerificationMethod,
@@ -120,7 +124,10 @@ internal fun resolveText(
         else -> stringResource(R.string.stripe_manualentrysuccess_desc_noaccount)
     }
     MicrodepositVerificationMethod.DESCRIPTOR_CODE -> when {
-        last4 != null -> stringResource(R.string.stripe_manualentrysuccess_desc_descriptorcode, last4)
+        last4 != null -> stringResource(
+            R.string.stripe_manualentrysuccess_desc_descriptorcode,
+            last4
+        )
         else -> stringResource(R.string.stripe_manualentrysuccess_desc_noaccount_descriptorcode)
     }
     MicrodepositVerificationMethod.UNKNOWN -> TODO()
@@ -232,7 +239,9 @@ internal fun ManualEntrySuccessScreenPreviewAmount() {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.AMOUNTS,
             last4 = "1234",
-            onCloseClick = {}
+            onCloseClick = {},
+            onDoneClick = {},
+            loading = false,
         )
     }
 }
@@ -244,7 +253,9 @@ internal fun ManualEntrySuccessScreenPreviewDescriptor() {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.DESCRIPTOR_CODE,
             last4 = "1234",
-            onCloseClick = {}
+            onCloseClick = {},
+            onDoneClick = {},
+            loading = false,
         )
     }
 }
@@ -256,7 +267,9 @@ internal fun ManualEntrySuccessScreenPreviewAmountNoAccount() {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.AMOUNTS,
             last4 = null,
-            onCloseClick = {}
+            onCloseClick = {},
+            onDoneClick = {},
+            loading = false,
         )
     }
 }
@@ -268,7 +281,9 @@ internal fun ManualEntrySuccessScreenPreviewDescriptorNoAccount() {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.DESCRIPTOR_CODE,
             last4 = null,
-            onCloseClick = {}
+            onCloseClick = {},
+            onDoneClick = {},
+            loading = false,
         )
     }
 }
