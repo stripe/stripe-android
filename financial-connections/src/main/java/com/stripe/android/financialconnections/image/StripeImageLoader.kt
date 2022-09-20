@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import java.io.InputStream
 import java.net.URL
 
@@ -15,8 +17,9 @@ import java.net.URL
  * memory cache to work the image loader instance needs to be shared.
  */
 internal class StripeImageLoader(
-    context: Context
-) {
+    lifecycleOwner: LifecycleOwner,
+    context: Context,
+) : DefaultLifecycleObserver {
     private var currentInputStream: InputStream? = null
 
     private val diskCache = ImageLruDiskCache(
@@ -24,6 +27,19 @@ internal class StripeImageLoader(
         uniqueName = "financial_connections_image_cache"
     )
     private val memoryCache = ImageLruMemoryCache()
+
+    init {
+        registerLifecycleObserver(lifecycleOwner)
+    }
+
+    private fun registerLifecycleObserver(lifecycleOwner: LifecycleOwner) {
+        lifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                cancel()
+                super.onDestroy(owner)
+            }
+        })
+    }
 
     fun load(
         url: String,

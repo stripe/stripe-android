@@ -55,7 +55,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        imageLoader = StripeImageLoader(context = this)
+        imageLoader = StripeImageLoader(
+            context = this,
+            lifecycleOwner = this
+        )
         viewModel.activityRetainedComponent.inject(this)
         viewModel.onEach { postInvalidate() }
         onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
@@ -193,11 +196,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 inclusive = true
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        imageLoader.cancel()
     }
 }
 
