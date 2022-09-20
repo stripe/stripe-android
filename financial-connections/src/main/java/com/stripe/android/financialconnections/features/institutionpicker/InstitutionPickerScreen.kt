@@ -303,11 +303,11 @@ private fun InstitutionResultTile(
         StripeImage(
             url = "https://www.fillmurray.com/108/108",
             imageLoader = LocalImageLoader.current,
-            placeHolder = painterResource(R.drawable.stripe_ic_brandicon_institution),
+            placeholder = painterResource(R.drawable.stripe_ic_brandicon_institution),
             modifier = Modifier
                 .size(36.dp)
                 .clip(RoundedCornerShape(6.dp)),
-            contentDescription = ""
+            contentDescription = "Institution icon image"
         )
         Spacer(modifier = Modifier.size(8.dp))
         Column {
@@ -354,11 +354,11 @@ private fun FeaturedInstitutionsGrid(
                 ) {
                     StripeImage(
                         url = "https://www.fillmurray.com/108/108",
-                        placeHolder = painterResource(R.drawable.stripe_ic_brandicon_institution),
+                        placeholder = painterResource(R.drawable.stripe_ic_brandicon_institution),
                         imageLoader = LocalImageLoader.current,
                         modifier = Modifier
                             .fillMaxSize(),
-                        contentDescription = ""
+                        contentDescription = "Institution icon image"
                     )
                 }
             }

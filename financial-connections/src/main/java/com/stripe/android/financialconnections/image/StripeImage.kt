@@ -23,10 +23,10 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun StripeImage(
     url: String,
-    placeHolder: Painter,
+    placeholder: Painter,
     imageLoader: StripeImageLoader,
-    modifier: Modifier = Modifier,
-    contentDescription: String? = null
+    contentDescription: String?,
+    modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(modifier) {
         val (width, height) = calculateBoxSize()
@@ -40,7 +40,7 @@ internal fun StripeImage(
                 painter.value = imageLoader.load(url, width, height)
                     .fold(
                         onSuccess = { bitmap -> BitmapPainter(bitmap.asImageBitmap()) },
-                        onFailure = { placeHolder }
+                        onFailure = { placeholder }
                     )
             }
             onDispose {

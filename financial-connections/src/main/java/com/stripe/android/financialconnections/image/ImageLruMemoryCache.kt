@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections.image
 import android.graphics.Bitmap
 import android.util.LruCache
 
-class ImageLruMemoryCache {
+internal class ImageLruMemoryCache {
 
     @Suppress("MagicNumber")
     private val lruCache = object : LruCache<String, Bitmap>(
