@@ -1,5 +1,6 @@
-package com.stripe.android.financialconnections.model.serializer
+package com.stripe.android.core.model.serializers
 
+import androidx.annotation.RestrictTo
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -11,7 +12,8 @@ import kotlinx.serialization.encoding.Encoder
 /**
  * Parses an enum using [values], and on unknown values, falls back to [defaultValue].
  */
-internal abstract class EnumIgnoreUnknownSerializer<T : Enum<T>>(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+abstract class EnumIgnoreUnknownSerializer<T : Enum<T>>(
     values: Array<out T>,
     private val defaultValue: T
 ) :
