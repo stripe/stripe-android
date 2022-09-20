@@ -17,7 +17,8 @@ internal data class WalletUiState(
     val hasCompleted: Boolean = false,
     val errorMessage: ErrorMessage? = null,
     val expiryDateInput: FormFieldEntry = FormFieldEntry(value = null),
-    val cvcInput: FormFieldEntry = FormFieldEntry(value = null)
+    val cvcInput: FormFieldEntry = FormFieldEntry(value = null),
+    val alertMessage: ErrorMessage? = null
 ) {
 
     val selectedCard: Card?
@@ -61,7 +62,7 @@ internal data class WalletUiState(
         return copy(
             paymentDetailsList = response.paymentDetails,
             selectedItem = selectedItem,
-            isExpanded = !isSelectedItemValid,
+            isExpanded = if (isSelectedItemValid) isExpanded else true,
             isProcessing = false
         )
     }

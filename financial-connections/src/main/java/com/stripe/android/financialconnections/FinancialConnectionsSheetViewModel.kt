@@ -128,7 +128,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         setState {
             if (authFlowActive && activityRecreated.not()) {
                 copy(viewEffect = FinishWithResult(Canceled))
-            } else this
+            } else {
+                this
+            }
         }
     }
 
@@ -141,7 +143,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         setState {
             if (authFlowActive && activityRecreated) {
                 copy(viewEffect = FinishWithResult(Canceled))
-            } else this
+            } else {
+                this
+            }
         }
     }
 
@@ -241,15 +245,20 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             val receivedUrl: Uri? = intent?.data?.toString()?.toUriOrNull()
             if (receivedUrl == null) {
                 onFatal(state, Exception("Intent url received from web flow is null"))
-            } else when (receivedUrl.buildUpon().clearQuery().toString()) {
-                state.manifest?.successUrl -> when (state.initialArgs) {
-                    is ForData -> fetchFinancialConnectionsSession(state)
-                    is ForToken -> fetchFinancialConnectionsSessionForToken(state)
-                    is ForLink -> onSuccessFromLinkFlow(receivedUrl)
+            } else {
+                when (receivedUrl.buildUpon().clearQuery().toString()) {
+                    state.manifest?.successUrl -> when (state.initialArgs) {
+                        is ForData -> fetchFinancialConnectionsSession(state)
+                        is ForToken -> fetchFinancialConnectionsSessionForToken(state)
+                        is ForLink -> onSuccessFromLinkFlow(receivedUrl)
+                    }
+                    state.manifest?.cancelUrl -> onUserCancel(state)
+                    else ->
+                        onFatal(
+                            state,
+                            Exception("Error processing FinancialConnectionsSheet intent")
+                        )
                 }
-                state.manifest?.cancelUrl -> onUserCancel(state)
-                else ->
-                    onFatal(state, Exception("Error processing FinancialConnectionsSheet intent"))
             }
         }
     }

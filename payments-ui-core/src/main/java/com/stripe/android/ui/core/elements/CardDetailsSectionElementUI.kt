@@ -20,7 +20,8 @@ import com.stripe.android.ui.core.cardscan.CardScanActivity
 fun CardDetailsSectionElementUI(
     enabled: Boolean,
     controller: CardDetailsSectionController,
-    hiddenIdentifiers: List<IdentifierSpec>?
+    hiddenIdentifiers: List<IdentifierSpec>?,
+    lastTextFieldIdentifier: IdentifierSpec?
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -47,8 +48,8 @@ fun CardDetailsSectionElementUI(
         }
     }
     SectionElementUI(
-        enabled,
-        SectionElement(
+        enabled = enabled,
+        element = SectionElement(
             IdentifierSpec.Generic("credit_details"),
             listOf(controller.cardDetailsElement),
             SectionController(
@@ -56,7 +57,7 @@ fun CardDetailsSectionElementUI(
                 listOf(controller.cardDetailsElement.sectionFieldErrorController())
             )
         ),
-        hiddenIdentifiers ?: emptyList(),
-        IdentifierSpec.Generic("card_details")
+        hiddenIdentifiers = hiddenIdentifiers ?: emptyList(),
+        lastTextFieldIdentifier = lastTextFieldIdentifier
     )
 }

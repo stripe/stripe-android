@@ -189,6 +189,7 @@ class PlaygroundTestDriver(
 
     internal fun pressEdit() {
         selectors.editButton.apply {
+            waitProcessingComplete()
             click()
         }
     }
@@ -404,6 +405,10 @@ class PlaygroundTestDriver(
         intent.putExtra(
             PaymentSheetPlaygroundActivity.USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA,
             testParameters.snapshotReturningCustomer
+        )
+        intent.putExtra(
+            PaymentSheetPlaygroundActivity.SUPPORTED_PAYMENT_METHODS_EXTRA,
+            testParameters.supportedPaymentMethods.toTypedArray()
         )
         val scenario = ActivityScenario.launch<PaymentSheetPlaygroundActivity>(intent)
         scenario.onActivity { activity ->

@@ -5,6 +5,7 @@ import com.stripe.android.identity.networking.VERIFICATION_PAGE_REQUIRE_LIVE_CAP
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
+import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import kotlinx.serialization.json.Json
 
 internal const val ERROR_BODY = "errorBody"
@@ -29,6 +30,27 @@ internal val CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA = Verificatio
     ),
     status = VerificationPageData.Status.VERIFIED,
     submitted = true
+)
+
+internal val VERIFICATION_PAGE_DATA_MISSING_BACK = VerificationPageData(
+    id = "id",
+    objectType = "type",
+    requirements = VerificationPageDataRequirements(
+        errors = emptyList(),
+        missings = listOf(VerificationPageRequirements.Missing.IDDOCUMENTBACK)
+    ),
+    status = VerificationPageData.Status.REQUIRESINPUT,
+    submitted = false
+)
+
+internal val VERIFICATION_PAGE_DATA_NOT_MISSING_BACK = VerificationPageData(
+    id = "id",
+    objectType = "type",
+    requirements = VerificationPageDataRequirements(
+        errors = emptyList()
+    ),
+    status = VerificationPageData.Status.REQUIRESINPUT,
+    submitted = false
 )
 
 internal val json: Json = Json {

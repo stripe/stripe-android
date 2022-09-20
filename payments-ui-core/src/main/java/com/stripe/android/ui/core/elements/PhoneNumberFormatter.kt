@@ -99,16 +99,20 @@ internal sealed class PhoneNumberFormatter {
                         }
 
                         override fun transformedToOriginal(offset: Int): Int {
-                            return if (offset == 0) 0 else metadata.pattern.let {
-                                // count the number of characters added as the number of non '#' characters
-                                var added = it.substring(0, min(offset, it.length))
-                                    .filter { it != '#' }.length
+                            return if (offset == 0) {
+                                0
+                            } else {
+                                metadata.pattern.let {
+                                    // count the number of characters added as the number of non '#' characters
+                                    var added = it.substring(0, min(offset, it.length))
+                                        .filter { it != '#' }.length
 
-                                // if bigger than the pattern, one space is added after the pattern
-                                if (offset > it.length) {
-                                    added++
+                                    // if bigger than the pattern, one space is added after the pattern
+                                    if (offset > it.length) {
+                                        added++
+                                    }
+                                    offset - added
                                 }
-                                offset - added
                             }
                         }
                     }

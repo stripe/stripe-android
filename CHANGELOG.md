@@ -2,17 +2,37 @@
 
 ## X.X.X - 2022-XX-XX
 
+## 20.13.0 - 2022-09-19
+This release makes the `PaymentMethod.Card.networks` field public, fixes the Alipay integration and the card scan form encoding.
+
+### Payments
+
+* [CHANGED] [5552](https://github.com/stripe/stripe-android/pull/5552) Make `PaymentMethod.Card.networks` field public.
+* [FIXED][5554](https://github.com/stripe/stripe-android/pull/5554) Fix Alipay integration when using the Alipay SDK.
+
+### CardScan
+
+* [FIXED] [5574](https://github.com/stripe/stripe-android/pull/5574) Fix encoding for form parameters for scan stats. 
+
+## 20.12.0 - 2022-09-13
+This release upgrades `compileSdkVersion` to 33, updates Google Pay button to match the new brand 
+guidelines and fixes some bugs in `FlowController`.
+
 * [CHANGED] [5495](https://github.com/stripe/stripe-android/pull/5495) Upgrade `compileSdkVersion`
   to 33.
 
 ### PaymentSheet
 
-* [CHANGED][5487](https://github.com/stripe/stripe-android/pull/5487) Updated Google Pay button to 
-  match new brand guidelines.
-* [ADDED][5502](https://github.com/stripe/stripe-android/pull/5502) Added phone number minimum 
-  length validation
-* [ADDED][5518](https://github.com/stripe/stripe-android/pull/5518) Added state/province dropdown 
+* [ADDED][5502](https://github.com/stripe/stripe-android/pull/5502) Added phone number minimum
+  length validation.
+* [ADDED][5518](https://github.com/stripe/stripe-android/pull/5518) Added state/province dropdown
   for US and Canada.
+* [CHANGED][5487](https://github.com/stripe/stripe-android/pull/5487) Updated Google Pay button to
+  match new brand guidelines.
+* [FIXED][5480](https://github.com/stripe/stripe-android/pull/5480) `FlowController` now correctly
+  preserves the previously selected payment method for guests.
+* [FIXED][5545](https://github.com/stripe/stripe-android/pull/5545) Fix an issue where custom flow 
+  PaymentSheet UI would have the bottom of the form cut off.
 
 ## 20.11.0 - 2022-08-29
 This release adds postal code validation for PaymentSheet and fixed a fileprovider naming bug for Identity.
@@ -45,7 +65,7 @@ Adds `IdentityVerificationSheet#rememberIdentityVerificationSheet` for Identity.
 * [ADDED][5340](https://github.com/stripe/stripe-android/pull/5340) Add a `resetCustomer` method to 
   `PaymentSheet`, that clears any persisted authentication state.
 * [FIXED][5388](https://github.com/stripe/stripe-android/pull/5388) Fixed issue with Appearance API
-  not working with `FlowController`
+  not working with `FlowController`.
 * [FIXED][5399](https://github.com/stripe/stripe-android/pull/5399) Bank Account Payments that pass 
   stripeAccountId for connected accounts will now succeed.
 

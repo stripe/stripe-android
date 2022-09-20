@@ -27,7 +27,6 @@ import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.databinding.SelfieScanFragmentBinding
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.FaceDetectorOutput
-import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SelfieUploadState
 import com.stripe.android.identity.networking.UploadedResult
@@ -80,8 +79,6 @@ internal class SelfieFragmentTest {
     }
 
     private val mockPageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
-    private val documentUploadState =
-        MutableStateFlow(DocumentUploadState())
 
     private val selfieUploadState = MutableStateFlow(SelfieUploadState())
     private val mockFPSTracker = mock<FPSTracker>()
@@ -111,7 +108,6 @@ internal class SelfieFragmentTest {
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { pageAndModelFiles } doReturn mockPageAndModel
-        on { documentUploadState } doReturn documentUploadState
         on { selfieUploadState } doReturn selfieUploadState
         on { identityAnalyticsRequestFactory } doReturn
             IdentityAnalyticsRequestFactory(

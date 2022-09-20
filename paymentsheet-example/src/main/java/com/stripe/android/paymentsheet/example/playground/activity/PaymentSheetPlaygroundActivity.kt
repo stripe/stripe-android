@@ -186,7 +186,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     linkEnabled,
                     setShippingAddress,
                     setAutomaticPaymentMethods,
-                    backendUrl
+                    backendUrl,
+                    intent.extras?.getStringArray(SUPPORTED_PAYMENT_METHODS_EXTRA)?.toList()
                 )
             }
         }
@@ -470,6 +471,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         const val FORCE_DARK_MODE_EXTRA = "ForceDark"
         const val APPEARANCE_EXTRA = "Appearance"
         const val USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA = "UseSnapshotReturningCustomer"
+        const val SUPPORTED_PAYMENT_METHODS_EXTRA = "SupportedPaymentMethods"
         private const val merchantName = "Example, Inc."
         private const val sharedPreferencesName = "playgroundToggles"
 

@@ -13,16 +13,16 @@ internal data class VerificationPageRequirements(
         @SerialName("biometric_consent")
         BIOMETRICCONSENT,
 
-        @SerialName("id_document_front")
+        @SerialName("id_document_back")
         IDDOCUMENTBACK,
 
-        @SerialName("id_document_back")
+        @SerialName("id_document_front")
         IDDOCUMENTFRONT,
 
         @SerialName("id_document_type")
         IDDOCUMENTTYPE,
 
         @SerialName("face")
-        FACE,
+        FACE
     }
 }

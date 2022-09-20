@@ -22,9 +22,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.AbstractComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -138,6 +140,14 @@ internal fun LinkInlineSignup(
     toggleExpanded: () -> Unit,
     onUserInteracted: () -> Unit
 ) {
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(expanded) {
+        if (expanded) {
+            focusRequester.requestFocus()
+        }
+    }
+
     CompositionLocalProvider(
         LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
     ) {
@@ -199,7 +209,8 @@ internal fun LinkInlineSignup(
                         EmailCollectionSection(
                             enabled = enabled,
                             emailController = emailController,
-                            signUpState = signUpState
+                            signUpState = signUpState,
+                            focusRequester = focusRequester
                         )
 
                         AnimatedVisibility(
@@ -207,7 +218,8 @@ internal fun LinkInlineSignup(
                                 errorMessage != null
                         ) {
                             ErrorText(
-                                text = errorMessage!!.getMessage(LocalContext.current.resources),
+                                text = errorMessage?.getMessage(LocalContext.current.resources)
+                                    .orEmpty(),
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -238,7 +250,8 @@ internal fun LinkInlineSignup(
 
                                 AnimatedVisibility(visible = errorMessage != null) {
                                     ErrorText(
-                                        text = errorMessage!!.getMessage(LocalContext.current.resources),
+                                        text = errorMessage?.getMessage(LocalContext.current.resources)
+                                            .orEmpty(),
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }

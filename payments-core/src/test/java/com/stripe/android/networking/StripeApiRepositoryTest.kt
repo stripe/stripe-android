@@ -1224,6 +1224,28 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun retrieveObject_shouldFireExpectedRequestsAndNotParseResult() = runTest {
+        val responseBody = "not a valid json"
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    responseBody,
+                    emptyMap()
+                )
+            )
+
+        val response = create().retrieveObject(
+            StripeApiRepository.paymentMethodsUrl,
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(any())
+        assertThat(response.body).isEqualTo(responseBody)
+        verifyAnalyticsRequest(PaymentAnalyticsEvent.StripeUrlRetrieve)
+    }
+
+    @Test
     fun apiRequest_withErrorResponse_onUnsupportedSdkVersion_shouldNotBeTranslated() =
         runTest {
             Locale.setDefault(Locale.JAPAN)

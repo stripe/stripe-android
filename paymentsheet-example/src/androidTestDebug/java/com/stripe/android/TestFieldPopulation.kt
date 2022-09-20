@@ -6,8 +6,11 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
+import com.stripe.android.test.core.Browser
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
@@ -90,6 +93,24 @@ class TestFieldPopulation {
         authorizationAction = null
     )
 
+    private val bancontact = TestParameters(
+        lpmRepository.fromCode("bancontact")!!,
+        Customer.New,
+        LinkState.Off,
+        GooglePayState.Off,
+        Currency.EUR,
+        IntentType.Pay,
+        Billing.Off,
+        shipping = Shipping.Off,
+        delayed = DelayedPMs.Off,
+        automatic = Automatic.Off,
+        saveCheckboxValue = false,
+        saveForFutureUseCheckboxVisible = false,
+        useBrowser = Browser.Chrome,
+        authorizationAction = AuthorizeAction.Authorize,
+        merchantCountryCode = "GB"
+    )
+
     @Ignore("Testing of dropdowns is not yet supported")
     fun testDropdowns() {
 
@@ -137,6 +158,18 @@ class TestFieldPopulation {
         ) {
             composeTestRule.onNodeWithText("IBAN")
                 .performTextInput("DE89370400440532013000")
+        }
+    }
+
+    @Test
+    fun testSinglePaymentMethodWithoutGooglePayAndKeyboardInput() {
+        testDriver.confirmNewOrGuestComplete(
+            bancontact.copy(
+                supportedPaymentMethods = listOf(PaymentMethod.Type.Bancontact.code)
+            )
+        ) {
+            composeTestRule.onNodeWithText("Full name")
+                .performTextInput("Jenny Rosen")
         }
     }
 

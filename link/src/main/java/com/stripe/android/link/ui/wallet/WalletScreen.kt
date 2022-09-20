@@ -1,10 +1,10 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -62,13 +65,17 @@ import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.ui.core.elements.DateConfig
 import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.RowController
+import com.stripe.android.ui.core.elements.RowElement
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionElementUI
+import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.flowOf
+import java.util.UUID
 
 @Preview
 @Composable
@@ -134,6 +141,21 @@ internal fun WalletBody(
     )
 
     val uiState by viewModel.uiState.collectAsState()
+
+    uiState.alertMessage?.let { alertMessage ->
+        AlertDialog(
+            text = { Text(alertMessage.getMessage(LocalContext.current.resources)) },
+            onDismissRequest = viewModel::onAlertDismissed,
+            confirmButton = {
+                TextButton(onClick = viewModel::onAlertDismissed) {
+                    Text(
+                        text = stringResource(android.R.string.ok),
+                        color = MaterialTheme.linkColors.actionLabel
+                    )
+                }
+            }
+        )
+    }
 
     if (uiState.paymentDetailsList.isEmpty()) {
         Box(
@@ -204,6 +226,14 @@ internal fun WalletBody(
         }
     }
 
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(uiState.isProcessing) {
+        if (uiState.isProcessing) {
+            focusManager.clearFocus()
+        }
+    }
+
     ScrollableTopLevelColumn {
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -264,9 +294,9 @@ internal fun WalletBody(
             )
         }
 
-        uiState.errorMessage?.let {
+        AnimatedVisibility(visible = uiState.errorMessage != null) {
             ErrorText(
-                text = it.getMessage(LocalContext.current.resources),
+                text = uiState.errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)
@@ -308,10 +338,25 @@ internal fun CardDetailsRecollectionForm(
     isCardExpired: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val cvcElement = remember(cvcController) {
-        CvcElement(
-            _identifier = IdentifierSpec.CardCvc,
-            controller = cvcController
+    val rowElement = remember(expiryDateController, cvcController) {
+        val rowFields: List<SectionSingleFieldElement> = buildList {
+            if (isCardExpired) {
+                this += SimpleTextElement(
+                    identifier = IdentifierSpec.Generic("date"),
+                    controller = expiryDateController
+                )
+            }
+
+            this += CvcElement(
+                _identifier = IdentifierSpec.CardCvc,
+                controller = cvcController
+            )
+        }
+
+        RowElement(
+            _identifier = IdentifierSpec.Generic("row_" + UUID.randomUUID().leastSignificantBits),
+            fields = rowFields,
+            controller = RowController(rowFields)
         )
     }
 
@@ -330,34 +375,12 @@ internal fun CardDetailsRecollectionForm(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                if (isCardExpired) {
-                    val expiryDateElement = remember(expiryDateController) {
-                        SimpleTextElement(
-                            identifier = IdentifierSpec.Generic("date"),
-                            controller = expiryDateController
-                        )
-                    }
-
-                    Box(modifier = Modifier.weight(0.5f)) {
-                        SectionElementUI(
-                            enabled = true,
-                            element = SectionElement.wrap(expiryDateElement),
-                            hiddenIdentifiers = emptyList(),
-                            lastTextFieldIdentifier = cvcElement.identifier
-                        )
-                    }
-                }
-
-                Box(modifier = Modifier.weight(0.5f)) {
-                    SectionElementUI(
-                        enabled = true,
-                        element = SectionElement.wrap(cvcElement),
-                        hiddenIdentifiers = emptyList(),
-                        lastTextFieldIdentifier = cvcElement.identifier
-                    )
-                }
-            }
+            SectionElementUI(
+                enabled = true,
+                element = SectionElement.wrap(rowElement),
+                hiddenIdentifiers = emptyList(),
+                lastTextFieldIdentifier = rowElement.fields.last().identifier
+            )
         }
     }
 }

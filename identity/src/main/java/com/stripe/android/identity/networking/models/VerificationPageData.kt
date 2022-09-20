@@ -45,5 +45,7 @@ internal data class VerificationPageData(
 
     internal companion object {
         fun VerificationPageData.hasError() = requirements.errors.isNotEmpty()
+        fun VerificationPageData.isMissingBack() =
+            requirements.missings?.contains(VerificationPageRequirements.Missing.IDDOCUMENTBACK) == true
     }
 }

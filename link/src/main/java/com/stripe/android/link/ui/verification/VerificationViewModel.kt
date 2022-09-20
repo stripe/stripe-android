@@ -16,6 +16,7 @@ import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -40,6 +41,9 @@ internal class VerificationViewModel @Inject constructor(
 
     private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
+
+    private val _requestFocus = MutableStateFlow(true)
+    val requestFocus: StateFlow<Boolean> = _requestFocus
 
     /**
      * Callback when user has successfully verified their account. If not overridden, defaults to
@@ -88,6 +92,14 @@ internal class VerificationViewModel @Inject constructor(
                 onFailure = {
                     onError(it)
                     linkEventsReporter.on2FAFailure()
+                    viewModelScope.launch {
+                        delay(50)
+                        for (i in 0 until otpElement.controller.otpLength) {
+                            delay(10)
+                            otpElement.controller.onValueChanged(i, "")
+                        }
+                        _requestFocus.value = true
+                    }
                 }
             )
         }
@@ -117,6 +129,10 @@ internal class VerificationViewModel @Inject constructor(
         clearError()
         navigator.navigateTo(LinkScreen.SignUp(), clearBackStack = true)
         linkAccountManager.logout()
+    }
+
+    fun onFocusRequested() {
+        _requestFocus.value = false
     }
 
     private fun clearError() {

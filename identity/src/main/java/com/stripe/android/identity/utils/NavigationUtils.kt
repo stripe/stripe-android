@@ -25,6 +25,8 @@ import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateTo
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithRequirementError
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.hasError
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
@@ -55,6 +57,87 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
     @IdRes fromFragment: Int,
     notSubmitBlock: ((verificationPageData: VerificationPageData) -> Unit)? = null
 ) {
+    postVerificationPageData(
+        identityViewModel,
+        collectedDataParam,
+        clearDataParam,
+        fromFragment
+    ) { postedVerificationPageData ->
+        notSubmitBlock?.invoke(postedVerificationPageData) ?: run {
+            submitVerificationPageDataAndNavigate(identityViewModel, fromFragment)
+        }
+    }
+}
+
+/**
+ * Check if selfie is required from [VerificationPage], navigate to selfie fragment if so, otherwise
+ * submit the verification.
+ */
+internal suspend fun Fragment.navigateToSelfieOrSubmit(
+    verificationPage: VerificationPage,
+    identityViewModel: IdentityViewModel,
+    @IdRes fromFragment: Int
+) {
+    if (verificationPage.requireSelfie()) {
+        findNavController().navigate(R.id.action_global_selfieFragment)
+    } else {
+        submitVerificationPageDataAndNavigate(
+            identityViewModel,
+            fromFragment
+        )
+    }
+}
+
+/**
+ * Submit the verification, if submit has error, navigates to error fragment with the error,
+ * if [VerificationPageData.submitted] is true, navigates to confirm fragment,
+ * otherwise navigate to generic error fragment.
+ */
+internal suspend fun Fragment.submitVerificationPageDataAndNavigate(
+    identityViewModel: IdentityViewModel,
+    @IdRes fromFragment: Int
+) {
+    runCatching {
+        identityViewModel.postVerificationPageSubmit()
+    }.fold(
+        onSuccess = { submittedVerificationPageData ->
+            when {
+                submittedVerificationPageData.hasError() -> {
+                    navigateToRequirementErrorFragment(
+                        fromFragment,
+                        submittedVerificationPageData.requirements.errors[0]
+                    )
+                }
+                submittedVerificationPageData.submitted -> {
+                    findNavController()
+                        .navigate(R.id.action_global_confirmationFragment)
+                }
+                else -> {
+                    "VerificationPage submit failed".let { msg ->
+                        Log.e(TAG, msg)
+                        navigateToDefaultErrorFragment(msg)
+                    }
+                }
+            }
+        },
+        onFailure = {
+            Log.e(TAG, "Failed to postVerificationPageSubmit: $it")
+            navigateToDefaultErrorFragment(it)
+        }
+    )
+}
+
+/**
+ * Post Verification data and callback in [onCorrectResponse] if the response is without error.
+ * Otherwise navigate to error fragment.
+ */
+internal suspend fun Fragment.postVerificationPageData(
+    identityViewModel: IdentityViewModel,
+    collectedDataParam: CollectedDataParam,
+    clearDataParam: ClearDataParam,
+    @IdRes fromFragment: Int,
+    onCorrectResponse: suspend ((verificationPageDataWithNoError: VerificationPageData) -> Unit)
+) {
     identityViewModel.screenTracker.screenTransitionStart(
         fromFragment.fragmentIdToScreenName()
     )
@@ -68,36 +151,7 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
                     postedVerificationPageData.requirements.errors[0]
                 )
             } else {
-                notSubmitBlock?.invoke(postedVerificationPageData) ?: run {
-                    runCatching {
-                        identityViewModel.postVerificationPageSubmit()
-                    }.fold(
-                        onSuccess = { submittedVerificationPageData ->
-                            when {
-                                submittedVerificationPageData.hasError() -> {
-                                    navigateToRequirementErrorFragment(
-                                        fromFragment,
-                                        submittedVerificationPageData.requirements.errors[0]
-                                    )
-                                }
-                                submittedVerificationPageData.submitted -> {
-                                    findNavController()
-                                        .navigate(R.id.action_global_confirmationFragment)
-                                }
-                                else -> {
-                                    "VerificationPage submit failed".let { msg ->
-                                        Log.e(TAG, msg)
-                                        navigateToDefaultErrorFragment(msg)
-                                    }
-                                }
-                            }
-                        },
-                        onFailure = {
-                            Log.e(TAG, "Failed to postVerificationPageSubmit: $it")
-                            navigateToDefaultErrorFragment(it)
-                        }
-                    )
-                }
+                onCorrectResponse(postedVerificationPageData)
             }
         },
         onFailure = {

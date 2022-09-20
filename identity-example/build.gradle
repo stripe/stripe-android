@@ -19,7 +19,7 @@ android {
         applicationId "com.stripe.android.identity.example"
         minSdk 21
         targetSdk rootProject.ext.compileSdkVersion
-        versionCode 2
+        versionCode 5
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -101,7 +101,7 @@ dependencies {
     // Integration with observables
     implementation("androidx.compose.runtime:runtime-livedata:$androidxComposeVersion")
     // MdcTheme
-    implementation "com.google.android.material:compose-theme-adapter:1.1.17"
+    implementation "com.google.android.material:compose-theme-adapter:1.1.18"
 
 }
 

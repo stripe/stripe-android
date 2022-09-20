@@ -8,6 +8,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.R
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.theme.DefaultLinkTheme
 import org.junit.Rule
 import org.junit.Test
@@ -19,7 +20,7 @@ internal class LinkAppBarTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun email_is_shown_when_provided() {
+    fun verified_email_is_shown_when_provided() {
         val email = "test@stripe.com"
         setContent(email)
 
@@ -48,6 +49,7 @@ internal class LinkAppBarTest {
 
     private fun setContent(
         email: String? = null,
+        accountStatus: AccountStatus? = null,
         onBackPress: () -> Unit = {},
         onLogout: () -> Unit = {},
         showBottomSheetContent: (BottomSheetContent?) -> Unit = {}
@@ -58,7 +60,8 @@ internal class LinkAppBarTest {
                     navigationIcon = R.drawable.ic_link_close,
                     showHeader = true,
                     showOverflowMenu = true,
-                    email = email
+                    email = email,
+                    accountStatus = accountStatus
                 ),
                 onBackPressed = onBackPress,
                 onLogout = onLogout,

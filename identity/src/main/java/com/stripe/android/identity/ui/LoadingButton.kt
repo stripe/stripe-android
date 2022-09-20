@@ -69,4 +69,12 @@ internal class LoadingButton @JvmOverloads constructor(
         findViewById<MaterialButton>(R.id.button).isEnabled = true
         findViewById<CircularProgressIndicator>(R.id.indicator).visibility = View.GONE
     }
+
+    /**
+     * Disable button and hide loading indicator.
+     */
+    fun toggleToDisabled() {
+        findViewById<MaterialButton>(R.id.button).isEnabled = false
+        findViewById<CircularProgressIndicator>(R.id.indicator).visibility = View.GONE
+    }
 }
