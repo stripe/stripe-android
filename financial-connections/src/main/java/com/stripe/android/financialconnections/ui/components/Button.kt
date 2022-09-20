@@ -25,7 +25,8 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun FinancialConnectionsButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    type: FinancialConnectionsButtonType = FinancialConnectionsButtonType.Primary,
+    type: FinancialConnectionsButton.Type = FinancialConnectionsButton.Type.Primary,
+    size: FinancialConnectionsButton.Size = FinancialConnectionsButton.Size.Regular,
     enabled: Boolean = true,
     loading: Boolean = false,
     content: @Composable (RowScope.() -> Unit)
@@ -35,12 +36,7 @@ internal fun FinancialConnectionsButton(
         modifier = modifier,
         enabled = enabled,
         shape = RoundedCornerShape(12.dp),
-        contentPadding = PaddingValues(
-            start = 16.dp,
-            top = 16.dp,
-            end = 16.dp,
-            bottom = 16.dp
-        ),
+        contentPadding = size.paddingValues(),
         colors = type.buttonColors(),
         content = {
             ProvideTextStyle(
@@ -62,31 +58,71 @@ internal fun FinancialConnectionsButton(
     )
 }
 
-internal sealed class FinancialConnectionsButtonType {
+internal object FinancialConnectionsButton {
 
-    @Composable
-    abstract fun buttonColors(): ButtonColors
+    internal sealed class Type {
 
-    object Primary : FinancialConnectionsButtonType() {
         @Composable
-        override fun buttonColors(): ButtonColors {
-            return buttonColors(
-                backgroundColor = colors.textBrand,
-                contentColor = colors.textWhite,
-                disabledBackgroundColor = colors.textBrand.copy(alpha = 0.12f),
-                disabledContentColor = colors.textWhite,
-            )
+        abstract fun buttonColors(): ButtonColors
+
+        object Primary : Type() {
+            @Composable
+            override fun buttonColors(): ButtonColors {
+                return buttonColors(
+                    backgroundColor = colors.textBrand,
+                    contentColor = colors.textWhite,
+                    disabledBackgroundColor = colors.textBrand.copy(alpha = 0.12f),
+                    disabledContentColor = colors.textWhite,
+                )
+            }
+        }
+
+        object Secondary : Type() {
+            @Composable
+            override fun buttonColors(): ButtonColors {
+                return buttonColors(
+                    backgroundColor = colors.textWhite,
+                    contentColor = colors.textPrimary,
+                    disabledBackgroundColor = colors.textWhite,
+                    disabledContentColor = colors.textPrimary.copy(alpha = 0.12f),
+                )
+            }
+        }
+
+        object Critical : Type() {
+            @Composable
+            override fun buttonColors(): ButtonColors {
+                return buttonColors(
+                    backgroundColor = colors.textCritical,
+                    contentColor = colors.textWhite,
+                    disabledBackgroundColor = colors.textCritical.copy(alpha = 0.12f),
+                    disabledContentColor = colors.textPrimary.copy(alpha = 0.12f),
+                )
+            }
         }
     }
 
-    object Secondary : FinancialConnectionsButtonType() {
+    sealed class Size {
         @Composable
-        override fun buttonColors(): ButtonColors {
-            return buttonColors(
-                backgroundColor = colors.textWhite,
-                contentColor = colors.textPrimary,
-                disabledBackgroundColor = colors.textWhite,
-                disabledContentColor = colors.textPrimary.copy(alpha = 0.12f),
+        abstract fun paddingValues(): PaddingValues
+
+        object Pill : Size() {
+            @Composable
+            override fun paddingValues(): PaddingValues = PaddingValues(
+                start = 8.dp,
+                top = 4.dp,
+                end = 8.dp,
+                bottom = 4.dp
+            )
+        }
+
+        object Regular : Size() {
+            @Composable
+            override fun paddingValues(): PaddingValues = PaddingValues(
+                start = 16.dp,
+                top = 16.dp,
+                end = 16.dp,
+                bottom = 16.dp
             )
         }
     }
@@ -123,7 +159,7 @@ internal fun FinancialConnectionsButtonLoadingPreview() {
 internal fun FinancialConnectionsButtonSecondaryPreview() {
     FinancialConnectionsTheme {
         FinancialConnectionsButton(
-            type = FinancialConnectionsButtonType.Secondary,
+            type = FinancialConnectionsButton.Type.Secondary,
             loading = false,
             onClick = { }
         ) {
@@ -137,9 +173,25 @@ internal fun FinancialConnectionsButtonSecondaryPreview() {
 internal fun FinancialConnectionsButtonSecondaryDisabledPreview() {
     FinancialConnectionsTheme {
         FinancialConnectionsButton(
-            type = FinancialConnectionsButtonType.Secondary,
+            type = FinancialConnectionsButton.Type.Secondary,
             loading = false,
             enabled = false,
+            onClick = { }
+        ) {
+            Text(text = "Sample text")
+        }
+    }
+}
+
+@Composable
+@Preview(group = "Components", name = "Pill button - critical - disabled")
+internal fun FinancialConnectionsButtonCriticalPreview() {
+    FinancialConnectionsTheme {
+        FinancialConnectionsButton(
+            type = FinancialConnectionsButton.Type.Critical,
+            size = FinancialConnectionsButton.Size.Pill,
+            loading = false,
+            enabled = true,
             onClick = { }
         ) {
             Text(text = "Sample text")

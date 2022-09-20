@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
@@ -18,10 +19,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.airbnb.mvrx.MavericksView
+import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.viewModel
 import com.airbnb.mvrx.withState
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
+import com.stripe.android.financialconnections.features.common.CloseDialog
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
@@ -49,10 +52,15 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         super.onCreate(savedInstanceState)
         viewModel.activityRetainedComponent.inject(this)
         viewModel.onEach { postInvalidate() }
+        onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
         setContent {
             FinancialConnectionsTheme {
                 Column {
-                    Box(modifier = Modifier.weight(1f)) { NavHost() }
+                    Box(modifier = Modifier.weight(1f)) {
+                        val showCloseDialog = viewModel.collectAsState { it.showCloseDialog }
+                        if (showCloseDialog.value) CloseDialog(viewModel::onCloseConfirm)
+                        NavHost()
+                    }
                 }
             }
         }
@@ -144,7 +152,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             navigationManager.commands.collect { command ->
                 if (command.destination.isNotEmpty()) {
                     navController.navigate(command.destination) {
-                        popUpAfterAuth(navController)
+                        popUpIfNotBackwardsNavigable(navController)
                     }
                 }
             }
@@ -152,11 +160,16 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     }
 
     /**
-     * Skips auth screens from back navigation.
+     * Removes screens that are not backwards-navigable from the backstack.
      */
-    private fun NavOptionsBuilder.popUpAfterAuth(navController: NavHostController) {
+    private fun NavOptionsBuilder.popUpIfNotBackwardsNavigable(navController: NavHostController) {
         val destination: String = navController.currentBackStackEntry?.destination?.route ?: return
-        if (navController.currentDestination?.route == NavigationDirections.partnerAuth.destination) {
+        val destinationsToSkipOnBack = listOf(
+            NavigationDirections.partnerAuth.destination,
+            NavigationDirections.reset.destination
+        )
+        if (destinationsToSkipOnBack.contains(navController.currentDestination?.route)
+        ) {
             popUpTo(destination) {
                 inclusive = true
             }

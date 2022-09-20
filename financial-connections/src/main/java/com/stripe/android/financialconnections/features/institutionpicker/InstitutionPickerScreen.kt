@@ -57,6 +57,7 @@ import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
+import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -65,6 +66,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 @Composable
 internal fun InstitutionPickerScreen() {
     val viewModel: InstitutionPickerViewModel = mavericksViewModel()
+    val parentViewModel = parentViewModel()
     val state by viewModel.collectAsState()
 
     // when in select institution error, back goes back to bank selection.
@@ -78,11 +80,12 @@ internal fun InstitutionPickerScreen() {
         selectInstitution = state.selectInstitution,
         searchMode = state.searchMode,
         query = state.query,
-        onQueryChanged = { viewModel.onQueryChanged(it) },
-        onInstitutionSelected = { viewModel.onInstitutionSelected(it) },
-        onCancelSearchClick = { viewModel.onCancelSearchClick() },
-        onSearchFocused = { viewModel.onSearchFocused() },
-        onSelectAnotherBank = { viewModel.onSelectAnotherBank() },
+        onQueryChanged = viewModel::onQueryChanged,
+        onInstitutionSelected = viewModel::onInstitutionSelected,
+        onCancelSearchClick = viewModel::onCancelSearchClick,
+        onSearchFocused = viewModel::onSearchFocused,
+        onSelectAnotherBank = viewModel::onSelectAnotherBank,
+        onCloseClick = parentViewModel::onCloseClick
     )
 }
 
@@ -97,12 +100,15 @@ private fun InstitutionPickerContent(
     onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
     onSelectAnotherBank: () -> Unit,
     onCancelSearchClick: () -> Unit,
+    onCloseClick: () -> Unit,
     onSearchFocused: () -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             if (!searchMode) {
-                FinancialConnectionsTopAppBar()
+                FinancialConnectionsTopAppBar(
+                    onCloseClick = onCloseClick
+                )
             }
         }
     ) {
@@ -373,7 +379,8 @@ internal fun SearchModeSearchingInstitutions(
             onInstitutionSelected = {},
             onCancelSearchClick = {},
             onSearchFocused = {},
-            onSelectAnotherBank = {}
+            onSelectAnotherBank = {},
+            onCloseClick = {}
         )
     }
 }
@@ -394,7 +401,8 @@ internal fun SearchModeWithResults(
             onInstitutionSelected = {},
             onCancelSearchClick = {},
             onSearchFocused = {},
-            onSelectAnotherBank = {}
+            onSelectAnotherBank = {},
+            onCloseClick = {}
         )
     }
 }
@@ -415,7 +423,8 @@ internal fun SearchModeSelectingInstitutions(
             onInstitutionSelected = {},
             onCancelSearchClick = {},
             onSearchFocused = {},
-            onSelectAnotherBank = {}
+            onSelectAnotherBank = {},
+            onCloseClick = {}
         )
     }
 }
@@ -436,7 +445,8 @@ internal fun SearchModeNoResults(
             onInstitutionSelected = {},
             onCancelSearchClick = {},
             onSearchFocused = {},
-            onSelectAnotherBank = {}
+            onSelectAnotherBank = {},
+            onCloseClick = {}
         )
     }
 }
@@ -457,7 +467,8 @@ internal fun SearchModeNoQuery(
             onInstitutionSelected = {},
             onCancelSearchClick = {},
             onSearchFocused = {},
-            onSelectAnotherBank = {}
+            onSelectAnotherBank = {},
+            onCloseClick = {}
         )
     }
 }
@@ -478,7 +489,8 @@ internal fun NoSearchMode(
             onInstitutionSelected = {},
             onCancelSearchClick = {},
             onSearchFocused = {},
-            onSelectAnotherBank = {}
+            onSelectAnotherBank = {},
+            onCloseClick = {}
         )
     }
 }

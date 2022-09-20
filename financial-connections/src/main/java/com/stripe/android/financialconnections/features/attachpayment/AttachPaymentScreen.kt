@@ -15,21 +15,32 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun AttachPaymentScreen() {
     val viewModel: AttachPaymentViewModel = mavericksViewModel()
+    val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
     BackHandler(enabled = true) {}
-    AttachPaymentContent(state.value.payload)
+    AttachPaymentContent(
+        payload = state.value.payload,
+        onCloseClick = parentViewModel::onCloseClick
+    )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun AttachPaymentContent(payload: Async<AttachPaymentState.Payload>) {
-    FinancialConnectionsScaffold {
+private fun AttachPaymentContent(
+    payload: Async<AttachPaymentState.Payload>,
+    onCloseClick: () -> Unit
+) {
+    FinancialConnectionsScaffold(
+        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+    ) {
         when (payload) {
             Uninitialized, is Loading -> TODO()
             is Success -> LoadingContent(
@@ -58,6 +69,9 @@ private fun AttachPaymentContent(payload: Async<AttachPaymentState.Payload>) {
 @Preview
 internal fun AttachPaymentScreenPreview() {
     FinancialConnectionsTheme {
-        AttachPaymentContent(Uninitialized)
+        AttachPaymentContent(
+            payload = Uninitialized,
+            onCloseClick = {}
+        )
     }
 }

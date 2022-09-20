@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections.presentation
 
 import android.content.Intent
+import androidx.compose.runtime.Composable
+import androidx.navigation.compose.NavHost
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
@@ -10,10 +12,12 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
+import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
@@ -23,6 +27,8 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.utils.UriComparator
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,16 +42,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
     private val uriComparator: UriComparator,
+    private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val logger: Logger,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
     init {
-        viewModelScope.launch {
-            stateFlow.collect {
-                logger.debug("Native state: $it")
-            }
-        }
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
                 when (message) {
@@ -114,6 +116,36 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
+    fun onCloseClick() {
+        // TODO@carlosmuvi: show close dialog instead of directly closing depending on pane.
+        if (false) {
+            setState { copy(showCloseDialog = true) }
+        } else {
+            close()
+        }
+    }
+
+    fun onCloseConfirm() = close()
+
+    /**
+     * [NavHost] handles back presses except for when backstack is empty, where it delegates
+     * to the container activity. [onBackPressed] will be triggered on these empty backstack cases.
+     */
+    fun onBackPressed() = close()
+
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun close() {
+        // Asynchronously complete the session while activity is closing.
+        // Using [GlobalScope] to prevent the call from cancel while activity finishes.
+        logger.debug("User intentionally closed the AuthFlow.")
+        GlobalScope.launch {
+            kotlin
+                .runCatching { completeFinancialConnectionsSession() }
+                .onFailure { logger.error("Error completing session before closing", it) }
+        }
+        setState { copy(viewEffect = Finish) }
+    }
+
     companion object :
         MavericksViewModelFactory<FinancialConnectionsSheetNativeViewModel, FinancialConnectionsSheetNativeState> {
 
@@ -140,6 +172,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 internal data class FinancialConnectionsSheetNativeState(
     val webAuthFlow: Async<String>,
     val configuration: FinancialConnectionsSheet.Configuration,
+    val showCloseDialog: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?
 ) : MavericksState {
 
@@ -150,9 +183,14 @@ internal data class FinancialConnectionsSheetNativeState(
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
         configuration = args.configuration,
+        showCloseDialog = false,
         viewEffect = null
     )
 }
+
+@Composable
+internal fun parentViewModel(): FinancialConnectionsSheetNativeViewModel =
+    mavericksActivityViewModel()
 
 internal sealed interface FinancialConnectionsSheetNativeViewEffect {
     /**

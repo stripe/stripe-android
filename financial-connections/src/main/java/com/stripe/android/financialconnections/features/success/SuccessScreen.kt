@@ -25,17 +25,19 @@ import com.stripe.android.financialconnections.features.common.AccessibleDataCal
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutWithAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButtonType
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun SuccessScreen() {
     val viewModel: SuccessViewModel = mavericksViewModel()
+    val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
     BackHandler(enabled = true) {}
     state.value.payload()?.let { payload ->
@@ -43,10 +45,11 @@ internal fun SuccessScreen() {
             accessibleDataModel = payload.accessibleData,
             disconnectUrl = payload.disconnectUrl,
             accounts = payload.accounts.data,
-            showLinkAnotherAccount = payload.showLinkAnotherAccount,
             loading = state.value.completeSession is Loading,
             onDoneClick = viewModel::onDoneClick,
             onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
+            onCloseClick = parentViewModel::onCloseClick,
+            showLinkAnotherAccount = payload.showLinkAnotherAccount,
         )
     }
 }
@@ -61,9 +64,12 @@ private fun SuccessContent(
     onDoneClick: () -> Unit,
     onLinkAnotherAccountClick: () -> Unit,
     showLinkAnotherAccount: Boolean,
+    onCloseClick: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
-    FinancialConnectionsScaffold {
+    FinancialConnectionsScaffold(
+        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+    ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
@@ -102,7 +108,7 @@ private fun SuccessContent(
             if (showLinkAnotherAccount) {
                 FinancialConnectionsButton(
                     loading = loading,
-                    type = FinancialConnectionsButtonType.Secondary,
+                    type = FinancialConnectionsButton.Type.Secondary,
                     enabled = loading.not(),
                     onClick = onLinkAnotherAccountClick,
                     modifier = Modifier
@@ -172,7 +178,8 @@ internal fun SuccessScreenPreview() {
             loading = false,
             onDoneClick = {},
             onLinkAnotherAccountClick = {},
-            showLinkAnotherAccount = true
+            showLinkAnotherAccount = true,
+            onCloseClick = {}
         )
     }
 }

@@ -74,4 +74,5 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
     debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
 }
