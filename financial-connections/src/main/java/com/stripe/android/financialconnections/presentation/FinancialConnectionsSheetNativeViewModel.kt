@@ -10,6 +10,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
@@ -35,19 +36,28 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
     private val uriComparator: UriComparator,
+    private val logger: Logger,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
     init {
         viewModelScope.launch {
+            stateFlow.collect {
+                logger.debug("Native state: $it")
+            }
+        }
+        viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
                 when (message) {
-                    Message.OpenWebAuthFlow -> {
+                    Message.OpenPartnerWebAuth -> {
                         val manifest = getManifest()
                         setState { copy(viewEffect = OpenUrl(manifest.hostedAuthUrl)) }
                     }
                     Message.Finish -> {
                         setState { copy(viewEffect = Finish) }
+                    }
+                    Message.ClearPartnerWebAuth -> {
+                        setState { copy(webAuthFlow = Uninitialized) }
                     }
                 }
             }

@@ -95,6 +95,11 @@ internal interface FinancialConnectionsManifestRepository {
         clientSecret: String
     ): FinancialConnectionsSessionManifest
 
+    suspend fun cancelAuthorizationSession(
+        clientSecret: String,
+        sessionId: String,
+    ): FinancialConnectionsAuthorizationSession
+
     companion object {
         operator fun invoke(
             requestExecutor: FinancialConnectionsRequestExecutor,
@@ -208,6 +213,26 @@ private class FinancialConnectionsManifestRepositoryImpl(
         }
     }
 
+    override suspend fun cancelAuthorizationSession(
+        clientSecret: String,
+        sessionId: String,
+    ): FinancialConnectionsAuthorizationSession {
+        val request = apiRequestFactory.createPost(
+            url = cancelAuthSessionUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_ID to sessionId,
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsAuthorizationSession.serializer()
+        ).also {
+            updateCachedActiveAuthSession("cancelAuthorizationSession", it)
+        }
+    }
+
     override suspend fun completeAuthorizationSession(
         clientSecret: String,
         sessionId: String,
@@ -281,6 +306,9 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal const val generateHostedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/generate_hosted_url"
+
+        internal const val cancelAuthSessionUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/cancel"
 
         internal const val getManifestUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/manifest"

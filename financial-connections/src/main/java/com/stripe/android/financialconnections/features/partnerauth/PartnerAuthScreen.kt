@@ -29,9 +29,9 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.InstitutionUnknownErrorContent
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PartnerCallout
-import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -55,13 +55,18 @@ internal fun PartnerAuthScreen() {
     LaunchedEffect(webAuthFlow.value) {
         viewModel.onWebAuthFlowFinished(webAuthFlow.value)
     }
-    PartnerAuthScreenContent(state.value, viewModel::onLaunchAuthClick)
+    PartnerAuthScreenContent(
+        state.value,
+        viewModel::onLaunchAuthClick,
+        viewModel::onSelectAnotherBank
+    )
 }
 
 @Composable
 private fun PartnerAuthScreenContent(
     state: PartnerAuthState,
-    onContinueClick: () -> Unit
+    onContinueClick: () -> Unit,
+    onSelectAnotherBank: () -> Unit,
 ) {
     FinancialConnectionsScaffold {
         when (state.authenticationStatus) {
@@ -77,7 +82,7 @@ private fun PartnerAuthScreenContent(
             )
             is Fail -> {
                 // TODO@carlosmuvi translate error type to specific error screen.
-                UnclassifiedErrorContent()
+                InstitutionUnknownErrorContent(onSelectAnotherBank)
             }
         }
     }
@@ -147,7 +152,8 @@ internal fun PrepaneContentPreview() {
                 authenticationStatus = Uninitialized,
                 flow = Flow.FINICITY_CONNECT_V2_OAUTH
             ),
-            onContinueClick = {}
+            onContinueClick = {},
+            onSelectAnotherBank = {}
         )
     }
 }
