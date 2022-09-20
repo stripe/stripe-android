@@ -27,8 +27,7 @@
 
     <fragment
         android:id="@+id/consentFragment"
-        android:name="com.stripe.android.identity.navigation.ConsentFragment"
-        tools:layout="@layout/consent_fragment">
+        android:name="com.stripe.android.identity.navigation.ConsentFragment">
         <action
             android:id="@+id/action_consentFragment_to_docSelectionFragment"
             app:destination="@id/docSelectionFragment" />
@@ -88,8 +87,7 @@
         tools:layout="@layout/confirmation_fragment" />
     <fragment
         android:id="@+id/docSelectionFragment"
-        android:name="com.stripe.android.identity.navigation.DocSelectionFragment"
-        tools:layout="@layout/doc_selection_fragment">
+        android:name="com.stripe.android.identity.navigation.DocSelectionFragment">
         <action
             android:id="@+id/action_docSelectionFragment_to_passportScanFragment"
             app:destination="@id/passportScanFragment" />

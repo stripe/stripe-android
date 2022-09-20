@@ -1,5 +1,6 @@
 package com.stripe.android.identity.ui
 
+import android.os.Build
 import android.widget.ImageView
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
@@ -26,7 +27,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(application = TestApplication::class)
+@Config(application = TestApplication::class, sdk = [Build.VERSION_CODES.Q])
 class ConsentScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
