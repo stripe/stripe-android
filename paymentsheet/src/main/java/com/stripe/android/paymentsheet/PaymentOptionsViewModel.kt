@@ -16,8 +16,8 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.features.isEnabled
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
 import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
@@ -165,7 +165,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun setupLink(stripeIntent: StripeIntent) {
-        if (LINK_ENABLED &&
+        if (PaymentSheetFeatures.link.isEnabled &&
             stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
         ) {
             viewModelScope.launch {

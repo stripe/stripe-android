@@ -242,7 +242,6 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        val LINK_ENABLED = false
         val supportedFundingSources = SupportedPaymentMethod.allTypes
     }
 }

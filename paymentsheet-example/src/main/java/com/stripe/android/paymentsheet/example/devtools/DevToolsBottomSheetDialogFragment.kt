@@ -52,6 +52,7 @@ import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.core.networking.StripeNetworkClientInterceptor
+import com.stripe.android.paymentsheet.PaymentSheetFeatures
 import kotlinx.coroutines.launch
 
 class DevToolsBottomSheetDialogFragment : BottomSheetDialogFragment() {
@@ -82,7 +83,7 @@ private enum class DevToolsTab {
 private fun DevToolsTab.Content() {
     when (this) {
         DevToolsTab.Network -> DevToolsNetwork()
-        DevToolsTab.FeatureFlags -> Text("Coming… someday?")
+        DevToolsTab.FeatureFlags -> DevToolsFeatureFlags()
     }
 }
 
@@ -139,127 +140,6 @@ private fun DevToolsTabRow(
                     }
                 }
             )
-        }
-    }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-private fun DevToolsNetwork() {
-    val endpoints = remember { DevToolsStore.endpoints }
-
-    LazyColumn(
-        modifier = Modifier.nestedScroll(rememberNestedScrollInteropConnection())
-    ) {
-        item {
-            Text(
-                text = "Fail requests to endpoints",
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-
-        item {
-            ErrorTypeDropdown()
-        }
-
-        itemsIndexed(endpoints) { index, endpoint ->
-            DevToolsEndpointItem(
-                endpoint = endpoint,
-                isLastItem = index == endpoints.lastIndex,
-                onToggle = { DevToolsStore.toggleFailureFor(endpoint) }
-            )
-        }
-    }
-}
-
-@Composable
-private fun ErrorTypeDropdown() {
-    var isExpanded by remember { mutableStateOf(false) }
-
-    val items = StripeNetworkClientInterceptor.ErrorType.values()
-    val selected = StripeNetworkClientInterceptor.errorType
-
-    Box(modifier = Modifier.padding(horizontal = 8.dp)) {
-        TextButton(onClick = { isExpanded = true }) {
-            Text(text = "Throws: ${selected.name}")
-        }
-
-        DropdownMenu(
-            expanded = isExpanded,
-            onDismissRequest = { isExpanded = false },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-        ) {
-            for (item in items) {
-                DropdownMenuItem(
-                    onClick = {
-                        StripeNetworkClientInterceptor.setErrorToThrow(item)
-                        isExpanded = false
-                    }
-                ) {
-                    Text(
-                        text = item.name,
-                        color = if (item == selected) {
-                            MaterialTheme.colors.primary
-                        } else {
-                            Color.Unspecified
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DevToolsEndpointItem(
-    endpoint: Endpoint,
-    isLastItem: Boolean,
-    onToggle: () -> Unit
-) {
-    val isTurnedOn = endpoint in DevToolsStore.failingEndpoints
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onToggle() }
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        val title = remember(endpoint.name) {
-            endpoint.name.buildAnnotatedUrl()
-        }
-
-        Text(
-            text = title,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
-        )
-
-        Switch(
-            checked = isTurnedOn,
-            onCheckedChange = { onToggle() }
-        )
-    }
-
-    if (!isLastItem) {
-        Divider()
-    }
-}
-
-private fun String.buildAnnotatedUrl(): AnnotatedString {
-    val parts = split("{", "}")
-    val paramParts = parts.filterIndexed { index, _ -> index % 2 == 1 }
-
-    return buildAnnotatedString {
-        for (part in parts) {
-            val color = if (part in paramParts) Color.Gray else Color.Unspecified
-            withStyle(style = SpanStyle(color = color)) {
-                append(part)
-            }
         }
     }
 }

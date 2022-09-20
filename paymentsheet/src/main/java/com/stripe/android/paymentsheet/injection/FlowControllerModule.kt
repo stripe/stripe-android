@@ -4,12 +4,13 @@ import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.features.isEnabled
 import com.stripe.android.link.injection.LINK_ENABLED
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.FlowController
+import com.stripe.android.paymentsheet.PaymentSheetFeatures
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowControllerInitializer
@@ -75,7 +76,7 @@ internal abstract class FlowControllerModule {
         @Provides
         @Singleton
         @Named(LINK_ENABLED)
-        fun provideLinkEnabled() = LinkPaymentLauncher.LINK_ENABLED
+        fun provideLinkEnabled() = PaymentSheetFeatures.link.isEnabled
 
         @Provides
         @Singleton
