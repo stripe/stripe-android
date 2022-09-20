@@ -211,6 +211,9 @@ data class FinancialConnectionsAccount(
         @SerialName("transactions")
         TRANSACTIONS("transactions"),
 
+        @SerialName("account_numbers")
+        ACCOUNT_NUMBERS("account_numbers"),
+
         UNKNOWN("unknown");
     }
 
