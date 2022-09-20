@@ -239,5 +239,4 @@ data class FinancialConnectionsAccount(
         internal const val OBJECT_OLD = "linked_account"
         internal const val OBJECT_NEW = "financial_connections.account"
     }
-
 }

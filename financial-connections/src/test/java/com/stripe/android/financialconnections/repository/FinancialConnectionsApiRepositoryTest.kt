@@ -38,7 +38,8 @@ class FinancialConnectionsApiRepositoryTest {
                 )
             )
 
-            val result = financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+            val result =
+                financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.accounts.data.size).isEqualTo(1)
         }
@@ -52,7 +53,8 @@ class FinancialConnectionsApiRepositoryTest {
                 )
             )
 
-            val result = financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+            val result =
+                financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.accounts.data.size).isEqualTo(1)
         }
@@ -66,7 +68,8 @@ class FinancialConnectionsApiRepositoryTest {
                 )
             )
 
-            val result = financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+            val result =
+                financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
         }
@@ -80,7 +83,8 @@ class FinancialConnectionsApiRepositoryTest {
                 )
             )
 
-            val result = financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+            val result =
+                financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
         }
@@ -94,7 +98,8 @@ class FinancialConnectionsApiRepositoryTest {
                 )
             )
 
-            val result = financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+            val result =
+                financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
         }
@@ -104,16 +109,17 @@ class FinancialConnectionsApiRepositoryTest {
         runTest {
             givenGetRequestReturns(
                 readResourceAsString(
-                    "json/linked_account_session_payment_account_as_financial_account.json"
+                    "json/linked_account_session_unknown_permission.json"
                 )
             )
 
-            val result = financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
-
-            val paymentAccount = result.paymentAccount
-            assertThat(paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
-            assertThat((paymentAccount as FinancialConnectionsAccount).permissions)
-                .containsExactly(FinancialConnectionsAccount.Permissions.PAYMENT_METHOD)
+            val result = financialConnectionsApiRepository
+                .getFinancialConnectionsSession("client_secret")
+            val financialConnectionsAccount = result.paymentAccount as FinancialConnectionsAccount
+            assertThat(financialConnectionsAccount.permissions).containsExactly(
+                FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
+                FinancialConnectionsAccount.Permissions.UNKNOWN,
+            )
         }
 
     @Test
@@ -125,7 +131,8 @@ class FinancialConnectionsApiRepositoryTest {
                 )
             )
 
-            val result = financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+            val result =
+                financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(BankAccount::class.java)
         }
