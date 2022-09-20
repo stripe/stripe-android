@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.IntSize.Companion.Zero
-import com.stripe.android.financialconnections.ui.LocalImageLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -25,10 +24,10 @@ import kotlinx.coroutines.launch
 internal fun StripeImage(
     url: String,
     placeHolder: Painter,
+    imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
     contentDescription: String? = null
 ) {
-    val imageLoader = LocalImageLoader.current
     BoxWithConstraints(modifier) {
         val (width, height) = calculateBoxSize()
         val painter: MutableState<Painter> =

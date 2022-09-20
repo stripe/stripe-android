@@ -58,7 +58,7 @@ import com.stripe.android.financialconnections.image.StripeImage
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
-import com.stripe.android.financialconnections.ui.LocalImageCache
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -302,6 +302,7 @@ private fun InstitutionResultTile(
     ) {
         StripeImage(
             url = "https://www.fillmurray.com/108/108",
+            imageLoader = LocalImageLoader.current,
             placeHolder = painterResource(R.drawable.stripe_ic_brandicon_institution),
             modifier = Modifier
                 .size(36.dp)
@@ -354,6 +355,7 @@ private fun FeaturedInstitutionsGrid(
                     StripeImage(
                         url = "https://www.fillmurray.com/108/108",
                         placeHolder = painterResource(R.drawable.stripe_ic_brandicon_institution),
+                        imageLoader = LocalImageLoader.current,
                         modifier = Modifier
                             .fillMaxSize(),
                         contentDescription = ""
