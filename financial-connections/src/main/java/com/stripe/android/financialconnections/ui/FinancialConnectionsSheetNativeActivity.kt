@@ -20,6 +20,7 @@ import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.ImageLoader
 import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.viewModel
@@ -34,7 +35,6 @@ import com.stripe.android.financialconnections.features.manualentrysuccess.Manua
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
-import com.stripe.android.financialconnections.image.StripeImageLoader
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
@@ -51,13 +51,12 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @Inject
     lateinit var navigationManager: NavigationManager
 
-    private lateinit var imageLoader: StripeImageLoader
+    private lateinit var imageLoader: ImageLoader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        imageLoader = StripeImageLoader(
+        imageLoader = ImageLoader(
             context = this,
-            lifecycleOwner = this
         )
         viewModel.activityRetainedComponent.inject(this)
         viewModel.onEach { postInvalidate() }
@@ -199,6 +198,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     }
 }
 
-internal val LocalImageLoader = staticCompositionLocalOf<StripeImageLoader> {
+internal val LocalImageLoader = staticCompositionLocalOf<ImageLoader> {
     error("CompositionLocal image loader not present")
 }
