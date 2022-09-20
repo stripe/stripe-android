@@ -100,6 +100,23 @@ class FinancialConnectionsApiRepositoryTest {
         }
 
     @Test
+    fun `getFinancialConnectionsSession - account with unknown permissions ignores unknown values`() =
+        runTest {
+            givenGetRequestReturns(
+                readResourceAsString(
+                    "json/linked_account_session_payment_account_as_financial_account.json"
+                )
+            )
+
+            val result = financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+
+            val paymentAccount = result.paymentAccount
+            assertThat(paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
+            assertThat((paymentAccount as FinancialConnectionsAccount).permissions)
+                .containsExactly(FinancialConnectionsAccount.Permissions.PAYMENT_METHOD)
+        }
+
+    @Test
     fun `getFinancialConnectionsSession - paymentAccount is BankAccount`() =
         runTest {
             givenGetRequestReturns(

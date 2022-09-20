@@ -23,7 +23,8 @@
     "last4": "5579",
     "livemode": true,
     "permissions": [
-      "payment_method"
+      "payment_method",
+      "hola"
     ],
     "status": "active",
     "subcategory": "credit_card",
