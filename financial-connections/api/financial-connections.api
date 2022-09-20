@@ -820,19 +820,6 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public static fun values ()[Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Category;
 }
 
-public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$Category$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Category$$serializer;
-	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Category;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Category;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
 public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$Category$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
@@ -850,6 +837,7 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 }
 
 public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions : java/lang/Enum {
+	public static final field ACCOUNT_NUMBERS Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;
 	public static final field BALANCES Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;
 	public static final field Companion Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions$Companion;
 	public static final field OWNERSHIP Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;
@@ -859,19 +847,6 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public final fun getValue ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;
 	public static fun values ()[Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;
-}
-
-public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions$$serializer;
-	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions$Companion {
@@ -887,19 +862,6 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public final fun getValue ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Status;
 	public static fun values ()[Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Status;
-}
-
-public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$Status$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Status$$serializer;
-	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Status;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Status;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$Status$Companion {
@@ -920,19 +882,6 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public static fun values ()[Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Subcategory;
 }
 
-public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$Subcategory$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Subcategory$$serializer;
-	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Subcategory;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Subcategory;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
 public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$Subcategory$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
@@ -945,19 +894,6 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public final fun getValue ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$SupportedPaymentMethodTypes;
 	public static fun values ()[Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$SupportedPaymentMethodTypes;
-}
-
-public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$SupportedPaymentMethodTypes$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$SupportedPaymentMethodTypes$$serializer;
-	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$SupportedPaymentMethodTypes;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$SupportedPaymentMethodTypes;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$SupportedPaymentMethodTypes$Companion {
