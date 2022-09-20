@@ -850,6 +850,7 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 }
 
 public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions : java/lang/Enum {
+	public static final field ACCOUNT_NUMBERS Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;
 	public static final field BALANCES Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;
 	public static final field Companion Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions$Companion;
 	public static final field OWNERSHIP Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount$Permissions;
