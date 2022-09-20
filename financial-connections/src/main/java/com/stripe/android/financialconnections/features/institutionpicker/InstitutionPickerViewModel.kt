@@ -106,6 +106,14 @@ internal class InstitutionPickerViewModel @Inject constructor(
         }
     }
 
+    fun onManualEntryClick() {
+        TODO("Not yet implemented")
+    }
+
+    fun onSupportClick() {
+        TODO("Not yet implemented")
+    }
+
     companion object :
         MavericksViewModelFactory<InstitutionPickerViewModel, InstitutionPickerState> {
 
