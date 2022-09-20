@@ -81,38 +81,40 @@ fun LinkInlineSignup(
     enabled: Boolean,
     onStateChanged: (InlineSignupViewState) -> Unit
 ) {
-    val viewModel: InlineSignupViewModel = viewModel(
-        factory = InlineSignupViewModel.Factory(linkPaymentLauncher.injector!!)
-    )
+    linkPaymentLauncher.injector?.let { injector ->
+        val viewModel: InlineSignupViewModel = viewModel(
+            factory = InlineSignupViewModel.Factory(injector)
+        )
 
-    val viewState by viewModel.viewState.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
+        val viewState by viewModel.viewState.collectAsState()
+        val errorMessage by viewModel.errorMessage.collectAsState()
 
-    LaunchedEffect(viewState) {
-        onStateChanged(viewState)
-    }
-
-    val focusManager = LocalFocusManager.current
-    val keyboardController = LocalSoftwareKeyboardController.current
-    LaunchedEffect(viewState.signUpState) {
-        if (viewState.signUpState == SignUpState.InputtingEmail && viewState.userInput != null) {
-            focusManager.clearFocus(true)
-            keyboardController?.hide()
+        LaunchedEffect(viewState) {
+            onStateChanged(viewState)
         }
-    }
 
-    LinkInlineSignup(
-        merchantName = viewModel.merchantName,
-        emailController = viewModel.emailController,
-        phoneNumberController = viewModel.phoneController,
-        nameController = viewModel.nameController,
-        signUpState = viewState.signUpState,
-        enabled = enabled,
-        expanded = viewState.isExpanded,
-        requiresNameCollection = viewModel.requiresNameCollection,
-        errorMessage = errorMessage,
-        toggleExpanded = viewModel::toggleExpanded
-    )
+        val focusManager = LocalFocusManager.current
+        val keyboardController = LocalSoftwareKeyboardController.current
+        LaunchedEffect(viewState.signUpState) {
+            if (viewState.signUpState == SignUpState.InputtingEmail && viewState.userInput != null) {
+                focusManager.clearFocus(true)
+                keyboardController?.hide()
+            }
+        }
+
+        LinkInlineSignup(
+            merchantName = viewModel.merchantName,
+            emailController = viewModel.emailController,
+            phoneNumberController = viewModel.phoneController,
+            nameController = viewModel.nameController,
+            signUpState = viewState.signUpState,
+            enabled = enabled,
+            expanded = viewState.isExpanded,
+            requiresNameCollection = viewModel.requiresNameCollection,
+            errorMessage = errorMessage,
+            toggleExpanded = viewModel::toggleExpanded
+        )
+    }
 }
 
 @Composable

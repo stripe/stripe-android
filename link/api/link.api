@@ -401,8 +401,8 @@ public final class com/stripe/android/link/ui/forms/ComposableSingletons$FormKt 
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function3;
 }
 
-public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupViewKt {
-	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupViewKt;
+public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public static field lambda-2 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
@@ -424,6 +424,9 @@ public final class com/stripe/android/link/ui/inline/InlineSignupViewModel_Facto
 	public fun injectMembers (Lcom/stripe/android/link/ui/inline/InlineSignupViewModel$Factory;)V
 	public synthetic fun injectMembers (Ljava/lang/Object;)V
 	public static fun injectViewModel (Lcom/stripe/android/link/ui/inline/InlineSignupViewModel$Factory;Lcom/stripe/android/link/ui/inline/InlineSignupViewModel;)V
+}
+
+public final class com/stripe/android/link/ui/inline/LinkInlineSignupKt {
 }
 
 public abstract class com/stripe/android/link/ui/inline/UserInput {
