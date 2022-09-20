@@ -36,7 +36,7 @@ internal fun StripeImage(
         val scope = rememberCoroutineScope()
 
         DisposableEffect(url) {
-            loadImageJob = scope.launch(Dispatchers.Default) {
+            loadImageJob = scope.launch(Dispatchers.IO) {
                 painter.value = imageLoader.load(url, width, height)
                     .fold(
                         onSuccess = { bitmap -> BitmapPainter(bitmap.asImageBitmap()) },

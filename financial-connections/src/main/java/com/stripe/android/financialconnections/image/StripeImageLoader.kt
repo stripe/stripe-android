@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.annotation.WorkerThread
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import java.io.InputStream
@@ -41,6 +42,7 @@ internal class StripeImageLoader(
         })
     }
 
+    @WorkerThread
     fun load(
         url: String,
         width: Int,

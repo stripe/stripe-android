@@ -694,14 +694,6 @@ public final class com/stripe/android/financialconnections/features/success/Succ
 	public static fun newInstance (Lcom/stripe/android/financialconnections/features/success/SuccessState;Lcom/stripe/android/financialconnections/domain/GetAuthorizationSessionAccounts;Lcom/stripe/android/financialconnections/domain/GetManifest;Lcom/stripe/android/core/Logger;Lcom/stripe/android/financialconnections/navigation/NavigationManager;Lcom/stripe/android/financialconnections/domain/CompleteFinancialConnectionsSession;Lcom/stripe/android/financialconnections/domain/NativeAuthFlowCoordinator;)Lcom/stripe/android/financialconnections/features/success/SuccessViewModel;
 }
 
-public final class com/stripe/android/financialconnections/image/ImageLruMemoryCache {
-	public static final field $stable I
-	public fun <init> ()V
-	public final fun clear ()V
-	public final fun getBitmap (Ljava/lang/String;)Landroid/graphics/Bitmap;
-	public final fun put (Ljava/lang/String;Landroid/graphics/Bitmap;)V
-}
-
 public final class com/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs$Companion {
 }
 
