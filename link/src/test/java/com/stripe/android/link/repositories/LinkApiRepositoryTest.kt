@@ -650,7 +650,7 @@ class LinkApiRepositoryTest {
     @Test
     fun `updatePaymentDetails sends correct parameters`() = runTest {
         val secret = "secret"
-        val params = ConsumerPaymentDetailsUpdateParams.Card("id")
+        val params = ConsumerPaymentDetailsUpdateParams("id")
         val consumerKey = "key"
 
         linkRepository.updatePaymentDetails(
@@ -669,7 +669,7 @@ class LinkApiRepositoryTest {
     @Test
     fun `updatePaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
         val secret = "secret"
-        val params = ConsumerPaymentDetailsUpdateParams.Card("id")
+        val params = ConsumerPaymentDetailsUpdateParams("id")
 
         linkRepository.updatePaymentDetails(
             params,
@@ -692,7 +692,7 @@ class LinkApiRepositoryTest {
             .thenReturn(consumerPaymentDetails)
 
         val result = linkRepository.updatePaymentDetails(
-            ConsumerPaymentDetailsUpdateParams.Card("id"),
+            ConsumerPaymentDetailsUpdateParams("id"),
             "secret",
             "key"
         )
@@ -707,7 +707,7 @@ class LinkApiRepositoryTest {
             .thenThrow(RuntimeException("error"))
 
         val result = linkRepository.updatePaymentDetails(
-            ConsumerPaymentDetailsUpdateParams.Card("id"),
+            ConsumerPaymentDetailsUpdateParams("id"),
             "secret",
             "key"
         )

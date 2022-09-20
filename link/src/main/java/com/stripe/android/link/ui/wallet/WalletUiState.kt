@@ -69,9 +69,9 @@ internal data class WalletUiState(
         )
     }
 
-    fun updateWithSetDefaultResult(response: ConsumerPaymentDetails): WalletUiState {
-        val updatedPaymentMethod = response.paymentDetails.single()
-
+    fun updateWithSetDefaultResult(
+        updatedPaymentMethod: ConsumerPaymentDetails.PaymentDetails
+    ): WalletUiState {
         val paymentMethods = paymentDetailsList.map { paymentMethod ->
             if (paymentMethod.id == updatedPaymentMethod.id) {
                 updatedPaymentMethod

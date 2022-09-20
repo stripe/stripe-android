@@ -107,10 +107,10 @@ internal class CardEditViewModel @Inject constructor(
             )
 
         viewModelScope.launch {
-            val updateParams = ConsumerPaymentDetailsUpdateParams.Card(
-                paymentDetails.id,
-                setAsDefault.value.takeUnless { isDefault || it == isDefault },
-                paymentMethodCreateParams
+            val updateParams = ConsumerPaymentDetailsUpdateParams(
+                id = paymentDetails.id,
+                isDefault = setAsDefault.value.takeUnless { isDefault || it == isDefault },
+                cardPaymentMethodCreateParams = paymentMethodCreateParams
             )
 
             linkAccountManager.updatePaymentDetails(updateParams).fold(

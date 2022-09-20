@@ -168,7 +168,7 @@ internal class WalletViewModel @Inject constructor(
     ): Result<ConsumerPaymentDetails> {
         val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams()
 
-        val updateParams = ConsumerPaymentDetailsUpdateParams.Card(
+        val updateParams = ConsumerPaymentDetailsUpdateParams(
             id = selectedPaymentDetails.id,
             isDefault = selectedPaymentDetails.isDefault,
             cardPaymentMethodCreateParams = paymentMethodCreateParams
@@ -246,24 +246,26 @@ internal class WalletViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val updateParams = ConsumerPaymentDetailsUpdateParams.Card(
+            val updateParams = ConsumerPaymentDetailsUpdateParams(
                 id = paymentDetails.id,
                 isDefault = true,
                 cardPaymentMethodCreateParams = null
             )
 
-            linkAccountManager.updatePaymentDetails(updateParams).fold(
-                onSuccess = { response ->
-                    _uiState.update {
-                        it.updateWithSetDefaultResult(response)
+            linkAccountManager.updatePaymentDetails(updateParams)
+                .mapCatching { it.paymentDetails.single() }
+                .fold(
+                    onSuccess = { paymentDetails ->
+                        _uiState.update {
+                            it.updateWithSetDefaultResult(paymentDetails)
+                        }
+                    },
+                    onFailure = {
+                        _uiState.update {
+                            it.copy(paymentMethodIdBeingUpdated = null)
+                        }
                     }
-                },
-                onFailure = {
-                    _uiState.update {
-                        it.copy(paymentMethodIdBeingUpdated = null)
-                    }
-                }
-            )
+                )
         }
     }
 
