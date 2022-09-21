@@ -23,7 +23,7 @@ internal class InstitutionPickerStates :
         // Search mode - searching institutions
         fun searchModeSearchingInstitutions() = InstitutionPickerState(
             selectInstitution = Uninitialized,
-            featuredInstitutions = Success(institutionResponse()),
+            payload = Success(payload()),
             searchInstitutions = Loading(),
             searchMode = true,
             query = "query",
@@ -32,7 +32,7 @@ internal class InstitutionPickerStates :
         // Search mode: with results
         fun searchModeWithResults() = InstitutionPickerState(
             selectInstitution = Uninitialized,
-            featuredInstitutions = Success(institutionResponse()),
+            payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
             searchMode = true,
             query = "query",
@@ -41,7 +41,7 @@ internal class InstitutionPickerStates :
         // Search mode: selecting institution
         fun searchModeSelectingInstitutions() = InstitutionPickerState(
             selectInstitution = Loading(),
-            featuredInstitutions = Success(institutionResponse()),
+            payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
             searchMode = true,
             query = "query",
@@ -50,7 +50,7 @@ internal class InstitutionPickerStates :
         // Search mode: No results
         fun searchModeNoResults() = InstitutionPickerState(
             selectInstitution = Uninitialized,
-            featuredInstitutions = Success(institutionResponse()),
+            payload = Success(payload()),
             searchInstitutions = Success(InstitutionResponse(emptyList())),
             searchMode = false,
             query = "query",
@@ -59,7 +59,7 @@ internal class InstitutionPickerStates :
         // Search mode: no query
         fun searchModeNoQuery() = InstitutionPickerState(
             selectInstitution = Uninitialized,
-            featuredInstitutions = Success(institutionResponse()),
+            payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
             searchMode = true,
             query = "",
@@ -68,12 +68,16 @@ internal class InstitutionPickerStates :
         // No search mode
         fun noSearchMode() = InstitutionPickerState(
             selectInstitution = Uninitialized,
-            featuredInstitutions = Success(institutionResponse()),
+            payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
             searchMode = false,
             query = "",
         )
 
+        private fun payload() = InstitutionPickerState.Payload(
+            featuredInstitutions = institutionResponse(),
+            allowManualEntry = true
+        )
         private fun institutionResponse() = InstitutionResponse(
             listOf(
                 FinancialConnectionsInstitution(

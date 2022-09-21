@@ -46,4 +46,8 @@ internal object FinancialConnectionsUrlResolver {
             false -> FinancialConnectionsUrls.PrivacyCenter.merchant
         }
     }
+
+    fun getSupportUrl() : String {
+        return "https://support.stripe.com/contact"
+    }
 }

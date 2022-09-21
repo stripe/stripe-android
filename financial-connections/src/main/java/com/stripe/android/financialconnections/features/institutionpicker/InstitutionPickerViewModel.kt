@@ -9,20 +9,27 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
+import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
+import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class InstitutionPickerViewModel @Inject constructor(
     private val configuration: FinancialConnectionsSheet.Configuration,
     private val searchInstitutions: SearchInstitutions,
+    private val getManifest: GetManifest,
     private val postAuthorizationSession: PostAuthorizationSession,
+    private val navigationManager: NavigationManager,
     private val goNext: GoNext,
     private val logger: Logger,
     initialState: InstitutionPickerState
@@ -33,18 +40,24 @@ internal class InstitutionPickerViewModel @Inject constructor(
     init {
         logErrors()
         suspend {
-            searchInstitutions(
-                clientSecret = configuration.financialConnectionsSessionClientSecret
+            val manifest = getManifest()
+            Payload(
+                featuredInstitutions = searchInstitutions(
+                    clientSecret = configuration.financialConnectionsSessionClientSecret
+                ),
+                allowManualEntry = kotlin
+                    .runCatching { manifest.allowManualEntry }
+                    .getOrElse { false }
             )
-        }.execute { copy(featuredInstitutions = it) }
+        }.execute { copy(payload = it) }
     }
 
     private fun logErrors() {
         onAsync(InstitutionPickerState::selectInstitution, onFail = {
             logger.error("Error selecting institution", it)
         })
-        onAsync(InstitutionPickerState::featuredInstitutions, onFail = {
-            logger.error("Error fetching featured institutions", it)
+        onAsync(InstitutionPickerState::payload, onFail = {
+            logger.error("Error fetching initial payload", it)
         })
         onAsync(InstitutionPickerState::searchInstitutions, onFail = {
             logger.error("Error searching institutions", it)
@@ -107,11 +120,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     fun onManualEntryClick() {
-        TODO("Not yet implemented")
-    }
-
-    fun onSupportClick() {
-        TODO("Not yet implemented")
+        navigationManager.navigate(NavigationDirections.manualEntry)
     }
 
     companion object :
@@ -136,7 +145,13 @@ internal class InstitutionPickerViewModel @Inject constructor(
 internal data class InstitutionPickerState(
     val query: String = "",
     val searchMode: Boolean = false,
-    val featuredInstitutions: Async<InstitutionResponse> = Uninitialized,
+    val allowManualEntry: Boolean = false,
+    val payload: Async<Payload> = Uninitialized,
     val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
     val selectInstitution: Async<Unit> = Uninitialized
-) : MavericksState
+) : MavericksState {
+    data class Payload(
+        val featuredInstitutions: InstitutionResponse,
+        val allowManualEntry: Boolean
+    )
+}

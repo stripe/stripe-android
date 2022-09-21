@@ -18,22 +18,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun SearchFooter(
-    onManualEntryClick : () -> Unit,
-    onSupportClick : () -> Unit,
+    onManualEntryClick: () -> Unit,
+    manualEntryEnabled: Boolean,
 ) {
     Column(
         modifier = Modifier
             .background(color = FinancialConnectionsTheme.colors.backgroundContainer)
             .padding(16.dp),
         content = {
+            val uriHandler = LocalUriHandler.current
             Text(
                 text = "CAN'T FIND YOUR BANK?",
                 style = FinancialConnectionsTheme.typography.caption.copy(
@@ -48,21 +51,25 @@ internal fun SearchFooter(
                 iconColor = FinancialConnectionsTheme.colors.textSecondary,
                 iconBackgroundColor = FinancialConnectionsTheme.colors.borderDefault
             )
-            SearchFooterRow(
-                title = "Manually add your account",
-                titleColor = FinancialConnectionsTheme.colors.textBrand,
-                icon = R.drawable.stripe_ic_edit,
-                iconColor = FinancialConnectionsTheme.colors.iconBrand,
-                iconBackgroundColor = FinancialConnectionsTheme.colors.borderFocus,
-                modifier = Modifier.clickable { onManualEntryClick() }
-            )
+            if (manualEntryEnabled) {
+                SearchFooterRow(
+                    title = "Manually add your account",
+                    titleColor = FinancialConnectionsTheme.colors.textBrand,
+                    icon = R.drawable.stripe_ic_edit,
+                    iconColor = FinancialConnectionsTheme.colors.iconBrand,
+                    iconBackgroundColor = FinancialConnectionsTheme.colors.borderFocus,
+                    modifier = Modifier.clickable { onManualEntryClick() }
+                )
+            }
             SearchFooterRow(
                 title = "Questions? Email support@stripe.com",
                 titleColor = FinancialConnectionsTheme.colors.textBrand,
                 icon = R.drawable.stripe_ic_mail,
                 iconColor = FinancialConnectionsTheme.colors.iconBrand,
                 iconBackgroundColor = FinancialConnectionsTheme.colors.borderFocus,
-                modifier = Modifier.clickable { onSupportClick() }
+                modifier = Modifier.clickable {
+                    uriHandler.openUri(FinancialConnectionsUrlResolver.getSupportUrl())
+                }
             )
         }
     )
@@ -116,6 +123,9 @@ private fun SearchFooterRow(
 @Preview
 internal fun SearchFooterTest() {
     FinancialConnectionsTheme {
-        SearchFooter({}, {})
+        SearchFooter(
+            onManualEntryClick = {},
+            manualEntryEnabled = false
+        )
     }
 }
