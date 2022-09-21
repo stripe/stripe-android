@@ -5,6 +5,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.BuildConfig
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentMethod
@@ -26,6 +27,7 @@ import com.stripe.android.paymentsheet.forms.PaypalRequirement
 import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
+import com.stripe.android.paymentsheet.forms.UpiRequirement
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
@@ -326,6 +328,15 @@ class LpmRepository constructor(
                 USBankAccountRequirement,
                 LayoutSpec(sharedDataSpec.fields)
             )
+            PaymentMethod.Type.Upi.code -> SupportedPaymentMethod(
+                code = "upi",
+                requiresMandate = false,
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_upi,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_upi,
+                tintIconOnSelection = false,
+                requirement = UpiRequirement,
+                formSpec = LayoutSpec(sharedDataSpec.fields)
+            ).takeIf { BuildConfig.DEBUG }
             else -> null
         }
 
@@ -436,6 +447,8 @@ class LpmRepository constructor(
                 PaymentMethod.Type.USBankAccount.code,
                 PaymentMethod.Type.Affirm.code,
                 PaymentMethod.Type.AuBecsDebit.code
+                // TODO: Enable when releasing UPI
+                // PaymentMethod.Type.Upi.code
             )
         }
     }

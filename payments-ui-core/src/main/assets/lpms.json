@@ -443,5 +443,10 @@
     "type": "us_bank_account",
     "async": true,
     "fields": []
+  },
+  {
+    "type": "upi",
+    "async": false,
+    "fields": []
   }
 ]
