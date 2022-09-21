@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
@@ -55,7 +56,7 @@ import com.stripe.android.financialconnections.features.common.InstitutionPlanne
 import com.stripe.android.financialconnections.features.common.InstitutionUnplannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.*
+import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -206,7 +207,7 @@ private fun LoadedContent(
             )
         } else {
             FeaturedInstitutionsGrid(
-                institutions = payload()?.featuredInstitutions?.data ?: emptyList(),
+                payload = payload,
                 onInstitutionSelected = onInstitutionSelected
             )
         }
@@ -265,16 +266,7 @@ private fun SearchInstitutionsList(
             when (val institutions: Async<InstitutionResponse> = institutionsProvider()) {
                 Uninitialized,
                 is Fail -> Unit
-                is Loading -> item {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        CircularProgressIndicator(
-                            color = FinancialConnectionsTheme.colors.textBrand
-                        )
-                    }
-                }
+                is Loading -> item { LoadingSpinner() }
                 is Success -> {
                     if (institutions().data.isEmpty()) {
                         item {
@@ -351,7 +343,7 @@ private fun InstitutionResultTile(
 
 @Composable
 private fun FeaturedInstitutionsGrid(
-    institutions: List<FinancialConnectionsInstitution>,
+    payload: Async<Payload>,
     onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit
 ) {
     LazyVerticalGrid(
@@ -364,30 +356,49 @@ private fun FeaturedInstitutionsGrid(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         content = {
-            items(institutions) { institution ->
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .height(80.dp)
-                        .fillMaxWidth()
-                        .border(
-                            width = 1.dp,
-                            color = FinancialConnectionsTheme.colors.borderDefault,
-                            shape = RoundedCornerShape(4.dp)
+            when (payload) {
+                Uninitialized, is Loading, is Fail -> {
+                    item(span = { GridItemSpan(2) }) {
+                        LoadingSpinner()
+                    }
+                }
+                is Success -> items(payload().featuredInstitutions.data) { institution ->
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .height(80.dp)
+                            .fillMaxWidth()
+                            .border(
+                                width = 1.dp,
+                                color = FinancialConnectionsTheme.colors.borderDefault,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .clickable { onInstitutionSelected(institution) }
+                            .padding(8.dp)
+                    ) {
+                        Text(
+                            text = institution.name,
+                            color = FinancialConnectionsTheme.colors.textPrimary,
+                            style = FinancialConnectionsTheme.typography.bodyEmphasized,
+                            textAlign = TextAlign.Center
                         )
-                        .clickable { onInstitutionSelected(institution) }
-                        .padding(8.dp)
-                ) {
-                    Text(
-                        text = institution.name,
-                        color = FinancialConnectionsTheme.colors.textPrimary,
-                        style = FinancialConnectionsTheme.typography.bodyEmphasized,
-                        textAlign = TextAlign.Center
-                    )
+                    }
                 }
             }
         }
     )
+}
+
+@Composable
+private fun LoadingSpinner() {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        CircularProgressIndicator(
+            color = FinancialConnectionsTheme.colors.textBrand
+        )
+    }
 }
 
 @Composable

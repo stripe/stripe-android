@@ -47,7 +47,5 @@ internal object FinancialConnectionsUrlResolver {
         }
     }
 
-    fun getSupportUrl() : String {
-        return "https://support.stripe.com/contact"
-    }
+    const val supportUrl: String = "https://support.stripe.com/contact"
 }

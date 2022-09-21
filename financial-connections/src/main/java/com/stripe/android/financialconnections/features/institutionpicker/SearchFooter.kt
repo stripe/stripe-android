@@ -68,7 +68,7 @@ internal fun SearchFooter(
                 iconColor = FinancialConnectionsTheme.colors.iconBrand,
                 iconBackgroundColor = FinancialConnectionsTheme.colors.borderFocus,
                 modifier = Modifier.clickable {
-                    uriHandler.openUri(FinancialConnectionsUrlResolver.getSupportUrl())
+                    uriHandler.openUri(FinancialConnectionsUrlResolver.supportUrl)
                 }
             )
         }
