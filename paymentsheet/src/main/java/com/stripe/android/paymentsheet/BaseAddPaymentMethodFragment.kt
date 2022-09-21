@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.utils.AnimationConstants
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,32 +71,34 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             setContent {
                 val processing by sheetViewModel.processing.observeAsState(false)
 
-                LinkInlineSignup(
-                    sheetViewModel.linkLauncher,
-                    !processing
-                ) { viewState ->
-                    sheetViewModel.updatePrimaryButtonUIState(
-                        if (viewState.useLink) {
-                            val userInput = viewState.userInput
-                            if (userInput != null && sheetViewModel.selection.value != null) {
-                                PrimaryButton.UIState(
-                                    label = null,
-                                    onClick = { sheetViewModel.payWithLinkInline(userInput) },
-                                    enabled = true,
-                                    visible = true
-                                )
+                PaymentsTheme {
+                    LinkInlineSignup(
+                        sheetViewModel.linkLauncher,
+                        !processing
+                    ) { viewState ->
+                        sheetViewModel.updatePrimaryButtonUIState(
+                            if (viewState.useLink) {
+                                val userInput = viewState.userInput
+                                if (userInput != null && sheetViewModel.selection.value != null) {
+                                    PrimaryButton.UIState(
+                                        label = null,
+                                        onClick = { sheetViewModel.payWithLinkInline(userInput) },
+                                        enabled = true,
+                                        visible = true
+                                    )
+                                } else {
+                                    PrimaryButton.UIState(
+                                        label = null,
+                                        onClick = null,
+                                        enabled = false,
+                                        visible = true
+                                    )
+                                }
                             } else {
-                                PrimaryButton.UIState(
-                                    label = null,
-                                    onClick = null,
-                                    enabled = false,
-                                    visible = true
-                                )
+                                null
                             }
-                        } else {
-                            null
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }

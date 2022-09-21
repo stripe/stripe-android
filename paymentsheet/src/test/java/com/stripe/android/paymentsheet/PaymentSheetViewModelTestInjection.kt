@@ -15,6 +15,8 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -25,7 +27,10 @@ import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcompone
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -47,10 +52,9 @@ internal open class PaymentSheetViewModelTestInjection {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     val eventReporter = mock<EventReporter>()
-    private val googlePayPaymentMethodLauncherFactory =
-        createGooglePayPaymentMethodLauncherFactory()
-    private val stripePaymentLauncherAssistedFactory =
-        mock<StripePaymentLauncherAssistedFactory>()
+    private val googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory()
+    private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
+    private val linkPaymentLauncherFactory = createLinkPaymentLauncherFactory()
 
     private lateinit var injector: Injector
 
@@ -71,6 +75,19 @@ internal open class PaymentSheetViewModelTestInjection {
                 val googlePayPaymentMethodLauncher = mock<GooglePayPaymentMethodLauncher>()
                 readyCallback.onReady(true)
                 return googlePayPaymentMethodLauncher
+            }
+        }
+
+    private fun createLinkPaymentLauncherFactory() =
+        object : LinkPaymentLauncherFactory {
+            override fun create(
+                merchantName: String,
+                customerEmail: String?,
+                customerPhone: String?,
+                customerName: String?,
+                shippingValues: Map<IdentifierSpec, String?>?
+            ): LinkPaymentLauncher {
+                return mock()
             }
         }
 
@@ -108,7 +125,7 @@ internal open class PaymentSheetViewModelTestInjection {
             savedStateHandle = SavedStateHandle().apply {
                 set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
             },
-            linkPaymentLauncherFactory = mock()
+            linkPaymentLauncherFactory = linkPaymentLauncherFactory
         )
     }
 
@@ -116,12 +133,13 @@ internal open class PaymentSheetViewModelTestInjection {
     fun registerViewModel(
         @InjectorKey injectorKey: String,
         viewModel: PaymentSheetViewModel,
-        lpmRepository: LpmRepository = mock(),
+        lpmRepository: LpmRepository,
+        addressRepository: AddressRepository,
         formViewModel: FormViewModel = FormViewModel(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             config = mock(),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = mock(),
+            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
             transformSpecToElement = mock()
         )
     ) {

@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataColl
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -500,7 +501,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 viewModel.updatePaymentMethods(stripeIntent)
                 viewModel.setStripeIntent(stripeIntent)
                 idleLooper()
-                registerViewModel(args.injectorKey, viewModel, lpmRepository)
+                registerViewModel(args.injectorKey, viewModel, lpmRepository, addressRepository)
             } else {
                 it.sheetViewModel.lpmResourceRepository.getRepository().forceUpdate(
                     stripeIntent.paymentMethodTypes,
@@ -522,6 +523,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
     }
 
     companion object {
+        val addressRepository = AddressRepository(ApplicationProvider.getApplicationContext<Context>().resources)
         val lpmRepository =
             LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)).apply {
                 this.forceUpdate(
