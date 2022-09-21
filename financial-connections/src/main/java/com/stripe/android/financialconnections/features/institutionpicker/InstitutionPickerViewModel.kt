@@ -10,9 +10,8 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
+import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
@@ -28,9 +27,8 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private val configuration: FinancialConnectionsSheet.Configuration,
     private val searchInstitutions: SearchInstitutions,
     private val getManifest: GetManifest,
-    private val postAuthorizationSession: PostAuthorizationSession,
     private val navigationManager: NavigationManager,
-    private val goNext: GoNext,
+    private val updateLocalManifest: UpdateLocalManifest,
     private val logger: Logger,
     initialState: InstitutionPickerState
 ) : MavericksViewModel<InstitutionPickerState>(initialState) {
@@ -53,9 +51,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     private fun logErrors() {
-        onAsync(InstitutionPickerState::selectInstitution, onFail = {
-            logger.error("Error selecting institution", it)
-        })
         onAsync(InstitutionPickerState::payload, onFail = {
             logger.error("Error fetching initial payload", it)
         })
@@ -79,16 +74,11 @@ internal class InstitutionPickerViewModel @Inject constructor(
     fun onInstitutionSelected(institution: FinancialConnectionsInstitution) {
         clearSearch()
         suspend {
-            // api call
-            val authSession = postAuthorizationSession(institution)
+            // updates local manifest with active institution
+            updateLocalManifest { it.copy(activeInstitution = institution) }
             // navigate to next step
-            goNext(authSession.nextPane)
-            Unit
-        }.execute {
-            copy(
-                selectInstitution = it,
-            )
-        }
+            navigationManager.navigate(NavigationDirections.partnerAuth)
+        }.execute { this }
     }
 
     fun onCancelSearchClick() {
@@ -108,14 +98,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
     fun onSearchFocused() {
         setState {
             copy(searchMode = true)
-        }
-    }
-
-    fun onSelectAnotherBank() {
-        setState {
-            copy(
-                selectInstitution = Uninitialized
-            )
         }
     }
 
@@ -148,7 +130,6 @@ internal data class InstitutionPickerState(
     val allowManualEntry: Boolean = false,
     val payload: Async<Payload> = Uninitialized,
     val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
-    val selectInstitution: Async<Unit> = Uninitialized
 ) : MavericksState {
     data class Payload(
         val featuredInstitutions: InstitutionResponse,

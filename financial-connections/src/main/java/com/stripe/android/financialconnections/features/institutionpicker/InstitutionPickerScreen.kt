@@ -50,12 +50,6 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.exception.InstitutionPlannedException
-import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
-import com.stripe.android.financialconnections.features.common.InstitutionPlannedDowntimeErrorContent
-import com.stripe.android.financialconnections.features.common.InstitutionUnplannedDowntimeErrorContent
-import com.stripe.android.financialconnections.features.common.LoadingContent
-import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
@@ -71,20 +65,16 @@ internal fun InstitutionPickerScreen() {
     val parentViewModel = parentViewModel()
     val state by viewModel.collectAsState()
 
-    // when in select institution error, back goes back to bank selection.
-    BackHandler(state.selectInstitution is Fail, viewModel::onSelectAnotherBank)
     // when in search mode, back closes search.
     BackHandler(state.searchMode, viewModel::onCancelSearchClick)
 
     InstitutionPickerContent(
         payload = state.payload,
         institutionsProvider = { state.searchInstitutions },
-        selectInstitution = state.selectInstitution,
         searchMode = state.searchMode,
         query = state.query,
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
-        onSelectAnotherBank = viewModel::onSelectAnotherBank,
         onCancelSearchClick = viewModel::onCancelSearchClick,
         onCloseClick = parentViewModel::onCloseClick,
         onSearchFocused = viewModel::onSearchFocused,
@@ -96,12 +86,10 @@ internal fun InstitutionPickerScreen() {
 private fun InstitutionPickerContent(
     payload: Async<Payload>,
     institutionsProvider: () -> Async<InstitutionResponse>,
-    selectInstitution: Async<Unit>,
     searchMode: Boolean,
     query: String,
     onQueryChanged: (String) -> Unit,
     onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
-    onSelectAnotherBank: () -> Unit,
     onCancelSearchClick: () -> Unit,
     onCloseClick: () -> Unit,
     onSearchFocused: () -> Unit,
@@ -116,52 +104,17 @@ private fun InstitutionPickerContent(
             }
         }
     ) {
-        when (selectInstitution) {
-            is Uninitialized,
-            is Success -> {
-                LoadedContent(
-                    searchMode = searchMode,
-                    query = query,
-                    onQueryChanged = onQueryChanged,
-                    onSearchFocused = onSearchFocused,
-                    onCancelSearchClick = onCancelSearchClick,
-                    institutionsProvider = institutionsProvider,
-                    onInstitutionSelected = onInstitutionSelected,
-                    payload = payload,
-                    onManualEntryClick = onManualEntryClick
-                )
-            }
-            is Loading -> {
-                LoadingContent(
-                    stringResource(id = R.string.stripe_picker_loading_title),
-                    stringResource(id = R.string.stripe_picker_loading_desc)
-                )
-            }
-            is Fail -> {
-                InstitutionPickerErrorContent(
-                    error = selectInstitution.error,
-                    onSelectAnotherBank = onSelectAnotherBank
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun InstitutionPickerErrorContent(
-    error: Throwable,
-    onSelectAnotherBank: () -> Unit
-) {
-    when (error) {
-        is InstitutionPlannedException -> InstitutionPlannedDowntimeErrorContent(
-            error,
-            onSelectAnotherBank
+        LoadedContent(
+            searchMode = searchMode,
+            query = query,
+            onQueryChanged = onQueryChanged,
+            onSearchFocused = onSearchFocused,
+            onCancelSearchClick = onCancelSearchClick,
+            institutionsProvider = institutionsProvider,
+            onInstitutionSelected = onInstitutionSelected,
+            payload = payload,
+            onManualEntryClick = onManualEntryClick
         )
-        is InstitutionUnplannedException -> InstitutionUnplannedDowntimeErrorContent(
-            error,
-            onSelectAnotherBank
-        )
-        else -> UnclassifiedErrorContent()
     }
 }
 
@@ -410,12 +363,10 @@ internal fun SearchModeSearchingInstitutions(
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
-            selectInstitution = state.selectInstitution,
             searchMode = state.searchMode,
             query = state.query,
             onQueryChanged = {},
             onInstitutionSelected = {},
-            onSelectAnotherBank = {},
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {}
@@ -432,12 +383,10 @@ internal fun SearchModeWithResults(
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
-            selectInstitution = state.selectInstitution,
             searchMode = state.searchMode,
             query = state.query,
             onQueryChanged = {},
             onInstitutionSelected = {},
-            onSelectAnotherBank = {},
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {}
@@ -454,12 +403,10 @@ internal fun SearchModeSelectingInstitutions(
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
-            selectInstitution = state.selectInstitution,
             searchMode = state.searchMode,
             query = state.query,
             onQueryChanged = {},
             onInstitutionSelected = {},
-            onSelectAnotherBank = {},
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {}
@@ -476,12 +423,10 @@ internal fun SearchModeNoResults(
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
-            selectInstitution = state.selectInstitution,
             searchMode = state.searchMode,
             query = state.query,
             onQueryChanged = {},
             onInstitutionSelected = {},
-            onSelectAnotherBank = {},
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {}
@@ -498,12 +443,10 @@ internal fun SearchModeNoQuery(
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
-            selectInstitution = state.selectInstitution,
             searchMode = state.searchMode,
             query = state.query,
             onQueryChanged = {},
             onInstitutionSelected = {},
-            onSelectAnotherBank = {},
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {}
@@ -520,12 +463,10 @@ internal fun NoSearchMode(
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
-            selectInstitution = state.selectInstitution,
             searchMode = state.searchMode,
             query = state.query,
             onQueryChanged = {},
             onInstitutionSelected = {},
-            onSelectAnotherBank = {},
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {}
