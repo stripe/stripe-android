@@ -185,6 +185,7 @@ private fun LoadedContent(
         if (searchMode.not()) {
             Text(
                 modifier = Modifier
+                    .padding(horizontal = 16.dp)
                     .fillMaxWidth(),
                 text = stringResource(R.string.stripe_institutionpicker_pane_select_bank),
                 style = FinancialConnectionsTheme.typography.subtitle
@@ -358,7 +359,11 @@ private fun FeaturedInstitutionsGrid(
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
-        contentPadding = PaddingValues(top = 16.dp),
+        contentPadding = PaddingValues(
+            top = 16.dp,
+            start = 16.dp,
+            end = 16.dp
+        ),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         content = {
