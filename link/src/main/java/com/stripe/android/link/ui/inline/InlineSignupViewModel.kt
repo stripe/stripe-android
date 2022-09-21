@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -75,10 +77,16 @@ internal class InlineSignupViewModel @Inject constructor(
         nameController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
             .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
-    val signUpState: StateFlow<SignUpState> = _signUpStatus
-
-    val isExpanded = MutableStateFlow(false)
+    private val _viewState =
+        MutableStateFlow(
+            InlineSignupViewState(
+                userInput = null,
+                isExpanded = false,
+                apiFailed = false,
+                signUpState = SignUpState.InputtingEmail
+            )
+        )
+    val viewState: StateFlow<InlineSignupViewState> = _viewState
 
     private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
@@ -92,21 +100,16 @@ internal class InlineSignupViewModel @Inject constructor(
             return countryCode != CountryCode.US.value
         }
 
-    /**
-     * The collected input from the user, always valid unless null.
-     * When not null, enough information has been collected to proceed with the payment flow.
-     * This means that the user has entered an email that already has a link account and just
-     * needs verification, or entered a new email and phone number.
-     */
-    val userInput = MutableStateFlow<UserInput?>(null)
     private var hasExpanded = false
 
     private var debouncer = SignUpViewModel.Debouncer(prefilledEmail)
 
     fun toggleExpanded() {
-        isExpanded.value = !isExpanded.value
+        _viewState.update { oldState ->
+            oldState.copy(isExpanded = !oldState.isExpanded)
+        }
         // First time user checks the box, start listening to inputs
-        if (isExpanded.value && !hasExpanded) {
+        if (_viewState.value.isExpanded && !hasExpanded) {
             hasExpanded = true
             watchUserInput()
             linkEventsReporter.onInlineSignupCheckboxChecked()
@@ -117,15 +120,19 @@ internal class InlineSignupViewModel @Inject constructor(
         debouncer.startWatching(
             coroutineScope = viewModelScope,
             emailFlow = consumerEmail,
-            onStateChanged = {
+            onStateChanged = { signUpState ->
                 clearError()
-                _signUpStatus.value = it
-                if (it == SignUpState.InputtingEmail || it == SignUpState.VerifyingEmail) {
-                    userInput.value = null
-                } else if (it == SignUpState.InputtingPhoneOrName) {
-                    userInput.value = mapToUserInput(
-                        phoneNumber = consumerPhoneNumber.value,
-                        name = consumerName.value
+                _viewState.update { oldState ->
+                    oldState.copy(
+                        signUpState = signUpState,
+                        userInput = when (signUpState) {
+                            SignUpState.InputtingEmail, SignUpState.VerifyingEmail -> null
+                            SignUpState.InputtingPhoneOrName ->
+                                mapToUserInput(
+                                    phoneNumber = consumerPhoneNumber.value,
+                                    name = consumerName.value
+                                )
+                        }
                     )
                 }
             },
@@ -142,7 +149,9 @@ internal class InlineSignupViewModel @Inject constructor(
                 consumerName,
                 this@InlineSignupViewModel::mapToUserInput
             ).collect {
-                userInput.value = it
+                _viewState.update { oldState ->
+                    oldState.copy(userInput = it)
+                }
             }
         }
     }
@@ -170,17 +179,35 @@ internal class InlineSignupViewModel @Inject constructor(
         linkAccountManager.lookupConsumer(email, startSession = false).fold(
             onSuccess = {
                 if (it != null) {
-                    userInput.value = UserInput.SignIn(email)
-                    _signUpStatus.value = SignUpState.InputtingEmail
+                    _viewState.update { oldState ->
+                        oldState.copy(
+                            userInput = UserInput.SignIn(email),
+                            signUpState = SignUpState.InputtingEmail,
+                            apiFailed = false
+                        )
+                    }
                 } else {
-                    userInput.value = null
-                    _signUpStatus.value = SignUpState.InputtingPhoneOrName
+                    _viewState.update { oldState ->
+                        oldState.copy(
+                            userInput = null,
+                            signUpState = SignUpState.InputtingPhoneOrName,
+                            apiFailed = false
+                        )
+                    }
                     linkEventsReporter.onSignupStarted(true)
                 }
             },
             onFailure = {
-                _signUpStatus.value = SignUpState.InputtingEmail
-                onError(it)
+                _viewState.update { oldState ->
+                    oldState.copy(
+                        userInput = null,
+                        signUpState = SignUpState.InputtingEmail,
+                        apiFailed = it is APIConnectionException
+                    )
+                }
+                if (!(it is APIConnectionException)) {
+                    onError(it)
+                }
             }
         )
     }

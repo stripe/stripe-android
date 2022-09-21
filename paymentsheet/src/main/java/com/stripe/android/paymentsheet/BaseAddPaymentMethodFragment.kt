@@ -8,19 +8,18 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asFlow
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
@@ -29,20 +28,20 @@ import com.stripe.android.paymentsheet.model.getPMAddForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormFragment
-import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
+import com.stripe.android.utils.AnimationConstants
+import kotlinx.coroutines.flow.MutableStateFlow
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
     private lateinit var viewBinding: FragmentPaymentsheetAddPaymentMethodBinding
-    private var showLinkInlineSignup = false
+    private var showLinkInlineSignup = MutableStateFlow(false)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -68,43 +67,37 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         sheetViewModel.headerText.value =
             getString(R.string.stripe_paymentsheet_add_payment_method_title)
 
-        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
-            viewBinding.linkInlineSignup.isEnabled = !isProcessing
-        }
-
         viewBinding.linkInlineSignup.apply {
-            linkLauncher = sheetViewModel.linkLauncher
-        }
+            setContent {
+                val processing by sheetViewModel.processing.observeAsState(false)
 
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(
-                    viewBinding.linkInlineSignup.isSelected,
-                    viewBinding.linkInlineSignup.userInput,
-                    sheetViewModel.selection.asFlow()
-                ) { isSelected, userInput, selection ->
-                    if (isSelected) {
-                        if (userInput != null && selection != null) {
-                            PrimaryButton.UIState(
-                                label = null,
-                                onClick = { sheetViewModel.payWithLinkInline(userInput) },
-                                enabled = true,
-                                visible = true
-                            )
-                        } else {
-                            PrimaryButton.UIState(
-                                label = null,
-                                onClick = null,
-                                enabled = false,
-                                visible = true
-                            )
-                        }
-                    } else {
-                        null
-                    }
-                }.collect {
-                    if (showLinkInlineSignup) {
-                        sheetViewModel.updatePrimaryButtonUIState(it)
+                PaymentsTheme {
+                    LinkInlineSignup(
+                        sheetViewModel.linkLauncher,
+                        !processing
+                    ) { viewState ->
+                        sheetViewModel.updatePrimaryButtonUIState(
+                            if (viewState.useLink) {
+                                val userInput = viewState.userInput
+                                if (userInput != null && sheetViewModel.selection.value != null) {
+                                    PrimaryButton.UIState(
+                                        label = null,
+                                        onClick = { sheetViewModel.payWithLinkInline(userInput) },
+                                        enabled = true,
+                                        visible = true
+                                    )
+                                } else {
+                                    PrimaryButton.UIState(
+                                        label = null,
+                                        onClick = null,
+                                        enabled = false,
+                                        visible = true
+                                    )
+                                }
+                            } else {
+                                null
+                            }
+                        )
                     }
                 }
             }
@@ -198,7 +191,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 amount = sheetViewModel.amount.value,
                 injectorKey = sheetViewModel.injectorKey,
                 newLpm = sheetViewModel.newPaymentSelection,
-                isShowingLinkInlineSignup = showLinkInlineSignup
+                isShowingLinkInlineSignup = showLinkInlineSignup.value
             )
         )
 
@@ -218,13 +211,13 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     }
 
     private fun updateLinkInlineSignupVisibility(selectedPaymentMethod: SupportedPaymentMethod) {
-        showLinkInlineSignup = sheetViewModel.isLinkEnabled.value == true &&
+        showLinkInlineSignup.value = sheetViewModel.isLinkEnabled.value == true &&
             sheetViewModel.stripeIntent.value
                 ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) ?: false &&
             selectedPaymentMethod.code == PaymentMethod.Type.Card.code &&
             sheetViewModel.linkLauncher.accountStatus.value == AccountStatus.SignedOut
 
-        viewBinding.linkInlineSignup.isVisible = showLinkInlineSignup
+        viewBinding.linkInlineSignup.isVisible = showLinkInlineSignup.value
     }
 
     private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
