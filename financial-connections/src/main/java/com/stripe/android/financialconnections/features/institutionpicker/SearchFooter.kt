@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
@@ -38,22 +39,21 @@ internal fun SearchFooter(
         content = {
             val uriHandler = LocalUriHandler.current
             Text(
-                text = "CAN'T FIND YOUR BANK?",
+                text = stringResource(id = R.string.stripe_institutionpicker_footer_title),
                 style = FinancialConnectionsTheme.typography.caption.copy(
                     color = FinancialConnectionsTheme.colors.textSecondary
                 )
             )
             SearchFooterRow(
-                title = "Double check your spelling and search terms",
+                title = stringResource(id = R.string.stripe_institutionpicker_footer_item_spelling),
                 titleColor = FinancialConnectionsTheme.colors.textPrimary,
-                subtitle = "You can also search by your bank’s login URL.",
                 icon = R.drawable.stripe_ic_check_nocircle,
                 iconColor = FinancialConnectionsTheme.colors.textSecondary,
                 iconBackgroundColor = FinancialConnectionsTheme.colors.borderDefault
             )
             if (manualEntryEnabled) {
                 SearchFooterRow(
-                    title = "Manually add your account",
+                    title = stringResource(id = R.string.stripe_institutionpicker_footer_item_manualentry),
                     titleColor = FinancialConnectionsTheme.colors.textBrand,
                     icon = R.drawable.stripe_ic_edit,
                     iconColor = FinancialConnectionsTheme.colors.iconBrand,
@@ -62,7 +62,7 @@ internal fun SearchFooter(
                 )
             }
             SearchFooterRow(
-                title = "Questions? Email support@stripe.com",
+                title = stringResource(id = R.string.stripe_institutionpicker_footer_item_support),
                 titleColor = FinancialConnectionsTheme.colors.textBrand,
                 icon = R.drawable.stripe_ic_mail,
                 iconColor = FinancialConnectionsTheme.colors.iconBrand,
@@ -83,7 +83,6 @@ private fun SearchFooterRow(
     iconColor: Color,
     iconBackgroundColor: Color,
     modifier: Modifier = Modifier,
-    subtitle: String? = null
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -108,13 +107,6 @@ private fun SearchFooterRow(
                 color = titleColor,
                 style = FinancialConnectionsTheme.typography.caption
             )
-            subtitle?.let {
-                Text(
-                    text = it,
-                    color = FinancialConnectionsTheme.colors.textSecondary,
-                    style = FinancialConnectionsTheme.typography.caption,
-                )
-            }
         }
     }
 }
