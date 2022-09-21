@@ -18,9 +18,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -57,6 +60,7 @@ import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.ui.core.elements.TextFieldSection
 import com.stripe.android.ui.core.paymentsColors
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -137,7 +141,8 @@ internal class USBankAccountFormFragment : Fragment() {
                     clientSecret,
                     sheetViewModel?.usBankAccountSavedScreenState,
                     (sheetViewModel?.newPaymentSelection as? PaymentSelection.New.USBankAccount),
-                    sheetViewModel?.config?.shippingDetails
+                    sheetViewModel?.config?.shippingDetails,
+                    sheetViewModel
                 )
             },
             this
@@ -198,37 +203,71 @@ internal class USBankAccountFormFragment : Fragment() {
                 }
             }
         }
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.currentScreenState.collect { screenState ->
-                    sheetViewModel?.onError(screenState.error)
-                    when (screenState) {
-                        is USBankAccountFormScreenState.NameAndEmailCollection -> {
-                            renderNameAndEmailCollectionScreen(screenState, this)
-                        }
-                        is USBankAccountFormScreenState.MandateCollection -> {
-                            renderMandateCollectionScreen(screenState)
-                        }
-                        is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
-                            renderVerifyWithMicrodepositsScreen(screenState)
-                        }
-                        is USBankAccountFormScreenState.SavedAccount -> {
-                            renderSavedAccountScreen(screenState)
-                        }
-                        is USBankAccountFormScreenState.ConfirmIntent -> {
-                            (sheetViewModel as? PaymentSheetViewModel)
-                                ?.confirmStripeIntent(screenState.confirmIntentParams)
-                        }
-                        is USBankAccountFormScreenState.Finished -> {
-                            sheetViewModel?.updateSelection(screenState.paymentSelection)
-                            sheetViewModel?.usBankAccountSavedScreenState =
-                                viewModel.generateSavedState(screenState)
-                            sheetViewModel?.onFinish()
-                        }
+
+        setContent {
+            PaymentsTheme {
+                val currentScreenState by viewModel.currentScreenState.collectAsState()
+
+                LaunchedEffect(currentScreenState) {
+                    sheetViewModel?.onError(currentScreenState.error)
+
+                    val shouldProcess = currentScreenState is USBankAccountFormScreenState.NameAndEmailCollection || completePayment
+                    val enabled = if (currentScreenState is USBankAccountFormScreenState.NameAndEmailCollection) {
+                        viewModel.requiredFields.value
+                    } else {
+                        true
+                    }
+
+                    updatePrimaryButton(
+                        text = currentScreenState.primaryButtonText,
+                        onClick = {
+                            viewModel.handlePrimaryButtonClick(currentScreenState)
+                        },
+                        enabled = enabled,
+                        shouldProcess = shouldProcess
+                    )
+
+                    updateMandateText(currentScreenState.mandateText)
+                }
+
+                when (val screenState = currentScreenState) {
+                    is USBankAccountFormScreenState.NameAndEmailCollection -> {
+                        NameAndEmailCollectionScreen(screenState)
+                    }
+                    is USBankAccountFormScreenState.MandateCollection -> {
+                        MandateCollectionScreen(screenState)
+                    }
+                    is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
+                        VerifyWithMicrodepositsScreen(screenState)
+                    }
+                    is USBankAccountFormScreenState.SavedAccount -> {
+                        SavedAccountScreen(screenState)
                     }
                 }
             }
         }
+
+//        lifecycleScope.launch {
+//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                viewModel.currentScreenState.collect { screenState ->
+//                    sheetViewModel?.onError(screenState.error)
+//                    when (screenState) {
+//                        is USBankAccountFormScreenState.NameAndEmailCollection -> {
+//                            renderNameAndEmailCollectionScreen(screenState, this)
+//                        }
+//                        is USBankAccountFormScreenState.MandateCollection -> {
+//                            renderMandateCollectionScreen(screenState)
+//                        }
+//                        is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
+//                            renderVerifyWithMicrodepositsScreen(screenState)
+//                        }
+//                        is USBankAccountFormScreenState.SavedAccount -> {
+//                            renderSavedAccountScreen(screenState)
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
     override fun onDetach() {
