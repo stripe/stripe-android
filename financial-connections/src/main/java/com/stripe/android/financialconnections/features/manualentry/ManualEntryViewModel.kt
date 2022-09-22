@@ -95,6 +95,18 @@ internal class ManualEntryViewModel @Inject constructor(
         }.execute { copy(linkPaymentAccount = it) }
     }
 
+    fun onRoutingFocused() {
+        TODO("Not yet implemented")
+    }
+
+    fun onAccountFocused() {
+        TODO("Not yet implemented")
+    }
+
+    fun onAccountConfirmFocused() {
+        TODO("Not yet implemented")
+    }
+
     companion object :
         MavericksViewModelFactory<ManualEntryViewModel, ManualEntryState> {
 
