@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.features.consent
 
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Permissions
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.ui.TextResource
 
@@ -69,29 +69,26 @@ internal object ConsentTextBuilder {
     fun getRequestedDataBullets(manifest: FinancialConnectionsSessionManifest): List<Pair<TextResource, TextResource>> {
         return manifest.permissions.mapNotNull { permission ->
             when (permission) {
-                FinancialConnectionsAccount.Permissions.BALANCES ->
-                    Pair(
-                        TextResource.StringId(R.string.stripe_consent_requested_data_balances_title),
-                        TextResource.StringId(R.string.stripe_consent_requested_data_balances_desc)
-                    )
-                FinancialConnectionsAccount.Permissions.OWNERSHIP ->
-                    Pair(
-                        TextResource.StringId(R.string.stripe_consent_requested_data_ownership_title),
-                        TextResource.StringId(R.string.stripe_consent_requested_data_ownership_desc)
-                    )
-                FinancialConnectionsAccount.Permissions.PAYMENT_METHOD ->
-                    Pair(
-                        TextResource.StringId(R.string.stripe_consent_requested_data_accountdetails_title),
-                        TextResource.StringId(R.string.stripe_consent_requested_data_accountdetails_desc)
-                    )
-                FinancialConnectionsAccount.Permissions.TRANSACTIONS ->
-                    Pair(
-                        TextResource.StringId(R.string.stripe_consent_requested_data_transactions_title),
-                        TextResource.StringId(R.string.stripe_consent_requested_data_transactions_desc)
-                    )
-                FinancialConnectionsAccount.Permissions.UNKNOWN -> null
+                Permissions.BALANCES -> Pair(
+                    TextResource.StringId(R.string.stripe_consent_requested_data_balances_title),
+                    TextResource.StringId(R.string.stripe_consent_requested_data_balances_desc)
+                )
+                Permissions.OWNERSHIP -> Pair(
+                    TextResource.StringId(R.string.stripe_consent_requested_data_ownership_title),
+                    TextResource.StringId(R.string.stripe_consent_requested_data_ownership_desc)
+                )
+                Permissions.PAYMENT_METHOD,
+                Permissions.ACCOUNT_NUMBERS -> Pair(
+                    TextResource.StringId(R.string.stripe_consent_requested_data_accountdetails_title),
+                    TextResource.StringId(R.string.stripe_consent_requested_data_accountdetails_desc)
+                )
+                Permissions.TRANSACTIONS -> Pair(
+                    TextResource.StringId(R.string.stripe_consent_requested_data_transactions_title),
+                    TextResource.StringId(R.string.stripe_consent_requested_data_transactions_desc)
+                )
+                Permissions.UNKNOWN -> null
             }
-        }
+        }.distinct()
     }
 
     fun getBusinessName(manifest: FinancialConnectionsSessionManifest): String? {

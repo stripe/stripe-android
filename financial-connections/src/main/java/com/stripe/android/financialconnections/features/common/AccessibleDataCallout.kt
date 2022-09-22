@@ -152,11 +152,12 @@ private fun List<Permissions>.toStringRes(): List<Int> = mapNotNull {
     when (it) {
         Permissions.BALANCES -> R.string.data_accessible_type_balances
         Permissions.OWNERSHIP -> R.string.data_accessible_type_ownership
-        Permissions.PAYMENT_METHOD -> R.string.data_accessible_type_accountdetails
+        Permissions.PAYMENT_METHOD,
+        Permissions.ACCOUNT_NUMBERS -> R.string.data_accessible_type_accountdetails
         Permissions.TRANSACTIONS -> R.string.data_accessible_type_transactions
         Permissions.UNKNOWN -> null
     }
-}
+}.distinct()
 
 internal data class AccessibleDataCalloutModel(
     val businessName: String?,
