@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -24,7 +25,11 @@ class ConsumerPaymentDetailsJsonParserTest {
                         expiryMonth = 12,
                         brand = CardBrand.MasterCard,
                         last4 = "4444",
-                        cvcCheck = CvcCheck.Pass
+                        cvcCheck = CvcCheck.Pass,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            CountryCode.US,
+                            "12312"
+                        )
                     )
                 )
             )
@@ -63,7 +68,11 @@ class ConsumerPaymentDetailsJsonParserTest {
                         expiryMonth = 12,
                         brand = CardBrand.MasterCard,
                         last4 = "4444",
-                        cvcCheck = CvcCheck.Pass
+                        cvcCheck = CvcCheck.Pass,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            CountryCode.US,
+                            "12312"
+                        )
                     ),
                     ConsumerPaymentDetails.Card(
                         id = "QAAAKIL",
@@ -72,7 +81,11 @@ class ConsumerPaymentDetailsJsonParserTest {
                         expiryMonth = 4,
                         brand = CardBrand.Visa,
                         last4 = "4242",
-                        cvcCheck = CvcCheck.Fail
+                        cvcCheck = CvcCheck.Fail,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            CountryCode.US,
+                            "42424"
+                        )
                     ),
                     ConsumerPaymentDetails.BankAccount(
                         id = "wAAACGA",
