@@ -54,4 +54,8 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         clientSecret: String,
         sessionId: String
     ): FinancialConnectionsAuthorizationSession = cancelAuthorizationSessionProvider()
+
+    override fun updateLocalManifest(
+        block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
+    ) = Unit
 }
