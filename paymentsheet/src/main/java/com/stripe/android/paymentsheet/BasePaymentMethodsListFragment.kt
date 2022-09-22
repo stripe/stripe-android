@@ -164,7 +164,6 @@ internal abstract class BasePaymentMethodsListFragment(
     }
 
     private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) {
-        adapter.removeItem(item)
         sheetViewModel.removePaymentMethod(item.paymentMethod)
     }
 
