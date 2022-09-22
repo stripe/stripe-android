@@ -27,6 +27,13 @@
     <string name="stripe_prepane_desc">A new window will open for you to log in and select the %1$s account(s) you want to link.\n\nThis page will update once you’re done.</string>
     <string name="stripe_prepane_continue">Continue</string>
     <string name="stripe_institutionpicker_pane_select_bank">Select your bank</string>
+    <string name="stripe_institutionpicker_footer_title">CAN\'T FIND YOUR BANK?</string>
+    <string name="stripe_institutionpicker_footer_item_spelling">Double check your spelling and search terms</string>
+    <string name="stripe_institutionpicker_footer_item_manualentry">Manually add your account</string>
+    <string name="stripe_institutionpicker_footer_item_support">Questions? Contact support</string>
+    <string name="stripe_institutionpicker_pane_error_title">Search is currently unavailable</string>
+    <string name="stripe_institutionpicker_pane_error_desc">Please try again later</string>
+    <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Please try again later or <annotation clickable="manual_entry">enter your bank details manually.</annotation></string>
     <string name="stripe_picker_loading_title">Establishing connection</string>
     <string name="stripe_picker_loading_desc">Please wait while the connection is established</string>
     <string name="stripe_picker_search_no_results">No results for "%1$s"</string>

@@ -18,9 +18,12 @@ import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.MixedOAuthParams
+import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,23 +36,31 @@ internal class PartnerAuthViewModel @Inject constructor(
     val configuration: FinancialConnectionsSheet.Configuration,
     val getManifest: GetManifest,
     val goNext: GoNext,
+    val navigationManager: NavigationManager,
     val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     val logger: Logger,
     initialState: PartnerAuthState
 ) : MavericksViewModel<PartnerAuthState>(initialState) {
 
     init {
-        viewModelScope.launch {
+        logErrors()
+        suspend {
             val manifest = getManifest()
-            val authSession = requireNotNull(manifest.activeAuthSession)
-            setState {
-                copy(
-                    flow = authSession.flow,
-                    showPartnerDisclosure = authSession.showPartnerDisclosure ?: false,
-                    institutionName = manifest.activeInstitution!!.name,
-                )
-            }
+            val authSession = createAuthorizationSession(manifest.activeInstitution!!)
+            Payload(
+                flow = authSession.flow,
+                showPartnerDisclosure = authSession.showPartnerDisclosure ?: false,
+                institutionName = manifest.activeInstitution.name,
+            )
+        }.execute {
+            copy(payload = it)
         }
+    }
+
+    private fun logErrors() {
+        onAsync(PartnerAuthState::payload, onFail = {
+            logger.error("Error fetching payload / posting AuthSession", it)
+        })
     }
 
     fun onLaunchAuthClick() {
@@ -60,10 +71,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 
     fun onSelectAnotherBank() {
-        viewModelScope.launch {
-            val authSession = getManifest().activeAuthSession!!
-            goNext(authSession.nextPane)
-        }
+        navigationManager.navigate(NavigationDirections.institutionPicker)
     }
 
     fun onWebAuthFlowFinished(
@@ -71,11 +79,11 @@ internal class PartnerAuthViewModel @Inject constructor(
     ) {
         logger.debug("Web AuthFlow status received $webStatus")
         viewModelScope.launch {
-            val authSession = getManifest().activeAuthSession!!
             when (webStatus) {
                 is Uninitialized -> {}
                 is Loading -> setState { copy(authenticationStatus = Loading()) }
                 is Success -> {
+                    val authSession = getManifest().activeAuthSession!!
                     logger.debug("Web AuthFlow completed! waiting for oauth results")
                     val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
                     logger.debug("OAuth results received! completing session")
@@ -85,6 +93,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                     )
                 }
                 is Fail -> {
+                    val authSession = getManifest().activeAuthSession!!
                     when (val error = webStatus.error) {
                         is WebAuthFlowCancelledException -> onAuthCancelled(authSession)
                         else -> onAuthFailed(error, authSession)
@@ -158,9 +167,13 @@ internal class PartnerAuthViewModel @Inject constructor(
 }
 
 internal data class PartnerAuthState(
-    val institutionName: String = "",
-    val flow: Flow? = null,
-    val showPartnerDisclosure: Boolean = false,
+    val payload: Async<Payload> = Uninitialized,
     val url: String? = null,
     val authenticationStatus: Async<String> = Uninitialized
-) : MavericksState
+) : MavericksState {
+    data class Payload(
+        val institutionName: String,
+        val flow: Flow?,
+        val showPartnerDisclosure: Boolean
+    )
+}

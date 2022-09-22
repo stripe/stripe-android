@@ -6,13 +6,14 @@ import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.domain.PostAuthorizationSession
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SearchInstitutions
+import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerViewModel
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
+import com.stripe.android.financialconnections.navigation.NavigationManager
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -28,8 +29,9 @@ internal class InstitutionPickerViewModelTest {
     val mvrxRule = MvRxTestRule()
 
     private val searchInstitutions = mock<SearchInstitutions>()
-    private val postAuthorizationSession = mock<PostAuthorizationSession>()
-    private val goNext = mock<GoNext>()
+    private val getManifest = mock<GetManifest>()
+    private val updateLocalManifest = mock<UpdateLocalManifest>()
+    private val navigationManager = mock<NavigationManager>()
     private val defaultConfiguration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
@@ -40,8 +42,9 @@ internal class InstitutionPickerViewModelTest {
     ) = InstitutionPickerViewModel(
         configuration = defaultConfiguration,
         searchInstitutions = searchInstitutions,
-        postAuthorizationSession = postAuthorizationSession,
-        goNext = goNext,
+        getManifest = getManifest,
+        navigationManager = navigationManager,
+        updateLocalManifest = updateLocalManifest,
         logger = Logger.noop(),
         initialState = state
     )
@@ -65,7 +68,7 @@ internal class InstitutionPickerViewModelTest {
         val viewModel = buildViewModel(InstitutionPickerState())
 
         withState(viewModel) { state ->
-            assertEquals(state.featuredInstitutions()!!.data, institutionResponse.data)
+            assertEquals(state.payload()!!.featuredInstitutions.data, institutionResponse.data)
             assertIs<Uninitialized>(state.searchInstitutions)
         }
     }
@@ -105,7 +108,7 @@ internal class InstitutionPickerViewModelTest {
         advanceUntilIdle()
 
         withState(viewModel) { state ->
-            assertEquals(state.featuredInstitutions()!!.data, featuredResults.data)
+            assertEquals(state.payload()!!.featuredInstitutions.data, featuredResults.data)
             assertEquals(state.searchInstitutions()!!.data, searchResults.data)
         }
     }

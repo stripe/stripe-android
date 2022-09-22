@@ -21,6 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
@@ -29,9 +30,14 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.exception.InstitutionPlannedException
+import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
+import com.stripe.android.financialconnections.features.common.InstitutionPlannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.InstitutionUnknownErrorContent
+import com.stripe.android.financialconnections.features.common.InstitutionUnplannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PartnerCallout
+import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -76,21 +82,61 @@ private fun PartnerAuthScreenContent(
     FinancialConnectionsScaffold(
         topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
     ) {
-        when (state.authenticationStatus) {
-            is Uninitialized -> PrePaneContent(
-                institutionName = state.institutionName,
-                flow = state.flow,
-                showPartnerDisclosure = state.showPartnerDisclosure,
-                onContinueClick = onContinueClick
-            )
-            is Loading, is Success -> LoadingContent(
+        when (val payload = state.payload) {
+            Uninitialized, is Loading -> LoadingContent(
                 stringResource(id = R.string.stripe_picker_loading_title),
                 stringResource(id = R.string.stripe_picker_loading_desc)
             )
-            is Fail -> {
-                // TODO@carlosmuvi translate error type to specific error screen.
-                InstitutionUnknownErrorContent(onSelectAnotherBank)
-            }
+            is Fail -> ErrorContent(payload.error, onSelectAnotherBank)
+            is Success -> LoadedContent(
+                authenticationStatus = state.authenticationStatus,
+                payload = payload(),
+                onContinueClick = onContinueClick,
+                onSelectAnotherBank = onSelectAnotherBank
+            )
+        }
+    }
+}
+
+@Composable
+fun ErrorContent(
+    error: Throwable,
+    onSelectAnotherBank: () -> Unit
+) {
+    when (error) {
+        is InstitutionPlannedException -> InstitutionPlannedDowntimeErrorContent(
+            error,
+            onSelectAnotherBank
+        )
+        is InstitutionUnplannedException -> InstitutionUnplannedDowntimeErrorContent(
+            error,
+            onSelectAnotherBank
+        )
+        else -> UnclassifiedErrorContent()
+    }
+}
+
+@Composable
+private fun LoadedContent(
+    authenticationStatus: Async<String>,
+    payload: PartnerAuthState.Payload,
+    onContinueClick: () -> Unit,
+    onSelectAnotherBank: () -> Unit
+) {
+    when (authenticationStatus) {
+        is Uninitialized -> PrePaneContent(
+            institutionName = payload.institutionName,
+            flow = payload.flow,
+            showPartnerDisclosure = payload.showPartnerDisclosure,
+            onContinueClick = onContinueClick
+        )
+        is Loading, is Success -> LoadingContent(
+            stringResource(id = R.string.stripe_picker_loading_title),
+            stringResource(id = R.string.stripe_picker_loading_desc)
+        )
+        is Fail -> {
+            // TODO@carlosmuvi translate error type to specific error screen.
+            InstitutionUnknownErrorContent(onSelectAnotherBank)
         }
     }
 }
@@ -154,10 +200,15 @@ internal fun PrepaneContentPreview() {
     FinancialConnectionsTheme {
         PartnerAuthScreenContent(
             state = PartnerAuthState(
-                institutionName = "Random bank",
-                url = null,
+                payload = Success(
+                    PartnerAuthState.Payload(
+                        institutionName = "Random bank",
+                        flow = Flow.FINICITY_CONNECT_V2_OAUTH,
+                        showPartnerDisclosure = true
+                    )
+                ),
                 authenticationStatus = Uninitialized,
-                flow = Flow.FINICITY_CONNECT_V2_OAUTH
+                url = null,
             ),
             onContinueClick = {},
             onSelectAnotherBank = {},

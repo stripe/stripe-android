@@ -46,4 +46,6 @@ internal object FinancialConnectionsUrlResolver {
             false -> FinancialConnectionsUrls.PrivacyCenter.merchant
         }
     }
+
+    const val supportUrl: String = "https://support.stripe.com/contact"
 }

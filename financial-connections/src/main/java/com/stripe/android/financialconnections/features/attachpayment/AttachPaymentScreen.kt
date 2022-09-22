@@ -42,7 +42,7 @@ private fun AttachPaymentContent(
         topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
     ) {
         when (payload) {
-            Uninitialized, is Loading -> TODO()
+            Uninitialized, is Loading -> LoadingContent()
             is Success -> LoadingContent(
                 title = pluralStringResource(
                     id = R.plurals.stripe_attachlinkedpaymentaccount_title,

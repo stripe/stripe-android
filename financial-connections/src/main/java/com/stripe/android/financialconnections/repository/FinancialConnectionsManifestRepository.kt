@@ -118,8 +118,13 @@ internal interface FinancialConnectionsManifestRepository {
                 initialManifest
             )
     }
+
+    fun updateLocalManifest(
+        block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
+    )
 }
 
+@Suppress("TooManyFunctions")
 private class FinancialConnectionsManifestRepositoryImpl(
     val requestExecutor: FinancialConnectionsRequestExecutor,
     val configuration: FinancialConnectionsSheet.Configuration,
@@ -273,6 +278,14 @@ private class FinancialConnectionsManifestRepositoryImpl(
         }
     }
 
+    override fun updateLocalManifest(
+        block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
+    ) {
+        cachedManifest
+            ?.let { block(it) }
+            ?.let { updateCachedManifest("updateLocalManifest", it) }
+    }
+
     private fun updateActiveInstitution(
         source: String,
         institution: FinancialConnectionsInstitution
@@ -282,6 +295,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
             activeInstitution = institution
         )
     }
+
     private fun updateCachedActiveAuthSession(
         source: String,
         authSession: FinancialConnectionsAuthorizationSession

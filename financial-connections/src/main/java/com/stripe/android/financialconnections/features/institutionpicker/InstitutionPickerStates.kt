@@ -1,9 +1,9 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 
@@ -12,7 +12,6 @@ internal class InstitutionPickerStates :
     override val values = sequenceOf(
         searchModeSearchingInstitutions(),
         searchModeWithResults(),
-        searchModeSelectingInstitutions(),
         searchModeNoResults(),
         searchModeNoQuery(),
         noSearchMode(),
@@ -22,8 +21,7 @@ internal class InstitutionPickerStates :
     companion object {
         // Search mode - searching institutions
         fun searchModeSearchingInstitutions() = InstitutionPickerState(
-            selectInstitution = Uninitialized,
-            featuredInstitutions = Success(institutionResponse()),
+            payload = Success(payload()),
             searchInstitutions = Loading(),
             searchMode = true,
             query = "query",
@@ -31,17 +29,7 @@ internal class InstitutionPickerStates :
 
         // Search mode: with results
         fun searchModeWithResults() = InstitutionPickerState(
-            selectInstitution = Uninitialized,
-            featuredInstitutions = Success(institutionResponse()),
-            searchInstitutions = Success(institutionResponse()),
-            searchMode = true,
-            query = "query",
-        )
-
-        // Search mode: selecting institution
-        fun searchModeSelectingInstitutions() = InstitutionPickerState(
-            selectInstitution = Loading(),
-            featuredInstitutions = Success(institutionResponse()),
+            payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
             searchMode = true,
             query = "query",
@@ -49,17 +37,23 @@ internal class InstitutionPickerStates :
 
         // Search mode: No results
         fun searchModeNoResults() = InstitutionPickerState(
-            selectInstitution = Uninitialized,
-            featuredInstitutions = Success(institutionResponse()),
+            payload = Success(payload()),
             searchInstitutions = Success(InstitutionResponse(emptyList())),
+            searchMode = false,
+            query = "query",
+        )
+
+        // Search mode: No results
+        fun searchModeFailed() = InstitutionPickerState(
+            payload = Success(payload()),
+            searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
             searchMode = false,
             query = "query",
         )
 
         // Search mode: no query
         fun searchModeNoQuery() = InstitutionPickerState(
-            selectInstitution = Uninitialized,
-            featuredInstitutions = Success(institutionResponse()),
+            payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
             searchMode = true,
             query = "",
@@ -67,13 +61,16 @@ internal class InstitutionPickerStates :
 
         // No search mode
         fun noSearchMode() = InstitutionPickerState(
-            selectInstitution = Uninitialized,
-            featuredInstitutions = Success(institutionResponse()),
+            payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
             searchMode = false,
             query = "",
         )
 
+        private fun payload() = InstitutionPickerState.Payload(
+            featuredInstitutions = institutionResponse(),
+            allowManualEntry = true
+        )
         private fun institutionResponse() = InstitutionResponse(
             listOf(
                 FinancialConnectionsInstitution(
