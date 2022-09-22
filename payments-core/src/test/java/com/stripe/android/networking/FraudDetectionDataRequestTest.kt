@@ -39,8 +39,11 @@ class FraudDetectionDataRequestTest {
                     "Cookie" to "m=${FRAUD_DETECTION_DATA.guid}",
                     "User-Agent" to RequestHeadersFactory.getUserAgent(),
                     "Accept-Charset" to "UTF-8",
-                    HEADER_X_STRIPE_USER_AGENT to "{\"lang\":\"kotlin\",\"bindings_version\":\"${StripeSdkVersion.VERSION_NAME}\"," +
-                        "\"os_version\":\"${Build.VERSION.SDK_INT}\",\"type\":\"robolectric_robolectric_robolectric\",\"model\":\"robolectric\"}"
+                    HEADER_X_STRIPE_USER_AGENT to "{\"lang\":\"kotlin\"," +
+                        "\"bindings_version\":\"${StripeSdkVersion.VERSION_NAME}\"," +
+                        "\"os_version\":\"${Build.VERSION.SDK_INT}\"," +
+                        "\"type\":\"robolectric_robolectric_robolectric\"," +
+                        "\"model\":\"robolectric\"}"
                 )
             )
     }
