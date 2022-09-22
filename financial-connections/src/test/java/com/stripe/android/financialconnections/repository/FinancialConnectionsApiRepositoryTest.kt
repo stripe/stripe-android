@@ -118,7 +118,7 @@ class FinancialConnectionsApiRepositoryTest {
             val financialConnectionsAccount = result.paymentAccount as FinancialConnectionsAccount
             assertThat(financialConnectionsAccount.permissions).containsExactly(
                 FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
-                FinancialConnectionsAccount.Permissions.UNKNOWN,
+                FinancialConnectionsAccount.Permissions.UNKNOWN
             )
         }
 
