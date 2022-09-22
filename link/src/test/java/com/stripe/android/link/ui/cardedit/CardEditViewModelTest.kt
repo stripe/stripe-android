@@ -8,7 +8,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
-import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
@@ -111,16 +110,15 @@ class CardEditViewModelTest {
 
         verify(linkAccountManager).updatePaymentDetails(
             argWhere {
-                it is ConsumerPaymentDetailsUpdateParams.Card &&
-                    it.toParamMap() == mapOf(
-                    "is_default" to true,
-                    "exp_month" to "12",
-                    "exp_year" to "2040",
-                    "billing_address" to mapOf(
-                        "country_code" to "US",
-                        "postal_code" to "12345"
-                    )
+                it.toParamMap() == mapOf(
+                "is_default" to true,
+                "exp_month" to "12",
+                "exp_year" to "2040",
+                "billing_address" to mapOf(
+                    "country_code" to "US",
+                    "postal_code" to "12345"
                 )
+            )
             }
         )
     }
@@ -135,8 +133,7 @@ class CardEditViewModelTest {
 
             verify(linkAccountManager).updatePaymentDetails(
                 argWhere {
-                    it is ConsumerPaymentDetailsUpdateParams.Card &&
-                        it.toParamMap() == mapOf(
+                    it.toParamMap() == mapOf(
                         "exp_month" to "12",
                         "exp_year" to "2040",
                         "billing_address" to mapOf(
@@ -157,8 +154,7 @@ class CardEditViewModelTest {
 
         verify(linkAccountManager).updatePaymentDetails(
             argWhere {
-                it is ConsumerPaymentDetailsUpdateParams.Card &&
-                    it.toParamMap() == mapOf(
+                it.toParamMap() == mapOf(
                     "exp_month" to "12",
                     "exp_year" to "2040",
                     "billing_address" to mapOf(

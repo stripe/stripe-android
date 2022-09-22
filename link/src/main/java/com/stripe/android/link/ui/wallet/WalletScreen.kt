@@ -118,6 +118,7 @@ private fun WalletBodyPreview() {
                 onItemSelected = {},
                 onAddNewPaymentMethodClick = {},
                 onEditPaymentMethod = {},
+                onSetDefault = {},
                 onDeletePaymentMethod = {},
                 onPrimaryButtonClick = {},
                 onPayAnotherWayClick = {},
@@ -179,6 +180,7 @@ internal fun WalletBody(
             onItemSelected = viewModel::onItemSelected,
             onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
             onEditPaymentMethod = viewModel::editPaymentMethod,
+            onSetDefault = viewModel::setDefault,
             onDeletePaymentMethod = viewModel::deletePaymentMethod,
             onPrimaryButtonClick = viewModel::onConfirmPayment,
             onPayAnotherWayClick = viewModel::payAnotherWay,
@@ -197,6 +199,7 @@ internal fun WalletBody(
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onAddNewPaymentMethodClick: () -> Unit,
     onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onSetDefault: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClick: () -> Unit,
@@ -252,6 +255,10 @@ internal fun WalletBody(
                                 onEditClick = {
                                     showBottomSheetContent(null)
                                     onEditPaymentMethod(it)
+                                },
+                                onSetDefaultClick = {
+                                    showBottomSheetContent(null)
+                                    onSetDefault(it)
                                 },
                                 onRemoveClick = {
                                     showBottomSheetContent(null)
@@ -493,6 +500,7 @@ private fun ExpandedPaymentDetails(
                 enabled = isEnabled,
                 isSupported = uiState.supportedTypes.contains(item.type),
                 isSelected = uiState.selectedItem?.id == item.id,
+                isUpdating = uiState.paymentMethodIdBeingUpdated == item.id,
                 onClick = {
                     onItemSelected(item)
                 },
