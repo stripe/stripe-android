@@ -18,9 +18,9 @@
 We provide an example backend hosted on Glitch, allowing you to easily test an integration end-to-end.
 1. [Open the Glitch project](https://glitch.com/edit/#!/stripe-example-mobile-backend).
 2. Click on "Remix", on the top right.
-3. In your newly created project, open the `.env` file, listed on the left panel.
+3. In your newly created project, open the `.env` file in the left sidebar.
 4. Set your [Stripe testmode secret key](https://dashboard.stripe.com/test/apikeys) as the `STRIPE_TEST_SECRET_KEY` field.
-5. Your backend implementation should now be running. You can see the logs by clicking on "Logs" at the bottom bar.
+5. Your backend implementation should now be running. You can see the logs by clicking on "Logs" in the bottom bar.
 
 ### Configure the app
 1. If it doesn't exist, create a `gradle.properties` in a location defined in the
