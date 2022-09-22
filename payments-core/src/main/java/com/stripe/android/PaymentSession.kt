@@ -155,17 +155,11 @@ class PaymentSession @VisibleForTesting internal constructor(
         resultCode: Int,
         data: Intent?
     ): Boolean {
-        // validate Intent
-        if (data == null) {
+        if (data == null || !isValidRequestCode(requestCode)) {
             return false
         }
 
-        // validate requestCode
-        if (!isValidRequestCode(requestCode)) {
-            return false
-        }
-
-        when (resultCode) {
+        return when (resultCode) {
             Activity.RESULT_CANCELED -> {
                 if (requestCode == PaymentMethodsActivityStarter.REQUEST_CODE) {
                     // If resultCode of `PaymentMethodsActivity` is `Activity.RESULT_CANCELED`,
@@ -174,9 +168,9 @@ class PaymentSession @VisibleForTesting internal constructor(
                 } else {
                     fetchCustomer()
                 }
-                return false
+                false
             }
-            Activity.RESULT_OK -> return when (requestCode) {
+            Activity.RESULT_OK -> when (requestCode) {
                 PaymentMethodsActivityStarter.REQUEST_CODE -> {
                     onPaymentMethodResult(data)
                     true
@@ -191,7 +185,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                     false
                 }
             }
-            else -> return false
+            else -> false
         }
     }
 
