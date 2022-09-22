@@ -124,6 +124,8 @@ class LpmRepository constructor(
             // we will use the LPM on disk if found
             val lpmsNotParsedFromServerSpec = expectedLpms
                 .filter { !lpmInitialFormData.containsKey(it) }
+                .filter { it in exposedPaymentMethods }
+
             if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
                 val mapFromDisk: Map<String, SharedDataSpec>? =
                     readFromDisk()
@@ -336,7 +338,7 @@ class LpmRepository constructor(
                 tintIconOnSelection = false,
                 requirement = UpiRequirement,
                 formSpec = LayoutSpec(sharedDataSpec.fields)
-            ).takeIf { BuildConfig.DEBUG }
+            )
             else -> null
         }
 
@@ -432,7 +434,7 @@ class LpmRepository constructor(
          * This is a list of the payment methods that we are allowing in the release
          */
         val exposedPaymentMethods by lazy {
-            listOf(
+            listOfNotNull(
                 PaymentMethod.Type.Card.code,
                 PaymentMethod.Type.Bancontact.code,
                 PaymentMethod.Type.Sofort.code,
@@ -446,9 +448,9 @@ class LpmRepository constructor(
                 PaymentMethod.Type.AfterpayClearpay.code,
                 PaymentMethod.Type.USBankAccount.code,
                 PaymentMethod.Type.Affirm.code,
-                PaymentMethod.Type.AuBecsDebit.code
-                // TODO: Enable when releasing UPI
-                // PaymentMethod.Type.Upi.code
+                PaymentMethod.Type.AuBecsDebit.code,
+                // TODO: Unconditionally enable this when releasing UPI
+                PaymentMethod.Type.Upi.code.takeIf { BuildConfig.DEBUG }
             )
         }
     }
