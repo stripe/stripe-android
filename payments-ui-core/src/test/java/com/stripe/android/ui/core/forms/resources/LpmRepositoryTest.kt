@@ -3,6 +3,8 @@ package com.stripe.android.ui.core.forms.resources
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentsUiFeatures
+import com.stripe.android.features.FeatureAvailability
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.ui.core.R
@@ -302,5 +304,55 @@ class LpmRepositoryTest {
         )
 
         assertThat(lpmRepository.fromCode("us_bank_account")).isNull()
+    }
+
+    @Test
+    fun `Verify that UPI is supported when it is enabled`() {
+        PaymentsUiFeatures.upi.overrideAvailability = FeatureAvailability.Enabled
+
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                ApplicationProvider.getApplicationContext<Application>().resources,
+                object : IsFinancialConnectionsAvailable {
+                    override fun invoke(): Boolean {
+                        return false
+                    }
+                }
+            )
+        )
+
+        lpmRepository.forceUpdate(
+            expectedLpms = listOf("upi"),
+            serverLpmSpecs = "[]" // UPI doesn't come from the backend; we rely on the local specs
+        )
+
+        assertThat(lpmRepository.fromCode("upi")).isNotNull()
+        PaymentsUiFeatures.upi.overrideAvailability = null
+    }
+
+    @Test
+    fun `Verify that UPI is not supported when it is disabled`() {
+        PaymentsUiFeatures.upi.overrideAvailability = FeatureAvailability.Disabled
+
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                ApplicationProvider.getApplicationContext<Application>().resources,
+                object : IsFinancialConnectionsAvailable {
+                    override fun invoke(): Boolean {
+                        return false
+                    }
+                }
+            )
+        )
+
+        lpmRepository.forceUpdate(
+            expectedLpms = listOf("upi"),
+            serverLpmSpecs = "[]" // UPI doesn't come from the backend; we rely on the local specs
+        )
+
+        assertThat(lpmRepository.fromCode("upi")).isNull()
+        PaymentsUiFeatures.upi.overrideAvailability = null
     }
 }

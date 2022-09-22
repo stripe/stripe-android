@@ -5,7 +5,8 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.BuildConfig
+import com.stripe.android.PaymentsUiFeatures
+import com.stripe.android.features.isEnabled
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentMethod
@@ -403,8 +404,10 @@ class LpmRepository constructor(
         }
 
         fun containsKey(it: String) = codeToSupportedPaymentMethod.containsKey(it)
-        fun putAll(map: Map<PaymentMethodCode, SupportedPaymentMethod>) =
+
+        fun putAll(map: Map<PaymentMethodCode, SupportedPaymentMethod>) {
             codeToSupportedPaymentMethod.putAll(map)
+        }
 
         internal companion object {
             val Instance = LpmInitialFormData()
@@ -433,8 +436,8 @@ class LpmRepository constructor(
         /**
          * This is a list of the payment methods that we are allowing in the release
          */
-        val exposedPaymentMethods by lazy {
-            listOfNotNull(
+        val exposedPaymentMethods: List<String>
+            get() = listOfNotNull(
                 PaymentMethod.Type.Card.code,
                 PaymentMethod.Type.Bancontact.code,
                 PaymentMethod.Type.Sofort.code,
@@ -450,9 +453,8 @@ class LpmRepository constructor(
                 PaymentMethod.Type.Affirm.code,
                 PaymentMethod.Type.AuBecsDebit.code,
                 // TODO: Unconditionally enable this when releasing UPI
-                PaymentMethod.Type.Upi.code.takeIf { BuildConfig.DEBUG }
+                PaymentMethod.Type.Upi.code.takeIf { PaymentsUiFeatures.upi.isEnabled }
             )
-        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
