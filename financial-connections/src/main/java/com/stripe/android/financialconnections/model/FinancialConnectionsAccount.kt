@@ -201,9 +201,7 @@ data class FinancialConnectionsAccount(
         UNKNOWN("unknown");
 
         internal object Serializer :
-            EnumIgnoreUnknownSerializer<SupportedPaymentMethodTypes>(
-                SupportedPaymentMethodTypes.values(), UNKNOWN
-            )
+            EnumIgnoreUnknownSerializer<SupportedPaymentMethodTypes>(values(), UNKNOWN)
     }
 
     /**
@@ -230,9 +228,7 @@ data class FinancialConnectionsAccount(
 
         UNKNOWN("unknown");
 
-        internal object Serializer : EnumIgnoreUnknownSerializer<Permissions>(
-            Permissions.values(), UNKNOWN
-        )
+        internal object Serializer : EnumIgnoreUnknownSerializer<Permissions>(values(), UNKNOWN)
     }
 
     companion object {
