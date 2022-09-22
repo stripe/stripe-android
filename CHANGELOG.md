@@ -10,6 +10,10 @@
 This release fixes a payment-method related error in `PaymentSheet` and manages missing permissions
 on Financial Connections.
 
+### Payments
+
+* [FIXED][5547](https://github.com/stripe/stripe-android/pull/5547) Expiry dates in `CardInputWidget`, `CardMultilineWidget`, and `CardFormView` are no longer formatted incorrectly on certain devices.
+
 ### PaymentSheet
 
 * [FIXED][5592](https://github.com/stripe/stripe-android/pull/5592)[5613](https://github.com/stripe/stripe-android/pull/5613) Fix deletion of the last used payment method.
