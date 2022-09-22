@@ -3,7 +3,7 @@ package com.stripe.android.features
 import androidx.annotation.RestrictTo
 import com.stripe.android.BuildConfig
 import com.stripe.android.features.FeatureAvailability.Disabled
-import com.stripe.android.features.FeatureAvailability.Enabled
+import com.stripe.android.features.FeatureAvailability.Release
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class FeatureFlag(
@@ -15,9 +15,9 @@ data class FeatureFlag(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 enum class FeatureAvailability {
-    Disabled, Debug, Enabled
+    Disabled, Debug, Release
 }
 
 val FeatureFlag.isEnabled: Boolean
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    get() = (BuildConfig.DEBUG || (overrideAvailability ?: availability) == Enabled) && (overrideAvailability ?: availability) != Disabled
+    get() = (BuildConfig.DEBUG || (overrideAvailability ?: availability) == Release) && (overrideAvailability ?: availability) != Disabled

@@ -7,8 +7,7 @@ import com.stripe.android.features.FeatureFlag
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object PaymentSheetFeatures {
-    val upi = FeatureFlag("UPI in Payment Sheet", availability = FeatureAvailability.Debug)
     val link = FeatureFlag("Link in Payment Sheet", availability = FeatureAvailability.Debug)
 
-    val all = mutableStateListOf(link, upi)
+    val all = mutableStateListOf(link)
 }

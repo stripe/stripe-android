@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
         setSupportActionBar(viewBinding.toolbar)
 
-        addDevToolsMenu()
+        addDevToolsMenu(showInMenu = true)
         application.registerActivityLifecycleCallbacks(DevToolsActivityLifecycleCallbacks())
 
         viewBinding.launchCompleteButton.setOnClickListener {
