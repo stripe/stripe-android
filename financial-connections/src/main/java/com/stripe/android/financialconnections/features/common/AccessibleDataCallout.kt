@@ -187,7 +187,8 @@ internal fun AccessibleDataCalloutPreview() {
                     Permissions.PAYMENT_METHOD,
                     Permissions.BALANCES,
                     Permissions.OWNERSHIP,
-                    Permissions.TRANSACTIONS
+                    Permissions.TRANSACTIONS,
+                    Permissions.ACCOUNT_NUMBERS
                 ),
                 isStripeDirect = true,
                 dataPolicyUrl = ""
