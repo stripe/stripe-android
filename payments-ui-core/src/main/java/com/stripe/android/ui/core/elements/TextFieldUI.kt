@@ -126,10 +126,12 @@ fun TextField(
     TextField(
         value = value,
         onValueChange = {
-            val newTextState = textFieldController.onValueChange(it)
+            if (!fieldState.isFull()) {
+                val newTextState = textFieldController.onValueChange(it)
 
-            if (newTextState != null) {
-                onTextStateChanged(newTextState)
+                if (newTextState != null) {
+                    onTextStateChanged(newTextState)
+                }
             }
         },
         modifier = modifier
