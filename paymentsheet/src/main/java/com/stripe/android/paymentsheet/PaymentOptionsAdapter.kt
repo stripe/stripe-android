@@ -267,16 +267,18 @@ internal class PaymentOptionsAdapter(
                     parent,
                     width,
                     lpmRepository,
-                    ::onItemSelected
-                ) { position ->
-                    onItemSelected(
-                        position = findInitialSelectedPosition(savedSelection),
-                        isClick = false,
-                        force = true
-                    )
-                    paymentMethodDeleteListener(items[position] as Item.SavedPaymentMethod)
-                    notifyItemRemoved(position)
-                }
+                    onItemSelectedListener = ::onItemSelected,
+                    onRemoveListener = { position ->
+                        paymentMethodDeleteListener(items[position] as Item.SavedPaymentMethod)
+                        removeItem(items[position])
+                        notifyItemRemoved(position)
+                        onItemSelected(
+                            position = findInitialSelectedPosition(savedSelection),
+                            isClick = false,
+                            force = true
+                        )
+                    }
+                )
         }
     }
 
@@ -310,7 +312,7 @@ internal class PaymentOptionsAdapter(
         private val composeView: ComposeView,
         private val width: Dp,
         private val lpmRepository: LpmRepository,
-        private val onRemoveListener: (Int) -> Unit,
+        @get:VisibleForTesting internal val onRemoveListener: (Int) -> Unit,
         private val onItemSelectedListener: ((Int, Boolean) -> Unit)
     ) : PaymentOptionViewHolder(
         composeView

@@ -968,7 +968,7 @@ public final class com/stripe/android/paymentsheet/databinding/ActivityPaymentSh
 }
 
 public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding : androidx/viewbinding/ViewBinding {
-	public final field linkInlineSignup Lcom/stripe/android/link/ui/inline/LinkInlineSignupView;
+	public final field linkInlineSignup Landroidx/compose/ui/platform/ComposeView;
 	public final field paymentMethodFragmentContainer Landroidx/fragment/app/FragmentContainerView;
 	public final field paymentMethodsRecycler Landroidx/compose/ui/platform/ComposeView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetAddPaymentMethodBinding;

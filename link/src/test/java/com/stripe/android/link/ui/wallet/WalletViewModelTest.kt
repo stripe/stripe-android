@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.wallet
 import androidx.lifecycle.Lifecycle
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.Logger
@@ -59,6 +60,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import javax.inject.Provider
+import kotlin.random.Random
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -548,6 +550,47 @@ class WalletViewModelTest {
     }
 
     @Test
+    fun `Updates payment method default selection correctly`() = runTest {
+        val originalPaymentDetails = mockCard(isDefault = false)
+        val updatedPaymentDetails = originalPaymentDetails.copy(isDefault = true)
+
+        val originalResponse = CONSUMER_PAYMENT_DETAILS.copy(
+            paymentDetails = CONSUMER_PAYMENT_DETAILS.paymentDetails.dropLast(1) + originalPaymentDetails
+        )
+        val updateResponse = CONSUMER_PAYMENT_DETAILS.copy(
+            paymentDetails = listOf(updatedPaymentDetails)
+        )
+
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(Result.success(originalResponse))
+
+        whenever(linkAccountManager.updatePaymentDetails(any()))
+            .thenReturn(Result.success(updateResponse))
+
+        val viewModel = createViewModel()
+        viewModel.uiState.test {
+            // We need to skip the initial UI state
+            skipItems(1)
+
+            viewModel.setDefault(originalPaymentDetails)
+
+            val loadingUiState = awaitItem()
+            assertThat(loadingUiState.paymentMethodIdBeingUpdated).isEqualTo(originalPaymentDetails.id)
+
+            val finalUiState = awaitItem()
+            assertThat(finalUiState.paymentMethodIdBeingUpdated).isNull()
+
+            assertThat(
+                finalUiState.paymentDetailsList.filter { it.isDefault }.size
+            ).isEqualTo(1)
+
+            assertThat(
+                finalUiState.paymentDetailsList.single { it.isDefault }
+            ).isEqualTo(updatedPaymentDetails)
+        }
+    }
+
+    @Test
     fun `Factory gets initialized by Injector`() {
         val mockBuilder = mock<SignedInViewModelSubcomponent.Builder>()
         val mockSubComponent = mock<SignedInViewModelSubcomponent>()
@@ -592,14 +635,16 @@ class WalletViewModelTest {
 
     private fun mockCard(
         cvcCheck: CvcCheck = CvcCheck.Pass,
-        isExpired: Boolean = false
+        isExpired: Boolean = false,
+        isDefault: Boolean = true
     ): ConsumerPaymentDetails.Card {
+        val id = Random.nextInt()
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
         val expiryYear = if (isExpired) currentYear - 1 else currentYear + 1
 
         return ConsumerPaymentDetails.Card(
-            id = "id_123",
-            isDefault = true,
+            id = "id_$id",
+            isDefault = isDefault,
             expiryYear = expiryYear,
             expiryMonth = 12,
             brand = CardBrand.Visa,

@@ -1996,7 +1996,7 @@ internal class StripeApiRepositoryTest {
             val id = "id"
             val clientSecret = "secret"
             val isDefault = true
-            val paymentDetailsUpdateParams = ConsumerPaymentDetailsUpdateParams.Card(
+            val paymentDetailsUpdateParams = ConsumerPaymentDetailsUpdateParams(
                 id,
                 isDefault,
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD

@@ -17,6 +17,9 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.injection.FakeLinkPaymentLauncherFactory
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -58,7 +61,9 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
@@ -1007,6 +1012,12 @@ internal class PaymentSheetActivityTest {
         whenever(lpmRepository.fromCode("card")).thenReturn(LpmRepository.HardcodedCard)
         whenever(lpmRepository.serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
 
+        val linkPaymentLauncherFactory = FakeLinkPaymentLauncherFactory(
+            mock<LinkPaymentLauncher>().stub {
+                onBlocking { setup(any(), any()) }.thenReturn(AccountStatus.SignedOut)
+            }
+        )
+
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
@@ -1024,7 +1035,7 @@ internal class PaymentSheetActivityTest {
             testDispatcher,
             DUMMY_INJECTOR_KEY,
             savedStateHandle = SavedStateHandle(),
-            mock()
+            linkPaymentLauncherFactory
         )
     }
 

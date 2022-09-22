@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import android.widget.LinearLayout
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -372,6 +374,33 @@ class PaymentOptionsAdapterTest {
             .isEqualTo(1)
         assertThat(adapter.selectedItem)
             .isNull()
+    }
+
+    @Test
+    fun `Selected item should be updated when deleted`() {
+        val savedPaymentMethod = paymentMethods[2]
+        val adapter = createConfiguredAdapter(
+            fragmentConfig = CONFIG.copy(
+                isGooglePayReady = true,
+                savedSelection = SavedSelection.PaymentMethod(savedPaymentMethod.id!!)
+            ),
+            showGooglePay = false
+        )
+
+        assertThat((adapter.selectedItem as PaymentOptionsAdapter.Item.SavedPaymentMethod).paymentMethod)
+            .isEqualTo(savedPaymentMethod)
+
+        val position = adapter.items.indexOf(adapter.selectedItem)
+        val viewHolder = adapter.onCreateViewHolder(
+            LinearLayout(ApplicationProvider.getApplicationContext()),
+            adapter.getItemViewType(position)
+        ) as PaymentOptionsAdapter.SavedPaymentMethodViewHolder
+        adapter.bindViewHolder(viewHolder, position)
+        viewHolder.onRemoveListener(position)
+
+        assertThat(paymentMethodsDeleted.map { it.paymentMethod }).containsExactly(savedPaymentMethod)
+        assertThat((adapter.selectedItem as PaymentOptionsAdapter.Item.SavedPaymentMethod).paymentMethod)
+            .isEqualTo(paymentMethods[0])
     }
 
     private fun createConfiguredAdapter(

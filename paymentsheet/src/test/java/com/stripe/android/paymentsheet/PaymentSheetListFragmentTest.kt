@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
 import android.os.Looper.getMainLooper
 import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
@@ -22,6 +23,7 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.After
@@ -255,26 +257,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         }
     }
 
-    @Test
-    fun `deletePaymentMethod() removes item from adapter`() {
-        createScenario(
-            initialState = Lifecycle.State.INITIALIZED,
-            paymentMethods = PAYMENT_METHODS
-        ).moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
-            idleLooper()
-
-            val adapter = recyclerView(fragment).adapter as PaymentOptionsAdapter
-            assertThat(adapter.itemCount).isEqualTo(3)
-
-            fragment.isEditing = true
-            adapter.paymentMethodDeleteListener(
-                adapter.items[2] as PaymentOptionsAdapter.Item.SavedPaymentMethod
-            )
-
-            assertThat(adapter.itemCount).isEqualTo(2)
-        }
-    }
-
     private fun recyclerView(it: PaymentSheetListFragment) =
         it.requireView().findViewById<RecyclerView>(R.id.recycler)
 
@@ -309,7 +291,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                 updatePaymentMethods(fragmentConfig.stripeIntent)
                 setStripeIntent(fragmentConfig.stripeIntent)
                 idleLooper()
-                registerViewModel(starterArgs.injectorKey, this, lpmRepository)
+                registerViewModel(starterArgs.injectorKey, this, lpmRepository, addressRepository)
             }
         }
         return launchFragmentInContainer(
@@ -330,6 +312,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
 
         private val FRAGMENT_CONFIG = FragmentConfigFixtures.DEFAULT
 
+        val addressRepository = AddressRepository(ApplicationProvider.getApplicationContext<Context>().resources)
         val lpmRepository =
             LpmRepository(
                 LpmRepository.LpmRepositoryArguments(

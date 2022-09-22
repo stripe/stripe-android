@@ -109,6 +109,24 @@ class FinancialConnectionsRepositoryImplTest {
         }
 
     @Test
+    fun `getFinancialConnectionsSession - account with unknown permissions ignores unknown values`() =
+        runTest {
+            givenGetRequestReturns(
+                readResourceAsString(
+                    "json/linked_account_session_unknown_permission.json"
+                )
+            )
+
+            val result = financialConnectionsRepositoryImpl
+                .getFinancialConnectionsSession("client_secret")
+            val financialConnectionsAccount = result.paymentAccount as FinancialConnectionsAccount
+            assertThat(financialConnectionsAccount.permissions).containsExactly(
+                FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
+                FinancialConnectionsAccount.Permissions.UNKNOWN
+            )
+        }
+
+    @Test
     fun `getFinancialConnectionsSession - paymentAccount is BankAccount`() =
         runTest {
             givenGetRequestReturns(
