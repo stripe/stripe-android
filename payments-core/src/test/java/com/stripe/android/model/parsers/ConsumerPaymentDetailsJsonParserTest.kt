@@ -181,7 +181,11 @@ class ConsumerPaymentDetailsJsonParserTest {
                         expiryMonth = 12,
                         brand = CardBrand.AmericanExpress,
                         last4 = "4444",
-                        cvcCheck = CvcCheck.Pass
+                        cvcCheck = CvcCheck.Pass,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            CountryCode.US,
+                            "12312"
+                        )
                     ),
                     ConsumerPaymentDetails.Card(
                         id = "QAAAKIL",
@@ -190,7 +194,11 @@ class ConsumerPaymentDetailsJsonParserTest {
                         expiryMonth = 4,
                         brand = CardBrand.DinersClub,
                         last4 = "4242",
-                        cvcCheck = CvcCheck.Fail
+                        cvcCheck = CvcCheck.Fail,
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            CountryCode.US,
+                            "42424"
+                        )
                     )
                 )
             )
