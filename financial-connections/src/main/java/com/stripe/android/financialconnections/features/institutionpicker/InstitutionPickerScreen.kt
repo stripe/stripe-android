@@ -263,7 +263,7 @@ private fun SearchInstitutionsList(
 }
 
 @Composable
-fun SearchInstitutionsFailedRow(
+private fun SearchInstitutionsFailedRow(
     manualEntryEnabled: Boolean,
     onManualEntryClick: () -> Unit
 ) {
