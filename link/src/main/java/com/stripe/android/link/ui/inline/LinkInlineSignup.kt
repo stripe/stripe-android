@@ -193,64 +193,64 @@ internal fun LinkInlineSignup(
                         }
                     }
 
-                AnimatedVisibility(
-                    visible = expanded,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
+                    AnimatedVisibility(
+                        visible = expanded,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     ) {
-                        EmailCollectionSection(
-                            enabled = enabled,
-                            emailController = emailController,
-                            signUpState = signUpState,
-                            focusRequester = focusRequester
-                        )
-
-                        AnimatedVisibility(
-                            visible = signUpState != SignUpState.InputtingPhoneOrName &&
-                                errorMessage != null
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp)
                         ) {
-                            ErrorText(
-                                text = errorMessage?.getMessage(LocalContext.current.resources)
-                                    .orEmpty(),
-                                modifier = Modifier.fillMaxWidth()
+                            EmailCollectionSection(
+                                enabled = enabled,
+                                emailController = emailController,
+                                signUpState = signUpState,
+                                focusRequester = focusRequester
                             )
-                        }
 
-                        AnimatedVisibility(
-                            visible = signUpState == SignUpState.InputtingPhoneOrName
-                        ) {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                PhoneNumberCollectionSection(
-                                    enabled = enabled,
-                                    phoneNumberController = phoneNumberController,
-                                    requestFocusWhenShown =
-                                    phoneNumberController.initialPhoneNumber.isEmpty(),
-                                    imeAction = if (requiresNameCollection) {
-                                        ImeAction.Next
-                                    } else {
-                                        ImeAction.Done
-                                    }
+                            AnimatedVisibility(
+                                visible = signUpState != SignUpState.InputtingPhoneOrName &&
+                                    errorMessage != null
+                            ) {
+                                ErrorText(
+                                    text = errorMessage?.getMessage(LocalContext.current.resources)
+                                        .orEmpty(),
+                                    modifier = Modifier.fillMaxWidth()
                                 )
+                            }
 
-                                if (requiresNameCollection) {
-                                    TextFieldSection(
-                                        textFieldController = nameController,
-                                        imeAction = ImeAction.Done,
-                                        enabled = enabled
+                            AnimatedVisibility(
+                                visible = signUpState == SignUpState.InputtingPhoneOrName
+                            ) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    PhoneNumberCollectionSection(
+                                        enabled = enabled,
+                                        phoneNumberController = phoneNumberController,
+                                        requestFocusWhenShown =
+                                        phoneNumberController.initialPhoneNumber.isEmpty(),
+                                        imeAction = if (requiresNameCollection) {
+                                            ImeAction.Next
+                                        } else {
+                                            ImeAction.Done
+                                        }
                                     )
-                                }
 
-                                AnimatedVisibility(visible = errorMessage != null) {
-                                    ErrorText(
-                                        text = errorMessage?.getMessage(LocalContext.current.resources)
-                                            .orEmpty(),
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
+                                    if (requiresNameCollection) {
+                                        TextFieldSection(
+                                            textFieldController = nameController,
+                                            imeAction = ImeAction.Done,
+                                            enabled = enabled
+                                        )
+                                    }
+
+                                    AnimatedVisibility(visible = errorMessage != null) {
+                                        ErrorText(
+                                            text = errorMessage?.getMessage(LocalContext.current.resources)
+                                                .orEmpty(),
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
 
                                     LinkTerms(
                                         modifier = Modifier.padding(top = 8.dp),
