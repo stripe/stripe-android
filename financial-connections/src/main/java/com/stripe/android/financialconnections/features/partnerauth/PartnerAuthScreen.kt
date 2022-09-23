@@ -150,7 +150,12 @@ private fun PrePaneContent(
 ) {
     Column(
         modifier = Modifier
-            .padding(16.dp)
+            .padding(
+                top = 24.dp,
+                start = 16.dp,
+                end = 16.dp,
+                bottom = 16.dp
+            )
     ) {
         Image(
             painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),

@@ -24,7 +24,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -51,6 +50,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
@@ -137,6 +137,7 @@ private fun LoadedContent(
         modifier = Modifier
     ) {
         if (searchMode.not()) {
+            Spacer(Modifier.size(24.dp))
             Text(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
@@ -228,7 +229,12 @@ private fun SearchInstitutionsList(
                     )
                 }
 
-                is Loading -> item { LoadingSpinner() }
+                is Loading -> item {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) { LoadingSpinner() }
+                }
                 is Success -> {
                     if (institutions().data.isEmpty()) {
                         item {
@@ -397,18 +403,6 @@ private fun FeaturedInstitutionsGrid(
             }
         }
     )
-}
-
-@Composable
-private fun LoadingSpinner() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        CircularProgressIndicator(
-            color = FinancialConnectionsTheme.colors.textBrand
-        )
-    }
 }
 
 @Composable

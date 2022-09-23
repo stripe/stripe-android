@@ -2,6 +2,8 @@
 
 package com.stripe.android.financialconnections.features.manualentry
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,7 +15,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -22,6 +30,7 @@ import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
@@ -82,12 +91,35 @@ private fun ManualEntryContent(
                     .verticalScroll(scrollState)
                     .padding(24.dp)
             ) {
+                var currentCheck: Int? by remember { mutableStateOf(R.drawable.stripe_check_base) }
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     text = stringResource(R.string.stripe_manualentry_title),
                     color = FinancialConnectionsTheme.colors.textPrimary,
                     style = FinancialConnectionsTheme.typography.subtitle
                 )
+                Spacer(modifier = Modifier.size(24.dp))
+                Box {
+                    Image(
+                        painter = painterResource(id = R.drawable.stripe_check_base),
+                        contentDescription = "Image of bank check referencing routing number"
+                    )
+                    currentCheck?.let {
+                        Image(
+                            painter = painterResource(id = it),
+                            contentDescription = "Image of bank check referencing routing number"
+                        )
+                    }
+                }
+                if (linkPaymentAccountStatus is Fail) {
+                    Text(
+                        text = (linkPaymentAccountStatus.error as? StripeException)?.message
+                            ?: stringResource(R.string.stripe_error_generic_title),
+                        color = FinancialConnectionsTheme.colors.textCritical,
+                        style = FinancialConnectionsTheme.typography.body
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                }
                 if (verifyWithMicrodeposits) {
                     Spacer(modifier = Modifier.size(8.dp))
                     Text(
@@ -96,26 +128,18 @@ private fun ManualEntryContent(
                         style = FinancialConnectionsTheme.typography.body
                     )
                 }
-                if (linkPaymentAccountStatus is Fail) {
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Text(
-                        text = (linkPaymentAccountStatus.error as? StripeException)?.message
-                            ?: stringResource(R.string.stripe_error_generic_title),
-                        color = FinancialConnectionsTheme.colors.textCritical,
-                        style = FinancialConnectionsTheme.typography.body
-                    )
-                }
-                Spacer(modifier = Modifier.size(24.dp))
                 InputWithError(
                     label = R.string.stripe_manualentry_routing,
                     inputWithError = routing,
                     onInputChanged = onRoutingEntered,
+                    onFocusGained = { currentCheck = R.drawable.stripe_check_routing },
                 )
                 Spacer(modifier = Modifier.size(24.dp))
                 InputWithError(
                     label = R.string.stripe_manualentry_account,
                     inputWithError = account,
                     onInputChanged = onAccountEntered,
+                    onFocusGained = { currentCheck = R.drawable.stripe_check_account },
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
@@ -128,6 +152,7 @@ private fun ManualEntryContent(
                     label = R.string.stripe_manualentry_accountconfirm,
                     inputWithError = accountConfirm,
                     onInputChanged = onAccountConfirmEntered,
+                    onFocusGained = { currentCheck = R.drawable.stripe_check_account },
                 )
                 Spacer(modifier = Modifier.weight(1f))
             }
@@ -163,13 +188,15 @@ private fun ManualEntryFooter(
 private fun InputWithError(
     inputWithError: Pair<String?, Int?>,
     label: Int,
+    onFocusGained: () -> Unit,
     onInputChanged: (String) -> Unit,
 ) {
     FinancialConnectionsOutlinedTextField(
         label = { Text(stringResource(label)) },
         value = inputWithError.first ?: "",
         isError = inputWithError.second != null,
-        onValueChange = onInputChanged
+        onValueChange = onInputChanged,
+        modifier = Modifier.onFocusChanged { if (it.isFocused) onFocusGained() }
     )
     if (inputWithError.second != null) {
         Text(
@@ -195,8 +222,28 @@ internal fun ManualEntryScreenPreview() {
             onRoutingEntered = {},
             onAccountEntered = {},
             onAccountConfirmEntered = {},
-            onSubmit = {},
-            onCloseClick = {},
-        )
+            onSubmit = {}
+        ) {}
+    }
+}
+
+@Preview
+@Composable
+internal fun ManualEntryScreenErrorPreview() {
+    FinancialConnectionsTheme {
+        ManualEntryContent(
+            routing = "" to null,
+            account = "" to null,
+            accountConfirm = "" to null,
+            isValidForm = true,
+            verifyWithMicrodeposits = true,
+            linkPaymentAccountStatus = Fail(
+                APIException(message = "Error linking accounts",)
+            ),
+            onRoutingEntered = {},
+            onAccountEntered = {},
+            onAccountConfirmEntered = {},
+            onSubmit = {}
+        ) {}
     }
 }
