@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.CardBrand
@@ -28,6 +29,7 @@ class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails>
                 ConsumerPaymentDetails.Card.type -> {
                     val cardDetails = json.getJSONObject(FIELD_CARD_DETAILS)
                     val checks = cardDetails.getJSONObject(FIELD_CARD_CHECKS)
+
                     ConsumerPaymentDetails.Card(
                         json.getString(FIELD_ID),
                         json.getBoolean(FIELD_IS_DEFAULT),
@@ -35,7 +37,8 @@ class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails>
                         cardDetails.getInt(FIELD_CARD_EXPIRY_MONTH),
                         CardBrand.fromCode(cardBrandFix(cardDetails.getString(FIELD_CARD_BRAND))),
                         cardDetails.getString(FIELD_CARD_LAST_4),
-                        CvcCheck.fromCode(checks.getString(FIELD_CARD_CVC_CHECK))
+                        CvcCheck.fromCode(checks.getString(FIELD_CARD_CVC_CHECK)),
+                        parseBillingAddress(json)
                     )
                 }
                 ConsumerPaymentDetails.BankAccount.type -> {
@@ -50,6 +53,14 @@ class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails>
                 }
                 else -> null
             }
+        }
+
+    private fun parseBillingAddress(json: JSONObject) =
+        json.getJSONObject(FIELD_BILLING_ADDRESS).let { address ->
+            ConsumerPaymentDetails.BillingAddress(
+                optString(address, FIELD_ADDRESS_COUNTRY_CODE)?.let { CountryCode(it) },
+                optString(address, FIELD_ADDRESS_POSTAL_CODE)
+            )
         }
 
     /**
@@ -69,6 +80,10 @@ class ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails>
         private const val FIELD_TYPE = "type"
         private const val FIELD_ID = "id"
         private const val FIELD_IS_DEFAULT = "is_default"
+
+        private const val FIELD_BILLING_ADDRESS = "billing_address"
+        private const val FIELD_ADDRESS_COUNTRY_CODE = "country_code"
+        private const val FIELD_ADDRESS_POSTAL_CODE = "postal_code"
 
         private const val FIELD_CARD_DETAILS = "card_details"
         private const val FIELD_CARD_EXPIRY_YEAR = "exp_year"
