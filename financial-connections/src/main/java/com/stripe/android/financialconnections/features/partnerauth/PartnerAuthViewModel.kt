@@ -178,5 +178,11 @@ internal data class PartnerAuthState(
     )
 
     val canNavigateBack: Boolean
-        get() = authenticationStatus !is Loading && authenticationStatus !is Success
+        get() =
+            // Authentication running -> don't allow back navigation
+            authenticationStatus !is Loading
+                && authenticationStatus !is Success
+                // Failures posting institution -> don't allow back navigation
+                && payload !is Fail
+
 }
