@@ -1,10 +1,13 @@
 package com.stripe.android.link.ui.cardedit
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -21,17 +24,15 @@ internal class CardEditScreenTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun when_default_show_default_label() {
+    fun when_default_show_show_disabled_checkbox() {
         setContent(isDefault = true)
-        onDefaultLabel().assertExists()
-        onSetAsDefaultLabel().assertDoesNotExist()
+        onDefaultCheckboxRow().assertIsNotEnabled()
     }
 
     @Test
-    fun when_not_default_show_checkbox() {
+    fun when_not_default_show_enabled_checkbox() {
         setContent(isDefault = false)
-        onDefaultLabel().assertDoesNotExist()
-        onSetAsDefaultLabel().assertExists()
+        onDefaultCheckboxRow().assertIsEnabled()
     }
 
     @Test
@@ -101,13 +102,16 @@ internal class CardEditScreenTest {
         }
     }
 
-    private fun onDefaultLabel() = composeTestRule.onNodeWithText("This is your default")
+    private fun onDefaultCheckboxRow() = composeTestRule.onNodeWithTag(
+        testTag = DEFAULT_PAYMENT_METHOD_CHECKBOX_TAG
+    )
+
     private fun onSetAsDefaultLabel() = composeTestRule.onNodeWithText("Set as default payment")
-    private fun onUpdateCardButton() =
-        composeTestRule.onNode(
-            hasText("Update card").and(hasParent(hasClickAction())),
-            useUnmergedTree = true
-        )
+
+    private fun onUpdateCardButton() = composeTestRule.onNode(
+        matcher = hasText("Update card").and(hasParent(hasClickAction())),
+        useUnmergedTree = true
+    )
 
     private fun onCancelButton() = composeTestRule.onNodeWithText("Cancel")
 }

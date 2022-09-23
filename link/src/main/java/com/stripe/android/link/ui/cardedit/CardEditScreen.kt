@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,6 +43,8 @@ import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.ui.forms.Form
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
 import com.stripe.android.ui.core.injection.NonFallbackInjector
+
+internal const val DEFAULT_PAYMENT_METHOD_CHECKBOX_TAG = "DEFAULT_PAYMENT_METHOD_CHECKBOX"
 
 @Preview
 @Composable
@@ -188,6 +191,7 @@ private fun DefaultPaymentMethodCheckbox(
 
     Row(
         modifier = modifier
+            .testTag(DEFAULT_PAYMENT_METHOD_CHECKBOX_TAG)
             .selectable(
                 selected = false,
                 enabled = canCheck,
