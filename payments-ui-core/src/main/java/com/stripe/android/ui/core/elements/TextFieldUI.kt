@@ -125,11 +125,15 @@ fun TextField(
 
     TextField(
         value = value,
-        onValueChange = {
-            val newTextState = textFieldController.onValueChange(it)
+        onValueChange = { newValue ->
+            val acceptInput = fieldState.canAcceptInput(value, newValue)
 
-            if (newTextState != null) {
-                onTextStateChanged(newTextState)
+            if (acceptInput) {
+                val newTextState = textFieldController.onValueChange(newValue)
+
+                if (newTextState != null) {
+                    onTextStateChanged(newTextState)
+                }
             }
         },
         modifier = modifier

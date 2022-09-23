@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.utils.FakeAndroidKeyStore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
@@ -24,17 +25,12 @@ class LinkPaymentLauncherTest {
     private val mockHostActivityLauncher = mock<ActivityResultLauncher<LinkActivityContract.Args>>()
 
     private var linkPaymentLauncher = LinkPaymentLauncher(
-        MERCHANT_NAME,
-        null,
-        null,
-        null,
-        null,
         context,
         setOf(PRODUCT_USAGE),
         { PUBLISHABLE_KEY },
         { STRIPE_ACCOUNT_ID },
         enableLogging = true,
-        ioContext = mock(),
+        ioContext = Dispatchers.IO,
         uiContext = mock(),
         paymentAnalyticsRequestFactory = mock(),
         analyticsRequestExecutor = mock(),
@@ -51,13 +47,26 @@ class LinkPaymentLauncherTest {
         runTest {
             launch {
                 val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED
-                linkPaymentLauncher.setup(stripeIntent, this)
+                linkPaymentLauncher.setup(
+                    configuration = LinkPaymentLauncher.Configuration(
+                        stripeIntent,
+                        MERCHANT_NAME,
+                        CUSTOMER_EMAIL,
+                        CUSTOMER_PHONE,
+                        CUSTOMER_NAME,
+                        null,
+                    ),
+                    coroutineScope = this
+                )
                 linkPaymentLauncher.present(mockHostActivityLauncher)
 
                 verify(mockHostActivityLauncher).launch(
                     argWhere { arg ->
                         arg.stripeIntent == stripeIntent &&
                             arg.merchantName == MERCHANT_NAME &&
+                            arg.customerEmail == CUSTOMER_EMAIL &&
+                            arg.customerPhone == CUSTOMER_PHONE &&
+                            arg.customerName == CUSTOMER_NAME &&
                             arg.injectionParams != null &&
                             arg.injectionParams.productUsage == setOf(PRODUCT_USAGE) &&
                             arg.injectionParams.injectorKey == LinkPaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&
@@ -78,5 +87,8 @@ class LinkPaymentLauncherTest {
         const val STRIPE_ACCOUNT_ID = "stripeAccountId"
 
         const val MERCHANT_NAME = "merchantName"
+        const val CUSTOMER_EMAIL = "email"
+        const val CUSTOMER_PHONE = "phone"
+        const val CUSTOMER_NAME = "name"
     }
 }

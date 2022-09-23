@@ -14,7 +14,4 @@
     <string name="stripe_paymentsheet_address_element_shipping_address">Shipping Address</string>
     <string name="stripe_paymentsheet_address_element_primary_button">Save Address</string>
     <string name="stripe_paymentsheet_address_element_same_as_shipping">Billing address is same as shipping</string>
-
-    <!-- Title for a bank account payment method -->
-    <string name="stripe_payment_method_bank">Bank</string>
 </resources>

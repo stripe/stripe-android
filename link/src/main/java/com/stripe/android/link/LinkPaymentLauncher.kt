@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import android.content.Context
+import android.os.Parcelable
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -14,14 +15,9 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.injection.CUSTOMER_EMAIL
-import com.stripe.android.link.injection.CUSTOMER_NAME
-import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkPaymentLauncherComponent
-import com.stripe.android.link.injection.MERCHANT_NAME
-import com.stripe.android.link.injection.SHIPPING_VALUES
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.cardedit.CardEditViewModel
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
@@ -41,11 +37,11 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
@@ -53,12 +49,7 @@ import kotlin.coroutines.CoroutineContext
  * Launcher for an Activity that will confirm a payment using Link.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkPaymentLauncher @AssistedInject internal constructor(
-    @Assisted(MERCHANT_NAME) private val merchantName: String,
-    @Assisted(CUSTOMER_EMAIL) private val customerEmail: String?,
-    @Assisted(CUSTOMER_PHONE) private val customerPhone: String?,
-    @Assisted(CUSTOMER_NAME) private val customerName: String?,
-    @Assisted(SHIPPING_VALUES) private val shippingValues: Map<IdentifierSpec, String?>?,
+class LinkPaymentLauncher @Inject internal constructor(
     context: Context,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
@@ -71,12 +62,8 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     stripeRepository: StripeRepository,
     addressResourceRepository: ResourceRepository<AddressRepository>
 ) : NonFallbackInjectable {
-    private var stripeIntent: StripeIntent? = null
+    private var configuration: Configuration? = null
     private val launcherComponentBuilder = DaggerLinkPaymentLauncherComponent.builder()
-        .merchantName(merchantName)
-        .customerEmail(customerEmail)
-        .customerPhone(customerPhone)
-        .customerName(customerName)
         .context(context)
         .ioContext(ioContext)
         .uiContext(uiContext)
@@ -117,24 +104,25 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
     lateinit var accountStatus: StateFlow<AccountStatus>
 
     /**
-     * Sets up Link to process the given [StripeIntent].
+     * Sets up Link to process the given [Configuration.stripeIntent].
      *
      * This will fetch the user's account if they're already logged in, or lookup the email passed
      * in during instantiation.
      *
-     * @param stripeIntent the PaymentIntent or SetupIntent.
+     * @param configuration the [LinkPaymentLauncher.Configuration], containing the parameters
+     *                      required to process a payment.
      * @param coroutineScope the coroutine scope used to collect the account status flow.
      */
     suspend fun setup(
-        stripeIntent: StripeIntent,
+        configuration: Configuration,
         coroutineScope: CoroutineScope
     ): AccountStatus {
-        val component = buildLinkPaymentLauncherComponent(stripeIntent)
+        val component = buildLinkPaymentLauncherComponent(configuration)
         accountStatus = component.linkAccountManager.accountStatus.stateIn(coroutineScope)
         linkAccountManager = component.linkAccountManager
         linkEventsReporter = component.linkEventsReporter
         linkComponentBuilder = component.linkComponentBuilder
-        this.stripeIntent = stripeIntent
+        this.configuration = configuration
         return accountStatus.value
     }
 
@@ -148,15 +136,15 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         activityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>,
         prefilledNewCardParams: PaymentMethodCreateParams? = null
     ) {
-        val stripeIntent = requireNotNull(stripeIntent) { "Must call setup before presenting" }
+        val configuration = requireNotNull(configuration) { "Must call setup before presenting" }
 
         val args = LinkActivityContract.Args(
-            stripeIntent,
-            merchantName,
-            customerEmail,
-            customerPhone,
-            customerName,
-            shippingValues,
+            configuration.stripeIntent,
+            configuration.merchantName,
+            configuration.customerEmail,
+            configuration.customerPhone,
+            configuration.customerName,
+            configuration.shippingValues,
             prefilledNewCardParams,
             LinkActivityContract.Args.InjectionParams(
                 injectorKey,
@@ -195,10 +183,14 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
      * sign up.
      */
     private fun buildLinkPaymentLauncherComponent(
-        stripeIntent: StripeIntent
+        configuration: Configuration
     ): LinkPaymentLauncherComponent {
         val component = launcherComponentBuilder
-            .stripeIntent(stripeIntent)
+            .merchantName(configuration.merchantName)
+            .customerEmail(configuration.customerEmail)
+            .customerPhone(configuration.customerPhone)
+            .customerName(configuration.customerName)
+            .stripeIntent(configuration.stripeIntent)
             .build()
 
         val injector = object : NonFallbackInjector {
@@ -239,6 +231,17 @@ class LinkPaymentLauncher @AssistedInject internal constructor(
         }
         WeakMapInjectorRegistry.register(injector, injectorKey)
     }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Configuration(
+        val stripeIntent: StripeIntent,
+        val merchantName: String,
+        val customerEmail: String?,
+        val customerPhone: String?,
+        val customerName: String?,
+        val shippingValues: Map<IdentifierSpec, String?>?
+    ) : Parcelable
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {

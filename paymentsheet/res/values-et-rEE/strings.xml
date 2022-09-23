@@ -12,8 +12,6 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ lisa</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Lisage makseteave</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Tagasi</string>
   <string name="stripe_paymentsheet_close">Sule</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe deponeerib teie pangakontole 0,01 dollarit 1–2 tööpäeva jooksul. Seejärel saate meili juhistega makse sooritamiseks ettevõttele %s.</string>
