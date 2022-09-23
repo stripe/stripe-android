@@ -19,7 +19,6 @@ import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.injection.FakeLinkPaymentLauncherFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -452,11 +451,9 @@ class PaymentOptionsActivityTest {
         val addressRepository = AddressRepository(
             ApplicationProvider.getApplicationContext<Application>().resources
         )
-        val linkPaymentLauncherFactory = FakeLinkPaymentLauncherFactory(
-            mock<LinkPaymentLauncher>().stub {
-                onBlocking { setup(any(), any()) }.thenReturn(AccountStatus.SignedOut)
-            }
-        )
+        val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
+            onBlocking { setup(any(), any()) }.thenReturn(AccountStatus.SignedOut)
+        }
         return PaymentOptionsViewModel(
             args = args,
             prefsRepositoryFactory = { FakePrefsRepository() },
@@ -473,7 +470,7 @@ class PaymentOptionsActivityTest {
                 addressRepository
             ),
             savedStateHandle = SavedStateHandle(),
-            linkPaymentLauncherFactory = linkPaymentLauncherFactory
+            linkLauncher = linkPaymentLauncher
         )
     }
 }

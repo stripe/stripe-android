@@ -17,8 +17,8 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
-import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -54,7 +54,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     lpmResourceRepository: ResourceRepository<LpmRepository>,
     addressResourceRepository: ResourceRepository<AddressRepository>,
     savedStateHandle: SavedStateHandle,
-    linkPaymentLauncherFactory: LinkPaymentLauncherFactory
+    linkLauncher: LinkPaymentLauncher
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -67,7 +67,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     lpmResourceRepository = lpmResourceRepository,
     addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
-    linkPaymentLauncherFactory = linkPaymentLauncherFactory
+    linkLauncher = linkLauncher
 ) {
     @VisibleForTesting
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
@@ -169,7 +169,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
         ) {
             viewModelScope.launch {
-                val accountStatus = linkLauncher.setup(stripeIntent, this)
+                val accountStatus = linkLauncher.setup(createLinkConfiguration(stripeIntent), this)
                 when (accountStatus) {
                     AccountStatus.Verified,
                     AccountStatus.VerificationStarted,

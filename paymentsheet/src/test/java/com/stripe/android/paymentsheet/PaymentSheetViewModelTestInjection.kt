@@ -15,7 +15,6 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.link.injection.FakeLinkPaymentLauncherFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
@@ -52,7 +51,6 @@ internal open class PaymentSheetViewModelTestInjection {
     val eventReporter = mock<EventReporter>()
     private val googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory()
     private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
-    private val linkPaymentLauncherFactory = FakeLinkPaymentLauncherFactory(mock())
 
     private lateinit var injector: Injector
 
@@ -110,7 +108,7 @@ internal open class PaymentSheetViewModelTestInjection {
             savedStateHandle = SavedStateHandle().apply {
                 set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
             },
-            linkPaymentLauncherFactory = linkPaymentLauncherFactory
+            linkLauncher = mock()
         )
     }
 
