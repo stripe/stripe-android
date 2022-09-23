@@ -310,7 +310,7 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             assertThat(activity.toolbar.navigationContentDescription)
-                .isEqualTo(context.getString(R.string.stripe_paymentsheet_back))
+                .isEqualTo(context.getString(R.string.back))
 
             activity.onBackPressed()
             idleLooper()

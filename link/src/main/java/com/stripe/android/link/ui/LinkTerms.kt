@@ -13,12 +13,12 @@ import com.stripe.android.ui.core.paymentsColors
 
 @Preview
 @Composable
-fun LinkTerms(
+internal fun LinkTerms(
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center
 ) {
     Html(
-        html = stringResource(R.string.sign_up_terms),
+        html = stringResource(R.string.sign_up_terms).replaceHyperlinks(),
         imageGetter = emptyMap(),
         color = MaterialTheme.paymentsColors.placeholderText,
         style = MaterialTheme.typography.subtitle1,
@@ -28,3 +28,11 @@ fun LinkTerms(
         )
     )
 }
+
+private fun String.replaceHyperlinks() = this.replace(
+    "<terms>",
+    "<a href=\"https://link.co/terms\">"
+).replace("</terms>", "</a>").replace(
+    "<privacy>",
+    "<a href=\"https://link.co/privacy\">"
+).replace("</privacy>", "</a>")

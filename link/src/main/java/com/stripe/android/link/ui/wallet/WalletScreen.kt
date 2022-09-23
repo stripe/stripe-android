@@ -288,7 +288,7 @@ internal fun WalletBody(
 
         if (uiState.selectedItem is ConsumerPaymentDetails.BankAccount) {
             Html(
-                html = stringResource(R.string.wallet_bank_account_terms),
+                html = stringResource(R.string.wallet_bank_account_terms).replaceHyperlinks(),
                 imageGetter = emptyMap(),
                 color = MaterialTheme.colors.onSecondary,
                 style = MaterialTheme.typography.caption,
@@ -532,3 +532,8 @@ private fun ExpandedPaymentDetails(
         }
     }
 }
+
+private fun String.replaceHyperlinks() = this.replace(
+    "<terms>",
+    "<a href=\"https://stripe.com/legal/ach-payments/authorization\">"
+).replace("</terms>", "</a>")
