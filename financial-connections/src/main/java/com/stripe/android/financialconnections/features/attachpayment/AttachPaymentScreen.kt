@@ -58,7 +58,7 @@ private fun AttachPaymentContent(
                         count = payload().accountsCount,
                         businessName
                     )
-                },
+                }
             )
             is Fail -> UnclassifiedErrorContent()
         }

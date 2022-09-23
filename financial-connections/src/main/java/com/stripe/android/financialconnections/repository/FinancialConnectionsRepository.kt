@@ -111,7 +111,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
             options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
             )
         )
         return requestExecutor.execute(

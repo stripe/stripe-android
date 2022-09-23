@@ -27,10 +27,10 @@ class FinancialConnectionsRepositoryImplTest {
     private val financialConnectionsRepositoryImpl = FinancialConnectionsRepositoryImpl(
         requestExecutor = FinancialConnectionsRequestExecutor(
             json = testJson(),
-            stripeNetworkClient = mockStripeNetworkClient,
+            stripeNetworkClient = mockStripeNetworkClient
         ),
         apiRequestFactory = apiRequestFactory,
-        apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+        apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
     )
 
     @Test

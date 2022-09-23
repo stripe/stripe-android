@@ -8,7 +8,7 @@ import javax.inject.Inject
  * Use case to update the local cached manifest with new data.
  */
 internal class UpdateLocalManifest @Inject constructor(
-    val repository: FinancialConnectionsManifestRepository,
+    val repository: FinancialConnectionsManifestRepository
 ) {
 
     operator fun invoke(

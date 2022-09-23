@@ -52,5 +52,5 @@ internal class ResetViewModel @Inject constructor(
 }
 
 internal data class ResetState(
-    val payload: Async<Unit> = Uninitialized,
+    val payload: Async<Unit> = Uninitialized
 ) : MavericksState

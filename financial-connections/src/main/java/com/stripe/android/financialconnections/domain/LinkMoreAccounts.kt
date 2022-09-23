@@ -17,7 +17,7 @@ internal class LinkMoreAccounts @Inject constructor(
 
     suspend operator fun invoke(): FinancialConnectionsSessionManifest {
         return repository.postMarkLinkingMoreAccounts(
-            clientSecret = configuration.financialConnectionsSessionClientSecret,
+            clientSecret = configuration.financialConnectionsSessionClientSecret
         )
     }
 }

@@ -30,11 +30,11 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
 
     private fun buildRepository() = FinancialConnectionsAccountsRepository(
         apiOptions = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         ),
         requestExecutor = mockRequestExecutor,
         apiRequestFactory = apiRequestFactory,
-        logger = Logger.noop(),
+        logger = Logger.noop()
     )
 
     @Test
@@ -54,7 +54,8 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
             authSessionId
         )
         verify(
-            mockRequestExecutor, times(1)
+            mockRequestExecutor,
+            times(1)
         ).execute(
             any(),
             eq(PartnerAccountsList.serializer())

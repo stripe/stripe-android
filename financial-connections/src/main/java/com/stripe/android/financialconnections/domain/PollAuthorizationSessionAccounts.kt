@@ -23,7 +23,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        manifest: FinancialConnectionsSessionManifest,
+        manifest: FinancialConnectionsSessionManifest
     ): PartnerAccountsList {
         return retryOnException(
             times = MAX_TRIES,
@@ -56,7 +56,9 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
                 stripeException = this,
                 merchantName = businessName ?: ""
             )
-        } else this
+        } else {
+            this
+        }
     } ?: this
 
     private companion object {

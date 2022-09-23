@@ -50,7 +50,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             Payload(
                 flow = authSession.flow,
                 showPartnerDisclosure = authSession.showPartnerDisclosure ?: false,
-                institutionName = manifest.activeInstitution.name,
+                institutionName = manifest.activeInstitution.name
             )
         }.execute {
             copy(payload = it)

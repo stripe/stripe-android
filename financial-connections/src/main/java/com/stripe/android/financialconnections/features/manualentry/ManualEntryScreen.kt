@@ -58,7 +58,7 @@ internal fun ManualEntryScreen() {
         onAccountEntered = viewModel::onAccountEntered,
         onAccountConfirmEntered = viewModel::onAccountConfirmEntered,
         onSubmit = viewModel::onSubmit,
-        onCloseClick = parentViewModel::onCloseClick,
+        onCloseClick = parentViewModel::onCloseClick
     )
 }
 
@@ -75,7 +75,7 @@ private fun ManualEntryContent(
     onAccountEntered: (String) -> Unit,
     onAccountConfirmEntered: (String) -> Unit,
     onSubmit: () -> Unit,
-    onCloseClick: () -> Unit,
+    onCloseClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
@@ -132,14 +132,14 @@ private fun ManualEntryContent(
                     label = R.string.stripe_manualentry_routing,
                     inputWithError = routing,
                     onInputChanged = onRoutingEntered,
-                    onFocusGained = { currentCheck = R.drawable.stripe_check_routing },
+                    onFocusGained = { currentCheck = R.drawable.stripe_check_routing }
                 )
                 Spacer(modifier = Modifier.size(24.dp))
                 InputWithError(
                     label = R.string.stripe_manualentry_account,
                     inputWithError = account,
                     onInputChanged = onAccountEntered,
-                    onFocusGained = { currentCheck = R.drawable.stripe_check_account },
+                    onFocusGained = { currentCheck = R.drawable.stripe_check_account }
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
@@ -152,7 +152,7 @@ private fun ManualEntryContent(
                     label = R.string.stripe_manualentry_accountconfirm,
                     inputWithError = accountConfirm,
                     onInputChanged = onAccountConfirmEntered,
-                    onFocusGained = { currentCheck = R.drawable.stripe_check_account },
+                    onFocusGained = { currentCheck = R.drawable.stripe_check_account }
                 )
                 Spacer(modifier = Modifier.weight(1f))
             }
@@ -189,7 +189,7 @@ private fun InputWithError(
     inputWithError: Pair<String?, Int?>,
     label: Int,
     onFocusGained: () -> Unit,
-    onInputChanged: (String) -> Unit,
+    onInputChanged: (String) -> Unit
 ) {
     FinancialConnectionsOutlinedTextField(
         label = { Text(stringResource(label)) },
@@ -238,7 +238,7 @@ internal fun ManualEntryScreenErrorPreview() {
             isValidForm = true,
             verifyWithMicrodeposits = true,
             linkPaymentAccountStatus = Fail(
-                APIException(message = "Error linking accounts",)
+                APIException(message = "Error linking accounts")
             ),
             onRoutingEntered = {},
             onAccountEntered = {},

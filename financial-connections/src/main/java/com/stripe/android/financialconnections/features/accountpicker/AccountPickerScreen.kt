@@ -76,7 +76,7 @@ internal fun AccountPickerScreen() {
         onAccountClicked = viewModel::onAccountClicked,
         onSelectAccounts = viewModel::selectAccounts,
         onSelectAnotherBank = viewModel::selectAnotherBank,
-        onCloseClick = parentViewModel::onCloseClick,
+        onCloseClick = parentViewModel::onCloseClick
     )
 }
 
@@ -216,7 +216,7 @@ private fun DropdownContent(
                 ExposedDropdownMenuDefaults.TrailingIcon(
                     expanded = expanded
                 )
-            },
+            }
         )
         ExposedDropdownMenu(
             expanded = expanded,
@@ -362,7 +362,7 @@ private fun AccountItem(
                     } else {
                         FinancialConnectionsTheme.colors.textDisabled
                     },
-                    style = FinancialConnectionsTheme.typography.bodyEmphasized,
+                    style = FinancialConnectionsTheme.typography.bodyEmphasized
                 )
                 account.displayableAccountNumbers?.let {
                     Text(
@@ -372,7 +372,7 @@ private fun AccountItem(
                         } else {
                             FinancialConnectionsTheme.colors.textDisabled
                         },
-                        style = FinancialConnectionsTheme.typography.captionTight,
+                        style = FinancialConnectionsTheme.typography.captionTight
                     )
                 }
             }

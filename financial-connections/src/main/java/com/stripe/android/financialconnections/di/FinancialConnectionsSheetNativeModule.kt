@@ -74,7 +74,7 @@ internal class FinancialConnectionsSheetNativeModule {
         requestExecutor = requestExecutor,
         apiRequestFactory = apiRequestFactory,
         apiOptions = apiOptions,
-        logger = logger,
+        logger = logger
     )
 
     @Singleton
@@ -82,7 +82,7 @@ internal class FinancialConnectionsSheetNativeModule {
     fun providesFinancialConnectionsInstitutionsRepository(
         requestExecutor: FinancialConnectionsRequestExecutor,
         apiRequestFactory: ApiRequest.Factory,
-        apiOptions: ApiRequest.Options,
+        apiOptions: ApiRequest.Options
     ) = FinancialConnectionsInstitutionsRepository(
         requestExecutor = requestExecutor,
         apiOptions = apiOptions,

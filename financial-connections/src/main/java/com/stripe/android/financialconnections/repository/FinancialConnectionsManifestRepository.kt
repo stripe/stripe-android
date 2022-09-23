@@ -97,7 +97,7 @@ internal interface FinancialConnectionsManifestRepository {
 
     suspend fun cancelAuthorizationSession(
         clientSecret: String,
-        sessionId: String,
+        sessionId: String
     ): FinancialConnectionsAuthorizationSession
 
     companion object {
@@ -220,14 +220,14 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     override suspend fun cancelAuthorizationSession(
         clientSecret: String,
-        sessionId: String,
+        sessionId: String
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
             url = cancelAuthSessionUrl,
             options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
             )
         )
         return requestExecutor.execute(
@@ -261,13 +261,13 @@ private class FinancialConnectionsManifestRepositoryImpl(
     }
 
     override suspend fun postMarkLinkingMoreAccounts(
-        clientSecret: String,
+        clientSecret: String
     ): FinancialConnectionsSessionManifest {
         val request = apiRequestFactory.createPost(
             url = linkMoreAccountsUrl,
             options = apiOptions,
             params = mapOf(
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
             )
         )
         return requestExecutor.execute(

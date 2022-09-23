@@ -53,7 +53,7 @@ class UriComparatorTest(
                 uri1 = "stripe-auth://link-accounts/com.stripe.android.paymentsheet.example/success",
                 uri2 = "stripe-auth://link-accounts/com.stripe.android.paymentsheet.example/error",
                 equals = false
-            ),
+            )
         )
 
         private fun parameters(

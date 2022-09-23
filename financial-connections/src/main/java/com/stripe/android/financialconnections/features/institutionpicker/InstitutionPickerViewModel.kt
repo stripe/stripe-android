@@ -145,7 +145,7 @@ internal data class InstitutionPickerState(
     val searchMode: Boolean = false,
     val allowManualEntry: Boolean = false,
     val payload: Async<Payload> = Uninitialized,
-    val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
+    val searchInstitutions: Async<InstitutionResponse> = Uninitialized
 ) : MavericksState {
     data class Payload(
         val featuredInstitutions: InstitutionResponse,

@@ -30,7 +30,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 @Composable
 internal fun SearchFooter(
     onManualEntryClick: () -> Unit,
-    manualEntryEnabled: Boolean,
+    manualEntryEnabled: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -82,7 +82,7 @@ private fun SearchFooterRow(
     @DrawableRes icon: Int,
     iconColor: Color,
     iconBackgroundColor: Color,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,

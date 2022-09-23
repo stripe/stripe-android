@@ -99,7 +99,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState {
             if (webAuthFlow is Loading) {
                 copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
-            } else this
+            } else {
+                this
+            }
         }
     }
 

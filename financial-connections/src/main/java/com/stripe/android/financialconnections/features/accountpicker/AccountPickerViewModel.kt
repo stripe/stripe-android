@@ -131,7 +131,7 @@ internal class AccountPickerViewModel @Inject constructor(
                         selectedAccounts = accounts
                             .filter { state.selectedIds.contains(it.account.id) }
                             .map { it.account },
-                        sessionId = manifest.activeAuthSession!!.id,
+                        sessionId = manifest.activeAuthSession!!.id
                     )
                     goNext(accountsList.nextPane)
                     accountsList

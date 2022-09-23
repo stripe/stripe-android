@@ -6,7 +6,7 @@ import com.stripe.android.financialconnections.ui.TextResource
 
 internal class ConsentStates : PreviewParameterProvider<ConsentState> {
     override val values = sequenceOf(
-        canonical(),
+        canonical()
     )
 
     override val count: Int

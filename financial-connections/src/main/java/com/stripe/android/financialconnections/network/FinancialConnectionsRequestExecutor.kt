@@ -29,7 +29,7 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
     )
     suspend fun <Response> execute(
         request: StripeRequest,
-        responseSerializer: KSerializer<Response>,
+        responseSerializer: KSerializer<Response>
     ): Response = runCatching {
         stripeNetworkClient.executeRequest(request)
     }.fold(

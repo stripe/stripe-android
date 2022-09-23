@@ -11,7 +11,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
     override val values = sequenceOf(
         multiSelect(),
         singleSelect(),
-        dropdown(),
+        dropdown()
     )
 
     override val count: Int
@@ -66,7 +66,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     displayableAccountNumbers = "1234",
                     currency = "$",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-                    supportedPaymentMethodTypes = emptyList(),
+                    supportedPaymentMethodTypes = emptyList()
                 ),
                 enabled = true
             ),

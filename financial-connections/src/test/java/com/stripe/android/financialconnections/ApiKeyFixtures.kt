@@ -48,6 +48,6 @@ internal object ApiKeyFixtures {
         data = emptyList(),
         hasMore = false,
         nextPane = FinancialConnectionsSessionManifest.NextPane.CONSENT,
-        url = "",
+        url = ""
     )
 }

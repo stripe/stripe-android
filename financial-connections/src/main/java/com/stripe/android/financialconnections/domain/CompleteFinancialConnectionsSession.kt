@@ -12,7 +12,7 @@ internal class CompleteFinancialConnectionsSession @Inject constructor(
 
     suspend operator fun invoke(): FinancialConnectionsSession {
         return repository.postCompleteFinancialConnectionsSessions(
-            clientSecret = configuration.financialConnectionsSessionClientSecret,
+            clientSecret = configuration.financialConnectionsSessionClientSecret
         )
     }
 }

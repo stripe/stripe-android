@@ -21,7 +21,7 @@ internal fun FinancialConnectionsTopAppBar(
             contentDescription = null // decorative element
         )
     },
-    onCloseClick: () -> Unit,
+    onCloseClick: () -> Unit
 ) {
     TopAppBar(
         title = title,
@@ -35,7 +35,7 @@ internal fun FinancialConnectionsTopAppBar(
             }
         },
         backgroundColor = FinancialConnectionsTheme.colors.textWhite,
-        contentColor = FinancialConnectionsTheme.colors.textBrand,
+        contentColor = FinancialConnectionsTheme.colors.textBrand
     )
 }
 

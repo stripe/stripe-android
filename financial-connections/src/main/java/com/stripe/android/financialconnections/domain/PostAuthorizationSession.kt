@@ -35,7 +35,7 @@ internal class PostAuthorizationSession @Inject constructor(
     }
 
     private fun StripeException.toDomainException(
-        institution: FinancialConnectionsInstitution,
+        institution: FinancialConnectionsInstitution
     ): StripeException = this.stripeError?.let {
         val institutionUnavailable: String? = it.extraFields?.get("institution_unavailable")
         val availableAt: String? = it.extraFields?.get("expected_to_be_available_at")

@@ -45,7 +45,7 @@ internal object FinancialConnectionsSheetSharedModule {
     @Singleton
     internal fun providesApiOptions(
         @Named(PUBLISHABLE_KEY) publishableKey: String,
-        @Named(STRIPE_ACCOUNT_ID) stripeAccountId: String?,
+        @Named(STRIPE_ACCOUNT_ID) stripeAccountId: String?
     ): ApiRequest.Options = ApiRequest.Options(
         apiKey = publishableKey,
         stripeAccount = stripeAccountId

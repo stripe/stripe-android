@@ -81,7 +81,7 @@ internal fun InstitutionPickerScreen() {
         onCancelSearchClick = viewModel::onCancelSearchClick,
         onCloseClick = parentViewModel::onCloseClick,
         onSearchFocused = viewModel::onSearchFocused,
-        onManualEntryClick = viewModel::onManualEntryClick,
+        onManualEntryClick = viewModel::onManualEntryClick
     )
 }
 
@@ -197,7 +197,9 @@ private fun FinancialConnectionsSearchRow(
                         }
                     )
                 }
-            } else null,
+            } else {
+                null
+            },
             modifier = Modifier
                 .onFocusChanged { if (it.isFocused) onSearchFocused() }
                 .weight(1f),
@@ -214,7 +216,7 @@ private fun SearchInstitutionsList(
     onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
     query: String,
     onManualEntryClick: () -> Unit,
-    manualEntryEnabled: Boolean,
+    manualEntryEnabled: Boolean
 ) {
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -303,7 +305,7 @@ private fun SearchInstitutionsFailedRow(
                 defaultStyle = FinancialConnectionsTheme.typography.body.copy(
                     textAlign = TextAlign.Center,
                     color = FinancialConnectionsTheme.colors.textSecondary
-                ),
+                )
             )
 
             else -> Text(

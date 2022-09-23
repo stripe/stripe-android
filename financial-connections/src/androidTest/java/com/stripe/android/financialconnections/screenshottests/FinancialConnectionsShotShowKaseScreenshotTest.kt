@@ -5,4 +5,4 @@ import com.airbnb.android.showkase.screenshot.testing.shot.ShotShowkaseScreensho
 import com.stripe.android.financialconnections.FinancialConnectionsShowkaseRootModule
 
 @ShowkaseScreenshot(rootShowkaseClass = FinancialConnectionsShowkaseRootModule::class)
-abstract class FinancialConnectionsShotShowkaseScreenshotTest: ShotShowkaseScreenshotTest()
+abstract class FinancialConnectionsShotShowkaseScreenshotTest : ShotShowkaseScreenshotTest()

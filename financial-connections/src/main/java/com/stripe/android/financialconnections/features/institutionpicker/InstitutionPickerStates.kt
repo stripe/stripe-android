@@ -14,7 +14,7 @@ internal class InstitutionPickerStates :
         searchModeWithResults(),
         searchModeNoResults(),
         searchModeNoQuery(),
-        noSearchMode(),
+        noSearchMode()
     )
 
     // TODO@carlosmuvi migrate to PreviewParameterProvider when showkase adds support.
@@ -24,7 +24,7 @@ internal class InstitutionPickerStates :
             payload = Success(payload()),
             searchInstitutions = Loading(),
             searchMode = true,
-            query = "query",
+            query = "query"
         )
 
         // Search mode: with results
@@ -32,7 +32,7 @@ internal class InstitutionPickerStates :
             payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
             searchMode = true,
-            query = "query",
+            query = "query"
         )
 
         // Search mode: No results
@@ -40,7 +40,7 @@ internal class InstitutionPickerStates :
             payload = Success(payload()),
             searchInstitutions = Success(InstitutionResponse(emptyList())),
             searchMode = false,
-            query = "query",
+            query = "query"
         )
 
         // Search mode: No results
@@ -48,7 +48,7 @@ internal class InstitutionPickerStates :
             payload = Success(payload()),
             searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
             searchMode = false,
-            query = "query",
+            query = "query"
         )
 
         // Search mode: no query
@@ -56,7 +56,7 @@ internal class InstitutionPickerStates :
             payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
             searchMode = true,
-            query = "",
+            query = ""
         )
 
         // No search mode
@@ -64,7 +64,7 @@ internal class InstitutionPickerStates :
             payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
             searchMode = false,
-            query = "",
+            query = ""
         )
 
         private fun payload() = InstitutionPickerState.Payload(

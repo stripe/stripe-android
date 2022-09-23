@@ -71,7 +71,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
 
     override suspend fun getOrFetchAccounts(
         clientSecret: String,
-        sessionId: String,
+        sessionId: String
     ): PartnerAccountsList =
         mutex.withLock {
             cachedAccounts ?: run {
@@ -81,14 +81,14 @@ private class FinancialConnectionsAccountsRepositoryImpl(
 
     override suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
-        sessionId: String,
+        sessionId: String
     ): PartnerAccountsList {
         val request = apiRequestFactory.createPost(
             url = accountsSessionUrl,
             options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
             )
         )
         return requestExecutor.execute(
@@ -127,7 +127,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
             ) + selectAccounts.mapIndexed { index, account -> "$PARAM_SELECTED_ACCOUNTS[$index]" to account }
         )
         return requestExecutor.execute(

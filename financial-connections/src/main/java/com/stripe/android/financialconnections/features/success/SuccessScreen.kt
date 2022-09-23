@@ -49,7 +49,7 @@ internal fun SuccessScreen() {
             onDoneClick = viewModel::onDoneClick,
             onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
             onCloseClick = parentViewModel::onCloseClick,
-            showLinkAnotherAccount = payload.showLinkAnotherAccount,
+            showLinkAnotherAccount = payload.showLinkAnotherAccount
         )
     }
 }
@@ -64,7 +64,7 @@ private fun SuccessContent(
     onDoneClick: () -> Unit,
     onLinkAnotherAccountClick: () -> Unit,
     showLinkAnotherAccount: Boolean,
-    onCloseClick: () -> Unit,
+    onCloseClick: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
     FinancialConnectionsScaffold(
@@ -178,7 +178,7 @@ internal fun SuccessScreenPreview() {
                     displayableAccountNumbers = "1234",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
-                ),
+                )
             ),
             loading = false,
             onDoneClick = {},

@@ -49,5 +49,5 @@ internal data class FinancialConnectionsColors(
     // icons
     val iconBrand: Color,
     val iconInfo: Color,
-    val iconSuccess: Color,
+    val iconSuccess: Color
 )

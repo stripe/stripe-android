@@ -13,11 +13,11 @@ internal class CancelAuthorizationSession @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        authorizationSessionId: String,
+        authorizationSessionId: String
     ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession {
         return repository.cancelAuthorizationSession(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
-            sessionId = authorizationSessionId,
+            sessionId = authorizationSessionId
         ).also { coordinator().emit(Message.ClearPartnerWebAuth) }
     }
 }

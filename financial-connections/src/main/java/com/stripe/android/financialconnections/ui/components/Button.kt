@@ -72,7 +72,7 @@ internal object FinancialConnectionsButton {
                     backgroundColor = colors.textBrand,
                     contentColor = colors.textWhite,
                     disabledBackgroundColor = colors.textBrand.copy(alpha = 0.12f),
-                    disabledContentColor = colors.textWhite,
+                    disabledContentColor = colors.textWhite
                 )
             }
         }
@@ -84,7 +84,7 @@ internal object FinancialConnectionsButton {
                     backgroundColor = colors.textWhite,
                     contentColor = colors.textPrimary,
                     disabledBackgroundColor = colors.textWhite,
-                    disabledContentColor = colors.textPrimary.copy(alpha = 0.12f),
+                    disabledContentColor = colors.textPrimary.copy(alpha = 0.12f)
                 )
             }
         }
@@ -96,7 +96,7 @@ internal object FinancialConnectionsButton {
                     backgroundColor = colors.textCritical,
                     contentColor = colors.textWhite,
                     disabledBackgroundColor = colors.textCritical.copy(alpha = 0.12f),
-                    disabledContentColor = colors.textPrimary.copy(alpha = 0.12f),
+                    disabledContentColor = colors.textPrimary.copy(alpha = 0.12f)
                 )
             }
         }

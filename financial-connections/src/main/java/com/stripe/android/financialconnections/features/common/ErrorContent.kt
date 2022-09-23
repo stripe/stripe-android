@@ -83,7 +83,7 @@ internal fun InstitutionPlannedDowntimeErrorContent(
         ),
         content = stringResource(
             R.string.stripe_error_planned_downtime_desc,
-            readableDate,
+            readableDate
         ),
         ctaText = stringResource(R.string.stripe_error_cta_select_another_bank),
         onCtaClick = onSelectAnotherBank
@@ -98,7 +98,7 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
     ErrorContent(
         painterResource(id = R.drawable.stripe_ic_brandicon_institution),
         title = stringResource(
-            R.string.stripe_account_picker_error_no_payment_method_title,
+            R.string.stripe_account_picker_error_no_payment_method_title
         ),
         content = stringResource(
             R.string.stripe_account_picker_error_no_payment_method_desc,

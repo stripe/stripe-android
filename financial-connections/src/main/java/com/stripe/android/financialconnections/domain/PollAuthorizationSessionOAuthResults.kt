@@ -19,7 +19,7 @@ internal class PollAuthorizationSessionOAuthResults @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        session: FinancialConnectionsAuthorizationSession,
+        session: FinancialConnectionsAuthorizationSession
     ): MixedOAuthParams {
         return retryOnException(
             times = MAX_TRIES,

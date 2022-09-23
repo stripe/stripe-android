@@ -38,7 +38,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 
 @Composable
 internal fun AccessibleDataCallout(
-    model: AccessibleDataCalloutModel,
+    model: AccessibleDataCalloutModel
 ) {
     AccessibleDataCalloutBox {
         AccessibleDataText(model)
@@ -79,7 +79,7 @@ internal fun AccessibleDataCalloutWithAccounts(
 
 @Composable
 private fun AccessibleDataText(
-    model: AccessibleDataCalloutModel,
+    model: AccessibleDataCalloutModel
 ) {
     val uriHandler = LocalUriHandler.current
     val permissionsReadable = remember(model.permissions) { model.permissions.toStringRes() }
@@ -110,7 +110,7 @@ private fun AccessibleDataText(
                 .copy(color = FinancialConnectionsTheme.colors.textBrand),
             StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
                 .toSpanStyle()
-                .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                .copy(color = FinancialConnectionsTheme.colors.textSecondary)
         )
     )
 }
@@ -125,7 +125,7 @@ private fun AccessibleDataCalloutBox(
             .border(
                 width = 1.dp,
                 shape = RoundedCornerShape(8.dp),
-                color = FinancialConnectionsTheme.colors.borderDefault,
+                color = FinancialConnectionsTheme.colors.borderDefault
             )
             .background(color = FinancialConnectionsTheme.colors.backgroundContainer)
             .padding(12.dp),
@@ -224,7 +224,7 @@ internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
                     displayableAccountNumbers = "1234",
                     currency = "$",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-                    supportedPaymentMethodTypes = emptyList(),
+                    supportedPaymentMethodTypes = emptyList()
                 ),
                 PartnerAccount(
                     authorization = "Authorization",
@@ -265,7 +265,7 @@ internal fun AccessibleDataCalloutWithOneAccountPreview() {
                     displayableAccountNumbers = "1234",
                     currency = "$",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-                    supportedPaymentMethodTypes = emptyList(),
+                    supportedPaymentMethodTypes = emptyList()
                 )
             )
         )

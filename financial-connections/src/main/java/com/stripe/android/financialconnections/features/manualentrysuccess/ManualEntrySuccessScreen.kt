@@ -188,7 +188,7 @@ internal fun TransactionHistoryTable(
                     brush = Brush.verticalGradient(
                         colors = listOf(
                             FinancialConnectionsTheme.colors.textWhite.copy(alpha = 0f),
-                            FinancialConnectionsTheme.colors.textWhite.copy(alpha = 1f),
+                            FinancialConnectionsTheme.colors.textWhite.copy(alpha = 1f)
                         )
                     )
                 )
@@ -198,7 +198,7 @@ internal fun TransactionHistoryTable(
 
 @Composable
 private fun buildTableRows(
-    microdepositVerificationMethod: MicrodepositVerificationMethod,
+    microdepositVerificationMethod: MicrodepositVerificationMethod
 ): List<Triple<Pair<String, Color>, Pair<String, Color>, Pair<String, Color>>> {
     val rowColor = FinancialConnectionsTheme.colors.textPrimary
     val highlightColor = FinancialConnectionsTheme.colors.textBrand
@@ -241,7 +241,7 @@ internal fun ManualEntrySuccessScreenPreviewAmount() {
             last4 = "1234",
             onCloseClick = {},
             onDoneClick = {},
-            loading = false,
+            loading = false
         )
     }
 }
@@ -255,7 +255,7 @@ internal fun ManualEntrySuccessScreenPreviewDescriptor() {
             last4 = "1234",
             onCloseClick = {},
             onDoneClick = {},
-            loading = false,
+            loading = false
         )
     }
 }
@@ -269,7 +269,7 @@ internal fun ManualEntrySuccessScreenPreviewAmountNoAccount() {
             last4 = null,
             onCloseClick = {},
             onDoneClick = {},
-            loading = false,
+            loading = false
         )
     }
 }
@@ -283,7 +283,7 @@ internal fun ManualEntrySuccessScreenPreviewDescriptorNoAccount() {
             last4 = null,
             onCloseClick = {},
             onDoneClick = {},
-            loading = false,
+            loading = false
         )
     }
 }

@@ -213,7 +213,7 @@ internal fun PrepaneContentPreview() {
                     )
                 ),
                 authenticationStatus = Uninitialized,
-                url = null,
+                url = null
             ),
             onContinueClick = {},
             onSelectAnotherBank = {},

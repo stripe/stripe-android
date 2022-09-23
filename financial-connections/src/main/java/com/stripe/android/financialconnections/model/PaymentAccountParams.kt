@@ -9,7 +9,7 @@ internal sealed class PaymentAccountParams(val type: String) {
     ) : PaymentAccountParams("linked_account") {
         override fun toParamMap(): Map<String, String> = mapOf(
             "type" to type,
-            "$type[id]" to id,
+            "$type[id]" to id
         )
     }
 
@@ -20,7 +20,7 @@ internal sealed class PaymentAccountParams(val type: String) {
         override fun toParamMap(): Map<String, String> = mapOf(
             "type" to type,
             "$type[routing_number]" to routingNumber,
-            "$type[account_number]" to accountNumber,
+            "$type[account_number]" to accountNumber
         )
     }
 }

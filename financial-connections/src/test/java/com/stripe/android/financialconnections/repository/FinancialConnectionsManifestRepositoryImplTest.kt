@@ -55,7 +55,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             // simulates to concurrent accesses to manifest.
             awaitAll(
                 async { repository.getOrFetchManifest() },
-                async { repository.getOrFetchManifest() },
+                async { repository.getOrFetchManifest() }
             )
 
             verify(mockRequestExecutor, times(1)).execute(any(), any<KSerializer<*>>())

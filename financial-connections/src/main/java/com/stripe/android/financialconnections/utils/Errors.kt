@@ -16,7 +16,7 @@ internal suspend fun <T> retryOnException(
     times: Int = Int.MAX_VALUE,
     delayMilliseconds: Long = 100,
     retryCondition: suspend (Throwable) -> Boolean,
-    block: suspend () -> T,
+    block: suspend () -> T
 ): T = channelFlow {
     var remainingTimes = times - 1
     while (!isClosedForSend) {

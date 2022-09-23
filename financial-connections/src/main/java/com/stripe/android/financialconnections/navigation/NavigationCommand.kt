@@ -68,7 +68,7 @@ internal object NavigationDirections {
 
         val arguments = listOf(
             navArgument(KEY_LAST4) { type = NavType.StringType },
-            navArgument(KEY_MICRODEPOSITS) { type = EnumType(MicrodepositVerificationMethod::class.java) },
+            navArgument(KEY_MICRODEPOSITS) { type = EnumType(MicrodepositVerificationMethod::class.java) }
         )
 
         fun argMap(

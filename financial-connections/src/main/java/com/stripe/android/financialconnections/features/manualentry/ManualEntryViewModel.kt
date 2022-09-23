@@ -46,7 +46,7 @@ internal class ManualEntryViewModel @Inject constructor(
         setState {
             copy(
                 routing = filteredInput to
-                    ManualEntryInputValidator.getRoutingErrorIdOrNull(filteredInput),
+                    ManualEntryInputValidator.getRoutingErrorIdOrNull(filteredInput)
             )
         }
     }
@@ -81,7 +81,7 @@ internal class ManualEntryViewModel @Inject constructor(
             pollAttachPaymentAccount(
                 PaymentAccountParams.BankAccount(
                     routingNumber = requireNotNull(state.routing.first),
-                    accountNumber = requireNotNull(state.account.first),
+                    accountNumber = requireNotNull(state.account.first)
                 )
             ).also {
                 goNext(
