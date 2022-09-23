@@ -1,7 +1,6 @@
 package com.stripe.android.link.ui.cardedit
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.CircularProgressIndicator
@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -140,39 +141,17 @@ internal fun CardEditBody(
             formContent()
         }
         Spacer(modifier = Modifier.height(8.dp))
-        if (isDefault) {
-            Text(
-                text = stringResource(R.string.pm_your_default),
-                modifier = Modifier.padding(vertical = 16.dp),
-                style = MaterialTheme.typography.h6,
-                color = MaterialTheme.linkColors.disabledText
-            )
-        } else {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-                    .clickable {
-                        onSetAsDefaultClick(!setAsDefaultChecked)
-                    }
-            ) {
-                Checkbox(
-                    checked = setAsDefaultChecked,
-                    onCheckedChange = null, // needs to be null for accessibility on row click to work
-                    modifier = Modifier.padding(end = 8.dp),
-                    enabled = !isProcessing,
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colors.primary,
-                        uncheckedColor = MaterialTheme.linkColors.disabledText
-                    )
-                )
-                Text(
-                    text = stringResource(R.string.pm_set_as_default),
-                    style = MaterialTheme.typography.h6,
-                    color = MaterialTheme.colors.onPrimary
-                )
-            }
-        }
+
+        DefaultPaymentMethodCheckbox(
+            setAsDefaultChecked = setAsDefaultChecked,
+            isDefault = isDefault,
+            isProcessing = isProcessing,
+            onSetAsDefaultClick = onSetAsDefaultClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
+        )
+
         AnimatedVisibility(visible = errorMessage != null) {
             ErrorText(
                 text = errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
@@ -192,6 +171,46 @@ internal fun CardEditBody(
             enabled = !isProcessing,
             label = stringResource(id = R.string.cancel),
             onClick = onCancelClick
+        )
+    }
+}
+
+@Composable
+fun DefaultPaymentMethodCheckbox(
+    setAsDefaultChecked: Boolean,
+    isDefault: Boolean,
+    isProcessing: Boolean,
+    onSetAsDefaultClick: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val isChecked = isDefault || setAsDefaultChecked
+    val canCheck = !isDefault && !isProcessing
+
+    Row(
+        modifier = modifier
+            .selectable(
+                selected = false,
+                enabled = canCheck,
+                onClick = {
+                    onSetAsDefaultClick(!setAsDefaultChecked)
+                }
+            )
+    ) {
+        Checkbox(
+            checked = isChecked,
+            onCheckedChange = null, // needs to be null for accessibility on row click to work
+            modifier = Modifier.padding(end = 8.dp),
+            enabled = canCheck,
+            colors = CheckboxDefaults.colors(
+                checkedColor = MaterialTheme.colors.primary,
+                uncheckedColor = MaterialTheme.linkColors.disabledText
+            )
+        )
+        Text(
+            text = stringResource(R.string.pm_set_as_default),
+            style = MaterialTheme.typography.h6,
+            color = MaterialTheme.colors.onPrimary,
+            modifier = Modifier.alpha(if (canCheck) 1f else 0.6f)
         )
     }
 }
