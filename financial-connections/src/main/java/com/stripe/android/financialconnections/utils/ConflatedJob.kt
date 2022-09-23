@@ -7,7 +7,7 @@ import kotlinx.coroutines.Job
  *
  * Assign the new job with the += operator.
  */
-class ConflatedJob {
+internal class ConflatedJob {
 
     private var job: Job? = null
     private var prevJob: Job? = null
