@@ -33,7 +33,8 @@ open class StripeEditText @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     defStyleAttr: Int = androidx.appcompat.R.attr.editTextStyle
 ) : TextInputEditText(context, attrs, defStyleAttr) {
-    protected var isLastKeyDelete: Boolean = false
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    internal var isLastKeyDelete: Boolean = false
 
     private var afterTextChangedListener: AfterTextChangedListener? = null
     private var deleteEmptyListener: DeleteEmptyListener? = null
