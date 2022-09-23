@@ -84,6 +84,8 @@
   <string name="stripe_continue_button_label">繼續</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">支付%s</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">銀行</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">銀行卡資訊</string>
   <!-- Payment Method type brand name. -->

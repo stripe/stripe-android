@@ -84,6 +84,8 @@
   <string name="stripe_continue_button_label">Pokračovať</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Zaplatiť %s</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">Banka</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Informácie o karte</string>
   <!-- Payment Method type brand name. -->
