@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -142,7 +144,7 @@ internal fun LinkInlineSignup(
         LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
     ) {
         PaymentsTheme {
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .border(
@@ -154,101 +156,107 @@ internal fun LinkInlineSignup(
                         shape = MaterialTheme.linkShapes.medium
                     )
             ) {
-                Row(
+                Column(
                     modifier = Modifier
-                        .padding(16.dp)
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.linkShapes.medium)
                         .clickable {
                             toggleExpanded()
                         }
                 ) {
-                    Checkbox(
-                        checked = expanded,
-                        onCheckedChange = null, // needs to be null for accessibility on row click to work
-                        modifier = Modifier.padding(end = 8.dp),
-                        enabled = enabled
-                    )
-                    Column {
-                        Text(
-                            text = stringResource(id = R.string.inline_sign_up_header),
-                            style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colors.onSurface
-                                .copy(alpha = LocalContentAlpha.current)
-                        )
-                        Text(
-                            text = stringResource(R.string.sign_up_message, merchantName),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 4.dp),
-                            style = MaterialTheme.typography.body1,
-                            color = MaterialTheme.colors.onSurface
-                                .copy(alpha = LocalContentAlpha.current)
-                        )
-                    }
-                }
-
-                AnimatedVisibility(
-                    visible = expanded,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    Column(
+                    Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
+                            .padding(16.dp)
                     ) {
-                        EmailCollectionSection(
-                            enabled = enabled,
-                            emailController = emailController,
-                            signUpState = signUpState,
-                            focusRequester = focusRequester
+                        Checkbox(
+                            checked = expanded,
+                            onCheckedChange = null, // needs to be null for accessibility on row click to work
+                            modifier = Modifier.padding(end = 8.dp),
+                            enabled = enabled
                         )
-
-                        AnimatedVisibility(
-                            visible = signUpState != SignUpState.InputtingPhoneOrName &&
-                                errorMessage != null
-                        ) {
-                            ErrorText(
-                                text = errorMessage?.getMessage(LocalContext.current.resources)
-                                    .orEmpty(),
-                                modifier = Modifier.fillMaxWidth()
+                        Column {
+                            Text(
+                                text = stringResource(id = R.string.inline_sign_up_header),
+                                style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colors.onSurface
+                                    .copy(alpha = LocalContentAlpha.current)
+                            )
+                            Text(
+                                text = stringResource(R.string.sign_up_message, merchantName),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 4.dp),
+                                style = MaterialTheme.typography.body1,
+                                color = MaterialTheme.colors.onSurface
+                                    .copy(alpha = LocalContentAlpha.current)
                             )
                         }
+                    }
 
-                        AnimatedVisibility(
-                            visible = signUpState == SignUpState.InputtingPhoneOrName
+                    AnimatedVisibility(
+                        visible = expanded,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 16.dp)
                         ) {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                PhoneNumberCollectionSection(
-                                    enabled = enabled,
-                                    phoneNumberController = phoneNumberController,
-                                    requestFocusWhenShown =
-                                    phoneNumberController.initialPhoneNumber.isEmpty(),
-                                    imeAction = if (requiresNameCollection) {
-                                        ImeAction.Next
-                                    } else {
-                                        ImeAction.Done
+                            EmailCollectionSection(
+                                enabled = enabled,
+                                emailController = emailController,
+                                signUpState = signUpState,
+                                focusRequester = focusRequester
+                            )
+
+                            AnimatedVisibility(
+                                visible = signUpState != SignUpState.InputtingPhoneOrName &&
+                                    errorMessage != null
+                            ) {
+                                ErrorText(
+                                    text = errorMessage?.getMessage(LocalContext.current.resources)
+                                        .orEmpty(),
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+                            AnimatedVisibility(
+                                visible = signUpState == SignUpState.InputtingPhoneOrName
+                            ) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    PhoneNumberCollectionSection(
+                                        enabled = enabled,
+                                        phoneNumberController = phoneNumberController,
+                                        requestFocusWhenShown =
+                                        phoneNumberController.initialPhoneNumber.isEmpty(),
+                                        imeAction = if (requiresNameCollection) {
+                                            ImeAction.Next
+                                        } else {
+                                            ImeAction.Done
+                                        }
+                                    )
+
+                                    if (requiresNameCollection) {
+                                        TextFieldSection(
+                                            textFieldController = nameController,
+                                            imeAction = ImeAction.Done,
+                                            enabled = enabled
+                                        )
                                     }
-                                )
 
-                                if (requiresNameCollection) {
-                                    TextFieldSection(
-                                        textFieldController = nameController,
-                                        imeAction = ImeAction.Done,
-                                        enabled = enabled
+                                    AnimatedVisibility(visible = errorMessage != null) {
+                                        ErrorText(
+                                            text = errorMessage?.getMessage(LocalContext.current.resources)
+                                                .orEmpty(),
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+
+                                    LinkTerms(
+                                        modifier = Modifier.padding(top = 8.dp),
+                                        textAlign = TextAlign.Left
                                     )
                                 }
-
-                                AnimatedVisibility(visible = errorMessage != null) {
-                                    ErrorText(
-                                        text = errorMessage?.getMessage(LocalContext.current.resources)
-                                            .orEmpty(),
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                }
-
-                                LinkTerms(
-                                    modifier = Modifier.padding(top = 8.dp),
-                                    textAlign = TextAlign.Left
-                                )
                             }
                         }
                     }
