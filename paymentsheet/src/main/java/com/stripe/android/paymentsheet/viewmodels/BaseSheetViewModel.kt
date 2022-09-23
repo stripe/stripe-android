@@ -15,7 +15,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.verification.LinkVerificationCallback
@@ -70,7 +70,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     val lpmResourceRepository: ResourceRepository<LpmRepository>,
     val addressResourceRepository: ResourceRepository<AddressRepository>,
     val savedStateHandle: SavedStateHandle,
-    protected val linkPaymentLauncherFactory: LinkPaymentLauncherFactory
+    val linkLauncher: LinkPaymentLauncher
 ) : AndroidViewModel(application) {
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
@@ -184,27 +184,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val notesText: LiveData<String?> = _notesText
 
     var usBankAccountSavedScreenState: USBankAccountFormScreenState? = null
-
-    val linkLauncher = linkPaymentLauncherFactory.let {
-        val shippingDetails: AddressDetails? = config?.shippingDetails
-        val customerPhone = if (shippingDetails?.isCheckboxSelected == true) {
-            shippingDetails.phoneNumber
-        } else {
-            config?.defaultBillingDetails?.phone
-        }
-        val shippingAddress = if (shippingDetails?.isCheckboxSelected == true) {
-            shippingDetails.toIdentifierMap(config?.defaultBillingDetails)
-        } else {
-            null
-        }
-        it.create(
-            merchantName = merchantName,
-            customerEmail = config?.defaultBillingDetails?.email,
-            customerPhone = customerPhone,
-            customerName = config?.defaultBillingDetails?.name,
-            shippingValues = shippingAddress
-        )
-    }
 
     protected val _showLinkVerificationDialog = MutableLiveData(false)
     val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog
@@ -475,6 +454,30 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * Function called during initialization to setup Link.
      */
     abstract fun setupLink(stripeIntent: StripeIntent)
+
+    protected fun createLinkConfiguration(
+        stripeIntent: StripeIntent
+    ): LinkPaymentLauncher.Configuration {
+        val shippingDetails: AddressDetails? = config?.shippingDetails
+        val customerPhone = if (shippingDetails?.isCheckboxSelected == true) {
+            shippingDetails.phoneNumber
+        } else {
+            config?.defaultBillingDetails?.phone
+        }
+        val shippingAddress = if (shippingDetails?.isCheckboxSelected == true) {
+            shippingDetails.toIdentifierMap(config?.defaultBillingDetails)
+        } else {
+            null
+        }
+        return LinkPaymentLauncher.Configuration(
+            stripeIntent = stripeIntent,
+            merchantName = merchantName,
+            customerEmail = config?.defaultBillingDetails?.email,
+            customerPhone = customerPhone,
+            customerName = config?.defaultBillingDetails?.name,
+            shippingValues = shippingAddress
+        )
+    }
 
     fun payWithLinkInline(userInput: UserInput) {
         (selection.value as? PaymentSelection.New.Card)?.paymentMethodCreateParams?.let { params ->

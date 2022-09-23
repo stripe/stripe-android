@@ -32,7 +32,6 @@ import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
-import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -93,7 +92,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @IOContext workContext: CoroutineContext,
     @InjectorKey injectorKey: String,
     savedStateHandle: SavedStateHandle,
-    linkPaymentLauncherFactory: LinkPaymentLauncherFactory
+    linkLauncher: LinkPaymentLauncher
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -106,7 +105,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     lpmResourceRepository = lpmResourceRepository,
     addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
-    linkPaymentLauncherFactory = linkPaymentLauncherFactory
+    linkLauncher = linkLauncher
 ) {
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
         args.clientSecret,
@@ -441,7 +440,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 .isNotEmpty()
         ) {
             viewModelScope.launch {
-                val accountStatus = linkLauncher.setup(stripeIntent, this)
+                val accountStatus = linkLauncher.setup(createLinkConfiguration(stripeIntent), this)
                 when (accountStatus) {
                     AccountStatus.Verified -> launchLink(launchedDirectly = true)
                     AccountStatus.VerificationStarted,

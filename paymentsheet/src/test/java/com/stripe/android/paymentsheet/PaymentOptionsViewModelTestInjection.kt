@@ -10,7 +10,6 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.link.injection.FakeLinkPaymentLauncherFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -76,7 +75,7 @@ internal open class PaymentOptionsViewModelTestInjection {
             savedStateHandle = SavedStateHandle().apply {
                 set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
             },
-            linkPaymentLauncherFactory = FakeLinkPaymentLauncherFactory(mock())
+            linkLauncher = mock()
         )
     }
 
