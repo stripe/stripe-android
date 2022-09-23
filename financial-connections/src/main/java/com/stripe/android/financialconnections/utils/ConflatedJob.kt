@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.utils
 
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 
 /**

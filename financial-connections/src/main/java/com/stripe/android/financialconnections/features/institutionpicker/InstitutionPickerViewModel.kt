@@ -10,6 +10,7 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SearchInstitutions
@@ -70,14 +71,16 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 query = query
             )
-        }.execute { async ->
-            copy(
-                searchInstitutions = when ((async as? Fail)?.error) {
-                    is CancellationException -> Loading()
-                    else -> async
-                }
-            )
+        }.execute {
+            copy(searchInstitutions = if (it.isCancellationError()) Loading() else it)
         }
+    }
+
+    private fun Async<InstitutionResponse>.isCancellationError(): Boolean = when {
+        this !is Fail -> false
+        error is CancellationException -> true
+        error is StripeException && error.cause is CancellationException -> true
+        else -> false
     }
 
     fun onInstitutionSelected(institution: FinancialConnectionsInstitution) {
