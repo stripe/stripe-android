@@ -299,5 +299,5 @@ internal val USBankAccountRequirement = PaymentMethodRequirements(
 internal val UpiRequirement = PaymentMethodRequirements(
     piRequirements = emptySet(),
     siRequirements = null,
-    confirmPMFromCustomer = true // TODO: Confirm this is correct
+    confirmPMFromCustomer = null
 )
