@@ -30,6 +30,7 @@ import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
@@ -110,20 +111,20 @@ private fun ManualEntryContent(
                         )
                     }
                 }
+                if (linkPaymentAccountStatus is Fail) {
+                    Text(
+                        text = (linkPaymentAccountStatus.error as? StripeException)?.message
+                            ?: stringResource(R.string.stripe_error_generic_title),
+                        color = FinancialConnectionsTheme.colors.textCritical,
+                        style = FinancialConnectionsTheme.typography.body
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                }
                 if (verifyWithMicrodeposits) {
                     Spacer(modifier = Modifier.size(8.dp))
                     Text(
                         text = stringResource(R.string.stripe_manualentry_microdeposits_desc),
                         color = FinancialConnectionsTheme.colors.textPrimary,
-                        style = FinancialConnectionsTheme.typography.body
-                    )
-                }
-                if (linkPaymentAccountStatus is Fail) {
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Text(
-                        text = (linkPaymentAccountStatus.error as? StripeException)?.message
-                            ?: stringResource(R.string.stripe_error_generic_title),
-                        color = FinancialConnectionsTheme.colors.textCritical,
                         style = FinancialConnectionsTheme.typography.body
                     )
                 }
@@ -218,6 +219,27 @@ internal fun ManualEntryScreenPreview() {
             isValidForm = true,
             verifyWithMicrodeposits = true,
             linkPaymentAccountStatus = Uninitialized,
+            onRoutingEntered = {},
+            onAccountEntered = {},
+            onAccountConfirmEntered = {},
+            onSubmit = {}
+        ) {}
+    }
+}
+
+@Preview
+@Composable
+internal fun ManualEntryScreenErrorPreview() {
+    FinancialConnectionsTheme {
+        ManualEntryContent(
+            routing = "" to null,
+            account = "" to null,
+            accountConfirm = "" to null,
+            isValidForm = true,
+            verifyWithMicrodeposits = true,
+            linkPaymentAccountStatus = Fail(
+                APIException(message = "Error linking accounts",)
+            ),
             onRoutingEntered = {},
             onAccountEntered = {},
             onAccountConfirmEntered = {},
