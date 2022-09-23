@@ -54,7 +54,7 @@ class LinkPaymentLauncherTest {
                         CUSTOMER_EMAIL,
                         CUSTOMER_PHONE,
                         CUSTOMER_NAME,
-                        null,
+                        null
                     ),
                     coroutineScope = this
                 )
