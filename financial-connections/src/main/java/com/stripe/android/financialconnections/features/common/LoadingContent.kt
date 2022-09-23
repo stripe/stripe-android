@@ -55,7 +55,7 @@ internal fun LoadingSpinner() {
         initialValue = 0F,
         targetValue = 360F,
         animationSpec = infiniteRepeatable(
-            animation = tween(1000)
+            animation = tween(LOADING_SPINNER_ROTATION_MS)
         )
     )
     Image(
@@ -64,6 +64,8 @@ internal fun LoadingSpinner() {
         contentDescription = "Loading spinner."
     )
 }
+
+private const val LOADING_SPINNER_ROTATION_MS = 1000
 
 @Composable
 @Preview()

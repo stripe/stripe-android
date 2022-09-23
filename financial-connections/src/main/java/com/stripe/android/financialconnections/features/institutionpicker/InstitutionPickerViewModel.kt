@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import com.airbnb.mvrx.Async
+import com.airbnb.mvrx.Fail
+import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
@@ -18,7 +20,8 @@ import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import kotlinx.coroutines.Job
+import com.stripe.android.financialconnections.utils.ConflatedJob
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import javax.inject.Inject
 
@@ -33,7 +36,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     initialState: InstitutionPickerState
 ) : MavericksViewModel<InstitutionPickerState>(initialState) {
 
-    private var searchJob: Job? = null
+    private var searchJob = ConflatedJob()
 
     init {
         logErrors()
@@ -61,14 +64,20 @@ internal class InstitutionPickerViewModel @Inject constructor(
 
     fun onQueryChanged(query: String) {
         setState { copy(query = query) }
-        searchJob?.cancel()
-        searchJob = suspend {
+        searchJob += suspend {
             delay(SEARCH_DEBOUNCE_MS)
             searchInstitutions(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 query = query
             )
-        }.execute { copy(searchInstitutions = it) }
+        }.execute { async ->
+            copy(
+                searchInstitutions = when ((async as? Fail)?.error) {
+                    is CancellationException -> Loading()
+                    else -> async
+                }
+            )
+        }
     }
 
     fun onInstitutionSelected(institution: FinancialConnectionsInstitution) {
