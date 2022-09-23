@@ -12,8 +12,6 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Добавить</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Укажите платежные данные</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Назад</string>
   <string name="stripe_paymentsheet_close">Закрыть</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Через 1-2 рабочих дня Stripe положит вам на счет сумму $0,01. После этого вы получите электронное письмо с инструкциями по завершению платежа в адрес %s.</string>

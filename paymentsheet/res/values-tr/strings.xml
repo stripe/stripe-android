@@ -12,8 +12,6 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Ekle</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Ödeme bilgilerinizi ekleyin</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Geri</string>
   <string name="stripe_paymentsheet_close">Kapat</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe, 1-2 iş günü içinde hesabınıza 0,01 ABD doları yatıracaktır. Ardından, %s ödemesini tamamlama talimatlarını içeren bir e-posta alacaksınız.</string>

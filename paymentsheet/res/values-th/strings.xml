@@ -12,8 +12,6 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ เพิ่ม</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">เพิ่มข้อมูลการชำระเงิน</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">ย้อนกลับ</string>
   <string name="stripe_paymentsheet_close">ปิด</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe จะฝากเงินจำนวน $0.01 ในบัญชีของคุณภายใน 1-2 วันทำการ จากนั้นคุณก็จะได้รับอีเมลแจ้งวิธีชำระเงินแก่ %s ให้เสร็จสิ้น</string>

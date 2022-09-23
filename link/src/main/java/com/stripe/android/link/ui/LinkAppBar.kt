@@ -115,7 +115,7 @@ internal fun LinkAppBar(
         ) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
-                contentDescription = stringResource(R.string.menu),
+                contentDescription = stringResource(R.string.show_menu),
                 tint = MaterialTheme.linkColors.closeButton
             )
         }

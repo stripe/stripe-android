@@ -40,6 +40,8 @@
   <string name="address_label_village_township">Selo ili grad</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Platite u <num_installments/> beskamatnih obroka po <installment_price/> koristeći <img/>]]></string>
+  <!-- Text for back button -->
+  <string name="back">Natrag</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Adresa za naplatu</string>
   <!-- Used when a required field is blank and submit is clicked. -->
