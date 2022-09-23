@@ -176,7 +176,7 @@ internal fun CardEditBody(
 }
 
 @Composable
-fun DefaultPaymentMethodCheckbox(
+private fun DefaultPaymentMethodCheckbox(
     setAsDefaultChecked: Boolean,
     isDefault: Boolean,
     isProcessing: Boolean,
