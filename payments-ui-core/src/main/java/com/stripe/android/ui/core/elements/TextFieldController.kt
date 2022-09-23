@@ -18,6 +18,14 @@ interface TextFieldController : InputController {
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
 
+    fun shouldAcceptInput(
+        currentValue: String,
+        proposedValue: String,
+        fieldState: TextFieldState
+    ): Boolean {
+        return !(fieldState.isFull() && proposedValue.length > currentValue.length)
+    }
+
     val debugLabel: String
     val trailingIcon: Flow<TextFieldIcon?>
     val capitalization: KeyboardCapitalization
