@@ -252,4 +252,6 @@ internal class StripeEditTextTest {
 
 private fun EditText.enterBackspace() {
     dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL))
+    setText(text.toString().dropLast(1))
+    dispatchKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DEL))
 }

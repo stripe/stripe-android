@@ -212,16 +212,22 @@ open class StripeEditText @JvmOverloads constructor(
 
         // This method works for hard keyboards and older phones.
         setOnKeyListener { _, keyCode, event ->
-            isLastKeyDelete = isDeleteKey(keyCode, event)
-            if (isLastKeyDelete && length() == 0) {
-                deleteEmptyListener?.onDeleteEmpty()
+            if (event.action == KeyEvent.ACTION_DOWN) {
+                // We only care about ACTION_DOWN and will ignore ACTION_UP
+                val isDelete = isDeleteKey(keyCode)
+                isLastKeyDelete = isDelete
+
+                if (isLastKeyDelete && length() == 0) {
+                    deleteEmptyListener?.onDeleteEmpty()
+                }
             }
+
             false
         }
     }
 
-    private fun isDeleteKey(keyCode: Int, event: KeyEvent): Boolean {
-        return keyCode == KeyEvent.KEYCODE_DEL && event.action == KeyEvent.ACTION_DOWN
+    private fun isDeleteKey(keyCode: Int): Boolean {
+        return keyCode == KeyEvent.KEYCODE_DEL
     }
 
     fun interface DeleteEmptyListener {
