@@ -1,9 +1,9 @@
 package com.stripe.android.financialconnections.features.consent
 
-import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.ui.TextResource
 import org.junit.Test
 
