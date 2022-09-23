@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.utils.FakeAndroidKeyStore
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
@@ -29,7 +30,7 @@ class LinkPaymentLauncherTest {
         { PUBLISHABLE_KEY },
         { STRIPE_ACCOUNT_ID },
         enableLogging = true,
-        ioContext = mock(),
+        ioContext = Dispatchers.IO,
         uiContext = mock(),
         paymentAnalyticsRequestFactory = mock(),
         analyticsRequestExecutor = mock(),
@@ -50,7 +51,7 @@ class LinkPaymentLauncherTest {
                     configuration = LinkPaymentLauncher.Configuration(
                         stripeIntent,
                         MERCHANT_NAME,
-                        CUSTOMER_NAME,
+                        CUSTOMER_EMAIL,
                         CUSTOMER_PHONE,
                         CUSTOMER_NAME,
                         null,
