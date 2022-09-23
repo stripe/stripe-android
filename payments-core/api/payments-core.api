@@ -1155,18 +1155,20 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Config
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;)V
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;Z)V
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;)V
-	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;Z)V
-	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZ)V
-	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;)V
+	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;Z)V
+	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;ZZ)V
+	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Z
 	public final fun component5 ()Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;
-	public final fun component6 ()Z
+	public final fun component6 ()Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;
 	public final fun component7 ()Z
-	public final fun copy (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZ)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;
-	public static synthetic fun copy$default (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZILjava/lang/Object;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;
+	public final fun component8 ()Z
+	public final fun copy (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;ZZ)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;
+	public static synthetic fun copy$default (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;ZZILjava/lang/Object;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllowCreditCards ()Z
@@ -1175,12 +1177,14 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Config
 	public final fun getExistingPaymentMethodRequired ()Z
 	public final fun getMerchantCountryCode ()Ljava/lang/String;
 	public final fun getMerchantName ()Ljava/lang/String;
+	public final fun getShippingAddressConfig ()Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;
 	public fun hashCode ()I
 	public final fun isEmailRequired ()Z
 	public final fun setAllowCreditCards (Z)V
 	public final fun setBillingAddressConfig (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;)V
 	public final fun setEmailRequired (Z)V
 	public final fun setExistingPaymentMethodRequired (Z)V
+	public final fun setShippingAddressConfig (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;)V
 	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
@@ -1258,6 +1262,31 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Result
 
 public abstract interface class com/stripe/android/googlepaylauncher/GooglePayLauncher$ResultCallback {
 	public abstract fun onResult (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Result;)V
+}
+
+public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public fun <init> (ZLjava/util/Set;)V
+	public fun <init> (ZLjava/util/Set;Z)V
+	public synthetic fun <init> (ZLjava/util/Set;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (ZLjava/util/Set;Z)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;
+	public static synthetic fun copy$default (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;ZLjava/util/Set;ZILjava/lang/Object;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$ShippingAddressConfig;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/googlepaylauncher/GooglePayLauncherContract : androidx/activity/result/contract/ActivityResultContract {

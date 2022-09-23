@@ -213,6 +213,11 @@ class GooglePayLauncher internal constructor(
         var billingAddressConfig: BillingAddressConfig = BillingAddressConfig(),
 
         /**
+         * Shipping address collection configuration.
+         */
+        var shippingAddressConfig: ShippingAddressConfig = ShippingAddressConfig(),
+
+        /**
          * If `true`, Google Pay is considered ready if the customer's Google Pay wallet
          * has existing payment methods.
          *
@@ -259,6 +264,46 @@ class GooglePayLauncher internal constructor(
              * Name, street address, locality, region, country code, and postal code.
              */
             Full("FULL")
+        }
+    }
+
+    @Parcelize
+    data class ShippingAddressConfig @JvmOverloads constructor(
+        /**
+         * Set to true to request a shipping address.
+         */
+        internal val isRequired: Boolean = false,
+
+        /**
+         * ISO 3166-1 alpha-2 country code values of the countries where shipping is allowed.
+         * If this object isn't specified, all shipping address countries are allowed.
+         */
+        internal val allowedCountryCodes: Set<String> = emptySet(),
+
+        /**
+         * Set to true if a phone number is required for the provided shipping address.
+         */
+        internal val isPhoneNumberRequired: Boolean = false
+    ) : Parcelable {
+        /**
+         * Normalized form of [allowedCountryCodes] (i.e. capitalized country codes)
+         */
+        private val normalizedAllowedCountryCodes: Set<String>
+            get() {
+                return allowedCountryCodes.map {
+                    it.uppercase()
+                }.toSet()
+            }
+
+        init {
+            val countryCodes = Locale.getISOCountries()
+            normalizedAllowedCountryCodes.forEach { allowedShippingCountryCode ->
+                require(
+                    countryCodes.any { allowedShippingCountryCode == it }
+                ) {
+                    "'$allowedShippingCountryCode' is not a valid country code"
+                }
+            }
         }
     }
 
