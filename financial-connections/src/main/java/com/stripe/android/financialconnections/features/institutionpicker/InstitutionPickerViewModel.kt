@@ -76,6 +76,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Prevents [CancellationException] to map to [Fail] when coroutine being cancelled
+     * due to search query changes. In these cases, re-map the [Async] instance to [Loading]
+     */
     private fun Async<InstitutionResponse>.isCancellationError(): Boolean = when {
         this !is Fail -> false
         error is CancellationException -> true
