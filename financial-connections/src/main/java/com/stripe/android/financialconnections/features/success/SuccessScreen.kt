@@ -68,7 +68,12 @@ private fun SuccessContent(
 ) {
     val uriHandler = LocalUriHandler.current
     FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                onCloseClick = onCloseClick,
+                showBack = false
+            )
+        }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
