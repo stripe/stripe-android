@@ -3,9 +3,6 @@ package com.stripe.android.ui.core.forms.resources
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentsUiFeatures
-import com.stripe.android.features.FeatureAvailability
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.EmptyFormSpec
@@ -18,12 +15,8 @@ import java.util.Locale
 class LpmRepositoryTest {
     private val lpmRepository = LpmRepository(
         LpmRepository.LpmRepositoryArguments(
-            ApplicationProvider.getApplicationContext<Application>().resources,
-            object : IsFinancialConnectionsAvailable {
-                override fun invoke(): Boolean {
-                    return true
-                }
-            }
+            resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            isFinancialConnectionsAvailable = { true }
         )
     )
 
@@ -156,7 +149,7 @@ class LpmRepositoryTest {
         lpmRepository.updateFromDisk()
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
-        LpmRepository.exposedPaymentMethods.forEach { code ->
+        lpmRepository.supportedPaymentMethods.forEach { code ->
             if (!hasEmptyForm(code)) {
                 assertThat(
                     lpmRepository.fromCode(code)!!.formSpec.items
@@ -179,12 +172,8 @@ class LpmRepositoryTest {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources,
-                object : IsFinancialConnectionsAvailable {
-                    override fun invoke(): Boolean {
-                        return true
-                    }
-                }
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                isFinancialConnectionsAvailable = { true }
             )
         )
 
@@ -283,12 +272,8 @@ class LpmRepositoryTest {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources,
-                object : IsFinancialConnectionsAvailable {
-                    override fun invoke(): Boolean {
-                        return false
-                    }
-                }
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                isFinancialConnectionsAvailable = { false }
             )
         )
 
@@ -308,17 +293,12 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify that UPI is supported when it is enabled`() {
-        PaymentsUiFeatures.upi.overrideAvailability = FeatureAvailability.Enabled
-
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources,
-                object : IsFinancialConnectionsAvailable {
-                    override fun invoke(): Boolean {
-                        return false
-                    }
-                }
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                isFinancialConnectionsAvailable = { false },
+                isUpiEnabled = true
             )
         )
 
@@ -328,22 +308,16 @@ class LpmRepositoryTest {
         )
 
         assertThat(lpmRepository.fromCode("upi")).isNotNull()
-        PaymentsUiFeatures.upi.overrideAvailability = null
     }
 
     @Test
     fun `Verify that UPI is not supported when it is disabled`() {
-        PaymentsUiFeatures.upi.overrideAvailability = FeatureAvailability.Disabled
-
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources,
-                object : IsFinancialConnectionsAvailable {
-                    override fun invoke(): Boolean {
-                        return false
-                    }
-                }
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                isFinancialConnectionsAvailable = { false },
+                isUpiEnabled = false
             )
         )
 
@@ -353,6 +327,5 @@ class LpmRepositoryTest {
         )
 
         assertThat(lpmRepository.fromCode("upi")).isNull()
-        PaymentsUiFeatures.upi.overrideAvailability = null
     }
 }
