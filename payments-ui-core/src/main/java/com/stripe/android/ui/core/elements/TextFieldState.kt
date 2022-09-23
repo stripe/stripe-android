@@ -44,3 +44,10 @@ interface TextFieldState {
      */
     fun isBlank(): Boolean
 }
+
+internal fun TextFieldState.canAcceptInput(
+    currentValue: String,
+    proposedValue: String
+): Boolean {
+    return !(isFull() && proposedValue.length > currentValue.length)
+}

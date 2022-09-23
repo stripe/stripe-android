@@ -5,13 +5,11 @@ import android.os.Looper.getMainLooper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error.Invalid
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid.Full
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid.Limitless
-import kotlinx.coroutines.flow.flowOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -221,53 +219,6 @@ internal class TextFieldControllerTest {
         controller.onValueChange("1a2b3c4d")
 
         verify(config).filter("1a2b3c4d")
-    }
-
-    @Test
-    fun `Does not accept input if text field is full`() {
-        val controller = CvcController(
-            cardBrandFlow = flowOf(CardBrand.MasterCard)
-        )
-
-        val didAccept = controller.shouldAcceptInput(
-            currentValue = "123",
-            proposedValue = "1234",
-            fieldState = Full
-        )
-
-        assertThat(didAccept).isFalse()
-    }
-
-    @Test
-    fun `Accepts input on a text field that's not full`() {
-        val controller = CvcController(
-            cardBrandFlow = flowOf(CardBrand.MasterCard)
-        )
-
-        val didAccept = controller.shouldAcceptInput(
-            currentValue = "12",
-            proposedValue = "123",
-            fieldState = TextFieldStateConstants.Error.Incomplete(
-                errorMessageResId = R.string.invalid_cvc
-            )
-        )
-
-        assertThat(didAccept).isTrue()
-    }
-
-    @Test
-    fun `Accepts input on a full text field if it's a deletion`() {
-        val controller = CvcController(
-            cardBrandFlow = flowOf(CardBrand.MasterCard)
-        )
-
-        val didAccept = controller.shouldAcceptInput(
-            currentValue = "123",
-            proposedValue = "12",
-            fieldState = Full
-        )
-
-        assertThat(didAccept).isTrue()
     }
 
     private fun createControllerWithState(

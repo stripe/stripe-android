@@ -126,7 +126,7 @@ fun TextField(
     TextField(
         value = value,
         onValueChange = { newValue ->
-            val acceptInput = textFieldController.shouldAcceptInput(value, newValue, fieldState)
+            val acceptInput = fieldState.canAcceptInput(value, newValue)
 
             if (acceptInput) {
                 val newTextState = textFieldController.onValueChange(newValue)
