@@ -176,4 +176,7 @@ internal data class PartnerAuthState(
         val flow: Flow?,
         val showPartnerDisclosure: Boolean
     )
+
+    val canNavigateBack: Boolean
+        get() = authenticationStatus is Loading || authenticationStatus is Success
 }

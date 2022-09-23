@@ -80,7 +80,12 @@ private fun PartnerAuthScreenContent(
     onCloseClick: () -> Unit
 ) {
     FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                onCloseClick = onCloseClick,
+                showBack = state.canNavigateBack
+            )
+        }
     ) {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> LoadingContent(
