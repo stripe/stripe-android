@@ -26,9 +26,9 @@ internal abstract class BasePaymentMethodsListFragment(
 ) {
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
-    protected lateinit var config: FragmentConfig
     @VisibleForTesting
     lateinit var adapter: PaymentOptionsAdapter
+    protected lateinit var config: FragmentConfig
     private var editMenuItem: MenuItem? = null
 
     @VisibleForTesting

@@ -107,7 +107,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         createScenario(
             fragmentConfig = FRAGMENT_CONFIG.copy(
                 savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
-            ),
+            )
         ).onFragment { fragment ->
             fragment.isEditing = true
             fragment.adapter.items = fragment.adapter.items.dropLast(1)

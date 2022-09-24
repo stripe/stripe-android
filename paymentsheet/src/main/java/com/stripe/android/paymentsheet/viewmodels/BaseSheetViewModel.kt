@@ -424,7 +424,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
             paymentMethod.id?.let { paymentMethodId ->
-                if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
+                if (
+                    (selection.value as? PaymentSelection.Saved)
+                        ?.paymentMethod?.id == paymentMethodId
+                ) {
                     _selection.value = null
                 }
 
