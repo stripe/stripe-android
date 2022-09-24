@@ -101,6 +101,22 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     }
 
     @Test
+    fun `When last item is deleted then edit menu item is hidden`() {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+        createScenario(
+            fragmentConfig = FRAGMENT_CONFIG.copy(
+                savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
+            ),
+        ).onFragment { fragment ->
+            fragment.isEditing = true
+            fragment.adapter.items = fragment.adapter.items.dropLast(1)
+            fragment.deletePaymentMethod(PaymentOptionsAdapter.Item.SavedPaymentMethod(paymentMethod))
+            assertThat(fragment.isEditing).isFalse()
+        }
+    }
+
+    @Test
     fun `sets up adapter`() {
         createScenario(
             initialState = Lifecycle.State.INITIALIZED
