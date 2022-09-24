@@ -29,8 +29,7 @@ internal abstract class BasePaymentMethodsListFragment(
     protected lateinit var config: FragmentConfig
     @VisibleForTesting
     lateinit var adapter: PaymentOptionsAdapter
-    @VisibleForTesting
-    var editMenuItem: MenuItem? = null
+    private var editMenuItem: MenuItem? = null
 
     @VisibleForTesting
     internal var isEditing = false
