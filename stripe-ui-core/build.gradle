@@ -1,0 +1,22 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'kotlin-kapt'
+apply plugin: 'checkstyle'
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+
+ext {
+    artifactId = "stripe-ui-core"
+    artifactName = "stripe-ui-core"
+    artifactDescrption = "The core UI module of Stripe Android SDKs"
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
+
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "com.google.truth:truth:$truthVersion"
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

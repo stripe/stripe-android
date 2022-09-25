@@ -82,22 +82,29 @@ import java.util.UUID
 private fun WalletBodyPreview() {
     val paymentDetailsList = listOf(
         ConsumerPaymentDetails.Card(
-            "id1",
-            true,
-            2030,
-            12,
-            CardBrand.Visa,
-            "4242",
-            CvcCheck.Fail
+            id = "id1",
+            isDefault = false,
+            expiryYear = 2030,
+            expiryMonth = 12,
+            brand = CardBrand.Visa,
+            last4 = "4242",
+            cvcCheck = CvcCheck.Fail
         ),
         ConsumerPaymentDetails.Card(
-            "id2",
-            false,
-            2022,
-            1,
-            CardBrand.MasterCard,
-            "4444",
-            CvcCheck.Pass
+            id = "id2",
+            isDefault = false,
+            expiryYear = 2022,
+            expiryMonth = 1,
+            brand = CardBrand.MasterCard,
+            last4 = "4444",
+            cvcCheck = CvcCheck.Pass
+        ),
+        ConsumerPaymentDetails.BankAccount(
+            id = "id2",
+            isDefault = true,
+            bankIconCode = "icon",
+            bankName = "Stripe Bank With Long Name",
+            last4 = "6789"
         )
     )
 
@@ -107,7 +114,7 @@ private fun WalletBodyPreview() {
                 uiState = WalletUiState(
                     paymentDetailsList = paymentDetailsList,
                     supportedTypes = SupportedPaymentMethod.allTypes,
-                    selectedItem = paymentDetailsList.first(),
+                    selectedItem = paymentDetailsList[2],
                     isExpanded = true,
                     errorMessage = ErrorMessage.Raw("Something went wrong")
                 ),
@@ -427,7 +434,6 @@ internal fun CollapsedPaymentDetails(
             color = MaterialTheme.linkColors.disabledText
         )
         PaymentDetails(paymentDetails = selectedPaymentMethod, enabled = true)
-        Spacer(modifier = Modifier.weight(1f))
         Icon(
             painter = painterResource(id = R.drawable.ic_link_chevron),
             contentDescription = stringResource(id = R.string.wallet_expand_accessibility),
