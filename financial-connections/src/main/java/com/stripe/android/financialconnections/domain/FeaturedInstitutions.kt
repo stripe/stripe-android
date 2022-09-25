@@ -5,24 +5,28 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsIn
 import javax.inject.Inject
 
 /**
- * Searches for institutions based on a given query.
+ * Fetches featured institutions.
  *
  */
-internal class SearchInstitutions @Inject constructor(
+internal class FeaturedInstitutions @Inject constructor(
     private val repository: FinancialConnectionsInstitutionsRepository
 ) {
     suspend operator fun invoke(
         clientSecret: String,
-        query: String
+        testMode: Boolean,
     ): InstitutionResponse {
-        return repository.searchInstitutions(
+        val limit = when (testMode) {
+            true -> SEARCH_INSTITUTIONS_LIMIT_TEST_MODE
+            false -> SEARCH_INSTITUTIONS_LIMIT
+        }
+        return repository.featuredInstitutions(
             clientSecret = clientSecret,
-            query = query,
-            limit = SEARCH_INSTITUTIONS_LIMIT
+            limit = limit
         )
     }
 
     private companion object {
         private const val SEARCH_INSTITUTIONS_LIMIT = 8
+        private const val SEARCH_INSTITUTIONS_LIMIT_TEST_MODE = 10
     }
 }

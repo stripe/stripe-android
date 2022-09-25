@@ -143,30 +143,35 @@ private fun AccountPickerLoaded(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(
+        Column(
             modifier = Modifier
-                .fillMaxWidth(),
-            text = stringResource(R.string.stripe_account_picker_multiselect_account),
-            style = FinancialConnectionsTheme.typography.subtitle
-        )
-        when (selectionMode) {
-            SelectionMode.DROPDOWN -> DropdownContent(
-                accounts = accounts,
-                selectedIds = selectedIds,
-                onAccountClicked = onAccountClicked
+                .weight(1f)
+        ) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                text = stringResource(R.string.stripe_account_picker_multiselect_account),
+                style = FinancialConnectionsTheme.typography.subtitle
             )
-            SelectionMode.RADIO -> SingleSelectContent(
-                accounts = accounts,
-                selectedIds = selectedIds,
-                onAccountClicked = onAccountClicked
-            )
-            SelectionMode.CHECKBOXES -> MultiSelectContent(
-                accounts = accounts,
-                selectedIds = selectedIds,
-                onAccountClicked = onAccountClicked
-            )
+            when (selectionMode) {
+                SelectionMode.DROPDOWN -> DropdownContent(
+                    accounts = accounts,
+                    selectedIds = selectedIds,
+                    onAccountClicked = onAccountClicked
+                )
+                SelectionMode.RADIO -> SingleSelectContent(
+                    accounts = accounts,
+                    selectedIds = selectedIds,
+                    onAccountClicked = onAccountClicked
+                )
+                SelectionMode.CHECKBOXES -> MultiSelectContent(
+                    accounts = accounts,
+                    selectedIds = selectedIds,
+                    onAccountClicked = onAccountClicked
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
         }
-        Spacer(modifier = Modifier.weight(1f))
         accessibleDataCalloutModel?.let { AccessibleDataCallout(it) }
         Spacer(modifier = Modifier.size(12.dp))
         FinancialConnectionsButton(

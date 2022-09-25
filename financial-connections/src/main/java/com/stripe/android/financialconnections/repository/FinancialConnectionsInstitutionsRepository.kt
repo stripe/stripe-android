@@ -7,8 +7,16 @@ import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_C
 
 internal interface FinancialConnectionsInstitutionsRepository {
 
-    suspend fun featuredInstitutions(clientSecret: String): InstitutionResponse
-    suspend fun searchInstitutions(clientSecret: String, query: String): InstitutionResponse
+    suspend fun featuredInstitutions(
+        clientSecret: String,
+        limit: Int
+    ): InstitutionResponse
+
+    suspend fun searchInstitutions(
+        clientSecret: String,
+        query: String,
+        limit: Int
+    ): InstitutionResponse
 
     companion object {
         operator fun invoke(
@@ -29,13 +37,16 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
     private val apiRequestFactory: ApiRequest.Factory
 ) : FinancialConnectionsInstitutionsRepository {
 
-    override suspend fun featuredInstitutions(clientSecret: String): InstitutionResponse {
+    override suspend fun featuredInstitutions(
+        clientSecret: String,
+        limit: Int
+    ): InstitutionResponse {
         val request = apiRequestFactory.createGet(
             url = featuredInstitutionsUrl,
             options = apiOptions,
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
-                "limit" to SEARCH_INSTITUTIONS_LIMIT
+                "limit" to limit
             )
         )
         return requestExecutor.execute(
@@ -46,7 +57,9 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
 
     override suspend fun searchInstitutions(
         clientSecret: String,
-        query: String
+        query: String,
+        limit: Int
+
     ): InstitutionResponse {
         val request = apiRequestFactory.createGet(
             url = institutionsUrl,
@@ -54,7 +67,7 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 "query" to query,
-                "limit" to SEARCH_INSTITUTIONS_LIMIT
+                "limit" to limit
             )
         )
         return requestExecutor.execute(
@@ -64,8 +77,6 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
     }
 
     companion object {
-        private const val SEARCH_INSTITUTIONS_LIMIT = 8
-
         internal const val institutionsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/institutions"
 
