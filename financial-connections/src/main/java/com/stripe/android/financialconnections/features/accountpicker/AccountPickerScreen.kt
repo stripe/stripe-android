@@ -334,6 +334,8 @@ private fun AccountItem(
     account: PartnerAccount,
     selectorContent: @Composable () -> Unit
 ) {
+    val padding =
+        remember(account) { if (account.displayableAccountNumbers != null) 10.dp else 12.dp }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -346,7 +348,7 @@ private fun AccountItem(
                 shape = RoundedCornerShape(8.dp)
             )
             .clickable(enabled = enabled) { onAccountClicked(account) }
-            .padding(12.dp)
+            .padding(padding)
     ) {
         Row(
             horizontalArrangement = Arrangement.Start,
@@ -364,15 +366,16 @@ private fun AccountItem(
                     },
                     style = FinancialConnectionsTheme.typography.bodyEmphasized
                 )
+                Spacer(modifier = Modifier.size(4.dp))
                 account.displayableAccountNumbers?.let {
                     Text(
-                        text = "****$it",
+                        text = "········$it",
                         color = if (enabled) {
                             FinancialConnectionsTheme.colors.textSecondary
                         } else {
                             FinancialConnectionsTheme.colors.textDisabled
                         },
-                        style = FinancialConnectionsTheme.typography.captionTight
+                        style = FinancialConnectionsTheme.typography.body
                     )
                 }
             }
