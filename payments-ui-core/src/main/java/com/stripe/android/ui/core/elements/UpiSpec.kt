@@ -13,7 +13,7 @@ data class UpiSpec(
 ) : FormItemSpec() {
     fun transform(): SectionElement {
         return createSectionElement(
-            sectionFieldElement = UpiElement(identifier = apiPath),
+            sectionFieldElement = UpiElement(identifier = IdentifierSpec.Vpa),
             label = R.string.stripe_paymentsheet_buy_using_upi_id
         )
     }

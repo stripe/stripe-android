@@ -62,6 +62,7 @@ data class IdentifierSpec(
         val SameAsShipping = IdentifierSpec("same_as_shipping", ignoreField = true)
 
         val Upi = IdentifierSpec("upi")
+        val Vpa = IdentifierSpec("upi[vpa]")
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {
