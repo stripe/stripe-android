@@ -46,7 +46,12 @@ internal class PostAuthorizationSessionTest {
             )
         }
 
-        val result: Throwable = kotlin.runCatching { postAuthorizationSession(selectedInstitution) }
+        val result: Throwable = kotlin.runCatching {
+            postAuthorizationSession(
+                institution = selectedInstitution,
+                allowManualEntry = true
+            )
+        }
             .exceptionOrNull()!!
 
         assertThat(result).isInstanceOf(InstitutionUnplannedException::class.java)
@@ -70,7 +75,12 @@ internal class PostAuthorizationSessionTest {
             )
         }
 
-        val result: Throwable = kotlin.runCatching { postAuthorizationSession(selectedInstitution) }
+        val result: Throwable = kotlin.runCatching {
+            postAuthorizationSession(
+                institution = selectedInstitution,
+                allowManualEntry = true
+            )
+        }
             .exceptionOrNull()!!
 
         assertThat(result).isInstanceOf(InstitutionPlannedException::class.java)
@@ -90,7 +100,12 @@ internal class PostAuthorizationSessionTest {
         )
         repository.postAuthorizationSessionProvider = { throw unhandledException }
 
-        val result: Throwable = kotlin.runCatching { postAuthorizationSession(selectedInstitution) }
+        val result: Throwable = kotlin.runCatching {
+            postAuthorizationSession(
+                institution = selectedInstitution,
+                allowManualEntry = true
+            )
+        }
             .exceptionOrNull()!!
 
         assertThat(result).isEqualTo(unhandledException)
