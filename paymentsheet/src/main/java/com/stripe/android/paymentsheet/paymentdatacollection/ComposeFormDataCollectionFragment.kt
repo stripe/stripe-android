@@ -17,6 +17,9 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.Upi
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParams.*
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetActivity
@@ -159,10 +162,18 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
 
                 )
             } else {
+                // TODO Can we avoid this?
+                val createParams = if (selectedPaymentMethodResources.code == Upi.code) {
+                    val vpa = formFieldValues.fieldValuePairs[IdentifierSpec.Upi]?.value
+                    PaymentMethodCreateParams.create(Upi(vpa))
+                } else {
+                    this
+                }
+
                 PaymentSelection.New.GenericPaymentMethod(
                     getString(selectedPaymentMethodResources.displayNameResource),
                     selectedPaymentMethodResources.iconResource,
-                    this,
+                    createParams,
                     customerRequestedSave = formFieldValues.userRequestedReuse
                 )
             }

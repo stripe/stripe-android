@@ -61,6 +61,8 @@ data class IdentifierSpec(
         val OneLineAddress = IdentifierSpec("address")
         val SameAsShipping = IdentifierSpec("same_as_shipping", ignoreField = true)
 
+        val Upi = IdentifierSpec("upi")
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {
             CardBrand.v1 -> CardBrand

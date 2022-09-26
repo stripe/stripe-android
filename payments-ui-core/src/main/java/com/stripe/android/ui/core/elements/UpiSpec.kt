@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UpiSpec(
     @SerialName("api_path")
-    override val apiPath: IdentifierSpec = IdentifierSpec.Generic("upi")
+    override val apiPath: IdentifierSpec = IdentifierSpec.Upi
 ) : FormItemSpec() {
     fun transform(): SectionElement {
         return createSectionElement(
