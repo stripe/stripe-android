@@ -24,7 +24,8 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.BlikAuthorize -> BlikAuthorizeParser()
             StripeIntent.NextActionType.WeChatPayRedirect -> WeChatPayRedirectParser()
             StripeIntent.NextActionType.VerifyWithMicrodeposits -> VerifyWithMicrodepositsParser()
-            else -> return null
+            StripeIntent.NextActionType.UpiAwaitNotification -> UpiAwaitNotificationParser()
+            null -> return null
         }
         return parser.parse(json.optJSONObject(nextActionType.code) ?: JSONObject())
     }
@@ -211,6 +212,13 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             private const val ARRIVAL_DATE = "arrival_date"
             private const val HOSTED_VERIFICATION_URL = "hosted_verification_url"
             private const val MICRODEPOSIT_TYPE = "microdeposit_type"
+        }
+    }
+
+    internal class UpiAwaitNotificationParser :
+        ModelJsonParser<StripeIntent.NextActionData.UpiAwaitNotification> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.UpiAwaitNotification {
+            return StripeIntent.NextActionData.UpiAwaitNotification
         }
     }
 
