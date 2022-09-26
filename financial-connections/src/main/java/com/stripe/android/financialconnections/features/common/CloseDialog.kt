@@ -52,7 +52,7 @@ internal fun CloseDialog(
 
 @Composable
 @Preview
-fun CloseDialogPreview() {
+internal fun CloseDialogPreview() {
     FinancialConnectionsTheme {
         CloseDialog(
             {}, {}
