@@ -95,7 +95,7 @@ ext {
     mockitoCoreVersion = '4.8.0'
     mockitoKotlinVersion = '4.0.0'
     espressoVersion = '3.4.0'
-    jsonVersion = '20220320'
+    jsonVersion = '20220924'
     uiautomator = '2.2.0'
 
     group_name = GROUP
