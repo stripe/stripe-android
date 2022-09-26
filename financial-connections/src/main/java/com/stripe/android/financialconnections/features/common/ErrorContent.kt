@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections.features.common
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,16 +10,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
@@ -25,6 +32,8 @@ import com.stripe.android.financialconnections.exception.InstitutionPlannedExcep
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
 import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import java.text.SimpleDateFormat
 
@@ -33,7 +42,7 @@ internal fun UnclassifiedErrorContent() {
     ErrorContent(
         painterResource(id = R.drawable.stripe_ic_brandicon_institution),
         title = stringResource(R.string.stripe_error_generic_title),
-        content = stringResource(R.string.stripe_error_generic_desc)
+        content = stringResource(R.string.stripe_error_generic_desc),
     )
 }
 
@@ -46,7 +55,7 @@ internal fun InstitutionUnknownErrorContent(
         title = stringResource(R.string.stripe_error_generic_title),
         content = stringResource(R.string.stripe_error_unplanned_downtime_desc),
         ctaText = stringResource(R.string.stripe_error_cta_select_another_bank),
-        onCtaClick = onSelectAnotherBank
+        onCtaClick = onSelectAnotherBank,
     )
 }
 
@@ -63,7 +72,7 @@ internal fun InstitutionUnplannedDowntimeErrorContent(
         ),
         content = stringResource(R.string.stripe_error_unplanned_downtime_desc),
         ctaText = stringResource(R.string.stripe_error_cta_select_another_bank),
-        onCtaClick = onSelectAnotherBank
+        onCtaClick = onSelectAnotherBank,
     )
 }
 
@@ -72,8 +81,9 @@ internal fun InstitutionPlannedDowntimeErrorContent(
     exception: InstitutionPlannedException,
     onSelectAnotherBank: () -> Unit
 ) {
+    val javaLocale: java.util.Locale = remember { java.util.Locale(Locale.current.language) }
     val readableDate = remember(exception.backUpAt) {
-        SimpleDateFormat("dd/MM/yyyy HH:mm").format(exception.backUpAt)
+        SimpleDateFormat("dd/MM/yyyy HH:mm", javaLocale).format(exception.backUpAt)
     }
     ErrorContent(
         iconPainter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
@@ -86,7 +96,7 @@ internal fun InstitutionPlannedDowntimeErrorContent(
             readableDate
         ),
         ctaText = stringResource(R.string.stripe_error_cta_select_another_bank),
-        onCtaClick = onSelectAnotherBank
+        onCtaClick = onSelectAnotherBank,
     )
 }
 
@@ -107,17 +117,21 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
             exception.merchantName
         ),
         ctaText = stringResource(R.string.stripe_error_cta_select_another_bank),
-        onCtaClick = onSelectAnotherBank
+        onCtaClick = onSelectAnotherBank,
     )
 }
 
 @Composable
 internal fun ErrorContent(
     iconPainter: Painter,
+    badge: Pair<Painter, Shape> = Pair(
+        painterResource(id = R.drawable.stripe_ic_warning_circle),
+        CircleShape
+    ),
     title: String,
     content: String,
     ctaText: String? = null,
-    onCtaClick: (() -> Unit)? = null
+    onCtaClick: (() -> Unit)? = null,
 ) {
     val scrollState = rememberScrollState()
     Column(
@@ -130,13 +144,7 @@ internal fun ErrorContent(
                 .weight(1f)
                 .verticalScroll(scrollState)
         ) {
-            Image(
-                painter = iconPainter,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(6.dp))
-            )
+            BadgedImage(iconPainter, badge)
             Spacer(modifier = Modifier.size(16.dp))
             Text(
                 text = title,
@@ -161,9 +169,45 @@ internal fun ErrorContent(
 }
 
 @Composable
+private fun BadgedImage(
+    iconPainter: Painter,
+    badge: Pair<Painter, Shape>,
+) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+    ) {
+        Image(
+            painter = iconPainter,
+            contentDescription = null,
+            modifier = Modifier
+                .size(36.dp)
+                .align(Alignment.BottomStart)
+                .clip(RoundedCornerShape(6.dp))
+        )
+        Icon(
+            painter = badge.first,
+            contentDescription = "",
+            tint = FinancialConnectionsTheme.colors.textCritical,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .size(12.dp)
+                .clip(badge.second)
+                // draws a background with padding around the badge to simulate a border.
+                .background(FinancialConnectionsTheme.colors.textWhite)
+                .padding(1.dp)
+        )
+    }
+}
+
+@Composable
 @Preview(group = "Errors", name = "unclassified error")
 internal fun ErrorContentPreview() {
     FinancialConnectionsTheme {
-        UnclassifiedErrorContent()
+        FinancialConnectionsScaffold(
+            topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
+        ) {
+            UnclassifiedErrorContent()
+        }
     }
 }

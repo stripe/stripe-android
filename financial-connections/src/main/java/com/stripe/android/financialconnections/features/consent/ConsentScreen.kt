@@ -294,7 +294,7 @@ private fun ConsentBottomSheetBullet(
 ) {
     Row {
         Icon(
-            painter = painterResource(id = R.drawable.stripe_ic_check),
+            painter = painterResource(id = R.drawable.stripe_ic_check_circle),
             contentDescription = null,
             tint = FinancialConnectionsTheme.colors.textSuccess,
             modifier = Modifier
