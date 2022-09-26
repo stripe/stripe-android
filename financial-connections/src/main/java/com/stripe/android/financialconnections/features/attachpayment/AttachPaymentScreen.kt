@@ -30,7 +30,7 @@ internal fun AttachPaymentScreen() {
     BackHandler(enabled = true) {}
     AttachPaymentContent(
         payload = state.value.payload,
-        onCloseClick = parentViewModel::onCloseClick,
+        onCloseClick = parentViewModel::onCloseWithConfirmationClick,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onSelectAnotherBank = viewModel::onSelectAnotherBank
     )

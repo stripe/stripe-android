@@ -3,25 +3,29 @@ package com.stripe.android.financialconnections.features.common
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun CloseDialog(
-    onConfirmClick: () -> Unit
+    onConfirmClick: () -> Unit,
+    onDismissClick: () -> Unit
 ) {
     AlertDialog(
         backgroundColor = FinancialConnectionsTheme.colors.backgroundContainer,
-        onDismissRequest = {},
+        onDismissRequest = onDismissClick,
         title = {
             Text(
-                text = "Are you sure you want to cancel?",
-                style = FinancialConnectionsTheme.typography.body
+                text = stringResource(R.string.stripe_close_dialog_title),
+                style = FinancialConnectionsTheme.typography.subtitle
             )
         },
         text = {
             Text(
-                text = "TBD",
+                text = stringResource(R.string.stripe_close_dialog_desc),
                 style = FinancialConnectionsTheme.typography.body
             )
         },
@@ -31,17 +35,27 @@ internal fun CloseDialog(
                 type = FinancialConnectionsButton.Type.Critical,
                 onClick = onConfirmClick
             ) {
-                Text("This is the Confirm Button")
+                Text(stringResource(R.string.stripe_close_dialog_confirm))
             }
         },
         dismissButton = {
             FinancialConnectionsButton(
                 size = FinancialConnectionsButton.Size.Pill,
                 type = FinancialConnectionsButton.Type.Secondary,
-                onClick = {}
+                onClick = onDismissClick
             ) {
-                Text("This is the dismiss Button")
+                Text(stringResource(R.string.stripe_close_dialog_back))
             }
-        }
+        },
     )
+}
+
+@Composable
+@Preview
+fun CloseDialogPreview() {
+    FinancialConnectionsTheme {
+        CloseDialog(
+            {}, {}
+        )
+    }
 }

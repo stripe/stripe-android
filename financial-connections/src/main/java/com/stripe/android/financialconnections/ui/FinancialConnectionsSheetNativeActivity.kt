@@ -58,7 +58,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 Column {
                     Box(modifier = Modifier.weight(1f)) {
                         val showCloseDialog = viewModel.collectAsState { it.showCloseDialog }
-                        if (showCloseDialog.value) CloseDialog(viewModel::onCloseConfirm)
+                        if (showCloseDialog.value) CloseDialog(
+                            viewModel::onCloseConfirm,
+                            viewModel::onCloseDismiss
+                        )
                         NavHost()
                     }
                 }

@@ -48,7 +48,7 @@ internal fun SuccessScreen() {
             loading = state.value.completeSession is Loading,
             onDoneClick = viewModel::onDoneClick,
             onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
-            onCloseClick = parentViewModel::onCloseClick,
+            onCloseClick = parentViewModel::onCloseWithConfirmationClick,
             showLinkAnotherAccount = payload.showLinkAnotherAccount
         )
     }

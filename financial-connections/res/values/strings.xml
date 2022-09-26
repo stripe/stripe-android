@@ -114,5 +114,9 @@
     <string name="stripe_attachlinkedpaymentaccount_error_title">Your account number couldn’t be accessed at this time</string>
     <string name="stripe_attachlinkedpaymentaccount_error_desc">Please enter your bank details manually</string>
     <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Please enter your bank details manually or select another bank.</string>
+    <string name="stripe_close_dialog_title">Are you sure you want to cancel?</string>
+    <string name="stripe_close_dialog_desc">You haven\'t finished linking your bank account.</string>
+    <string name="stripe_close_dialog_confirm">Yes, cancel</string>
+    <string name="stripe_close_dialog_back">Back</string>
 </resources>
 

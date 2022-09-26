@@ -54,7 +54,7 @@ internal fun ManualEntrySuccessScreen(
         microdepositVerificationMethod = microdepositVerificationMethod,
         last4 = last4,
         loading = completeAuthSessionAsync.value is Loading,
-        onCloseClick = parentViewModel::onCloseClick,
+        onCloseClick = parentViewModel::onCloseWithConfirmationClick,
         onDoneClick = viewModel::onSubmit
     )
 }

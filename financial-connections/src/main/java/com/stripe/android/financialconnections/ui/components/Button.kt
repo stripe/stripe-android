@@ -17,6 +17,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
@@ -35,7 +36,7 @@ internal fun FinancialConnectionsButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(size = size.radius),
         contentPadding = size.paddingValues(),
         colors = type.buttonColors(),
         content = {
@@ -103,10 +104,14 @@ internal object FinancialConnectionsButton {
     }
 
     sealed class Size {
+
         @Composable
         abstract fun paddingValues(): PaddingValues
+        abstract val radius: Dp
 
         object Pill : Size() {
+            override val radius: Dp = 4.dp
+
             @Composable
             override fun paddingValues(): PaddingValues = PaddingValues(
                 start = 8.dp,
@@ -117,6 +122,8 @@ internal object FinancialConnectionsButton {
         }
 
         object Regular : Size() {
+            override val radius: Dp = 12.dp
+
             @Composable
             override fun paddingValues(): PaddingValues = PaddingValues(
                 start = 16.dp,
