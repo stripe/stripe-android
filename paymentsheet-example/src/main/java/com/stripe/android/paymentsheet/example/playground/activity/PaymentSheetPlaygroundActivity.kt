@@ -479,31 +479,34 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
          * This is a pairing of the countries to their default currency
          **/
         private val countryCurrencyPairs = CountryUtils.getOrderedCountries(Locale.getDefault())
-            .filter {
+            .filter { country ->
                 /**
                  * Modify this list if you want to change the countries displayed in the playground.
                  */
-                setOf("US", "GB", "AU", "FR").contains(it.code.value)
-            }.map {
+                country.code.value in setOf("US", "GB", "AU", "FR", "IN")
+            }.map { country ->
                 /**
                  * Modify this statement to change the default currency associated with each
                  * country.  The currency values should match the stripeSupportedCurrencies.
                  */
-                when (it.code.value) {
+                when (country.code.value) {
                     "GB" -> {
-                        it to "GBP"
+                        country to "GBP"
                     }
                     "FR" -> {
-                        it to "EUR"
+                        country to "EUR"
                     }
                     "AU" -> {
-                        it to "AUD"
+                        country to "AUD"
                     }
                     "US" -> {
-                        it to "USD"
+                        country to "USD"
+                    }
+                    "IN" -> {
+                        country to "INR"
                     }
                     else -> {
-                        it to "USD"
+                        country to "USD"
                     }
                 }
             }
@@ -511,12 +514,12 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         // List was created from: https://stripe.com/docs/currencies
         /** Modify this list if you want to change the currencies displayed in the playground **/
         private val stripeSupportedCurrencies = listOf(
-            "AUD", "EUR", "GBP", "USD",
+            "AUD", "EUR", "GBP", "USD", "INR"
 //            "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS",  "AWG", "AZN", "BAM",
 //            "BBD", "BDT", "BGN", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BWP", "BYN", "BZD",
 //            "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CVE", "CZK", "DJF", "DKK", "DOP",
-//            "DZD", "EGP", "ETB", "FJD", "FKP",  "GEL", "GIP", "GMD", "GNF", "GTQ",
-//            "GYD", "HKD", "HNL", "HRK", "HTG", "HUF", "IDR", "ILS", "INR", "ISK", "JMD", "JPY",
+//            "DZD", "EGP", "ETB", "FJD", "FKP", "GEL", "GIP", "GMD", "GNF", "GTQ",
+//            "GYD", "HKD", "HNL", "HRK", "HTG", "HUF", "IDR", "ILS", "ISK", "JMD", "JPY",
 //            "KES", "KGS", "KHR", "KMF", "KRW", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL",
 //            "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRO", "MUR", "MVR", "MWK", "MXN",
 //            "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "PAB", "PEN", "PGK", "PHP",

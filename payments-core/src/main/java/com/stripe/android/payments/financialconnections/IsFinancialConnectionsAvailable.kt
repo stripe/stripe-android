@@ -3,7 +3,7 @@ package com.stripe.android.payments.financialconnections
 import androidx.annotation.RestrictTo
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface IsFinancialConnectionsAvailable {
+fun interface IsFinancialConnectionsAvailable {
     operator fun invoke(): Boolean
 }
 

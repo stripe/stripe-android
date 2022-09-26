@@ -3,7 +3,6 @@ package com.stripe.android.ui.core.forms.resources
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.EmptyFormSpec
@@ -16,12 +15,8 @@ import java.util.Locale
 class LpmRepositoryTest {
     private val lpmRepository = LpmRepository(
         LpmRepository.LpmRepositoryArguments(
-            ApplicationProvider.getApplicationContext<Application>().resources,
-            object : IsFinancialConnectionsAvailable {
-                override fun invoke(): Boolean {
-                    return true
-                }
-            }
+            resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            isFinancialConnectionsAvailable = { true }
         )
     )
 
@@ -154,7 +149,7 @@ class LpmRepositoryTest {
         lpmRepository.updateFromDisk()
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
-        LpmRepository.exposedPaymentMethods.forEach { code ->
+        lpmRepository.supportedPaymentMethods.forEach { code ->
             if (!hasEmptyForm(code)) {
                 assertThat(
                     lpmRepository.fromCode(code)!!.formSpec.items
@@ -177,12 +172,8 @@ class LpmRepositoryTest {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources,
-                object : IsFinancialConnectionsAvailable {
-                    override fun invoke(): Boolean {
-                        return true
-                    }
-                }
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                isFinancialConnectionsAvailable = { true }
             )
         )
 
@@ -281,12 +272,8 @@ class LpmRepositoryTest {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources,
-                object : IsFinancialConnectionsAvailable {
-                    override fun invoke(): Boolean {
-                        return false
-                    }
-                }
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                isFinancialConnectionsAvailable = { false }
             )
         )
 
@@ -302,5 +289,43 @@ class LpmRepositoryTest {
         )
 
         assertThat(lpmRepository.fromCode("us_bank_account")).isNull()
+    }
+
+    @Test
+    fun `Verify that UPI is supported when it is enabled`() {
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                isFinancialConnectionsAvailable = { false },
+                isUpiEnabled = true
+            )
+        )
+
+        lpmRepository.forceUpdate(
+            expectedLpms = listOf("upi"),
+            serverLpmSpecs = "[]" // UPI doesn't come from the backend; we rely on the local specs
+        )
+
+        assertThat(lpmRepository.fromCode("upi")).isNotNull()
+    }
+
+    @Test
+    fun `Verify that UPI is not supported when it is disabled`() {
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                isFinancialConnectionsAvailable = { false },
+                isUpiEnabled = false
+            )
+        )
+
+        lpmRepository.forceUpdate(
+            expectedLpms = listOf("upi"),
+            serverLpmSpecs = "[]" // UPI doesn't come from the backend; we rely on the local specs
+        )
+
+        assertThat(lpmRepository.fromCode("upi")).isNull()
     }
 }
