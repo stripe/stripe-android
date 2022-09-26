@@ -13,6 +13,8 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.exception.AccountNumberRetrievalException
+import com.stripe.android.financialconnections.features.common.AccountNumberRetrievalErrorContent
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -28,7 +30,9 @@ internal fun AttachPaymentScreen() {
     BackHandler(enabled = true) {}
     AttachPaymentContent(
         payload = state.value.payload,
-        onCloseClick = parentViewModel::onCloseClick
+        onCloseClick = parentViewModel::onCloseClick,
+        onEnterDetailsManually = viewModel::onEnterDetailsManually,
+        onSelectAnotherBank = viewModel::onSelectAnotherBank
     )
 }
 
@@ -36,6 +40,8 @@ internal fun AttachPaymentScreen() {
 @Composable
 private fun AttachPaymentContent(
     payload: Async<AttachPaymentState.Payload>,
+    onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: () -> Unit,
     onCloseClick: () -> Unit
 ) {
     FinancialConnectionsScaffold(
@@ -60,8 +66,28 @@ private fun AttachPaymentContent(
                     )
                 }
             )
-            is Fail -> UnclassifiedErrorContent()
+            is Fail -> ErrorContent(
+                error = payload.error,
+                onSelectAnotherBank = onSelectAnotherBank,
+                onEnterDetailsManually = onEnterDetailsManually
+            )
         }
+    }
+}
+
+@Composable
+private fun ErrorContent(
+    error: Throwable,
+    onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: () -> Unit
+) {
+    when (error) {
+        is AccountNumberRetrievalException -> AccountNumberRetrievalErrorContent(
+            exception = error,
+            onSelectAnotherBank = onSelectAnotherBank,
+            onEnterDetailsManually = onEnterDetailsManually
+        )
+        else -> UnclassifiedErrorContent()
     }
 }
 
@@ -70,8 +96,15 @@ private fun AttachPaymentContent(
 internal fun AttachPaymentScreenPreview() {
     FinancialConnectionsTheme {
         AttachPaymentContent(
-            payload = Uninitialized,
-            onCloseClick = {}
+            payload = Success(
+                AttachPaymentState.Payload(
+                    accountsCount = 10,
+                    businessName = "Random Business"
+                )
+            ),
+            onCloseClick = {},
+            onEnterDetailsManually = {},
+            onSelectAnotherBank = {}
         )
     }
 }

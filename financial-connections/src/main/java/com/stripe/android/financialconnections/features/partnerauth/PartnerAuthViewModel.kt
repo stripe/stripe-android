@@ -185,6 +185,6 @@ internal data class PartnerAuthState(
     data class Payload(
         val institutionName: String,
         val flow: Flow?,
-        val showPartnerDisclosure: Boolean,
+        val showPartnerDisclosure: Boolean
     )
 }

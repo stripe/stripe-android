@@ -49,7 +49,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
     private fun StripeException.toDomainException(
         institution: FinancialConnectionsInstitution,
         businessName: String?,
-        allowManualEntry: Boolean,
+        allowManualEntry: Boolean
     ): StripeException =
         when {
             stripeError?.extraFields?.get("reason") == "no_supported_payment_method_type_accounts_found" ->

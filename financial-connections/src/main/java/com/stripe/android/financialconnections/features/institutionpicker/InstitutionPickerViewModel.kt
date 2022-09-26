@@ -47,7 +47,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
             val manifest = getManifest()
             Payload(
                 featuredInstitutions = featuredInstitutions(
-                    clientSecret = configuration.financialConnectionsSessionClientSecret,
+                    clientSecret = configuration.financialConnectionsSessionClientSecret
                 ),
                 allowManualEntry = kotlin
                     .runCatching { manifest.allowManualEntry }

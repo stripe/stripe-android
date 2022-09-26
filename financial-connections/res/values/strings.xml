@@ -111,5 +111,8 @@
         <item quantity="one">Please wait while your account is linked to this business</item>
         <item quantity="other">Please wait while your accounts are linked to this business</item>
     </plurals>
+    <string name="stripe_attachlinkedpaymentaccount_error_title">Your account number couldn’t be accessed at this time</string>
+    <string name="stripe_attachlinkedpaymentaccount_error_desc">Please enter your bank details manually</string>
+    <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Please enter your bank details manually or select another bank.</string>
 </resources>
 

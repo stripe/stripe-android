@@ -12,7 +12,7 @@ internal class FeaturedInstitutions @Inject constructor(
     private val repository: FinancialConnectionsInstitutionsRepository
 ) {
     suspend operator fun invoke(
-        clientSecret: String,
+        clientSecret: String
     ): InstitutionResponse {
         return repository.featuredInstitutions(
             clientSecret = clientSecret,

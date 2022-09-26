@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.exception.AccountNumberRetrievalException
 import com.stripe.android.financialconnections.exception.InstitutionPlannedException
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
 import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
@@ -47,7 +48,7 @@ internal fun UnclassifiedErrorContent() {
     ErrorContent(
         painterResource(id = R.drawable.stripe_ic_brandicon_institution),
         title = stringResource(R.string.stripe_error_generic_title),
-        content = stringResource(R.string.stripe_error_generic_desc),
+        content = stringResource(R.string.stripe_error_generic_desc)
     )
 }
 
@@ -62,7 +63,7 @@ internal fun InstitutionUnknownErrorContent(
         primaryCta = Pair(
             stringResource(R.string.stripe_error_cta_select_another_bank),
             onSelectAnotherBank
-        ),
+        )
     )
 }
 
@@ -88,7 +89,9 @@ internal fun InstitutionUnplannedDowntimeErrorContent(
                 stringResource(R.string.stripe_error_cta_manual_entry),
                 onEnterDetailsManually
             )
-        } else null
+        } else {
+            null
+        }
     )
 }
 
@@ -121,7 +124,9 @@ internal fun InstitutionPlannedDowntimeErrorContent(
                 stringResource(R.string.stripe_error_cta_manual_entry),
                 onEnterDetailsManually
             )
-        } else null
+        } else {
+            null
+        }
     )
 }
 
@@ -144,7 +149,7 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
         primaryCta = Pair(
             stringResource(R.string.stripe_error_cta_select_another_bank),
             onSelectAnotherBank
-        ),
+        )
     )
 }
 
@@ -161,16 +166,52 @@ internal fun NoAccountsAvailableErrorContent(
         ),
         content = stringResource(
             R.string.stripe_account_picker_error_no_account_available_desc,
-            exception.institution.name,
+            exception.institution.name
         ),
         primaryCta = Pair(
             stringResource(R.string.stripe_error_cta_select_another_bank),
             onTryAgain
         ),
-        secondaryCta = if (exception.allowManualEntry) Pair(
-            stringResource(R.string.stripe_error_cta_manual_entry),
-            onEnterDetailsManually
-        ) else null,
+        secondaryCta = if (exception.allowManualEntry) {
+            Pair(
+                stringResource(R.string.stripe_error_cta_manual_entry),
+                onEnterDetailsManually
+            )
+        } else {
+            null
+        }
+    )
+}
+
+@Composable
+internal fun AccountNumberRetrievalErrorContent(
+    exception: AccountNumberRetrievalException,
+    onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: () -> Unit
+) {
+    ErrorContent(
+        painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        title = stringResource(
+            R.string.stripe_attachlinkedpaymentaccount_error_title
+        ),
+        content = stringResource(
+            when (exception.allowManualEntry) {
+                true -> R.string.stripe_attachlinkedpaymentaccount_error_desc_manual_entry
+                false -> R.string.stripe_attachlinkedpaymentaccount_error_desc
+            }
+        ),
+        primaryCta = Pair(
+            stringResource(R.string.stripe_error_cta_select_another_bank),
+            onSelectAnotherBank
+        ),
+        secondaryCta = if (exception.allowManualEntry) {
+            Pair(
+                stringResource(R.string.stripe_error_cta_manual_entry),
+                onEnterDetailsManually
+            )
+        } else {
+            null
+        }
     )
 }
 
@@ -184,7 +225,7 @@ internal fun ErrorContent(
     title: String,
     content: String,
     primaryCta: Pair<String, () -> Unit>? = null,
-    secondaryCta: Pair<String, () -> Unit>? = null,
+    secondaryCta: Pair<String, () -> Unit>? = null
 ) {
     val scrollState = rememberScrollState()
     Column(
@@ -236,7 +277,7 @@ internal fun ErrorContent(
 @Composable
 private fun BadgedImage(
     iconPainter: Painter,
-    badge: Pair<Painter, Shape>,
+    badge: Pair<Painter, Shape>
 ) {
     Box(
         modifier = Modifier
