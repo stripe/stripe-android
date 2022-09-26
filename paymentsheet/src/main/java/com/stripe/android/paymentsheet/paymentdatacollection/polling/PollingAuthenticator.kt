@@ -11,7 +11,7 @@ import com.stripe.android.view.AuthActivityStarterHost
 import javax.inject.Singleton
 
 @Singleton
-//@JvmSuppressWildcards TODO
+// @JvmSuppressWildcards TODO
 // TODO Move this to payments-core
 internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent> {
 

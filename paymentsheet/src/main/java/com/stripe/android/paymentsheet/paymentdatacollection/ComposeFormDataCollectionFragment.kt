@@ -16,10 +16,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethod.Type.Upi
+import com.stripe.android.model.PaymentMethod.Type
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodCreateParams.*
+import com.stripe.android.model.PaymentMethodCreateParams.Upi
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetActivity
@@ -152,7 +151,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
             selectedPaymentMethodResources.code,
             selectedPaymentMethodResources.requiresMandate
         ).run {
-            if (selectedPaymentMethodResources.code == PaymentMethod.Type.Card.code) {
+            if (selectedPaymentMethodResources.code == Type.Card.code) {
                 PaymentSelection.New.Card(
                     paymentMethodCreateParams = this,
                     brand = CardBrand.fromCode(
@@ -163,7 +162,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
                 )
             } else {
                 // TODO Can we avoid this?
-                val createParams = if (selectedPaymentMethodResources.code == Upi.code) {
+                val createParams = if (selectedPaymentMethodResources.code == Type.Upi.code) {
                     val vpa = formFieldValues.fieldValuePairs[IdentifierSpec.Upi]?.value
                     PaymentMethodCreateParams.create(Upi(vpa))
                 } else {

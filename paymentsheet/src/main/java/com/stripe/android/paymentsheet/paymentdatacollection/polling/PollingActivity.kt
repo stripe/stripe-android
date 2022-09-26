@@ -8,7 +8,6 @@ import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.postDelayed
 import androidx.fragment.app.FragmentResultListener
-import androidx.lifecycle.lifecycleScope
 import com.stripe.android.utils.AnimationConstants
 
 internal class PollingActivity : AppCompatActivity() {

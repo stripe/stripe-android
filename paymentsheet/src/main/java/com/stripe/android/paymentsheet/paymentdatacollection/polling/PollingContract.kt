@@ -10,7 +10,8 @@ import kotlinx.parcelize.Parcelize
 
 private const val EXTRA_ARGS = "extra_args"
 
-internal class PollingContract : ActivityResultContract<PollingContract.Args, PaymentFlowResult.Unvalidated>() {
+internal class PollingContract :
+    ActivityResultContract<PollingContract.Args, PaymentFlowResult.Unvalidated>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
         val args = bundleOf(EXTRA_ARGS to input)
