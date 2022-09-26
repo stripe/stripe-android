@@ -447,6 +447,10 @@
   {
     "type": "upi",
     "async": false,
-    "fields": []
+    "fields": [
+      {
+        "type": "upi"
+      }
+    ]
   }
 ]
