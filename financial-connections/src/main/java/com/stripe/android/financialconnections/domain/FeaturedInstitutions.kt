@@ -13,20 +13,14 @@ internal class FeaturedInstitutions @Inject constructor(
 ) {
     suspend operator fun invoke(
         clientSecret: String,
-        testMode: Boolean,
     ): InstitutionResponse {
-        val limit = when (testMode) {
-            true -> SEARCH_INSTITUTIONS_LIMIT_TEST_MODE
-            false -> SEARCH_INSTITUTIONS_LIMIT
-        }
         return repository.featuredInstitutions(
             clientSecret = clientSecret,
-            limit = limit
+            limit = SEARCH_INSTITUTIONS_LIMIT
         )
     }
 
     private companion object {
-        private const val SEARCH_INSTITUTIONS_LIMIT = 8
-        private const val SEARCH_INSTITUTIONS_LIMIT_TEST_MODE = 10
+        private const val SEARCH_INSTITUTIONS_LIMIT = 10
     }
 }

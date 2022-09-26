@@ -23,6 +23,6 @@ internal class SearchInstitutions @Inject constructor(
     }
 
     private companion object {
-        private const val SEARCH_INSTITUTIONS_LIMIT = 8
+        private const val SEARCH_INSTITUTIONS_LIMIT = 10
     }
 }
