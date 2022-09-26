@@ -123,7 +123,9 @@ internal class PaymentOptionsAdapter(
         notifyDataSetChanged()
     }
 
-    fun removeItem(item: Item) {
+    fun hasSavedItems() = items.filterIsInstance<Item.SavedPaymentMethod>().isNotEmpty()
+
+    private fun removeItem(item: Item) {
         val itemIndex = items.indexOf(item)
         items = items.toMutableList().apply { removeAt(itemIndex) }
         notifyItemRemoved(itemIndex)
@@ -269,14 +271,17 @@ internal class PaymentOptionsAdapter(
                     lpmRepository,
                     onItemSelectedListener = ::onItemSelected,
                     onRemoveListener = { position ->
-                        paymentMethodDeleteListener(items[position] as Item.SavedPaymentMethod)
-                        removeItem(items[position])
-                        notifyItemRemoved(position)
-                        onItemSelected(
-                            position = findInitialSelectedPosition(savedSelection),
-                            isClick = false,
-                            force = true
-                        )
+                        val removedItem = items[position] as Item.SavedPaymentMethod
+                        removeItem(removedItem)
+                        paymentMethodDeleteListener(removedItem)
+                        selectedItemPosition = findInitialSelectedPosition(savedSelection)
+                        if (selectedItemPosition != NO_POSITION) {
+                            onItemSelected(
+                                position = selectedItemPosition,
+                                isClick = false,
+                                force = true
+                            )
+                        }
                     }
                 )
         }

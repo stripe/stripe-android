@@ -4,7 +4,7 @@
 
 ### PaymentSheet
 
-* [FIXED][5592](https://github.com/stripe/stripe-android/pull/5592) Fix deletion of the last used payment method.
+* [FIXED][5592](https://github.com/stripe/stripe-android/pull/5592)[5613](https://github.com/stripe/stripe-android/pull/5613) Fix deletion of the last used payment method.
 
 ## 20.13.0 - 2022-09-19
 This release makes the `PaymentMethod.Card.networks` field public, fixes the Alipay integration and the card scan form encoding.

@@ -190,6 +190,23 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
+    fun `Removing selected payment method clears selection`() = runTest {
+        val cards = PaymentMethodFixtures.createCards(3)
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(paymentMethods = cards)
+        )
+
+        val selection = PaymentSelection.Saved(cards[1])
+        viewModel.updateSelection(selection)
+        assertThat(viewModel.selection.value).isEqualTo(selection)
+
+        viewModel.removePaymentMethod(selection.paymentMethod)
+        idleLooper()
+
+        assertThat(viewModel.selection.value).isNull()
+    }
+
+    @Test
     fun `when paymentMethods is empty, primary button and text below button are gone`() = runTest {
         val paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT
         val viewModel = createViewModel(
