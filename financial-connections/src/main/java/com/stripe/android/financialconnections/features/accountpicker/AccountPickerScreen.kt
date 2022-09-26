@@ -50,12 +50,14 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
 import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.PartnerAccountUI
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.common.LoadingContent
+import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -76,7 +78,9 @@ internal fun AccountPickerScreen() {
         onAccountClicked = viewModel::onAccountClicked,
         onSelectAccounts = viewModel::selectAccounts,
         onSelectAnotherBank = viewModel::selectAnotherBank,
-        onCloseClick = parentViewModel::onCloseClick
+        onCloseClick = parentViewModel::onCloseClick,
+        onEnterDetailsManually = viewModel::onEnterDetailsManually,
+        onLoadAccountsAgain = viewModel::onLoadAccountsAgain
     )
 }
 
@@ -86,6 +90,8 @@ private fun AccountPickerContent(
     onAccountClicked: (PartnerAccount) -> Unit,
     onSelectAccounts: () -> Unit,
     onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: () -> Unit,
+    onLoadAccountsAgain: () -> Unit,
     onCloseClick: () -> Unit
 ) {
     FinancialConnectionsScaffold(
@@ -112,6 +118,12 @@ private fun AccountPickerContent(
                     NoSupportedPaymentMethodTypeAccountsErrorContent(
                         error,
                         onSelectAnotherBank
+                    )
+                is NoAccountsAvailableException ->
+                    NoAccountsAvailableErrorContent(
+                        exception = error,
+                        onEnterDetailsManually = onEnterDetailsManually,
+                        onTryAgain = onLoadAccountsAgain
                     )
                 else -> UnclassifiedErrorContent()
             }
@@ -401,7 +413,9 @@ internal fun AccountPickerPreviewMultiSelect() {
             onAccountClicked = {},
             onSelectAccounts = {},
             onSelectAnotherBank = {},
-            onCloseClick = {}
+            onCloseClick = {},
+            onEnterDetailsManually = {},
+            onLoadAccountsAgain = {}
         )
     }
 }
@@ -419,7 +433,9 @@ internal fun AccountPickerPreviewSingleSelect() {
             onAccountClicked = {},
             onSelectAccounts = {},
             onSelectAnotherBank = {},
-            onCloseClick = {}
+            onCloseClick = {},
+            onEnterDetailsManually = {},
+            onLoadAccountsAgain = {}
         )
     }
 }
@@ -437,7 +453,9 @@ internal fun AccountPickerPreviewDropdown() {
             onAccountClicked = {},
             onSelectAccounts = {},
             onSelectAnotherBank = {},
-            onCloseClick = {}
+            onCloseClick = {},
+            onEnterDetailsManually = {},
+            onLoadAccountsAgain = {}
         )
     }
 }

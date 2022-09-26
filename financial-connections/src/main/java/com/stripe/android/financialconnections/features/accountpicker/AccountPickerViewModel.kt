@@ -39,6 +39,10 @@ internal class AccountPickerViewModel @Inject constructor(
     init {
         logErrors()
         navigateIfSkipAccountSelection()
+        loadAccounts()
+    }
+
+    private fun loadAccounts() {
         suspend {
             val manifest = getManifest()
             val partnerAccountList = pollAuthorizationSessionAccounts(manifest)
@@ -142,9 +146,11 @@ internal class AccountPickerViewModel @Inject constructor(
         }
     }
 
-    fun selectAnotherBank() {
-        navigationManager.navigate(NavigationDirections.institutionPicker)
-    }
+    fun selectAnotherBank() = navigationManager.navigate(NavigationDirections.institutionPicker)
+
+    fun onEnterDetailsManually() = navigationManager.navigate(NavigationDirections.manualEntry)
+
+    fun onLoadAccountsAgain() = loadAccounts()
 
     companion object :
         MavericksViewModelFactory<AccountPickerViewModel, AccountPickerState> {

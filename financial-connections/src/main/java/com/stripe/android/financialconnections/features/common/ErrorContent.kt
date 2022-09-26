@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package com.stripe.android.financialconnections.features.common
 
 import androidx.compose.foundation.Image
@@ -31,6 +33,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.InstitutionPlannedException
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
+import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
 import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -142,6 +145,32 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
             stringResource(R.string.stripe_error_cta_select_another_bank),
             onSelectAnotherBank
         ),
+    )
+}
+
+@Composable
+internal fun NoAccountsAvailableErrorContent(
+    exception: NoAccountsAvailableException,
+    onEnterDetailsManually: () -> Unit,
+    onTryAgain: () -> Unit
+) {
+    ErrorContent(
+        painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        title = stringResource(
+            R.string.stripe_account_picker_error_no_account_available_title
+        ),
+        content = stringResource(
+            R.string.stripe_account_picker_error_no_account_available_desc,
+            exception.institution.name,
+        ),
+        primaryCta = Pair(
+            stringResource(R.string.stripe_error_cta_select_another_bank),
+            onTryAgain
+        ),
+        secondaryCta = if (exception.allowManualEntry) Pair(
+            stringResource(R.string.stripe_error_cta_manual_entry),
+            onEnterDetailsManually
+        ) else null,
     )
 }
 
@@ -272,6 +301,33 @@ internal fun InstitutionPlannedDowntimeErrorContentPreview() {
                 ),
                 onEnterDetailsManually = {},
                 onSelectAnotherBank = {}
+            )
+        }
+    }
+}
+
+@Composable
+@Preview(group = "Errors", name = "no accounts available error")
+internal fun NoAccountsAvailableErrorContentPreview() {
+    FinancialConnectionsTheme {
+        FinancialConnectionsScaffold(
+            topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
+        ) {
+            NoAccountsAvailableErrorContent(
+                exception = NoAccountsAvailableException(
+                    institution = FinancialConnectionsInstitution(
+                        id = "3",
+                        name = "RandomInstitution",
+                        url = "RandomInstitution url",
+                        featured = false,
+                        featuredOrder = null,
+                        mobileHandoffCapable = false
+                    ),
+                    allowManualEntry = true,
+                    stripeException = APIException()
+                ),
+                onEnterDetailsManually = {},
+                onTryAgain = {}
             )
         }
     }
