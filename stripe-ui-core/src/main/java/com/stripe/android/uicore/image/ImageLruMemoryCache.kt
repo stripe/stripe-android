@@ -2,8 +2,11 @@ package com.stripe.android.uicore.image
 
 import android.graphics.Bitmap
 import android.util.LruCache
+import androidx.annotation.RestrictTo
 
-internal class ImageLruMemoryCache {
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+ class ImageLruMemoryCache {
 
     @Suppress("MagicNumber")
     private val lruCache = object : LruCache<String, Bitmap>(

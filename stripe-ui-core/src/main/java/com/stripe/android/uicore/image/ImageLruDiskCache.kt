@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
 import android.graphics.BitmapFactory
 import android.util.Log
+import androidx.annotation.RestrictTo
 import com.stripe.android.uicore.BuildConfig
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -16,7 +17,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
-internal class ImageLruDiskCache(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class ImageLruDiskCache(
     context: Context,
     uniqueName: String,
     maxSizeBytes: Long = 10L * 1024 * 1024, // 10MB

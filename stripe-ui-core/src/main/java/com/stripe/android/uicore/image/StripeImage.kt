@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.image
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
@@ -19,7 +20,8 @@ import androidx.compose.ui.unit.IntSize.Companion.Zero
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun StripeImage(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun StripeImage(
     url: String,
     placeholder: Painter,
     imageLoader: StripeImageLoader,

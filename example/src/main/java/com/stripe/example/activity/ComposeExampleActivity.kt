@@ -18,13 +18,17 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.Logger
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.uicore.image.StripeImage
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.example.R
 import com.stripe.example.Settings
 import com.stripe.example.module.StripeIntentViewModel
@@ -35,8 +39,15 @@ import com.stripe.example.module.StripeIntentViewModel
 class ComposeExampleActivity : AppCompatActivity() {
     private val viewModel: StripeIntentViewModel by viewModels()
 
+    //TODO@carlosmuvi delete, here for test purposes.
+    private lateinit var imageLoader: StripeImageLoader
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        imageLoader = StripeImageLoader(
+            context = this,
+            logger = Logger.getInstance(true)
+        )
         setContent {
             ComposeScreen()
         }
@@ -62,6 +73,12 @@ class ComposeExampleActivity : AppCompatActivity() {
         onConfirm: (ConfirmPaymentIntentParams) -> Unit
     ) {
         Column(modifier = Modifier.padding(horizontal = 10.dp)) {
+            StripeImage(
+                url = "https://www.fillmurray.com/g/1024/1024",
+                placeholder = painterResource(id = R.drawable.stripe_ic_bank_generic),
+                imageLoader = imageLoader,
+                contentDescription = "example image"
+            )
             if (inProgress) {
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth()

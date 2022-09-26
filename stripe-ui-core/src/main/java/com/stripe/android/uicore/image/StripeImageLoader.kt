@@ -3,6 +3,7 @@ package com.stripe.android.uicore.image
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import androidx.annotation.RestrictTo
 import androidx.annotation.WorkerThread
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +23,8 @@ import kotlin.coroutines.resumeWithException
  * @param memoryCache, memory cache to be used, or null if no memory cache is desired.
  * @param diskCache, memory cache to be used, or null if no memory cache is desired.
  */
-internal class StripeImageLoader(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class StripeImageLoader(
     context: Context,
     private val logger: Logger,
     private val memoryCache: ImageLruMemoryCache? = ImageLruMemoryCache(),
