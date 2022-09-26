@@ -46,6 +46,7 @@
     <string name="stripe_error_planned_downtime_title">%1$s is undergoing maintenance</string>
     <string name="stripe_error_planned_downtime_desc">Maintenance is scheduled to end at %1$s. Please select another bank or try again later.</string>
     <string name="stripe_error_cta_select_another_bank">Select another bank</string>
+    <string name="stripe_error_cta_manual_entry">Enter bank details manually</string>
     <string name="stripe_account_picker_loading_title">Retrieving accounts</string>
     <string name="stripe_account_picker_loading_desc">Please wait while we retrieve your accounts</string>
     <string name="stripe_account_picker_select_account">Select your account</string>

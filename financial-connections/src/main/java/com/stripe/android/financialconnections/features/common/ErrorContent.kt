@@ -27,10 +27,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.InstitutionPlannedException
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
 import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -54,15 +56,18 @@ internal fun InstitutionUnknownErrorContent(
         iconPainter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
         title = stringResource(R.string.stripe_error_generic_title),
         content = stringResource(R.string.stripe_error_unplanned_downtime_desc),
-        ctaText = stringResource(R.string.stripe_error_cta_select_another_bank),
-        onCtaClick = onSelectAnotherBank,
+        primaryCta = Pair(
+            stringResource(R.string.stripe_error_cta_select_another_bank),
+            onSelectAnotherBank
+        ),
     )
 }
 
 @Composable
 internal fun InstitutionUnplannedDowntimeErrorContent(
     exception: InstitutionUnplannedException,
-    onSelectAnotherBank: () -> Unit
+    onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: () -> Unit
 ) {
     ErrorContent(
         iconPainter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
@@ -71,15 +76,24 @@ internal fun InstitutionUnplannedDowntimeErrorContent(
             exception.institution.name
         ),
         content = stringResource(R.string.stripe_error_unplanned_downtime_desc),
-        ctaText = stringResource(R.string.stripe_error_cta_select_another_bank),
-        onCtaClick = onSelectAnotherBank,
+        primaryCta = Pair(
+            stringResource(R.string.stripe_error_cta_select_another_bank),
+            onSelectAnotherBank
+        ),
+        secondaryCta = if (exception.allowManualEntry) {
+            Pair(
+                stringResource(R.string.stripe_error_cta_manual_entry),
+                onEnterDetailsManually
+            )
+        } else null
     )
 }
 
 @Composable
 internal fun InstitutionPlannedDowntimeErrorContent(
     exception: InstitutionPlannedException,
-    onSelectAnotherBank: () -> Unit
+    onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: () -> Unit
 ) {
     val javaLocale: java.util.Locale = remember { java.util.Locale(Locale.current.language) }
     val readableDate = remember(exception.backUpAt) {
@@ -95,8 +109,16 @@ internal fun InstitutionPlannedDowntimeErrorContent(
             R.string.stripe_error_planned_downtime_desc,
             readableDate
         ),
-        ctaText = stringResource(R.string.stripe_error_cta_select_another_bank),
-        onCtaClick = onSelectAnotherBank,
+        primaryCta = Pair(
+            stringResource(R.string.stripe_error_cta_select_another_bank),
+            onSelectAnotherBank
+        ),
+        secondaryCta = if (exception.allowManualEntry) {
+            Pair(
+                stringResource(R.string.stripe_error_cta_manual_entry),
+                onEnterDetailsManually
+            )
+        } else null
     )
 }
 
@@ -116,8 +138,10 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
             exception.institution.name,
             exception.merchantName
         ),
-        ctaText = stringResource(R.string.stripe_error_cta_select_another_bank),
-        onCtaClick = onSelectAnotherBank,
+        primaryCta = Pair(
+            stringResource(R.string.stripe_error_cta_select_another_bank),
+            onSelectAnotherBank
+        ),
     )
 }
 
@@ -130,8 +154,8 @@ internal fun ErrorContent(
     ),
     title: String,
     content: String,
-    ctaText: String? = null,
-    onCtaClick: (() -> Unit)? = null,
+    primaryCta: Pair<String, () -> Unit>? = null,
+    secondaryCta: Pair<String, () -> Unit>? = null,
 ) {
     val scrollState = rememberScrollState()
     Column(
@@ -156,13 +180,25 @@ internal fun ErrorContent(
                 style = FinancialConnectionsTheme.typography.body
             )
         }
-        if (ctaText != null && onCtaClick != null) {
+        secondaryCta?.let { (text, onClick) ->
             FinancialConnectionsButton(
-                onClick = onCtaClick,
+                type = FinancialConnectionsButton.Type.Secondary,
+                onClick = onClick,
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                Text(text = ctaText)
+                Text(text = text)
+            }
+        }
+        if (primaryCta != null && secondaryCta != null) Spacer(Modifier.size(8.dp))
+        primaryCta?.let { (text, onClick) ->
+            FinancialConnectionsButton(
+                type = FinancialConnectionsButton.Type.Primary,
+                onClick = onClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(text = text)
             }
         }
     }
@@ -202,12 +238,41 @@ private fun BadgedImage(
 
 @Composable
 @Preview(group = "Errors", name = "unclassified error")
-internal fun ErrorContentPreview() {
+internal fun UnclassifiedErrorContentPreview() {
     FinancialConnectionsTheme {
         FinancialConnectionsScaffold(
             topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
         ) {
             UnclassifiedErrorContent()
+        }
+    }
+}
+
+@Composable
+@Preview(group = "Errors", name = "institution down planned error")
+internal fun InstitutionPlannedDowntimeErrorContentPreview() {
+    FinancialConnectionsTheme {
+        FinancialConnectionsScaffold(
+            topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
+        ) {
+            InstitutionPlannedDowntimeErrorContent(
+                exception = InstitutionPlannedException(
+                    institution = FinancialConnectionsInstitution(
+                        id = "3",
+                        name = "RandomInstitution",
+                        url = "RandomInstitution url",
+                        featured = false,
+                        featuredOrder = null,
+                        mobileHandoffCapable = false
+                    ),
+                    allowManualEntry = true,
+                    isToday = true,
+                    backUpAt = 10000L,
+                    stripeException = APIException()
+                ),
+                onEnterDetailsManually = {},
+                onSelectAnotherBank = {}
+            )
         }
     }
 }

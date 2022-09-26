@@ -68,7 +68,8 @@ internal fun PartnerAuthScreen() {
         state = state.value,
         onContinueClick = viewModel::onLaunchAuthClick,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
-        onCloseClick = parentViewModel::onCloseClick
+        onCloseClick = parentViewModel::onCloseClick,
+        onEnterDetailsManually = viewModel::onEnterDetailsManuallyClick
     )
 }
 
@@ -77,6 +78,7 @@ private fun PartnerAuthScreenContent(
     state: PartnerAuthState,
     onContinueClick: () -> Unit,
     onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: () -> Unit,
     onCloseClick: () -> Unit
 ) {
     FinancialConnectionsScaffold(
@@ -87,7 +89,11 @@ private fun PartnerAuthScreenContent(
                 stringResource(id = R.string.stripe_picker_loading_title),
                 stringResource(id = R.string.stripe_picker_loading_desc)
             )
-            is Fail -> ErrorContent(payload.error, onSelectAnotherBank)
+            is Fail -> ErrorContent(
+                error = payload.error,
+                onSelectAnotherBank = onSelectAnotherBank,
+                onEnterDetailsManually = onEnterDetailsManually
+            )
             is Success -> LoadedContent(
                 authenticationStatus = state.authenticationStatus,
                 payload = payload(),
@@ -101,16 +107,19 @@ private fun PartnerAuthScreenContent(
 @Composable
 fun ErrorContent(
     error: Throwable,
-    onSelectAnotherBank: () -> Unit
+    onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: (() -> Unit)
 ) {
     when (error) {
         is InstitutionPlannedException -> InstitutionPlannedDowntimeErrorContent(
-            error,
-            onSelectAnotherBank
+            exception = error,
+            onSelectAnotherBank = onSelectAnotherBank,
+            onEnterDetailsManually = onEnterDetailsManually
         )
         is InstitutionUnplannedException -> InstitutionUnplannedDowntimeErrorContent(
-            error,
-            onSelectAnotherBank
+            exception = error,
+            onSelectAnotherBank = onSelectAnotherBank,
+            onEnterDetailsManually = onEnterDetailsManually
         )
         else -> UnclassifiedErrorContent()
     }
@@ -217,7 +226,8 @@ internal fun PrepaneContentPreview() {
             ),
             onContinueClick = {},
             onSelectAnotherBank = {},
-            onCloseClick = {}
+            onCloseClick = {},
+            onEnterDetailsManually = {}
         )
     }
 }

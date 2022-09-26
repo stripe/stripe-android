@@ -5,6 +5,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 
 internal class InstitutionUnplannedException(
     val institution: FinancialConnectionsInstitution,
+    val allowManualEntry: Boolean,
     stripeException: StripeException
 ) : StripeException(
     stripeException.stripeError,
