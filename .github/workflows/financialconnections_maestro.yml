@@ -1,0 +1,32 @@
+name: financial-connections-example maestro
+on:
+  pull_request:
+    paths:
+      - 'financial-connections/**'
+      - 'financial-connections-example/**'
+      - 'stripe-core/**'
+      - 'payments-model/**'
+      - 'dependencies.gradle'
+jobs:
+  # Checkout PR branch and build the APK
+  build-pr:
+    name: Build PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install maestro
+        uses: dsaltares/fetch-gh-release-asset@master
+        with:
+          repo: 'mobile-dev-inc/maestro'
+          version: 'tags/cli-1.8.2'
+          file: 'maestro-1.8.2.zip'
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build PR branch
+        run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-pr.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v1
+        with:
+          name: apk
+          path: financial-connections-example/build/outputs/apk/release/financial-connections-example-release-pr.apk
+
