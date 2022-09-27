@@ -16,7 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod.Type
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetActivity
@@ -149,7 +149,7 @@ internal class ComposeFormDataCollectionFragment : Fragment() {
             selectedPaymentMethodResources.code,
             selectedPaymentMethodResources.requiresMandate
         ).run {
-            if (selectedPaymentMethodResources.code == Type.Card.code) {
+            if (selectedPaymentMethodResources.code == PaymentMethod.Type.Card.code) {
                 PaymentSelection.New.Card(
                     paymentMethodCreateParams = this,
                     brand = CardBrand.fromCode(
