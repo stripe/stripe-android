@@ -27,6 +27,9 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+      - name: Show path
+        run: |
+          ls -la
       - name: End-to-end tests
         run: maestro/maestro-1.8.1/bin/maestro test maestro/fc-flow-testmode.yaml
       - name: run tests
