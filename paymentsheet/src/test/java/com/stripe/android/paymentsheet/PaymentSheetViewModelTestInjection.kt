@@ -25,7 +25,9 @@ import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcompone
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -47,10 +49,8 @@ internal open class PaymentSheetViewModelTestInjection {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     val eventReporter = mock<EventReporter>()
-    private val googlePayPaymentMethodLauncherFactory =
-        createGooglePayPaymentMethodLauncherFactory()
-    private val stripePaymentLauncherAssistedFactory =
-        mock<StripePaymentLauncherAssistedFactory>()
+    private val googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory()
+    private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
 
     private lateinit var injector: Injector
 
@@ -108,7 +108,7 @@ internal open class PaymentSheetViewModelTestInjection {
             savedStateHandle = SavedStateHandle().apply {
                 set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
             },
-            linkPaymentLauncherFactory = mock()
+            linkLauncher = mock()
         )
     }
 
@@ -116,12 +116,13 @@ internal open class PaymentSheetViewModelTestInjection {
     fun registerViewModel(
         @InjectorKey injectorKey: String,
         viewModel: PaymentSheetViewModel,
-        lpmRepository: LpmRepository = mock(),
+        lpmRepository: LpmRepository,
+        addressRepository: AddressRepository,
         formViewModel: FormViewModel = FormViewModel(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             config = mock(),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = mock(),
+            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
             transformSpecToElement = mock()
         )
     ) {

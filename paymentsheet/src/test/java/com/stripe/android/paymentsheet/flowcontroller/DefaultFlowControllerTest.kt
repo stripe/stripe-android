@@ -19,12 +19,6 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.injection.CUSTOMER_EMAIL
-import com.stripe.android.link.injection.CUSTOMER_NAME
-import com.stripe.android.link.injection.CUSTOMER_PHONE
-import com.stripe.android.link.injection.LinkPaymentLauncherFactory
-import com.stripe.android.link.injection.MERCHANT_NAME
-import com.stripe.android.link.injection.SHIPPING_VALUES
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -56,9 +50,7 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.view.ActivityScenarioFactory
-import dagger.assisted.Assisted
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -996,6 +988,7 @@ internal class DefaultFlowControllerTest {
         activityResultCaller,
         INJECTOR_KEY,
         flowControllerInitializer,
+        mock(),
         eventReporter,
         viewModel,
         paymentLauncherAssistedFactory,
@@ -1006,7 +999,7 @@ internal class DefaultFlowControllerTest {
         ENABLE_LOGGING,
         PRODUCT_USAGE,
         createGooglePayPaymentMethodLauncherFactory(),
-        createLinkPaymentLauncherFactory()
+        linkPaymentLauncher
     )
 
     private fun createGooglePayPaymentMethodLauncherFactory() =
@@ -1019,19 +1012,6 @@ internal class DefaultFlowControllerTest {
                 skipReadyCheck: Boolean
             ): GooglePayPaymentMethodLauncher {
                 return googlePayPaymentMethodLauncher
-            }
-        }
-
-    private fun createLinkPaymentLauncherFactory() =
-        object : LinkPaymentLauncherFactory {
-            override fun create(
-                @Assisted(MERCHANT_NAME) merchantName: String,
-                @Assisted(CUSTOMER_EMAIL) customerEmail: String?,
-                @Assisted(CUSTOMER_PHONE) customerPhone: String?,
-                @Assisted(CUSTOMER_NAME) customerName: String?,
-                @Assisted(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?
-            ): LinkPaymentLauncher {
-                return linkPaymentLauncher
             }
         }
 

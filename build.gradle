@@ -58,8 +58,8 @@ ext {
     buildToolsVersion = "30.0.3"
     compileSdkVersion = 33
 
-    androidxActivityVersion = '1.5.1'
-    androidxAnnotationVersion = '1.4.0'
+    androidxActivityVersion = '1.6.0'
+    androidxAnnotationVersion = '1.5.0'
     androidxAppcompatVersion = '1.5.1'
     androidxArchCoreVersion = '2.1.0'
     androidxBrowserVersion = '1.4.0'
@@ -68,7 +68,7 @@ ext {
     androidxConstraintlayoutComposeVersion = '1.0.1'
     androidxConstraintlayoutVersion = '2.1.4'
     androidxCoreVersion = '1.9.0'
-    androidxFragmentVersion = '1.5.2'
+    androidxFragmentVersion = '1.5.3'
     androidxLifecycleVersion = '2.5.1'
     androidxNavigationVersion = '2.5.2'
     androidxPreferenceVersion = '1.2.0'

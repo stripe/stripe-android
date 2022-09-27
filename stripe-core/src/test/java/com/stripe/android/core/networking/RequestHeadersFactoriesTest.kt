@@ -6,6 +6,10 @@ import com.stripe.android.core.ApiKeyFixtures
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.AppInfoFixtures
+import com.stripe.android.core.networking.RequestHeadersFactory.Companion.KOTLIN
+import com.stripe.android.core.networking.RequestHeadersFactory.Companion.LANG
+import com.stripe.android.core.networking.RequestHeadersFactory.Companion.MODEL
+import com.stripe.android.core.networking.RequestHeadersFactory.Companion.TYPE
 import com.stripe.android.core.networking.RequestHeadersFactory.FraudDetection.Companion.HEADER_COOKIE
 import com.stripe.android.core.networking.StripeClientUserAgentHeaderFactory.Companion.HEADER_STRIPE_CLIENT_USER_AGENT
 import com.stripe.android.core.version.StripeSdkVersion
@@ -89,6 +93,19 @@ class RequestHeadersFactoriesTest {
         val headers = createBasePaymentApiHeaders(appInfo = AppInfoFixtures.DEFAULT)
         assertThat(headers[HEADER_USER_AGENT])
             .isEqualTo("${RequestHeadersFactory.getUserAgent()} MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)")
+
+        val xStripeUserAgent = JSONObject(
+            requireNotNull(headers[HEADER_X_STRIPE_USER_AGENT])
+        )
+        assertThat(xStripeUserAgent[LANG]).isEqualTo(KOTLIN)
+        assertThat(xStripeUserAgent[AnalyticsFields.BINDINGS_VERSION]).isEqualTo(StripeSdkVersion.VERSION_NAME)
+        assertThat(xStripeUserAgent[AnalyticsFields.OS_VERSION]).isEqualTo("${Build.VERSION.SDK_INT}")
+        assertThat(xStripeUserAgent.has(TYPE)).isTrue()
+        assertThat(xStripeUserAgent[MODEL]).isEqualTo(Build.MODEL)
+        assertThat(xStripeUserAgent["name"]).isEqualTo("MyAwesomePlugin")
+        assertThat(xStripeUserAgent["version"]).isEqualTo("1.2.34")
+        assertThat(xStripeUserAgent["url"]).isEqualTo("https://myawesomeplugin.info")
+        assertThat(xStripeUserAgent["partner_id"]).isEqualTo("pp_partner_1234")
 
         val stripeClientUserAgent = headers[HEADER_STRIPE_CLIENT_USER_AGENT]
             ?: error("Invalid JSON in `$HEADER_STRIPE_CLIENT_USER_AGENT`")

@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,7 +36,7 @@ fun CheckboxElementUI(
 
     Row(
         modifier = Modifier
-            .requiredHeight(32.dp)
+            .padding(vertical = 4.dp)
             .semantics {
                 testTag = automationTestTag
                 stateDescription = accessibilityDescription

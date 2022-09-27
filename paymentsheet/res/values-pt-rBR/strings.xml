@@ -12,8 +12,6 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Adicionar</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Adicione seus dados de pagamento</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Voltar</string>
   <string name="stripe_paymentsheet_close">Fechar</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">A Stripe depositará $ 0,01 na sua conta em 1 a 2 dias úteis. Depois disso, você receberá um e-mail com instruções de como concluir o pagamento para %s.</string>

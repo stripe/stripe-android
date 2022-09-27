@@ -18,6 +18,8 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
@@ -41,7 +43,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.stub
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 
@@ -447,6 +451,9 @@ class PaymentOptionsActivityTest {
         val addressRepository = AddressRepository(
             ApplicationProvider.getApplicationContext<Application>().resources
         )
+        val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
+            onBlocking { setup(any(), any()) }.thenReturn(AccountStatus.SignedOut)
+        }
         return PaymentOptionsViewModel(
             args = args,
             prefsRepositoryFactory = { FakePrefsRepository() },
@@ -463,7 +470,7 @@ class PaymentOptionsActivityTest {
                 addressRepository
             ),
             savedStateHandle = SavedStateHandle(),
-            linkPaymentLauncherFactory = mock()
+            linkLauncher = linkPaymentLauncher
         )
     }
 }

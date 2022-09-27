@@ -27,12 +27,6 @@ const val CUSTOMER_PHONE = "customerPhone"
 const val CUSTOMER_NAME = "customerName"
 
 /**
- * Identifies the shipping address passed in from the customer, used to pre-fill address forms.
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val SHIPPING_VALUES = "shippingValues"
-
-/**
  * Identifies whether Link is enabled.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

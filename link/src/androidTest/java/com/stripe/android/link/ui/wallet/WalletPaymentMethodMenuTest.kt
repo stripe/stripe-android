@@ -38,33 +38,73 @@ class WalletPaymentMethodMenuTest {
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
     @Test
-    fun testCardMenuIsDisplayedCorrectly() {
+    fun testCardMenuIsDisplayedCorrectlyForNonDefaultCard() {
         composeTestRule.setContent {
             WalletPaymentMethodMenu(
-                paymentDetails = MOCK_CARD,
+                paymentDetails = MOCK_CARD.copy(isDefault = false),
                 onEditClick = {},
+                onSetDefaultClick = {},
                 onRemoveClick = {},
                 onCancelClick = {}
             )
         }
 
         composeTestRule.onNodeWithText("Update card").assertExists()
+        composeTestRule.onNodeWithText("Set as default").assertExists()
         composeTestRule.onNodeWithText("Remove card").assertExists()
         composeTestRule.onNodeWithText("Cancel").assertExists()
     }
 
     @Test
-    fun testBankAccountMenuIsDisplayedCorrectly() {
+    fun testCardMenuIsDisplayedCorrectlyForDefaultCard() {
         composeTestRule.setContent {
             WalletPaymentMethodMenu(
-                paymentDetails = MOCK_BANK_ACCOUNT,
+                paymentDetails = MOCK_CARD.copy(isDefault = true),
                 onEditClick = {},
+                onSetDefaultClick = {},
+                onRemoveClick = {},
+                onCancelClick = {}
+            )
+        }
+
+        composeTestRule.onNodeWithText("Update card").assertExists()
+        composeTestRule.onNodeWithText("Set as default").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Remove card").assertExists()
+        composeTestRule.onNodeWithText("Cancel").assertExists()
+    }
+
+    @Test
+    fun testBankAccountMenuIsDisplayedCorrectlyForNonDefaultAccount() {
+        composeTestRule.setContent {
+            WalletPaymentMethodMenu(
+                paymentDetails = MOCK_BANK_ACCOUNT.copy(isDefault = false),
+                onEditClick = {},
+                onSetDefaultClick = {},
                 onRemoveClick = {},
                 onCancelClick = {}
             )
         }
 
         composeTestRule.onNodeWithText("Update card").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Set as default").assertExists()
+        composeTestRule.onNodeWithText("Remove linked account").assertExists()
+        composeTestRule.onNodeWithText("Cancel").assertExists()
+    }
+
+    @Test
+    fun testBankAccountMenuIsDisplayedCorrectlyForDefaultAccount() {
+        composeTestRule.setContent {
+            WalletPaymentMethodMenu(
+                paymentDetails = MOCK_BANK_ACCOUNT.copy(isDefault = true),
+                onEditClick = {},
+                onSetDefaultClick = {},
+                onRemoveClick = {},
+                onCancelClick = {}
+            )
+        }
+
+        composeTestRule.onNodeWithText("Update card").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Set as default").assertDoesNotExist()
         composeTestRule.onNodeWithText("Remove linked account").assertExists()
         composeTestRule.onNodeWithText("Cancel").assertExists()
     }
@@ -77,6 +117,7 @@ class WalletPaymentMethodMenuTest {
             WalletPaymentMethodMenu(
                 paymentDetails = MOCK_CARD,
                 onEditClick = clickRecorder::onEditClick,
+                onSetDefaultClick = clickRecorder::onSetAsDefaultClick,
                 onRemoveClick = clickRecorder::onRemoveClick,
                 onCancelClick = clickRecorder::onCancelClick
             )
@@ -90,13 +131,35 @@ class WalletPaymentMethodMenuTest {
     }
 
     @Test
-    fun testRemoveCardWorksCorrectly() {
+    fun testSetAsDefaultWorksCorrectly() {
+        val clickRecorder = MockClickRecorder()
+
+        composeTestRule.setContent {
+            WalletPaymentMethodMenu(
+                paymentDetails = MOCK_CARD.copy(isDefault = false),
+                onEditClick = clickRecorder::onEditClick,
+                onSetDefaultClick = clickRecorder::onSetAsDefaultClick,
+                onRemoveClick = clickRecorder::onRemoveClick,
+                onCancelClick = clickRecorder::onCancelClick
+            )
+        }
+
+        composeTestRule.onNodeWithText("Set as default").performClick()
+
+        assertThat(clickRecorder).isEqualTo(
+            MockClickRecorder(setAsDefaultClicked = true)
+        )
+    }
+
+    @Test
+    fun testRemoveWorksCorrectly() {
         val clickRecorder = MockClickRecorder()
 
         composeTestRule.setContent {
             WalletPaymentMethodMenu(
                 paymentDetails = MOCK_CARD,
                 onEditClick = clickRecorder::onEditClick,
+                onSetDefaultClick = clickRecorder::onSetAsDefaultClick,
                 onRemoveClick = clickRecorder::onRemoveClick,
                 onCancelClick = clickRecorder::onCancelClick
             )
@@ -117,6 +180,7 @@ class WalletPaymentMethodMenuTest {
             WalletPaymentMethodMenu(
                 paymentDetails = MOCK_CARD,
                 onEditClick = clickRecorder::onEditClick,
+                onSetDefaultClick = clickRecorder::onSetAsDefaultClick,
                 onRemoveClick = clickRecorder::onRemoveClick,
                 onCancelClick = clickRecorder::onCancelClick
             )
@@ -131,10 +195,12 @@ class WalletPaymentMethodMenuTest {
 
     private data class MockClickRecorder(
         var editClicked: Boolean = false,
+        var setAsDefaultClicked: Boolean = false,
         var removeClicked: Boolean = false,
         var cancelClicked: Boolean = false
     ) {
         fun onEditClick() { editClicked = true }
+        fun onSetAsDefaultClick() { setAsDefaultClicked = true }
         fun onRemoveClick() { removeClicked = true }
         fun onCancelClick() { cancelClicked = true }
     }

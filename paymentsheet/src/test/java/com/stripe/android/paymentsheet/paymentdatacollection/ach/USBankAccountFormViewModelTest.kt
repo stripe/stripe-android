@@ -320,7 +320,7 @@ class USBankAccountFormViewModelTest {
             )
         )
         whenever(
-            stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(any(), any(), any(), any())
+            stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(any(), any(), any(), any(), any())
         ).thenReturn(paymentIntent)
 
         return CollectBankAccountResult.Completed(
@@ -347,7 +347,7 @@ class USBankAccountFormViewModelTest {
             )
         )
         whenever(
-            stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(any(), any(), any(), any())
+            stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(any(), any(), any(), any(), any())
         ).thenReturn(paymentIntent)
 
         return CollectBankAccountResult.Completed(

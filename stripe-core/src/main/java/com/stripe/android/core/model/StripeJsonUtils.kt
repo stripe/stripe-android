@@ -254,6 +254,7 @@ object StripeJsonUtils {
      * @return a [JSONObject] representing the input map, or `null` if the input
      * object is `null`
      */
+    @Suppress("NestedBlockDepth")
     fun mapToJsonObject(mapObject: Map<String, *>?): JSONObject? {
         if (mapObject == null) {
             return null

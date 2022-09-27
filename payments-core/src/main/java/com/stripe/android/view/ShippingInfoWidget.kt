@@ -164,6 +164,7 @@ class ShippingInfoWidget @JvmOverloads constructor(
      *
      * @return `true` if all shown fields are valid, `false` otherwise
      */
+    @Suppress("ComplexMethod", "ReturnCount")
     fun validateAllFields(): Boolean {
         val address = addressEditText.text?.toString() ?: return false
         val name = nameEditText.text?.toString() ?: return false

@@ -12,8 +12,6 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ 追加</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">支払い情報を追加</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">戻る</string>
   <string name="stripe_paymentsheet_close">閉じる</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">1 ～ 2 営業日以内に Stripe は口座に $0.01 を入金します。その後、%s への支払いを完了するための手順が記載されたメールが送信されます。</string>

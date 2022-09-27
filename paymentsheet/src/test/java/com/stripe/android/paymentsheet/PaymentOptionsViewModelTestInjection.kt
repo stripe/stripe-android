@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
@@ -15,7 +16,9 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -34,6 +37,9 @@ internal open class PaymentOptionsViewModelTestInjection {
     val rule = InstantTaskExecutorRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
+    private val addressResourceRepository = StaticAddressResourceRepository(
+        AddressRepository(ApplicationProvider.getApplicationContext<Context>().resources)
+    )
 
     val eventReporter = mock<EventReporter>()
 
@@ -65,11 +71,11 @@ internal open class PaymentOptionsViewModelTestInjection {
             logger = Logger.noop(),
             injectorKey = injectorKey,
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = mock(),
+            addressResourceRepository = addressResourceRepository,
             savedStateHandle = SavedStateHandle().apply {
                 set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
             },
-            linkPaymentLauncherFactory = mock()
+            linkLauncher = mock()
         )
     }
 
@@ -82,7 +88,7 @@ internal open class PaymentOptionsViewModelTestInjection {
             paymentMethodCode = PaymentMethod.Type.Card.code,
             config = mock(),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = mock(),
+            addressResourceRepository = addressResourceRepository,
             transformSpecToElement = mock()
         )
     ) {

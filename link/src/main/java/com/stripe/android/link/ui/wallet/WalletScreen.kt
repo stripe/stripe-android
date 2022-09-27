@@ -82,22 +82,29 @@ import java.util.UUID
 private fun WalletBodyPreview() {
     val paymentDetailsList = listOf(
         ConsumerPaymentDetails.Card(
-            "id1",
-            true,
-            2030,
-            12,
-            CardBrand.Visa,
-            "4242",
-            CvcCheck.Fail
+            id = "id1",
+            isDefault = false,
+            expiryYear = 2030,
+            expiryMonth = 12,
+            brand = CardBrand.Visa,
+            last4 = "4242",
+            cvcCheck = CvcCheck.Fail
         ),
         ConsumerPaymentDetails.Card(
-            "id2",
-            false,
-            2022,
-            1,
-            CardBrand.MasterCard,
-            "4444",
-            CvcCheck.Pass
+            id = "id2",
+            isDefault = false,
+            expiryYear = 2022,
+            expiryMonth = 1,
+            brand = CardBrand.MasterCard,
+            last4 = "4444",
+            cvcCheck = CvcCheck.Pass
+        ),
+        ConsumerPaymentDetails.BankAccount(
+            id = "id2",
+            isDefault = true,
+            bankIconCode = "icon",
+            bankName = "Stripe Bank With Long Name",
+            last4 = "6789"
         )
     )
 
@@ -107,7 +114,7 @@ private fun WalletBodyPreview() {
                 uiState = WalletUiState(
                     paymentDetailsList = paymentDetailsList,
                     supportedTypes = SupportedPaymentMethod.allTypes,
-                    selectedItem = paymentDetailsList.first(),
+                    selectedItem = paymentDetailsList[2],
                     isExpanded = true,
                     errorMessage = ErrorMessage.Raw("Something went wrong")
                 ),
@@ -118,6 +125,7 @@ private fun WalletBodyPreview() {
                 onItemSelected = {},
                 onAddNewPaymentMethodClick = {},
                 onEditPaymentMethod = {},
+                onSetDefault = {},
                 onDeletePaymentMethod = {},
                 onPrimaryButtonClick = {},
                 onPayAnotherWayClick = {},
@@ -179,6 +187,7 @@ internal fun WalletBody(
             onItemSelected = viewModel::onItemSelected,
             onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
             onEditPaymentMethod = viewModel::editPaymentMethod,
+            onSetDefault = viewModel::setDefault,
             onDeletePaymentMethod = viewModel::deletePaymentMethod,
             onPrimaryButtonClick = viewModel::onConfirmPayment,
             onPayAnotherWayClick = viewModel::payAnotherWay,
@@ -197,6 +206,7 @@ internal fun WalletBody(
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onAddNewPaymentMethodClick: () -> Unit,
     onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onSetDefault: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClick: () -> Unit,
@@ -253,6 +263,10 @@ internal fun WalletBody(
                                     showBottomSheetContent(null)
                                     onEditPaymentMethod(it)
                                 },
+                                onSetDefaultClick = {
+                                    showBottomSheetContent(null)
+                                    onSetDefault(it)
+                                },
                                 onRemoveClick = {
                                     showBottomSheetContent(null)
                                     itemBeingRemoved = it
@@ -281,7 +295,7 @@ internal fun WalletBody(
 
         if (uiState.selectedItem is ConsumerPaymentDetails.BankAccount) {
             Html(
-                html = stringResource(R.string.wallet_bank_account_terms),
+                html = stringResource(R.string.wallet_bank_account_terms).replaceHyperlinks(),
                 imageGetter = emptyMap(),
                 color = MaterialTheme.colors.onSecondary,
                 style = MaterialTheme.typography.caption,
@@ -420,7 +434,6 @@ internal fun CollapsedPaymentDetails(
             color = MaterialTheme.linkColors.disabledText
         )
         PaymentDetails(paymentDetails = selectedPaymentMethod, enabled = true)
-        Spacer(modifier = Modifier.weight(1f))
         Icon(
             painter = painterResource(id = R.drawable.ic_link_chevron),
             contentDescription = stringResource(id = R.string.wallet_expand_accessibility),
@@ -493,6 +506,7 @@ private fun ExpandedPaymentDetails(
                 enabled = isEnabled,
                 isSupported = uiState.supportedTypes.contains(item.type),
                 isSelected = uiState.selectedItem?.id == item.id,
+                isUpdating = uiState.paymentMethodIdBeingUpdated == item.id,
                 onClick = {
                     onItemSelected(item)
                 },
@@ -524,3 +538,8 @@ private fun ExpandedPaymentDetails(
         }
     }
 }
+
+private fun String.replaceHyperlinks() = this.replace(
+    "<terms>",
+    "<a href=\"https://stripe.com/legal/ach-payments/authorization\">"
+).replace("</terms>", "</a>")

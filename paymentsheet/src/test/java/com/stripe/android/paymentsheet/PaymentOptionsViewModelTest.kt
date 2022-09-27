@@ -43,29 +43,15 @@ internal class PaymentOptionsViewModelTest {
     private val paymentMethodRepository = FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
     private val lpmResourceRepository = StaticLpmResourceRepository(mock())
 
-    private val viewModel = PaymentOptionsViewModel(
-        args = PAYMENT_OPTION_CONTRACT_ARGS,
-        prefsRepositoryFactory = { prefsRepository },
-        eventReporter = eventReporter,
-        customerRepository = customerRepository,
-        workContext = testDispatcher,
-        application = ApplicationProvider.getApplicationContext(),
-        logger = Logger.noop(),
-        injectorKey = DUMMY_INJECTOR_KEY,
-        lpmResourceRepository = lpmResourceRepository,
-        addressResourceRepository = mock(),
-        savedStateHandle = SavedStateHandle(),
-        linkPaymentLauncherFactory = mock()
-    )
-
     @Test
     fun `onUserSelection() when selection has been made should set the view state to process result`() {
         var paymentOptionResult: PaymentOptionResult? = null
+
+        val viewModel = createViewModel()
         viewModel.paymentOptionResult.observeForever {
             paymentOptionResult = it
         }
         viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
-
         viewModel.onUserSelection()
 
         assertThat(paymentOptionResult).isEqualTo(
@@ -81,11 +67,12 @@ internal class PaymentOptionsViewModelTest {
     fun `onUserSelection() when new card selection with no save should set the view state to process result`() =
         runTest {
             var paymentOptionResult: PaymentOptionResult? = null
+
+            val viewModel = createViewModel()
             viewModel.paymentOptionResult.observeForever {
                 paymentOptionResult = it
             }
             viewModel.updateSelection(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
-
             viewModel.onUserSelection()
 
             assertThat(paymentOptionResult)
@@ -107,12 +94,12 @@ internal class PaymentOptionsViewModelTest {
             paymentMethodRepository.savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
             var paymentOptionResult: PaymentOptionResult? = null
+
+            val viewModel = createViewModel()
             viewModel.paymentOptionResult.observeForever {
                 paymentOptionResult = it
             }
-
             viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
-
             viewModel.onUserSelection()
 
             val paymentOptionResultSucceeded =
@@ -124,19 +111,8 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `resolveTransitionTarget no new card`() {
-        val viewModel = PaymentOptionsViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(newLpm = null),
-            prefsRepositoryFactory = { prefsRepository },
-            eventReporter = eventReporter,
-            customerRepository = customerRepository,
-            workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY,
-            lpmResourceRepository = lpmResourceRepository,
-            addressResourceRepository = mock(),
-            savedStateHandle = SavedStateHandle(),
-            linkPaymentLauncherFactory = mock()
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(newLpm = null)
         )
 
         var transitionTarget: BaseSheetViewModel.Event<TransitionTarget?>? = null
@@ -153,23 +129,12 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `resolveTransitionTarget new card saved`() {
-        val viewModel = PaymentOptionsViewModel(
+        val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
                 newLpm = NEW_CARD_PAYMENT_SELECTION.copy(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
                 )
-            ),
-            prefsRepositoryFactory = { prefsRepository },
-            eventReporter = eventReporter,
-            customerRepository = customerRepository,
-            workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY,
-            lpmResourceRepository = lpmResourceRepository,
-            addressResourceRepository = mock(),
-            savedStateHandle = SavedStateHandle(),
-            linkPaymentLauncherFactory = mock()
+            )
         )
 
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
@@ -187,23 +152,12 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `resolveTransitionTarget new card NOT saved`() {
-        val viewModel = PaymentOptionsViewModel(
+        val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
                 newLpm = NEW_CARD_PAYMENT_SELECTION.copy(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 )
-            ),
-            prefsRepositoryFactory = { prefsRepository },
-            eventReporter = eventReporter,
-            customerRepository = customerRepository,
-            workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY,
-            lpmResourceRepository = lpmResourceRepository,
-            addressResourceRepository = mock(),
-            savedStateHandle = SavedStateHandle(),
-            linkPaymentLauncherFactory = mock()
+            )
         )
 
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
@@ -224,19 +178,8 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `removePaymentMethod removes it from payment methods list`() = runTest {
         val cards = PaymentMethodFixtures.createCards(3)
-        val viewModel = PaymentOptionsViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(paymentMethods = cards),
-            prefsRepositoryFactory = { FakePrefsRepository() },
-            eventReporter = eventReporter,
-            customerRepository = customerRepository,
-            workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY,
-            lpmResourceRepository = lpmResourceRepository,
-            addressResourceRepository = mock(),
-            savedStateHandle = SavedStateHandle(),
-            linkPaymentLauncherFactory = mock()
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(paymentMethods = cards)
         )
 
         viewModel.removePaymentMethod(cards[1])
@@ -247,23 +190,29 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
+    fun `Removing selected payment method clears selection`() = runTest {
+        val cards = PaymentMethodFixtures.createCards(3)
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(paymentMethods = cards)
+        )
+
+        val selection = PaymentSelection.Saved(cards[1])
+        viewModel.updateSelection(selection)
+        assertThat(viewModel.selection.value).isEqualTo(selection)
+
+        viewModel.removePaymentMethod(selection.paymentMethod)
+        idleLooper()
+
+        assertThat(viewModel.selection.value).isNull()
+    }
+
+    @Test
     fun `when paymentMethods is empty, primary button and text below button are gone`() = runTest {
         val paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT
-        val viewModel = PaymentOptionsViewModel(
+        val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
                 paymentMethods = listOf(paymentMethod)
-            ),
-            prefsRepositoryFactory = { FakePrefsRepository() },
-            eventReporter = eventReporter,
-            customerRepository = customerRepository,
-            workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY,
-            lpmResourceRepository = lpmResourceRepository,
-            addressResourceRepository = mock(),
-            savedStateHandle = SavedStateHandle(),
-            linkPaymentLauncherFactory = mock()
+            )
         )
 
         viewModel.removePaymentMethod(paymentMethod)
@@ -274,6 +223,23 @@ internal class PaymentOptionsViewModelTest {
         assertThat(viewModel.primaryButtonUIState.value).isNull()
         assertThat(viewModel.notesText.value).isNull()
     }
+
+    private fun createViewModel(
+        args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS
+    ) = PaymentOptionsViewModel(
+        args = args,
+        prefsRepositoryFactory = { prefsRepository },
+        eventReporter = eventReporter,
+        customerRepository = customerRepository,
+        workContext = testDispatcher,
+        application = ApplicationProvider.getApplicationContext(),
+        logger = Logger.noop(),
+        injectorKey = DUMMY_INJECTOR_KEY,
+        lpmResourceRepository = lpmResourceRepository,
+        addressResourceRepository = mock(),
+        savedStateHandle = SavedStateHandle(),
+        linkLauncher = mock()
+    )
 
     private companion object {
         private val SELECTION_SAVED_PAYMENT_METHOD = PaymentSelection.Saved(

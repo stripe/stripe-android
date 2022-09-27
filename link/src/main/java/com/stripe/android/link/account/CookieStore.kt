@@ -57,6 +57,7 @@ class CookieStore @Inject internal constructor(
     internal fun logout(email: String) {
         storeLoggedOutEmail(email)
         store.delete(AUTH_SESSION_COOKIE)
+        store.delete(SIGNED_UP_EMAIL)
     }
 
     /**

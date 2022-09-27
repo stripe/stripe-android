@@ -2,6 +2,22 @@
 
 ## X.X.X - 2022-XX-XX
 
+### PaymentSheet
+
+* [FIXED][5624](https://github.com/stripe/stripe-android/pull/5624) `CollectBankAccountResult` included intents will now contain the expanded `payment_method` field.
+
+## 20.14.0 - 2022-09-26
+This release fixes a payment-method related error in `PaymentSheet` and manages missing permissions
+on Financial Connections.
+
+### PaymentSheet
+
+* [FIXED][5592](https://github.com/stripe/stripe-android/pull/5592)[5613](https://github.com/stripe/stripe-android/pull/5613) Fix deletion of the last used payment method.
+
+### Financial Connections
+
+* [CHANGED][5583](https://github.com/stripe/stripe-android/pull/5583) Adds support for `account_numbers` permission.
+
 ## 20.13.0 - 2022-09-19
 This release makes the `PaymentMethod.Card.networks` field public, fixes the Alipay integration and the card scan form encoding.
 
