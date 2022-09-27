@@ -8,8 +8,11 @@ import androidx.annotation.WorkerThread
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.net.URL
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -33,35 +36,25 @@ class StripeImageLoader(
         uniqueName = "stripe_image_cache"
     ),
 ) {
+
+    private val imageLoadMutexes = ConcurrentHashMap<String, Mutex>()
+
+    /**
+     * loads the given [url] with the associated [width]x[height].
+     *
+     * If the same [url] is being loaded concurrently, function will be suspended until
+     * the original load completes.
+     */
     suspend fun load(
         url: String,
         width: Int,
         height: Int
     ): Result<Bitmap> = withContext(Dispatchers.IO) {
-        loadFromMemory(url)
-            ?: loadFromDisk(url)
-            ?: loadFromNetwork(url, width, height)
-                .onSuccess {
-                    debug("Image loaded from internet")
-                    diskCache?.put(url, it)
-                    memoryCache?.put(url, it)
-                }
-                .onFailure { debug("Could not load image from network") }
-    }
-
-    private fun loadFromDisk(url: String): Result<Bitmap>? {
-        return diskCache?.getBitmap(url)
-            .also {
-                if (it != null) {
-                    debug("Image loaded from disk cache")
-                } else {
-                    debug("Image not found on disk cache")
-                }
-            }
-            ?.let {
-                memoryCache?.put(url, it)
-                Result.success(it)
-            }
+        withMutexByUrlLock(url) {
+            loadFromMemory(url)
+                ?: loadFromNetwork(url, width, height)
+                    .onFailure { debug("Could not load image from network") }
+        }
     }
 
     private fun loadFromMemory(url: String): Result<Bitmap>? {
@@ -85,7 +78,8 @@ class StripeImageLoader(
         width: Int,
         height: Int
     ): Result<Bitmap> = kotlin.runCatching {
-        BitmapFactory.Options().run {
+        debug("Image loading from internet")
+        val bitmap = BitmapFactory.Options().run {
             // First decode with inJustDecodeBounds=true to check dimensions
             inJustDecodeBounds = true
             decodeStream(url)
@@ -95,6 +89,10 @@ class StripeImageLoader(
             inJustDecodeBounds = false
             decodeStream(url)
         }!!
+
+        diskCache?.put(url, bitmap)
+        memoryCache?.put(url, bitmap)
+        bitmap
     }
 
     private suspend fun BitmapFactory.Options.decodeStream(
@@ -131,6 +129,17 @@ class StripeImageLoader(
             }
         }
         return inSampleSize
+    }
+
+    /**
+     * Runs the specified [action] within a locked mutex keyed by the passed url.
+     */
+    private suspend fun <T> withMutexByUrlLock(url: String, action: suspend () -> T): T {
+        return imageLoadMutexes.getOrPut(url) { Mutex() }.withLock {
+            action()
+        }.also {
+            imageLoadMutexes.remove(url)
+        }
     }
 
     private fun debug(message: String) {

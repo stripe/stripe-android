@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.LinearProgressIndicator
@@ -27,6 +29,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.uicore.image.ImageLruMemoryCache
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.example.R
@@ -46,6 +49,8 @@ class ComposeExampleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         imageLoader = StripeImageLoader(
             context = this,
+            memoryCache = ImageLruMemoryCache(),
+            diskCache = null,
             logger = Logger.getInstance(true)
         )
         setContent {
@@ -72,13 +77,19 @@ class ComposeExampleActivity : AppCompatActivity() {
         status: String,
         onConfirm: (ConfirmPaymentIntentParams) -> Unit
     ) {
+        val content = List(40) { "https://www.fillmurray.com/g/50/50" }
         Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-            StripeImage(
-                url = "https://www.fillmurray.com/g/1024/1024",
-                placeholder = painterResource(id = R.drawable.stripe_ic_bank_generic),
-                imageLoader = imageLoader,
-                contentDescription = "example image"
-            )
+            LazyColumn {
+                items(content) {
+                    StripeImage(
+                        url = it,
+                        placeholder = painterResource(id = R.drawable.stripe_ic_bank_generic),
+                        imageLoader = imageLoader,
+                        contentDescription = "example image"
+                    )
+                }
+            }
+
             if (inProgress) {
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth()

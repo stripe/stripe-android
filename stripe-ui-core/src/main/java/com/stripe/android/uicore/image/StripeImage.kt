@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.IntSize.Companion.Zero
 import kotlinx.coroutines.launch
 
-@Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Composable
 fun StripeImage(
     url: String,
     placeholder: Painter,

@@ -4,9 +4,8 @@ import android.graphics.Bitmap
 import android.util.LruCache
 import androidx.annotation.RestrictTo
 
-
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
- class ImageLruMemoryCache {
+class ImageLruMemoryCache {
 
     @Suppress("MagicNumber")
     private val lruCache = object : LruCache<String, Bitmap>(
@@ -19,17 +18,23 @@ import androidx.annotation.RestrictTo
     }
 
     fun put(key: String, bitmap: Bitmap) {
-        if (lruCache.get(key.toKey()) == null) {
-            lruCache.put(key.toKey(), bitmap)
+        synchronized(this) {
+            if (lruCache.get(key.toKey()) == null) {
+                lruCache.put(key.toKey(), bitmap)
+            }
         }
     }
 
     fun getBitmap(key: String): Bitmap? {
-        return lruCache.get(key.toKey())
+        synchronized(this) {
+            return lruCache.get(key.toKey())
+        }
     }
 
     fun clear() {
-        lruCache.evictAll()
+        synchronized(this) {
+            lruCache.evictAll()
+        }
     }
 
     private fun String.toKey() = hashCode().toString()
