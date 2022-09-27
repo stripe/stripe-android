@@ -76,6 +76,7 @@ com.stripe.android.core.exception
 com.stripe.android.core.injection
 com.stripe.android.core.model
 com.stripe.android.core.model.parsers
+com.stripe.android.core.model.serializers
 com.stripe.android.core.networking
 com.stripe.android.core.storage
 com.stripe.android.core.utils
