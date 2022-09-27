@@ -19,5 +19,5 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
-          script: ./maestro/maestro-1.8.1/bin/maestro test maestro/fc-flow-testmode.yaml
+          script: maestro/maestro-1.8.1/bin/maestro test maestro/fc-flow-testmode.yaml
 
