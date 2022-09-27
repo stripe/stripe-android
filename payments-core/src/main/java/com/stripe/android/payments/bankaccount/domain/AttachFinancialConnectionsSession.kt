@@ -28,7 +28,7 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
             paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId,
             requestOptions = ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
+                stripeAccount = stripeAccountId
             ),
             expandFields = EXPAND_PAYMENT_METHOD
         )
