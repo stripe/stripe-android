@@ -11,8 +11,6 @@ import com.stripe.android.view.AuthActivityStarterHost
 import javax.inject.Singleton
 
 @Singleton
-// @JvmSuppressWildcards TODO
-// TODO Move this to payments-core
 internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent> {
 
     private var pollingLauncher: ActivityResultLauncher<PollingContract.Args>? = null
@@ -22,7 +20,6 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent> {
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        // TODO: Make sure this approach works for the intent flow
         val args = PollingContract.Args(
             clientSecret = requireNotNull(authenticatable.clientSecret)
         )

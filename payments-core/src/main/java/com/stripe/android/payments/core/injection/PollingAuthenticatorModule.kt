@@ -10,8 +10,6 @@ import dagger.multibindings.IntoMap
 @Module
 internal class PollingAuthenticatorModule {
 
-    // TODO: Check if this can live in paymentsheet module
-
     @IntentAuthenticatorMap
     @Provides
     @IntoMap
