@@ -342,7 +342,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                 ApiRequest.Options(
                                     apiKey = lazyPaymentConfig.get().publishableKey,
                                     stripeAccount = lazyPaymentConfig.get().stripeAccountId
-                                )
+                                ),
+                                expandFields = emptyList()
                             )
                         }
                         is SetupIntentClientSecret -> {
@@ -353,7 +354,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                 ApiRequest.Options(
                                     apiKey = lazyPaymentConfig.get().publishableKey,
                                     stripeAccount = lazyPaymentConfig.get().stripeAccountId
-                                )
+                                ),
+                                expandFields = emptyList()
                             )
                         }
                     }
