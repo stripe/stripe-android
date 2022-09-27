@@ -22,11 +22,13 @@ jobs:
           version: 'tags/cli-1.8.2'
           file: 'maestro-1.8.2.zip'
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build PR branch
-        run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-pr.apk
-      - name: Upload APK
-        uses: actions/upload-artifact@v1
+      - name: Unzip maestro
+        uses: montudor/action-zip@v1
         with:
-          name: apk
-          path: financial-connections-example/build/outputs/apk/release/financial-connections-example-release-pr.apk
+          args: unzip -qq maestro-1.8.2.zip -d maestro
+      - name: run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          script: ./gradlew :financial-connections-example:installDebug
 
