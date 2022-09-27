@@ -468,7 +468,7 @@ internal class DefaultFlowController @Inject internal constructor(
             } else {
                 null
             }
-            val customerEmail = config.customer?.let {
+            val customerEmail = config.defaultBillingDetails?.email ?: config.customer?.let {
                 customerApiRepository.retrieveCustomer(
                     it.id,
                     it.ephemeralKeySecret
@@ -478,7 +478,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 configuration = LinkPaymentLauncher.Configuration(
                     stripeIntent = initData.stripeIntent,
                     merchantName = config.merchantDisplayName,
-                    customerEmail = customerEmail ?: config.defaultBillingDetails?.email,
+                    customerEmail = customerEmail,
                     customerPhone = customerPhone,
                     customerName = config.defaultBillingDetails?.name,
                     shippingValues = shippingAddress

@@ -469,7 +469,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         } else {
             null
         }
-        val customerEmail = config?.customer?.let {
+        val customerEmail = config?.defaultBillingDetails?.email ?: config?.customer?.let {
             customerRepository.retrieveCustomer(
                 it.id,
                 it.ephemeralKeySecret
@@ -478,7 +478,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         return LinkPaymentLauncher.Configuration(
             stripeIntent = stripeIntent,
             merchantName = merchantName,
-            customerEmail = customerEmail ?: config?.defaultBillingDetails?.email,
+            customerEmail = customerEmail,
             customerPhone = customerPhone,
             customerName = config?.defaultBillingDetails?.name,
             shippingValues = shippingAddress
