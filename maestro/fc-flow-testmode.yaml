@@ -1,0 +1,16 @@
+appId: com.stripe.android.financialconnections.example
+---
+- launchApp
+# Android specific: Navigate to example
+- tapOn: "Collect account for data"
+- tapOn: "CONNECT AN ACCOUNT"
+# Common: web authflow - connect OAuth institution
+- tapOn: "Agree"
+- tapOn: "Test OAuth Institution"
+- tapOn: "Continue"
+- tapOn: "All accounts" # deselect all accounts
+- tapOn: "Success" # select success account
+- tapOn: "Link account"
+- tapOn: "Done"
+# Android specific: Assert the connected account displays on the sample app.
+- assertVisible: "StripeBank - Success - 6789 - CASH/CHECKING"

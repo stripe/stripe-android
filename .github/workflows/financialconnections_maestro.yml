@@ -15,20 +15,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Install maestro
-        uses: dsaltares/fetch-gh-release-asset@master
-        with:
-          repo: 'mobile-dev-inc/maestro'
-          version: 'tags/cli-1.8.2'
-          file: 'maestro-1.8.2.zip'
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Unzip maestro
-        uses: montudor/action-zip@v1
-        with:
-          args: unzip -qq maestro-1.8.2.zip -d maestro
       - name: run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
-          script: ./gradlew :financial-connections-example:installDebug
+          script: ./gradlew :financial-connections-example:installDebug && ./maestro/maestro test maestro/fc-flow-testmode.yaml
 
