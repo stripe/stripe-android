@@ -2,6 +2,10 @@
 
 ## X.X.X - 2022-XX-XX
 
+### Payments
+
+* [FIXED][5547](https://github.com/stripe/stripe-android/pull/5547) Expiry dates in `CardInputWidget`, `CardMultilineWidget`, and `CardFormView` are no longer formatted incorrectly on certain devices.
+
 ### PaymentSheet
 
 * [FIXED][5624](https://github.com/stripe/stripe-android/pull/5624) `CollectBankAccountResult` included intents will now contain the expanded `payment_method` field.
@@ -9,10 +13,6 @@
 ## 20.14.0 - 2022-09-26
 This release fixes a payment-method related error in `PaymentSheet` and manages missing permissions
 on Financial Connections.
-
-### Payments
-
-* [FIXED][5547](https://github.com/stripe/stripe-android/pull/5547) Expiry dates in `CardInputWidget`, `CardMultilineWidget`, and `CardFormView` are no longer formatted incorrectly on certain devices.
 
 ### PaymentSheet
 
