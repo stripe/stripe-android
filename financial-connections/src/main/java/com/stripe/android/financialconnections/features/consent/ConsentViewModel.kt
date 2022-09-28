@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -26,6 +27,7 @@ internal class ConsentViewModel @Inject constructor(
 ) : MavericksViewModel<ConsentState>(initialState) {
 
     init {
+        logErrors()
         viewModelScope.launch {
             val manifest = getManifest()
             setState {
@@ -43,6 +45,12 @@ internal class ConsentViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun logErrors() {
+        onAsync(ConsentState::acceptConsent, onFail = {
+            logger.error("Error accepting consent", it)
+        })
     }
 
     fun onContinueClick() {
