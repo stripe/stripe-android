@@ -19,6 +19,20 @@ import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.IntSize.Companion.Zero
 import kotlinx.coroutines.launch
 
+/**
+ * A composable that executes an image request asynchronously using the
+ * provided [StripeImageLoader] and renders the result.
+ *
+ * @param url to be requested and rendered.
+ * @param contentDescription Text used by accessibility services to describe what this image
+ *  represents. This should always be provided unless this image is used for decorative purposes,
+ *  and does not represent a meaningful action that a user can take.
+ * @param imageLoader The [StripeImageLoader] that will be used to execute the request.
+ * @param modifier Modifier used to adjust the layout algorithm or draw decoration content.
+ * @param placeholder A [Painter] that is displayed while the image is loading.
+ * @param contentScale Optional scale parameter used to determine the aspect ratio scaling to be
+ *  used if the bounds are a different size from the intrinsic size of the painter.
+ */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 fun StripeImage(
@@ -26,7 +40,8 @@ fun StripeImage(
     placeholder: Painter,
     imageLoader: StripeImageLoader,
     contentDescription: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Fit
 ) {
     BoxWithConstraints(modifier) {
         val (width, height) = calculateBoxSize()
@@ -45,7 +60,7 @@ fun StripeImage(
         Image(
             modifier = modifier,
             contentDescription = contentDescription,
-            contentScale = ContentScale.Crop,
+            contentScale = contentScale,
             painter = painter.value
         )
     }

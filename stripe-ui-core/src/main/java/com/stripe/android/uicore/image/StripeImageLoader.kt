@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.image
 
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.annotation.RestrictTo
@@ -23,17 +24,18 @@ import kotlin.coroutines.resumeWithException
  * [StripeImageLoader] is stateful as it holds the memoryCache instance. For
  * memory cache to work the image loader instance needs to be shared.
  *
+ * @
  * @param memoryCache, memory cache to be used, or null if no memory cache is desired.
  * @param diskCache, memory cache to be used, or null if no memory cache is desired.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class StripeImageLoader(
     context: Context,
-    private val logger: Logger,
+    private val logger: Logger = Logger.getInstance(context.isDebuggable()),
     private val memoryCache: ImageLruMemoryCache? = ImageLruMemoryCache(),
     private val diskCache: ImageLruDiskCache? = ImageLruDiskCache(
         context = context,
-        uniqueName = "stripe_image_cache"
+        cacheFolder = "stripe_image_cache"
     ),
 ) {
 
@@ -162,3 +164,6 @@ class StripeImageLoader(
         private const val TAG = "StripeImageLoader"
     }
 }
+
+private fun Context.isDebuggable(): Boolean =
+    (0 != (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE))

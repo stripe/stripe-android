@@ -18,10 +18,22 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
+/**
+ * Implementation of disk cache based on [DiskLruCache].
+ *
+ * @see [DiskLruCache]
+
+ * @param cacheFolder name of the folder that will store the images of this cache.
+ *        It will create a cache if none exists there.
+ * @param maxSizeBytes the maximum number of bytes this cache should use to store
+ * @param compressFormat the format to be used when compressing to store the image in cache.
+ * @param mCompressQuality the compress quality to be used when compressing to store the image in cache.
+ * @throws IOException if reading or writing the cache directory fails
+ **/
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ImageLruDiskCache(
     context: Context,
-    uniqueName: String,
+    cacheFolder: String,
     maxSizeBytes: Long = 10L * 1024 * 1024, // 10MB
     private val compressFormat: CompressFormat = CompressFormat.JPEG,
     private val mCompressQuality: Int = 70,
@@ -31,7 +43,7 @@ class ImageLruDiskCache(
     init {
         try {
             diskLruCache = DiskLruCache.open(
-                /* directory = */ getDiskCacheDir(context, uniqueName),
+                /* directory = */ getDiskCacheDir(context, cacheFolder),
                 /* appVersion = */ APP_VERSION,
                 /* valueCount = */ VALUE_COUNT,
                 /* maxSize = */ maxSizeBytes
@@ -141,6 +153,7 @@ class ImageLruDiskCache(
         val cachePath: String = context.cacheDir.path
         return File(cachePath + File.separator + uniqueName)
     }
+
     companion object {
         private const val TAG = "stripe_image_disk_cache"
         private const val APP_VERSION = 1
