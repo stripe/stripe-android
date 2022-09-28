@@ -79,10 +79,14 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                             sheetViewModel.updatePrimaryButtonUIState(
                                 if (viewState.useLink) {
                                     val userInput = viewState.userInput
-                                    if (userInput != null && sheetViewModel.selection.value != null) {
+                                    if (userInput != null
+                                        && sheetViewModel.selection.value != null
+                                    ) {
                                         PrimaryButton.UIState(
                                             label = null,
-                                            onClick = { sheetViewModel.payWithLinkInline(userInput) },
+                                            onClick = {
+                                                sheetViewModel.payWithLinkInline(userInput)
+                                            },
                                             enabled = true,
                                             visible = true
                                         )
