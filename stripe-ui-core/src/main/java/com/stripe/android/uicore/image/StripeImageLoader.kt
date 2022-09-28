@@ -51,9 +51,7 @@ class StripeImageLoader(
         height: Int
     ): Result<Bitmap> = withContext(Dispatchers.IO) {
         withMutexByUrlLock(url) {
-            loadFromMemory(url)
-                ?: loadFromNetwork(url, width, height)
-                    .onFailure { logger.error("$TAG: Could not load image from network", it) }
+            loadFromMemory(url) ?: loadFromDisk(url) ?: loadFromNetwork(url, width, height)
         }
     }
 
@@ -68,6 +66,21 @@ class StripeImageLoader(
             }
             ?.let {
                 diskCache?.put(url, it)
+                Result.success(it)
+            }
+    }
+
+    private fun loadFromDisk(url: String): Result<Bitmap>? {
+        return diskCache?.getBitmap(url)
+            .also {
+                if (it != null) {
+                    debug("Image loaded from disk cache")
+                } else {
+                    debug("Image not found on disk cache")
+                }
+            }
+            ?.let {
+                memoryCache?.put(url, it)
                 Result.success(it)
             }
     }
@@ -89,11 +102,10 @@ class StripeImageLoader(
             inJustDecodeBounds = false
             decodeStream(url)
         }!!
-
         diskCache?.put(url, bitmap)
         memoryCache?.put(url, bitmap)
         bitmap
-    }
+    }.onFailure { logger.error("$TAG: Could not load image from network", it) }
 
     private suspend fun BitmapFactory.Options.decodeStream(
         url: String

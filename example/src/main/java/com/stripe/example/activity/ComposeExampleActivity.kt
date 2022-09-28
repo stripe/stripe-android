@@ -31,7 +31,6 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.uicore.image.ImageLruMemoryCache
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.example.R
@@ -51,8 +50,7 @@ class ComposeExampleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         imageLoader = StripeImageLoader(
             context = this,
-            memoryCache = ImageLruMemoryCache(),
-            diskCache = null,
+            memoryCache = null,
             logger = Logger.getInstance(true)
         )
         setContent {
@@ -79,7 +77,7 @@ class ComposeExampleActivity : AppCompatActivity() {
         status: String,
         onConfirm: (ConfirmPaymentIntentParams) -> Unit
     ) {
-        val content = List(20) { "https://dummyimage.com/108x108/000/fff&text=test_${('a'..'z').random()}" }
+        val content = List(200) { "https://dummyimage.com/108x108/000/fff&text=test_${('a'..'z').random()}" }
         Column(modifier = Modifier.padding(horizontal = 10.dp)) {
             LazyRow {
                 items(content) {
