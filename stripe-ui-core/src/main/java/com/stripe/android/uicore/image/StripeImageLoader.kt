@@ -68,20 +68,18 @@ class StripeImageLoader(
             }
     }
 
-    private fun loadFromDisk(url: String): Result<Bitmap>? {
-        return diskCache?.getBitmap(url)
-            .also {
-                if (it != null) {
-                    debug("Image loaded from disk cache")
-                } else {
-                    debug("Image not found on disk cache")
-                }
+    private fun loadFromDisk(url: String): Result<Bitmap>? = diskCache?.getBitmap(url)
+        .also {
+            if (it != null) {
+                debug("Image loaded from disk cache")
+            } else {
+                debug("Image not found on disk cache")
             }
-            ?.let {
-                memoryCache?.put(url, it)
-                Result.success(it)
-            }
-    }
+        }
+        ?.let {
+            memoryCache?.put(url, it)
+            Result.success(it)
+        }
 
     @WorkerThread
     private suspend fun loadFromNetwork(
