@@ -75,7 +75,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private val _currentScreenState: MutableStateFlow<USBankAccountFormScreenState> =
         MutableStateFlow(
-            args.savedScreenState ?: USBankAccountFormScreenState.NameAndEmailCollection(
+            USBankAccountFormScreenState.NameAndEmailCollection(
                 name = name.value,
                 email = email.value,
                 primaryButtonText = application.getString(
@@ -249,23 +249,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    private fun updateSavedAccount(
-        bankName: String,
-        last4: String
-    ): USBankAccountFormScreenState? {
-        return when (val screenState = currentScreenState.value) {
-            is USBankAccountFormScreenState.SavedAccount -> {
-                screenState.copy(
-                    bankName = bankName,
-                    last4 = last4,
-                    financialConnectionsSessionId = screenState.financialConnectionsSessionId,
-                    intentId = screenState.intentId
-                )
-            }
-            else -> null
-        }
-    }
-
     fun reset(@StringRes error: Int? = null) {
         hasLaunched = false
         saveForFutureUseElement.controller.onValueChange(true)
@@ -282,6 +265,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     fun onDestroy() {
+        // Save before we die
+        _currentScreenState.update {
+            it.updateInputs(
+                name.value,
+                email.value,
+                saveForFutureUse.value
+            )
+        }
+
         collectBankAccountLauncher = null
     }
 
@@ -395,11 +387,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     if (args.isCompleteFlow) {
                         confirm(clientSecret, paymentSelection)
                     } else {
-                        val savedAccount = updateSavedAccount(
-                            bankName = bankName,
-                            last4 = last4
-                        )
-                        args.onUpdateSelectionAndFinish(paymentSelection, savedAccount)
+                        _currentScreenState.update { screenState ->
+                            if (screenState is USBankAccountFormScreenState.SavedAccount) {
+                                screenState.copy(
+                                    bankName = bankName,
+                                    last4 = last4
+                                )
+                            } else {
+                                screenState
+                            }
+                        }
+                        args.onUpdateSelectionAndFinish(paymentSelection)
                     }
                 }
             }
@@ -497,11 +495,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val formArgs: FormFragmentArguments,
         val isCompleteFlow: Boolean,
         val clientSecret: ClientSecret?,
-        val savedScreenState: USBankAccountFormScreenState?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
         val onConfirmStripeIntent: (ConfirmStripeIntentParams) -> Unit,
-        val onUpdateSelectionAndFinish: (PaymentSelection, USBankAccountFormScreenState?) -> Unit,
+        val onUpdateSelectionAndFinish: (PaymentSelection) -> Unit,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     )
 
