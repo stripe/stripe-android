@@ -39,7 +39,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
@@ -182,8 +181,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     private val _notesText = MutableLiveData<String?>()
     internal val notesText: LiveData<String?> = _notesText
-
-    var usBankAccountSavedScreenState: USBankAccountFormScreenState? = null
 
     protected val _showLinkVerificationDialog = MutableLiveData(false)
     val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog

@@ -130,7 +130,7 @@ internal class USBankAccountFormFragment : Fragment() {
         }
     }
 
-    private val viewModel by viewModels<USBankAccountFormViewModel> {
+    private val viewModel by activityViewModels<USBankAccountFormViewModel> {
         USBankAccountFormViewModel.Factory(
             applicationSupplier = { requireActivity().application },
             argsSupplier = {
@@ -141,15 +141,13 @@ internal class USBankAccountFormFragment : Fragment() {
                     formArgs = formArgs,
                     isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
                     clientSecret = clientSecret,
-                    savedScreenState = sheetViewModel?.usBankAccountSavedScreenState,
                     savedPaymentMethod = savedPaymentMethod,
                     shippingDetails = sheetViewModel?.config?.shippingDetails,
                     onConfirmStripeIntent = { params ->
                         (sheetViewModel as? PaymentSheetViewModel)?.confirmStripeIntent(params)
                     },
-                    onUpdateSelectionAndFinish = { paymentSelection, savedAccount ->
+                    onUpdateSelectionAndFinish = { paymentSelection ->
                         sheetViewModel?.updateSelection(paymentSelection)
-                        sheetViewModel?.usBankAccountSavedScreenState = savedAccount
                         sheetViewModel?.onFinish()
                     }
                 )
@@ -258,12 +256,6 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     override fun onDetach() {
-        sheetViewModel?.usBankAccountSavedScreenState =
-            viewModel.currentScreenState.value.updateInputs(
-                viewModel.name.value,
-                viewModel.email.value,
-                viewModel.saveForFutureUse.value
-            )
         sheetViewModel?.updateBelowButtonText(null)
         sheetViewModel?.updatePrimaryButtonUIState(null)
         viewModel.onDestroy()
