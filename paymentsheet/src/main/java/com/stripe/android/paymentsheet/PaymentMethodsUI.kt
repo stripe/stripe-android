@@ -66,26 +66,23 @@ internal fun PaymentMethodsUI(
             userScrollEnabled = isEnabled,
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
-            itemsIndexed(
-                items = paymentMethods,
-                itemContent = { index, item ->
-                    PaymentMethodUI(
-                        modifier = Modifier.testTag(
-                            TEST_TAG_LIST + stringResource(item.displayNameResource)
-                        ),
-                        viewWidth = viewWidth,
-                        iconRes = item.iconResource,
-                        title = stringResource(item.displayNameResource),
-                        isSelected = index == selectedIndex,
-                        isEnabled = isEnabled,
-                        tintOnSelected = item.tintIconOnSelection,
-                        itemIndex = index,
-                        onItemSelectedListener = {
-                            onItemSelectedListener(paymentMethods[it])
-                        }
-                    )
-                }
-            )
+            itemsIndexed(items = paymentMethods) { index, item ->
+                PaymentMethodUI(
+                    modifier = Modifier.testTag(
+                        TEST_TAG_LIST + stringResource(item.displayNameResource)
+                    ),
+                    viewWidth = viewWidth,
+                    iconRes = item.iconResource,
+                    title = stringResource(item.displayNameResource),
+                    isSelected = index == selectedIndex,
+                    isEnabled = isEnabled,
+                    tintOnSelected = item.tintIconOnSelection,
+                    itemIndex = index,
+                    onItemSelectedListener = {
+                        onItemSelectedListener(paymentMethods[it])
+                    }
+                )
+            }
         }
     }
 }
