@@ -552,10 +552,6 @@ public final class com/stripe/android/financialconnections/features/attachpaymen
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/financialconnections/features/common/CloseDialogKt {
-	public static final fun CloseDialogPreview (Landroidx/compose/runtime/Composer;I)V
-}
-
 public final class com/stripe/android/financialconnections/features/common/ComposableSingletons$AccessibleDataCalloutKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/common/ComposableSingletons$AccessibleDataCalloutKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
