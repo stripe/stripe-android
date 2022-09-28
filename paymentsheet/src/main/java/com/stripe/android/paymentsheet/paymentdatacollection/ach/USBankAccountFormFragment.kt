@@ -33,7 +33,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -48,7 +47,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -68,9 +66,7 @@ internal class USBankAccountFormFragment : Fragment() {
 
     private val formArgs by lazy {
         requireNotNull(
-            requireArguments().getParcelable<FormFragmentArguments>(
-                ComposeFormDataCollectionFragment.EXTRA_CONFIG
-            )
+            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
         )
     }
 
@@ -218,12 +214,13 @@ internal class USBankAccountFormFragment : Fragment() {
                 LaunchedEffect(currentScreenState) {
                     sheetViewModel?.onError(currentScreenState.error)
 
-                    val shouldProcess = currentScreenState is USBankAccountFormScreenState.NameAndEmailCollection ||
+                    val shouldProcess =
+                        currentScreenState is USBankAccountFormScreenState.NameAndEmailCollection ||
                             completePayment
                     val enabled = if (
-                            currentScreenState is
-                            USBankAccountFormScreenState.NameAndEmailCollection
-                        ) {
+                        currentScreenState is
+                        USBankAccountFormScreenState.NameAndEmailCollection
+                    ) {
                         viewModel.requiredFields.value
                     } else {
                         true
@@ -502,5 +499,9 @@ internal class USBankAccountFormFragment : Fragment() {
             """.trimIndent()
         } ?: run { null }
         sheetViewModel?.updateBelowButtonText(updatedText)
+    }
+
+    companion object {
+        const val EXTRA_CONFIG = "com.stripe.android.paymentsheet.extra_config"
     }
 }
