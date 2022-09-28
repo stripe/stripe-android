@@ -81,7 +81,8 @@ private fun Preview() {
 fun LinkInlineSignup(
     linkPaymentLauncher: LinkPaymentLauncher,
     enabled: Boolean,
-    onStateChanged: (InlineSignupViewState) -> Unit
+    onStateChanged: (InlineSignupViewState) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     linkPaymentLauncher.injector?.let { injector ->
         val viewModel: InlineSignupViewModel = viewModel(
@@ -114,7 +115,8 @@ fun LinkInlineSignup(
             expanded = viewState.isExpanded,
             requiresNameCollection = viewModel.requiresNameCollection,
             errorMessage = errorMessage,
-            toggleExpanded = viewModel::toggleExpanded
+            toggleExpanded = viewModel::toggleExpanded,
+            modifier = modifier
         )
     }
 }
@@ -130,7 +132,8 @@ internal fun LinkInlineSignup(
     expanded: Boolean,
     requiresNameCollection: Boolean,
     errorMessage: ErrorMessage?,
-    toggleExpanded: () -> Unit
+    toggleExpanded: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val focusRequester = remember { FocusRequester() }
 
@@ -145,8 +148,7 @@ internal fun LinkInlineSignup(
     ) {
         PaymentsTheme {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = modifier
                     .border(
                         border = MaterialTheme.getBorderStroke(isSelected = false),
                         shape = MaterialTheme.linkShapes.medium
