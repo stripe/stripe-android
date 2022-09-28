@@ -99,6 +99,7 @@ class PlaygroundTestDriver(
     }
 
     private fun pressContinue() {
+        TimeUnit.MILLISECONDS.sleep(250)
         selectors.continueButton.apply {
             scrollTo()
             click()
@@ -181,6 +182,7 @@ class PlaygroundTestDriver(
     }
 
     private fun pressBuy() {
+        TimeUnit.MILLISECONDS.sleep(250)
         selectors.buyButton.apply {
             scrollTo()
             click()
@@ -188,6 +190,7 @@ class PlaygroundTestDriver(
     }
 
     internal fun pressEdit() {
+        TimeUnit.MILLISECONDS.sleep(250)
         selectors.editButton.apply {
             waitProcessingComplete()
             click()

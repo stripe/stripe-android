@@ -2,6 +2,7 @@ package com.stripe.android
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -168,8 +169,12 @@ class TestFieldPopulation {
                 supportedPaymentMethods = listOf(PaymentMethod.Type.Bancontact.code)
             )
         ) {
-            composeTestRule.onNodeWithText("Full name")
-                .performTextInput("Jenny Rosen")
+            composeTestRule.waitForIdle()
+            val node = composeTestRule.onNodeWithText("Full name")
+            node.performClick()
+            composeTestRule.waitForIdle()
+            node.performTextInput("Jenny Rosen")
+            composeTestRule.waitForIdle()
         }
     }
 
