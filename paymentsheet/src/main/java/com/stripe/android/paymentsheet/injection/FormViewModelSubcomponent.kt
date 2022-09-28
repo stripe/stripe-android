@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
-import com.stripe.android.model.PaymentMethodCode
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import dagger.BindsInstance
@@ -13,12 +13,12 @@ internal interface FormViewModelSubcomponent {
     @Subcomponent.Builder
     interface Builder {
         @BindsInstance
-        fun paymentMethodCode(paymentMethodCode: PaymentMethodCode): Builder
-
-        @BindsInstance
         fun formFragmentArguments(
             config: FormFragmentArguments
         ): Builder
+
+        @BindsInstance
+        fun savedStateHandle(handle: SavedStateHandle): Builder
 
         fun build(): FormViewModelSubcomponent
     }

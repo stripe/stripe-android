@@ -1,10 +1,15 @@
 package com.stripe.android.paymentsheet.forms
 
+import android.app.Application
 import android.content.Context
+import android.os.Bundle
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.model.PaymentMethodCode
@@ -49,17 +54,20 @@ import javax.inject.Provider
  */
 @FlowPreview
 internal class FormViewModel @Inject internal constructor(
-    paymentMethodCode: PaymentMethodCode,
+    context: Context,
     config: FormFragmentArguments,
     internal val lpmResourceRepository: ResourceRepository<LpmRepository>,
     internal val addressResourceRepository: ResourceRepository<AddressRepository>,
-    private val transformSpecToElement: TransformSpecToElement
-) : ViewModel() {
+    private val transformSpecToElement: TransformSpecToElement,
+    val savedStateHandle: SavedStateHandle
+) : AndroidViewModel(context.applicationContext as Application) {
     internal class Factory(
         val config: FormFragmentArguments,
-        var paymentMethodCode: PaymentMethodCode,
-        private val contextSupplier: () -> Context
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+        private val contextSupplier: () -> Context,
+        owner: SavedStateRegistryOwner,
+        defaultArgs: Bundle? = null
+    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
+        Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val context: Context
         )
@@ -68,12 +76,16 @@ internal class FormViewModel @Inject internal constructor(
         lateinit var subComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(
+            key: String,
+            modelClass: Class<T>,
+            savedStateHandle: SavedStateHandle
+        ): T {
             val context = contextSupplier()
             injectWithFallback(config.injectorKey, FallbackInitializeParam(context))
             return subComponentBuilderProvider.get()
                 .formFragmentArguments(config)
-                .paymentMethodCode(paymentMethodCode)
+                .savedStateHandle(savedStateHandle)
                 .build().viewModel as T
         }
 
@@ -94,7 +106,7 @@ internal class FormViewModel @Inject internal constructor(
         if (resourceRepositories.all { it.isLoaded() }) {
             elements = MutableStateFlow(
                 transformSpecToElement.transform(
-                    getLpmItems(paymentMethodCode)
+                    getLpmItems(config.paymentMethodCode)
                 )
             )
         } else {
@@ -114,7 +126,7 @@ internal class FormViewModel @Inject internal constructor(
                         // is no longer listening for the resource repository to be ready and so
                         // the resource repository is not ready!
                         val values = transformSpecToElement.transform(
-                            getLpmItems(paymentMethodCode)
+                            getLpmItems(config.paymentMethodCode)
                         )
                         withContext(Dispatchers.Main) {
                             delayedElements.value = values

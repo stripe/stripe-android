@@ -23,7 +23,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -49,7 +48,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -58,10 +56,9 @@ import com.stripe.android.ui.core.elements.H6Text
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
-import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.ui.core.elements.TextFieldSection
+import com.stripe.android.ui.core.paymentsColors
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -72,9 +69,7 @@ internal class USBankAccountFormFragment : Fragment() {
 
     private val formArgs by lazy {
         requireNotNull(
-            requireArguments().getParcelable<FormFragmentArguments>(
-                ComposeFormDataCollectionFragment.EXTRA_CONFIG
-            )
+            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
         )
     }
 
@@ -214,12 +209,14 @@ internal class USBankAccountFormFragment : Fragment() {
                 LaunchedEffect(currentScreenState) {
                     sheetViewModel?.onError(currentScreenState.error)
 
-                    val shouldProcess = currentScreenState is USBankAccountFormScreenState.NameAndEmailCollection || completePayment
-                    val enabled = if (currentScreenState is USBankAccountFormScreenState.NameAndEmailCollection) {
-                        viewModel.requiredFields.value
-                    } else {
-                        true
-                    }
+                    val shouldProcess =
+                        currentScreenState is USBankAccountFormScreenState.NameAndEmailCollection || completePayment
+                    val enabled =
+                        if (currentScreenState is USBankAccountFormScreenState.NameAndEmailCollection) {
+                            viewModel.requiredFields.value
+                        } else {
+                            true
+                        }
 
                     updatePrimaryButton(
                         text = currentScreenState.primaryButtonText,
@@ -583,7 +580,7 @@ internal class USBankAccountFormFragment : Fragment() {
     private fun updateMandateText(mandateText: String?) {
         val microdepositsText =
             if (viewModel.currentScreenState.value
-                is USBankAccountFormScreenState.VerifyWithMicrodeposits
+                    is USBankAccountFormScreenState.VerifyWithMicrodeposits
             ) {
                 getString(
                     R.string.stripe_paymentsheet_microdeposit,
@@ -600,5 +597,9 @@ internal class USBankAccountFormFragment : Fragment() {
             """.trimIndent()
         } ?: run { null }
         sheetViewModel?.updateBelowButtonText(updatedText)
+    }
+
+    companion object {
+        const val EXTRA_CONFIG = "com.stripe.android.paymentsheet.extra_config"
     }
 }

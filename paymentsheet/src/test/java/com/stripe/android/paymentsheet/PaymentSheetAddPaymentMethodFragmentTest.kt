@@ -76,7 +76,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         }
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding, _ ->
             assertThat(
-                calculateViewWidth(
+                rememberViewWidth(
                     convertPixelsToDp(
                         viewBinding.paymentMethodFragmentContainer.measuredWidth,
                         fragment.resources
@@ -95,7 +95,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         }
         createFragment(stripeIntent = paymentIntent) { fragment, viewBinding, _ ->
             assertThat(
-                calculateViewWidth(
+                rememberViewWidth(
                     convertPixelsToDp(
                         viewBinding.paymentMethodFragmentContainer.measuredWidth,
                         fragment.resources
