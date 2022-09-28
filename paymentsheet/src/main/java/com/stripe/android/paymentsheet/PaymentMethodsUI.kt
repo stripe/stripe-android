@@ -98,20 +98,19 @@ private fun rememberViewWidth(
     calculateViewWidth(maxWidth, numberOfPaymentMethods)
 }
 
-@Composable
-internal fun rememberViewWidth(
+internal fun calculateViewWidth(
     maxWidth: Dp,
     numberOfPaymentMethods: Int
-) = remember(maxWidth, numberOfPaymentMethods) {
+): Dp {
     val targetWidthDp = maxWidth - (PM_LIST_PADDING.dp * 2)
     val minItemWidthDp = (100 + (2 * CARD_HORIZONTAL_PADDING)).dp
-
-    if ((minItemWidthDp * numberOfPaymentMethods) < targetWidthDp) {
+    val viewWidth = if ((minItemWidthDp * numberOfPaymentMethods) < targetWidthDp) {
         targetWidthDp / numberOfPaymentMethods
     } else {
         val maxNumVisibleItemsAtMinimumSize = (targetWidthDp / minItemWidthDp).toInt()
         targetWidthDp / maxNumVisibleItemsAtMinimumSize
     }
+    return viewWidth
 }
 
 @Composable
