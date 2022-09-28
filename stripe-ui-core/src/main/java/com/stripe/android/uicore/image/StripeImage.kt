@@ -6,9 +6,10 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -45,8 +46,9 @@ fun StripeImage(
 ) {
     BoxWithConstraints(modifier) {
         val (width, height) = calculateBoxSize()
-        val painter: MutableState<Painter> =
-            remember { mutableStateOf(BitmapPainter(ImageBitmap(width, height))) }
+        var painter: Painter by remember {
+            mutableStateOf(BitmapPainter(ImageBitmap(width, height)))
+        }
         LaunchedEffect(url) {
             launch {
                 imageLoader
@@ -54,14 +56,14 @@ fun StripeImage(
                     .fold(
                         onSuccess = { bitmap -> BitmapPainter(bitmap.asImageBitmap()) },
                         onFailure = { placeholder }
-                    ).let { painter.value = it }
+                    ).let { painter = it }
             }
         }
         Image(
             modifier = modifier,
             contentDescription = contentDescription,
             contentScale = contentScale,
-            painter = painter.value
+            painter = painter
         )
     }
 }
