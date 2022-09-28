@@ -23,7 +23,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -59,9 +58,6 @@ import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.ui.core.elements.TextFieldSection
 import com.stripe.android.ui.core.paymentsColors
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -133,19 +129,29 @@ internal class USBankAccountFormFragment : Fragment() {
 
     private val viewModel by viewModels<USBankAccountFormViewModel> {
         USBankAccountFormViewModel.Factory(
-            { requireActivity().application },
-            {
+            applicationSupplier = { requireActivity().application },
+            argsSupplier = {
+                val savedPaymentMethod =
+                    sheetViewModel?.newPaymentSelection as? PaymentSelection.New.USBankAccount
+
                 USBankAccountFormViewModel.Args(
-                    formArgs,
-                    sheetViewModel is PaymentSheetViewModel,
-                    clientSecret,
-                    sheetViewModel?.usBankAccountSavedScreenState,
-                    (sheetViewModel?.newPaymentSelection as? PaymentSelection.New.USBankAccount),
-                    sheetViewModel?.config?.shippingDetails,
-                    sheetViewModel
+                    formArgs = formArgs,
+                    isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
+                    clientSecret = clientSecret,
+                    savedScreenState = sheetViewModel?.usBankAccountSavedScreenState,
+                    savedPaymentMethod = savedPaymentMethod,
+                    shippingDetails = sheetViewModel?.config?.shippingDetails,
+                    onConfirmStripeIntent = { params ->
+                        (sheetViewModel as? PaymentSheetViewModel)?.confirmStripeIntent(params)
+                    },
+                    onUpdateSelectionAndFinish = { paymentSelection, savedAccount ->
+                        sheetViewModel?.updateSelection(paymentSelection)
+                        sheetViewModel?.usBankAccountSavedScreenState = savedAccount
+                        sheetViewModel?.onFinish()
+                    }
                 )
             },
-            this
+            owner = this
         )
     }
 
@@ -246,28 +252,6 @@ internal class USBankAccountFormFragment : Fragment() {
                 }
             }
         }
-
-//        lifecycleScope.launch {
-//            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-//                viewModel.currentScreenState.collect { screenState ->
-//                    sheetViewModel?.onError(screenState.error)
-//                    when (screenState) {
-//                        is USBankAccountFormScreenState.NameAndEmailCollection -> {
-//                            renderNameAndEmailCollectionScreen(screenState, this)
-//                        }
-//                        is USBankAccountFormScreenState.MandateCollection -> {
-//                            renderMandateCollectionScreen(screenState)
-//                        }
-//                        is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
-//                            renderVerifyWithMicrodepositsScreen(screenState)
-//                        }
-//                        is USBankAccountFormScreenState.SavedAccount -> {
-//                            renderSavedAccountScreen(screenState)
-//                        }
-//                    }
-//                }
-//            }
-//        }
     }
 
     override fun onDetach() {
@@ -281,85 +265,6 @@ internal class USBankAccountFormFragment : Fragment() {
         sheetViewModel?.updatePrimaryButtonUIState(null)
         viewModel.onDestroy()
         super.onDetach()
-    }
-
-    private suspend fun ComposeView.renderNameAndEmailCollectionScreen(
-        screenState: USBankAccountFormScreenState.NameAndEmailCollection,
-        coroutineScope: CoroutineScope
-    ) {
-        setContent {
-            PaymentsTheme {
-                NameAndEmailCollectionScreen(screenState)
-            }
-        }
-        updatePrimaryButton(
-            text = screenState.primaryButtonText,
-            onClick = {
-                viewModel.handlePrimaryButtonClick(screenState)
-            },
-            enabled = viewModel.requiredFields.stateIn(coroutineScope).value
-        )
-        updateMandateText(null)
-    }
-
-    private fun ComposeView.renderMandateCollectionScreen(
-        screenState: USBankAccountFormScreenState.MandateCollection
-    ) {
-        setContent {
-            PaymentsTheme {
-                MandateCollectionScreen(screenState)
-            }
-        }
-        updatePrimaryButton(
-            text = screenState.primaryButtonText,
-            onClick = {
-                viewModel.handlePrimaryButtonClick(screenState)
-            },
-            shouldProcess = completePayment
-        )
-        updateMandateText(
-            screenState.mandateText
-        )
-    }
-
-    private fun ComposeView.renderVerifyWithMicrodepositsScreen(
-        screenState: USBankAccountFormScreenState.VerifyWithMicrodeposits
-    ) {
-        setContent {
-            PaymentsTheme {
-                VerifyWithMicrodepositsScreen(screenState)
-            }
-        }
-        updatePrimaryButton(
-            text = screenState.primaryButtonText,
-            onClick = {
-                viewModel.handlePrimaryButtonClick(screenState)
-            },
-            shouldProcess = completePayment
-        )
-        updateMandateText(
-            screenState.mandateText
-        )
-    }
-
-    private fun ComposeView.renderSavedAccountScreen(
-        screenState: USBankAccountFormScreenState.SavedAccount
-    ) {
-        setContent {
-            PaymentsTheme {
-                SavedAccountScreen(screenState)
-            }
-        }
-        updatePrimaryButton(
-            text = screenState.primaryButtonText,
-            onClick = {
-                viewModel.handlePrimaryButtonClick(screenState)
-            },
-            shouldProcess = completePayment
-        )
-        updateMandateText(
-            screenState.mandateText
-        )
     }
 
     @Composable

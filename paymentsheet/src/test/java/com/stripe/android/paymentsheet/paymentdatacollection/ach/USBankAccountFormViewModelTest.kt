@@ -9,6 +9,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
@@ -16,11 +17,9 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,7 +31,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.isA
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -45,7 +44,8 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 class USBankAccountFormViewModelTest {
 
-    private val sheetViewModel: BaseSheetViewModel<*> = mock()
+    private val onConfirmStripeIntent: (ConfirmStripeIntentParams) -> Unit = mock()
+    private val onUpdateSelectionAndFinish: (PaymentSelection, USBankAccountFormScreenState?) -> Unit = mock()
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
         formArgs = FormFragmentArguments(
@@ -60,12 +60,13 @@ class USBankAccountFormViewModelTest {
                 email = CUSTOMER_EMAIL
             )
         ),
-        completePayment = true,
+        isCompleteFlow = true,
         clientSecret = PaymentIntentClientSecret("pi_12345"),
         savedScreenState = null,
         savedPaymentMethod = null,
         shippingDetails = null,
-        sheetViewModel = sheetViewModel
+        onConfirmStripeIntent = onConfirmStripeIntent,
+        onUpdateSelectionAndFinish = onUpdateSelectionAndFinish
     )
 
     private val stripeRepository = mock<StripeRepository>()
@@ -135,12 +136,7 @@ class USBankAccountFormViewModelTest {
     @Test
     fun `when payment sheet, unverified bank account, then confirm intent callable`() =
         runTest(UnconfinedTestDispatcher()) {
-            val paymentSheetViewModel = mock<PaymentSheetViewModel>()
-            val viewModel = createViewModel(
-                args = defaultArgs.copy(
-                    sheetViewModel = paymentSheetViewModel
-                )
-            )
+            val viewModel = createViewModel()
 
             viewModel.handleCollectBankAccountResult(
                 mockUnverifiedBankAccount()
@@ -156,18 +152,13 @@ class USBankAccountFormViewModelTest {
             assertThat(newScreenState)
                 .isInstanceOf(USBankAccountFormScreenState.VerifyWithMicrodeposits::class.java)
 
-            verify(paymentSheetViewModel).confirmStripeIntent(any())
+            verify(onConfirmStripeIntent).invoke(any())
         }
 
     @Test
     fun `when payment sheet, verified bank account, then confirm intent callable`() =
         runTest(UnconfinedTestDispatcher()) {
-            val paymentSheetViewModel = mock<PaymentSheetViewModel>()
-            val viewModel = createViewModel(
-                args = defaultArgs.copy(
-                    sheetViewModel = paymentSheetViewModel
-                )
-            )
+            val viewModel = createViewModel()
 
             viewModel.handleCollectBankAccountResult(
                 mockVerifiedBankAccount()
@@ -183,13 +174,13 @@ class USBankAccountFormViewModelTest {
             assertThat(newScreenState)
                 .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
 
-            verify(paymentSheetViewModel).confirmStripeIntent(any())
+            verify(onConfirmStripeIntent).invoke(any())
         }
 
     @Test
     fun `when payment options, unverified bank account, then finished`() =
         runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(defaultArgs.copy(completePayment = false))
+            val viewModel = createViewModel(defaultArgs.copy(isCompleteFlow = false))
             val bankAccount = mockUnverifiedBankAccount()
 
             viewModel.handleCollectBankAccountResult(bankAccount)
@@ -208,18 +199,16 @@ class USBankAccountFormViewModelTest {
             val expectedBankAccount = session.paymentAccount as BankAccount
 
             val argumentCaptor = argumentCaptor<PaymentSelection>()
-            verify(sheetViewModel).updateSelection(argumentCaptor.capture())
+            verify(onUpdateSelectionAndFinish).invoke(argumentCaptor.capture(), isNull())
 
             val actualBankAccount = argumentCaptor.firstValue as PaymentSelection.New.USBankAccount
             assertThat(expectedBankAccount.last4).isEqualTo(actualBankAccount.last4)
-
-            verify(sheetViewModel).onFinish()
         }
 
     @Test
     fun `when payment options, verified bank account, then finished`() =
         runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(defaultArgs.copy(completePayment = false))
+            val viewModel = createViewModel(defaultArgs.copy(isCompleteFlow = false))
             val bankAccount = mockVerifiedBankAccount()
 
             viewModel.handleCollectBankAccountResult(bankAccount)
@@ -238,12 +227,10 @@ class USBankAccountFormViewModelTest {
             val expectedBankAccount = session.paymentAccount as FinancialConnectionsAccount
 
             val argumentCaptor = argumentCaptor<PaymentSelection>()
-            verify(sheetViewModel).updateSelection(argumentCaptor.capture())
+            verify(onUpdateSelectionAndFinish).invoke(argumentCaptor.capture(), isNull())
 
             val actualBankAccount = argumentCaptor.firstValue as PaymentSelection.New.USBankAccount
             assertThat(expectedBankAccount.last4).isEqualTo(actualBankAccount.last4)
-
-            verify(sheetViewModel).onFinish()
         }
 
     @Test
