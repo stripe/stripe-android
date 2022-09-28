@@ -9,6 +9,7 @@ appId: com.stripe.android.financialconnections.example
 - takeScreenshot: ChromeSetup
 # Android specific - Chrome opens, likely with first open setup. Pass setup.
 - tapOn: "Accept & continue"
+- takeScreenshot: ChromeSetup2
 - tapOn: "No thanks"
 # Common: web authflow - connect OAuth institution
 - assertVisible: "Agree"
