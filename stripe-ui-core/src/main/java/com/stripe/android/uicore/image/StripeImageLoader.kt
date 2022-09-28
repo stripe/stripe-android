@@ -3,19 +3,14 @@ package com.stripe.android.uicore.image
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import androidx.annotation.RestrictTo
 import androidx.annotation.WorkerThread
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /**
  * Image loader that fetches images from memory, disk or network and runs
@@ -33,6 +28,7 @@ class StripeImageLoader(
     context: Context,
     private val logger: Logger = Logger.getInstance(context.isDebuggable()),
     private val memoryCache: ImageLruMemoryCache? = ImageLruMemoryCache(),
+    private val networkImageDecoder: NetworkImageDecoder = NetworkImageDecoder(),
     private val diskCache: ImageLruDiskCache? = ImageLruDiskCache(
         context = context,
         cacheFolder = "stripe_image_cache"
@@ -94,56 +90,11 @@ class StripeImageLoader(
         height: Int
     ): Result<Bitmap> = kotlin.runCatching {
         debug("Image $url loading from internet")
-        val bitmap = BitmapFactory.Options().run {
-            // First decode with inJustDecodeBounds=true to check dimensions
-            inJustDecodeBounds = true
-            decodeStream(url)
-            // Calculate inSampleSize
-            inSampleSize = calculateInSampleSize(this, width, height)
-            // Decode bitmap with inSampleSize set
-            inJustDecodeBounds = false
-            decodeStream(url)
-        }!!
+        val bitmap = networkImageDecoder.decode(url, width, height)
         diskCache?.put(url, bitmap)
         memoryCache?.put(url, bitmap)
         bitmap
     }.onFailure { logger.error("$TAG: Could not load image from network", it) }
-
-    private suspend fun BitmapFactory.Options.decodeStream(
-        url: String
-    ): Bitmap? = suspendCancellableCoroutine { cont ->
-        kotlin.runCatching {
-            URL(url).openStream()
-                .also { stream -> cont.invokeOnCancellation { stream.close() } }
-                .use { BitmapFactory.decodeStream(it, null, this) }
-        }.fold(
-            onSuccess = { cont.resume(it) },
-            onFailure = { cont.resumeWithException(it) }
-        )
-    }
-
-    private fun calculateInSampleSize(
-        options: BitmapFactory.Options,
-        reqWidth: Int,
-        reqHeight: Int
-    ): Int {
-        // Raw height and width of image
-        val (height: Int, width: Int) = options.run { outHeight to outWidth }
-        var inSampleSize = 1
-
-        if (height > reqHeight || width > reqWidth) {
-
-            val halfHeight: Int = height / 2
-            val halfWidth: Int = width / 2
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
-                inSampleSize *= 2
-            }
-        }
-        return inSampleSize
-    }
 
     /**
      * Runs the specified [action] within a locked mutex keyed by the passed url.
