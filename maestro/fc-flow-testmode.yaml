@@ -12,6 +12,9 @@ appId: com.stripe.android.financialconnections.example
 #- takeScreenshot: ChromeSetup2
 #- tapOn: "No thanks"
 # Common: web authflow - connect OAuth institution
+- extendedWaitUntil:
+    visible: "Agree"    # Same input as in assertVisible or tapOn
+    timeout: 50000      # Timeout in milliseconds
 - assertVisible: "Agree"
 - takeScreenshot: Consent
 - tapOn: "Agree"
