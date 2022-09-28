@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
@@ -94,41 +96,45 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     fun NavHost() {
         val navController = rememberNavController()
         NavigationEffect(navController)
-        NavHost(navController, startDestination = NavigationDirections.consent.destination) {
-            composable(NavigationDirections.consent.destination) {
-                ConsentScreen()
-            }
-            composable(NavigationDirections.manualEntry.destination) {
-                ManualEntryScreen()
-            }
-            composable(
-                route = NavigationDirections.ManualEntrySuccess.route,
-                arguments = NavigationDirections.ManualEntrySuccess.arguments
-            ) {
-                ManualEntrySuccessScreen(
-                    microdepositVerificationMethod = NavigationDirections
-                        .ManualEntrySuccess.microdeposits(it),
-                    last4 = NavigationDirections
-                        .ManualEntrySuccess.last4(it)
-                )
-            }
-            composable(NavigationDirections.institutionPicker.destination) {
-                InstitutionPickerScreen()
-            }
-            composable(NavigationDirections.partnerAuth.destination) {
-                PartnerAuthScreen()
-            }
-            composable(NavigationDirections.accountPicker.destination) {
-                AccountPickerScreen()
-            }
-            composable(NavigationDirections.success.destination) {
-                SuccessScreen()
-            }
-            composable(NavigationDirections.reset.destination) {
-                ResetScreen()
-            }
-            composable(NavigationDirections.attachLinkedPaymentAccount.destination) {
-                AttachPaymentScreen()
+        CompositionLocalProvider(
+            LocalNavHostController provides navController,
+        ) {
+            NavHost(navController, startDestination = NavigationDirections.consent.destination) {
+                composable(NavigationDirections.consent.destination) {
+                    ConsentScreen()
+                }
+                composable(NavigationDirections.manualEntry.destination) {
+                    ManualEntryScreen()
+                }
+                composable(
+                    route = NavigationDirections.ManualEntrySuccess.route,
+                    arguments = NavigationDirections.ManualEntrySuccess.arguments
+                ) {
+                    ManualEntrySuccessScreen(
+                        microdepositVerificationMethod = NavigationDirections
+                            .ManualEntrySuccess.microdeposits(it),
+                        last4 = NavigationDirections
+                            .ManualEntrySuccess.last4(it)
+                    )
+                }
+                composable(NavigationDirections.institutionPicker.destination) {
+                    InstitutionPickerScreen()
+                }
+                composable(NavigationDirections.partnerAuth.destination) {
+                    PartnerAuthScreen()
+                }
+                composable(NavigationDirections.accountPicker.destination) {
+                    AccountPickerScreen()
+                }
+                composable(NavigationDirections.success.destination) {
+                    SuccessScreen()
+                }
+                composable(NavigationDirections.reset.destination) {
+                    ResetScreen()
+                }
+                composable(NavigationDirections.attachLinkedPaymentAccount.destination) {
+                    AttachPaymentScreen()
+                }
             }
         }
     }
@@ -175,4 +181,8 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             }
         }
     }
+}
+
+internal val LocalNavHostController = staticCompositionLocalOf<NavHostController> {
+    error("No NavHostController provided")
 }

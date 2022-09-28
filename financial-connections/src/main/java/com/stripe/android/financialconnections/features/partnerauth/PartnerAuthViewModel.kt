@@ -176,4 +176,12 @@ internal data class PartnerAuthState(
         val flow: Flow?,
         val showPartnerDisclosure: Boolean
     )
+
+    val canNavigateBack: Boolean
+        get() =
+            // Authentication running -> don't allow back navigation
+            authenticationStatus !is Loading &&
+                authenticationStatus !is Success &&
+                // Failures posting institution -> don't allow back navigation
+                payload !is Fail
 }
