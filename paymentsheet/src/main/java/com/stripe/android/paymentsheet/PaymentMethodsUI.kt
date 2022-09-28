@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.ui.core.MeasureComposableWidth
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.paymentsColors
@@ -52,40 +53,42 @@ internal fun PaymentMethodsUI(
         state.animateScrollToItem(selectedIndex)
     }
 
-    BoxWithConstraints(
-        modifier = modifier.testTag(TEST_TAG_LIST + "1")
-    ) {
-        val viewWidth = rememberViewWidth(
-            this.maxWidth,
-            paymentMethods.size
-        )
-
-        LazyRow(
-            state = state,
-            contentPadding = PaddingValues(horizontal = PM_LIST_PADDING.dp),
-            userScrollEnabled = isEnabled,
-            modifier = Modifier.testTag(TEST_TAG_LIST)
+    PaymentsTheme {
+        BoxWithConstraints(
+            modifier = modifier.testTag(TEST_TAG_LIST + "1")
         ) {
-            itemsIndexed(
-                items = paymentMethods,
-                itemContent = { index, item ->
-                    PaymentMethodUI(
-                        modifier = Modifier.testTag(
-                            TEST_TAG_LIST + stringResource(item.displayNameResource)
-                        ),
-                        viewWidth = viewWidth,
-                        iconRes = item.iconResource,
-                        title = stringResource(item.displayNameResource),
-                        isSelected = index == selectedIndex,
-                        isEnabled = isEnabled,
-                        tintOnSelected = item.tintIconOnSelection,
-                        itemIndex = index,
-                        onItemSelectedListener = {
-                            onItemSelectedListener(paymentMethods[it])
-                        }
-                    )
-                }
+            val viewWidth = rememberViewWidth(
+                this.maxWidth,
+                paymentMethods.size
             )
+
+            LazyRow(
+                state = state,
+                contentPadding = PaddingValues(horizontal = PM_LIST_PADDING.dp),
+                userScrollEnabled = isEnabled,
+                modifier = Modifier.testTag(TEST_TAG_LIST)
+            ) {
+                itemsIndexed(
+                    items = paymentMethods,
+                    itemContent = { index, item ->
+                        PaymentMethodUI(
+                            modifier = Modifier.testTag(
+                                TEST_TAG_LIST + stringResource(item.displayNameResource)
+                            ),
+                            viewWidth = viewWidth,
+                            iconRes = item.iconResource,
+                            title = stringResource(item.displayNameResource),
+                            isSelected = index == selectedIndex,
+                            isEnabled = isEnabled,
+                            tintOnSelected = item.tintIconOnSelection,
+                            itemIndex = index,
+                            onItemSelectedListener = {
+                                onItemSelectedListener(paymentMethods[it])
+                            }
+                        )
+                    }
+                )
+            }
         }
     }
 }

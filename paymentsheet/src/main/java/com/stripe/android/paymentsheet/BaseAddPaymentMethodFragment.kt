@@ -73,32 +73,33 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
                 PaymentsTheme {
                     LinkInlineSignup(
-                        sheetViewModel.linkLauncher,
-                        !processing
-                    ) { viewState ->
-                        sheetViewModel.updatePrimaryButtonUIState(
-                            if (viewState.useLink) {
-                                val userInput = viewState.userInput
-                                if (userInput != null && sheetViewModel.selection.value != null) {
-                                    PrimaryButton.UIState(
-                                        label = null,
-                                        onClick = { sheetViewModel.payWithLinkInline(userInput) },
-                                        enabled = true,
-                                        visible = true
-                                    )
+                        linkPaymentLauncher = sheetViewModel.linkLauncher,
+                        enabled = !processing,
+                        onStateChanged = { viewState ->
+                            sheetViewModel.updatePrimaryButtonUIState(
+                                if (viewState.useLink) {
+                                    val userInput = viewState.userInput
+                                    if (userInput != null && sheetViewModel.selection.value != null) {
+                                        PrimaryButton.UIState(
+                                            label = null,
+                                            onClick = { sheetViewModel.payWithLinkInline(userInput) },
+                                            enabled = true,
+                                            visible = true
+                                        )
+                                    } else {
+                                        PrimaryButton.UIState(
+                                            label = null,
+                                            onClick = null,
+                                            enabled = false,
+                                            visible = true
+                                        )
+                                    }
                                 } else {
-                                    PrimaryButton.UIState(
-                                        label = null,
-                                        onClick = null,
-                                        enabled = false,
-                                        visible = true
-                                    )
+                                    null
                                 }
-                            } else {
-                                null
-                            }
-                        )
-                    }
+                            )
+                        }
+                    )
                 }
             }
         }
