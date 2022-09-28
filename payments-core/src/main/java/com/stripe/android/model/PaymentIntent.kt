@@ -160,12 +160,21 @@ data class PaymentIntent internal constructor(
 
     override val nextActionType: StripeIntent.NextActionType?
         get() = when (nextActionData) {
-            is StripeIntent.NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
-            is StripeIntent.NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
-            is StripeIntent.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
-            is StripeIntent.NextActionData.VerifyWithMicrodeposits ->
+            is StripeIntent.NextActionData.SdkData -> {
+                StripeIntent.NextActionType.UseStripeSdk
+            }
+            is StripeIntent.NextActionData.RedirectToUrl -> {
+                StripeIntent.NextActionType.RedirectToUrl
+            }
+            is StripeIntent.NextActionData.DisplayOxxoDetails -> {
+                StripeIntent.NextActionType.DisplayOxxoDetails
+            }
+            is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
-            else -> null
+            }
+            else -> {
+                null
+            }
         }
 
     override val isConfirmed: Boolean

@@ -132,7 +132,9 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.payment_auth_web_view_menu, menu)
 
         viewModel.buttonText?.let {
-            logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating close button text")
+            logger.debug(
+                "PaymentAuthWebViewActivity#customizeToolbar() - updating close button text"
+            )
             menu.findItem(R.id.action_close).title = it
         }
 
@@ -165,7 +167,9 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         logger.debug("PaymentAuthWebViewActivity#customizeToolbar()")
 
         viewModel.toolbarTitle?.let {
-            logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating toolbar title")
+            logger.debug(
+                "PaymentAuthWebViewActivity#customizeToolbar() - updating toolbar title"
+            )
             viewBinding.toolbar.title = CustomizeUtils.buildStyledText(
                 this,
                 it.text,
@@ -174,7 +178,9 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         }
 
         viewModel.toolbarBackgroundColor?.let { backgroundColor ->
-            logger.debug("PaymentAuthWebViewActivity#customizeToolbar() - updating toolbar background color")
+            logger.debug(
+                "PaymentAuthWebViewActivity#customizeToolbar() - updating toolbar background color"
+            )
             @ColorInt val backgroundColorInt = Color.parseColor(backgroundColor)
             viewBinding.toolbar.setBackgroundColor(backgroundColorInt)
             CustomizeUtils.setStatusBarColor(this, backgroundColorInt)

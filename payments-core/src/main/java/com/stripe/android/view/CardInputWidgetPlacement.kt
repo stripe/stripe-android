@@ -100,8 +100,8 @@ internal data class CardInputWidgetPlacement(
                 )
                 this.cvcPostalCodeSeparation =
                     toMinimalValueIfNegative(
-                        frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth - dateCvcSeparation -
-                            postalCodeWidth
+                        frameWidth - peekCardWidth - cardDateSeparation - dateWidth -
+                            cvcWidth - dateCvcSeparation - postalCodeWidth
                     )
 
                 val dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
@@ -156,41 +156,65 @@ internal data class CardInputWidgetPlacement(
         isShowingFullCard -> {
             // Then our view is
             // |full card||space||date|
-
             when {
-                touchX < frameStart + cardWidth -> // Then the card edit view will already handle this touch.
+                touchX < frameStart + cardWidth -> {
+                    // Then the card edit view will already handle this touch.
                     null
-                touchX < cardTouchBufferLimit -> // Then we want to act like this was a touch on the card view
+                }
+                touchX < cardTouchBufferLimit -> {
+                    // Then we want to act like this was a touch on the card view
                     Field.Number
-                touchX < dateStartPosition -> // Then we act like this was a touch on the date editor.
+                }
+                touchX < dateStartPosition -> {
+                    // Then we act like this was a touch on the date editor.
                     Field.Expiry
-                else -> // Then the date editor will already handle this touch.
+                }
+                else -> {
+                    // Then the date editor will already handle this touch.
                     null
+                }
             }
         }
         postalCodeEnabled -> {
             // Our view is
             // |peek card||space||date||space||cvc||space||postal code|
             when {
-                // This was a touch on the card number editor, so we don't need to handle it.
-                touchX < frameStart + peekCardWidth ->
+                touchX < frameStart + peekCardWidth -> {
+                    // This was a touch on the card number editor, so we don't need to handle it.
                     null
-                touchX < cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
+                }
+                touchX < cardTouchBufferLimit -> {
+                    // Then we need to act like the user touched the card editor
                     Field.Number
-                touchX < dateStartPosition -> // Then we need to act like this was a touch on the date editor
+                }
+                touchX < dateStartPosition -> {
+                    // Then we need to act like this was a touch on the date editor
                     Field.Expiry
-                touchX < dateStartPosition + dateWidth -> // Just a regular touch on the date editor.
+                }
+                touchX < dateStartPosition + dateWidth -> {
+                    // Just a regular touch on the date editor.
                     null
-                touchX < dateEndTouchBufferLimit -> // We need to act like this was a touch on the date editor
+                }
+                touchX < dateEndTouchBufferLimit -> {
+                    // We need to act like this was a touch on the date editor
                     Field.Expiry
-                touchX < cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
+                }
+                touchX < cvcStartPosition -> {
+                    // We need to act like this was a touch on the cvc editor.
                     Field.Cvc
-                touchX < cvcStartPosition + cvcWidth -> // Just a regular touch on the cvc editor.
+                }
+                touchX < cvcStartPosition + cvcWidth -> {
+                    // Just a regular touch on the cvc editor.
                     null
-                touchX < cvcEndTouchBufferLimit -> // We need to act like this was a touch on the cvc editor.
+                }
+                touchX < cvcEndTouchBufferLimit -> {
+                    // We need to act like this was a touch on the cvc editor.
                     Field.Cvc
-                touchX < postalCodeStartPosition -> // We need to act like this was a touch on the postal code editor.
+                }
+                touchX < postalCodeStartPosition -> {
+                    // We need to act like this was a touch on the postal code editor.
                     Field.PostalCode
+                }
                 else -> null
             }
         }
@@ -198,19 +222,30 @@ internal data class CardInputWidgetPlacement(
             // Our view is
             // |peek card||space||date||space||cvc|
             when {
-                // This was a touch on the card number editor, so we don't need to handle it.
-                touchX < frameStart + peekCardWidth ->
+                touchX < frameStart + peekCardWidth -> {
+                    // This was a touch on the card number editor, so we don't need to handle it.
                     null
-                touchX < cardTouchBufferLimit -> // Then we need to act like the user touched the card editor
+                }
+                touchX < cardTouchBufferLimit -> {
+                    // Then we need to act like the user touched the card editor
                     Field.Number
-                touchX < dateStartPosition -> // Then we need to act like this was a touch on the date editor
+                }
+                touchX < dateStartPosition -> {
+                    // Then we need to act like this was a touch on the date editor
                     Field.Expiry
-                touchX < dateStartPosition + dateWidth -> // Just a regular touch on the date editor.
+                }
+                touchX < dateStartPosition + dateWidth -> {
+                    // Just a regular touch on the date editor.
                     null
-                touchX < dateEndTouchBufferLimit -> // We need to act like this was a touch on the date editor
+                }
+                touchX < dateEndTouchBufferLimit -> {
+                    // We need to act like this was a touch on the date editor
                     Field.Expiry
-                touchX < cvcStartPosition -> // We need to act like this was a touch on the cvc editor.
+                }
+                touchX < cvcStartPosition -> {
+                    // We need to act like this was a touch on the cvc editor.
                     Field.Cvc
+                }
                 else -> null
             }
         }

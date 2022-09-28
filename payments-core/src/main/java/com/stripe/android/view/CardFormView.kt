@@ -238,7 +238,9 @@ class CardFormView @JvmOverloads constructor(
             postalCodeView.setErrorMessage(resources.getString(R.string.address_zip_invalid))
         } else {
             postalCodeView.config = PostalCodeEditText.Config.Global
-            postalCodeView.setErrorMessage(resources.getString(R.string.address_postal_code_invalid))
+            postalCodeView.setErrorMessage(
+                errorMessage = resources.getString(R.string.address_postal_code_invalid)
+            )
         }
     }
 
@@ -289,9 +291,12 @@ class CardFormView @JvmOverloads constructor(
         cardMultilineWidget.setCvcPlaceholderText("")
 
         cardMultilineWidget.cvcEditText.imeOptions = EditorInfo.IME_ACTION_NEXT
-        cardMultilineWidget.setBackgroundResource(R.drawable.stripe_card_form_view_text_input_layout_background)
+        cardMultilineWidget.setBackgroundResource(
+            R.drawable.stripe_card_form_view_text_input_layout_background
+        )
         cardMultilineWidget.cvcEditText.doAfterTextChanged { cvcText ->
-            if (postalCodeContainer.isVisible && cardMultilineWidget.brand.isMaxCvc(cvcText.toString())) {
+            val input = cvcText.toString()
+            if (postalCodeContainer.isVisible && cardMultilineWidget.brand.isMaxCvc(input)) {
                 postalCodeView.requestFocus()
             }
         }

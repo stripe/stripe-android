@@ -131,7 +131,9 @@ class GooglePayLauncher internal constructor(
 
     init {
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.GooglePayLauncherInit)
+            paymentAnalyticsRequestFactory.createRequest(
+                event = PaymentAnalyticsEvent.GooglePayLauncherInit
+            )
         )
 
         lifecycleScope.launch {
@@ -156,7 +158,7 @@ class GooglePayLauncher internal constructor(
      */
     fun presentForPaymentIntent(clientSecret: String) {
         check(isReady) {
-            "presentForPaymentIntent() may only be called when Google Pay is available on this device."
+            "presentForPaymentIntent() may only be called when Google Pay is available."
         }
 
         activityResultLauncher.launch(
@@ -182,7 +184,7 @@ class GooglePayLauncher internal constructor(
         currencyCode: String
     ) {
         check(isReady) {
-            "presentForSetupIntent() may only be called when Google Pay is available on this device."
+            "presentForSetupIntent() may only be called when Google Pay is available."
         }
 
         activityResultLauncher.launch(

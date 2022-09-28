@@ -83,7 +83,8 @@ sealed class PaymentFlowResult {
             }
 
             private const val EXTRA = "extra_args"
-            private const val CLIENT_SECRET_INTENT_ERROR = "Invalid client_secret value in result Intent."
+            private const val CLIENT_SECRET_INTENT_ERROR =
+                "Invalid client_secret value in result Intent."
         }
     }
 

@@ -7,13 +7,14 @@ import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
 import com.stripe.android.model.Address
 import com.stripe.android.model.LuxePostConfirmActionRepository
+import com.stripe.android.model.LuxePostConfirmActionRepository.Companion.Instance
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentIntentJsonParser(
-    val luxePostConfirmActionRepository: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
+    val luxePostConfirmActionRepository: LuxePostConfirmActionRepository = Instance
 ) : ModelJsonParser<PaymentIntent> {
     override fun parse(json: JSONObject): PaymentIntent? {
         val objectType = optString(json, FIELD_OBJECT)
@@ -75,8 +76,12 @@ class PaymentIntentJsonParser(
                     json
                 )
             ) {
-                is LuxePostConfirmActionRepository.Result.Action -> luxeNextActionResult.postConfirmAction
-                is LuxePostConfirmActionRepository.Result.NoAction -> null
+                is LuxePostConfirmActionRepository.Result.Action -> {
+                    luxeNextActionResult.postConfirmAction
+                }
+                is LuxePostConfirmActionRepository.Result.NoAction -> {
+                    null
+                }
                 is LuxePostConfirmActionRepository.Result.NotSupported -> {
                     NextActionDataParser().parse(it)
                 }

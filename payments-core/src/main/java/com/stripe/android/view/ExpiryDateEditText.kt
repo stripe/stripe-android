@@ -191,7 +191,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
                     // This covers the case where the user has entered a month of 15, for instance.
                     val month = expirationDate.month
                     val year = expirationDate.year
-                    var shouldShowError = month.length == 2 && !expirationDate.isMonthValid
+                    var hasError = month.length == 2 && !expirationDate.isMonthValid
 
                     // Note that we have to check the parts array because afterTextChanged has odd
                     // behavior when it comes to pasting, where a paste of "1212" triggers this
@@ -202,7 +202,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
                         isDateValid = isDateValid(month, year)
                         // Here, we have a complete date, so if we've made an invalid one, we want
                         // to show an error.
-                        shouldShowError = !isDateValid
+                        hasError = !isDateValid
                         if (!wasComplete && isDateValid) {
                             completionCallback()
                         }
@@ -223,7 +223,7 @@ class ExpiryDateEditText @JvmOverloads constructor(
                     )
 
                     this@ExpiryDateEditText.shouldShowError =
-                        shouldShowError && (expirationDate.isPartialEntry || expirationDate.isComplete)
+                        hasError && (expirationDate.isPartialEntry || expirationDate.isComplete)
 
                     formattedDate = null
                     newCursorPosition = null

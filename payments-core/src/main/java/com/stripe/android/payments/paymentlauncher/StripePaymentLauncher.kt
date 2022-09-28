@@ -19,6 +19,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.DaggerPaymentLauncherComponent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentLauncherComponent
+import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract.Args
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import javax.inject.Named
@@ -32,7 +33,7 @@ import kotlin.coroutines.CoroutineContext
 class StripePaymentLauncher @AssistedInject internal constructor(
     @Assisted(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Assisted(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
-    @Assisted private val hostActivityLauncher: ActivityResultLauncher<PaymentLauncherContract.Args>,
+    @Assisted private val hostActivityLauncher: ActivityResultLauncher<Args>,
     context: Context,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @IOContext ioContext: CoroutineContext,
@@ -75,7 +76,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
 
     override fun confirm(params: ConfirmPaymentIntentParams) {
         hostActivityLauncher.launch(
-            PaymentLauncherContract.Args.IntentConfirmationArgs(
+            Args.IntentConfirmationArgs(
                 injectorKey = injectorKey,
                 publishableKey = publishableKeyProvider(),
                 stripeAccountId = stripeAccountIdProvider(),
@@ -88,7 +89,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
 
     override fun confirm(params: ConfirmSetupIntentParams) {
         hostActivityLauncher.launch(
-            PaymentLauncherContract.Args.IntentConfirmationArgs(
+            Args.IntentConfirmationArgs(
                 injectorKey = injectorKey,
                 publishableKey = publishableKeyProvider(),
                 stripeAccountId = stripeAccountIdProvider(),
@@ -101,7 +102,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
 
     override fun handleNextActionForPaymentIntent(clientSecret: String) {
         hostActivityLauncher.launch(
-            PaymentLauncherContract.Args.PaymentIntentNextActionArgs(
+            Args.PaymentIntentNextActionArgs(
                 injectorKey = injectorKey,
                 publishableKey = publishableKeyProvider(),
                 stripeAccountId = stripeAccountIdProvider(),
@@ -114,7 +115,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
 
     override fun handleNextActionForSetupIntent(clientSecret: String) {
         hostActivityLauncher.launch(
-            PaymentLauncherContract.Args.SetupIntentNextActionArgs(
+            Args.SetupIntentNextActionArgs(
                 injectorKey = injectorKey,
                 publishableKey = publishableKeyProvider(),
                 stripeAccountId = stripeAccountIdProvider(),

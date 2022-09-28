@@ -208,7 +208,8 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                     else -> {
                         listener.onError(
                             CardPinActionError.UNKNOWN_ERROR,
-                            "The call to retrieve the PIN failed, possibly an error with the verification.",
+                            "The call to retrieve the PIN failed, " +
+                                "possibly an error with the verification.",
                             throwable
                         )
                     }
@@ -254,6 +255,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         }
     }
 
+    @Suppress("ktlint:max-line-length")
     private suspend fun onUpdatePinError(
         throwable: Throwable,
         listener: IssuingCardPinUpdateListener
@@ -292,7 +294,8 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                     else -> {
                         listener.onError(
                             CardPinActionError.UNKNOWN_ERROR,
-                            "The call to update the PIN failed, possibly an error with the verification.",
+                            "The call to update the PIN failed, " +
+                                "possibly an error with the verification.",
                             throwable
                         )
                     }

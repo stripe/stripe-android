@@ -18,8 +18,8 @@ internal class FraudDetectionDataRequestParamsFactory @VisibleForTesting interna
     private val versionName: String?,
     private val timeZone: String
 ) {
-    private val screen: String =
-        "${displayMetrics.widthPixels}w_${displayMetrics.heightPixels}h_${displayMetrics.densityDpi}dpi"
+    private val screen: String = "${displayMetrics.widthPixels}w_" +
+        "${displayMetrics.heightPixels}h_${displayMetrics.densityDpi}dpi"
 
     private val androidVersionString =
         "Android ${Build.VERSION.RELEASE} ${Build.VERSION.CODENAME} ${Build.VERSION.SDK_INT}"

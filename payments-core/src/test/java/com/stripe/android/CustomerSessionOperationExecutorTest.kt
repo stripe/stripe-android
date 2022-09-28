@@ -102,6 +102,7 @@ internal class CustomerSessionOperationExecutorTest {
             .isEmpty()
     }
 
+    @Suppress("ktlint:max-line-length")
     @Test
     fun `execute with UpdateDefaultSource operation when valid Customer returned should call listener with PaymentMethod and invoke customerCallback`() = runTest {
         val listener = mock<CustomerSession.CustomerRetrievalListener>()

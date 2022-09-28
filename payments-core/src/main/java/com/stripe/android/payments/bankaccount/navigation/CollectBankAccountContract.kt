@@ -95,6 +95,7 @@ class CollectBankAccountContract :
         }
     }
 
+    @Suppress("ktlint:max-line-length")
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal companion object {
         @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

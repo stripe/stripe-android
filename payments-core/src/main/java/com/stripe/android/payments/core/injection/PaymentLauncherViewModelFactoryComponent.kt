@@ -37,10 +37,14 @@ internal interface PaymentLauncherViewModelFactoryComponent {
         fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder
 
         @BindsInstance
-        fun publishableKeyProvider(@Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String): Builder
+        fun publishableKeyProvider(
+            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
+        ): Builder
 
         @BindsInstance
-        fun stripeAccountIdProvider(@Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?): Builder
+        fun stripeAccountIdProvider(
+            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?
+        ): Builder
 
         @BindsInstance
         fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder

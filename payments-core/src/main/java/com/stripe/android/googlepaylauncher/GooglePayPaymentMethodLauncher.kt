@@ -28,6 +28,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract.Args
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherComponent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -59,7 +60,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     @Assisted lifecycleScope: CoroutineScope,
     @Assisted private val config: Config,
     @Assisted private val readyCallback: ReadyCallback,
-    @Assisted private val activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+    @Assisted private val activityResultLauncher: ActivityResultLauncher<Args>,
     @Assisted private val skipReadyCheck: Boolean,
     context: Context,
     private val googlePayRepositoryFactory: (GooglePayEnvironment) -> GooglePayRepository,
@@ -110,7 +111,9 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                     launcherComponent.inject(injectable)
                 }
                 else -> {
-                    throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
+                    throw IllegalArgumentException(
+                        "invalid Injectable $injectable requested in $this"
+                    )
                 }
             }
         }
@@ -175,7 +178,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     private constructor (
         context: Context,
         lifecycleScope: CoroutineScope,
-        activityResultLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>,
+        activityResultLauncher: ActivityResultLauncher<Args>,
         config: Config,
         readyCallback: ReadyCallback
     ) : this(
@@ -203,7 +206,9 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         WeakMapInjectorRegistry.register(injector, injectorKey)
 
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.GooglePayPaymentMethodLauncherInit)
+            paymentAnalyticsRequestFactory.createRequest(
+                event = PaymentAnalyticsEvent.GooglePayPaymentMethodLauncherInit
+            )
         )
 
         if (!skipReadyCheck) {
@@ -242,12 +247,12 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         }
 
         activityResultLauncher.launch(
-            GooglePayPaymentMethodLauncherContract.Args(
+            Args(
                 config = config,
                 currencyCode = currencyCode,
                 amount = amount,
                 transactionId = transactionId,
-                injectionParams = GooglePayPaymentMethodLauncherContract.Args.InjectionParams(
+                injectionParams = Args.InjectionParams(
                     injectorKey,
                     productUsage,
                     enableLogging,

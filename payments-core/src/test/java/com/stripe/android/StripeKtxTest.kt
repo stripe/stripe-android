@@ -560,6 +560,7 @@ internal class StripeKtxTest {
             }
         }
 
+    @Suppress("ktlint:max-line-length")
     private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns non-empty value when calling createAPI then returns correct result`(
         crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,
@@ -598,6 +599,7 @@ internal class StripeKtxTest {
         }
     }
 
+    @Suppress("ktlint:max-line-length")
     private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns null when calling createAPI then throws InvalidRequestException`(
         crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> ApiObject?,

@@ -286,6 +286,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         updateBrandUi()
     }
 
+    @Suppress("ktlint:max-line-length")
     internal var cardNumberErrorListener: StripeEditText.ErrorMessageListener by Delegates.observable(
         ErrorListener(cardNumberTextInputLayout)
     ) { _, _, newValue ->
@@ -297,6 +298,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         cardNumberErrorListener = listener
     }
 
+    @Suppress("ktlint:max-line-length")
     internal var expirationDateErrorListener: StripeEditText.ErrorMessageListener by Delegates.observable(
         ErrorListener(expiryTextInputLayout)
     ) { _, _, newValue ->
@@ -319,6 +321,7 @@ class CardMultilineWidget @JvmOverloads constructor(
         cvcErrorListener = listener
     }
 
+    @Suppress("ktlint:max-line-length")
     internal var postalCodeErrorListener: StripeEditText.ErrorMessageListener? by Delegates.observable(
         ErrorListener(postalInputLayout)
     ) { _, _, newValue ->
@@ -466,18 +469,18 @@ class CardMultilineWidget @JvmOverloads constructor(
      */
     fun validateAllFields(): Boolean {
         val cardNumberIsValid = validatedCardNumber != null
-        val expiryIsValid = expirationDate != null
-        val cvcIsValid = cvcEditText.cvc != null
+        val validExpiry = expirationDate != null
+        val validCvc = cvcEditText.cvc != null
         cardNumberEditText.shouldShowError = !cardNumberIsValid
-        expiryDateEditText.shouldShowError = !expiryIsValid
-        cvcEditText.shouldShowError = !cvcIsValid
+        expiryDateEditText.shouldShowError = !validExpiry
+        cvcEditText.shouldShowError = !validCvc
         postalCodeEditText.shouldShowError =
             (postalCodeRequired || usZipCodeRequired) &&
             postalCodeEditText.postalCode.isNullOrBlank()
 
         allFields.firstOrNull { it.shouldShowError }?.requestFocus()
 
-        return cardNumberIsValid && expiryIsValid && cvcIsValid && !postalCodeEditText.shouldShowError
+        return cardNumberIsValid && validExpiry && validCvc && !postalCodeEditText.shouldShowError
     }
 
     override fun onWindowFocusChanged(hasWindowFocus: Boolean) {

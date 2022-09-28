@@ -61,6 +61,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
      * [paymentBrowserAuthLauncher] is mutable and might be updated through
      * [onNewActivityResultCaller]
      */
+    @Suppress("ktlint:max-line-length")
     internal var paymentBrowserAuthLauncher: ActivityResultLauncher<PaymentBrowserAuthContract.Args>? =
         null
 
@@ -141,8 +142,9 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
             productUsage: Set<String>,
             isInstantApp: Boolean
         ): PaymentAuthenticatorRegistry {
-            val injectorKey =
-                WeakMapInjectorRegistry.nextKey(requireNotNull(PaymentAuthenticatorRegistry::class.simpleName))
+            val injectorKey = WeakMapInjectorRegistry.nextKey(
+                prefix = requireNotNull(PaymentAuthenticatorRegistry::class.simpleName)
+            )
             val component = DaggerAuthenticationComponent.builder()
                 .context(context)
                 .stripeRepository(stripeRepository)

@@ -72,6 +72,7 @@ class WebIntentAuthenticatorTest {
         whenever(paymentBrowserAuthStarterFactory(any())).thenReturn(paymentBrowserWebStarter)
     }
 
+    @Suppress("ktlint:max-line-length")
     @Test
     fun authenticate_whenSdk3ds1() {
         threeDs1IntentReturnUrlMap.remove(PAYMENT_INTENT_ID_FOR_3DS1)
@@ -84,6 +85,7 @@ class WebIntentAuthenticatorTest {
         )
     }
 
+    @Suppress("ktlint:max-line-length")
     @Test
     fun authenticate_whenSdk3ds1_withReturnUrl() {
         verifyAuthenticate(
@@ -96,6 +98,7 @@ class WebIntentAuthenticatorTest {
         assertThat(threeDs1IntentReturnUrlMap).doesNotContainKey(PAYMENT_INTENT_ID_FOR_3DS1)
     }
 
+    @Suppress("ktlint:max-line-length")
     @Test
     fun authenticate_whenRedirectToUrl() {
         verifyAuthenticate(
@@ -107,6 +110,7 @@ class WebIntentAuthenticatorTest {
         )
     }
 
+    @Suppress("ktlint:max-line-length")
     @Test
     fun authenticate_whenRedirectToUrlWithSetupIntent() {
         verifyAuthenticate(

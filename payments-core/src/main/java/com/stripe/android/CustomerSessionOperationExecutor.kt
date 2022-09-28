@@ -1,5 +1,8 @@
 package com.stripe.android
 
+import com.stripe.android.CustomerSession.PaymentMethodRetrievalListener
+import com.stripe.android.CustomerSession.PaymentMethodsRetrievalListener
+import com.stripe.android.CustomerSession.SourceRetrievalListener
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
@@ -49,7 +52,7 @@ internal class CustomerSessionOperationExecutor(
                     }
                 }
                 withContext(Dispatchers.Main) {
-                    val listener: CustomerSession.SourceRetrievalListener? = getListener(operation.id)
+                    val listener: SourceRetrievalListener? = getListener(operation.id)
                     result.fold(
                         onSuccess = { source ->
                             listener?.onSourceRetrieved(source)
@@ -75,7 +78,7 @@ internal class CustomerSessionOperationExecutor(
                     }
                 }
                 withContext(Dispatchers.Main) {
-                    val listener: CustomerSession.SourceRetrievalListener? = getListener(operation.id)
+                    val listener: SourceRetrievalListener? = getListener(operation.id)
                     result.fold(
                         onSuccess = { source ->
                             listener?.onSourceRetrieved(source)
@@ -101,7 +104,7 @@ internal class CustomerSessionOperationExecutor(
                     }
                 }
                 withContext(Dispatchers.Main) {
-                    val listener: CustomerSession.PaymentMethodRetrievalListener? = getListener(operation.id)
+                    val listener: PaymentMethodRetrievalListener? = getListener(operation.id)
                     result.fold(
                         onSuccess = { paymentMethod ->
                             listener?.onPaymentMethodRetrieved(paymentMethod)
@@ -126,7 +129,7 @@ internal class CustomerSessionOperationExecutor(
                     }
                 }
                 withContext(Dispatchers.Main) {
-                    val listener: CustomerSession.PaymentMethodRetrievalListener? = getListener(operation.id)
+                    val listener: PaymentMethodRetrievalListener? = getListener(operation.id)
                     result.fold(
                         onSuccess = { paymentMethod ->
                             listener?.onPaymentMethodRetrieved(paymentMethod)
@@ -153,7 +156,7 @@ internal class CustomerSessionOperationExecutor(
                     )
                 }
                 withContext(Dispatchers.Main) {
-                    val listener: CustomerSession.PaymentMethodsRetrievalListener? = getListener(operation.id)
+                    val listener: PaymentMethodsRetrievalListener? = getListener(operation.id)
                     result.fold(
                         onSuccess = { paymentMethods ->
                             listener?.onPaymentMethodsRetrieved(paymentMethods)

@@ -17,6 +17,8 @@ import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.GooglePayJsonFactory.TransactionInfo.CheckoutOption
+import com.stripe.android.GooglePayJsonFactory.TransactionInfo.TotalPriceStatus
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripePaymentController
@@ -134,21 +136,21 @@ internal class GooglePayLauncherViewModel(
             is PaymentIntent -> {
                 GooglePayJsonFactory.TransactionInfo(
                     currencyCode = currencyCode,
-                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+                    totalPriceStatus = TotalPriceStatus.Final,
                     countryCode = args.config.merchantCountryCode,
                     transactionId = stripeIntent.id,
                     totalPrice = stripeIntent.amount?.toInt(),
-                    checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase
+                    checkoutOption = CheckoutOption.CompleteImmediatePurchase
                 )
             }
             is SetupIntent -> {
                 GooglePayJsonFactory.TransactionInfo(
                     currencyCode = currencyCode,
-                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+                    totalPriceStatus = TotalPriceStatus.Estimated,
                     countryCode = args.config.merchantCountryCode,
                     transactionId = stripeIntent.id,
                     totalPrice = 0,
-                    checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                    checkoutOption = CheckoutOption.Default
                 )
             }
         }

@@ -32,7 +32,8 @@ internal class PaymentMethodSwipeCallback(
         ContextCompat.getColor(context, R.color.stripe_swipe_threshold_payment_method)
     private val background = ColorDrawable(swipeStartColor)
     private val itemViewStartPadding = trashIcon.intrinsicWidth / 2
-    private val iconStartOffset = context.resources.getDimensionPixelSize(R.dimen.stripe_list_row_start_padding)
+    private val iconStartOffset =
+        context.resources.getDimensionPixelSize(R.dimen.stripe_list_row_start_padding)
 
     override fun onMove(
         recyclerView: RecyclerView,

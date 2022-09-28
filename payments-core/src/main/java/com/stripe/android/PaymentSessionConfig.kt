@@ -44,7 +44,8 @@ data class PaymentSessionConfig internal constructor(
     val canDeletePaymentMethods: Boolean = true,
 
     internal val shouldPrefetchCustomer: Boolean = true,
-    internal val shippingInformationValidator: ShippingInformationValidator = DefaultShippingInfoValidator(),
+    internal val shippingInformationValidator: ShippingInformationValidator =
+        DefaultShippingInfoValidator(),
     internal val shippingMethodsFactory: ShippingMethodsFactory? = null,
     internal val windowFlags: Int? = null
 ) : Parcelable {

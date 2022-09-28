@@ -62,12 +62,16 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
             }
             is ChallengeResult.ProtocolError -> {
                 analyticsRequestExecutor.executeAsync(
-                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2ChallengeErrored)
+                    paymentAnalyticsRequestFactory.createRequest(
+                        event = PaymentAnalyticsEvent.Auth3ds2ChallengeErrored
+                    )
                 )
             }
             is ChallengeResult.RuntimeError -> {
                 analyticsRequestExecutor.executeAsync(
-                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2ChallengeErrored)
+                    paymentAnalyticsRequestFactory.createRequest(
+                        event = PaymentAnalyticsEvent.Auth3ds2ChallengeErrored
+                    )
                 )
             }
             is ChallengeResult.Timeout -> {

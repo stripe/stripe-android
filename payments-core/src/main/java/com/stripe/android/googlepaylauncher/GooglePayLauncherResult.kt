@@ -8,12 +8,13 @@ import com.google.android.gms.common.api.Status
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.view.ActivityStarter
+import com.stripe.android.view.ActivityStarter.Result.Companion.EXTRA
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 
 internal sealed class GooglePayLauncherResult : ActivityStarter.Result {
     override fun toBundle(): Bundle {
-        return bundleOf(ActivityStarter.Result.EXTRA to this)
+        return bundleOf(EXTRA to this)
     }
 
     @Parcelize
@@ -59,7 +60,7 @@ internal sealed class GooglePayLauncherResult : ActivityStarter.Result {
          */
         @JvmStatic
         fun fromIntent(intent: Intent?): GooglePayLauncherResult {
-            val result = intent?.getParcelableExtra<GooglePayLauncherResult>(ActivityStarter.Result.EXTRA)
+            val result = intent?.getParcelableExtra<GooglePayLauncherResult>(EXTRA)
             return result ?: Error(
                 exception = IllegalStateException(
                     "Error while processing result from Google Pay."

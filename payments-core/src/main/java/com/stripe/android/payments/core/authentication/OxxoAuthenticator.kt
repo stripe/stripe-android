@@ -22,8 +22,8 @@ internal class OxxoAuthenticator @Inject constructor(
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        (authenticatable.nextActionData as NextActionData.DisplayOxxoDetails).let { oxxoDetailsData ->
-            if (oxxoDetailsData.hostedVoucherUrl == null) {
+        (authenticatable.nextActionData as NextActionData.DisplayOxxoDetails).let { data ->
+            if (data.hostedVoucherUrl == null) {
                 noOpIntentAuthenticator.authenticate(
                     host,
                     authenticatable,

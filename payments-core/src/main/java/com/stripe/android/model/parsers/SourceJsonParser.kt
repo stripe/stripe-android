@@ -37,7 +37,10 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
     internal class CodeVerificationJsonParser : ModelJsonParser<Source.CodeVerification> {
         override fun parse(json: JSONObject): Source.CodeVerification {
             return Source.CodeVerification(
-                attemptsRemaining = json.optInt(FIELD_ATTEMPTS_REMAINING, INVALID_ATTEMPTS_REMAINING),
+                attemptsRemaining = json.optInt(
+                    FIELD_ATTEMPTS_REMAINING,
+                    INVALID_ATTEMPTS_REMAINING
+                ),
                 status = Source.CodeVerification.Status.fromCode(optString(json, FIELD_STATUS))
             )
         }
@@ -104,7 +107,10 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
                 lastName = optString(json, FIELD_LAST_NAME),
                 purchaseCountry = optString(json, FIELD_PURCHASE_COUNTRY),
                 clientToken = optString(json, FIELD_CLIENT_TOKEN),
-                payLaterAssetUrlsDescriptive = optString(json, FIELD_PAY_LATER_ASSET_URLS_DESCRIPTIVE),
+                payLaterAssetUrlsDescriptive = optString(
+                    json,
+                    FIELD_PAY_LATER_ASSET_URLS_DESCRIPTIVE
+                ),
                 payLaterAssetUrlsStandard = optString(json, FIELD_PAY_LATER_ASSET_URLS_STANDARD),
                 payLaterName = optString(json, FIELD_PAY_LATER_NAME),
                 payLaterRedirectUrl = optString(json, FIELD_PAY_LATER_REDIRECT_URL),
@@ -112,8 +118,14 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
                 payNowAssetUrlsStandard = optString(json, FIELD_PAY_NOW_ASSET_URLS_STANDARD),
                 payNowName = optString(json, FIELD_PAY_NOW_NAME),
                 payNowRedirectUrl = optString(json, FIELD_PAY_NOW_REDIRECT_URL),
-                payOverTimeAssetUrlsDescriptive = optString(json, FIELD_PAY_OVER_TIME_ASSET_URLS_DESCRIPTIVE),
-                payOverTimeAssetUrlsStandard = optString(json, FIELD_PAY_OVER_TIME_ASSET_URLS_STANDARD),
+                payOverTimeAssetUrlsDescriptive = optString(
+                    json,
+                    FIELD_PAY_OVER_TIME_ASSET_URLS_DESCRIPTIVE
+                ),
+                payOverTimeAssetUrlsStandard = optString(
+                    json,
+                    FIELD_PAY_OVER_TIME_ASSET_URLS_STANDARD
+                ),
                 payOverTimeName = optString(json, FIELD_PAY_OVER_TIME_NAME),
                 payOverTimeRedirectUrl = optString(json, FIELD_PAY_OVER_TIME_REDIRECT_URL),
                 paymentMethodCategories = parseSet(json, FIELD_PAYMENT_METHOD_CATEGORIES),
@@ -125,6 +137,7 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
             return optString(json, key)?.split(",")?.toSet().orEmpty()
         }
 
+        @Suppress("ktlint:max-line-length")
         private companion object {
             private const val FIELD_FIRST_NAME = "first_name"
             private const val FIELD_LAST_NAME = "last_name"

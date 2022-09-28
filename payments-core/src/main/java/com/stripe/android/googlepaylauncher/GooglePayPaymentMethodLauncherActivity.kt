@@ -10,6 +10,7 @@ import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract.Companion.EXTRA_STATUS_BAR_COLOR
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.utils.AnimationConstants
 import kotlinx.coroutines.launch
@@ -42,7 +43,7 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val statusColor = intent.getIntExtra(GooglePayPaymentMethodLauncherContract.EXTRA_STATUS_BAR_COLOR, -1)
+        val statusColor = intent.getIntExtra(EXTRA_STATUS_BAR_COLOR, -1)
         if (statusColor != -1) {
             window.statusBarColor = statusColor
         }

@@ -121,7 +121,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         DefaultFraudDetectionDataRepository(context, workContext),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
-    private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
+    private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils =
+        FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
     sdkVersion: String = StripeSdkVersion.VERSION
@@ -286,7 +287,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
             PaymentIntentJsonParser()
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.PaymentIntentRetrieve)
+                paymentAnalyticsRequestFactory.createRequest(
+                    event = PaymentAnalyticsEvent.PaymentIntentRetrieve
+                )
             )
         }
     }
@@ -321,7 +324,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
             PaymentIntentJsonParser()
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.PaymentIntentRefresh)
+                paymentAnalyticsRequestFactory.createRequest(
+                    event = PaymentAnalyticsEvent.PaymentIntentRefresh
+                )
             )
         }
     }
@@ -460,7 +465,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
             SetupIntentJsonParser()
         ) {
             fireAnalyticsRequest(
-                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.SetupIntentRetrieve)
+                paymentAnalyticsRequestFactory.createRequest(
+                    event = PaymentAnalyticsEvent.SetupIntentRetrieve
+                )
             )
         }
     }
@@ -1136,7 +1143,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): RadarSession? {
         return runCatching {
             require(Stripe.advancedFraudSignalsEnabled) {
-                "Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session."
+                "Stripe.advancedFraudSignalsEnabled must " +
+                    "be set to 'true' to create a Radar Session."
             }
             requireNotNull(fraudDetectionDataRepository.getLatest()) {
                 "Could not obtain fraud data required to create a Radar Session."
@@ -1152,7 +1160,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 RadarSessionJsonParser()
             ) {
                 fireAnalyticsRequest(
-                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.RadarSessionCreate)
+                    paymentAnalyticsRequestFactory.createRequest(
+                        event = PaymentAnalyticsEvent.RadarSessionCreate
+                    )
                 )
             }
         }.getOrElse {
@@ -1606,7 +1616,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): PaymentIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getVerifyMicrodepositsOnPaymentIntentUrl(PaymentIntent.ClientSecret(clientSecret).paymentIntentId),
+                getVerifyMicrodepositsOnPaymentIntentUrl(
+                    clientSecret = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+                ),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret,
@@ -1629,7 +1641,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): PaymentIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getVerifyMicrodepositsOnPaymentIntentUrl(PaymentIntent.ClientSecret(clientSecret).paymentIntentId),
+                getVerifyMicrodepositsOnPaymentIntentUrl(
+                    clientSecret = PaymentIntent.ClientSecret(clientSecret).paymentIntentId
+                ),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret,
@@ -1653,7 +1667,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): SetupIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getVerifyMicrodepositsOnSetupIntentUrl(SetupIntent.ClientSecret(clientSecret).setupIntentId),
+                getVerifyMicrodepositsOnSetupIntentUrl(
+                    clientSecret = SetupIntent.ClientSecret(clientSecret).setupIntentId
+                ),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret,
@@ -1676,7 +1692,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
     ): SetupIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
-                getVerifyMicrodepositsOnSetupIntentUrl(SetupIntent.ClientSecret(clientSecret).setupIntentId),
+                getVerifyMicrodepositsOnSetupIntentUrl(
+                    clientSecret = SetupIntent.ClientSecret(clientSecret).setupIntentId
+                ),
                 requestOptions,
                 mapOf(
                     "client_secret" to clientSecret,

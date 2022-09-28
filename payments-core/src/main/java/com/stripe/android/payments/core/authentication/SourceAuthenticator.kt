@@ -26,7 +26,8 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 @JvmSuppressWildcards
 internal class SourceAuthenticator @Inject constructor(
-    private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
+    private val paymentBrowserAuthStarterFactory:
+        (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,

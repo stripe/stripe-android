@@ -10,6 +10,7 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 
+@Suppress("ktlint:max-line-length")
 class GooglePayPaymentMethodLauncherContract :
     ActivityResultContract<GooglePayPaymentMethodLauncherContract.Args, GooglePayPaymentMethodLauncher.Result>() {
 

@@ -147,7 +147,8 @@ internal class StripeGooglePayActivity : AppCompatActivity() {
                     viewModel.updateGooglePayResult(
                         GooglePayLauncherResult.Error(
                             RuntimeException(
-                                "Google Pay returned an error. See googlePayStatus property for more information."
+                                "Google Pay returned an error. " +
+                                    "See googlePayStatus property for more information."
                             ),
                             googlePayStatus = status
                         )

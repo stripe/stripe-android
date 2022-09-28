@@ -6,9 +6,10 @@ import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.view.PaymentRelayActivity
 
+@Suppress("ktlint:max-line-length")
 internal class PaymentRelayContract : ActivityResultContract<PaymentRelayStarter.Args, PaymentFlowResult.Unvalidated>() {
     override fun createIntent(context: Context, input: PaymentRelayStarter.Args): Intent {
-        val paymentFlowResult = input?.toResult() ?: PaymentFlowResult.Unvalidated()
+        val paymentFlowResult = input.toResult()
         return Intent(context, PaymentRelayActivity::class.java)
             .putExtras(paymentFlowResult.toBundle())
     }

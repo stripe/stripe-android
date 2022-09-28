@@ -1079,8 +1079,8 @@ class CardInputWidget @JvmOverloads constructor(
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
             view.updateLayoutParams<FrameLayout.LayoutParams> {
-                marginStart =
-                    (interpolatedTime * destination + (1 - interpolatedTime) * startPosition).toInt()
+                val value = interpolatedTime * destination + (1 - interpolatedTime) * startPosition
+                marginStart = value.toInt()
             }
         }
     }
@@ -1094,8 +1094,8 @@ class CardInputWidget @JvmOverloads constructor(
         override fun applyTransformation(interpolatedTime: Float, t: Transformation) {
             super.applyTransformation(interpolatedTime, t)
             view.updateLayoutParams<FrameLayout.LayoutParams> {
-                this.marginStart =
-                    (interpolatedTime * destination + (1 - interpolatedTime) * startPosition).toInt()
+                val value = interpolatedTime * destination + (1 - interpolatedTime) * startPosition
+                this.marginStart = value.toInt()
                 this.marginEnd = 0
                 this.width = newWidth
             }
@@ -1111,8 +1111,8 @@ class CardInputWidget @JvmOverloads constructor(
         override fun applyTransformation(interpolatedTime: Float, t: Transformation?) {
             super.applyTransformation(interpolatedTime, t)
             view.updateLayoutParams<FrameLayout.LayoutParams> {
-                this.marginStart =
-                    (interpolatedTime * destination + (1 - interpolatedTime) * startPosition).toInt()
+                val value = interpolatedTime * destination + (1 - interpolatedTime) * startPosition
+                this.marginStart = value.toInt()
                 this.marginEnd = 0
                 this.width = newWidth
             }

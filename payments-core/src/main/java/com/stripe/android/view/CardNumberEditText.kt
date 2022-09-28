@@ -242,7 +242,9 @@ class CardNumberEditText internal constructor(
     @JvmSynthetic
     internal fun onCardMetadataLoadedTooSlow() {
         analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.CardMetadataLoadedTooSlow)
+            paymentAnalyticsRequestFactory.createRequest(
+                event = PaymentAnalyticsEvent.CardMetadataLoadedTooSlow
+            )
         )
     }
 

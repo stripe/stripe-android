@@ -8,7 +8,9 @@ sealed class LuxePostConfirmActionCreator {
     internal fun create(stripeIntentJsonString: String) =
         create(JSONObject(stripeIntentJsonString))
 
-    internal abstract fun create(stripeIntentJson: JSONObject): LuxePostConfirmActionRepository.Result
+    internal abstract fun create(
+        stripeIntentJson: JSONObject
+    ): LuxePostConfirmActionRepository.Result
 
     data class RedirectActionCreator
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

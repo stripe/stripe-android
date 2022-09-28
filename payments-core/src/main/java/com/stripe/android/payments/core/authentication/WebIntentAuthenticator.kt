@@ -25,7 +25,8 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 @JvmSuppressWildcards
 internal class WebIntentAuthenticator @Inject constructor(
-    private val paymentBrowserAuthStarterFactory: (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
+    private val paymentBrowserAuthStarterFactory:
+        (AuthActivityStarterHost) -> PaymentBrowserAuthStarter,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
@@ -78,12 +79,16 @@ internal class WebIntentAuthenticator @Inject constructor(
             is StripeIntent.NextActionData.DisplayOxxoDetails -> {
                 // nextActionData.hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
                 authUrl = nextActionData.hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
-                    ?: throw IllegalArgumentException("null hostedVoucherUrl for DisplayOxxoDetails")
+                    ?: throw IllegalArgumentException(
+                        "null hostedVoucherUrl for DisplayOxxoDetails"
+                    )
                 returnUrl = null
                 shouldCancelIntentOnUserNavigation = false
             }
             else ->
-                throw IllegalArgumentException("WebAuthenticator can't process nextActionData: $nextActionData")
+                throw IllegalArgumentException(
+                    "WebAuthenticator can't process nextActionData: $nextActionData"
+                )
         }
 
         beginWebAuth(

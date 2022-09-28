@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 
+@Suppress("ktlint:max-line-length")
 internal class AddPaymentMethodContract :
     ActivityResultContract<AddPaymentMethodActivityStarter.Args, AddPaymentMethodActivityStarter.Result>() {
 

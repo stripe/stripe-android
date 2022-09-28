@@ -78,7 +78,9 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
             )
         }.getOrElse {
             analyticsRequestExecutor.executeAsync(
-                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds2RequestParamsFailed)
+                paymentAnalyticsRequestFactory.createRequest(
+                    event = PaymentAnalyticsEvent.Auth3ds2RequestParamsFailed
+                )
             )
 
             NextStep.Complete(

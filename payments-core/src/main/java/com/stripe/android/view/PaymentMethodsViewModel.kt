@@ -68,7 +68,9 @@ internal class PaymentMethodsViewModel(
                     paymentMethodType = PaymentMethod.Type.Card,
                     productUsage = productUsage,
                     listener = object : CustomerSession.PaymentMethodsRetrievalListener {
-                        override fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>) {
+                        override fun onPaymentMethodsRetrieved(
+                            paymentMethods: List<PaymentMethod>
+                        ) {
                             resultData.value = Result.success(paymentMethods)
                             progressData.value = false
                         }

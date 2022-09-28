@@ -4,6 +4,7 @@ import com.stripe.android.stripe3ds2.transaction.AuthenticationRequestParameters
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import java.util.UUID
 
+@Suppress("ktlint:max-line-length")
 internal object Stripe3ds2Fixtures {
     const val MESSAGE_VERSION = "2.1.0"
 

@@ -5,6 +5,7 @@ import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.USBankAccount
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -252,24 +253,28 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         }
     }
 
-    internal class USBankAccountJsonParser : ModelJsonParser<PaymentMethod.USBankAccount> {
-        override fun parse(json: JSONObject): PaymentMethod.USBankAccount {
-            return PaymentMethod.USBankAccount(
-                accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.values().find {
+    internal class USBankAccountJsonParser : ModelJsonParser<USBankAccount> {
+        override fun parse(json: JSONObject): USBankAccount {
+            return USBankAccount(
+                accountHolderType = USBankAccount.USBankAccountHolderType.values().find {
                     StripeJsonUtils.optString(json, FIELD_ACCOUNT_HOLDER_TYPE) == it.value
-                } ?: PaymentMethod.USBankAccount.USBankAccountHolderType.UNKNOWN,
-                accountType = PaymentMethod.USBankAccount.USBankAccountType.values().find {
+                } ?: USBankAccount.USBankAccountHolderType.UNKNOWN,
+                accountType = USBankAccount.USBankAccountType.values().find {
                     StripeJsonUtils.optString(json, FIELD_ACCOUNT_TYPE) == it.value
-                } ?: PaymentMethod.USBankAccount.USBankAccountType.UNKNOWN,
+                } ?: USBankAccount.USBankAccountType.UNKNOWN,
                 bankName = StripeJsonUtils.optString(json, FIELD_BANK_NAME),
                 fingerprint = StripeJsonUtils.optString(json, FIELD_FINGERPRINT),
                 last4 = StripeJsonUtils.optString(json, FIELD_LAST4),
                 linkedAccount = StripeJsonUtils.optString(json, FIELD_LINKED_ACCOUNT),
                 networks = if (json.has(FIELD_NETWORKS)) {
-                    PaymentMethod.USBankAccount.USBankNetworks(
-                        StripeJsonUtils.optString(json.optJSONObject(FIELD_NETWORKS), FIELD_NETWORKS_PREFERRED),
+                    USBankAccount.USBankNetworks(
+                        StripeJsonUtils.optString(
+                            jsonObject = json.optJSONObject(FIELD_NETWORKS),
+                            fieldName = FIELD_NETWORKS_PREFERRED
+                        ),
                         StripeJsonUtils.jsonArrayToList(
-                            json.optJSONObject(FIELD_NETWORKS)?.getJSONArray(FIELD_NETWORKS_SUPPORTED)
+                            jsonArray = json.optJSONObject(FIELD_NETWORKS)
+                                ?.getJSONArray(FIELD_NETWORKS_SUPPORTED)
                         ).orEmpty().map { it.toString() }
                     )
                 } else {

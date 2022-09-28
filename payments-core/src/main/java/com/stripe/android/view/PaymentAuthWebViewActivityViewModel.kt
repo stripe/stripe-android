@@ -73,7 +73,9 @@ internal class PaymentAuthWebViewActivityViewModel(
      */
     fun logStart() {
         fireAnalytics(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds1ChallengeStart)
+            paymentAnalyticsRequestFactory.createRequest(
+                event = PaymentAnalyticsEvent.Auth3ds1ChallengeStart
+            )
         )
 
         fireAnalytics(
@@ -88,7 +90,9 @@ internal class PaymentAuthWebViewActivityViewModel(
      */
     fun logError() {
         fireAnalytics(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds1ChallengeError)
+            paymentAnalyticsRequestFactory.createRequest(
+                event = PaymentAnalyticsEvent.Auth3ds1ChallengeError
+            )
         )
     }
 
@@ -97,7 +101,9 @@ internal class PaymentAuthWebViewActivityViewModel(
      */
     fun logComplete() {
         fireAnalytics(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.Auth3ds1ChallengeComplete)
+            paymentAnalyticsRequestFactory.createRequest(
+                event = PaymentAnalyticsEvent.Auth3ds1ChallengeComplete
+            )
         )
     }
 

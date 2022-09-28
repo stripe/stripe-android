@@ -12,6 +12,8 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentApiRequestTest {
+
+    @Suppress("ktlint:max-line-length")
     @Test
     fun url_withCardData_createsProperQueryString() {
         val url = ApiRequest.Factory().createGet(
@@ -21,8 +23,8 @@ class PaymentApiRequestTest {
                 .plus(FRAUD_DETECTION_DATA.params)
         ).url
 
-        assertThat(Uri.parse(url))
-            .isEqualTo(Uri.parse("https://api.stripe.com/v1/sources?muid=${FRAUD_DETECTION_DATA.muid}&guid=${FRAUD_DETECTION_DATA.guid}&card%5Bnumber%5D=4242424242424242&card%5Bexp_month%5D=1&card%5Bcvc%5D=123&card%5Bexp_year%5D=2050&sid=${FRAUD_DETECTION_DATA.sid}"))
+        val expectedUrl = "https://api.stripe.com/v1/sources?muid=${FRAUD_DETECTION_DATA.muid}&guid=${FRAUD_DETECTION_DATA.guid}&card%5Bnumber%5D=4242424242424242&card%5Bexp_month%5D=1&card%5Bcvc%5D=123&card%5Bexp_year%5D=2050&sid=${FRAUD_DETECTION_DATA.sid}"
+        assertThat(Uri.parse(url)).isEqualTo(Uri.parse(expectedUrl))
     }
 
     private companion object {

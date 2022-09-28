@@ -7,6 +7,8 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class AlipayRedirectTest {
+
+    @Suppress("ktlint:max-line-length")
     @Test
     fun `Alipay data should parse return_url correctly`() {
         val data = StripeIntent.NextActionData.AlipayRedirect(

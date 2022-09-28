@@ -9,6 +9,7 @@ import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.liveData
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.GooglePayJsonFactory.TransactionInfo.CheckoutOption
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -54,7 +55,7 @@ internal class StripeGooglePayViewModel(
                 countryCode = args.config.countryCode,
                 transactionId = args.config.transactionId,
                 totalPrice = args.config.amount,
-                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.CompleteImmediatePurchase
+                checkoutOption = CheckoutOption.CompleteImmediatePurchase
             ),
             merchantInfo = GooglePayJsonFactory.MerchantInfo(
                 merchantName = args.config.merchantName ?: appName

@@ -75,7 +75,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
             }
                 .mapCatching { requireNotNull(it.clientSecret) }
                 .onSuccess { financialConnectionsSessionSecret: String ->
-                    logger.debug("Bank account session created! $financialConnectionsSessionSecret.")
+                    logger.debug(
+                        "Bank account session created! $financialConnectionsSessionSecret."
+                    )
                     hasLaunched = true
                     _viewEffect.emit(
                         OpenConnectionsFlow(
@@ -99,7 +101,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     finishWithError(result.error)
                 is FinancialConnectionsSheetResult.Completed ->
                     if (args.attachToIntent) {
-                        attachFinancialConnectionsSessionToIntent(result.financialConnectionsSession)
+                        attachFinancialConnectionsSessionToIntent(
+                            financialConnectionsSession = result.financialConnectionsSession
+                        )
                     } else {
                         finishWithFinancialConnectionsSession(result.financialConnectionsSession)
                     }
@@ -111,7 +115,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
         _viewEffect.emit(CollectBankAccountViewEffect.FinishWithResult(result))
     }
 
-    private fun finishWithFinancialConnectionsSession(financialConnectionsSession: FinancialConnectionsSession) {
+    private fun finishWithFinancialConnectionsSession(
+        financialConnectionsSession: FinancialConnectionsSession
+    ) {
         viewModelScope.launch {
             retrieveStripeIntent(
                 args.publishableKey,
@@ -131,7 +137,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
         }
     }
 
-    private fun attachFinancialConnectionsSessionToIntent(financialConnectionsSession: FinancialConnectionsSession) {
+    private fun attachFinancialConnectionsSessionToIntent(
+        financialConnectionsSession: FinancialConnectionsSession
+    ) {
         viewModelScope.launch {
             when (args) {
                 is ForPaymentIntent -> attachFinancialConnectionsSession.forPaymentIntent(

@@ -272,6 +272,7 @@ class PaymentAuthWebViewClientTest {
             .isTrue()
     }
 
+    @Suppress("ktlint:max-line-length")
     @Test
     fun shouldOverrideUrlLoading_withAuthenticationUrlWithReturnUrlParam_shouldPopulateCompletionUrl() {
         val url =
@@ -291,6 +292,7 @@ class PaymentAuthWebViewClientTest {
             )
     }
 
+    @Suppress("ktlint:max-line-length")
     @Test
     fun shouldOverrideUrlLoading_withAuthenticationUrlWithoutReturnUrlParam_shouldNotPopulateCompletionUrl() {
         val url =

@@ -51,7 +51,9 @@ internal interface AuthenticationComponent {
         fun analyticsRequestExecutor(analyticsRequestExecutor: AnalyticsRequestExecutor): Builder
 
         @BindsInstance
-        fun analyticsRequestFactory(paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory): Builder
+        fun analyticsRequestFactory(
+            paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
+        ): Builder
 
         @BindsInstance
         fun enableLogging(@Named(ENABLE_LOGGING) enableLogging: Boolean): Builder

@@ -162,7 +162,10 @@ internal class PaymentLauncherViewModel @Inject constructor(
     /**
      * Fetches a [StripeIntent] and handles its next action.
      */
-    internal fun handleNextActionForStripeIntent(clientSecret: String, host: AuthActivityStarterHost) {
+    internal fun handleNextActionForStripeIntent(
+        clientSecret: String,
+        host: AuthActivityStarterHost
+    ) {
         if (hasStarted) return
         viewModelScope.launch {
             savedStateHandle.set(KEY_HAS_STARTED, true)
@@ -284,6 +287,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
             val productUsage: Set<String>
         )
 
+        @Suppress("ktlint:max-line-length")
         @Inject
         lateinit var subComponentBuilderProvider: Provider<PaymentLauncherViewModelSubcomponent.Builder>
 

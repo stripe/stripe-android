@@ -22,6 +22,7 @@ internal class DefaultAlipayRepositoryTest {
     private val stripeRepository: StripeRepository = mock()
     private val repository = DefaultAlipayRepository(stripeRepository)
 
+    @Suppress("ktlint:max-line-length")
     @Test
     fun `authenticate() should handle success`() = runTest {
         val result = repository.authenticate(

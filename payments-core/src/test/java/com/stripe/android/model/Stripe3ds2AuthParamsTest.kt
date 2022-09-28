@@ -76,6 +76,7 @@ class Stripe3ds2AuthParamsTest {
         )
     }
 
+    @Suppress("ktlint:max-line-length")
     private companion object {
         private const val SOURCE_ID = "src_12345"
         private const val RETURN_URL = "stripe://payment-auth-return"
