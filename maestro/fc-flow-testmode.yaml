@@ -5,7 +5,9 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Collect account for data"
 - tapOn: "CONNECT AN ACCOUNT"
 # Common: web authflow - connect OAuth institution
+- takeScreenshot: Consent
 - tapOn: "Agree"
+- takeScreenshot: BankPicker
 - tapOn: "Test OAuth Institution"
 - tapOn: "Continue"
 - tapOn: "All accounts" # deselect all accounts
