@@ -48,10 +48,10 @@ class ComposeExampleActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // example image loader setup with just disk cache.
         imageLoader = StripeImageLoader(
             context = this,
             memoryCache = null,
-            logger = Logger.getInstance(true)
         )
         setContent {
             ComposeScreen()
