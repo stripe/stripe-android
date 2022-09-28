@@ -15,9 +15,6 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
-/**
- *
- */
 @Composable
 internal fun FinancialConnectionsTopAppBar(
     title: @Composable () -> Unit = {
