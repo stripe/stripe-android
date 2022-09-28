@@ -2,6 +2,7 @@
 
 package com.stripe.android.financialconnections.features.manualentrysuccess
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,6 +49,7 @@ internal fun ManualEntrySuccessScreen(
 ) {
     val parentViewModel = parentViewModel()
     val viewModel: ManualEntrySuccessViewModel = mavericksViewModel()
+    BackHandler(true) {}
     val completeAuthSessionAsync = viewModel
         .collectAsState(ManualEntrySuccessState::completeAuthSession)
     ManualEntrySuccessContent(
@@ -68,7 +70,12 @@ internal fun ManualEntrySuccessContent(
     onDoneClick: () -> Unit
 ) {
     FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                onCloseClick = onCloseClick,
+                showBack = false
+            )
+        }
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),

@@ -45,7 +45,12 @@ private fun AttachPaymentContent(
     onCloseClick: () -> Unit
 ) {
     FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                onCloseClick = onCloseClick,
+                showBack = false
+            )
+        }
     ) {
         when (payload) {
             Uninitialized, is Loading -> LoadingContent()

@@ -2,6 +2,7 @@
 
 package com.stripe.android.financialconnections.features.accountpicker
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -72,6 +73,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun AccountPickerScreen() {
     val viewModel: AccountPickerViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
+    BackHandler(true) {}
     val state: State<AccountPickerState> = viewModel.collectAsState()
     AccountPickerContent(
         state = state.value,
@@ -95,7 +97,12 @@ private fun AccountPickerContent(
     onCloseClick: () -> Unit
 ) {
     FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                onCloseClick = onCloseClick,
+                showBack = false
+            )
+        }
     ) {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> AccountPickerLoading()
