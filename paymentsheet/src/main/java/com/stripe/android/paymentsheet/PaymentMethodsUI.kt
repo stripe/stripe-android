@@ -91,6 +91,14 @@ internal fun PaymentMethodsUI(
 }
 
 @Composable
+private fun rememberViewWidth(
+    maxWidth: Dp,
+    numberOfPaymentMethods: Int
+) = remember(maxWidth, numberOfPaymentMethods) {
+    calculateViewWidth(maxWidth, numberOfPaymentMethods)
+}
+
+@Composable
 internal fun rememberViewWidth(
     maxWidth: Dp,
     numberOfPaymentMethods: Int
