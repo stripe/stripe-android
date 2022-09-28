@@ -4,11 +4,12 @@ appId: com.stripe.android.financialconnections.example
 # Android specific: Navigate to example
 - tapOn: "Collect account for data"
 - tapOn: "CONNECT AN ACCOUNT"
-- takeScreenshot: ChromeSetup
+ - takeScreenshot: ChromeSetup
 # Android specific - Chrome opens, likely with first open setup. Pass setup.
 - tapOn: "Accept & continue"
 - tapOn: "No thanks"
 # Common: web authflow - connect OAuth institution
+- assertVisible: "Agree"
 - takeScreenshot: Consent
 - tapOn: "Agree"
 - takeScreenshot: BankPicker
