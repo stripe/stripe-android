@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
@@ -48,6 +49,7 @@ internal open class PaymentSheetViewModelTestInjection {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     val eventReporter = mock<EventReporter>()
     private val googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory()
     private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
@@ -119,11 +121,12 @@ internal open class PaymentSheetViewModelTestInjection {
         lpmRepository: LpmRepository,
         addressRepository: AddressRepository,
         formViewModel: FormViewModel = FormViewModel(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
+            context = context,
             config = mock(),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
             addressResourceRepository = StaticAddressResourceRepository(addressRepository),
-            transformSpecToElement = mock()
+            transformSpecToElement = mock(),
+            savedStateHandle = SavedStateHandle()
         )
     ) {
         injector = object : Injector {
@@ -147,7 +150,6 @@ internal open class PaymentSheetViewModelTestInjection {
 
                     whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
                     whenever(mockBuilder.formFragmentArguments(any())).thenReturn(mockBuilder)
-                    whenever(mockBuilder.paymentMethodCode(any())).thenReturn(mockBuilder)
                     whenever(mockSubcomponent.viewModel).thenReturn(formViewModel)
                     whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider

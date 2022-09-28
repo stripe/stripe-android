@@ -36,6 +36,7 @@ internal open class PaymentOptionsViewModelTestInjection {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
     private val addressResourceRepository = StaticAddressResourceRepository(
         AddressRepository(ApplicationProvider.getApplicationContext<Context>().resources)
@@ -85,11 +86,12 @@ internal open class PaymentOptionsViewModelTestInjection {
         viewModel: PaymentOptionsViewModel,
         lpmRepository: LpmRepository = mock(),
         formViewModel: FormViewModel = FormViewModel(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
+            context = context,
             config = mock(),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
             addressResourceRepository = addressResourceRepository,
-            transformSpecToElement = mock()
+            transformSpecToElement = mock(),
+            savedStateHandle = SavedStateHandle()
         )
     ) {
         val mockBuilder = mock<PaymentOptionsViewModelSubcomponent.Builder>()
@@ -107,7 +109,6 @@ internal open class PaymentOptionsViewModelTestInjection {
         val mockFormSubComponentBuilderProvider = mock<Provider<FormViewModelSubcomponent.Builder>>()
         whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
         whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
-        whenever(mockFormBuilder.paymentMethodCode(any())).thenReturn(mockFormBuilder)
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 

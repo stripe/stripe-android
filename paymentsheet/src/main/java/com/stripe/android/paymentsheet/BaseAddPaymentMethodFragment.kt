@@ -50,7 +50,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             val processing by sheetViewModel.processing.observeAsState(false)
 //            val linkAccountStatus by sheetViewModel.linkLauncher.accountStatus.collectAsState()
 
-
             if (isReady == true) {
                 var selectedPaymentMethodCode: String by rememberSaveable {
                     mutableStateOf(
@@ -69,7 +68,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     sheetViewModel.config
                 )
 
-                val showLinkInlineSignup = false //sheetViewModel.isLinkEnabled.value == true &&
+                val showLinkInlineSignup = false // sheetViewModel.isLinkEnabled.value == true &&
 //                    sheetViewModel.stripeIntent.value
 //                        ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
 //                    selectedItem.code == PaymentMethod.Type.Card.code &&
@@ -89,17 +88,18 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                         shippingDetails = sheetViewModel.config?.shippingDetails,
                         injectorKey = sheetViewModel.injectorKey,
                         initialPaymentMethodCreateParams =
-                        sheetViewModel.newPaymentSelection?.paymentMethodCreateParams?.typeCode?.takeIf {
-                            it == selectedItem.code
-                        }?.let {
-                            when (sheetViewModel.newPaymentSelection) {
-                                is PaymentSelection.New.GenericPaymentMethod ->
-                                    sheetViewModel.newPaymentSelection?.paymentMethodCreateParams
-                                is PaymentSelection.New.Card ->
-                                    sheetViewModel.newPaymentSelection?.paymentMethodCreateParams
-                                else -> null
+                        sheetViewModel.newPaymentSelection?.paymentMethodCreateParams?.typeCode
+                            ?.takeIf {
+                                it == selectedItem.code
+                            }?.let {
+                                when (val selection = sheetViewModel.newPaymentSelection) {
+                                    is PaymentSelection.New.GenericPaymentMethod ->
+                                        selection.paymentMethodCreateParams
+                                    is PaymentSelection.New.Card ->
+                                        selection.paymentMethodCreateParams
+                                    else -> null
+                                }
                             }
-                        }
                     )
                 }
 
@@ -123,11 +123,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                         }
 
                         if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
-
-
                             Text("Bank Account form goes here")
-
-
                         } else {
                             PaymentMethodForm(
                                 args = arguments,
@@ -152,7 +148,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                                     sheetViewModel.updatePrimaryButtonUIState(
                                         if (viewState.useLink) {
                                             val userInput = viewState.userInput
-                                            if (userInput != null && sheetViewModel.selection.value != null) {
+                                            if (userInput != null &&
+                                                sheetViewModel.selection.value != null
+                                            ) {
                                                 PrimaryButton.UIState(
                                                     label = null,
                                                     onClick = {

@@ -12,7 +12,6 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -50,14 +49,14 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
 
     @Test
     fun `Factory gets initialized by Injector when Injector is available`() {
-        createFragment { fragment, _, viewModel ->
+        createFragment { fragment, viewModel ->
             assertThat(fragment.sheetViewModel).isEqualTo(viewModel)
         }
     }
 
     @Test
     fun `Factory gets initialized with fallback when no Injector is available`() = runTest(UnconfinedTestDispatcher()) {
-        createFragment(registerInjector = false) { fragment, _, viewModel ->
+        createFragment(registerInjector = false) { fragment, viewModel ->
             assertThat(fragment.sheetViewModel).isNotEqualTo(viewModel)
         }
     }
@@ -76,7 +75,7 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
         ),
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         registerInjector: Boolean = true,
-        onReady: (PaymentOptionsAddPaymentMethodFragment, FragmentPaymentsheetAddPaymentMethodBinding, PaymentOptionsViewModel) -> Unit
+        onReady: (PaymentOptionsAddPaymentMethodFragment, PaymentOptionsViewModel) -> Unit
     ): FragmentScenario<PaymentOptionsAddPaymentMethodFragment> {
         assertThat(WeakMapInjectorRegistry.staticCacheMap.size).isEqualTo(0)
         val viewModel = createViewModel(
@@ -100,9 +99,6 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
             fragment.sheetViewModel.lpmResourceRepository.getRepository().updateFromDisk()
             onReady(
                 fragment,
-                FragmentPaymentsheetAddPaymentMethodBinding.bind(
-                    requireNotNull(fragment.view)
-                ),
                 viewModel
             )
         }
