@@ -27,12 +27,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-      - name: Show path
-        run: |
-          cd maestro/maestro-1.8.1/bin
-          ls -la
-      - name: End-to-end tests
-        run: ./maestro/maestro-1.8.1/bin/maestro test maestro/fc-flow-testmode.yaml
       - name: run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
