@@ -73,22 +73,6 @@ internal sealed class USBankAccountFormScreenState(
             this.copy(name = name, email = email, saveForFutureUsage = saveForFutureUsage)
     }
 
-//    data class ConfirmIntent(
-//        val confirmIntentParams: ConfirmStripeIntentParams
-//    ) : USBankAccountFormScreenState() {
-//        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) = this
-//    }
-
-//    data class Finished(
-//        val paymentSelection: PaymentSelection,
-//        val financialConnectionsSessionId: String,
-//        val intentId: String,
-//        val last4: String,
-//        val bankName: String
-//    ) : USBankAccountFormScreenState() {
-//        override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) = this
-//    }
-
     abstract fun updateInputs(
         name: String,
         email: String?,

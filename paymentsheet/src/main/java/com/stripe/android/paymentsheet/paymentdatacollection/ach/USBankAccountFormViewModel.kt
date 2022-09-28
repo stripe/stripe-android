@@ -18,13 +18,13 @@ import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
@@ -36,7 +36,6 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
@@ -393,25 +392,14 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                         intentId = intentId
                     )
 
-                    if (args.completePayment) {
+                    if (args.isCompleteFlow) {
                         confirm(clientSecret, paymentSelection)
                     } else {
-                        args.sheetViewModel?.updateSelection(paymentSelection)
-                        args.sheetViewModel?.usBankAccountSavedScreenState = updateSavedAccount(
+                        val savedAccount = updateSavedAccount(
                             bankName = bankName,
                             last4 = last4
                         )
-                        args.sheetViewModel?.onFinish()
-
-//                        _currentScreenState.update {
-//                            USBankAccountFormScreenState.Finished(
-//                                paymentSelection,
-//                                linkAccountId,
-//                                intentId,
-//                                bankName,
-//                                last4
-//                            )
-//                        }
+                        args.onUpdateSelectionAndFinish(paymentSelection, savedAccount)
                     }
                 }
             }
@@ -425,18 +413,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 args.shippingDetails?.toConfirmPaymentIntentShipping()
             )
             val confirmIntent = confirmParamsFactory.create(paymentSelection)
-
-            (args.sheetViewModel as? PaymentSheetViewModel)?.confirmStripeIntent(confirmIntent)
-
-//            _currentScreenState.update {
-//                USBankAccountFormScreenState.ConfirmIntent(confirmIntent)
-//            }
+            args.onConfirmStripeIntent(confirmIntent)
         }
     }
 
     private fun buildPrimaryButtonText(): String? {
         return when {
-            args.completePayment -> {
+            args.isCompleteFlow -> {
                 if (args.clientSecret is PaymentIntentClientSecret) {
                     args.formArgs.amount?.buildPayButtonLabel(application.resources)
                 } else {
@@ -506,18 +489,19 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
      * Arguments for launching [USBankAccountFormFragment]
      *
      * @param formArgs The form arguments supplied by the payment sheet
-     * @param completePayment Whether the payment should be completed, or the selected payment
+     * @param isCompleteFlow Whether the payment should be completed, or the selected payment
      *                          method should be returned as a result
      * @param clientSecret The client secret for the Stripe Intent being processed
      */
     data class Args(
         val formArgs: FormFragmentArguments,
-        val completePayment: Boolean,
+        val isCompleteFlow: Boolean,
         val clientSecret: ClientSecret?,
         val savedScreenState: USBankAccountFormScreenState?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
-        val sheetViewModel: BaseSheetViewModel<*>?,
+        val onConfirmStripeIntent: (ConfirmStripeIntentParams) -> Unit,
+        val onUpdateSelectionAndFinish: (PaymentSelection, USBankAccountFormScreenState?) -> Unit,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     )
 
