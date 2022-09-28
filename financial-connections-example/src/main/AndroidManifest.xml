@@ -8,6 +8,11 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="com.stripe.android.financialconnections.example.backend_url"
+            android:value="${BACKEND_URL}" />
+
         <activity
             android:name=".FinancialConnectionsLauncherActivity"
             android:exported="true">

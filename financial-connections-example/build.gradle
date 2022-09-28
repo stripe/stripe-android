@@ -7,6 +7,11 @@ ext {
     retrofitVersion = '2.9.0'
 }
 
+// Read values from gradle.properties or system environment variable
+def getBackendUrl() {
+    return findProperty('STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL') ?: ""
+}
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -17,6 +22,10 @@ android {
         targetSdk rootProject.ext.compileSdkVersion
         versionCode 1
         versionName "1.0"
+
+        manifestPlaceholders = [
+                BACKEND_URL: getBackendUrl(),
+        ]
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
