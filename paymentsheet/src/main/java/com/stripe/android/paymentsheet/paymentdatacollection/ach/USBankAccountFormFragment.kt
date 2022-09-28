@@ -210,9 +210,13 @@ internal class USBankAccountFormFragment : Fragment() {
                     sheetViewModel?.onError(currentScreenState.error)
 
                     val shouldProcess =
-                        currentScreenState is USBankAccountFormScreenState.NameAndEmailCollection || completePayment
+                        currentScreenState is USBankAccountFormScreenState.NameAndEmailCollection ||
+                            completePayment
                     val enabled =
-                        if (currentScreenState is USBankAccountFormScreenState.NameAndEmailCollection) {
+                        if (
+                            currentScreenState is
+                            USBankAccountFormScreenState.NameAndEmailCollection
+                        ) {
                             viewModel.requiredFields.value
                         } else {
                             true
@@ -579,8 +583,9 @@ internal class USBankAccountFormFragment : Fragment() {
 
     private fun updateMandateText(mandateText: String?) {
         val microdepositsText =
-            if (viewModel.currentScreenState.value
-                    is USBankAccountFormScreenState.VerifyWithMicrodeposits
+            if (
+                viewModel.currentScreenState.value
+                is USBankAccountFormScreenState.VerifyWithMicrodeposits
             ) {
                 getString(
                     R.string.stripe_paymentsheet_microdeposit,

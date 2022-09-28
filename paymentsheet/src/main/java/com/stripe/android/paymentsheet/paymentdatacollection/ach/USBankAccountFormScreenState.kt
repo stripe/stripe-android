@@ -3,8 +3,6 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 import androidx.annotation.StringRes
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.model.ConfirmStripeIntentParams
-import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal sealed class USBankAccountFormScreenState(
     @StringRes open val error: Int? = null
