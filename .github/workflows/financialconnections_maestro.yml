@@ -24,10 +24,11 @@ jobs:
           brew tap mobile-dev-inc/tap
           brew install maestro
       - name: Run Tests
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@v2.22.0
         with:
           api-level: 29
-          profile: Nexus 6
+          arch: x86
+          disable-animations: true
           script: |
             ./gradlew :financial-connections-example:installDebug
             maestro --platform android test maestro/fc-flow-testmode.yaml
