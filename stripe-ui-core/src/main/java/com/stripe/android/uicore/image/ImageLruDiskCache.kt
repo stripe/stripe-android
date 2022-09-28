@@ -8,6 +8,7 @@ import android.graphics.Bitmap.CompressFormat
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.annotation.RestrictTo
+import com.jakewharton.disklrucache.DiskLruCache
 import com.stripe.android.uicore.BuildConfig
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
