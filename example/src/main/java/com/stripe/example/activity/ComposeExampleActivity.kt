@@ -5,10 +5,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
@@ -77,16 +79,18 @@ class ComposeExampleActivity : AppCompatActivity() {
         status: String,
         onConfirm: (ConfirmPaymentIntentParams) -> Unit
     ) {
-        val content = List(40) { "https://www.fillmurray.com/g/50/50" }
+        val content = List(20) { "https://dummyimage.com/108x108/000/fff&text=test_${('a'..'z').random()}" }
         Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-            LazyColumn {
+            LazyRow {
                 items(content) {
-                    StripeImage(
-                        url = it,
-                        placeholder = painterResource(id = R.drawable.stripe_ic_bank_generic),
-                        imageLoader = imageLoader,
-                        contentDescription = "example image"
-                    )
+                    Box(modifier = Modifier.size(50.dp)) {
+                        StripeImage(
+                            url = it,
+                            placeholder = painterResource(id = R.drawable.stripe_ic_bank_generic),
+                            imageLoader = imageLoader,
+                            contentDescription = "example image"
+                        )
+                    }
                 }
             }
 

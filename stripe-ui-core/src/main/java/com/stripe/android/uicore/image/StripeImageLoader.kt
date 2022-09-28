@@ -53,7 +53,7 @@ class StripeImageLoader(
         withMutexByUrlLock(url) {
             loadFromMemory(url)
                 ?: loadFromNetwork(url, width, height)
-                    .onFailure { debug("Could not load image from network") }
+                    .onFailure { logger.error("$TAG: Could not load image from network", it) }
         }
     }
 
@@ -78,7 +78,7 @@ class StripeImageLoader(
         width: Int,
         height: Int
     ): Result<Bitmap> = kotlin.runCatching {
-        debug("Image loading from internet")
+        debug("Image $url loading from internet")
         val bitmap = BitmapFactory.Options().run {
             // First decode with inJustDecodeBounds=true to check dimensions
             inJustDecodeBounds = true
@@ -143,6 +143,10 @@ class StripeImageLoader(
     }
 
     private fun debug(message: String) {
-        logger.debug("StripeImageLoader: $message")
+        logger.debug("$TAG: $message")
+    }
+
+    private companion object {
+        private const val TAG = "StripeImageLoader"
     }
 }
