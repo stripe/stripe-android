@@ -3,6 +3,8 @@ appId: com.stripe.android.financialconnections.example
 - launchApp
 # Android specific: Navigate to example
 - tapOn: "Collect account for data"
+- assertVisible: "CONNECT AN ACCOUNT"
+- takeScreenshot: ExampleAppLauncher
 - tapOn: "CONNECT AN ACCOUNT"
 - takeScreenshot: ChromeSetup
 # Android specific - Chrome opens, likely with first open setup. Pass setup.
