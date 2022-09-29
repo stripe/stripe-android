@@ -26,7 +26,8 @@ jobs:
       - name: Run Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 22
+          api-level: 29
+          profile: Nexus 6
           disable-animations: true
           emulator-options: -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
           script: |
