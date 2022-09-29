@@ -28,7 +28,7 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
     }
 
     private fun logErrors() {
-        onAsync(ManualEntrySuccessState::completeAuthSession, onFail = {
+        onAsync(ManualEntrySuccessState::completeSession, onFail = {
             logger.error("Error completing session", it)
         })
     }
@@ -42,7 +42,7 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
                 )
                 nativeAuthFlowCoordinator().emit(Finish(result))
             }
-        }.execute { copy(completeAuthSession = it) }
+        }.execute { copy(completeSession = it) }
     }
 
     companion object :
@@ -64,5 +64,5 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
 }
 
 internal data class ManualEntrySuccessState(
-    val completeAuthSession: Async<FinancialConnectionsSession> = Uninitialized
+    val completeSession: Async<FinancialConnectionsSession> = Uninitialized
 ) : MavericksState

@@ -51,7 +51,7 @@ internal fun ManualEntrySuccessScreen(
     val viewModel: ManualEntrySuccessViewModel = mavericksViewModel()
     BackHandler(true) {}
     val completeAuthSessionAsync = viewModel
-        .collectAsState(ManualEntrySuccessState::completeAuthSession)
+        .collectAsState(ManualEntrySuccessState::completeSession)
     ManualEntrySuccessContent(
         microdepositVerificationMethod = microdepositVerificationMethod,
         last4 = last4,
