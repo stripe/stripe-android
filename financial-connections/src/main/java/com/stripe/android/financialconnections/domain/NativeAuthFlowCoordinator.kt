@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,6 +30,8 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
          * Ensures partner web auth status gets cleared after the current session is finished.
          */
         object ClearPartnerWebAuth : Message
-        object Finish : Message
+        data class Finish(
+            val result: FinancialConnectionsSheetActivityResult
+        ) : Message
     }
 }

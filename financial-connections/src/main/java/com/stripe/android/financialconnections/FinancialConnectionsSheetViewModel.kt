@@ -23,8 +23,10 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -83,7 +85,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             val nativeAuthFlow = true
             copy(
                 manifest = manifest,
-                authFlowActive = true,
+                authFlowActive = nativeAuthFlow.not(),
                 viewEffect = if (nativeAuthFlow) {
                     OpenNativeAuthFlow(initialArgs.configuration, manifest)
                 } else {
@@ -150,19 +152,16 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     internal fun onNativeAuthFlowResult(activityResult: ActivityResult) {
-        if (activityResult.resultCode == Activity.RESULT_OK) {
-            setState { copy(authFlowActive = false) }
-            withState { state ->
-                when (state.initialArgs) {
-                    is ForData -> fetchFinancialConnectionsSession(state)
-                    is ForToken -> fetchFinancialConnectionsSessionForToken(state)
-                    is ForLink -> TODO("Native does not yet support Link flows.")
-                }
+        val result: FinancialConnectionsSheetActivityResult? = activityResult.data
+            ?.getParcelableExtra(FinancialConnectionsSheetNativeActivity.EXTRA_RESULT)
+        if (activityResult.resultCode == Activity.RESULT_OK && result != null) {
+            setState {
+                copy(
+                    viewEffect = FinishWithResult(result)
+                )
             }
         } else {
-            setState {
-                copy(viewEffect = FinishWithResult(Canceled))
-            }
+            setState { copy(viewEffect = FinishWithResult(Canceled)) }
         }
     }
 
@@ -215,7 +214,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @param throwable the error encountered during the [FinancialConnectionsSheet] auth flow
      */
     private fun onFatal(state: FinancialConnectionsSheetState, throwable: Throwable) {
-        val result = FinancialConnectionsSheetActivityResult.Failed(throwable)
+        val result = Failed(throwable)
         eventReporter.onResult(state.initialArgs.configuration, result)
         setState { copy(viewEffect = FinishWithResult(result)) }
     }

@@ -10,6 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Finish
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
@@ -35,7 +36,11 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
     fun onSubmit() {
         suspend {
             completeFinancialConnectionsSession().also {
-                nativeAuthFlowCoordinator().emit(Finish)
+                val result = Completed(
+                    financialConnectionsSession = it,
+                    token = it.parsedToken
+                )
+                nativeAuthFlowCoordinator().emit(Finish(result))
             }
         }.execute { copy(completeAuthSession = it) }
     }

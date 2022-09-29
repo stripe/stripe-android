@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
@@ -61,7 +62,11 @@ internal class SuccessViewModel @Inject constructor(
     fun onDoneClick() {
         suspend {
             completeFinancialConnectionsSession().also {
-                nativeAuthFlowCoordinator().emit(Message.Finish)
+                val result = Completed(
+                    financialConnectionsSession = it,
+                    token = it.parsedToken
+                )
+                nativeAuthFlowCoordinator().emit(Message.Finish(result))
             }
         }.execute { copy(completeSession = it) }
     }
