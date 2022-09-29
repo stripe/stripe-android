@@ -3,15 +3,11 @@ package com.stripe.android.link.ui.cardedit
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -21,9 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,7 +27,6 @@ import com.stripe.android.link.R
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PaymentsThemeForLink
-import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
@@ -42,6 +35,7 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.ui.forms.Form
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
+import com.stripe.android.ui.core.elements.CheckboxElementUI
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 internal const val DEFAULT_PAYMENT_METHOD_CHECKBOX_TAG = "DEFAULT_PAYMENT_METHOD_CHECKBOX"
@@ -142,18 +136,16 @@ internal fun CardEditBody(
         )
         PaymentsThemeForLink {
             formContent()
-        }
-        Spacer(modifier = Modifier.height(8.dp))
 
-        DefaultPaymentMethodCheckbox(
-            setAsDefaultChecked = setAsDefaultChecked,
-            isDefault = isDefault,
-            isProcessing = isProcessing,
-            onSetAsDefaultClick = onSetAsDefaultClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
-        )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            DefaultPaymentMethodCheckbox(
+                setAsDefaultChecked = setAsDefaultChecked,
+                isDefault = isDefault,
+                isProcessing = isProcessing,
+                onSetAsDefaultClick = onSetAsDefaultClick,
+            )
+        }
 
         AnimatedVisibility(visible = errorMessage != null) {
             ErrorText(
@@ -184,37 +176,17 @@ private fun DefaultPaymentMethodCheckbox(
     isDefault: Boolean,
     isProcessing: Boolean,
     onSetAsDefaultClick: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
 ) {
     val isChecked = isDefault || setAsDefaultChecked
     val canCheck = !isDefault && !isProcessing
 
-    Row(
-        modifier = modifier
-            .testTag(DEFAULT_PAYMENT_METHOD_CHECKBOX_TAG)
-            .selectable(
-                selected = false,
-                enabled = canCheck,
-                onClick = {
-                    onSetAsDefaultClick(!setAsDefaultChecked)
-                }
-            )
-    ) {
-        Checkbox(
-            checked = isChecked,
-            onCheckedChange = null, // needs to be null for accessibility on row click to work
-            modifier = Modifier.padding(end = 8.dp),
-            enabled = canCheck,
-            colors = CheckboxDefaults.colors(
-                checkedColor = MaterialTheme.colors.primary,
-                uncheckedColor = MaterialTheme.linkColors.disabledText
-            )
-        )
-        Text(
-            text = stringResource(R.string.pm_set_as_default),
-            style = MaterialTheme.typography.h6,
-            color = MaterialTheme.colors.onPrimary,
-            modifier = Modifier.alpha(if (canCheck) 1f else 0.6f)
-        )
-    }
+    CheckboxElementUI(
+        automationTestTag = DEFAULT_PAYMENT_METHOD_CHECKBOX_TAG,
+        isChecked = isChecked,
+        label = stringResource(R.string.pm_set_as_default),
+        isEnabled = canCheck,
+        onValueChange = {
+            onSetAsDefaultClick(!setAsDefaultChecked)
+        }
+    )
 }
