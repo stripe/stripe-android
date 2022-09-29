@@ -30,6 +30,7 @@ appId: com.stripe.android.financialconnections.example
     timeout: 50000
 - takeScreenshot: AccountPicker_AllAccounts
 - tapOn: "All accounts" # deselect all accounts
+- scroll
 - tapOn: "Success" # select success account
 - takeScreenshot: AccountPicker_SuccessAccount
 - tapOn: "Link account"
