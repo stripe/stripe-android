@@ -9,7 +9,7 @@ appId: com.stripe.android.financialconnections.example
 - takeScreenshot: ChromeSetup
 # Android specific - Chrome initial setup might open.
 - tapOn:
-    test: "Accept & continue"
+    text: "Accept & continue"
     optional: true
 - tapOn:
     text: "No thanks"
