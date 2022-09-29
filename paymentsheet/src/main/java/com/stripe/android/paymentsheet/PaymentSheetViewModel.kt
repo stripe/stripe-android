@@ -67,6 +67,7 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -440,7 +441,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 .isNotEmpty()
         ) {
             viewModelScope.launch {
-                val accountStatus = linkLauncher.setup(createLinkConfiguration(stripeIntent), this)
+                val configuration = createLinkConfiguration(stripeIntent).also {
+                    _linkConfiguration.value = it
+                }
+                val accountStatus = linkLauncher.getAccountStatusFlow(configuration).first()
                 when (accountStatus) {
                     AccountStatus.Verified -> launchLink(launchedDirectly = true)
                     AccountStatus.VerificationStarted,
@@ -466,13 +470,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override fun completeLinkInlinePayment(
+        configuration: LinkPaymentLauncher.Configuration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         isReturningUser: Boolean
     ) {
         if (isReturningUser) {
             launchLink(launchedDirectly = false, paymentMethodCreateParams)
         } else {
-            super.completeLinkInlinePayment(paymentMethodCreateParams, isReturningUser)
+            super.completeLinkInlinePayment(
+                configuration,
+                paymentMethodCreateParams,
+                isReturningUser
+            )
         }
     }
 

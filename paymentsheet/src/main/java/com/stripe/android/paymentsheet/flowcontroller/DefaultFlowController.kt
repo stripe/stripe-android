@@ -62,6 +62,7 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -474,7 +475,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     it.ephemeralKeySecret
                 )?.email
             }
-            val accountStatus = linkLauncher.setup(
+            val accountStatus = linkLauncher.getAccountStatusFlow(
                 configuration = LinkPaymentLauncher.Configuration(
                     stripeIntent = initData.stripeIntent,
                     merchantName = config.merchantDisplayName,
@@ -482,9 +483,8 @@ internal class DefaultFlowController @Inject internal constructor(
                     customerPhone = customerPhone,
                     customerName = config.defaultBillingDetails?.name,
                     shippingValues = shippingAddress
-                ),
-                coroutineScope = lifecycleScope
-            )
+                )
+            ).first()
             // If a returning user is paying with a new card inline, launch Link to complete payment
             (paymentSelection as? PaymentSelection.New.LinkInline)?.takeIf {
                 accountStatus == AccountStatus.Verified

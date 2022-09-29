@@ -18,8 +18,8 @@ public final class com/stripe/android/link/LinkActivityContract$Args : com/strip
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/link/LinkActivityContract$Args$Companion;
-	public final fun copy (Lcom/stripe/android/model/StripeIntent;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/link/LinkActivityContract$Args$InjectionParams;)Lcom/stripe/android/link/LinkActivityContract$Args;
-	public static synthetic fun copy$default (Lcom/stripe/android/link/LinkActivityContract$Args;Lcom/stripe/android/model/StripeIntent;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/link/LinkActivityContract$Args$InjectionParams;ILjava/lang/Object;)Lcom/stripe/android/link/LinkActivityContract$Args;
+	public final fun copy (Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;Lcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/link/LinkActivityContract$Args$InjectionParams;)Lcom/stripe/android/link/LinkActivityContract$Args;
+	public static synthetic fun copy$default (Lcom/stripe/android/link/LinkActivityContract$Args;Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;Lcom/stripe/android/model/PaymentMethodCreateParams;Lcom/stripe/android/link/LinkActivityContract$Args$InjectionParams;ILjava/lang/Object;)Lcom/stripe/android/link/LinkActivityContract$Args;
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -257,36 +257,52 @@ public final class com/stripe/android/link/injection/DaggerLinkViewModelFactoryC
 	public static fun builder ()Lcom/stripe/android/link/injection/LinkViewModelFactoryComponent$Builder;
 }
 
-public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideCustomerEmailFactory : dagger/internal/Factory {
+public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideConfigurationFactory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideCustomerEmailFactory;
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideConfigurationFactory;
+	public fun get ()Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;
 	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/lang/String;
-	public static fun provideCustomerEmail (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/lang/String;
+	public static fun provideConfiguration (Lcom/stripe/android/link/LinkActivityContract$Args;)Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;
 }
 
-public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideCustomerPhoneFactory : dagger/internal/Factory {
+public final class com/stripe/android/link/injection/LinkCommonModule_Companion_CustomerEmailFactory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideCustomerPhoneFactory;
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkCommonModule_Companion_CustomerEmailFactory;
+	public static fun customerEmail (Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;)Ljava/lang/String;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Ljava/lang/String;
-	public static fun provideCustomerPhone (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/lang/String;
 }
 
-public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideMerchantNameFactory : dagger/internal/Factory {
+public final class com/stripe/android/link/injection/LinkCommonModule_Companion_CustomerNameFactory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideMerchantNameFactory;
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkCommonModule_Companion_CustomerNameFactory;
+	public static fun customerName (Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;)Ljava/lang/String;
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Ljava/lang/String;
-	public static fun provideMerchantName (Lcom/stripe/android/link/LinkActivityContract$Args;)Ljava/lang/String;
 }
 
-public final class com/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideStripeIntentFactory : dagger/internal/Factory {
+public final class com/stripe/android/link/injection/LinkCommonModule_Companion_CustomerPhoneFactory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkActivityContractArgsModule_Companion_ProvideStripeIntentFactory;
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkCommonModule_Companion_CustomerPhoneFactory;
+	public static fun customerPhone (Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;)Ljava/lang/String;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/link/injection/LinkCommonModule_Companion_MerchantNameFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkCommonModule_Companion_MerchantNameFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Ljava/lang/String;
+	public static fun merchantName (Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;)Ljava/lang/String;
+}
+
+public final class com/stripe/android/link/injection/LinkCommonModule_Companion_StripeIntentFactory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkCommonModule_Companion_StripeIntentFactory;
 	public fun get ()Lcom/stripe/android/model/StripeIntent;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideStripeIntent (Lcom/stripe/android/link/LinkActivityContract$Args;)Lcom/stripe/android/model/StripeIntent;
+	public static fun stripeIntent (Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;)Lcom/stripe/android/model/StripeIntent;
 }
 
 public final class com/stripe/android/link/injection/NamedConstantsKt {

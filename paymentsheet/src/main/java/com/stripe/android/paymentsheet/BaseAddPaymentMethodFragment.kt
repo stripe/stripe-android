@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asFlow
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkInlineSignup
@@ -35,6 +36,7 @@ import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.utils.AnimationConstants
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
@@ -217,13 +219,15 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     }
 
     private fun updateLinkInlineSignupVisibility(selectedPaymentMethod: SupportedPaymentMethod) {
-        showLinkInlineSignup.value = sheetViewModel.isLinkEnabled.value == true &&
-            sheetViewModel.stripeIntent.value
-                ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) ?: false &&
-            selectedPaymentMethod.code == PaymentMethod.Type.Card.code &&
-            sheetViewModel.linkLauncher.accountStatus.value == AccountStatus.SignedOut
+        lifecycleScope.launch {
+            showLinkInlineSignup.value = sheetViewModel.isLinkEnabled.value == true &&
+                sheetViewModel.stripeIntent.value
+                    ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) ?: false &&
+                selectedPaymentMethod.code == PaymentMethod.Type.Card.code &&
+                sheetViewModel.getLinkAccountStatus() == AccountStatus.SignedOut
 
-        viewBinding.linkInlineSignup.isVisible = showLinkInlineSignup.value
+            viewBinding.linkInlineSignup.isVisible = showLinkInlineSignup.value
+        }
     }
 
     private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =

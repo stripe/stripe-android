@@ -56,6 +56,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -638,6 +639,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with link payment method should launch LinkPaymentLauncher`() = runTest {
+        whenever(linkPaymentLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
         val flowController = createFlowController(
             savedSelection = SavedSelection.Link,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -657,7 +659,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with LinkInline and user signed in should launch LinkPaymentLauncher`() = runTest {
-        whenever(linkPaymentLauncher.setup(any(), any())).thenReturn(AccountStatus.Verified)
+        whenever(linkPaymentLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
 
         val flowController = createFlowController(
             savedSelection = SavedSelection.Link,
@@ -690,7 +692,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with LinkInline and user not signed in should confirm with PaymentLauncher`() = runTest {
-        whenever(linkPaymentLauncher.setup(any(), any())).thenReturn(AccountStatus.SignedOut)
+        whenever(linkPaymentLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
 
         val flowController = createFlowController(
             savedSelection = SavedSelection.Link,
@@ -723,7 +725,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with Link and shipping should have shipping details in confirm params`() = runTest {
-        whenever(linkPaymentLauncher.setup(any(), any())).thenReturn(AccountStatus.SignedOut)
+        whenever(linkPaymentLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
 
         val flowController = createFlowController(
             savedSelection = SavedSelection.Link,
@@ -769,7 +771,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with Link and no shipping should not have shipping details in confirm params`() = runTest {
-        whenever(linkPaymentLauncher.setup(any(), any())).thenReturn(AccountStatus.SignedOut)
+        whenever(linkPaymentLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
 
         val flowController = createFlowController(
             savedSelection = SavedSelection.Link,

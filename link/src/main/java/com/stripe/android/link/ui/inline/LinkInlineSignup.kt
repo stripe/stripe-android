@@ -84,9 +84,9 @@ fun LinkInlineSignup(
     onStateChanged: (InlineSignupViewState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    linkPaymentLauncher.injector?.let { injector ->
+    linkPaymentLauncher.component?.let { component ->
         val viewModel: InlineSignupViewModel = viewModel(
-            factory = InlineSignupViewModel.Factory(injector)
+            factory = InlineSignupViewModel.Factory(component.injector)
         )
 
         val viewState by viewModel.viewState.collectAsState()
