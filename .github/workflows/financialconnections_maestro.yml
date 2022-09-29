@@ -13,15 +13,36 @@ jobs:
     strategy:
       matrix:
         api-level: [ 21, 23, 29 ]
-        target: [ default, google_apis ]
     steps:
       - name: Checkout
         uses: actions/checkout@v1
+
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
 
       - name: Set Up JDK
         uses: actions/setup-java@v1
         with:
           java-version: 1.11
+
+      - name: AVD cache
+        uses: actions/cache@v3
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}
+
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
 
       - name: Install Maestro CLI
         run: |
@@ -31,10 +52,9 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
-          target: ${{ matrix.target }}
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          arch: x86_64
-          profile: Nexus 6
           script: |
             ./gradlew :financial-connections-example:installDebug
             maestro --platform android test maestro/fc-flow-testmode.yaml
