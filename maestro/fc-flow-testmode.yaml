@@ -22,7 +22,6 @@ appId: com.stripe.android.financialconnections.example
     visible: "Test Institution"
     timeout: 50000
 - tapOn: "Test Institution"
-- tapOn: "Continue"
 - tapOn: "All accounts" # deselect all accounts
 - tapOn: "Success" # select success account
 - tapOn: "Link account"
