@@ -24,7 +24,7 @@ jobs:
           brew tap mobile-dev-inc/tap
           brew install maestro
       - name: Run Tests
-        uses: reactivecircus/android-emulator-runner@v2.22.0
+        uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 22
           disable-animations: true
