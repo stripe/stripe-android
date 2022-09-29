@@ -10,6 +10,10 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    strategy:
+      matrix:
+        api-level: [ 21, 23, 29 ]
+        target: [ default, google_apis ]
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -26,10 +30,11 @@ jobs:
       - name: Run Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30
-          arch: arm64-v8a
+          api-level: ${{ matrix.api-level }}
+          target: ${{ matrix.target }}
           disable-animations: true
-          emulator-options: -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
+          arch: x86_64
+          profile: Nexus 6
           script: |
             ./gradlew :financial-connections-example:installDebug
             maestro --platform android test maestro/fc-flow-testmode.yaml
