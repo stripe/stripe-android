@@ -17,7 +17,6 @@ import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONFIRMATION
 import com.stripe.android.identity.ui.ConfirmationScreen
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -41,25 +40,6 @@ internal class ConfirmationFragment(
         setContent {
             val verificationPage by identityViewModel.verificationPage.observeAsState()
             ConfirmationScreen(verificationPage) {
-                lifecycleScope.launch {
-                    identityViewModel.analyticsState.collectLatest {
-                        identityViewModel.sendAnalyticsRequest(
-                            identityViewModel.identityAnalyticsRequestFactory.verificationSucceeded(
-                                isFromFallbackUrl = false,
-                                scanType = it.scanType,
-                                requireSelfie = it.requireSelfie,
-                                docFrontRetryTimes = it.docFrontRetryTimes,
-                                docBackRetryTimes = it.docBackRetryTimes,
-                                selfieRetryTimes = it.selfieRetryTimes,
-                                docFrontUploadType = it.docFrontUploadType,
-                                docBackUploadType = it.docBackUploadType,
-                                docFrontModelScore = it.docFrontModelScore,
-                                docBackModelScore = it.docBackModelScore,
-                                selfieModelScore = it.selfieModelScore
-                            )
-                        )
-                    }
-                }
                 identityViewModel.sendSucceededAnalyticsRequestForNative()
                 verificationFlowFinishable.finishWithResult(
                     IdentityVerificationSheet.VerificationFlowResult.Completed
