@@ -483,7 +483,8 @@ internal class DefaultFlowController @Inject internal constructor(
                     customerName = config.defaultBillingDetails?.name,
                     shippingValues = shippingAddress
                 ),
-                coroutineScope = lifecycleScope
+                coroutineScope = lifecycleScope,
+                savedStateHandle = viewModel.savedStateHandle
             )
             // If a returning user is paying with a new card inline, launch Link to complete payment
             (paymentSelection as? PaymentSelection.New.LinkInline)?.takeIf {

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +21,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -48,7 +50,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         setContent {
             val isReady by sheetViewModel.isResourceRepositoryReady.observeAsState(false)
             val processing by sheetViewModel.processing.observeAsState(false)
-//            val linkAccountStatus by sheetViewModel.linkLauncher.accountStatus.collectAsState()
+            val linkAccountStatus by sheetViewModel.linkLauncher.getAccountStatusFlow().collectAsState(null)
 
             if (isReady == true) {
                 var selectedPaymentMethodCode: String by rememberSaveable {
@@ -68,11 +70,11 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     sheetViewModel.config
                 )
 
-                val showLinkInlineSignup = false // sheetViewModel.isLinkEnabled.value == true &&
-//                    sheetViewModel.stripeIntent.value
-//                        ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
-//                    selectedItem.code == PaymentMethod.Type.Card.code &&
-//                    linkAccountStatus == AccountStatus.SignedOut
+                val showLinkInlineSignup = sheetViewModel.isLinkEnabled.value == true &&
+                    sheetViewModel.stripeIntent.value
+                        ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
+                    selectedItem.code == PaymentMethod.Type.Card.code &&
+                    linkAccountStatus == AccountStatus.SignedOut
 
                 val arguments = remember(selectedItem) {
                     FormFragmentArguments(

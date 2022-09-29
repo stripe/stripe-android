@@ -1012,7 +1012,7 @@ internal class PaymentSheetActivityTest {
         whenever(lpmRepository.serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
 
         val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
-            onBlocking { setup(any(), any()) }.thenReturn(AccountStatus.SignedOut)
+            onBlocking { setup(any(), any(), any()) }.thenReturn(AccountStatus.SignedOut)
         }
 
         PaymentSheetViewModel(

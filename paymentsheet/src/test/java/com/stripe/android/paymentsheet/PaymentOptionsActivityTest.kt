@@ -452,7 +452,7 @@ class PaymentOptionsActivityTest {
             ApplicationProvider.getApplicationContext<Application>().resources
         )
         val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
-            onBlocking { setup(any(), any()) }.thenReturn(AccountStatus.SignedOut)
+            onBlocking { setup(any(), any(), any()) }.thenReturn(AccountStatus.SignedOut)
         }
         return PaymentOptionsViewModel(
             args = args,

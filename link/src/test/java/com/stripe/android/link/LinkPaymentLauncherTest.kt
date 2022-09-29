@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.model.StripeIntentFixtures
@@ -56,7 +57,8 @@ class LinkPaymentLauncherTest {
                         CUSTOMER_NAME,
                         null
                     ),
-                    coroutineScope = this
+                    coroutineScope = this,
+                    savedStateHandle = SavedStateHandle()
                 )
                 linkPaymentLauncher.present(mockHostActivityLauncher)
 

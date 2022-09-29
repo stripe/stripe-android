@@ -59,13 +59,15 @@ private fun LinkButton(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
-    val account = linkPaymentLauncher.linkAccountManager.linkAccount.collectAsState()
+    linkPaymentLauncher.component?.let { component ->
+        val account = component.linkAccountManager.linkAccount.collectAsState()
 
-    LinkButton(
-        enabled = enabled,
-        email = account.value?.email,
-        onClick = onClick
-    )
+        LinkButton(
+            enabled = enabled,
+            email = account.value?.email,
+            onClick = onClick
+        )
+    }
 }
 
 @Composable

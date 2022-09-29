@@ -50,11 +50,19 @@ internal class LinkAccountManager @Inject constructor(
                 ?: (
                     // If consumer has previously logged in, fetch their account
                     cookieStore.getAuthSessionCookie()?.let {
-                        lookupConsumer(null).getOrNull()?.accountStatus
+                        lookupConsumer(null).map {
+                            it?.accountStatus
+                        }.getOrElse {
+                            AccountStatus.Error
+                        }
                     }
                         // If the user recently signed up on this device, use their email
                         ?: cookieStore.getNewUserEmail()?.let {
-                            lookupConsumer(it).getOrNull()?.accountStatus
+                            lookupConsumer(it).map {
+                                it?.accountStatus
+                            }.getOrElse {
+                                AccountStatus.Error
+                            }
                         }
                         // If a customer email was passed in, lookup the account,
                         // unless the user has logged out of this account
@@ -62,7 +70,11 @@ internal class LinkAccountManager @Inject constructor(
                             if (hasUserLoggedOut(it)) {
                                 AccountStatus.SignedOut
                             } else {
-                                lookupConsumer(customerEmail).getOrNull()?.accountStatus
+                                lookupConsumer(customerEmail).map {
+                                    it?.accountStatus
+                                }.getOrElse {
+                                    AccountStatus.Error
+                                }
                             }
                         } ?: AccountStatus.SignedOut
                     )

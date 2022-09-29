@@ -46,6 +46,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -189,6 +190,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     abstract var newPaymentSelection: PaymentSelection.New?
 
     abstract fun onFatal(throwable: Throwable)
+
+    val initiallySelectedPaymentMethodCode: String
+        get() = newPaymentSelection?.paymentMethodCreateParams?.typeCode
+            ?: supportedPaymentMethods.first().code
 
     val buttonsEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
@@ -420,8 +425,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 }
 
                 if (_paymentMethods.value?.all {
-                    it.type != PaymentMethod.Type.USBankAccount
-                } == true
+                        it.type != PaymentMethod.Type.USBankAccount
+                    } == true
                 ) {
                     updatePrimaryButtonUIState(
                         primaryButtonUIState.value?.copy(
@@ -474,41 +479,46 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             savedStateHandle[SAVE_PROCESSING] = true
             updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
 
-            when (linkLauncher.accountStatus.value) {
-                AccountStatus.Verified -> {
-                    activeLinkSession.value = true
-                    completeLinkInlinePayment(params, userInput is UserInput.SignIn)
-                }
-                AccountStatus.VerificationStarted,
-                AccountStatus.NeedsVerification -> {
-                    linkVerificationCallback = { success ->
-                        activeLinkSession.value = success
-                        linkVerificationCallback = null
-                        _showLinkVerificationDialog.value = false
-
-                        if (success) {
+            viewModelScope.launch {
+                linkLauncher.getAccountStatusFlow().collectLatest {
+                    when (it) {
+                        AccountStatus.Verified -> {
+                            activeLinkSession.value = true
                             completeLinkInlinePayment(params, userInput is UserInput.SignIn)
-                        } else {
-                            savedStateHandle[SAVE_PROCESSING] = false
-                            updatePrimaryButtonState(PrimaryButton.State.Ready)
                         }
-                    }
-                    _showLinkVerificationDialog.value = true
-                }
-                AccountStatus.SignedOut -> {
-                    activeLinkSession.value = false
-                    viewModelScope.launch {
-                        linkLauncher.signInWithUserInput(userInput).fold(
-                            onSuccess = {
-                                // If successful, the account was fetched or created, so try again
-                                payWithLinkInline(userInput)
-                            },
-                            onFailure = {
-                                onError(it.localizedMessage)
-                                savedStateHandle[SAVE_PROCESSING] = false
-                                updatePrimaryButtonState(PrimaryButton.State.Ready)
+                        AccountStatus.VerificationStarted,
+                        AccountStatus.NeedsVerification -> {
+                            linkVerificationCallback = { success ->
+                                activeLinkSession.value = success
+                                linkVerificationCallback = null
+                                _showLinkVerificationDialog.value = false
+
+                                if (success) {
+                                    completeLinkInlinePayment(params, userInput is UserInput.SignIn)
+                                } else {
+                                    savedStateHandle[SAVE_PROCESSING] = false
+                                    updatePrimaryButtonState(PrimaryButton.State.Ready)
+                                }
                             }
-                        )
+                            _showLinkVerificationDialog.value = true
+                        }
+                        AccountStatus.SignedOut -> {
+                            activeLinkSession.value = false
+                            linkLauncher.signInWithUserInput(userInput).fold(
+                                onSuccess = {
+                                    // If successful, the account was fetched or created, so try again
+                                    payWithLinkInline(userInput)
+                                },
+                                onFailure = {
+                                    onError(it.localizedMessage)
+                                    savedStateHandle[SAVE_PROCESSING] = false
+                                    updatePrimaryButtonState(PrimaryButton.State.Ready)
+                                }
+                            )
+                        }
+                        AccountStatus.Error -> {
+                            // Complete payment from here
+                        }
                     }
                 }
             }
