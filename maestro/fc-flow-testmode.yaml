@@ -19,9 +19,9 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Agree"
 - takeScreenshot: BankPicker
 - extendedWaitUntil:
-    visible: "Test OAuth Institution"
+    visible: "Test Institution"
     timeout: 50000
-- tapOn: "Test OAuth Institution"
+- tapOn: "Test Institution"
 - tapOn: "Continue"
 - tapOn: "All accounts" # deselect all accounts
 - tapOn: "Success" # select success account
