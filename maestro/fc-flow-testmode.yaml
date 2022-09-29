@@ -13,12 +13,14 @@ appId: com.stripe.android.financialconnections.example
 #- tapOn: "No thanks"
 # Common: web authflow - connect OAuth institution
 - extendedWaitUntil:
-    visible: "Agree"    # Same input as in assertVisible or tapOn
-    timeout: 50000      # Timeout in milliseconds
-- assertVisible: "Agree"
+    visible: "Agree"
+    timeout: 50000
 - takeScreenshot: Consent
 - tapOn: "Agree"
 - takeScreenshot: BankPicker
+- extendedWaitUntil:
+    visible: "Test OAuth Institution"
+    timeout: 50000
 - tapOn: "Test OAuth Institution"
 - tapOn: "Continue"
 - tapOn: "All accounts" # deselect all accounts
