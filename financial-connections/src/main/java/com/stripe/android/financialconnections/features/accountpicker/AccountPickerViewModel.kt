@@ -176,8 +176,11 @@ internal data class AccountPickerState(
     val selectedIds: Set<String> = emptySet()
 ) : MavericksState {
 
-    val isLoading: Boolean
+    val submitLoading: Boolean
         get() = payload is Loading || selectAccounts is Loading
+
+    val submitEnabled: Boolean
+        get() = selectedIds.isNotEmpty()
 
     data class Payload(
         val skipAccountSelection: Boolean,
