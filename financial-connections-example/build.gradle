@@ -57,7 +57,8 @@ android {
 }
 
 dependencies {
-    implementation project(':financial-connections')
+    implementation "com.stripe:financial-connections:20.14.0"
+    implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
 
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"

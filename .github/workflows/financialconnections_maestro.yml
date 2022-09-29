@@ -26,7 +26,7 @@ jobs:
       - name: Run Tests
         uses: reactivecircus/android-emulator-runner@v2.22.0
         with:
-          api-level: 21
+          api-level: 22
           disable-animations: true
           emulator-options: -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-snapshot-save
           script: |
