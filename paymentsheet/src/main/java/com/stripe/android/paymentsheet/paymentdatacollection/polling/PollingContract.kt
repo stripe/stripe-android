@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.ColorInt
 import androidx.core.os.bundleOf
 import com.stripe.android.payments.PaymentFlowResult
 import kotlinx.parcelize.Parcelize
@@ -24,7 +25,8 @@ internal class PollingContract :
 
     @Parcelize
     internal data class Args(
-        val clientSecret: String
+        val clientSecret: String,
+        @ColorInt val statusBarColor: Int?,
     ) : Parcelable {
 
         internal companion object {

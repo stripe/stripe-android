@@ -22,7 +22,8 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent> {
         requestOptions: ApiRequest.Options
     ) {
         val args = PollingContract.Args(
-            clientSecret = requireNotNull(authenticatable.clientSecret)
+            clientSecret = requireNotNull(authenticatable.clientSecret),
+            statusBarColor = host.statusBarColor
         )
         pollingLauncher?.launch(args)
     }
@@ -35,5 +36,9 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent> {
             PollingContract(),
             activityResultCallback
         )
+    }
+
+    override fun onLauncherInvalidated() {
+        pollingLauncher?.unregister()
     }
 }

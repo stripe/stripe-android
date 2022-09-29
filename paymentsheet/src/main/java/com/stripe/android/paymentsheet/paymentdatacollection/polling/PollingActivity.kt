@@ -8,6 +8,10 @@ import androidx.fragment.app.FragmentResultListener
 
 internal class PollingActivity : AppCompatActivity() {
 
+    private val args: PollingContract.Args by lazy {
+        requireNotNull(PollingContract.Args.fromIntent(intent))
+    }
+
     private val listener = FragmentResultListener { _, result ->
         handleResult(result)
     }
@@ -20,6 +24,10 @@ internal class PollingActivity : AppCompatActivity() {
             this,
             listener
         )
+
+        args.statusBarColor?.let { color ->
+            window.statusBarColor = color
+        }
 
         if (savedInstanceState == null) {
             val fragment = PollingFragment.newInstance()
