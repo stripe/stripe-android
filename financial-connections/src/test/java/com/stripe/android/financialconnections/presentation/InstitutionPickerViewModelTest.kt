@@ -6,6 +6,7 @@ import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -29,6 +30,7 @@ internal class InstitutionPickerViewModelTest {
     val mvrxRule = MvRxTestRule()
 
     private val searchInstitutions = mock<SearchInstitutions>()
+    private val featuredInstitutions = mock<FeaturedInstitutions>()
     private val getManifest = mock<GetManifest>()
     private val updateLocalManifest = mock<UpdateLocalManifest>()
     private val navigationManager = mock<NavigationManager>()
@@ -42,6 +44,7 @@ internal class InstitutionPickerViewModelTest {
     ) = InstitutionPickerViewModel(
         configuration = defaultConfiguration,
         searchInstitutions = searchInstitutions,
+        featuredInstitutions = featuredInstitutions,
         getManifest = getManifest,
         navigationManager = navigationManager,
         updateLocalManifest = updateLocalManifest,
@@ -129,7 +132,7 @@ internal class InstitutionPickerViewModelTest {
 
     private suspend fun givenFeaturedInstitutionsReturns(institutionResponse: InstitutionResponse) {
         whenever(
-            searchInstitutions(
+            featuredInstitutions(
                 clientSecret = defaultConfiguration.financialConnectionsSessionClientSecret
             )
         ).thenReturn(

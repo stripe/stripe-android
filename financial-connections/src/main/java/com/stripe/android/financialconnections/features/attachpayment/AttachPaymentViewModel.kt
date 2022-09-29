@@ -14,13 +14,17 @@ import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
+import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
+@Suppress("LongParameterList")
 internal class AttachPaymentViewModel @Inject constructor(
     initialState: AttachPaymentState,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
+    private val navigationManager: NavigationManager,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
     private val logger: Logger
@@ -30,20 +34,24 @@ internal class AttachPaymentViewModel @Inject constructor(
         logErrors()
         suspend {
             val manifest = getManifest()
-            val authSessionId = manifest.activeAuthSession!!.id
+            val authSession = requireNotNull(manifest.activeAuthSession)
             AttachPaymentState.Payload(
                 businessName = manifest.businessName,
-                accountsCount = getAuthorizationSessionAccounts(authSessionId).data.size
+                accountsCount = getAuthorizationSessionAccounts(authSession.id).data.size
             )
         }.execute { copy(payload = it) }
         suspend {
             val manifest = getManifest()
-            val authSessionId = manifest.activeAuthSession!!.id
-            val accounts = getAuthorizationSessionAccounts(authSessionId).data
+            val authSession = requireNotNull(manifest.activeAuthSession)
+            val activeInstitution = requireNotNull(manifest.activeInstitution)
+            val accounts = getAuthorizationSessionAccounts(authSession.id).data
             require(accounts.size == 1)
             val id = accounts.first().linkedAccountId
-            pollAttachPaymentAccount(PaymentAccountParams.LinkedAccount(requireNotNull(id)))
-                .also { goNext(it.nextPane ?: NextPane.SUCCESS) }
+            pollAttachPaymentAccount(
+                allowManualEntry = manifest.allowManualEntry,
+                activeInstitution = activeInstitution,
+                params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
+            ).also { goNext(it.nextPane ?: NextPane.SUCCESS) }
         }.execute { copy(linkPaymentAccount = it) }
     }
 
@@ -55,6 +63,10 @@ internal class AttachPaymentViewModel @Inject constructor(
             logger.error("Error Attaching payment account", it)
         })
     }
+
+    fun onEnterDetailsManually() = navigationManager.navigate(NavigationDirections.manualEntry)
+
+    fun onSelectAnotherBank() = navigationManager.navigate(NavigationDirections.institutionPicker)
 
     companion object : MavericksViewModelFactory<AttachPaymentViewModel, AttachPaymentState> {
 

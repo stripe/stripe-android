@@ -56,7 +56,7 @@ internal fun ManualEntrySuccessScreen(
         microdepositVerificationMethod = microdepositVerificationMethod,
         last4 = last4,
         loading = completeAuthSessionAsync.value is Loading,
-        onCloseClick = parentViewModel::onCloseClick,
+        onCloseClick = parentViewModel::onCloseWithConfirmationClick,
         onDoneClick = viewModel::onSubmit
     )
 }
@@ -85,7 +85,7 @@ internal fun ManualEntrySuccessContent(
         ) {
             Icon(
                 modifier = Modifier.size(40.dp),
-                painter = painterResource(R.drawable.stripe_ic_check),
+                painter = painterResource(R.drawable.stripe_ic_check_circle),
                 contentDescription = null,
                 tint = FinancialConnectionsTheme.colors.textSuccess
             )

@@ -46,7 +46,10 @@ internal class PartnerAuthViewModel @Inject constructor(
         logErrors()
         suspend {
             val manifest = getManifest()
-            val authSession = createAuthorizationSession(manifest.activeInstitution!!)
+            val authSession = createAuthorizationSession(
+                institution = manifest.activeInstitution!!,
+                allowManualEntry = manifest.allowManualEntry
+            )
             Payload(
                 flow = authSession.flow,
                 showPartnerDisclosure = authSession.showPartnerDisclosure ?: false,
@@ -124,7 +127,11 @@ internal class PartnerAuthViewModel @Inject constructor(
             logger.debug("Auth cancelled, cancelling AuthSession")
             cancelAuthorizationSession(authSession.id)
             logger.debug("Session cancelled, creating a new one for same institution")
-            val newSession = createAuthorizationSession(getManifest().activeInstitution!!)
+            val manifest = getManifest()
+            val newSession = createAuthorizationSession(
+                institution = manifest.activeInstitution!!,
+                allowManualEntry = manifest.allowManualEntry
+            )
             goNext(newSession.nextPane)
         }.onFailure {
             logger.error("failed cancelling session after cancelled web flow", it)
@@ -147,6 +154,10 @@ internal class PartnerAuthViewModel @Inject constructor(
             logger.error("failed authorizing session", it)
             setState { copy(authenticationStatus = Fail(it)) }
         }
+    }
+
+    fun onEnterDetailsManuallyClick() {
+        navigationManager.navigate(NavigationDirections.manualEntry)
     }
 
     companion object : MavericksViewModelFactory<PartnerAuthViewModel, PartnerAuthState> {

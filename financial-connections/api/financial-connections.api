@@ -390,6 +390,14 @@ public final class com/stripe/android/financialconnections/domain/CompleteFinanc
 	public static fun newInstance (Lcom/stripe/android/financialconnections/repository/FinancialConnectionsRepository;Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;)Lcom/stripe/android/financialconnections/domain/CompleteFinancialConnectionsSession;
 }
 
+public final class com/stripe/android/financialconnections/domain/FeaturedInstitutions_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/domain/FeaturedInstitutions_Factory;
+	public fun get ()Lcom/stripe/android/financialconnections/domain/FeaturedInstitutions;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/financialconnections/repository/FinancialConnectionsInstitutionsRepository;)Lcom/stripe/android/financialconnections/domain/FeaturedInstitutions;
+}
+
 public final class com/stripe/android/financialconnections/domain/FetchFinancialConnectionsSessionForToken_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/domain/FetchFinancialConnectionsSessionForToken_Factory;
@@ -530,11 +538,11 @@ public final class com/stripe/android/financialconnections/features/accountpicke
 }
 
 public final class com/stripe/android/financialconnections/features/attachpayment/AttachPaymentViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/features/attachpayment/AttachPaymentViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/features/attachpayment/AttachPaymentViewModel_Factory;
 	public fun get ()Lcom/stripe/android/financialconnections/features/attachpayment/AttachPaymentViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/financialconnections/features/attachpayment/AttachPaymentState;Lcom/stripe/android/financialconnections/domain/PollAttachPaymentAccount;Lcom/stripe/android/financialconnections/domain/GetAuthorizationSessionAccounts;Lcom/stripe/android/financialconnections/domain/GetManifest;Lcom/stripe/android/financialconnections/domain/GoNext;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/financialconnections/features/attachpayment/AttachPaymentViewModel;
+	public static fun newInstance (Lcom/stripe/android/financialconnections/features/attachpayment/AttachPaymentState;Lcom/stripe/android/financialconnections/domain/PollAttachPaymentAccount;Lcom/stripe/android/financialconnections/domain/GetAuthorizationSessionAccounts;Lcom/stripe/android/financialconnections/navigation/NavigationManager;Lcom/stripe/android/financialconnections/domain/GetManifest;Lcom/stripe/android/financialconnections/domain/GoNext;Lcom/stripe/android/core/Logger;)Lcom/stripe/android/financialconnections/features/attachpayment/AttachPaymentViewModel;
 }
 
 public final class com/stripe/android/financialconnections/features/attachpayment/ComposableSingletons$AttachPaymentScreenKt {
@@ -573,8 +581,24 @@ public final class com/stripe/android/financialconnections/features/common/Compo
 public final class com/stripe/android/financialconnections/features/common/ComposableSingletons$ErrorContentKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/common/ComposableSingletons$ErrorContentKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function3;
+	public static field lambda-3 Lkotlin/jvm/functions/Function2;
+	public static field lambda-4 Lkotlin/jvm/functions/Function2;
+	public static field lambda-5 Lkotlin/jvm/functions/Function3;
+	public static field lambda-6 Lkotlin/jvm/functions/Function2;
+	public static field lambda-7 Lkotlin/jvm/functions/Function2;
+	public static field lambda-8 Lkotlin/jvm/functions/Function3;
+	public static field lambda-9 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-3$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-4$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-5$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-6$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-7$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-8$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-9$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/financialconnections/features/consent/ComposableSingletons$ConsentScreenKt {
@@ -613,11 +637,11 @@ public final class com/stripe/android/financialconnections/features/institutionp
 }
 
 public final class com/stripe/android/financialconnections/features/institutionpicker/InstitutionPickerViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/features/institutionpicker/InstitutionPickerViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/financialconnections/features/institutionpicker/InstitutionPickerViewModel_Factory;
 	public fun get ()Lcom/stripe/android/financialconnections/features/institutionpicker/InstitutionPickerViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;Lcom/stripe/android/financialconnections/domain/SearchInstitutions;Lcom/stripe/android/financialconnections/domain/GetManifest;Lcom/stripe/android/financialconnections/navigation/NavigationManager;Lcom/stripe/android/financialconnections/domain/UpdateLocalManifest;Lcom/stripe/android/core/Logger;Lcom/stripe/android/financialconnections/features/institutionpicker/InstitutionPickerState;)Lcom/stripe/android/financialconnections/features/institutionpicker/InstitutionPickerViewModel;
+	public static fun newInstance (Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$Configuration;Lcom/stripe/android/financialconnections/domain/SearchInstitutions;Lcom/stripe/android/financialconnections/domain/FeaturedInstitutions;Lcom/stripe/android/financialconnections/domain/GetManifest;Lcom/stripe/android/financialconnections/navigation/NavigationManager;Lcom/stripe/android/financialconnections/domain/UpdateLocalManifest;Lcom/stripe/android/core/Logger;Lcom/stripe/android/financialconnections/features/institutionpicker/InstitutionPickerState;)Lcom/stripe/android/financialconnections/features/institutionpicker/InstitutionPickerViewModel;
 }
 
 public final class com/stripe/android/financialconnections/features/manualentry/ComposableSingletons$ManualEntryScreenKt {
@@ -672,7 +696,7 @@ public final class com/stripe/android/financialconnections/features/partnerauth/
 }
 
 public final class com/stripe/android/financialconnections/features/partnerauth/PartnerAuthScreenKt {
-	public static final fun ErrorContent (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
+	public static final fun ErrorContent (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroidx/compose/runtime/Composer;I)V
 }
 
 public final class com/stripe/android/financialconnections/features/partnerauth/PartnerAuthViewModel_Factory : dagger/internal/Factory {

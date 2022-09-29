@@ -26,6 +26,7 @@ internal class ConsentViewModel @Inject constructor(
 ) : MavericksViewModel<ConsentState>(initialState) {
 
     init {
+        logErrors()
         viewModelScope.launch {
             val manifest = getManifest()
             setState {
@@ -43,6 +44,12 @@ internal class ConsentViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun logErrors() {
+        onAsync(ConsentState::acceptConsent, onFail = {
+            logger.error("Error accepting consent", it)
+        })
     }
 
     fun onContinueClick() {

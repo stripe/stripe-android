@@ -78,8 +78,11 @@ internal class ManualEntryViewModel @Inject constructor(
     fun onSubmit() {
         suspend {
             val state = awaitState()
+            val manifest = getManifest()
             pollAttachPaymentAccount(
-                PaymentAccountParams.BankAccount(
+                allowManualEntry = manifest.allowManualEntry,
+                activeInstitution = requireNotNull(manifest.activeInstitution),
+                params = PaymentAccountParams.BankAccount(
                     routingNumber = requireNotNull(state.routing.first),
                     accountNumber = requireNotNull(state.account.first)
                 )

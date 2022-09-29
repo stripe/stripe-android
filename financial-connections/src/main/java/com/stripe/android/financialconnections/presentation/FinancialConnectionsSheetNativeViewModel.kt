@@ -118,16 +118,19 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
+    fun onCloseWithConfirmationClick() {
+        setState { copy(showCloseDialog = true) }
+    }
+
     fun onCloseClick() {
-        // TODO@carlosmuvi: show close dialog instead of directly closing depending on pane.
-        if (false) {
-            setState { copy(showCloseDialog = true) }
-        } else {
-            close()
-        }
+        close()
     }
 
     fun onCloseConfirm() = close()
+
+    fun onCloseDismiss() {
+        setState { copy(showCloseDialog = false) }
+    }
 
     /**
      * [NavHost] handles back presses except for when backstack is empty, where it delegates

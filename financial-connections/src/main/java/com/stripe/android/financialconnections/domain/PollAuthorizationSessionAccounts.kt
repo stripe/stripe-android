@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
 import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -38,7 +39,8 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
             } catch (@Suppress("SwallowedException") e: StripeException) {
                 throw e.toDomainException(
                     requireNotNull(manifest.activeInstitution),
-                    ConsentTextBuilder.getBusinessName(manifest)
+                    ConsentTextBuilder.getBusinessName(manifest),
+                    manifest.allowManualEntry
                 )
             }
         }
@@ -46,20 +48,25 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
 
     private fun StripeException.toDomainException(
         institution: FinancialConnectionsInstitution,
-        businessName: String?
-    ): StripeException = this.stripeError?.let {
-        return if (it.extraFields?.get("reason") == "no_supported_payment_method_type_accounts_found") {
-            val accountsCount = it.extraFields?.get("total_accounts_count")?.toInt() ?: 0
-            NoSupportedPaymentMethodTypeAccountsException(
-                accountsCount = accountsCount,
+        businessName: String?,
+        allowManualEntry: Boolean
+    ): StripeException =
+        when {
+            stripeError?.extraFields?.get("reason") == "no_supported_payment_method_type_accounts_found" ->
+                NoSupportedPaymentMethodTypeAccountsException(
+                    accountsCount = stripeError?.extraFields?.get("total_accounts_count")?.toInt()
+                        ?: 0,
+                    institution = institution,
+                    stripeException = this,
+                    merchantName = businessName ?: ""
+                )
+
+            else -> NoAccountsAvailableException(
+                allowManualEntry = allowManualEntry,
                 institution = institution,
-                stripeException = this,
-                merchantName = businessName ?: ""
+                stripeException = this
             )
-        } else {
-            this
         }
-    } ?: this
 
     private companion object {
         private const val POLLING_TIME_MS = 2000L

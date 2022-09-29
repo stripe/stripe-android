@@ -47,7 +47,7 @@ internal fun SearchFooter(
             SearchFooterRow(
                 title = stringResource(id = R.string.stripe_institutionpicker_footer_item_spelling),
                 titleColor = FinancialConnectionsTheme.colors.textPrimary,
-                icon = R.drawable.stripe_ic_check_nocircle,
+                icon = R.drawable.stripe_ic_check,
                 iconColor = FinancialConnectionsTheme.colors.textSecondary,
                 iconBackgroundColor = FinancialConnectionsTheme.colors.borderDefault
             )

@@ -46,6 +46,7 @@
     <string name="stripe_error_planned_downtime_title">%1$s is undergoing maintenance</string>
     <string name="stripe_error_planned_downtime_desc">Maintenance is scheduled to end at %1$s. Please select another bank or try again later.</string>
     <string name="stripe_error_cta_select_another_bank">Select another bank</string>
+    <string name="stripe_error_cta_manual_entry">Enter bank details manually</string>
     <string name="stripe_account_picker_loading_title">Retrieving accounts</string>
     <string name="stripe_account_picker_loading_desc">Please wait while we retrieve your accounts</string>
     <string name="stripe_account_picker_select_account">Select your account</string>
@@ -76,6 +77,8 @@
     <string name="stripe_partner_wellsfargo">Wells Fargo</string>
     <string name="stripe_account_picker_error_no_payment_method_title">No checking or savings account available</string>
     <string name="stripe_account_picker_error_no_payment_method_desc">We found %1$s %2$s accounts but you can only link checking or savings to %3$s. Please try selecting another bank.</string>
+    <string name="stripe_account_picker_error_no_account_available_title">There was a problem accessing your %1$s account</string>
+    <string name="stripe_account_picker_error_no_account_available_desc">Please select another bank or try again</string>
     <string name="stripe_manualentry_title">Enter bank account details</string>
     <string name="stripe_manualentry_routing">Routing number</string>
     <string name="stripe_manualentry_account">Account number</string>
@@ -108,5 +111,12 @@
         <item quantity="one">Please wait while your account is linked to this business</item>
         <item quantity="other">Please wait while your accounts are linked to this business</item>
     </plurals>
+    <string name="stripe_attachlinkedpaymentaccount_error_title">Your account number couldn’t be accessed at this time</string>
+    <string name="stripe_attachlinkedpaymentaccount_error_desc">Please enter your bank details manually</string>
+    <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Please enter your bank details manually or select another bank.</string>
+    <string name="stripe_close_dialog_title">Are you sure you want to cancel?</string>
+    <string name="stripe_close_dialog_desc">You haven\'t finished linking your bank account.</string>
+    <string name="stripe_close_dialog_confirm">Yes, cancel</string>
+    <string name="stripe_close_dialog_back">Back</string>
 </resources>
 

@@ -12,6 +12,7 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -30,6 +31,7 @@ import javax.inject.Inject
 internal class InstitutionPickerViewModel @Inject constructor(
     private val configuration: FinancialConnectionsSheet.Configuration,
     private val searchInstitutions: SearchInstitutions,
+    private val featuredInstitutions: FeaturedInstitutions,
     private val getManifest: GetManifest,
     private val navigationManager: NavigationManager,
     private val updateLocalManifest: UpdateLocalManifest,
@@ -44,7 +46,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
         suspend {
             val manifest = getManifest()
             Payload(
-                featuredInstitutions = searchInstitutions(
+                featuredInstitutions = featuredInstitutions(
                     clientSecret = configuration.financialConnectionsSessionClientSecret
                 ),
                 allowManualEntry = kotlin
