@@ -26,8 +26,9 @@ internal abstract class BasePaymentMethodsListFragment(
 ) {
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
+    @VisibleForTesting
+    lateinit var adapter: PaymentOptionsAdapter
     protected lateinit var config: FragmentConfig
-    private lateinit var adapter: PaymentOptionsAdapter
     private var editMenuItem: MenuItem? = null
 
     @VisibleForTesting
@@ -96,6 +97,7 @@ internal abstract class BasePaymentMethodsListFragment(
                 color = Color(appearance.getColors(context.isSystemDarkTheme()).appBarIcon),
                 fontFamily = appearance.typography.fontResId
             )
+            isVisible = adapter.hasSavedItems()
         }
     }
 
@@ -163,8 +165,12 @@ internal abstract class BasePaymentMethodsListFragment(
         sheetViewModel.updateSelection(paymentSelection)
     }
 
-    private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) {
+    @VisibleForTesting
+    fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) {
         sheetViewModel.removePaymentMethod(item.paymentMethod)
+        if (!adapter.hasSavedItems()) {
+            isEditing = false
+        }
     }
 
     private companion object {

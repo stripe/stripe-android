@@ -424,6 +424,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
         launch {
             paymentMethod.id?.let { paymentMethodId ->
+                if (
+                    (selection.value as? PaymentSelection.Saved)
+                        ?.paymentMethod?.id == paymentMethodId
+                ) {
+                    _selection.value = null
+                }
+
                 savedStateHandle[SAVE_PAYMENT_METHODS] = _paymentMethods.value?.filter {
                     it.id != paymentMethodId
                 }
@@ -455,7 +462,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      */
     abstract fun setupLink(stripeIntent: StripeIntent)
 
-    protected fun createLinkConfiguration(
+    protected suspend fun createLinkConfiguration(
         stripeIntent: StripeIntent
     ): LinkPaymentLauncher.Configuration {
         val shippingDetails: AddressDetails? = config?.shippingDetails
@@ -469,10 +476,16 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         } else {
             null
         }
+        val customerEmail = config?.defaultBillingDetails?.email ?: config?.customer?.let {
+            customerRepository.retrieveCustomer(
+                it.id,
+                it.ephemeralKeySecret
+            )
+        }?.email
         return LinkPaymentLauncher.Configuration(
             stripeIntent = stripeIntent,
             merchantName = merchantName,
-            customerEmail = config?.defaultBillingDetails?.email,
+            customerEmail = customerEmail,
             customerPhone = customerPhone,
             customerName = config?.defaultBillingDetails?.name,
             shippingValues = shippingAddress

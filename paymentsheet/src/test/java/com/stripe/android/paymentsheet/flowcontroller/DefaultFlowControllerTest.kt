@@ -988,6 +988,7 @@ internal class DefaultFlowControllerTest {
         activityResultCaller,
         INJECTOR_KEY,
         flowControllerInitializer,
+        mock(),
         eventReporter,
         viewModel,
         paymentLauncherAssistedFactory,

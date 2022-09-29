@@ -40,7 +40,8 @@ fun FormUI(
     enabledFlow: Flow<Boolean>,
     elementsFlow: Flow<List<FormElement>?>,
     lastTextFieldIdentifierFlow: Flow<IdentifierSpec?>,
-    loadingComposable: @Composable ColumnScope.() -> Unit
+    loadingComposable: @Composable ColumnScope.() -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val hiddenIdentifiers by hiddenIdentifiersFlow.collectAsState(emptyList())
     val enabled by enabledFlow.collectAsState(true)
@@ -48,7 +49,7 @@ fun FormUI(
     val lastTextFieldIdentifier by lastTextFieldIdentifierFlow.collectAsState(null)
 
     Column(
-        modifier = Modifier.fillMaxWidth(1f)
+        modifier = modifier.fillMaxWidth(1f)
     ) {
         elements?.let {
             it.forEachIndexed { _, element ->

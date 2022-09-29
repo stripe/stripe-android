@@ -382,7 +382,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         clientSecret: String,
         paymentIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
     ): PaymentIntent? {
         return null
     }
@@ -391,7 +392,8 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         clientSecret: String,
         setupIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
     ): SetupIntent? {
         return null
     }
