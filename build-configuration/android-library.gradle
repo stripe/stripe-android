@@ -64,4 +64,11 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
 }
