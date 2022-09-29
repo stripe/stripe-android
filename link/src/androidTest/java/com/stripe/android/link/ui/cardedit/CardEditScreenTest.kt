@@ -106,7 +106,7 @@ internal class CardEditScreenTest {
         testTag = DEFAULT_PAYMENT_METHOD_CHECKBOX_TAG
     )
 
-    private fun onSetAsDefaultLabel() = composeTestRule.onNodeWithText("Set as default payment")
+    private fun onSetAsDefaultLabel() = composeTestRule.onNodeWithText("Set as default payment method")
 
     private fun onUpdateCardButton() = composeTestRule.onNode(
         matcher = hasText("Update card").and(hasParent(hasClickAction())),
