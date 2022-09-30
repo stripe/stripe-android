@@ -47,18 +47,17 @@ class LinkPaymentLauncherTest {
         runTest {
             launch {
                 val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED
-                linkPaymentLauncher.setup(
-                    configuration = LinkPaymentLauncher.Configuration(
+                linkPaymentLauncher.present(
+                    LinkPaymentLauncher.Configuration(
                         stripeIntent,
                         MERCHANT_NAME,
+                        CUSTOMER_NAME,
                         CUSTOMER_EMAIL,
                         CUSTOMER_PHONE,
-                        CUSTOMER_NAME,
                         null
                     ),
-                    coroutineScope = this
+                    mockHostActivityLauncher
                 )
-                linkPaymentLauncher.present(mockHostActivityLauncher)
 
                 verify(mockHostActivityLauncher).launch(
                     argWhere { arg ->

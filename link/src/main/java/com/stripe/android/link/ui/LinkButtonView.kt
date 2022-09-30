@@ -57,7 +57,7 @@ private fun LinkButton() {
 private fun LinkButton(
     linkPaymentLauncher: LinkPaymentLauncher,
     enabled: Boolean,
-    onClick: () -> Unit
+    onClick: (LinkPaymentLauncher.Configuration) -> Unit
 ) {
     linkPaymentLauncher.component?.let { component ->
         val account = component.linkAccountManager.linkAccount.collectAsState()
@@ -65,7 +65,9 @@ private fun LinkButton(
         LinkButton(
             enabled = enabled,
             email = account.value?.email,
-            onClick = onClick
+            onClick = {
+                onClick(component.configuration)
+            }
         )
     }
 }
@@ -150,7 +152,7 @@ class LinkButtonView @JvmOverloads constructor(
         private set
 
     var linkPaymentLauncher: LinkPaymentLauncher? = null
-    var onClick by mutableStateOf({})
+    var onClick by mutableStateOf<(LinkPaymentLauncher.Configuration) -> Unit>({})
     private var isEnabledState by mutableStateOf(isEnabled)
 
     override fun setEnabled(enabled: Boolean) {

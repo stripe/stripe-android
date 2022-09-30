@@ -475,25 +475,24 @@ internal class DefaultFlowController @Inject internal constructor(
                     it.ephemeralKeySecret
                 )?.email
             }
-            val accountStatus = linkLauncher.getAccountStatusFlow(
-                configuration = LinkPaymentLauncher.Configuration(
-                    stripeIntent = initData.stripeIntent,
-                    merchantName = config.merchantDisplayName,
-                    customerEmail = customerEmail,
-                    customerPhone = customerPhone,
-                    customerName = config.defaultBillingDetails?.name,
-                    shippingValues = shippingAddress
-                )
-            ).first()
+            val linkConfig = LinkPaymentLauncher.Configuration(
+                stripeIntent = initData.stripeIntent,
+                merchantName = config.merchantDisplayName,
+                customerEmail = customerEmail,
+                customerPhone = customerPhone,
+                customerName = config.defaultBillingDetails?.name,
+                shippingValues = shippingAddress
+            )
+            val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
             // If a returning user is paying with a new card inline, launch Link to complete payment
             (paymentSelection as? PaymentSelection.New.LinkInline)?.takeIf {
                 accountStatus == AccountStatus.Verified
             }?.linkPaymentDetails?.originalParams?.let {
-                linkLauncher.present(linkActivityResultLauncher, it)
+                linkLauncher.present(linkConfig, linkActivityResultLauncher, it)
             } ?: run {
                 if (paymentSelection is PaymentSelection.Link) {
                     // User selected Link as the payment method, not inline
-                    linkLauncher.present(linkActivityResultLauncher)
+                    linkLauncher.present(linkConfig, linkActivityResultLauncher)
                 } else {
                     // New user paying inline, complete without launching Link
                     confirmPaymentSelection(paymentSelection, initData)

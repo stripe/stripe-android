@@ -446,7 +446,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }
                 val accountStatus = linkLauncher.getAccountStatusFlow(configuration).first()
                 when (accountStatus) {
-                    AccountStatus.Verified -> launchLink(launchedDirectly = true)
+                    AccountStatus.Verified -> launchLink(configuration, launchedDirectly = true)
                     AccountStatus.VerificationStarted,
                     AccountStatus.NeedsVerification -> {
                         linkVerificationCallback = { success ->
@@ -454,7 +454,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             _showLinkVerificationDialog.value = false
 
                             if (success) {
-                                launchLink(launchedDirectly = true)
+                                launchLink(configuration, launchedDirectly = true)
                             }
                         }
                         _showLinkVerificationDialog.value = true
@@ -475,7 +475,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         isReturningUser: Boolean
     ) {
         if (isReturningUser) {
-            launchLink(launchedDirectly = false, paymentMethodCreateParams)
+            launchLink(configuration, launchedDirectly = false, paymentMethodCreateParams)
         } else {
             super.completeLinkInlinePayment(
                 configuration,
@@ -486,12 +486,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun launchLink(
+        configuration: LinkPaymentLauncher.Configuration,
         launchedDirectly: Boolean,
         paymentMethodCreateParams: PaymentMethodCreateParams? = null
     ) {
         launchedLinkDirectly = launchedDirectly
         linkActivityResultLauncher?.let { activityResultLauncher ->
             linkLauncher.present(
+                configuration,
                 activityResultLauncher,
                 paymentMethodCreateParams
             )

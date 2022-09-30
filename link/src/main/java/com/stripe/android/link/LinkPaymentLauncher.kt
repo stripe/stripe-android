@@ -87,18 +87,20 @@ class LinkPaymentLauncher @Inject internal constructor(
         getLinkPaymentLauncherComponent(configuration).linkAccountManager.accountStatus
 
     /**
-     * Launch the Link UI to process the Stripe Intent sent in [setup].
+     * Launch the Link UI to process a payment.
      *
+     * @param configuration The payment and customer settings
+     * @param activityResultLauncher Launcher that will receive the payment result.
      * @param prefilledNewCardParams The card information prefilled by the user. If non null, Link
      *  will launch into adding a new card, with the card information pre-filled.
      */
     fun present(
+        configuration: Configuration,
         activityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>,
         prefilledNewCardParams: PaymentMethodCreateParams? = null
     ) {
-        val component = requireNotNull(component) { "Must call setup before presenting" }
         val args = LinkActivityContract.Args(
-            component.configuration,
+            configuration,
             prefilledNewCardParams,
             LinkActivityContract.Args.InjectionParams(
                 injectorKey,
@@ -108,7 +110,7 @@ class LinkPaymentLauncher @Inject internal constructor(
                 stripeAccountIdProvider()
             )
         )
-        buildLinkComponent(component, args)
+        buildLinkComponent(getLinkPaymentLauncherComponent(configuration), args)
         activityResultLauncher.launch(args)
     }
 
