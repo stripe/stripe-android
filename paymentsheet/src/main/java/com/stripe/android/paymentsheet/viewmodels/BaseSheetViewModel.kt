@@ -466,11 +466,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      */
     abstract fun setupLink(stripeIntent: StripeIntent)
 
-    suspend fun getLinkAccountStatus(): AccountStatus? =
-        linkConfiguration.value?.let {
-            linkLauncher.getAccountStatusFlow(it).first()
-        }
-
     protected suspend fun createLinkConfiguration(
         stripeIntent: StripeIntent
     ): LinkPaymentLauncher.Configuration {
@@ -501,18 +496,17 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         )
     }
 
-    fun payWithLinkInline(userInput: UserInput) {
+    fun payWithLinkInline(configuration: LinkPaymentLauncher.Configuration, userInput: UserInput) {
         (selection.value as? PaymentSelection.New.Card)?.paymentMethodCreateParams?.let { params ->
             savedStateHandle[SAVE_PROCESSING] = true
             updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
 
             viewModelScope.launch {
-                val linkConfig = requireNotNull(linkConfiguration.value)
-                when (linkLauncher.getAccountStatusFlow(linkConfig).first()) {
+                when (linkLauncher.getAccountStatusFlow(configuration).first()) {
                     AccountStatus.Verified -> {
                         activeLinkSession.value = true
                         completeLinkInlinePayment(
-                            linkConfig,
+                            configuration,
                             params,
                             userInput is UserInput.SignIn
                         )
@@ -526,7 +520,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
                             if (success) {
                                 completeLinkInlinePayment(
-                                    linkConfig,
+                                    configuration,
                                     params,
                                     userInput is UserInput.SignIn
                                 )
@@ -539,10 +533,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     }
                     AccountStatus.SignedOut -> {
                         activeLinkSession.value = false
-                        linkLauncher.signInWithUserInput(linkConfig, userInput).fold(
+                        linkLauncher.signInWithUserInput(configuration, userInput).fold(
                             onSuccess = {
                                 // If successful, the account was fetched or created, so try again
-                                payWithLinkInline(userInput)
+                                payWithLinkInline(configuration, userInput)
                             },
                             onFailure = {
                                 onError(it.localizedMessage)
