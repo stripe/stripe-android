@@ -147,7 +147,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     logger.error("Error completing session before closing", it)
                 }
                 .onSuccess {
-                    FinancialConnectionsSheetActivityResult.Completed()
                     setState { copy(viewEffect = Finish(Canceled)) }
                 }
         }
