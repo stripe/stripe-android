@@ -90,8 +90,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val isResourceRepositoryReady: LiveData<Boolean?> =
         _isResourceRepositoryReady.distinctUntilChanged()
 
-    protected val _isLinkEnabled = MutableLiveData<Boolean>()
-    internal val isLinkEnabled: LiveData<Boolean> = _isLinkEnabled.distinctUntilChanged()
+    @VisibleForTesting
+    internal val _isLinkEnabled = MutableLiveData<Boolean>()
+    internal val isLinkEnabled: LiveData<Boolean> = _isLinkEnabled
 
     internal val activeLinkSession = MutableLiveData(false)
 
@@ -531,7 +532,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         }
                         _showLinkVerificationDialog.value = true
                     }
-                    AccountStatus.SignedOut -> {
+                    AccountStatus.SignedOut,
+                    AccountStatus.Error -> {
                         activeLinkSession.value = false
                         linkLauncher.signInWithUserInput(configuration, userInput).fold(
                             onSuccess = {

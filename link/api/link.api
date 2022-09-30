@@ -309,6 +309,7 @@ public final class com/stripe/android/link/injection/NamedConstantsKt {
 }
 
 public final class com/stripe/android/link/model/AccountStatus : java/lang/Enum {
+	public static final field Error Lcom/stripe/android/link/model/AccountStatus;
 	public static final field NeedsVerification Lcom/stripe/android/link/model/AccountStatus;
 	public static final field SignedOut Lcom/stripe/android/link/model/AccountStatus;
 	public static final field VerificationStarted Lcom/stripe/android/link/model/AccountStatus;
