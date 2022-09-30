@@ -19,7 +19,7 @@ sealed class AuthActivityStarterHost {
         requestCode: Int
     )
 
-    internal abstract val statusBarColor: Int?
+    abstract val statusBarColor: Int?
 
     internal class ActivityHost(
         val activity: ComponentActivity,
