@@ -4,7 +4,6 @@ import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.PersistState
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 
 /**
@@ -14,7 +13,7 @@ internal data class FinancialConnectionsSheetState(
     val initialArgs: FinancialConnectionsSheetActivityArgs,
     val activityRecreated: Boolean = false,
     @PersistState val manifest: FinancialConnectionsSessionManifest? = null,
-    @PersistState val authFlowActive: Boolean = false,
+    @PersistState val webAuthFlowActive: Boolean = false,
     val viewEffect: FinancialConnectionsSheetViewEffect? = null
 ) : MavericksState {
 
@@ -52,7 +51,7 @@ internal sealed class FinancialConnectionsSheetViewEffect {
     ) : FinancialConnectionsSheetViewEffect()
 
     /**
-     * Finish [FinancialConnectionsSheetActivity] with a given [FinancialConnectionsSheetForDataContract.Result]
+     * Finish [FinancialConnectionsSheetActivity] with the given FinancialConnectionsSheetActivityResult]
      */
     data class FinishWithResult(
         val result: FinancialConnectionsSheetActivityResult

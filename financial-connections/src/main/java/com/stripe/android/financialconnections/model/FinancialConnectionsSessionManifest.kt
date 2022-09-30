@@ -1,3 +1,5 @@
+@file:SuppressWarnings("unused")
+
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
@@ -42,7 +44,6 @@ import kotlinx.serialization.Serializable
  * @param modalCustomization
  * @param paymentMethodType
  * @param successUrl
- * @param theme
  */
 @Suppress("MaxLineLength")
 @Serializable
@@ -146,7 +147,13 @@ internal data class FinancialConnectionsSessionManifest(
     val paymentMethodType: SupportedPaymentMethodTypes? = null,
 
     @SerialName(value = "success_url")
-    val successUrl: String
+    val successUrl: String,
+
+    /**
+     * TODO@carlosmuvi mock manifest field to simulate experiment-based authFlow.
+     */
+    @kotlinx.serialization.Transient
+    val nativeAuthFlowEnabled: Boolean = true
 
 ) : Parcelable {
 
@@ -213,6 +220,7 @@ internal data class FinancialConnectionsSessionManifest(
      * OPAL,PAYMENT_FLOWS,RESERVE_APPEALS,STANDARD_ONBOARDING,STRIPE_CARD,SUPPORT_SITE
      */
     @Serializable
+    @Suppress("unused")
     enum class Product(val value: String) {
         @SerialName(value = "billpay")
         BILLPAY("billpay"),
@@ -332,7 +340,7 @@ internal data class FinancialConnectionsSessionManifest(
     ) : Parcelable {
 
         @Serializable
-        enum class Flow(val value: kotlin.String?) {
+        enum class Flow(val value: String?) {
             @SerialName("direct")
             DIRECT("direct"),
 

@@ -48,7 +48,9 @@ class FinancialConnectionsSheetViewModelTest {
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
 
-    private val manifest = sessionManifest()
+    private val manifest = sessionManifest().copy(
+        nativeAuthFlowEnabled = false
+    )
 
     private val fetchFinancialConnectionsSession = mock<FetchFinancialConnectionsSession>()
     private val fetchFinancialConnectionsSessionForToken =
@@ -116,7 +118,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isFalse()
+                assertThat(it.webAuthFlowActive).isFalse()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(
                     Completed(linkedAccountId = linkedAccountId)
@@ -129,7 +131,6 @@ class FinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - on Link flows with invalid account, error is thrown`() {
         runTest {
             // Given
-            val linkedAccountId = "1234"
             whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
             val viewModel = createViewModel(
                 defaultInitialState.copy(initialArgs = ForLink(configuration))
@@ -181,7 +182,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isFalse()
+                assertThat(it.webAuthFlowActive).isFalse()
                 assertThat(it.viewEffect).isEqualTo(FinishWithResult(Canceled))
             }
         }
@@ -199,7 +200,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isFalse()
+                assertThat(it.webAuthFlowActive).isFalse()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isInstanceOf(Failed::class.java)
             }
@@ -221,7 +222,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isFalse()
+                assertThat(it.webAuthFlowActive).isFalse()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(
                     Completed(financialConnectionsSession = expectedSession)
@@ -244,7 +245,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isFalse()
+                assertThat(it.webAuthFlowActive).isFalse()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Failed(apiException))
             }
@@ -264,7 +265,7 @@ class FinancialConnectionsSheetViewModelTest {
             // Then
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isFalse()
+                assertThat(it.webAuthFlowActive).isFalse()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Failed(APIException()))
             }
@@ -283,7 +284,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isTrue()
+                assertThat(it.webAuthFlowActive).isTrue()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
             }
@@ -297,7 +298,7 @@ class FinancialConnectionsSheetViewModelTest {
             val viewModel = createViewModel(
                 defaultInitialState.copy(
                     manifest = manifest,
-                    authFlowActive = true
+                    webAuthFlowActive = true
                 )
             )
 
@@ -309,7 +310,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isTrue()
+                assertThat(it.webAuthFlowActive).isTrue()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
             }
