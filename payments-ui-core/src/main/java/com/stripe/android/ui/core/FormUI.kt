@@ -36,18 +36,38 @@ import kotlinx.coroutines.flow.Flow
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun FormUI(
-    hiddenIdentifiersFlow: Flow<List<IdentifierSpec>>,
+    hiddenIdentifiersFlow: Flow<Set<IdentifierSpec>>,
     enabledFlow: Flow<Boolean>,
     elementsFlow: Flow<List<FormElement>?>,
     lastTextFieldIdentifierFlow: Flow<IdentifierSpec?>,
     loadingComposable: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val hiddenIdentifiers by hiddenIdentifiersFlow.collectAsState(emptyList())
+    val hiddenIdentifiers by hiddenIdentifiersFlow.collectAsState(emptySet())
     val enabled by enabledFlow.collectAsState(true)
     val elements by elementsFlow.collectAsState(null)
     val lastTextFieldIdentifier by lastTextFieldIdentifierFlow.collectAsState(null)
 
+    FormUI(
+        hiddenIdentifiers = hiddenIdentifiers,
+        enabled = enabled,
+        elements = elements,
+        lastTextFieldIdentifier = lastTextFieldIdentifier,
+        loadingComposable = loadingComposable,
+        modifier = modifier
+    )
+}
+
+@Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun FormUI(
+    hiddenIdentifiers: Set<IdentifierSpec>,
+    enabled: Boolean,
+    elements: List<FormElement>?,
+    lastTextFieldIdentifier: IdentifierSpec?,
+    loadingComposable: @Composable ColumnScope.() -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier.fillMaxWidth(1f)
     ) {

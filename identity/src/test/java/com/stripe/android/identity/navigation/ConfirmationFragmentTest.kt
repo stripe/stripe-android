@@ -1,11 +1,10 @@
 package com.stripe.android.identity.navigation
 
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
-import com.google.common.truth.Truth.assertThat
-import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
@@ -13,7 +12,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONFIRMATION
-import com.stripe.android.identity.databinding.ConfirmationFragmentBinding
+import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentTextPage
 import com.stripe.android.identity.viewModelFactoryFor
@@ -22,14 +21,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.KArgumentCaptor
-import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -39,6 +33,7 @@ import org.robolectric.RobolectricTestRunner
 class ConfirmationFragmentTest {
     private val mockVerificationFlowFinishable = mock<VerificationFlowFinishable>()
     private val testDispatcher = UnconfinedTestDispatcher()
+    private val verificationPageLiveData = MutableLiveData<Resource<VerificationPage>>()
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { identityAnalyticsRequestFactory }.thenReturn(
@@ -51,47 +46,28 @@ class ConfirmationFragmentTest {
         on { workContext } doReturn testDispatcher
         on { screenTracker } doReturn mock()
         on { analyticsState } doReturn mock()
+
+        on { verificationPage } doReturn verificationPageLiveData
     }
 
-    private val verificationPage = mock<VerificationPage>().also {
-        whenever(it.success).thenReturn(
+    private val verificationPage = mock<VerificationPage>()
+
+    private fun setUpSuccessVerificationPage() {
+        whenever(verificationPage.success).thenReturn(
             VerificationPageStaticContentTextPage(
                 body = CONFIRMATION_BODY,
                 buttonText = CONFIRMATION_BUTTON_TEXT,
                 title = CONFIRMATION_TITLE
             )
         )
-    }
-
-    private fun setUpSuccessVerificationPage() {
-        val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
-        verify(
-            mockIdentityViewModel,
-            times(1)
-        ).observeForVerificationPage(
-            any(),
-            successCaptor.capture(),
-            any()
-        )
-        successCaptor.lastValue(verificationPage)
-    }
-
-    private fun setUpErrorVerificationPage() {
-        val failureCaptor: KArgumentCaptor<(Throwable?) -> Unit> = argumentCaptor()
-        verify(
-            mockIdentityViewModel
-        ).observeForVerificationPage(
-            any(),
-            any(),
-            failureCaptor.capture()
-        )
-        failureCaptor.firstValue(mock())
+        verificationPageLiveData.postValue(Resource.success(verificationPage))
     }
 
     @Test
-    fun `when verification page is available UI is bound correctly`() {
-        launchConfirmationFragment { binding, _ ->
-            setUpSuccessVerificationPage()
+    fun `when verification page is available analytics is sent and screen is tracked`() {
+        setUpSuccessVerificationPage()
+
+        launchConfirmationFragment { _ ->
 
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
@@ -99,37 +75,11 @@ class ConfirmationFragmentTest {
                         (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_CONFIRMATION
                 }
             )
-            assertThat(binding.titleText.text).isEqualTo(CONFIRMATION_TITLE)
-            assertThat(binding.contentText.text.toString()).isEqualTo(CONFIRMATION_BODY)
-            assertThat(binding.kontinue.text).isEqualTo(CONFIRMATION_BUTTON_TEXT)
-        }
-    }
-
-    @Test
-    fun `when finish button clicked then finish with completed`() {
-        launchConfirmationFragment { binding, _ ->
-            setUpSuccessVerificationPage()
-            binding.kontinue.callOnClick()
-
-            verify(mockIdentityViewModel).sendSucceededAnalyticsRequestForNative()
-            verify(mockVerificationFlowFinishable).finishWithResult(
-                eq(IdentityVerificationSheet.VerificationFlowResult.Completed)
-            )
-        }
-    }
-
-    @Test
-    fun `when verification page is not available navigates to error`() {
-        launchConfirmationFragment { _, navController ->
-            setUpErrorVerificationPage()
-
-            assertThat(navController.currentDestination?.id)
-                .isEqualTo(R.id.errorFragment)
         }
     }
 
     private fun launchConfirmationFragment(
-        testBlock: (binding: ConfirmationFragmentBinding, navController: TestNavHostController) -> Unit
+        testBlock: (navController: TestNavHostController) -> Unit
     ) = launchFragmentInContainer(
         themeResId = R.style.Theme_MaterialComponents
     ) {
@@ -150,7 +100,7 @@ class ConfirmationFragmentTest {
             navController
         )
 
-        testBlock(ConfirmationFragmentBinding.bind(it.requireView()), navController)
+        testBlock(navController)
     }
 
     private companion object {

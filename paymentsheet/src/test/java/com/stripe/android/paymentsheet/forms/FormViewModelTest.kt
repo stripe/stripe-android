@@ -205,7 +205,7 @@ internal class FormViewModelTest {
             transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
         )
 
-        val values = mutableListOf<List<IdentifierSpec>>()
+        val values = mutableListOf<Set<IdentifierSpec>>()
         formViewModel.hiddenIdentifiers.asLiveData()
             .observeForever {
                 values.add(it)
@@ -216,7 +216,7 @@ internal class FormViewModelTest {
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-        assertThat(values[1][0]).isEqualTo(
+        assertThat(values[1]).containsExactly(
             IdentifierSpec.SaveForFutureUse
         )
     }
@@ -266,7 +266,7 @@ internal class FormViewModelTest {
             transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
         )
 
-        formViewModel.addHiddenIdentifiers(listOf(IdentifierSpec.Email))
+        formViewModel.addHiddenIdentifiers(setOf(IdentifierSpec.Email))
 
         // Verify formFieldValues does not contain email
         assertThat(formViewModel.lastTextFieldIdentifier.first()?.v1).isEqualTo(
@@ -305,7 +305,7 @@ internal class FormViewModelTest {
             formViewModel.completeFormValues.first()?.fieldValuePairs
         ).containsKey(IdentifierSpec.Email)
 
-        formViewModel.addHiddenIdentifiers(listOf(IdentifierSpec.Email))
+        formViewModel.addHiddenIdentifiers(setOf(IdentifierSpec.Email))
 
         // Verify formFieldValues does not contain email
         assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs)
@@ -342,7 +342,7 @@ internal class FormViewModelTest {
         // Verify formFieldValues is null because the email is required and invalid
         assertThat(formViewModel.completeFormValues.first()).isNull()
 
-        formViewModel.addHiddenIdentifiers(listOf(IdentifierSpec.Email))
+        formViewModel.addHiddenIdentifiers(setOf(IdentifierSpec.Email))
 
         // Verify formFieldValues is not null even though the card number is invalid
         // (because it is not required)

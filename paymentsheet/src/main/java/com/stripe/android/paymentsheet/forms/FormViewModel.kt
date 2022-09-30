@@ -162,17 +162,17 @@ internal class FormViewModel @Inject internal constructor(
                 ?.filterIsInstance<CardBillingAddressElement>()
                 ?.firstOrNull()
         }
-    private var externalHiddenIdentifiers = MutableStateFlow(emptyList<IdentifierSpec>())
+    private var externalHiddenIdentifiers = MutableStateFlow(emptySet<IdentifierSpec>())
 
     @VisibleForTesting
-    internal fun addHiddenIdentifiers(identifierSpecs: List<IdentifierSpec>) {
+    internal fun addHiddenIdentifiers(identifierSpecs: Set<IdentifierSpec>) {
         externalHiddenIdentifiers.value = identifierSpecs
     }
 
     internal val hiddenIdentifiers = combine(
         saveForFutureUseVisible,
         cardBillingElement.map {
-            it?.hiddenIdentifiers ?: flowOf(emptyList())
+            it?.hiddenIdentifiers ?: flowOf(emptySet())
         }.flattenConcat(),
         externalHiddenIdentifiers
     ) { showFutureUse, cardBillingIdentifiers, saveFutureUseIdentifiers ->

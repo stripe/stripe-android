@@ -18,7 +18,7 @@ import com.stripe.android.ui.core.paymentsShapes
 fun SectionElementUI(
     enabled: Boolean,
     element: SectionElement,
-    hiddenIdentifiers: List<IdentifierSpec>,
+    hiddenIdentifiers: Set<IdentifierSpec>,
     lastTextFieldIdentifier: IdentifierSpec?
 ) {
     if (!hiddenIdentifiers.contains(element.identifier)) {
