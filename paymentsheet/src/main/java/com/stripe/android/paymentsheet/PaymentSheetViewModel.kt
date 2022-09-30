@@ -152,7 +152,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
 
-    private var launchedLinkDirectly: Boolean = false
+    @VisibleForTesting
+    internal var launchedLinkDirectly: Boolean = false
 
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
@@ -459,10 +460,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         }
                         _showLinkVerificationDialog.value = true
                     }
-                    AccountStatus.SignedOut -> {}
+                    AccountStatus.SignedOut,
+                    AccountStatus.Error -> {}
                 }
                 activeLinkSession.value = accountStatus == AccountStatus.Verified
-                _isLinkEnabled.value = true
+                _isLinkEnabled.value = accountStatus != AccountStatus.Error
             }
         } else {
             _isLinkEnabled.value = false

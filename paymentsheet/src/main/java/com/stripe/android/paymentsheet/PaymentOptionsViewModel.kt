@@ -181,10 +181,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
                         // If account exists, select link by default
                         savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
                     }
-                    AccountStatus.SignedOut -> {}
+                    AccountStatus.SignedOut,
+                    AccountStatus.Error -> {}
                 }
                 activeLinkSession.value = accountStatus == AccountStatus.Verified
-                _isLinkEnabled.value = true
+                _isLinkEnabled.value = accountStatus != AccountStatus.Error
             }
         } else {
             _isLinkEnabled.value = false
