@@ -19,11 +19,11 @@
     <ID>FunctionNaming:LinkAppBar.kt$@Preview @Composable private fun LinkAppBar_ChildScreen_NoEmail()</ID>
     <ID>FunctionNaming:LinkAppBar.kt$@Preview @Composable private fun LinkAppBar_NoEmail()</ID>
     <ID>FunctionNaming:LinkButtonView.kt$@Composable private fun LinkButton( enabled: Boolean, email: String?, onClick: () -> Unit )</ID>
-    <ID>FunctionNaming:LinkButtonView.kt$@Composable private fun LinkButton( linkPaymentLauncher: LinkPaymentLauncher, enabled: Boolean, onClick: () -> Unit )</ID>
+    <ID>FunctionNaming:LinkButtonView.kt$@Composable private fun LinkButton( linkPaymentLauncher: LinkPaymentLauncher, enabled: Boolean, onClick: (LinkPaymentLauncher.Configuration) -> Unit )</ID>
     <ID>FunctionNaming:LinkButtonView.kt$@Preview @Composable private fun LinkButton()</ID>
     <ID>FunctionNaming:LinkInlineSignup.kt$@Composable internal fun LinkInlineSignup( merchantName: String, emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, signUpState: SignUpState, enabled: Boolean, expanded: Boolean, requiresNameCollection: Boolean, errorMessage: ErrorMessage?, toggleExpanded: () -> Unit, modifier: Modifier = Modifier )</ID>
     <ID>FunctionNaming:LinkInlineSignup.kt$@Preview @Composable private fun Preview()</ID>
-    <ID>FunctionNaming:LinkInlineSignup.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) @OptIn(ExperimentalComposeUiApi::class) @Composable fun LinkInlineSignup( linkPaymentLauncher: LinkPaymentLauncher, enabled: Boolean, onStateChanged: (InlineSignupViewState) -> Unit, modifier: Modifier = Modifier )</ID>
+    <ID>FunctionNaming:LinkInlineSignup.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) @OptIn(ExperimentalComposeUiApi::class) @Composable fun LinkInlineSignup( linkPaymentLauncher: LinkPaymentLauncher, enabled: Boolean, onStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit, modifier: Modifier = Modifier )</ID>
     <ID>FunctionNaming:LinkLogoutSheet.kt$@Composable internal fun LinkLogoutSheet( onLogoutClick: () -> Unit, onCancelClick: () -> Unit )</ID>
     <ID>FunctionNaming:LinkMenu.kt$@Composable internal fun &lt;T : LinkMenuItem> LinkMenu( items: List&lt;T>, onItemPress: (T) -> Unit )</ID>
     <ID>FunctionNaming:LinkMenu.kt$@Composable private fun &lt;T : LinkMenuItem> LinkBottomSheetRow( item: T, modifier: Modifier = Modifier )</ID>
@@ -114,7 +114,6 @@
     <ID>MatchingDeclarationName:WalletPaymentMethodMenu.kt$WalletPaymentMethodMenuItem : LinkMenuItem</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$val d = delegate ?: throw IllegalStateException("Cannot run onActivity since the activity hasn't been launched.")</ID>
-    <ID>MaxLineLength:LinkPaymentLauncherTest.kt$LinkPaymentLauncherTest$arg.injectionParams.injectorKey == LinkPaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get()</ID>
     <ID>MaxLineLength:StripeIntentFixtures.kt$StripeIntentFixtures$url</ID>
     <ID>MayBeConst:LinkPaymentLauncher.kt$LinkPaymentLauncher.Companion$val LINK_ENABLED = false</ID>
     <ID>TooManyFunctions:DefaultLinkEventsReporter.kt$DefaultLinkEventsReporter : LinkEventsReporter</ID>
@@ -128,7 +127,6 @@
     <ID>TopLevelPropertyNaming:PrimaryButton.kt$internal const val completedIconTestTag = "CompletedIcon"</ID>
     <ID>TopLevelPropertyNaming:PrimaryButton.kt$internal const val progressIndicatorTestTag = "CircularProgressIndicator"</ID>
     <ID>UnnecessaryAbstractClass:LinkComponent.kt$LinkComponent$LinkComponent</ID>
-    <ID>UnnecessaryAbstractClass:LinkPaymentLauncherComponent.kt$LinkPaymentLauncherComponent$LinkPaymentLauncherComponent</ID>
     <ID>UnusedPrivateMember:ErrorText.kt$@Preview @Composable private fun ErrorTextPreview()</ID>
     <ID>UnusedPrivateMember:LinkAppBar.kt$@Preview @Composable private fun LinkAppBarPreview()</ID>
     <ID>UnusedPrivateMember:LinkAppBar.kt$@Preview @Composable private fun LinkAppBar_ChildScreen()</ID>

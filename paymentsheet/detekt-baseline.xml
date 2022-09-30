@@ -36,15 +36,6 @@
     <ID>FunctionNaming:USBankAccountFormFragment.kt$USBankAccountFormFragment$@Composable private fun VerifyWithMicrodepositsScreen( screenState: USBankAccountFormScreenState.VerifyWithMicrodeposits )</ID>
     <ID>FunctionOnlyReturningConstant:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput.Companion$fun toCsvHeader()</ID>
     <ID>FunctionOnlyReturningConstant:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.TestOutput.Companion$fun toCsvHeader()</ID>
-    <ID>ImportOrdering:com.stripe.android.paymentsheet.PaymentOptionContract.kt:3</ID>
-    <ID>ImportOrdering:com.stripe.android.paymentsheet.PaymentOptionsActivity.kt:3</ID>
-    <ID>ImportOrdering:com.stripe.android.paymentsheet.addresselement.AddressElementActivity.kt:3</ID>
-    <ID>ImportOrdering:com.stripe.android.paymentsheet.addresselement.AutocompleteViewModel.kt:3</ID>
-    <ID>ImportOrdering:com.stripe.android.paymentsheet.addresselement.InputAddressViewModel.kt:3</ID>
-    <ID>ImportOrdering:com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormFragment.kt:3</ID>
-    <ID>ImportOrdering:com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormComponent.kt:3</ID>
-    <ID>ImportOrdering:com.stripe.android.paymentsheet.repositories.CustomerRepositoryTest.kt:3</ID>
-    <ID>ImportOrdering:com.stripe.android.paymentsheet.ui.BillingAddressViewTest.kt:3</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
     <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
     <ID>LargeClass:PaymentSheetActivityTest.kt$PaymentSheetActivityTest</ID>
@@ -131,10 +122,6 @@
     <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection)</ID>
     <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)</ID>
     <ID>NestedBlockDepth:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$private fun generatePaymentIntentScenarios(): List&lt;PaymentIntentTestInput></ID>
-    <ID>ParameterListWrapping:com.stripe.android.paymentsheet.PaymentOptionsAddPaymentMethodFragmentTest.kt:79</ID>
-    <ID>ParameterListWrapping:com.stripe.android.paymentsheet.PaymentOptionsAddPaymentMethodFragmentTest.kt:80</ID>
-    <ID>ParameterListWrapping:com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.kt:480</ID>
-    <ID>ParameterListWrapping:com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.kt:481</ID>
     <ID>ReturnCount:AddressUtils.kt$internal fun CharSequence.levenshtein(other: CharSequence): Int</ID>
     <ID>SwallowedException:PaymentOptionsActivity.kt$PaymentOptionsActivity$e: InvalidParameterException</ID>
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
@@ -157,10 +144,11 @@
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _amount = savedStateHandle.getLiveData&lt;Amount>(SAVE_AMOUNT)</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _contentVisible = MutableLiveData(true)</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _isGooglePayReady = savedStateHandle.getLiveData&lt;Boolean>(SAVE_GOOGLE_PAY_READY)</ID>
+    <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _isLinkEnabled = MutableLiveData&lt;Boolean>()</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _liveMode get() = savedStateHandle.getLiveData&lt;Boolean>(SAVE_STATE_LIVE_MODE)</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting(otherwise = VisibleForTesting.PROTECTED) internal val _paymentMethods = savedStateHandle.getLiveData&lt;List&lt;PaymentMethod>>(SAVE_PAYMENT_METHODS)</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting(otherwise = VisibleForTesting.PROTECTED) internal val _processing = savedStateHandle.getLiveData&lt;Boolean>(SAVE_PROCESSING)</ID>
-    <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$protected val _isLinkEnabled = MutableLiveData&lt;Boolean>()</ID>
+    <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$protected val _linkConfiguration = savedStateHandle.getLiveData&lt;LinkPaymentLauncher.Configuration>(LINK_CONFIGURATION)</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$protected val _showLinkVerificationDialog = MutableLiveData(false)</ID>
     <ID>VariableNaming:PaymentOptionsViewModel.kt$PaymentOptionsViewModel$@VisibleForTesting internal val _paymentOptionResult = MutableLiveData&lt;PaymentOptionResult>()</ID>
     <ID>VariableNaming:PaymentSheetViewModel.kt$PaymentSheetViewModel$@VisibleForTesting internal val _paymentSheetResult = MutableLiveData&lt;PaymentSheetResult>()</ID>
