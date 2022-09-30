@@ -76,7 +76,11 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
         ),
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         registerInjector: Boolean = true,
-        onReady: (PaymentOptionsAddPaymentMethodFragment, FragmentPaymentsheetAddPaymentMethodBinding, PaymentOptionsViewModel) -> Unit
+        onReady: (
+            PaymentOptionsAddPaymentMethodFragment,
+            FragmentPaymentsheetAddPaymentMethodBinding,
+            PaymentOptionsViewModel
+        ) -> Unit
     ): FragmentScenario<PaymentOptionsAddPaymentMethodFragment> {
         assertThat(WeakMapInjectorRegistry.staticCacheMap.size).isEqualTo(0)
         val viewModel = createViewModel(

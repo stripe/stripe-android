@@ -1,0 +1,131 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexMethod:IdentityCameraScanFragment.kt$IdentityCameraScanFragment$internal fun startScanning(scanType: IdentityScanState.ScanType)</ID>
+    <ID>ComplexMethod:IdentityCameraScanFragment.kt$IdentityCameraScanFragment$override fun onViewCreated(view: View, savedInstanceState: Bundle?)</ID>
+    <ID>ComplexMethod:IdentityFragmentFactory.kt$IdentityFragmentFactory$override fun instantiate(classLoader: ClassLoader, className: String): Fragment</ID>
+    <ID>ComplexMethod:NavigationUtils.kt$internal fun Int.fragmentIdToScreenName(): String</ID>
+    <ID>EmptyFunctionBlock:IdentityCameraScanFragmentTest.kt$IdentityCameraScanFragmentTest.TestFragment${ }</ID>
+    <ID>EmptyFunctionBlock:IdentityCameraScanFragmentTest.kt$IdentityCameraScanFragmentTest.TestFragment${}</ID>
+    <ID>ForbiddenComment:ConsentScreenTest.kt$ConsentScreenTest$// TODO: assert text after migrating to compose Text</ID>
+    <ID>FunctionNaming:ComposeLoadingButton.kt$@Composable internal fun LoadingButton( modifier: Modifier = Modifier, text: String, state: LoadingButtonState, onClick: () -> Unit )</ID>
+    <ID>FunctionNaming:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( verificationPageState: Resource&lt;VerificationPage>?, onConfirmed: () -> Unit )</ID>
+    <ID>FunctionNaming:ConsentScreen.kt$@Composable internal fun ConsentScreen( verificationState: Resource&lt;VerificationPage>, onMerchantViewCreated: (ImageView) -> Unit, onSuccess: (VerificationPage) -> Unit, onFallbackUrl: (String) -> Unit, onError: (Throwable) -> Unit, onConsentAgreed: (Boolean) -> Unit, onConsentDeclined: (Boolean) -> Unit )</ID>
+    <ID>FunctionNaming:ConsentScreen.kt$@Composable private fun LoadingUI()</ID>
+    <ID>FunctionNaming:ConsentScreen.kt$@Composable private fun SuccessUI( verificationPage: VerificationPage, onMerchantViewCreated: (ImageView) -> Unit, onConsentAgreed: (Boolean) -> Unit, onConsentDeclined: (Boolean) -> Unit )</ID>
+    <ID>FunctionNaming:DocSelectionScreen.kt$@Composable internal fun DocSelectionScreen( verificationPageState: Resource&lt;VerificationPage>?, onDocTypeSelected: (Type, Boolean) -> Unit )</ID>
+    <ID>FunctionNaming:DocSelectionScreen.kt$@Composable internal fun MultiSelection( idDocumentTypeAllowlist: Map&lt;String, String>, requireSelfie: Boolean, onDocTypeSelected: (Type, Boolean) -> Unit )</ID>
+    <ID>FunctionNaming:DocSelectionScreen.kt$@Composable internal fun SingleSelection( allowedType: String, buttonText: String, bodyText: String?, requireSelfie: Boolean, onDocTypeSelected: (Type, Boolean) -> Unit )</ID>
+    <ID>FunctionOnlyReturningConstant:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$private fun isFaceFocused(): Boolean</ID>
+    <ID>LargeClass:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest</ID>
+    <ID>LargeClass:IDScanFragmentTest.kt$IDScanFragmentTest</ID>
+    <ID>LongMethod:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( verificationPageState: Resource&lt;VerificationPage>?, onConfirmed: () -> Unit )</ID>
+    <ID>LongMethod:ConsentScreen.kt$@Composable private fun SuccessUI( verificationPage: VerificationPage, onMerchantViewCreated: (ImageView) -> Unit, onConsentAgreed: (Boolean) -> Unit, onConsentDeclined: (Boolean) -> Unit )</ID>
+    <ID>LongMethod:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - not require selfie - submit`()</ID>
+    <ID>LongMethod:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - require selfie - to selfie`()</ID>
+    <ID>LongMethod:IDDetectorAnalyzer.kt$IDDetectorAnalyzer$override suspend fun analyze( data: AnalyzerInput, state: IdentityScanState ): AnalyzerOutput</ID>
+    <ID>LongMethod:IDScanFragmentTest.kt$IDScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - not require selfie - submit`()</ID>
+    <ID>LongMethod:IDScanFragmentTest.kt$IDScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - require selfie - to selfie`()</ID>
+    <ID>LongMethod:IdentityActivity.kt$IdentityActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>LongMethod:IdentityCameraScanFragment.kt$IdentityCameraScanFragment$override fun onViewCreated(view: View, savedInstanceState: Bundle?)</ID>
+    <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$internal fun uploadScanResult( result: IdentityAggregator.FinalResult, verificationPage: VerificationPage, targetScanType: IdentityScanState.ScanType? )</ID>
+    <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$private fun uploadDocumentImagesAndNotify( imageFile: File, filePurpose: StripeFilePurpose, uploadMethod: UploadMethod, scores: List&lt;Float>? = null, isHighRes: Boolean, isFront: Boolean, scanType: IdentityScanState.ScanType, compressionQuality: Float )</ID>
+    <ID>LongMethod:IdentityViewModelTest.kt$IdentityViewModelTest$private fun testUploadDocumentScanSuccessResult(isFront: Boolean)</ID>
+    <ID>LongMethod:IdentityViewModelTest.kt$IdentityViewModelTest$private fun testUploadSelfieScanSuccessResult( selfie: FaceDetectorTransitioner.Selfie, isHighRes: Boolean )</ID>
+    <ID>LongMethod:PassportScanFragmentTest.kt$PassportScanFragmentTest$@Test fun `front scanned and uploaded - not require selfie - submit`()</ID>
+    <ID>LongMethod:PassportScanFragmentTest.kt$PassportScanFragmentTest$@Test fun `front scanned and uploaded - require selfie - to selfie`()</ID>
+    <ID>LongParameterList:CollectedDataParam.kt$CollectedDataParam.Companion$( firstHighResResult: UploadedResult, firstLowResResult: UploadedResult, lastHighResResult: UploadedResult, lastLowResResult: UploadedResult, bestHighResResult: UploadedResult, bestLowResResult: UploadedResult, trainingConsent: Boolean, bestFaceScore: Float, faceScoreVariance: Float, numFrames: Int )</ID>
+    <ID>LongParameterList:ConsentScreen.kt$( verificationState: Resource&lt;VerificationPage>, onMerchantViewCreated: (ImageView) -> Unit, onSuccess: (VerificationPage) -> Unit, onFallbackUrl: (String) -> Unit, onError: (Throwable) -> Unit, onConsentAgreed: (Boolean) -> Unit, onConsentDeclined: (Boolean) -> Unit )</ID>
+    <ID>LongParameterList:IdentityAnalyticsRequestFactory.kt$IdentityAnalyticsRequestFactory$( isFromFallbackUrl: Boolean, scanType: IdentityScanState.ScanType? = null, requireSelfie: Boolean? = null, docFrontRetryTimes: Int? = null, docBackRetryTimes: Int? = null, selfieRetryTimes: Int? = null, docFrontUploadType: DocumentUploadParam.UploadMethod? = null, docBackUploadType: DocumentUploadParam.UploadMethod? = null, docFrontModelScore: Float? = null, docBackModelScore: Float? = null, selfieModelScore: Float? = null )</ID>
+    <ID>LongParameterList:IdentityAnalyticsRequestFactory.kt$IdentityAnalyticsRequestFactory$( isFromFallbackUrl: Boolean, scanType: IdentityScanState.ScanType? = null, requireSelfie: Boolean? = null, docFrontUploadType: DocumentUploadParam.UploadMethod? = null, docBackUploadType: DocumentUploadParam.UploadMethod? = null, throwable: Throwable )</ID>
+    <ID>LongParameterList:IdentityAnalyticsRequestFactory.kt$IdentityAnalyticsRequestFactory$( value: Long, compressionQuality: Float, scanType: IdentityScanState.ScanType, id: String?, fileName: String?, fileSize: Long )</ID>
+    <ID>LongParameterList:IdentityFragmentFactory.kt$IdentityFragmentFactory$( private val cameraPermissionEnsureable: CameraPermissionEnsureable, private val appSettingsOpenable: AppSettingsOpenable, private val verificationFlowFinishable: VerificationFlowFinishable, private val identityScanViewModelFactory: IdentityScanViewModel.IdentityScanViewModelFactory, private val consentFragmentViewModelFactory: ConsentFragmentViewModel.ConsentFragmentViewModelFactory, internal val identityViewModelFactory: ViewModelProvider.Factory, private val fallbackUrlLauncher: FallbackUrlLauncher, private val identityIO: IdentityIO )</ID>
+    <ID>LongParameterList:IdentityIO.kt$IdentityIO$( originalUri: Uri, verificationId: String, isFullFrame: Boolean, side: String? = null, maxDimension: Int, compressionQuality: Float )</ID>
+    <ID>LongParameterList:IdentityViewModel.kt$IdentityViewModel$( imageFile: File, filePurpose: StripeFilePurpose, uploadMethod: UploadMethod, scores: List&lt;Float>? = null, isHighRes: Boolean, isFront: Boolean, scanType: IdentityScanState.ScanType, compressionQuality: Float )</ID>
+    <ID>LongParameterList:IdentityViewModel.kt$IdentityViewModel$( internal val verificationArgs: IdentityVerificationSheetContract.Args, private val identityRepository: IdentityRepository, private val identityModelFetcher: IdentityModelFetcher, private val identityIO: IdentityIO, internal val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory, internal val fpsTracker: FPSTracker, internal val screenTracker: ScreenTracker, private val savedStateHandle: SavedStateHandle, @UIContext internal val uiContext: CoroutineContext, @IOContext internal val workContext: CoroutineContext )</ID>
+    <ID>LongParameterList:IdentityViewModel.kt$IdentityViewModel$( originalBitmap: Bitmap, boundingBox: BoundingBox, docCapturePage: VerificationPageStaticContentDocumentCapturePage, isHighRes: Boolean, isFront: Boolean, scores: List&lt;Float>, targetScanType: IdentityScanState.ScanType )</ID>
+    <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$100</ID>
+    <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$5</ID>
+    <ID>MagicNumber:FaceDetectorAnalyzer.kt$FaceDetectorAnalyzer$3</ID>
+    <ID>MagicNumber:IDDetectorAnalyzer.kt$IDDetectorAnalyzer$3</ID>
+    <ID>MagicNumber:RoundToMaxDecimals.kt$10</ID>
+    <ID>MatchingDeclarationName:ComposeLoadingButton.kt$LoadingButtonState</ID>
+    <ID>MaxLineLength:CameraPermissionDeniedFragment.kt$CameraPermissionDeniedFragment.Companion$CollectedDataParam.Type.DRIVINGLICENSE -> R.id.action_cameraPermissionDeniedFragment_to_driverLicenseUploadFragment</ID>
+    <ID>MaxLineLength:ConsentFragment.kt$ConsentFragment$if (requireSelfie) ClearDataParam.CONSENT_TO_DOC_SELECT_WITH_SELFIE else ClearDataParam.CONSENT_TO_DOC_SELECT</ID>
+    <ID>MaxLineLength:CouldNotCaptureFragment.kt$CouldNotCaptureFragment.Companion$IdentityScanState.ScanType.DL_FRONT -> R.id.action_couldNotCaptureFragment_to_driverLicenseUploadFragment</ID>
+    <ID>MaxLineLength:DefaultIdentityRepositoryTest.kt$DefaultIdentityRepositoryTest$fun</ID>
+    <ID>MaxLineLength:DocSelectionFragment.kt$DocSelectionFragment$if (requireSelfie) ClearDataParam.DOC_SELECT_TO_UPLOAD_WITH_SELFIE else ClearDataParam.DOC_SELECT_TO_UPLOAD</ID>
+    <ID>MaxLineLength:DocSelectionFragmentTest.kt$DocSelectionFragmentTest$fun</ID>
+    <ID>MaxLineLength:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest$(params[PARAM_EVENT_META_DATA] as Map&lt;*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE</ID>
+    <ID>MaxLineLength:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest$assertThat(binding.kontinue.findViewById&lt;CircularProgressIndicator>(R.id.indicator).visibility)</ID>
+    <ID>MaxLineLength:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest$fun</ID>
+    <ID>MaxLineLength:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$return</ID>
+    <ID>MaxLineLength:IDDetectorTransitioner.kt$IDDetectorTransitioner$"Scan for ${unsatisfiedState.type} Unsatisfied with reason ${unsatisfiedState.reason}, transition to Initial."</ID>
+    <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$fun</ID>
+    <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION + 1).milliseconds)</ID>
+    <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION - 1).milliseconds)</ID>
+    <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION + 1).milliseconds)</ID>
+    <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION - 1).milliseconds)</ID>
+    <ID>MaxLineLength:IDScanFragmentTest.kt$IDScanFragmentTest$(params[PARAM_EVENT_META_DATA] as Map&lt;*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_LIVE_CAPTURE_ID</ID>
+    <ID>MaxLineLength:IDScanFragmentTest.kt$IDScanFragmentTest$assertThat(binding.kontinue.findViewById&lt;CircularProgressIndicator>(R.id.indicator).visibility)</ID>
+    <ID>MaxLineLength:IDScanFragmentTest.kt$IDScanFragmentTest$fun</ID>
+    <ID>MaxLineLength:IdentityActivityTest.kt$IdentityActivityTest$(IdentityActivity, Toolbar, ImageButton, NavController, InjectableActivityScenario&lt;IdentityActivity>) -> Unit</ID>
+    <ID>MaxLineLength:IdentityDocumentScanFragment.kt$IdentityDocumentScanFragment$clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_FRONT_SELFIE else ClearDataParam.UPLOAD_FRONT</ID>
+    <ID>MaxLineLength:IdentityDocumentScanFragment.kt$IdentityDocumentScanFragment$clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_TO_SELFIE else ClearDataParam.UPLOAD_TO_CONFIRM</ID>
+    <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$body</ID>
+    <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$fallback_url</ID>
+    <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$id_detector_url</ID>
+    <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$privacy_policy</ID>
+    <ID>MaxLineLength:IdentityScanFlow.kt$IdentityScanFlow$private val aggregateResultListener: AggregateResultListener&lt;IdentityAggregator.InterimResult, IdentityAggregator.FinalResult></ID>
+    <ID>MaxLineLength:IdentityUploadFragment.kt$IdentityUploadFragment$clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_FRONT_SELFIE else ClearDataParam.UPLOAD_FRONT</ID>
+    <ID>MaxLineLength:IdentityUploadFragment.kt$IdentityUploadFragment$clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_TO_SELFIE else ClearDataParam.UPLOAD_TO_CONFIRM</ID>
+    <ID>MaxLineLength:IdentityUploadFragmentTest.kt$IdentityUploadFragmentTest$(params[PARAM_EVENT_META_DATA] as Map&lt;*, *>)[PARAM_SCAN_TYPE] == ID</ID>
+    <ID>MaxLineLength:IdentityUploadFragmentTest.kt$IdentityUploadFragmentTest$assertThat(binding.kontinue.findViewById&lt;CircularProgressIndicator>(R.id.indicator).visibility)</ID>
+    <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$?:</ID>
+    <ID>MaxLineLength:NavigationUtils.kt$*</ID>
+    <ID>MaxLineLength:NavigationUtilsTest.kt$NavigationUtilsTest$fun</ID>
+    <ID>MaxLineLength:NavigationUtilsTest.kt$NavigationUtilsTest$verify(mockScreenTracker, times(times)).screenTransitionStart(eq(fromFragment.fragmentIdToScreenName()), any())</ID>
+    <ID>MaxLineLength:PassportScanFragmentTest.kt$PassportScanFragmentTest$(params[PARAM_EVENT_META_DATA] as Map&lt;*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_LIVE_CAPTURE_PASSPORT</ID>
+    <ID>MaxLineLength:PassportScanFragmentTest.kt$PassportScanFragmentTest$assertThat(binding.kontinue.findViewById&lt;CircularProgressIndicator>(R.id.indicator).visibility)</ID>
+    <ID>MaxLineLength:PassportUploadFragmentTest.kt$PassportUploadFragmentTest$assertThat(binding.kontinue.findViewById&lt;CircularProgressIndicator>(R.id.indicator).visibility)</ID>
+    <ID>MaxLineLength:SelfieFragment.kt$SelfieFragment$"collectUploadedStateAndUploadForCollectedSelfies reaches unexpected upload state: $it"</ID>
+    <ID>MaxLineLength:SelfieFragment.kt$SelfieFragment$identityScanViewModel.finalResult.value?.identityState?.transitioner as? FaceDetectorTransitioner</ID>
+    <ID>MaxLineLength:VerificationPage.kt$VerificationPage$* A VerificationPage contains the static content and initial state that is required for Stripe Identity's native mobile SDKs to render the verification flow.</ID>
+    <ID>MaxLineLength:VerificationPageData.kt$VerificationPageData$* VerificationPageData contains the state of a verification, including what information needs to be collected to complete the verification flow.</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.camera.IdentityScanFlow.kt:34</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.navigation.CameraPermissionDeniedFragment.kt:70</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.navigation.ConsentFragment.kt:137</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.navigation.CouldNotCaptureFragment.kt:71</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.navigation.DocSelectionFragment.kt:79</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.navigation.IdentityDocumentScanFragment.kt:182</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.navigation.IdentityDocumentScanFragment.kt:249</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.navigation.IdentityUploadFragment.kt:319</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.navigation.IdentityUploadFragment.kt:356</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.navigation.SelfieFragment.kt:213</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.navigation.SelfieFragment.kt:243</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.states.FaceDetectorTransitioner.kt:221</ID>
+    <ID>MaximumLineLength:com.stripe.android.identity.states.IDDetectorTransitioner.kt:127</ID>
+    <ID>ThrowsCount:DefaultIdentityRepository.kt$DefaultIdentityRepository$private suspend fun &lt;Response : StripeModel> executeRequestWithModelJsonParser( request: StripeRequest, responseJsonParser: ModelJsonParser&lt;Response>, onSuccessExecutionTimeBlock: (Long) -> Unit = {} ): Response</ID>
+    <ID>TooManyFunctions:IdentityAnalyticsRequestFactory.kt$IdentityAnalyticsRequestFactory</ID>
+    <ID>TooManyFunctions:IdentityUploadFragment.kt$IdentityUploadFragment : Fragment</ID>
+    <ID>TooManyFunctions:IdentityViewModel.kt$IdentityViewModel : ViewModel</ID>
+    <ID>TooManyFunctions:NavigationUtils.kt$com.stripe.android.identity.utils.NavigationUtils.kt</ID>
+    <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationConfirmButtonTag = "ConfirmButton"</ID>
+    <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationTitleTag = "ConfirmationTitle"</ID>
+    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val acceptButtonTag = "Accept"</ID>
+    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val bodyTag = "Body"</ID>
+    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val declineButtonTag = "Decline"</ID>
+    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val dividerTag = "divider"</ID>
+    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val loadingScreenTag = "Loading"</ID>
+    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val privacyPolicyTag = "PrivacyPolicy"</ID>
+    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val timeEstimateTag = "TimeEstimate"</ID>
+    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val titleTag = "Title"</ID>
+    <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val docSelectionTitleTag = "Title"</ID>
+    <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val singleSelectionTag = "SingleSelection"</ID>
+    <ID>UnnecessaryAbstractClass:IdentityCommonModule.kt$IdentityCommonModule$IdentityCommonModule</ID>
+    <ID>UnusedPrivateMember:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$i</ID>
+    <ID>UnusedPrivateMember:IdentityUploadFragment.kt$IdentityUploadFragment$private fun IdentityScanState.ScanType.toType(): CollectedDataParam.Type</ID>
+    <ID>UnusedPrivateMember:IdentityUploadFragment.kt$IdentityUploadFragment$private fun checkBackFields( nonNullBlock: (String, String, IdentityScanState.ScanType) -> Unit, nullBlock: () -> Unit )</ID>
+  </CurrentIssues>
+</SmellBaseline>
