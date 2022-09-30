@@ -60,7 +60,7 @@ jobs:
 #          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
-            ./gradlew :financial-connections-example:installDebug
+            ./gradlew :financial-connections-example:installRelease
             ./maestro/bin/maestro --platform android test maestro/fc-flow-testmode.yaml
       - name: Archive maestro screenshots
         if: always()
