@@ -31,6 +31,7 @@ import kotlin.coroutines.CoroutineContext
         AuthenticationModule::class,
         Stripe3DSAuthenticatorModule::class,
         WeChatPayAuthenticatorModule::class,
+        PollingAuthenticatorModule::class,
         CoreCommonModule::class
     ]
 )

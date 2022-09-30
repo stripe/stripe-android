@@ -462,7 +462,9 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         paymentMethods: List<PaymentMethod> = emptyList(),
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
         registerInjector: Boolean = true,
-        onReady: (PaymentSheetAddPaymentMethodFragment, PaymentSheetViewModel) -> Unit
+        onReady: (PaymentSheetAddPaymentMethodFragment,
+            PaymentSheetViewModel
+        ) -> Unit
     ): FragmentScenario<PaymentSheetAddPaymentMethodFragment> {
         assertThat(WeakMapInjectorRegistry.staticCacheMap.size).isEqualTo(0)
         val viewModel = createViewModel(

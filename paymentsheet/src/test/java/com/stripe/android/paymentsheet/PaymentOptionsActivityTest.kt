@@ -39,6 +39,7 @@ import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -452,7 +453,7 @@ class PaymentOptionsActivityTest {
             ApplicationProvider.getApplicationContext<Application>().resources
         )
         val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
-            onBlocking { setup(any(), any(), any()) }.thenReturn(AccountStatus.SignedOut)
+            onBlocking { getAccountStatusFlow(any(), any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
         }
         return PaymentOptionsViewModel(
             args = args,

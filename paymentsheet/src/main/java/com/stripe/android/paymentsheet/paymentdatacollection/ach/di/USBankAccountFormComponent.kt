@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach.di
 
 import android.app.Application
+import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import dagger.BindsInstance

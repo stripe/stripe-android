@@ -1,7 +1,6 @@
 package com.stripe.android.link.injection
 
 import android.content.Context
-import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -67,9 +66,6 @@ internal abstract class LinkPaymentLauncherComponent {
     interface Builder {
         @BindsInstance
         fun configuration(configuration: LinkPaymentLauncher.Configuration): Builder
-
-        @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         @BindsInstance
         fun context(context: Context): Builder

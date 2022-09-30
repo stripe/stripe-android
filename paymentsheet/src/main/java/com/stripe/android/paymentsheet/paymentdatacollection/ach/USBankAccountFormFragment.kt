@@ -57,6 +57,7 @@ import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.ui.core.elements.TextFieldSection
 import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.ui.core.paymentsColors
 import kotlinx.coroutines.launch
 
 /**

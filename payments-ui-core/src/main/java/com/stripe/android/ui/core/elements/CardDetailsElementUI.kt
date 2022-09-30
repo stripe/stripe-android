@@ -14,7 +14,7 @@ import com.stripe.android.ui.core.paymentsShapes
 internal fun CardDetailsElementUI(
     enabled: Boolean,
     controller: CardDetailsController,
-    hiddenIdentifiers: List<IdentifierSpec>?,
+    hiddenIdentifiers: Set<IdentifierSpec>,
     lastTextFieldIdentifier: IdentifierSpec?
 ) {
     controller.fields.forEachIndexed { index, field ->

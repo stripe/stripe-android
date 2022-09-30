@@ -1,0 +1,4 @@
+root=true
+
+[*.{kt,kts}]
+ktlint_disabled_rules=import-ordering,trailing-comma-on-call-site,trailing-comma-on-declaration-site

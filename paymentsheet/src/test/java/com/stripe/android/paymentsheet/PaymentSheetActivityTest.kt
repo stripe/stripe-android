@@ -53,6 +53,7 @@ import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -1012,7 +1013,7 @@ internal class PaymentSheetActivityTest {
         whenever(lpmRepository.serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
 
         val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
-            onBlocking { setup(any(), any(), any()) }.thenReturn(AccountStatus.SignedOut)
+            onBlocking { getAccountStatusFlow(any(), any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
         }
 
         PaymentSheetViewModel(

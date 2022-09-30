@@ -67,6 +67,7 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -151,7 +152,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
 
-    private var launchedLinkDirectly: Boolean = false
+    @VisibleForTesting
+    internal var launchedLinkDirectly: Boolean = false
 
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
@@ -440,13 +442,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 .isNotEmpty()
         ) {
             viewModelScope.launch {
-                val accountStatus = linkLauncher.setup(
-                    configuration = createLinkConfiguration(stripeIntent),
-                    coroutineScope = this,
-                    savedStateHandle = savedStateHandle
-                )
+                val linkConfig = createLinkConfiguration(stripeIntent).also {
+                    _linkConfiguration.value = it
+                }
+                val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
                 when (accountStatus) {
-                    AccountStatus.Verified -> launchLink(launchedDirectly = true)
+                    AccountStatus.Verified -> launchLink(linkConfig, launchedDirectly = true)
                     AccountStatus.VerificationStarted,
                     AccountStatus.NeedsVerification -> {
                         linkVerificationCallback = { success ->
@@ -454,7 +455,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             _showLinkVerificationDialog.value = false
 
                             if (success) {
-                                launchLink(launchedDirectly = true)
+                                launchLink(linkConfig, launchedDirectly = true)
                             }
                         }
                         _showLinkVerificationDialog.value = true
@@ -471,23 +472,30 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override fun completeLinkInlinePayment(
+        configuration: LinkPaymentLauncher.Configuration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         isReturningUser: Boolean
     ) {
         if (isReturningUser) {
-            launchLink(launchedDirectly = false, paymentMethodCreateParams)
+            launchLink(configuration, launchedDirectly = false, paymentMethodCreateParams)
         } else {
-            super.completeLinkInlinePayment(paymentMethodCreateParams, isReturningUser)
+            super.completeLinkInlinePayment(
+                configuration,
+                paymentMethodCreateParams,
+                isReturningUser
+            )
         }
     }
 
     fun launchLink(
+        configuration: LinkPaymentLauncher.Configuration,
         launchedDirectly: Boolean,
         paymentMethodCreateParams: PaymentMethodCreateParams? = null
     ) {
         launchedLinkDirectly = launchedDirectly
         linkActivityResultLauncher?.let { activityResultLauncher ->
             linkLauncher.present(
+                configuration,
                 activityResultLauncher,
                 paymentMethodCreateParams
             )

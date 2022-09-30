@@ -64,7 +64,7 @@ class FormController @Inject constructor(
      */
     val hiddenIdentifiers =
         cardBillingElement.map {
-            it?.hiddenIdentifiers ?: flowOf(emptyList())
+            it?.hiddenIdentifiers ?: flowOf(emptySet())
         }.flattenConcat()
 
     /**

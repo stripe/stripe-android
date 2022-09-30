@@ -42,14 +42,19 @@ class LinkActivityContract :
     ) : ActivityStarter.Args {
         @IgnoredOnParcel
         internal val stripeIntent = configuration.stripeIntent
+
         @IgnoredOnParcel
         internal val merchantName = configuration.merchantName
+
         @IgnoredOnParcel
         internal val customerEmail = configuration.customerEmail
+
         @IgnoredOnParcel
         internal val customerPhone = configuration.customerPhone
+
         @IgnoredOnParcel
         internal val customerName = configuration.customerName
+
         @IgnoredOnParcel
         internal val shippingValues = configuration.shippingValues
 
