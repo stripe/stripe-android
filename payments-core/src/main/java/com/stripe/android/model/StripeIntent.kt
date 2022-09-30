@@ -262,7 +262,7 @@ sealed interface StripeIntent : StripeModel {
         @Parcelize
         object BlikAuthorize : NextActionData() {
             override fun hashCode(): Int {
-                return 0
+                return this::class.java.hashCode()
             }
 
             override fun equals(other: Any?): Boolean {
@@ -284,7 +284,7 @@ sealed interface StripeIntent : StripeModel {
         @Parcelize
         object UpiAwaitNotification : NextActionData() {
             override fun hashCode(): Int {
-                return 0
+                return this::class.java.hashCode()
             }
 
             override fun equals(other: Any?): Boolean {
