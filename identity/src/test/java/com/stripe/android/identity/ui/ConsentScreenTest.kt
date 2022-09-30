@@ -47,7 +47,8 @@ class ConsentScreenTest {
                 privacyPolicy = CONSENT_PRIVACY_POLICY,
                 timeEstimate = CONSENT_TIME_ESTIMATE,
                 body = CONSENT_BODY,
-                declineButtonText = CONSENT_DECLINE_TEXT
+                declineButtonText = CONSENT_DECLINE_TEXT,
+                scrollToContinueButtonText = SCROLL_TO_CONTINUE_TEXT
             )
         )
         whenever(it.requirements).thenReturn(
@@ -80,6 +81,9 @@ class ConsentScreenTest {
                 )
             )
         )
+        if (CONSENT_REQUIRE_SELFIE) {
+            whenever(it.selfieCapture).thenReturn(mock())
+        }
     }
 
     private val verificationPageWithUnsupportedClient = mock<VerificationPage>().also {
@@ -100,9 +104,8 @@ class ConsentScreenTest {
             onNodeWithTag(dividerTag).assertExists()
             onNodeWithTag(bodyTag).assertExists() // TODO: assert text after migrating to compose Text
 
-            onNodeWithTag(acceptButtonTag).onChildAt(0)
-                .assertTextEquals(CONSENT_ACCEPT_TEXT.uppercase())
-            onNodeWithTag(acceptButtonTag).onChildAt(1).assertDoesNotExist()
+            onNodeWithTag(scrollToAcceptButtonTag).assertTextEquals(SCROLL_TO_CONTINUE_TEXT)
+            onNodeWithTag(acceptButtonTag).assertDoesNotExist()
 
             onNodeWithTag(declineButtonTag).onChildAt(0)
                 .assertTextEquals(CONSENT_DECLINE_TEXT.uppercase())
@@ -135,7 +138,7 @@ class ConsentScreenTest {
 
     @Test
     fun `when agreed button is clicked onConsentAgreed is called and UI is updated`() {
-        setComposeTestRuleWith(Resource.success(verificationPageWithTimeAndPolicy)) {
+        setComposeTestRuleWith(Resource.success(verificationPageWithOutTimeAndPolicy)) {
             onNodeWithTag(acceptButtonTag).onChildAt(0).performClick()
             verify(onConsentAgreedMock).invoke(CONSENT_REQUIRE_SELFIE)
 
@@ -157,9 +160,8 @@ class ConsentScreenTest {
             onNodeWithTag(declineButtonTag).onChildAt(0).assertIsNotEnabled()
             onNodeWithTag(declineButtonTag).onChildAt(1).assertExists() // CircularProgressIndicator
 
-            onNodeWithTag(acceptButtonTag).onChildAt(0).assertIsNotEnabled()
-            onNodeWithTag(acceptButtonTag).onChildAt(1)
-                .assertDoesNotExist() // CircularProgressIndicator
+            onNodeWithTag(scrollToAcceptButtonTag).assertExists()
+            onNodeWithTag(acceptButtonTag).assertDoesNotExist()
         }
     }
 
@@ -209,6 +211,7 @@ class ConsentScreenTest {
         const val CONSENT_BODY = "this is the consent body"
         const val CONSENT_ACCEPT_TEXT = "yes"
         const val CONSENT_DECLINE_TEXT = "no"
+        const val SCROLL_TO_CONTINUE_TEXT = "scroll to continue"
         const val CONSENT_FALLBACK_URL = "path/to/fallback"
         const val CONSENT_REQUIRE_SELFIE = true
     }

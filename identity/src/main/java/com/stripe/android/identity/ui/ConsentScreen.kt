@@ -1,6 +1,5 @@
 package com.stripe.android.identity.ui
 
-import android.graphics.Typeface
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.compose.foundation.Image
@@ -14,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
@@ -96,8 +96,10 @@ internal const val privacyPolicyTag = "PrivacyPolicy"
 internal const val dividerTag = "divider"
 internal const val bodyTag = "Body"
 internal const val acceptButtonTag = "Accept"
+internal const val scrollToAcceptButtonTag = "ScrollToAccept"
 internal const val declineButtonTag = "Decline"
 internal const val loadingScreenTag = "Loading"
+internal const val scrollableColumn = "ScrollableColumn"
 
 @Composable
 private fun SuccessUI(
@@ -119,10 +121,14 @@ private fun SuccessUI(
                 bottom = dimensionResource(id = R.dimen.page_vertical_margin)
             )
     ) {
+        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
+                .semantics {
+                    testTag = scrollableColumn
+                }
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -157,11 +163,9 @@ private fun SuccessUI(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        top = dimensionResource(
+                        vertical = dimensionResource(
                             id = R.dimen.item_vertical_margin
-                        ),
-                        bottom = 42.dp
-
+                        )
                     )
                     .semantics {
                         testTag = titleTag
@@ -187,35 +191,24 @@ private fun SuccessUI(
                             },
                         factory = { TextView(it) },
                         update = {
-                            it.typeface = Typeface.DEFAULT_BOLD
                             it.text = timeEstimateString
                         }
                     )
                 }
             }
             consentPage.privacyPolicy?.let { privacyPolicyString ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.privacy_policy_icon),
-                        contentDescription = stringResource(id = R.string.description_privacy_policy)
-                    )
-                    AndroidView(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 6.dp)
-                            .semantics {
-                                testTag = privacyPolicyTag
-                            },
-                        factory = { TextView(it) },
-                        update = {
-                            it.typeface = Typeface.DEFAULT_BOLD
-                            it.setHtmlString(privacyPolicyString)
-                        }
-                    )
-                }
+                AndroidView(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
+                        .semantics {
+                            testTag = privacyPolicyTag
+                        },
+                    factory = { TextView(it) },
+                    update = {
+                        it.setHtmlString(privacyPolicyString)
+                    }
+                )
             }
             if (consentPage.timeEstimate != null && consentPage.privacyPolicy != null) {
                 Divider(
@@ -228,6 +221,7 @@ private fun SuccessUI(
                 )
             }
 
+            // TODO(ccen-stripe): replace with [Html]
             AndroidView(
                 modifier = Modifier
                     .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
@@ -243,17 +237,35 @@ private fun SuccessUI(
 
         var acceptState by remember { mutableStateOf(LoadingButtonState.Idle) }
         var declineState by remember { mutableStateOf(LoadingButtonState.Idle) }
+        var scrolledToBottom by remember { mutableStateOf(false) }
 
-        LoadingButton(
-            modifier = Modifier
-                .padding(bottom = 10.dp)
-                .semantics { testTag = acceptButtonTag },
-            text = consentPage.acceptButtonText.uppercase(),
-            state = acceptState
-        ) {
-            acceptState = LoadingButtonState.Loading
-            declineState = LoadingButtonState.Disabled
-            onConsentAgreed(requireSelfie)
+        if (scrollState.value == scrollState.maxValue) {
+            scrolledToBottom = true
+        }
+
+        if (scrolledToBottom) {
+            LoadingButton(
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .semantics { testTag = acceptButtonTag },
+                text = consentPage.acceptButtonText.uppercase(),
+                state = acceptState
+            ) {
+                acceptState = LoadingButtonState.Loading
+                declineState = LoadingButtonState.Disabled
+                onConsentAgreed(requireSelfie)
+            }
+        } else {
+            Button(
+                onClick = {},
+                enabled = false,
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .fillMaxWidth()
+                    .semantics { testTag = scrollToAcceptButtonTag }
+            ) {
+                Text(text = consentPage.scrollToContinueButtonText ?: "scroll to continue".uppercase())
+            }
         }
 
         LoadingButton(
