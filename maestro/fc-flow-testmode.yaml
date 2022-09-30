@@ -1,12 +1,19 @@
 appId: com.stripe.android.financialconnections.example
 ---
 - launchApp
-# Android specific: Navigate to example
+# Android specific: Navigate to example (1)
+- extendedWaitUntil:
+      visible: "Collect account for data"
+      timeout: 100000
 - tapOn: "Collect account for data"
-- assertVisible: "CONNECT AN ACCOUNT"
+
+# Android specific: Navigate to example (2)
+- extendedWaitUntil:
+    visible: "CONNECT AN ACCOUNT"
+    timeout: 100000
 - takeScreenshot: ExampleAppLauncher
 - tapOn: "CONNECT AN ACCOUNT"
-- takeScreenshot: ChromeSetup
+
 # Android specific - Chrome initial setup might open.
 - tapOn:
     text: "Accept & continue"
@@ -14,6 +21,7 @@ appId: com.stripe.android.financialconnections.example
 - tapOn:
     text: "No thanks"
     optional: true
+
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
     visible: "Agree"
