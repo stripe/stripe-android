@@ -264,7 +264,7 @@ private fun SuccessUI(
                     .fillMaxWidth()
                     .semantics { testTag = scrollToAcceptButtonTag }
             ) {
-                Text(text = consentPage.scrollToContinueButtonText ?: "scroll to continue".uppercase())
+                Text(text = consentPage.scrollToContinueButtonText)
             }
         }
 
