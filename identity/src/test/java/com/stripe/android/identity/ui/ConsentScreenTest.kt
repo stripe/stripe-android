@@ -71,7 +71,8 @@ class ConsentScreenTest {
                 privacyPolicy = null,
                 timeEstimate = null,
                 body = CONSENT_BODY,
-                declineButtonText = CONSENT_DECLINE_TEXT
+                declineButtonText = CONSENT_DECLINE_TEXT,
+                scrollToContinueButtonText = SCROLL_TO_CONTINUE_TEXT
             )
         )
         whenever(it.requirements).thenReturn(
@@ -104,7 +105,7 @@ class ConsentScreenTest {
             onNodeWithTag(dividerTag).assertExists()
             onNodeWithTag(bodyTag).assertExists() // TODO: assert text after migrating to compose Text
 
-            onNodeWithTag(scrollToAcceptButtonTag).assertTextEquals(SCROLL_TO_CONTINUE_TEXT)
+            onNodeWithTag(scrollToAcceptButtonTag).assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
             onNodeWithTag(acceptButtonTag).assertDoesNotExist()
 
             onNodeWithTag(declineButtonTag).onChildAt(0)
