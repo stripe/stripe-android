@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -169,7 +170,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
             stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
         ) {
             viewModelScope.launch {
-                val accountStatus = linkLauncher.setup(createLinkConfiguration(stripeIntent), this)
+                val configuration = createLinkConfiguration(stripeIntent).also {
+                    _linkConfiguration.value = it
+                }
+                val accountStatus = linkLauncher.getAccountStatusFlow(configuration).first()
                 when (accountStatus) {
                     AccountStatus.Verified,
                     AccountStatus.VerificationStarted,

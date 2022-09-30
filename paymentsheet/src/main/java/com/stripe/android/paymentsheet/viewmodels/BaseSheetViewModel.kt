@@ -95,6 +95,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     internal val activeLinkSession = MutableLiveData(false)
 
+    protected val _linkConfiguration =
+        savedStateHandle.getLiveData<LinkPaymentLauncher.Configuration>(LINK_CONFIGURATION)
+    internal val linkConfiguration: LiveData<LinkPaymentLauncher.Configuration> = _linkConfiguration
+
     private val _stripeIntent = savedStateHandle.getLiveData<StripeIntent>(SAVE_STRIPE_INTENT)
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
 
@@ -492,39 +496,47 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         )
     }
 
-    fun payWithLinkInline(userInput: UserInput) {
+    fun payWithLinkInline(configuration: LinkPaymentLauncher.Configuration, userInput: UserInput) {
         (selection.value as? PaymentSelection.New.Card)?.paymentMethodCreateParams?.let { params ->
             savedStateHandle[SAVE_PROCESSING] = true
             updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
 
-            when (linkLauncher.accountStatus.value) {
-                AccountStatus.Verified -> {
-                    activeLinkSession.value = true
-                    completeLinkInlinePayment(params, userInput is UserInput.SignIn)
-                }
-                AccountStatus.VerificationStarted,
-                AccountStatus.NeedsVerification -> {
-                    linkVerificationCallback = { success ->
-                        activeLinkSession.value = success
-                        linkVerificationCallback = null
-                        _showLinkVerificationDialog.value = false
-
-                        if (success) {
-                            completeLinkInlinePayment(params, userInput is UserInput.SignIn)
-                        } else {
-                            savedStateHandle[SAVE_PROCESSING] = false
-                            updatePrimaryButtonState(PrimaryButton.State.Ready)
-                        }
+            viewModelScope.launch {
+                when (linkLauncher.getAccountStatusFlow(configuration).first()) {
+                    AccountStatus.Verified -> {
+                        activeLinkSession.value = true
+                        completeLinkInlinePayment(
+                            configuration,
+                            params,
+                            userInput is UserInput.SignIn
+                        )
                     }
-                    _showLinkVerificationDialog.value = true
-                }
-                AccountStatus.SignedOut -> {
-                    activeLinkSession.value = false
-                    viewModelScope.launch {
-                        linkLauncher.signInWithUserInput(userInput).fold(
+                    AccountStatus.VerificationStarted,
+                    AccountStatus.NeedsVerification -> {
+                        linkVerificationCallback = { success ->
+                            activeLinkSession.value = success
+                            linkVerificationCallback = null
+                            _showLinkVerificationDialog.value = false
+
+                            if (success) {
+                                completeLinkInlinePayment(
+                                    configuration,
+                                    params,
+                                    userInput is UserInput.SignIn
+                                )
+                            } else {
+                                savedStateHandle[SAVE_PROCESSING] = false
+                                updatePrimaryButtonState(PrimaryButton.State.Ready)
+                            }
+                        }
+                        _showLinkVerificationDialog.value = true
+                    }
+                    AccountStatus.SignedOut -> {
+                        activeLinkSession.value = false
+                        linkLauncher.signInWithUserInput(configuration, userInput).fold(
                             onSuccess = {
                                 // If successful, the account was fetched or created, so try again
-                                payWithLinkInline(userInput)
+                                payWithLinkInline(configuration, userInput)
                             },
                             onFailure = {
                                 onError(it.localizedMessage)
@@ -539,12 +551,16 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     internal open fun completeLinkInlinePayment(
+        configuration: LinkPaymentLauncher.Configuration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         isReturningUser: Boolean
     ) {
         viewModelScope.launch {
             onLinkPaymentDetailsCollected(
-                linkLauncher.attachNewCardToAccount(paymentMethodCreateParams).getOrNull()
+                linkLauncher.attachNewCardToAccount(
+                    configuration,
+                    paymentMethodCreateParams
+                ).getOrNull()
             )
         }
     }
@@ -608,5 +624,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         internal const val SAVE_GOOGLE_PAY_READY = "google_pay_ready"
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
         internal const val SAVE_STATE_LIVE_MODE = "save_state_live_mode"
+        internal const val LINK_CONFIGURATION = "link_configuration"
     }
 }
