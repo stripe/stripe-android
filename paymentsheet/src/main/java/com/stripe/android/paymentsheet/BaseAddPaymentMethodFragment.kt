@@ -36,6 +36,7 @@ import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.utils.AnimationConstants
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
@@ -77,7 +78,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     LinkInlineSignup(
                         linkPaymentLauncher = sheetViewModel.linkLauncher,
                         enabled = !processing,
-                        onStateChanged = { viewState ->
+                        onStateChanged = { config, viewState ->
                             sheetViewModel.updatePrimaryButtonUIState(
                                 if (viewState.useLink) {
                                     val userInput = viewState.userInput
@@ -88,7 +89,10 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                                         PrimaryButton.UIState(
                                             label = null,
                                             onClick = {
-                                                sheetViewModel.payWithLinkInline(userInput)
+                                                sheetViewModel.payWithLinkInline(
+                                                    config,
+                                                    userInput
+                                                )
                                             },
                                             enabled = true,
                                             visible = true
@@ -224,7 +228,10 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 sheetViewModel.stripeIntent.value
                     ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) ?: false &&
                 selectedPaymentMethod.code == PaymentMethod.Type.Card.code &&
-                sheetViewModel.getLinkAccountStatus() == AccountStatus.SignedOut
+                sheetViewModel.linkConfiguration.value
+                ?.let {
+                    sheetViewModel.linkLauncher.getAccountStatusFlow(it).first()
+                } == AccountStatus.SignedOut
 
             viewBinding.linkInlineSignup.isVisible = showLinkInlineSignup.value
         }
