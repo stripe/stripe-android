@@ -16,39 +16,6 @@
     <ID>LongMethod:VerificationScreen.kt$@Composable internal fun VerificationBody( @StringRes headerStringResId: Int, @StringRes messageStringResId: Int, showChangeEmailMessage: Boolean, redactedPhoneNumber: String, email: String, otpElement: OTPElement, isProcessing: Boolean, errorMessage: ErrorMessage?, focusRequester: FocusRequester, onBack: () -> Unit, onChangeEmailClick: () -> Unit, onResendCodeClick: () -> Unit )</ID>
     <ID>LongMethod:WalletScreen.kt$@Composable internal fun WalletBody( uiState: WalletUiState, primaryButtonLabel: String, expiryDateController: TextFieldController, cvcController: CvcController, setExpanded: (Boolean) -> Unit, onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onAddNewPaymentMethodClick: () -> Unit, onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onSetDefault: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onPrimaryButtonClick: () -> Unit, onPayAnotherWayClick: () -> Unit, showBottomSheetContent: (BottomSheetContent?) -> Unit )</ID>
     <ID>LongMethod:WalletScreen.kt$@Composable private fun ExpandedPaymentDetails( uiState: WalletUiState, onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onMenuButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onAddNewPaymentMethodClick: () -> Unit, onCollapse: () -> Unit )</ID>
-    <ID>LongParameterList:CardEditScreen.kt$( isProcessing: Boolean, isDefault: Boolean, setAsDefaultChecked: Boolean, primaryButtonEnabled: Boolean, errorMessage: ErrorMessage?, onSetAsDefaultClick: (Boolean) -> Unit, onPrimaryButtonClick: () -> Unit, onCancelClick: () -> Unit, formContent: @Composable ColumnScope.() -> Unit )</ID>
-    <ID>LongParameterList:InlineSignupViewModel.kt$InlineSignupViewModel$( @Named(LINK_INTENT) val stripeIntent: StripeIntent, @Named(MERCHANT_NAME) val merchantName: String, @Named(CUSTOMER_EMAIL) customerEmail: String?, @Named(CUSTOMER_PHONE) customerPhone: String?, @Named(CUSTOMER_NAME) customerName: String?, private val linkAccountManager: LinkAccountManager, private val linkEventsReporter: LinkEventsReporter, private val logger: Logger )</ID>
-    <ID>LongParameterList:LinkInlineSignup.kt$( merchantName: String, emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, signUpState: SignUpState, enabled: Boolean, expanded: Boolean, requiresNameCollection: Boolean, errorMessage: ErrorMessage?, toggleExpanded: () -> Unit, modifier: Modifier = Modifier )</ID>
-    <ID>LongParameterList:LinkPaymentLauncher.kt$LinkPaymentLauncher$( context: Context, @Named(PRODUCT_USAGE) private val productUsage: Set&lt;String>, @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String, @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?, @Named(ENABLE_LOGGING) private val enableLogging: Boolean, @IOContext ioContext: CoroutineContext, @UIContext uiContext: CoroutineContext, paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory, analyticsRequestExecutor: AnalyticsRequestExecutor, stripeRepository: StripeRepository, addressResourceRepository: ResourceRepository&lt;AddressRepository> )</ID>
-    <ID>LongParameterList:LinkRepository.kt$LinkRepository$( email: String, phone: String, country: String, name: String?, authSessionCookie: String?, consentAction: ConsumerSignUpConsentAction )</ID>
-    <ID>LongParameterList:PaymentDetails.kt$( paymentDetails: ConsumerPaymentDetails.PaymentDetails, enabled: Boolean, isSupported: Boolean, isSelected: Boolean, isUpdating: Boolean, onClick: () -> Unit, onMenuButtonClick: () -> Unit )</ID>
-    <ID>LongParameterList:PaymentMethodBody.kt$( supportedPaymentMethods: List&lt;SupportedPaymentMethod>, selectedPaymentMethod: SupportedPaymentMethod, primaryButtonLabel: String, primaryButtonState: PrimaryButtonState, secondaryButtonLabel: String, errorMessage: ErrorMessage?, onPaymentMethodSelected: (SupportedPaymentMethod) -> Unit, onPrimaryButtonClick: () -> Unit, onSecondaryButtonClick: () -> Unit, formContent: @Composable ColumnScope.() -> Unit )</ID>
-    <ID>LongParameterList:PaymentMethodViewModel.kt$PaymentMethodViewModel$( val args: LinkActivityContract.Args, val linkAccount: LinkAccount, private val linkAccountManager: LinkAccountManager, private val navigator: Navigator, private val confirmationManager: ConfirmationManager, private val logger: Logger, private val formControllerProvider: Provider&lt;FormControllerSubcomponent.Builder> )</ID>
-    <ID>LongParameterList:SignUpScreen.kt$( merchantName: String, emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, signUpState: SignUpState, isReadyToSignUp: Boolean, requiresNameCollection: Boolean, errorMessage: ErrorMessage?, onSignUpClick: () -> Unit )</ID>
-    <ID>LongParameterList:VerificationScreen.kt$( @StringRes headerStringResId: Int, @StringRes messageStringResId: Int, showChangeEmailMessage: Boolean, linkAccount: LinkAccount, injector: NonFallbackInjector, onVerificationCompleted: (() -> Unit)? = null )</ID>
-    <ID>LongParameterList:VerificationScreen.kt$( @StringRes headerStringResId: Int, @StringRes messageStringResId: Int, showChangeEmailMessage: Boolean, redactedPhoneNumber: String, email: String, otpElement: OTPElement, isProcessing: Boolean, errorMessage: ErrorMessage?, focusRequester: FocusRequester, onBack: () -> Unit, onChangeEmailClick: () -> Unit, onResendCodeClick: () -> Unit )</ID>
-    <ID>LongParameterList:WalletScreen.kt$( uiState: WalletUiState, primaryButtonLabel: String, expiryDateController: TextFieldController, cvcController: CvcController, setExpanded: (Boolean) -> Unit, onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onAddNewPaymentMethodClick: () -> Unit, onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onSetDefault: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onPrimaryButtonClick: () -> Unit, onPayAnotherWayClick: () -> Unit, showBottomSheetContent: (BottomSheetContent?) -> Unit )</ID>
-    <ID>MagicNumber:Color.kt$0x1F0A2348</ID>
-    <ID>MagicNumber:Color.kt$0x2E747480</ID>
-    <ID>MagicNumber:Color.kt$0x2EFE87A1</ID>
-    <ID>MagicNumber:Color.kt$0x33787880</ID>
-    <ID>MagicNumber:Color.kt$0x5C787880</ID>
-    <ID>MagicNumber:Color.kt$0x61FFFFFF</ID>
-    <ID>MagicNumber:Color.kt$0x99000000</ID>
-    <ID>MagicNumber:Color.kt$0x99EBEBF5</ID>
-    <ID>MagicNumber:Color.kt$0xFF05A87F</ID>
-    <ID>MagicNumber:Color.kt$0xFF1AC59B</ID>
-    <ID>MagicNumber:Color.kt$0xFF1C1C1E</ID>
-    <ID>MagicNumber:Color.kt$0xFF1D3944</ID>
-    <ID>MagicNumber:Color.kt$0xFF30313D</ID>
-    <ID>MagicNumber:Color.kt$0xFF33DDB3</ID>
-    <ID>MagicNumber:Color.kt$0xFF6A7383</ID>
-    <ID>MagicNumber:Color.kt$0xFFA3ACBA</ID>
-    <ID>MagicNumber:Color.kt$0xFFE0E6EB</ID>
-    <ID>MagicNumber:Color.kt$0xFFEBEEF1</ID>
-    <ID>MagicNumber:Color.kt$0xFFEFF2F4</ID>
-    <ID>MagicNumber:Color.kt$0xFFF6F8FA</ID>
-    <ID>MagicNumber:Color.kt$0xFFFF2F4C</ID>
     <ID>MagicNumber:DefaultLinkEventsReporter.kt$DefaultLinkEventsReporter$1000f</ID>
     <ID>MagicNumber:PaymentDetails.kt$0.6f</ID>
     <ID>MagicNumber:PaymentMethodBody.kt$0.6f</ID>
@@ -76,16 +43,6 @@
     <ID>TopLevelPropertyNaming:PrimaryButton.kt$internal const val completedIconTestTag = "CompletedIcon"</ID>
     <ID>TopLevelPropertyNaming:PrimaryButton.kt$internal const val progressIndicatorTestTag = "CircularProgressIndicator"</ID>
     <ID>UnnecessaryAbstractClass:LinkComponent.kt$LinkComponent$LinkComponent</ID>
-    <ID>UnusedPrivateMember:ErrorText.kt$@Preview @Composable private fun ErrorTextPreview()</ID>
-    <ID>UnusedPrivateMember:LinkAppBar.kt$@Preview @Composable private fun LinkAppBarPreview()</ID>
-    <ID>UnusedPrivateMember:LinkAppBar.kt$@Preview @Composable private fun LinkAppBar_ChildScreen()</ID>
-    <ID>UnusedPrivateMember:LinkAppBar.kt$@Preview @Composable private fun LinkAppBar_ChildScreen_NoEmail()</ID>
-    <ID>UnusedPrivateMember:LinkAppBar.kt$@Preview @Composable private fun LinkAppBar_NoEmail()</ID>
-    <ID>UnusedPrivateMember:LinkTerms.kt$textAlign: TextAlign = TextAlign.Center</ID>
-    <ID>UnusedPrivateMember:PaymentMethodBody.kt$@Preview @Composable private fun PaymentMethodBodyPreview()</ID>
     <ID>UnusedPrivateMember:PaymentMethodViewModelTest.kt$PaymentMethodViewModelTest$private fun createFinancialConnectionsAccount(id: String = "id")</ID>
-    <ID>UnusedPrivateMember:SignUpScreen.kt$@Preview @Composable private fun SignUpBodyPreview()</ID>
-    <ID>UnusedPrivateMember:VerificationScreen.kt$@Preview @Composable private fun VerificationBodyPreview()</ID>
-    <ID>UnusedPrivateMember:WalletScreen.kt$@Preview @Composable private fun WalletBodyPreview()</ID>
   </CurrentIssues>
 </SmellBaseline>

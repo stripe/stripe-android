@@ -29,23 +29,11 @@
     <ID>LargeClass:MemoizeTest.kt$MemoizeTest</ID>
     <ID>LongMethod:DurationTest.kt$DurationTest$@Test @SmallTest fun reflective()</ID>
     <ID>LongMethod:Fetcher.kt$WebFetcher$override suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedData</ID>
-    <ID>LongParameterList:CombinePriors.kt$( trainedImageSize: Size, featureMapSize: Size, shrinkage: Size, boxSizeMin: Float, boxSizeMax: Float, aspectRatio: Float )</ID>
-    <ID>LongParameterList:Network.kt$Network$( stripePublishableKey: String, path: String, data: Request, requestSerializer: KSerializer&lt;Request>, responseSerializer: KSerializer&lt;Response>, errorSerializer: KSerializer&lt;Error> )</ID>
-    <ID>LongParameterList:SSD.kt$( scores: Array&lt;ClassifierScores>, boxes: Array&lt;RectForm>, probabilityThreshold: Float, intersectionOverUnionThreshold: Float, limit: Int?, classifierToLabel: (Int) -> Int = { it } )</ID>
-    <ID>LongParameterList:StripeApi.kt$( stripePublishableKey: String, civId: String, civSecret: String, instanceId: String, scanId: String?, device: Device, appDetails: AppDetails, scanStatistics: ScanStatistics, scanConfig: ScanConfig, payloadInfo: PayloadInfo? )</ID>
-    <ID>LongParameterList:StripeApi.kt$( stripePublishableKey: String, instanceId: String, scanId: String?, device: Device, appDetails: AppDetails, scanStatistics: ScanStatistics, scanConfig: ScanConfig )</ID>
     <ID>MagicNumber:BitmapExtensions.kt$100.0</ID>
-    <ID>MagicNumber:CardDetect.kt$224</ID>
     <ID>MagicNumber:CardExpiry.kt$100</ID>
     <ID>MagicNumber:CardExpiry.kt$12</ID>
     <ID>MagicNumber:CardExpiry.kt$31</ID>
     <ID>MagicNumber:CardExpiry.kt$4</ID>
-    <ID>MagicNumber:CardImageVerificationActivity.kt$1067</ID>
-    <ID>MagicNumber:CardImageVerificationActivity.kt$600</ID>
-    <ID>MagicNumber:CardScanActivity.kt$1067</ID>
-    <ID>MagicNumber:CardScanActivity.kt$600</ID>
-    <ID>MagicNumber:CardScanFragment.kt$1067</ID>
-    <ID>MagicNumber:CardScanFragment.kt$600</ID>
     <ID>MagicNumber:CombinePriors.kt$0.5F</ID>
     <ID>MagicNumber:CombinePriors.kt$12</ID>
     <ID>MagicNumber:CombinePriors.kt$16</ID>
@@ -61,68 +49,8 @@
     <ID>MagicNumber:Network.kt$LegacyStripeNetwork$300</ID>
     <ID>MagicNumber:NonMaximumSuppression.kt$0.00001f</ID>
     <ID>MagicNumber:NonMaximumSuppression.kt$200</ID>
-    <ID>MagicNumber:PanFormatter.kt$12</ID>
-    <ID>MagicNumber:PanFormatter.kt$13</ID>
-    <ID>MagicNumber:PanFormatter.kt$14</ID>
-    <ID>MagicNumber:PanFormatter.kt$15</ID>
-    <ID>MagicNumber:PanFormatter.kt$16</ID>
-    <ID>MagicNumber:PanFormatter.kt$17</ID>
-    <ID>MagicNumber:PanFormatter.kt$18</ID>
-    <ID>MagicNumber:PanFormatter.kt$19</ID>
-    <ID>MagicNumber:PanFormatter.kt$3</ID>
-    <ID>MagicNumber:PanFormatter.kt$4</ID>
-    <ID>MagicNumber:PanFormatter.kt$5</ID>
-    <ID>MagicNumber:PanFormatter.kt$6</ID>
     <ID>MagicNumber:PanValidator.kt$LuhnPanValidator$10</ID>
     <ID>MagicNumber:PanValidator.kt$LuhnPanValidator$9</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$14</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$15</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$16</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$19</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$222100</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$272099</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$3</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$300000</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$305999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$309500</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$309599</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$340000</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$349999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$352800</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$358999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$360000</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$369999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$370000</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$379999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$380000</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$399999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$4</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$400000</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$499999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$500000</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$509999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$510000</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$559999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$560000</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$601100</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$601199</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$620000</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$622126</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$622925</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$624000</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$626999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$628200</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$628899</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$629999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$640000</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$659999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$675900</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$675999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$676770</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$676774</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$699999</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$810000</ID>
-    <ID>MagicNumber:PaymentCardUtils.kt$819999</ID>
     <ID>MagicNumber:RectForm.kt$1000F</ID>
     <ID>MagicNumber:RectForm.kt$3</ID>
     <ID>MagicNumber:SSDOcr.kt$SSDOcr$10</ID>
@@ -130,8 +58,6 @@
     <ID>MagicNumber:ScanFragment.kt$ScanFragment$1500</ID>
     <ID>MagicNumber:SimpleScanActivity.kt$SimpleScanActivity$128</ID>
     <ID>MagicNumber:SizeAndCenter.kt$3</ID>
-    <ID>MagicNumber:StripeApi.kt$500</ID>
-    <ID>MagicNumber:StripeApi.kt$599</ID>
     <ID>MagicNumber:Yolo.kt$3</ID>
     <ID>MagicNumber:Yolo.kt$4</ID>
     <ID>MagicNumber:Yolo.kt$5</ID>
