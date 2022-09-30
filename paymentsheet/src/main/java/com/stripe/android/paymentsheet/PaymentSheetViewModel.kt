@@ -441,12 +441,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 .isNotEmpty()
         ) {
             viewModelScope.launch {
-                val configuration = createLinkConfiguration(stripeIntent).also {
+                val linkConfig = createLinkConfiguration(stripeIntent).also {
                     _linkConfiguration.value = it
                 }
-                val accountStatus = linkLauncher.getAccountStatusFlow(configuration).first()
+                val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
                 when (accountStatus) {
-                    AccountStatus.Verified -> launchLink(configuration, launchedDirectly = true)
+                    AccountStatus.Verified -> launchLink(linkConfig, launchedDirectly = true)
                     AccountStatus.VerificationStarted,
                     AccountStatus.NeedsVerification -> {
                         linkVerificationCallback = { success ->
@@ -454,7 +454,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             _showLinkVerificationDialog.value = false
 
                             if (success) {
-                                launchLink(configuration, launchedDirectly = true)
+                                launchLink(linkConfig, launchedDirectly = true)
                             }
                         }
                         _showLinkVerificationDialog.value = true

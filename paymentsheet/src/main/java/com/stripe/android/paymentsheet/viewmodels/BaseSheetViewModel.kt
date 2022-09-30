@@ -507,12 +507,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
 
             viewModelScope.launch {
-                val configuration = requireNotNull(linkConfiguration.value)
-                when (linkLauncher.getAccountStatusFlow(configuration).first()) {
+                val linkConfig = requireNotNull(linkConfiguration.value)
+                when (linkLauncher.getAccountStatusFlow(linkConfig).first()) {
                     AccountStatus.Verified -> {
                         activeLinkSession.value = true
                         completeLinkInlinePayment(
-                            configuration,
+                            linkConfig,
                             params,
                             userInput is UserInput.SignIn
                         )
@@ -526,7 +526,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
                             if (success) {
                                 completeLinkInlinePayment(
-                                    configuration,
+                                    linkConfig,
                                     params,
                                     userInput is UserInput.SignIn
                                 )
@@ -539,7 +539,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     }
                     AccountStatus.SignedOut -> {
                         activeLinkSession.value = false
-                        linkLauncher.signInWithUserInput(configuration, userInput).fold(
+                        linkLauncher.signInWithUserInput(linkConfig, userInput).fold(
                             onSuccess = {
                                 // If successful, the account was fetched or created, so try again
                                 payWithLinkInline(userInput)
