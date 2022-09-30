@@ -26,7 +26,6 @@
     <ID>FunctionOnlyReturningConstant:AppDetails.kt$private fun getApplicationId(): String</ID>
     <ID>FunctionOnlyReturningConstant:Device.kt$@SuppressLint("HardwareIds") private fun getAndroidId()</ID>
     <ID>FunctionOnlyReturningConstant:Device.kt$internal fun getPlatform()</ID>
-    <ID>ImportOrdering:com.stripe.android.stripecardscan.cardimageverification.result.MainLoopAggregator.kt:3</ID>
     <ID>LargeClass:MemoizeTest.kt$MemoizeTest</ID>
     <ID>LongMethod:DurationTest.kt$DurationTest$@Test @SmallTest fun reflective()</ID>
     <ID>LongMethod:Fetcher.kt$WebFetcher$override suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedData</ID>
