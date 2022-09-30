@@ -4,9 +4,11 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.model.StripeIntentFixtures
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.FakeAndroidKeyStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -44,9 +46,10 @@ class LinkPaymentLauncherTest {
     }
 
     @Test
-    fun `verify component is reused for same configuration`() {
-        val component = linkPaymentLauncher.component
+    fun `verify component is reused for same configuration`() = runTest {
         linkPaymentLauncher.getAccountStatusFlow(config)
+        val component = linkPaymentLauncher.component
+        linkPaymentLauncher.signInWithUserInput(config, mock<UserInput.SignIn>())
         assertThat(linkPaymentLauncher.component).isEqualTo(component)
     }
 
