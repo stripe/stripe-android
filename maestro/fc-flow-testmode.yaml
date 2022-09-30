@@ -17,17 +17,17 @@ appId: com.stripe.android.financialconnections.example
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
     visible: "Agree"
-    timeout: 1000000
+    timeout: 100000
 - takeScreenshot: Consent
 - tapOn: "Agree"
 - extendedWaitUntil:
     visible: "Test Institution"
-    timeout: 50000
+    timeout: 100000
 - takeScreenshot: BankPicker
 - tapOn: "Test Institution"
 - extendedWaitUntil:
     visible: "All accounts"
-    timeout: 50000
+    timeout: 100000
 - takeScreenshot: AccountPicker_AllAccounts
 - tapOn: "All accounts" # deselect all accounts
 - scroll
@@ -36,7 +36,7 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Link account"
 - extendedWaitUntil:
       visible: "Done"
-      timeout: 50000
+      timeout: 100000
 - takeScreenshot: Success
 - tapOn: "Done"
 # Android specific: Assert the connected account displays on the sample app.
