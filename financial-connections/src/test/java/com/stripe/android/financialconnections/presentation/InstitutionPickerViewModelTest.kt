@@ -13,8 +13,10 @@ import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerViewModel
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -24,6 +26,7 @@ import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
+@ExperimentalCoroutinesApi
 internal class InstitutionPickerViewModelTest {
 
     @get:Rule
@@ -66,6 +69,8 @@ internal class InstitutionPickerViewModelTest {
                 )
             )
         )
+
+        givenManifestReturns(ApiKeyFixtures.sessionManifest())
         givenFeaturedInstitutionsReturns(institutionResponse)
 
         val viewModel = buildViewModel(InstitutionPickerState())
@@ -103,6 +108,8 @@ internal class InstitutionPickerViewModelTest {
                 )
             )
         )
+
+        givenManifestReturns(ApiKeyFixtures.sessionManifest())
         givenFeaturedInstitutionsReturns(featuredResults)
         givenSearchInstitutionsReturns(query, searchResults)
 
@@ -114,6 +121,10 @@ internal class InstitutionPickerViewModelTest {
             assertEquals(state.payload()!!.featuredInstitutions.data, featuredResults.data)
             assertEquals(state.searchInstitutions()!!.data, searchResults.data)
         }
+    }
+
+    private suspend fun givenManifestReturns(manifest: FinancialConnectionsSessionManifest) {
+        whenever(getManifest()).thenReturn(manifest)
     }
 
     private suspend fun givenSearchInstitutionsReturns(
