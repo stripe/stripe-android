@@ -17,7 +17,7 @@ appId: com.stripe.android.financialconnections.example
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
     visible: "Agree"
-    timeout: 50000
+    timeout: 1000000
 - takeScreenshot: Consent
 - tapOn: "Agree"
 - extendedWaitUntil:
