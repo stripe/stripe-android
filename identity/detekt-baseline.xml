@@ -9,14 +9,6 @@
     <ID>EmptyFunctionBlock:IdentityCameraScanFragmentTest.kt$IdentityCameraScanFragmentTest.TestFragment${ }</ID>
     <ID>EmptyFunctionBlock:IdentityCameraScanFragmentTest.kt$IdentityCameraScanFragmentTest.TestFragment${}</ID>
     <ID>ForbiddenComment:ConsentScreenTest.kt$ConsentScreenTest$// TODO: assert text after migrating to compose Text</ID>
-    <ID>FunctionNaming:ComposeLoadingButton.kt$@Composable internal fun LoadingButton( modifier: Modifier = Modifier, text: String, state: LoadingButtonState, onClick: () -> Unit )</ID>
-    <ID>FunctionNaming:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( verificationPageState: Resource&lt;VerificationPage>?, onConfirmed: () -> Unit )</ID>
-    <ID>FunctionNaming:ConsentScreen.kt$@Composable internal fun ConsentScreen( verificationState: Resource&lt;VerificationPage>, onMerchantViewCreated: (ImageView) -> Unit, onSuccess: (VerificationPage) -> Unit, onFallbackUrl: (String) -> Unit, onError: (Throwable) -> Unit, onConsentAgreed: (Boolean) -> Unit, onConsentDeclined: (Boolean) -> Unit )</ID>
-    <ID>FunctionNaming:ConsentScreen.kt$@Composable private fun LoadingUI()</ID>
-    <ID>FunctionNaming:ConsentScreen.kt$@Composable private fun SuccessUI( verificationPage: VerificationPage, onMerchantViewCreated: (ImageView) -> Unit, onConsentAgreed: (Boolean) -> Unit, onConsentDeclined: (Boolean) -> Unit )</ID>
-    <ID>FunctionNaming:DocSelectionScreen.kt$@Composable internal fun DocSelectionScreen( verificationPageState: Resource&lt;VerificationPage>?, onDocTypeSelected: (Type, Boolean) -> Unit )</ID>
-    <ID>FunctionNaming:DocSelectionScreen.kt$@Composable internal fun MultiSelection( idDocumentTypeAllowlist: Map&lt;String, String>, requireSelfie: Boolean, onDocTypeSelected: (Type, Boolean) -> Unit )</ID>
-    <ID>FunctionNaming:DocSelectionScreen.kt$@Composable internal fun SingleSelection( allowedType: String, buttonText: String, bodyText: String?, requireSelfie: Boolean, onDocTypeSelected: (Type, Boolean) -> Unit )</ID>
     <ID>FunctionOnlyReturningConstant:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$private fun isFaceFocused(): Boolean</ID>
     <ID>LargeClass:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest</ID>
     <ID>LargeClass:IDScanFragmentTest.kt$IDScanFragmentTest</ID>
