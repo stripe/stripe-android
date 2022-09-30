@@ -533,7 +533,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         _showLinkVerificationDialog.value = true
                     }
                     AccountStatus.SignedOut,
-                        AccountStatus.Error -> {
+                    AccountStatus.Error -> {
                         activeLinkSession.value = false
                         linkLauncher.signInWithUserInput(configuration, userInput).fold(
                             onSuccess = {
