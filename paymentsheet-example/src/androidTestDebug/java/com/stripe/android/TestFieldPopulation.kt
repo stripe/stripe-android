@@ -15,6 +15,7 @@ import com.stripe.android.test.core.Browser
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
+import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
@@ -43,6 +44,9 @@ class TestFieldPopulation {
 
     @get:Rule
     val testWatcher = TestWatcher()
+
+    @get:Rule
+    val disableAnimations = DisableAnimationsRule()
 
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver

@@ -6,6 +6,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
+import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
@@ -39,6 +40,9 @@ class TestHardCodedLpms {
 
     @get:Rule
     val testWatcher = TestWatcher()
+
+    @get:Rule
+    val disableAnimations = DisableAnimationsRule()
 
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
