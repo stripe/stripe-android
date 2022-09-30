@@ -18,55 +18,6 @@
     <ID>EmptyFunctionBlock:CardNumberViewOnlyController.kt$CardNumberViewOnlyController${}</ID>
     <ID>ForbiddenComment:LpmRepository.kt$LpmRepository$// TODO: Unconditionally enable this when we release UPI</ID>
     <ID>ForbiddenComment:Menu.kt$// TODO: Make sure this gets the rounded corner values</ID>
-    <ID>FunctionNaming:AddressElementUI.kt$@Composable internal fun AddressElementUI( enabled: Boolean, controller: AddressController, hiddenIdentifiers: Set&lt;IdentifierSpec>, lastTextFieldIdentifier: IdentifierSpec? )</ID>
-    <ID>FunctionNaming:AddressTextFieldUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun AddressTextFieldUI( controller: AddressTextFieldController, onClick: () -> Unit = { controller.launchAutocompleteScreen() } )</ID>
-    <ID>FunctionNaming:AffirmElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun AffirmElementUI()</ID>
-    <ID>FunctionNaming:AfterpayClearpayElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun AfterpayClearpayElementUI( enabled: Boolean, element: AfterpayClearpayHeaderElement )</ID>
-    <ID>FunctionNaming:AndroidMenu.kt$@Composable internal fun DropdownMenuItem( onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, contentPadding: PaddingValues = MenuDefaults.DropdownMenuItemContentPadding, interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }, content: @Composable RowScope.() -> Unit )</ID>
-    <ID>FunctionNaming:AndroidMenu.kt$@Suppress("ModifierParameter") @Composable internal fun DropdownMenu( expanded: Boolean, initialFirstVisibleItemIndex: Int, onDismissRequest: () -> Unit, modifier: Modifier = Modifier, offset: DpOffset = DpOffset(0.dp, 0.dp), properties: PopupProperties = PopupProperties(focusable = true), content: LazyListScope.() -> Unit )</ID>
-    <ID>FunctionNaming:AuBecsDebitMandateElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun AuBecsDebitMandateElementUI( element: AuBecsDebitMandateTextElement )</ID>
-    <ID>FunctionNaming:BsbElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun BsbElementUI( enabled: Boolean, element: BsbElement, lastTextFieldIdentifier: IdentifierSpec? )</ID>
-    <ID>FunctionNaming:CardDetailsElementUI.kt$@Composable internal fun CardDetailsElementUI( enabled: Boolean, controller: CardDetailsController, hiddenIdentifiers: Set&lt;IdentifierSpec>, lastTextFieldIdentifier: IdentifierSpec? )</ID>
-    <ID>FunctionNaming:CardDetailsSectionElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun CardDetailsSectionElementUI( enabled: Boolean, controller: CardDetailsSectionController, hiddenIdentifiers: Set&lt;IdentifierSpec>, lastTextFieldIdentifier: IdentifierSpec? )</ID>
-    <ID>FunctionNaming:Checkbox.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Checkbox( checked: Boolean, onCheckedChange: ((Boolean) -> Unit)?, modifier: Modifier = Modifier, enabled: Boolean = true )</ID>
-    <ID>FunctionNaming:CheckboxElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun CheckboxElementUI( automationTestTag: String = "", isChecked: Boolean = false, label: String? = null, isEnabled: Boolean = false, onValueChange: (Boolean) -> Unit )</ID>
-    <ID>FunctionNaming:DropdownFieldUI.kt$@Composable internal fun DropDown( controller: DropdownFieldController, enabled: Boolean, modifier: Modifier = Modifier )</ID>
-    <ID>FunctionNaming:DropdownFieldUI.kt$@Composable internal fun DropdownMenuItem( displayValue: String, isSelected: Boolean, currentTextColor: Color, onClick: () -> Unit = {} )</ID>
-    <ID>FunctionNaming:FormLabel.kt$@Composable internal fun FormLabel( text: String, modifier: Modifier = Modifier, enabled: Boolean = true )</ID>
-    <ID>FunctionNaming:FormUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun FormUI( hiddenIdentifiers: Set&lt;IdentifierSpec>, enabled: Boolean, elements: List&lt;FormElement>?, lastTextFieldIdentifier: IdentifierSpec?, loadingComposable: @Composable ColumnScope.() -> Unit, modifier: Modifier = Modifier )</ID>
-    <ID>FunctionNaming:FormUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun FormUI( hiddenIdentifiersFlow: Flow&lt;Set&lt;IdentifierSpec>>, enabledFlow: Flow&lt;Boolean>, elementsFlow: Flow&lt;List&lt;FormElement>?>, lastTextFieldIdentifierFlow: Flow&lt;IdentifierSpec?>, loadingComposable: @Composable ColumnScope.() -> Unit, modifier: Modifier = Modifier )</ID>
-    <ID>FunctionNaming:H4Text.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun H4Text( text: String, modifier: Modifier = Modifier )</ID>
-    <ID>FunctionNaming:H6Text.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun H6Text( text: String, modifier: Modifier = Modifier )</ID>
-    <ID>FunctionNaming:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Html( html: String, imageGetter: Map&lt;String, EmbeddableImage>, color: Color, style: TextStyle, modifier: Modifier = Modifier, enabled: Boolean = true, urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline), imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline )</ID>
-    <ID>FunctionNaming:Html.kt$@Composable private fun ClickableText( text: AnnotatedString, modifier: Modifier = Modifier, inlineContent: Map&lt;String, InlineTextContent> = mapOf(), color: Color = MaterialTheme.paymentsColors.subtitle, style: TextStyle = MaterialTheme.typography.body2, softWrap: Boolean = true, overflow: TextOverflow = TextOverflow.Clip, maxLines: Int = Int.MAX_VALUE, onTextLayout: (TextLayoutResult) -> Unit = {}, onClick: (Int) -> Unit )</ID>
-    <ID>FunctionNaming:HyperlinkedText.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun HyperlinkedText( text: String, modifier: Modifier = Modifier, color: Color = Color.Unspecified, style: TextStyle = LocalTextStyle.current )</ID>
-    <ID>FunctionNaming:IdentifierSpec.kt$IdentifierSpec.Companion$fun Generic(_value: String)</ID>
-    <ID>FunctionNaming:MandateTextUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun MandateTextUI( element: MandateTextElement )</ID>
-    <ID>FunctionNaming:MeasureComposableWidth.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun MeasureComposableWidth( composable: @Composable () -> Unit, content: @Composable (width: Dp) -> Unit )</ID>
-    <ID>FunctionNaming:Menu.kt$@Composable internal fun DropdownMenuItemContent( onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, contentPadding: PaddingValues = MenuDefaults.DropdownMenuItemContentPadding, interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }, content: @Composable RowScope.() -> Unit )</ID>
-    <ID>FunctionNaming:Menu.kt$@Suppress("ModifierParameter") @Composable internal fun DropdownMenuContent( expandedStates: MutableTransitionState&lt;Boolean>, transformOriginState: MutableState&lt;TransformOrigin>, initialFirstVisibleItemIndex: Int, modifier: Modifier = Modifier, content: LazyListScope.() -> Unit )</ID>
-    <ID>FunctionNaming:OTPElementUI.kt$@OptIn(ExperimentalMaterialApi::class) @Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun OTPElementUI( enabled: Boolean, element: OTPElement, modifier: Modifier = Modifier, colors: OTPElementColors = OTPElementColors( selectedBorder = MaterialTheme.colors.primary, placeholder = MaterialTheme.paymentsColors.placeholderText ), focusRequester: FocusRequester = remember { FocusRequester() } )</ID>
-    <ID>FunctionNaming:PaymentsTheme.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun DefaultPaymentsTheme( content: @Composable () -> Unit )</ID>
-    <ID>FunctionNaming:PaymentsTheme.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun PaymentsTheme( colors: PaymentsColors = PaymentsTheme.getColors(isSystemInDarkTheme()), shapes: PaymentsShapes = PaymentsTheme.shapesMutable, typography: PaymentsTypography = PaymentsTheme.typographyMutable, content: @Composable () -> Unit )</ID>
-    <ID>FunctionNaming:PhoneNumberElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun PhoneNumberCollectionSection( enabled: Boolean, phoneNumberController: PhoneNumberController, @StringRes sectionTitle: Int? = null, requestFocusWhenShown: Boolean = false, imeAction: ImeAction = ImeAction.Done )</ID>
-    <ID>FunctionNaming:PhoneNumberElementUI.kt$@Composable internal fun PhoneNumberElementUI( enabled: Boolean, controller: PhoneNumberController, requestFocusWhenShown: Boolean = false, imeAction: ImeAction = ImeAction.Done )</ID>
-    <ID>FunctionNaming:RowElementUI.kt$@Composable internal fun RowElementUI( enabled: Boolean, controller: RowController, hiddenIdentifiers: Set&lt;IdentifierSpec>, lastTextFieldIdentifier: IdentifierSpec? )</ID>
-    <ID>FunctionNaming:SameAsShippingElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun SameAsShippingElementUI( controller: SameAsShippingController )</ID>
-    <ID>FunctionNaming:SaveForFutureUseElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun SaveForFutureUseElementUI( enabled: Boolean, element: SaveForFutureUseElement )</ID>
-    <ID>FunctionNaming:ScanCardButtonUI.kt$@Composable internal fun ScanCardButtonUI( enabled: Boolean, onResult: (intent: Intent) -> Unit )</ID>
-    <ID>FunctionNaming:SectionElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun SectionElementUI( enabled: Boolean, element: SectionElement, hiddenIdentifiers: Set&lt;IdentifierSpec>, lastTextFieldIdentifier: IdentifierSpec? )</ID>
-    <ID>FunctionNaming:SectionFieldElementUI.kt$@Composable internal fun SectionFieldElementUI( enabled: Boolean, field: SectionFieldElement, modifier: Modifier = Modifier, hiddenIdentifiers: Set&lt;IdentifierSpec> = emptySet(), lastTextFieldIdentifier: IdentifierSpec?, nextFocusDirection: FocusDirection = FocusDirection.Down, previousFocusDirection: FocusDirection = FocusDirection.Up )</ID>
-    <ID>FunctionNaming:SectionUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun SectionCard( modifier: Modifier = Modifier, isSelected: Boolean = false, border: BorderStroke = MaterialTheme.getBorderStroke(isSelected), content: @Composable () -> Unit )</ID>
-    <ID>FunctionNaming:SectionUI.kt$@Composable internal fun Section( @StringRes title: Int?, error: String?, contentOutsideCard: @Composable () -> Unit = {}, contentInCard: @Composable () -> Unit )</ID>
-    <ID>FunctionNaming:SectionUI.kt$@Composable internal fun SectionError(error: String)</ID>
-    <ID>FunctionNaming:SectionUI.kt$@Composable internal fun SectionTitle(@StringRes titleText: Int?)</ID>
-    <ID>FunctionNaming:SimpleDialogElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun SimpleDialogElementUI( openDialog: MutableState&lt;Boolean>, titleText: String, messageText: String, confirmText: String, dismissText: String, onConfirmListener: (() -> Unit) = {}, onDismissListener: (() -> Unit) = {} )</ID>
-    <ID>FunctionNaming:StaticTextElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun StaticTextElementUI( element: StaticTextElement )</ID>
-    <ID>FunctionNaming:TextFieldUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun TextFieldColors( shouldShowError: Boolean = false )</ID>
-    <ID>FunctionNaming:TextFieldUI.kt$@Composable fun AnimatedIcons( icons: List&lt;TextFieldIcon.Trailing>, loading: Boolean )</ID>
-    <ID>FunctionNaming:TextFieldUI.kt$@Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
-    <ID>FunctionNaming:TextFieldUI.kt$@Composable fun TextFieldSection( textFieldController: TextFieldController, imeAction: ImeAction, enabled: Boolean, modifier: Modifier = Modifier, @StringRes sectionTitle: Int? = null, onTextStateChanged: (TextFieldState?) -> Unit = {} )</ID>
-    <ID>FunctionNaming:TextFieldUI.kt$@Composable internal fun TrailingIcon( trailingIcon: TextFieldIcon.Trailing, loading: Boolean )</ID>
     <ID>FunctionParameterNaming:IdentifierSpec.kt$IdentifierSpec.Companion$_value: String</ID>
     <ID>ImplicitDefaultLocale:CurrencyFormatterTest.kt$CurrencyFormatterTest$String.format("%s, ", it.currencyCode)</ID>
     <ID>ImplicitDefaultLocale:DateConfigTest.kt$DateConfigTest$String.format( "%d%d", get1BasedCurrentMonth() + 1 % 12, Calendar.getInstance().get(Calendar.YEAR) % 100 )</ID>
@@ -87,25 +38,8 @@
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test US address with sublocality`()</ID>
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test US address without sublocality`()</ID>
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test should not combine dependent locality - US`()</ID>
-    <ID>LongParameterList:AddressElement.kt$AddressElement$( _identifier: IdentifierSpec, private val addressRepository: AddressRepository, private var rawValuesMap: Map&lt;IdentifierSpec, String?> = emptyMap(), private val addressType: AddressType = AddressType.Normal(), countryCodes: Set&lt;String> = emptySet(), countryDropdownFieldController: DropdownFieldController = DropdownFieldController( CountryConfig(countryCodes), rawValuesMap[IdentifierSpec.Country] ), sameAsShippingElement: SameAsShippingElement?, shippingValuesMap: Map&lt;IdentifierSpec, String?>? )</ID>
-    <ID>LongParameterList:AndroidMenu.kt$( expanded: Boolean, initialFirstVisibleItemIndex: Int, onDismissRequest: () -> Unit, modifier: Modifier = Modifier, offset: DpOffset = DpOffset(0.dp, 0.dp), properties: PopupProperties = PopupProperties(focusable = true), content: LazyListScope.() -> Unit )</ID>
-    <ID>LongParameterList:AndroidMenu.kt$( onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, contentPadding: PaddingValues = MenuDefaults.DropdownMenuItemContentPadding, interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }, content: @Composable RowScope.() -> Unit )</ID>
-    <ID>LongParameterList:CardBillingAddressElement.kt$CardBillingAddressElement$( identifier: IdentifierSpec, rawValuesMap: Map&lt;IdentifierSpec, String?> = emptyMap(), addressRepository: AddressRepository, countryCodes: Set&lt;String> = emptySet(), countryDropdownFieldController: DropdownFieldController = DropdownFieldController( CountryConfig(countryCodes), rawValuesMap[IdentifierSpec.Country] ), sameAsShippingElement: SameAsShippingElement?, shippingValuesMap: Map&lt;IdentifierSpec, String?>? )</ID>
-    <ID>LongParameterList:FormControllerModule.kt$FormControllerModule.Companion$( addressResourceRepository: ResourceRepository&lt;AddressRepository>, context: Context, merchantName: String, stripeIntent: StripeIntent?, @Named(INITIAL_VALUES) initialValues: Map&lt;IdentifierSpec, String?>, @Named(SHIPPING_VALUES) shippingValues: Map&lt;IdentifierSpec, String?>?, viewOnlyFields: Set&lt;IdentifierSpec> )</ID>
-    <ID>LongParameterList:FormUI.kt$( hiddenIdentifiers: Set&lt;IdentifierSpec>, enabled: Boolean, elements: List&lt;FormElement>?, lastTextFieldIdentifier: IdentifierSpec?, loadingComposable: @Composable ColumnScope.() -> Unit, modifier: Modifier = Modifier )</ID>
-    <ID>LongParameterList:FormUI.kt$( hiddenIdentifiersFlow: Flow&lt;Set&lt;IdentifierSpec>>, enabledFlow: Flow&lt;Boolean>, elementsFlow: Flow&lt;List&lt;FormElement>?>, lastTextFieldIdentifierFlow: Flow&lt;IdentifierSpec?>, loadingComposable: @Composable ColumnScope.() -> Unit, modifier: Modifier = Modifier )</ID>
-    <ID>LongParameterList:Html.kt$( html: String, imageGetter: Map&lt;String, EmbeddableImage>, color: Color, style: TextStyle, modifier: Modifier = Modifier, enabled: Boolean = true, urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline), imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline )</ID>
-    <ID>LongParameterList:Html.kt$( text: AnnotatedString, modifier: Modifier = Modifier, inlineContent: Map&lt;String, InlineTextContent> = mapOf(), color: Color = MaterialTheme.paymentsColors.subtitle, style: TextStyle = MaterialTheme.typography.body2, softWrap: Boolean = true, overflow: TextOverflow = TextOverflow.Clip, maxLines: Int = Int.MAX_VALUE, onTextLayout: (TextLayoutResult) -> Unit = {}, onClick: (Int) -> Unit )</ID>
-    <ID>LongParameterList:Menu.kt$( onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, contentPadding: PaddingValues = MenuDefaults.DropdownMenuItemContentPadding, interactionSource: MutableInteractionSource = remember { MutableInteractionSource() }, content: @Composable RowScope.() -> Unit )</ID>
-    <ID>LongParameterList:SectionFieldElementUI.kt$( enabled: Boolean, field: SectionFieldElement, modifier: Modifier = Modifier, hiddenIdentifiers: Set&lt;IdentifierSpec> = emptySet(), lastTextFieldIdentifier: IdentifierSpec?, nextFocusDirection: FocusDirection = FocusDirection.Down, previousFocusDirection: FocusDirection = FocusDirection.Up )</ID>
-    <ID>LongParameterList:SimpleDialogElementUI.kt$( openDialog: MutableState&lt;Boolean>, titleText: String, messageText: String, confirmText: String, dismissText: String, onConfirmListener: (() -> Unit) = {}, onDismissListener: (() -> Unit) = {} )</ID>
-    <ID>LongParameterList:TextFieldUI.kt$( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
-    <ID>LongParameterList:TextFieldUI.kt$( textFieldController: TextFieldController, imeAction: ImeAction, enabled: Boolean, modifier: Modifier = Modifier, @StringRes sectionTitle: Int? = null, onTextStateChanged: (TextFieldState?) -> Unit = {} )</ID>
-    <ID>LongParameterList:TransformAddressToElement.kt$( identifierSpec: IdentifierSpec, label: Int, capitalization: KeyboardCapitalization, keyboardType: KeyboardType, countryCode: String, showOptionalLabel: Boolean )</ID>
-    <ID>LongParameterList:TransformSpecToElements.kt$TransformSpecToElements$( private val addressResourceRepository: ResourceRepository&lt;AddressRepository>, private val initialValues: Map&lt;IdentifierSpec, String?>, private val shippingValues: Map&lt;IdentifierSpec, String?>?, private val amount: Amount?, private val saveForFutureUseInitialValue: Boolean, private val merchantName: String, private val context: Context, private val viewOnlyFields: Set&lt;IdentifierSpec> = emptySet() )</ID>
     <ID>MagicNumber:AfterpayClearpayHeaderElement.kt$AfterpayClearpayHeaderElement$3</ID>
     <ID>MagicNumber:AfterpayClearpayHeaderElement.kt$AfterpayClearpayHeaderElement$4</ID>
-    <ID>MagicNumber:BsbConfig.kt$BsbConfig.&lt;no name provided>$3</ID>
     <ID>MagicNumber:CardDetailsElement.kt$2000</ID>
     <ID>MagicNumber:CardDetailsElement.kt$4</ID>
     <ID>MagicNumber:CardNumberController.kt$CardNumberEditableController$3</ID>
@@ -135,24 +69,12 @@
     <ID>MagicNumber:DropdownFieldUI.kt$8.9f</ID>
     <ID>MagicNumber:Html.kt$0.1f</ID>
     <ID>MagicNumber:IbanConfig.kt$IbanConfig$10</ID>
-    <ID>MagicNumber:IbanConfig.kt$IbanConfig$3</ID>
     <ID>MagicNumber:IbanConfig.kt$IbanConfig$4</ID>
-    <ID>MagicNumber:IbanConfig.kt$IbanConfig.&lt;no name provided>$4</ID>
-    <ID>MagicNumber:IbanConfig.kt$IbanConfig.&lt;no name provided>$5</ID>
     <ID>MagicNumber:LpmRepository.kt$LpmRepository$20</ID>
     <ID>MagicNumber:Menu.kt$0.8f</ID>
     <ID>MagicNumber:PaymentsTheme.kt$0.15</ID>
     <ID>MagicNumber:PaymentsTheme.kt$0.32</ID>
     <ID>MagicNumber:PaymentsTheme.kt$3</ID>
-    <ID>MagicNumber:PaymentsTheme.kt$PaymentsThemeDefaults$0x33787880</ID>
-    <ID>MagicNumber:PaymentsTheme.kt$PaymentsThemeDefaults$0x61FFFFFF</ID>
-    <ID>MagicNumber:PaymentsTheme.kt$PaymentsThemeDefaults$0x99000000</ID>
-    <ID>MagicNumber:PaymentsTheme.kt$PaymentsThemeDefaults$0x993C3C43</ID>
-    <ID>MagicNumber:PaymentsTheme.kt$PaymentsThemeDefaults$0x99FFFFFF</ID>
-    <ID>MagicNumber:PaymentsTheme.kt$PaymentsThemeDefaults$0xFF0074D4</ID>
-    <ID>MagicNumber:PaymentsTheme.kt$PaymentsThemeDefaults$0xFF007AFF</ID>
-    <ID>MagicNumber:PaymentsTheme.kt$PaymentsThemeDefaults$0xFF787880</ID>
-    <ID>MagicNumber:PaymentsTheme.kt$PaymentsThemeDefaults$0xff2e2e2e</ID>
     <ID>MagicNumber:PhoneNumberController.kt$PhoneNumberController.Companion$4</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$3</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$5</ID>
@@ -195,8 +117,6 @@
     <ID>TooGenericExceptionCaught:PlacesClientProxy.kt$DefaultPlacesClientProxy$e: Exception</ID>
     <ID>TooManyFunctions:LpmRepository.kt$LpmRepository</ID>
     <ID>TooManyFunctions:PaymentsTheme.kt$com.stripe.android.ui.core.PaymentsTheme.kt</ID>
-    <ID>TopLevelPropertyNaming:Menu.kt$// Menu open/close animation. internal const val InTransitionDuration = 120</ID>
-    <ID>TopLevelPropertyNaming:Menu.kt$internal const val OutTransitionDuration = 75</ID>
     <ID>UnnecessaryAbstractClass:FormControllerModule.kt$FormControllerModule$FormControllerModule</ID>
     <ID>UnnecessaryAbstractClass:ResourceRepositoryModule.kt$ResourceRepositoryModule$ResourceRepositoryModule</ID>
     <ID>UtilityClassWithPublicConstructor:CurrencyFormatter.kt$CurrencyFormatter</ID>

@@ -21,10 +21,6 @@
     <ID>ForbiddenComment:Memoize.kt$CachedFirstResultSuspend3$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
     <ID>ForbiddenComment:NV21Image.kt$NV21Image$* https://github.com/silvaren/easyrs/blob/c8eed0f0b713bbb1eb375aca23d615677e8adb3c/easyrs/src/main/java/io/github/silvaren/easyrs/tools/YuvToRgb.java * * TODO: once the renderscript toolkit is available in maven central, replace this method with * the yuvToRgbBitmap from that https://github.com/android/renderscript-intrinsics-replacement-toolkit/blob/main/renderscript-toolkit/src/main/java/com/google/android/renderscript/Toolkit.kt#L1079</ID>
     <ID>LongMethod:Layout.kt$@CheckResult @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Size.resizeRegion( originalRegion: Rect, newRegion: Rect, newSize: Size ): Map&lt;Rect, Rect></ID>
-    <ID>LongParameterList:NV21Image.kt$( width: Int, height: Int, planeBuffers: Array&lt;ByteBuffer>, rowStrides: IntArray, pixelStrides: IntArray, format: Int, crop: Rect = Rect(0, 0, width, height) )</ID>
-    <ID>LongParameterList:ScanFlow.kt$ScanFlow$( context: Context, imageStream: Flow&lt;DataType>, viewFinder: Rect, lifecycleOwner: LifecycleOwner, coroutineScope: CoroutineScope, parameters: Parameters )</ID>
-    <ID>MagicNumber:Camera1Adapter.kt$1080</ID>
-    <ID>MagicNumber:Camera1Adapter.kt$1920</ID>
     <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter$1.5</ID>
     <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter$1000</ID>
     <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter$150</ID>
@@ -32,13 +28,6 @@
     <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter.CameraPreview$8</ID>
     <ID>MagicNumber:CameraAdapter.kt$CameraAdapter.Companion$90</ID>
     <ID>MagicNumber:Duration.kt$10</ID>
-    <ID>MagicNumber:Duration.kt$DurationNanoseconds$1000</ID>
-    <ID>MagicNumber:Duration.kt$DurationNanoseconds$1000.0</ID>
-    <ID>MagicNumber:Duration.kt$DurationNanoseconds$12</ID>
-    <ID>MagicNumber:Duration.kt$DurationNanoseconds$24</ID>
-    <ID>MagicNumber:Duration.kt$DurationNanoseconds$365.25</ID>
-    <ID>MagicNumber:Duration.kt$DurationNanoseconds$60</ID>
-    <ID>MagicNumber:Duration.kt$DurationNanoseconds$7</ID>
     <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$1000</ID>
     <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$12</ID>
     <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$24</ID>
