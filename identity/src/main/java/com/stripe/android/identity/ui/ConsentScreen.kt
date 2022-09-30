@@ -43,6 +43,16 @@ import com.stripe.android.identity.networking.models.VerificationPage.Companion.
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.utils.setHtmlString
 
+internal const val TITLE_TAG = "Title"
+internal const val TIME_ESTIMATE_TAG = "TimeEstimate"
+internal const val PRIVACY_POLICY_TAG = "PrivacyPolicy"
+internal const val DIVIDER_TAG = "divider"
+internal const val BODY_TAG = "Body"
+internal const val ACCEPT_BUTTON_TAG = "Accept"
+internal const val DECLINE_BUTTON_TAG = "Decline"
+internal const val LOADING_SCREEN_TAG = "Loading"
+internal const val SCROLLABLE_COLUMN_TAG = "ScrollableColumn"
+
 @Composable
 internal fun ConsentScreen(
     verificationState: Resource<VerificationPage>,
@@ -90,17 +100,6 @@ internal fun ConsentScreen(
     }
 }
 
-internal const val titleTag = "Title"
-internal const val timeEstimateTag = "TimeEstimate"
-internal const val privacyPolicyTag = "PrivacyPolicy"
-internal const val dividerTag = "divider"
-internal const val bodyTag = "Body"
-internal const val acceptButtonTag = "Accept"
-internal const val scrollToAcceptButtonTag = "ScrollToAccept"
-internal const val declineButtonTag = "Decline"
-internal const val loadingScreenTag = "Loading"
-internal const val scrollableColumn = "ScrollableColumn"
-
 @Composable
 private fun SuccessUI(
     verificationPage: VerificationPage,
@@ -127,7 +126,7 @@ private fun SuccessUI(
                 .weight(1f)
                 .verticalScroll(scrollState)
                 .semantics {
-                    testTag = scrollableColumn
+                    testTag = SCROLLABLE_COLUMN_TAG
                 }
         ) {
             Row(
@@ -168,7 +167,7 @@ private fun SuccessUI(
                         )
                     )
                     .semantics {
-                        testTag = titleTag
+                        testTag = TITLE_TAG
                     },
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
@@ -187,7 +186,7 @@ private fun SuccessUI(
                             .fillMaxWidth()
                             .padding(start = 6.dp)
                             .semantics {
-                                testTag = timeEstimateTag
+                                testTag = TIME_ESTIMATE_TAG
                             },
                         factory = { TextView(it) },
                         update = {
@@ -202,7 +201,7 @@ private fun SuccessUI(
                         .fillMaxWidth()
                         .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
                         .semantics {
-                            testTag = privacyPolicyTag
+                            testTag = PRIVACY_POLICY_TAG
                         },
                     factory = { TextView(it) },
                     update = {
@@ -216,7 +215,7 @@ private fun SuccessUI(
                         .fillMaxWidth()
                         .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
                         .semantics {
-                            testTag = dividerTag
+                            testTag = DIVIDER_TAG
                         }
                 )
             }
@@ -226,7 +225,7 @@ private fun SuccessUI(
                 modifier = Modifier
                     .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
                     .semantics {
-                        testTag = bodyTag
+                        testTag = BODY_TAG
                     },
                 factory = { TextView(it) },
                 update = {
@@ -243,34 +242,21 @@ private fun SuccessUI(
             scrolledToBottom = true
         }
 
-        if (scrolledToBottom) {
-            LoadingButton(
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-                    .semantics { testTag = acceptButtonTag },
-                text = consentPage.acceptButtonText.uppercase(),
-                state = acceptState
-            ) {
-                acceptState = LoadingButtonState.Loading
-                declineState = LoadingButtonState.Disabled
-                onConsentAgreed(requireSelfie)
-            }
-        } else {
-            Button(
-                onClick = {},
-                enabled = false,
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-                    .fillMaxWidth()
-                    .semantics { testTag = scrollToAcceptButtonTag }
-            ) {
-                Text(text = consentPage.scrollToContinueButtonText.uppercase())
-            }
+        LoadingButton(
+            modifier = Modifier
+                .padding(bottom = 10.dp)
+                .semantics { testTag = ACCEPT_BUTTON_TAG },
+            text = if (scrolledToBottom) consentPage.acceptButtonText.uppercase() else consentPage.scrollToContinueButtonText.uppercase(),
+            state = if (scrolledToBottom) acceptState else LoadingButtonState.Disabled
+        ) {
+            acceptState = LoadingButtonState.Loading
+            declineState = LoadingButtonState.Disabled
+            onConsentAgreed(requireSelfie)
         }
 
         LoadingButton(
             modifier = Modifier
-                .semantics { testTag = declineButtonTag },
+                .semantics { testTag = DECLINE_BUTTON_TAG },
             text = consentPage.declineButtonText.uppercase(),
             state = declineState
         ) {
@@ -287,7 +273,7 @@ private fun LoadingUI() {
         modifier = Modifier
             .fillMaxSize()
             .semantics {
-                testTag = loadingScreenTag
+                testTag = LOADING_SCREEN_TAG
             },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally

@@ -95,59 +95,59 @@ class ConsentScreenTest {
     @Test
     fun `when VerificationPage with time and policy UI is bound correctly`() {
         setComposeTestRuleWith(Resource.success(verificationPageWithTimeAndPolicy)) {
-            onNodeWithTag(loadingScreenTag).assertDoesNotExist()
+            onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
             verify(onSuccessMock).invoke(same(verificationPageWithTimeAndPolicy))
 
             verify(onMerchantViewCreatedMock).invoke(any())
-            onNodeWithTag(titleTag).assertTextEquals(CONSENT_TITLE)
-            onNodeWithTag(timeEstimateTag).assertExists() // TODO: assert text after migrating to compose Text
-            onNodeWithTag(privacyPolicyTag).assertExists() // TODO: assert text after migrating to compose Text
-            onNodeWithTag(dividerTag).assertExists()
-            onNodeWithTag(bodyTag).assertExists() // TODO: assert text after migrating to compose Text
+            onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
+            onNodeWithTag(TIME_ESTIMATE_TAG).assertExists() // TODO: assert text after migrating to compose Text
+            onNodeWithTag(PRIVACY_POLICY_TAG).assertExists() // TODO: assert text after migrating to compose Text
+            onNodeWithTag(DIVIDER_TAG).assertExists()
+            onNodeWithTag(BODY_TAG).assertExists() // TODO: assert text after migrating to compose Text
 
-            onNodeWithTag(scrollToAcceptButtonTag).assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
-            onNodeWithTag(acceptButtonTag).assertDoesNotExist()
+            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0).assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
+            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
 
-            onNodeWithTag(declineButtonTag).onChildAt(0)
+            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(CONSENT_DECLINE_TEXT.uppercase())
-            onNodeWithTag(declineButtonTag).onChildAt(1).assertDoesNotExist()
+            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(1).assertDoesNotExist()
         }
     }
 
     @Test
     fun `when VerificationPage without time and policy UI is bound correctly`() {
         setComposeTestRuleWith(Resource.success(verificationPageWithOutTimeAndPolicy)) {
-            onNodeWithTag(loadingScreenTag).assertDoesNotExist()
+            onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
             verify(onSuccessMock).invoke(same(verificationPageWithOutTimeAndPolicy))
 
             verify(onMerchantViewCreatedMock).invoke(any())
-            onNodeWithTag(titleTag).assertTextEquals(CONSENT_TITLE)
-            onNodeWithTag(timeEstimateTag).assertDoesNotExist()
-            onNodeWithTag(privacyPolicyTag).assertDoesNotExist()
-            onNodeWithTag(dividerTag).assertDoesNotExist()
-            onNodeWithTag(bodyTag).assertExists() // TODO: assert text after migrating to compose Text
+            onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
+            onNodeWithTag(TIME_ESTIMATE_TAG).assertDoesNotExist()
+            onNodeWithTag(PRIVACY_POLICY_TAG).assertDoesNotExist()
+            onNodeWithTag(DIVIDER_TAG).assertDoesNotExist()
+            onNodeWithTag(BODY_TAG).assertExists() // TODO: assert text after migrating to compose Text
 
-            onNodeWithTag(acceptButtonTag).onChildAt(0)
+            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(CONSENT_ACCEPT_TEXT.uppercase())
-            onNodeWithTag(acceptButtonTag).onChildAt(1).assertDoesNotExist()
+            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(1).assertDoesNotExist()
 
-            onNodeWithTag(declineButtonTag).onChildAt(0)
+            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(CONSENT_DECLINE_TEXT.uppercase())
-            onNodeWithTag(declineButtonTag).onChildAt(1).assertDoesNotExist()
+            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(1).assertDoesNotExist()
         }
     }
 
     @Test
     fun `when agreed button is clicked onConsentAgreed is called and UI is updated`() {
         setComposeTestRuleWith(Resource.success(verificationPageWithOutTimeAndPolicy)) {
-            onNodeWithTag(acceptButtonTag).onChildAt(0).performClick()
+            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0).performClick()
             verify(onConsentAgreedMock).invoke(CONSENT_REQUIRE_SELFIE)
 
-            onNodeWithTag(acceptButtonTag).onChildAt(0).assertIsNotEnabled()
-            onNodeWithTag(acceptButtonTag).onChildAt(1).assertExists() // CircularProgressIndicator
+            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
+            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(1).assertExists() // CircularProgressIndicator
 
-            onNodeWithTag(declineButtonTag).onChildAt(0).assertIsNotEnabled()
-            onNodeWithTag(declineButtonTag).onChildAt(1)
+            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
+            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(1)
                 .assertDoesNotExist() // CircularProgressIndicator
         }
     }
@@ -155,14 +155,13 @@ class ConsentScreenTest {
     @Test
     fun `when agreed button is clicked onConsentDeclined is called`() {
         setComposeTestRuleWith(Resource.success(verificationPageWithTimeAndPolicy)) {
-            onNodeWithTag(declineButtonTag).onChildAt(0).performClick()
+            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).performClick()
             verify(onConsentDeclinedMock).invoke(CONSENT_REQUIRE_SELFIE)
 
-            onNodeWithTag(declineButtonTag).onChildAt(0).assertIsNotEnabled()
-            onNodeWithTag(declineButtonTag).onChildAt(1).assertExists() // CircularProgressIndicator
+            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
+            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(1).assertExists() // CircularProgressIndicator
 
-            onNodeWithTag(scrollToAcceptButtonTag).assertExists()
-            onNodeWithTag(acceptButtonTag).assertDoesNotExist()
+            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
     }
 
@@ -182,7 +181,7 @@ class ConsentScreenTest {
     @Test
     fun `when VerificationPage is Loading UI is bound correctly`() {
         setComposeTestRuleWith(Resource.loading()) {
-            onNodeWithTag(loadingScreenTag).assertExists()
+            onNodeWithTag(LOADING_SCREEN_TAG).assertExists()
         }
     }
 
