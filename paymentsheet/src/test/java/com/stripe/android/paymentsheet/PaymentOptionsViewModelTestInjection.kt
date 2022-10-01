@@ -86,12 +86,8 @@ internal open class PaymentOptionsViewModelTestInjection {
         viewModel: PaymentOptionsViewModel,
         lpmRepository: LpmRepository = mock(),
         formViewModel: FormViewModel = FormViewModel(
-            context = context,
-            config = mock(),
-            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = addressResourceRepository,
-            transformSpecToElement = mock(),
-            savedStateHandle = SavedStateHandle()
+            elementsFlow = mock(),
+            showCheckboxFlow = mock()
         )
     ) {
         val mockBuilder = mock<PaymentOptionsViewModelSubcomponent.Builder>()
@@ -109,7 +105,6 @@ internal open class PaymentOptionsViewModelTestInjection {
         val mockFormSubComponentBuilderProvider = mock<Provider<FormViewModelSubcomponent.Builder>>()
         whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
         whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
-        whenever(mockFormBuilder.savedStateHandle(any())).thenReturn(mockFormBuilder)
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 

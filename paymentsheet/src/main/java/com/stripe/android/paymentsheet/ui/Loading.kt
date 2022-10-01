@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.forms
+package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -13,47 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.ui.core.FormUI
-import com.stripe.android.ui.core.elements.FormElement
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-
-@FlowPreview
-@Composable
-internal fun Form(
-    formViewModel: FormViewModel,
-    modifier: Modifier = Modifier
-) {
-    FormInternal(
-        formViewModel.hiddenIdentifiers,
-        formViewModel.enabled,
-        formViewModel.elements,
-        formViewModel.lastTextFieldIdentifier,
-        modifier
-    )
-}
-
-@Composable
-internal fun FormInternal(
-    hiddenIdentifiersFlow: Flow<Set<IdentifierSpec>>,
-    enabledFlow: Flow<Boolean>,
-    elementsFlow: Flow<List<FormElement>?>,
-    lastTextFieldIdentifierFlow: Flow<IdentifierSpec?>,
-    modifier: Modifier = Modifier
-) {
-    FormUI(
-        hiddenIdentifiersFlow = hiddenIdentifiersFlow,
-        enabledFlow = enabledFlow,
-        elementsFlow = elementsFlow,
-        lastTextFieldIdentifierFlow = lastTextFieldIdentifierFlow,
-        loadingComposable = {
-            Loading()
-        },
-        modifier = modifier
-    )
-}
 
 @Composable
 internal fun Loading() {

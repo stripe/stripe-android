@@ -462,7 +462,8 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         paymentMethods: List<PaymentMethod> = emptyList(),
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
         registerInjector: Boolean = true,
-        onReady: (PaymentSheetAddPaymentMethodFragment,
+        onReady: (
+            PaymentSheetAddPaymentMethodFragment,
             PaymentSheetViewModel
         ) -> Unit
     ): FragmentScenario<PaymentSheetAddPaymentMethodFragment> {

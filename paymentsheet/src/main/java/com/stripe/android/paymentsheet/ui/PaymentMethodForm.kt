@@ -6,18 +6,23 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.paymentsheet.forms.Form
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.ui.core.FormUI
+import com.stripe.android.ui.core.elements.FormElement
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 
+@FlowPreview
 @Composable
 internal fun PaymentMethodForm(
     args: FormFragmentArguments,
     enabled: Boolean,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
+    elementsFlow: Flow<List<FormElement>?>,
+    showCheckboxFlow: Flow<Boolean>,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -25,8 +30,9 @@ internal fun PaymentMethodForm(
         key = args.paymentMethodCode,
         factory = FormViewModel.Factory(
             config = args,
-            contextSupplier = { context },
-            owner = LocalSavedStateRegistryOwner.current
+            elementsFlow = elementsFlow,
+            showCheckboxFlow = showCheckboxFlow,
+            contextSupplier = { context }
         )
     )
 
@@ -36,12 +42,18 @@ internal fun PaymentMethodForm(
         onFormFieldValuesChanged(formValues)
     }
 
-    LaunchedEffect(enabled) {
-        formViewModel.setEnabled(enabled)
-    }
+    val hiddenIdentifiers by formViewModel.hiddenIdentifiers.collectAsState(emptySet())
+    val elements by formViewModel.elementsFlow.collectAsState(null)
+    val lastTextFieldIdentifier by formViewModel.lastTextFieldIdentifier.collectAsState(null)
 
-    Form(
-        formViewModel = formViewModel,
+    FormUI(
+        hiddenIdentifiers = hiddenIdentifiers,
+        enabled = enabled,
+        elements = elements,
+        lastTextFieldIdentifier = lastTextFieldIdentifier,
+        loadingComposable = {
+            Loading()
+        },
         modifier = modifier
     )
 }

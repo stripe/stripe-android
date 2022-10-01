@@ -75,7 +75,8 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
         ),
         fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         registerInjector: Boolean = true,
-        onReady: (PaymentOptionsAddPaymentMethodFragment,
+        onReady: (
+            PaymentOptionsAddPaymentMethodFragment,
             PaymentOptionsViewModel
         ) -> Unit
     ): FragmentScenario<PaymentOptionsAddPaymentMethodFragment> {

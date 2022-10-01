@@ -1,10 +1,11 @@
 package com.stripe.android.paymentsheet.injection
 
-import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.ui.core.elements.FormElement
 import dagger.BindsInstance
 import dagger.Subcomponent
+import kotlinx.coroutines.flow.Flow
 
 @Subcomponent
 internal interface FormViewModelSubcomponent {
@@ -18,7 +19,10 @@ internal interface FormViewModelSubcomponent {
         ): Builder
 
         @BindsInstance
-        fun savedStateHandle(handle: SavedStateHandle): Builder
+        fun elementsFlow(elementsFlow: Flow<List<FormElement>?>): Builder
+
+        @BindsInstance
+        fun showCheckboxFlow(saveForFutureUseVisibleFlow: Flow<Boolean>): Builder
 
         fun build(): FormViewModelSubcomponent
     }

@@ -88,7 +88,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val isResourceRepositoryReady: LiveData<Boolean?> =
         _isResourceRepositoryReady.distinctUntilChanged()
 
-    @VisibleForTesting
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     internal val _isLinkEnabled = MutableLiveData<Boolean>()
     internal val isLinkEnabled: LiveData<Boolean> = _isLinkEnabled
 
@@ -334,8 +334,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
                         " (${
-                            lpmResourceRepository.getRepository().values()
-                                .map { it.code }.toList()
+                        lpmResourceRepository.getRepository().values()
+                            .map { it.code }.toList()
                         })"
                 )
             )
@@ -429,8 +429,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                 }
 
                 if (_paymentMethods.value?.all {
-                        it.type != PaymentMethod.Type.USBankAccount
-                    } == true
+                    it.type != PaymentMethod.Type.USBankAccount
+                } == true
                 ) {
                     updatePrimaryButtonUIState(
                         primaryButtonUIState.value?.copy(

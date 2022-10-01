@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -28,17 +29,20 @@ import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.forms.Loading
+import com.stripe.android.paymentsheet.forms.FormViewModel.Companion.getElements
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getPMAddForm
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.ui.Loading
 import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
@@ -49,6 +53,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = ComposeView(requireContext()).apply {
+        val elementsFlow = MutableStateFlow<List<FormElement>?>(null)
+        val showCheckboxFlow = MutableStateFlow(false)
+
         setContent {
             val isReady by sheetViewModel.isResourceRepositoryReady.observeAsState(false)
             val processing by sheetViewModel.processing.observeAsState(false)
@@ -78,11 +85,11 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
                 val showLinkInlineSignup = sheetViewModel.isLinkEnabled.value == true &&
                     sheetViewModel.stripeIntent.value
-                        ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
+                    ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
                     selectedItem.code == PaymentMethod.Type.Card.code &&
                     linkAccountStatus == AccountStatus.SignedOut
 
-                val arguments = remember(selectedItem) {
+                val arguments = remember(selectedItem, showLinkInlineSignup) {
                     FormFragmentArguments(
                         paymentMethodCode = selectedPaymentMethodCode,
                         showCheckbox = layoutFormDescriptor.showCheckbox && !showLinkInlineSignup,
@@ -108,6 +115,20 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                                     else -> null
                                 }
                             }
+                    )
+                }
+
+                LaunchedEffect(arguments) {
+                    elementsFlow.emit(
+                        getElements(
+                            requireContext(),
+                            arguments,
+                            sheetViewModel.lpmResourceRepository,
+                            sheetViewModel.addressResourceRepository
+                        )
+                    )
+                    showCheckboxFlow.emit(
+                        arguments.showCheckbox
                     )
                 }
 
@@ -144,6 +165,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                                         )
                                     )
                                 },
+                                elementsFlow = elementsFlow,
+                                showCheckboxFlow = showCheckboxFlow,
                                 modifier = Modifier.padding(horizontal = 20.dp)
                             )
                         }
