@@ -53,7 +53,7 @@ import com.stripe.android.link.ui.rememberLinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpBody
 import com.stripe.android.link.ui.verification.VerificationBodyFullFlow
 import com.stripe.android.link.ui.wallet.WalletBody
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -247,21 +247,19 @@ internal class LinkActivity : ComponentActivity() {
             object : ViewTreeObserver.OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
                     lifecycleScope.launch {
-                        viewModel.linkAccountManager.accountStatus.collectLatest { accountStatus ->
-                            viewModel.navigator.navigateTo(
-                                target = when (accountStatus) {
-                                    AccountStatus.Verified ->
-                                        LinkScreen.Wallet
-                                    AccountStatus.NeedsVerification,
-                                    AccountStatus.VerificationStarted ->
-                                        LinkScreen.Verification
-                                    AccountStatus.SignedOut,
-                                    AccountStatus.Error ->
-                                        LinkScreen.SignUp(starterArgs.customerEmail)
-                                },
-                                clearBackStack = true
-                            )
-                        }
+                        viewModel.navigator.navigateTo(
+                            target = when (viewModel.linkAccountManager.accountStatus.first()) {
+                                AccountStatus.Verified ->
+                                    LinkScreen.Wallet
+                                AccountStatus.NeedsVerification,
+                                AccountStatus.VerificationStarted ->
+                                    LinkScreen.Verification
+                                AccountStatus.SignedOut,
+                                AccountStatus.Error ->
+                                    LinkScreen.SignUp(starterArgs.customerEmail)
+                            },
+                            clearBackStack = true
+                        )
                     }
                     window.decorView.rootView.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 }
