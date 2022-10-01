@@ -57,7 +57,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         val showCheckboxFlow = MutableStateFlow(false)
 
         setContent {
-            val isReady by sheetViewModel.isResourceRepositoryReady.observeAsState(false)
+            val isRepositoryReady by sheetViewModel.isResourceRepositoryReady.observeAsState(false)
             val processing by sheetViewModel.processing.observeAsState(false)
 
             val linkConfig by sheetViewModel.linkConfiguration.observeAsState()
@@ -65,7 +65,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 sheetViewModel.linkLauncher.getAccountStatusFlow(it).collectAsState(null)
             } ?: mutableStateOf(null)
 
-            if (isReady == true) {
+            if (isRepositoryReady == true) {
                 var selectedPaymentMethodCode: String by rememberSaveable {
                     mutableStateOf(
                         sheetViewModel.newPaymentSelection?.paymentMethodCreateParams?.typeCode
