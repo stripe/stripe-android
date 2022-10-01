@@ -46,7 +46,6 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -335,8 +334,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
                         " (${
-                        lpmResourceRepository.getRepository().values()
-                            .map { it.code }.toList()
+                            lpmResourceRepository.getRepository().values()
+                                .map { it.code }.toList()
                         })"
                 )
             )
@@ -501,34 +500,33 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                             linkVerificationCallback = null
                             _showLinkVerificationDialog.value = false
 
-                                if (success) {
-                                    completeLinkInlinePayment(configuration,
+                            if (success) {
+                                completeLinkInlinePayment(
+                                    configuration,
                                     params,
                                     userInput is UserInput.SignIn
-                                )} else {
-                                    savedStateHandle[SAVE_PROCESSING] = false
-                                    updatePrimaryButtonState(PrimaryButton.State.Ready)
-                                }
+                                )
+                            } else {
+                                savedStateHandle[SAVE_PROCESSING] = false
+                                updatePrimaryButtonState(PrimaryButton.State.Ready)
                             }
-                            _showLinkVerificationDialog.value = true
                         }
-                        AccountStatus.SignedOut ,
-                            AccountStatus.Error -> {activeLinkSession.value = false
-                            linkLauncher.signInWithUserInput(configuration,userInput).fold(
-                                onSuccess = {
-                                    // If successful, the account was fetched or created, so try again
-                                    payWithLinkInline(configuration,userInput)
-                                },
-                                onFailure = {
-                                    onError(it.localizedMessage)
-                                    savedStateHandle[SAVE_PROCESSING] = false
-                                    updatePrimaryButtonState(PrimaryButton.State.Ready)
-                                }
-                            )
-                        }
-                        AccountStatus.Error -> {
-                            // Complete payment from here
-                        }
+                        _showLinkVerificationDialog.value = true
+                    }
+                    AccountStatus.SignedOut,
+                    AccountStatus.Error -> {
+                        activeLinkSession.value = false
+                        linkLauncher.signInWithUserInput(configuration, userInput).fold(
+                            onSuccess = {
+                                // If successful, the account was fetched or created, so try again
+                                payWithLinkInline(configuration, userInput)
+                            },
+                            onFailure = {
+                                onError(it.localizedMessage)
+                                savedStateHandle[SAVE_PROCESSING] = false
+                                updatePrimaryButtonState(PrimaryButton.State.Ready)
+                            }
+                        )
                     }
                 }
             }

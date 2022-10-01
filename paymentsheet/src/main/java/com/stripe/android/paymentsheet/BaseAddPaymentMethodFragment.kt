@@ -50,7 +50,11 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         setContent {
             val isReady by sheetViewModel.isResourceRepositoryReady.observeAsState(false)
             val processing by sheetViewModel.processing.observeAsState(false)
-            val linkAccountStatus by sheetViewModel.linkLauncher.getAccountStatusFlow().collectAsState(null)
+
+            val linkConfig by sheetViewModel.linkConfiguration.observeAsState()
+            val linkAccountStatus by linkConfig?.let {
+                sheetViewModel.linkLauncher.getAccountStatusFlow(it).collectAsState(null)
+            } ?: mutableStateOf(null)
 
             if (isReady == true) {
                 var selectedPaymentMethodCode: String by rememberSaveable {
@@ -146,7 +150,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                             LinkInlineSignup(
                                 linkPaymentLauncher = sheetViewModel.linkLauncher,
                                 enabled = !processing,
-                                onStateChanged = { viewState ->
+                                onStateChanged = { config, viewState ->
                                     sheetViewModel.updatePrimaryButtonUIState(
                                         if (viewState.useLink) {
                                             val userInput = viewState.userInput
@@ -157,6 +161,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                                                     label = null,
                                                     onClick = {
                                                         sheetViewModel.payWithLinkInline(
+                                                            config,
                                                             userInput
                                                         )
                                                     },
