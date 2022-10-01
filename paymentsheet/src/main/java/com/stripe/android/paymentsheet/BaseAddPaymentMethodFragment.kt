@@ -21,7 +21,9 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -150,37 +152,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                             LinkInlineSignup(
                                 linkPaymentLauncher = sheetViewModel.linkLauncher,
                                 enabled = !processing,
-                                onStateChanged = { config, viewState ->
-                                    sheetViewModel.updatePrimaryButtonUIState(
-                                        if (viewState.useLink) {
-                                            val userInput = viewState.userInput
-                                            if (userInput != null &&
-                                                sheetViewModel.selection.value != null
-                                            ) {
-                                                PrimaryButton.UIState(
-                                                    label = null,
-                                                    onClick = {
-                                                        sheetViewModel.payWithLinkInline(
-                                                            config,
-                                                            userInput
-                                                        )
-                                                    },
-                                                    enabled = true,
-                                                    visible = true
-                                                )
-                                            } else {
-                                                PrimaryButton.UIState(
-                                                    label = null,
-                                                    onClick = null,
-                                                    enabled = false,
-                                                    visible = true
-                                                )
-                                            }
-                                        } else {
-                                            null
-                                        }
-                                    )
-                                },
+                                onStateChanged = ::onLinkSignupStateChanged,
                                 modifier = Modifier
                                     .padding(horizontal = 20.dp, vertical = 6.dp)
                                     .fillMaxWidth()
@@ -202,6 +174,41 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm(
             linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
             activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
+        )
+    }
+
+    private fun onLinkSignupStateChanged(
+        config: LinkPaymentLauncher.Configuration,
+        viewState: InlineSignupViewState
+    ) {
+        sheetViewModel.updatePrimaryButtonUIState(
+            if (viewState.useLink) {
+                val userInput = viewState.userInput
+                if (userInput != null &&
+                    sheetViewModel.selection.value != null
+                ) {
+                    PrimaryButton.UIState(
+                        label = null,
+                        onClick = {
+                            sheetViewModel.payWithLinkInline(
+                                config,
+                                userInput
+                            )
+                        },
+                        enabled = true,
+                        visible = true
+                    )
+                } else {
+                    PrimaryButton.UIState(
+                        label = null,
+                        onClick = null,
+                        enabled = false,
+                        visible = true
+                    )
+                }
+            } else {
+                null
+            }
         )
     }
 
