@@ -4,6 +4,7 @@
   <CurrentIssues>
     <ID>ComplexCondition:BaseSheetViewModel.kt$BaseSheetViewModel$stripeIntentValue != null &amp;&amp; paymentMethodsValue != null &amp;&amp; isGooglePayReadyValue != null &amp;&amp; isResourceRepositoryReadyValue != null &amp;&amp; isLinkReadyValue != null &amp;&amp; savedSelectionValue != null</ID>
     <ID>ComplexCondition:PaymentOptionsAdapter.kt$PaymentOptionsAdapter$force || position != NO_POSITION &amp;&amp; (canClickSelectedItem || position != selectedItemPosition) &amp;&amp; !isEditing</ID>
+    <ID>ComplexMethod:BaseAddPaymentMethodFragment.kt$BaseAddPaymentMethodFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? )</ID>
     <ID>EmptyDefaultConstructor:PaymentOptionsListFragment.kt$PaymentOptionsListFragment$()</ID>
     <ID>EmptyDefaultConstructor:PaymentSheetAddPaymentMethodFragment.kt$PaymentSheetAddPaymentMethodFragment$()</ID>
     <ID>EmptyDefaultConstructor:PaymentSheetListFragment.kt$PaymentSheetListFragment$()</ID>
@@ -18,7 +19,7 @@
     <ID>LargeClass:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest</ID>
     <ID>LongMethod:AddressElementActivity.kt$AddressElementActivity$@OptIn(ExperimentalAnimationApi::class) override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel)</ID>
-    <ID>LongMethod:BaseAddPaymentMethodFragment.kt$BaseAddPaymentMethodFragment$override fun onViewCreated(view: View, savedInstanceState: Bundle?)</ID>
+    <ID>LongMethod:BaseAddPaymentMethodFragment.kt$BaseAddPaymentMethodFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? )</ID>
     <ID>LongMethod:BaseSheetActivity.kt$BaseSheetActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@ExperimentalCoroutinesApi @Test fun `Verify params are set when element address fields are complete`()</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@ExperimentalCoroutinesApi @Test fun `Verify params are set when required address fields are complete`()</ID>
@@ -31,7 +32,6 @@
     <ID>LongMethod:USBankAccountFormFragment.kt$USBankAccountFormFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? ): View</ID>
     <ID>LongMethod:USBankAccountFormViewModel.kt$USBankAccountFormViewModel$private fun attachFinancialAccountToIntent( clientSecret: ClientSecret, intentId: String, linkAccountId: String, bankName: String?, last4: String? )</ID>
     <ID>MagicNumber:AutocompleteScreen.kt$0.07f</ID>
-    <ID>MagicNumber:ComposeFormDataCollectionFragment.kt$ComposeFormDataCollectionFragment$18</ID>
     <ID>MagicNumber:GooglePayButton.kt$GooglePayButton$0.5f</ID>
     <ID>MagicNumber:PaymentMethodsUI.kt$0.6F</ID>
     <ID>MagicNumber:PaymentMethodsUI.kt$100</ID>
@@ -64,7 +64,7 @@
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.Configuration$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.GooglePayConfiguration$*</ID>
     <ID>MaxLineLength:PaymentSheetActivityTest.kt$PaymentSheetActivityTest$fun</ID>
-    <ID>MaxLineLength:PaymentSheetAddPaymentMethodFragmentTest.kt$PaymentSheetAddPaymentMethodFragmentTest$fun</ID>
+    <ID>MaxLineLength:PaymentSheetAddPaymentMethodFragmentTest.kt$PaymentSheetAddPaymentMethodFragmentTest$// fun `when multiple supported payment methods and configuration changes it should restore selected payment method`() {</ID>
     <ID>MaxLineLength:PaymentSheetAddPaymentMethodFragmentTest.kt$PaymentSheetAddPaymentMethodFragmentTest.Companion$LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext&lt;Application>().resources))</ID>
     <ID>MaxLineLength:PaymentSheetEventTest.kt$PaymentSheetEventTest$paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())</ID>
     <ID>MaxLineLength:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$fun</ID>
@@ -77,8 +77,6 @@
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput$fun toCsv()</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput.Companion$fun toCsvHeader()</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.TestOutput.Companion$formShowsSaveCheckbox == false &amp;&amp; formShowsCheckboxControlledFields == true -> "merchantRequiredSave"</ID>
-    <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$assertThat(viewModel.saveForFutureUseElement.controller.saveForFutureUse.stateIn(viewModel.viewModelScope).value).isFalse()</ID>
-    <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$assertThat(viewModel.saveForFutureUseElement.controller.saveForFutureUse.stateIn(viewModel.viewModelScope).value).isTrue()</ID>
     <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection)</ID>
     <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)</ID>
     <ID>NestedBlockDepth:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$private fun generatePaymentIntentScenarios(): List&lt;PaymentIntentTestInput></ID>
@@ -100,12 +98,19 @@
     <ID>UnnecessaryAbstractClass:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule$PaymentSheetLauncherModule</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
     <ID>UnusedPrivateMember:BillingAddressViewTest.kt$BillingAddressViewTest.Companion$private val FRANCE = CountryCode.create("FR")</ID>
+    <ID>UnusedPrivateMember:PaymentOptionsViewModelTestInjection.kt$PaymentOptionsViewModelTestInjection$lpmRepository: LpmRepository = mock()</ID>
+    <ID>UnusedPrivateMember:PaymentOptionsViewModelTestInjection.kt$PaymentOptionsViewModelTestInjection$private val context = ApplicationProvider.getApplicationContext&lt;Context>()</ID>
+    <ID>UnusedPrivateMember:PaymentSheetAddPaymentMethodFragmentTest.kt$PaymentSheetAddPaymentMethodFragmentTest$private fun convertPixelsToDp(px: Int, resources: Resources): Dp</ID>
+    <ID>UnusedPrivateMember:PaymentSheetAddPaymentMethodFragmentTest.kt$PaymentSheetAddPaymentMethodFragmentTest$private fun createAmount(paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING)</ID>
+    <ID>UnusedPrivateMember:PaymentSheetViewModelTestInjection.kt$PaymentSheetViewModelTestInjection$addressRepository: AddressRepository</ID>
+    <ID>UnusedPrivateMember:PaymentSheetViewModelTestInjection.kt$PaymentSheetViewModelTestInjection$lpmRepository: LpmRepository</ID>
+    <ID>UnusedPrivateMember:PaymentSheetViewModelTestInjection.kt$PaymentSheetViewModelTestInjection$private val context = ApplicationProvider.getApplicationContext&lt;Context>()</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$// a fatal error protected val _fatal = MutableLiveData&lt;Throwable>()</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _amount = savedStateHandle.getLiveData&lt;Amount>(SAVE_AMOUNT)</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _contentVisible = MutableLiveData(true)</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _isGooglePayReady = savedStateHandle.getLiveData&lt;Boolean>(SAVE_GOOGLE_PAY_READY)</ID>
-    <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _isLinkEnabled = MutableLiveData&lt;Boolean>()</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _liveMode get() = savedStateHandle.getLiveData&lt;Boolean>(SAVE_STATE_LIVE_MODE)</ID>
+    <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting(otherwise = VisibleForTesting.PROTECTED) internal val _isLinkEnabled = MutableLiveData&lt;Boolean>()</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting(otherwise = VisibleForTesting.PROTECTED) internal val _paymentMethods = savedStateHandle.getLiveData&lt;List&lt;PaymentMethod>>(SAVE_PAYMENT_METHODS)</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting(otherwise = VisibleForTesting.PROTECTED) internal val _processing = savedStateHandle.getLiveData&lt;Boolean>(SAVE_PROCESSING)</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$protected val _linkConfiguration = savedStateHandle.getLiveData&lt;LinkPaymentLauncher.Configuration>(LINK_CONFIGURATION)</ID>

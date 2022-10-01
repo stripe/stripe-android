@@ -313,11 +313,11 @@ class USBankAccountFormViewModelTest {
             )
         }
 
-    @Test
-    fun `when saved screen state, saved screen state is emitted`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(
-                defaultArgs.copy(
+//    @Test
+//    fun `when saved screen state, saved screen state is emitted`() =
+//        runTest(UnconfinedTestDispatcher()) {
+//            val viewModel = createViewModel(
+//                defaultArgs.copy(
 //                    savedScreenState = USBankAccountFormScreenState.SavedAccount(
 //                        name = "Test",
 //                        email = "test@email.com",
@@ -329,18 +329,18 @@ class USBankAccountFormViewModelTest {
 //                        mandateText = "Test",
 //                        saveForFutureUsage = true
 //                    )
-                )
-            )
-
-            val currentScreenState =
-                viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
-
-            assertThat(
-                currentScreenState
-            ).isInstanceOf(
-                USBankAccountFormScreenState.SavedAccount::class.java
-            )
-        }
+//                )
+//            )
+//
+//            val currentScreenState =
+//                viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+//
+//            assertThat(
+//                currentScreenState
+//            ).isInstanceOf(
+//                USBankAccountFormScreenState.SavedAccount::class.java
+//            )
+//        }
 
     private fun createViewModel(
         args: USBankAccountFormViewModel.Args = defaultArgs
