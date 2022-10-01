@@ -195,10 +195,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     abstract fun onFatal(throwable: Throwable)
 
-    val initiallySelectedPaymentMethodCode: String
-        get() = newPaymentSelection?.paymentMethodCreateParams?.typeCode
-            ?: supportedPaymentMethods.first().code
-
     val buttonsEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
             processing,
