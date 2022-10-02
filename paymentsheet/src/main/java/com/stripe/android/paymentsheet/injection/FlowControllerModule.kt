@@ -26,8 +26,7 @@ import kotlin.coroutines.CoroutineContext
 
 @Module(
     subcomponents = [
-        PaymentOptionsViewModelSubcomponent::class,
-        FormViewModelSubcomponent::class
+        PaymentOptionsViewModelSubcomponent::class
     ]
 )
 internal abstract class FlowControllerModule {

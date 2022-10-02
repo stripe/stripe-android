@@ -28,6 +28,7 @@ dependencies {
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
 
     implementation "androidx.compose.ui:ui:$androidxComposeVersion"
+    implementation "androidx.compose.ui:ui-viewbinding:$androidxComposeVersion"
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
     implementation "androidx.compose.foundation:foundation:$androidxComposeVersion"
     // Material Design

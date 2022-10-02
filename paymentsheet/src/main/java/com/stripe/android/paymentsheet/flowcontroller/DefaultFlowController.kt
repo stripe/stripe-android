@@ -43,7 +43,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerFlowControllerComponent
 import com.stripe.android.paymentsheet.injection.FlowControllerComponent
 import com.stripe.android.paymentsheet.model.ClientSecret
@@ -125,9 +124,6 @@ internal class DefaultFlowController @Inject internal constructor(
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is PaymentOptionsViewModel.Factory -> {
-                flowControllerComponent.inject(injectable)
-            }
-            is FormViewModel.Factory -> {
                 flowControllerComponent.inject(injectable)
             }
             else -> {

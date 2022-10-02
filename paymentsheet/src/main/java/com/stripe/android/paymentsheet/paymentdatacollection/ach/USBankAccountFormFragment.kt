@@ -39,6 +39,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetActivity
@@ -47,7 +49,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
@@ -66,7 +68,7 @@ internal class USBankAccountFormFragment : Fragment() {
 
     private val formArgs by lazy {
         requireNotNull(
-            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
+            (requireActivity() as BaseSheetActivity<*>).formArgs
         )
     }
 
@@ -152,9 +154,13 @@ internal class USBankAccountFormFragment : Fragment() {
         )
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewModel.registerFragment(this)
+    val collectBankAccountLauncher = CollectBankAccountLauncher.create(
+        this,
+        ::handleCollectBankAccountResult
+    )
+
+    fun handleCollectBankAccountResult(result: CollectBankAccountResult) {
+        viewModel.handleCollectBankAccountResult(result)
     }
 
     override fun onCreateView(
@@ -162,6 +168,8 @@ internal class USBankAccountFormFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View = ComposeView(inflater.context).apply {
+        viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+
         layoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
@@ -499,9 +507,5 @@ internal class USBankAccountFormFragment : Fragment() {
             """.trimIndent()
         } ?: run { null }
         sheetViewModel?.updateBelowButtonText(updatedText)
-    }
-
-    companion object {
-        const val EXTRA_CONFIG = "com.stripe.android.paymentsheet.extra_config"
     }
 }

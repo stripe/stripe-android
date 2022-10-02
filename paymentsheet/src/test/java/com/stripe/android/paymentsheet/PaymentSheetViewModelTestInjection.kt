@@ -20,8 +20,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.forms.FormController
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -126,7 +125,7 @@ internal open class PaymentSheetViewModelTestInjection {
         viewModel: PaymentSheetViewModel,
         lpmRepository: LpmRepository,
         addressRepository: AddressRepository,
-        formViewModel: FormViewModel = FormViewModel(
+        formController: FormController = FormController(
             elementsFlow = mock(),
             showCheckboxFlow = mock()
         )
@@ -146,7 +145,7 @@ internal open class PaymentSheetViewModelTestInjection {
                     whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider
                 }
-                (injectable as? FormViewModel.Factory)?.let {
+                (injectable as? FormController.Factory)?.let {
                     val mockBuilder = mock<FormViewModelSubcomponent.Builder>()
                     val mockSubcomponent = mock<FormViewModelSubcomponent>()
                     val mockSubComponentBuilderProvider =
@@ -154,7 +153,7 @@ internal open class PaymentSheetViewModelTestInjection {
 
                     whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
                     whenever(mockBuilder.formFragmentArguments(any())).thenReturn(mockBuilder)
-                    whenever(mockSubcomponent.viewModel).thenReturn(formViewModel)
+                    whenever(mockSubcomponent.viewModel).thenReturn(formController)
                     whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider
                 }

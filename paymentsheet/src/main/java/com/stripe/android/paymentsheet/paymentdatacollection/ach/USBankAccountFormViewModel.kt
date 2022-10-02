@@ -112,7 +112,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     val processing: StateFlow<Boolean>
         get() = _processing
 
-    @VisibleForTesting
     var collectBankAccountLauncher: CollectBankAccountLauncher? = null
 
     init {
@@ -137,14 +136,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
         set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 
-    fun registerFragment(fragment: Fragment) {
-        collectBankAccountLauncher = CollectBankAccountLauncher.create(
-            fragment,
-            ::handleCollectBankAccountResult
-        )
-    }
-
-    @VisibleForTesting
     fun handleCollectBankAccountResult(result: CollectBankAccountResult) {
         hasLaunched = false
         when (result) {

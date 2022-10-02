@@ -13,7 +13,6 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressRepository
@@ -60,7 +59,7 @@ import javax.inject.Provider
 @ExperimentalCoroutinesApi
 @FlowPreview
 @RunWith(RobolectricTestRunner::class)
-internal class FormViewModelTest {
+internal class FormControllerTest {
     private val emailSection = EmailSpec()
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(),
@@ -100,19 +99,19 @@ internal class FormViewModelTest {
 
         val injector = object : Injector {
             override fun inject(injectable: Injectable<*>) {
-                val factory = injectable as FormViewModel.Factory
+                val factory = injectable as FormController.Factory
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
             }
         }
         WeakMapInjectorRegistry.register(injector, injectorKey)
-        val factory = FormViewModel.Factory(
+        val factory = FormController.Factory(
             config,
             elementsFlow,
             showCheckboxFlow,
             contextSupplier = { ApplicationProvider.getApplicationContext<Application>() }
         )
         val factorySpy = spy(factory)
-        val createdViewModel = factorySpy.create(FormViewModel::class.java)
+        val createdViewModel = factorySpy.create(FormController::class.java)
         verify(factorySpy, times(0)).fallbackInitialize(any())
         assertThat(createdViewModel).isEqualTo(vmToBeReturned)
 
@@ -123,14 +122,14 @@ internal class FormViewModelTest {
     @Test
     fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
         val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = DUMMY_INJECTOR_KEY)
-        val factory = FormViewModel.Factory(
+        val factory = FormController.Factory(
             config,
             elementsFlow,
             showCheckboxFlow,
             contextSupplier = { ApplicationProvider.getApplicationContext<Application>() }
         )
         val factorySpy = spy(factory)
-        assertNotNull(factorySpy.create(FormViewModel::class.java))
+        assertNotNull(factorySpy.create(FormController::class.java))
         verify(factorySpy).fallbackInitialize(
             argWhere {
                 it.context == ApplicationProvider.getApplicationContext<Application>()
@@ -168,7 +167,7 @@ internal class FormViewModelTest {
         val formViewModel = createViewModel()
         showCheckboxFlow.emit(true)
         elementsFlow.emit(
-            FormViewModel.getElements(
+            FormController.getElements(
                 context,
                 formFragmentArguments = args,
                 lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
@@ -218,7 +217,7 @@ internal class FormViewModelTest {
         val formViewModel = createViewModel()
         showCheckboxFlow.tryEmit(true)
         elementsFlow.tryEmit(
-            FormViewModel.getElements(
+            FormController.getElements(
                 context,
                 formFragmentArguments = args,
                 lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
@@ -256,7 +255,7 @@ internal class FormViewModelTest {
         )
         val formViewModel = createViewModel()
         elementsFlow.tryEmit(
-            FormViewModel.getElements(
+            FormController.getElements(
                 context,
                 formFragmentArguments = args,
                 lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
@@ -286,7 +285,7 @@ internal class FormViewModelTest {
             )
             val formViewModel = createViewModel()
             elementsFlow.tryEmit(
-                FormViewModel.getElements(
+                FormController.getElements(
                     context,
                     formFragmentArguments = args,
                     lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
@@ -319,7 +318,7 @@ internal class FormViewModelTest {
         )
         val formViewModel = createViewModel()
         elementsFlow.tryEmit(
-            FormViewModel.getElements(
+            FormController.getElements(
                 context,
                 formFragmentArguments = args,
                 lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
@@ -362,7 +361,7 @@ internal class FormViewModelTest {
             )
             val formViewModel = createViewModel()
             elementsFlow.tryEmit(
-                FormViewModel.getElements(
+                FormController.getElements(
                     context,
                     formFragmentArguments = args,
                     lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
@@ -414,7 +413,7 @@ internal class FormViewModelTest {
         )
         val formViewModel = createViewModel()
         elementsFlow.tryEmit(
-            FormViewModel.getElements(
+            FormController.getElements(
                 context,
                 formFragmentArguments = args,
                 lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
@@ -477,7 +476,7 @@ internal class FormViewModelTest {
         )
         val formViewModel = createViewModel()
         elementsFlow.tryEmit(
-            FormViewModel.getElements(
+            FormController.getElements(
                 context,
                 formFragmentArguments = args,
                 lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
@@ -567,7 +566,7 @@ internal class FormViewModelTest {
         )
         val formViewModel = createViewModel()
         elementsFlow.tryEmit(
-            FormViewModel.getElements(
+            FormController.getElements(
                 context,
                 formFragmentArguments = args,
                 lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
@@ -648,10 +647,10 @@ internal class FormViewModelTest {
     }
 
     private suspend fun getSectionFieldTextControllerWithLabel(
-        formViewModel: FormViewModel,
+        formController: FormController,
         @StringRes label: Int
     ) =
-        formViewModel.elementsFlow.first()!!
+        formController.elementsFlow.first()!!
             .filterIsInstance<SectionElement>()
             .flatMap { it.fields }
             .filterIsInstance<SectionSingleFieldElement>()
@@ -663,27 +662,27 @@ internal class FormViewModelTest {
         val controllers: List<TextFieldController>
     ) {
         companion object {
-            suspend fun create(formViewModel: FormViewModel) =
+            suspend fun create(formController: FormController) =
                 AddressControllers(
                     listOfNotNull(
                         getAddressSectionTextControllerWithLabel(
-                            formViewModel,
+                            formController,
                             R.string.address_label_address_line1
                         ),
                         getAddressSectionTextControllerWithLabel(
-                            formViewModel,
+                            formController,
                             R.string.address_label_address_line2
                         ),
                         getAddressSectionTextControllerWithLabel(
-                            formViewModel,
+                            formController,
                             R.string.address_label_city
                         ),
                         getAddressSectionTextControllerWithLabel(
-                            formViewModel,
+                            formController,
                             R.string.address_label_state
                         ),
                         getAddressSectionTextControllerWithLabel(
-                            formViewModel,
+                            formController,
                             R.string.address_label_zip_code
                         )
                     )
@@ -693,10 +692,10 @@ internal class FormViewModelTest {
 
     companion object {
         private suspend fun getAddressSectionTextControllerWithLabel(
-            formViewModel: FormViewModel,
+            formController: FormController,
             @StringRes label: Int
         ): TextFieldController? {
-            val addressElementFields = formViewModel.elementsFlow.first()!!
+            val addressElementFields = formController.elementsFlow.first()!!
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<AddressElement>()
@@ -717,14 +716,14 @@ internal class FormViewModelTest {
         }
     }
 
-    fun createViewModel() = FormViewModel(
+    fun createViewModel() = FormController(
         elementsFlow = elementsFlow,
         showCheckboxFlow = showCheckboxFlow
     )
 }
 
 @OptIn(FlowPreview::class)
-internal suspend fun FormViewModel.setSaveForFutureUse(value: Boolean) {
+internal suspend fun FormController.setSaveForFutureUse(value: Boolean) {
     elementsFlow
         .firstOrNull()
         ?.filterIsInstance<SaveForFutureUseElement>()
