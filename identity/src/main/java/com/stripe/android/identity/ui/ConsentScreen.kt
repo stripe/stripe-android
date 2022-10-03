@@ -236,10 +236,10 @@ private fun SuccessUI(
         var acceptState by remember { mutableStateOf(LoadingButtonState.Idle) }
         var declineState by remember { mutableStateOf(LoadingButtonState.Idle) }
 
-        var scrolledToButton by remember { mutableStateOf(false) }
+        var scrolledToBottom by remember { mutableStateOf(false) }
         LaunchedEffect(scrollState.value) {
-            if (!scrolledToButton) {
-                scrolledToButton = scrollState.value == scrollState.maxValue
+            if (!scrolledToBottom) {
+                scrolledToBottom = scrollState.value == scrollState.maxValue
             }
         }
 
@@ -248,12 +248,12 @@ private fun SuccessUI(
                 .padding(bottom = 10.dp)
                 .semantics { testTag = ACCEPT_BUTTON_TAG },
             text =
-            if (scrolledToButton) {
+            if (scrolledToBottom) {
                 consentPage.acceptButtonText.uppercase()
             } else {
                 consentPage.scrollToContinueButtonText.uppercase()
             },
-            state = if (scrolledToButton) {
+            state = if (scrolledToBottom) {
                 acceptState
             } else {
                 LoadingButtonState.Disabled

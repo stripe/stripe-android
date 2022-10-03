@@ -105,7 +105,8 @@ class ConsentScreenTest {
             onNodeWithTag(DIVIDER_TAG).assertExists()
             onNodeWithTag(BODY_TAG).assertExists() // TODO: assert text after migrating to compose Text
 
-            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0).assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
+            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0)
+                .assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
 
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0)
@@ -128,27 +129,12 @@ class ConsentScreenTest {
             onNodeWithTag(BODY_TAG).assertExists() // TODO: assert text after migrating to compose Text
 
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0)
-                .assertTextEquals(CONSENT_ACCEPT_TEXT.uppercase())
+                .assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(1).assertDoesNotExist()
 
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(CONSENT_DECLINE_TEXT.uppercase())
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(1).assertDoesNotExist()
-        }
-    }
-
-    @Test
-    fun `when agreed button is clicked onConsentAgreed is called and UI is updated`() {
-        setComposeTestRuleWith(Resource.success(verificationPageWithOutTimeAndPolicy)) {
-            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0).performClick()
-            verify(onConsentAgreedMock).invoke(CONSENT_REQUIRE_SELFIE)
-
-            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
-            onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(1).assertExists() // CircularProgressIndicator
-
-            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
-            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(1)
-                .assertDoesNotExist() // CircularProgressIndicator
         }
     }
 
@@ -159,7 +145,8 @@ class ConsentScreenTest {
             verify(onConsentDeclinedMock).invoke(CONSENT_REQUIRE_SELFIE)
 
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
-            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(1).assertExists() // CircularProgressIndicator
+            onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(1)
+                .assertExists() // CircularProgressIndicator
 
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
         }
