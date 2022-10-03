@@ -46,7 +46,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
@@ -67,7 +67,7 @@ internal class USBankAccountFormFragment : Fragment() {
 
     private val formArgs by lazy {
         requireNotNull(
-            requireArguments().getParcelable<FormFragmentArguments>(EXTRA_CONFIG)
+            (requireActivity() as BaseSheetActivity<*>).formArgs
         )
     }
 
@@ -558,9 +558,5 @@ internal class USBankAccountFormFragment : Fragment() {
             """.trimIndent()
         } ?: run { null }
         sheetViewModel?.updateBelowButtonText(updatedText)
-    }
-
-    companion object {
-        const val EXTRA_CONFIG = "com.stripe.android.paymentsheet.extra_config"
     }
 }
