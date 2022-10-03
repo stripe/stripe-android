@@ -27,6 +27,7 @@ internal fun PaymentMethodForm(
 ) {
     val context = LocalContext.current
     val formViewModel: FormViewModel = viewModel(
+        key = args.paymentMethodCode,
         factory = FormViewModel.Factory(
             config = args,
             elementsFlow = elementsFlow,

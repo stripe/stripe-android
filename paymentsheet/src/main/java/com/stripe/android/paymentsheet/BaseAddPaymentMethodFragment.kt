@@ -23,12 +23,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.databinding.FragmentAchBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel.Companion.getElements
@@ -40,6 +42,7 @@ import com.stripe.android.paymentsheet.ui.Loading
 import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.FormElement
@@ -244,41 +247,20 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         )
     }
 
-    private fun createFormArguments(
+    @VisibleForTesting
+    internal fun createFormArguments(
         selectedItem: LpmRepository.SupportedPaymentMethod,
         showLinkInlineSignup: Boolean
-    ): FormFragmentArguments {
-        val layoutFormDescriptor = selectedItem.getPMAddForm(
-            requireNotNull(sheetViewModel.stripeIntent.value),
-            sheetViewModel.config
-        )
-        return FormFragmentArguments(
-            paymentMethodCode = selectedItem.code,
-            showCheckbox = layoutFormDescriptor.showCheckbox && !showLinkInlineSignup,
-            showCheckboxControlledFields = sheetViewModel.newPaymentSelection?.let {
-                sheetViewModel.newPaymentSelection?.customerRequestedSave ==
-                    PaymentSelection.CustomerRequestedSave.RequestReuse
-            } ?: layoutFormDescriptor.showCheckboxControlledFields,
-            merchantName = sheetViewModel.merchantName,
-            amount = sheetViewModel.amount.value,
-            billingDetails = sheetViewModel.config?.defaultBillingDetails,
-            shippingDetails = sheetViewModel.config?.shippingDetails,
-            injectorKey = sheetViewModel.injectorKey,
-            initialPaymentMethodCreateParams =
-            sheetViewModel.newPaymentSelection?.paymentMethodCreateParams?.typeCode
-                ?.takeIf {
-                    it == selectedItem.code
-                }?.let {
-                    when (val selection = sheetViewModel.newPaymentSelection) {
-                        is PaymentSelection.New.GenericPaymentMethod ->
-                            selection.paymentMethodCreateParams
-                        is PaymentSelection.New.Card ->
-                            selection.paymentMethodCreateParams
-                        else -> null
-                    }
-                }
-        )
-    }
+    ) = getFormArguments(
+        showPaymentMethod = selectedItem,
+        stripeIntent = requireNotNull(sheetViewModel.stripeIntent.value),
+        config = sheetViewModel.config,
+        merchantName = sheetViewModel.merchantName,
+        amount = sheetViewModel.amount.value,
+        injectorKey = sheetViewModel.injectorKey,
+        newLpm = sheetViewModel.newPaymentSelection,
+        isShowingLinkInlineSignup = showLinkInlineSignup
+    )
 
     @VisibleForTesting
     internal fun transformToPaymentSelection(
@@ -311,6 +293,49 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     customerRequestedSave = formFieldValues.userRequestedReuse
                 )
             }
+        }
+    }
+
+    companion object {
+
+        @VisibleForTesting
+        fun getFormArguments(
+            showPaymentMethod: LpmRepository.SupportedPaymentMethod,
+            stripeIntent: StripeIntent,
+            config: PaymentSheet.Configuration?,
+            merchantName: String,
+            amount: Amount? = null,
+            @InjectorKey injectorKey: String,
+            newLpm: PaymentSelection.New?,
+            isShowingLinkInlineSignup: Boolean = false
+        ): FormFragmentArguments {
+            val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
+
+            return FormFragmentArguments(
+                paymentMethodCode = showPaymentMethod.code,
+                showCheckbox = layoutFormDescriptor.showCheckbox && !isShowingLinkInlineSignup,
+                showCheckboxControlledFields = newLpm?.let {
+                    newLpm.customerRequestedSave ==
+                        PaymentSelection.CustomerRequestedSave.RequestReuse
+                } ?: layoutFormDescriptor.showCheckboxControlledFields,
+                merchantName = merchantName,
+                amount = amount,
+                billingDetails = config?.defaultBillingDetails,
+                shippingDetails = config?.shippingDetails,
+                injectorKey = injectorKey,
+                initialPaymentMethodCreateParams =
+                newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
+                    it == showPaymentMethod.code
+                }?.let {
+                    when (newLpm) {
+                        is PaymentSelection.New.GenericPaymentMethod ->
+                            newLpm.paymentMethodCreateParams
+                        is PaymentSelection.New.Card ->
+                            newLpm.paymentMethodCreateParams
+                        else -> null
+                    }
+                }
+            )
         }
     }
 }
