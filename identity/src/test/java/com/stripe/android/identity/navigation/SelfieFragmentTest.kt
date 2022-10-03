@@ -279,7 +279,9 @@ internal class SelfieFragmentTest {
         }
     }
 
-    private fun launchSelfieFragment(testBlock: (SelfieScanFragmentBinding, TestNavHostController, SelfieFragment) -> Unit) =
+    private fun launchSelfieFragment(
+        testBlock: (SelfieScanFragmentBinding, TestNavHostController, SelfieFragment) -> Unit
+    ) =
         launchFragmentInContainer(
             themeResId = R.style.Theme_MaterialComponents
         ) {

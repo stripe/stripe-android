@@ -15,5 +15,9 @@
             android:name=".addresselement.AddressElementActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />
+        <activity
+            android:name=".paymentdatacollection.polling.PollingActivity"
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:exported="false" />
     </application>
 </manifest>

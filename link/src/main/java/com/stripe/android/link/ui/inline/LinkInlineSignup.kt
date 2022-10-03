@@ -81,19 +81,19 @@ private fun Preview() {
 fun LinkInlineSignup(
     linkPaymentLauncher: LinkPaymentLauncher,
     enabled: Boolean,
-    onStateChanged: (InlineSignupViewState) -> Unit,
+    onStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    linkPaymentLauncher.injector?.let { injector ->
+    linkPaymentLauncher.component?.let { component ->
         val viewModel: InlineSignupViewModel = viewModel(
-            factory = InlineSignupViewModel.Factory(injector)
+            factory = InlineSignupViewModel.Factory(component.injector)
         )
 
         val viewState by viewModel.viewState.collectAsState()
         val errorMessage by viewModel.errorMessage.collectAsState()
 
         LaunchedEffect(viewState) {
-            onStateChanged(viewState)
+            onStateChanged(component.configuration, viewState)
         }
 
         val focusManager = LocalFocusManager.current

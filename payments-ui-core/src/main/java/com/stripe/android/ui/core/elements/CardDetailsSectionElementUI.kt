@@ -20,7 +20,7 @@ import com.stripe.android.ui.core.cardscan.CardScanActivity
 fun CardDetailsSectionElementUI(
     enabled: Boolean,
     controller: CardDetailsSectionController,
-    hiddenIdentifiers: List<IdentifierSpec>?,
+    hiddenIdentifiers: Set<IdentifierSpec>,
     lastTextFieldIdentifier: IdentifierSpec?
 ) {
     Row(
@@ -57,7 +57,7 @@ fun CardDetailsSectionElementUI(
                 listOf(controller.cardDetailsElement.sectionFieldErrorController())
             )
         ),
-        hiddenIdentifiers = hiddenIdentifiers ?: emptyList(),
+        hiddenIdentifiers = hiddenIdentifiers,
         lastTextFieldIdentifier = lastTextFieldIdentifier
     )
 }

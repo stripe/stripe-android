@@ -2,7 +2,7 @@ apply plugin: 'io.gitlab.arturbosch.detekt'
 
 detekt {
     buildUponDefaultConfig = true
-    baseline = file("detekt-baseline.xml")
+    baseline = file("detekt-baseline.xml") // https://detekt.dev/docs/introduction/baseline/
     ignoredBuildTypes = ["debug"]
     ignoredFlavors = []
     ignoredVariants = []

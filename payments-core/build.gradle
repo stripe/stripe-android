@@ -83,8 +83,6 @@ android {
             }
         }
     }
-    productFlavors {
-    }
 
     buildFeatures {
         compose = true

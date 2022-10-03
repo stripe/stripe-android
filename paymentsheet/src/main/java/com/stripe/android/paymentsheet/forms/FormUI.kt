@@ -37,7 +37,7 @@ internal fun Form(
 
 @Composable
 internal fun FormInternal(
-    hiddenIdentifiersFlow: Flow<List<IdentifierSpec>>,
+    hiddenIdentifiersFlow: Flow<Set<IdentifierSpec>>,
     enabledFlow: Flow<Boolean>,
     elementsFlow: Flow<List<FormElement>?>,
     lastTextFieldIdentifierFlow: Flow<IdentifierSpec?>,

@@ -10,12 +10,12 @@ internal fun SectionFieldElementUI(
     enabled: Boolean,
     field: SectionFieldElement,
     modifier: Modifier = Modifier,
-    hiddenIdentifiers: List<IdentifierSpec>? = null,
+    hiddenIdentifiers: Set<IdentifierSpec> = emptySet(),
     lastTextFieldIdentifier: IdentifierSpec?,
     nextFocusDirection: FocusDirection = FocusDirection.Down,
     previousFocusDirection: FocusDirection = FocusDirection.Up
 ) {
-    if (hiddenIdentifiers?.contains(field.identifier) == false) {
+    if (!hiddenIdentifiers.contains(field.identifier)) {
         when (val controller = field.sectionFieldErrorController()) {
             is SameAsShippingController -> {
                 SameAsShippingElementUI(
