@@ -41,10 +41,8 @@ appId: com.stripe.android.financialconnections.example
 - scroll
 - tapOn: "Success" # select success account
 - takeScreenshot: AccountPicker_SuccessAccount
-- tapOn: "Link account"
-- extendedWaitUntil:
-      visible: "Done"
-      timeout: 100000
+- tapOn:
+      point: 500,2150 # For some reason bottom button does not click on account picker. Using pixels instead.
 - takeScreenshot: Success
 - tapOn: "Done"
 # Android specific: Assert the connected account displays on the sample app.
