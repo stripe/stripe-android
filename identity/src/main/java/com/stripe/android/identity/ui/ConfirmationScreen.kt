@@ -95,7 +95,7 @@ internal fun ConfirmationScreen(
                     modifier = Modifier
                         .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
                         .semantics {
-                            testTag = bodyTag
+                            testTag = BODY_TAG
                         },
                     factory = { TextView(it) },
                     update = {
