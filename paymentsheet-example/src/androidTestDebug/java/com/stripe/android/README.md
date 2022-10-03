@@ -15,9 +15,9 @@ To Update the baseline Snapshots:
 After running you can check baseline result html in /Users/skyler/stripe/stripe-android/paymentsheet-example/build/reports/shot/debug/record/index.html
 and you can check the screenshots here: ./stripe-android/paymentsheet-example/screenshots/debug/
 
-## Running Browserstack Tests
+## Running BrowserStack Tests
 
-You can run browser stack tests with the following command:
+You can run BrowserStack tests with the following command:
 
 ```bash
 ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug && \
