@@ -21,7 +21,6 @@ appId: com.stripe.android.financialconnections.example
 - tapOn:
     text: "No thanks"
     optional: true
-
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
     visible: "Agree"
@@ -41,8 +40,9 @@ appId: com.stripe.android.financialconnections.example
 - scroll
 - tapOn: "Success" # select success account
 - takeScreenshot: AccountPicker_SuccessAccount
+# For some reason CTA cannot be found by text on account picker. Using pixels instead.
 - tapOn:
-      point: 500,2150 # For some reason bottom button does not click on account picker. Using pixels instead.
+      point: 500,2150
 - takeScreenshot: Success
 - tapOn: "Done"
 # Android specific: Assert the connected account displays on the sample app.
