@@ -5,143 +5,194 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.view.ContextThemeWrapper
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.isVisible
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.lifecycleScope
-import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkInlineSignup
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetAddPaymentMethodBinding
+import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.forms.FormViewModel.Companion.getElements
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getPMAddForm
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormFragment
+import com.stripe.android.paymentsheet.ui.Loading
+import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.ui.core.elements.FormElement
+import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
-    private lateinit var viewBinding: FragmentPaymentsheetAddPaymentMethodBinding
-    private var showLinkInlineSignup = MutableStateFlow(false)
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val themedInflater = inflater.cloneInContext(
-            ContextThemeWrapper(requireActivity(), R.style.StripePaymentSheetAddPaymentMethodTheme)
-        )
-        return themedInflater.inflate(
-            R.layout.fragment_paymentsheet_add_payment_method,
-            container,
-            false
-        )
+    ) = ComposeView(requireContext()).apply {
+        val elementsFlow = MutableStateFlow<List<FormElement>?>(null)
+        val showCheckboxFlow = MutableStateFlow(false)
+
+        setContent {
+            val isRepositoryReady by sheetViewModel.isResourceRepositoryReady.observeAsState(false)
+            val processing by sheetViewModel.processing.observeAsState(false)
+
+            val linkConfig by sheetViewModel.linkConfiguration.observeAsState()
+            val linkAccountStatus by linkConfig?.let {
+                sheetViewModel.linkLauncher.getAccountStatusFlow(it).collectAsState(null)
+            } ?: mutableStateOf(null)
+
+            if (isRepositoryReady == true) {
+                var selectedPaymentMethodCode: String by rememberSaveable {
+                    mutableStateOf(
+                        sheetViewModel.newPaymentSelection?.paymentMethodCreateParams?.typeCode
+                            ?: sheetViewModel.supportedPaymentMethods.first().code
+                    )
+                }
+                val selectedItem = remember(selectedPaymentMethodCode) {
+                    sheetViewModel.supportedPaymentMethods.first {
+                        it.code == selectedPaymentMethodCode
+                    }
+                }
+
+                val layoutFormDescriptor = selectedItem.getPMAddForm(
+                    requireNotNull(sheetViewModel.stripeIntent.value),
+                    sheetViewModel.config
+                )
+
+                val showLinkInlineSignup = sheetViewModel.isLinkEnabled.value == true &&
+                    sheetViewModel.stripeIntent.value
+                    ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
+                    selectedItem.code == PaymentMethod.Type.Card.code &&
+                    linkAccountStatus == AccountStatus.SignedOut
+
+                val arguments = remember(selectedItem, showLinkInlineSignup) {
+                    FormFragmentArguments(
+                        paymentMethodCode = selectedPaymentMethodCode,
+                        showCheckbox = layoutFormDescriptor.showCheckbox && !showLinkInlineSignup,
+                        showCheckboxControlledFields = sheetViewModel.newPaymentSelection?.let {
+                            sheetViewModel.newPaymentSelection?.customerRequestedSave ==
+                                PaymentSelection.CustomerRequestedSave.RequestReuse
+                        } ?: layoutFormDescriptor.showCheckboxControlledFields,
+                        merchantName = sheetViewModel.merchantName,
+                        amount = sheetViewModel.amount.value,
+                        billingDetails = sheetViewModel.config?.defaultBillingDetails,
+                        shippingDetails = sheetViewModel.config?.shippingDetails,
+                        injectorKey = sheetViewModel.injectorKey,
+                        initialPaymentMethodCreateParams =
+                        sheetViewModel.newPaymentSelection?.paymentMethodCreateParams?.typeCode
+                            ?.takeIf {
+                                it == selectedItem.code
+                            }?.let {
+                                when (val selection = sheetViewModel.newPaymentSelection) {
+                                    is PaymentSelection.New.GenericPaymentMethod ->
+                                        selection.paymentMethodCreateParams
+                                    is PaymentSelection.New.Card ->
+                                        selection.paymentMethodCreateParams
+                                    else -> null
+                                }
+                            }
+                    )
+                }
+
+                LaunchedEffect(arguments) {
+                    elementsFlow.emit(
+                        getElements(
+                            requireContext(),
+                            arguments,
+                            sheetViewModel.lpmResourceRepository,
+                            sheetViewModel.addressResourceRepository
+                        )
+                    )
+                    showCheckboxFlow.emit(
+                        arguments.showCheckbox
+                    )
+                }
+
+                PaymentsTheme {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        if (sheetViewModel.supportedPaymentMethods.size > 1) {
+                            PaymentMethodsUI(
+                                selectedIndex = sheetViewModel.supportedPaymentMethods.indexOf(
+                                    selectedItem
+                                ),
+                                isEnabled = !processing,
+                                paymentMethods = sheetViewModel.supportedPaymentMethods,
+                                onItemSelectedListener = { selectedLpm ->
+                                    if (selectedItem != selectedLpm) {
+                                        sheetViewModel.updatePrimaryButtonUIState(null)
+                                        selectedPaymentMethodCode = selectedLpm.code
+                                    }
+                                },
+                                modifier = Modifier.padding(top = 18.dp, bottom = 6.dp)
+                            )
+                        }
+
+                        if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
+                            Text("Bank Account form goes here")
+                        } else {
+                            PaymentMethodForm(
+                                args = arguments,
+                                enabled = !processing,
+                                onFormFieldValuesChanged = { formValues ->
+                                    sheetViewModel.updateSelection(
+                                        transformToPaymentSelection(
+                                            formValues,
+                                            selectedItem
+                                        )
+                                    )
+                                },
+                                elementsFlow = elementsFlow,
+                                showCheckboxFlow = showCheckboxFlow,
+                                modifier = Modifier.padding(horizontal = 20.dp)
+                            )
+                        }
+
+                        if (showLinkInlineSignup) {
+                            LinkInlineSignup(
+                                linkPaymentLauncher = sheetViewModel.linkLauncher,
+                                enabled = !processing,
+                                onStateChanged = ::onLinkSignupStateChanged,
+                                modifier = Modifier
+                                    .padding(horizontal = 20.dp, vertical = 6.dp)
+                                    .fillMaxWidth()
+                            )
+                        }
+                    }
+                }
+            } else {
+                Loading()
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewBinding = FragmentPaymentsheetAddPaymentMethodBinding.bind(view)
-
-        val paymentMethods = sheetViewModel.supportedPaymentMethods
-
         sheetViewModel.headerText.value =
             getString(R.string.stripe_paymentsheet_add_payment_method_title)
-
-        viewBinding.linkInlineSignup.apply {
-            setContent {
-                val processing by sheetViewModel.processing.observeAsState(false)
-
-                PaymentsTheme {
-                    LinkInlineSignup(
-                        linkPaymentLauncher = sheetViewModel.linkLauncher,
-                        enabled = !processing,
-                        onStateChanged = { config, viewState ->
-                            sheetViewModel.updatePrimaryButtonUIState(
-                                if (viewState.useLink) {
-                                    val userInput = viewState.userInput
-                                    if (
-                                        userInput != null &&
-                                        sheetViewModel.selection.value != null
-                                    ) {
-                                        PrimaryButton.UIState(
-                                            label = null,
-                                            onClick = {
-                                                sheetViewModel.payWithLinkInline(
-                                                    config,
-                                                    userInput
-                                                )
-                                            },
-                                            enabled = true,
-                                            visible = true
-                                        )
-                                    } else {
-                                        PrimaryButton.UIState(
-                                            label = null,
-                                            onClick = null,
-                                            enabled = false,
-                                            visible = true
-                                        )
-                                    }
-                                } else {
-                                    null
-                                }
-                            )
-                        }
-                    )
-                }
-            }
-        }
-
-        sheetViewModel.isResourceRepositoryReady.observe(viewLifecycleOwner) { isReady ->
-            if (isReady == true) {
-                val selectedPaymentMethodIndex = paymentMethods.indexOf(
-                    sheetViewModel.addFragmentSelectedLPM
-                ).takeUnless { it == -1 } ?: 0
-
-                // In order to be able to read sheetViewModel.addFragmentSelectedLPM
-                // the repository needs to be set. This might not be set if recovery
-                // from a killed process or don't keep activities event
-                if (paymentMethods.size > 1) {
-                    setupRecyclerView(
-                        viewBinding,
-                        paymentMethods,
-                        sheetViewModel.addFragmentSelectedLPM
-                    )
-                }
-
-                if (paymentMethods.isNotEmpty()) {
-                    updateLinkInlineSignupVisibility(paymentMethods[selectedPaymentMethodIndex])
-                    // If the activity is destroyed and recreated, then the fragment is already present
-                    // and doesn't need to be replaced, only the selected payment method needs to be set
-                    if (savedInstanceState == null) {
-                        replacePaymentMethodFragment(paymentMethods[selectedPaymentMethodIndex])
-                    }
-                }
-            }
-        }
 
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm(
             linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
@@ -149,140 +200,72 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         )
     }
 
-    private fun setupRecyclerView(
-        viewBinding: FragmentPaymentsheetAddPaymentMethodBinding,
-        paymentMethods: List<SupportedPaymentMethod>,
-        initialSelectedItem: SupportedPaymentMethod
+    private fun onLinkSignupStateChanged(
+        config: LinkPaymentLauncher.Configuration,
+        viewState: InlineSignupViewState
     ) {
-        viewBinding.paymentMethodsRecycler.isVisible = true
-        viewBinding.paymentMethodsRecycler.apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                val processing by sheetViewModel.processing
-                    .asFlow()
-                    .collectAsState(initial = false)
-                val selectedItem by sheetViewModel.getAddFragmentSelectedLpm()
-                    .asFlow()
-                    .collectAsState(initial = initialSelectedItem)
-                PaymentMethodsUI(
-                    selectedIndex = paymentMethods.indexOf(selectedItem),
-                    isEnabled = !processing,
-                    paymentMethods = paymentMethods,
-                    onItemSelectedListener = { selectedLpm ->
-                        if (sheetViewModel.addFragmentSelectedLPM != selectedLpm) {
-                            onPaymentMethodSelected(selectedLpm)
-                        }
-                    }
-                )
+        sheetViewModel.updatePrimaryButtonUIState(
+            if (viewState.useLink) {
+                val userInput = viewState.userInput
+                if (userInput != null &&
+                    sheetViewModel.selection.value != null
+                ) {
+                    PrimaryButton.UIState(
+                        label = null,
+                        onClick = {
+                            sheetViewModel.payWithLinkInline(
+                                config,
+                                userInput
+                            )
+                        },
+                        enabled = true,
+                        visible = true
+                    )
+                } else {
+                    PrimaryButton.UIState(
+                        label = null,
+                        onClick = null,
+                        enabled = false,
+                        visible = true
+                    )
+                }
+            } else {
+                null
             }
-        }
+        )
     }
 
     @VisibleForTesting
-    internal fun onPaymentMethodSelected(paymentMethod: SupportedPaymentMethod) {
-        // hide the soft keyboard.
-        ViewCompat.getWindowInsetsController(requireView())
-            ?.hide(WindowInsetsCompat.Type.ime())
+    internal fun transformToPaymentSelection(
+        formFieldValues: FormFieldValues?,
+        selectedPaymentMethodResources: LpmRepository.SupportedPaymentMethod
+    ) = formFieldValues?.let {
+        FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
+            formFieldValues.fieldValuePairs
+                .filterNot { entry ->
+                    entry.key == IdentifierSpec.SaveForFutureUse ||
+                        entry.key == IdentifierSpec.CardBrand
+                },
+            selectedPaymentMethodResources.code,
+            selectedPaymentMethodResources.requiresMandate
+        ).run {
+            if (selectedPaymentMethodResources.code == PaymentMethod.Type.Card.code) {
+                PaymentSelection.New.Card(
+                    paymentMethodCreateParams = this,
+                    brand = CardBrand.fromCode(
+                        formFieldValues.fieldValuePairs[IdentifierSpec.CardBrand]?.value
+                    ),
+                    customerRequestedSave = formFieldValues.userRequestedReuse
 
-        sheetViewModel.updatePrimaryButtonUIState(null)
-        updateLinkInlineSignupVisibility(paymentMethod)
-        replacePaymentMethodFragment(paymentMethod)
-    }
-
-    private fun replacePaymentMethodFragment(paymentMethod: SupportedPaymentMethod) {
-        sheetViewModel.addFragmentSelectedLPM = paymentMethod
-
-        val args = requireArguments()
-        args.putParcelable(
-            ComposeFormDataCollectionFragment.EXTRA_CONFIG,
-            getFormArguments(
-                stripeIntent = requireNotNull(sheetViewModel.stripeIntent.value),
-                config = sheetViewModel.config,
-                showPaymentMethod = paymentMethod,
-                merchantName = sheetViewModel.merchantName,
-                amount = sheetViewModel.amount.value,
-                injectorKey = sheetViewModel.injectorKey,
-                newLpm = sheetViewModel.newPaymentSelection,
-                isShowingLinkInlineSignup = showLinkInlineSignup.value
-            )
-        )
-
-        childFragmentManager.commit {
-            setCustomAnimations(
-                AnimationConstants.FADE_IN,
-                AnimationConstants.FADE_OUT,
-                AnimationConstants.FADE_IN,
-                AnimationConstants.FADE_OUT
-            )
-            replace(
-                R.id.payment_method_fragment_container,
-                fragmentForPaymentMethod(paymentMethod),
-                args
-            )
-        }
-    }
-
-    private fun updateLinkInlineSignupVisibility(selectedPaymentMethod: SupportedPaymentMethod) {
-        lifecycleScope.launch {
-            showLinkInlineSignup.value = sheetViewModel.isLinkEnabled.value == true &&
-                sheetViewModel.stripeIntent.value
-                    ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) ?: false &&
-                selectedPaymentMethod.code == PaymentMethod.Type.Card.code &&
-                sheetViewModel.linkConfiguration.value
-                ?.let {
-                    sheetViewModel.linkLauncher.getAccountStatusFlow(it).first()
-                } == AccountStatus.SignedOut
-
-            viewBinding.linkInlineSignup.isVisible = showLinkInlineSignup.value
-        }
-    }
-
-    private fun fragmentForPaymentMethod(paymentMethod: SupportedPaymentMethod) =
-        when (paymentMethod.code) {
-            PaymentMethod.Type.USBankAccount.code -> USBankAccountFormFragment::class.java
-            else -> ComposeFormDataCollectionFragment::class.java
-        }
-
-    companion object {
-
-        @VisibleForTesting
-        fun getFormArguments(
-            showPaymentMethod: SupportedPaymentMethod,
-            stripeIntent: StripeIntent,
-            config: PaymentSheet.Configuration?,
-            merchantName: String,
-            amount: Amount? = null,
-            @InjectorKey injectorKey: String,
-            newLpm: PaymentSelection.New?,
-            isShowingLinkInlineSignup: Boolean = false
-        ): FormFragmentArguments {
-            val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
-
-            return FormFragmentArguments(
-                paymentMethodCode = showPaymentMethod.code,
-                showCheckbox = layoutFormDescriptor.showCheckbox && !isShowingLinkInlineSignup,
-                showCheckboxControlledFields = newLpm?.let {
-                    newLpm.customerRequestedSave ==
-                        PaymentSelection.CustomerRequestedSave.RequestReuse
-                } ?: layoutFormDescriptor.showCheckboxControlledFields,
-                merchantName = merchantName,
-                amount = amount,
-                billingDetails = config?.defaultBillingDetails,
-                shippingDetails = config?.shippingDetails,
-                injectorKey = injectorKey,
-                initialPaymentMethodCreateParams =
-                newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
-                    it == showPaymentMethod.code
-                }?.let {
-                    when (newLpm) {
-                        is PaymentSelection.New.GenericPaymentMethod ->
-                            newLpm.paymentMethodCreateParams
-                        is PaymentSelection.New.Card ->
-                            newLpm.paymentMethodCreateParams
-                        else -> null
-                    }
-                }
-            )
+                )
+            } else {
+                PaymentSelection.New.GenericPaymentMethod(
+                    getString(selectedPaymentMethodResources.displayNameResource),
+                    selectedPaymentMethodResources.iconResource,
+                    this,
+                    customerRequestedSave = formFieldValues.userRequestedReuse
+                )
+            }
         }
     }
 }

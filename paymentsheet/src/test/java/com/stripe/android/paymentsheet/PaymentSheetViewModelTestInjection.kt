@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
@@ -27,7 +28,6 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -48,8 +48,10 @@ internal open class PaymentSheetViewModelTestInjection {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     val eventReporter = mock<EventReporter>()
-    private val googlePayPaymentMethodLauncherFactory = createGooglePayPaymentMethodLauncherFactory()
+    private val googlePayPaymentMethodLauncherFactory =
+        createGooglePayPaymentMethodLauncherFactory()
     private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
 
     private lateinit var injector: Injector
@@ -96,7 +98,13 @@ internal open class PaymentSheetViewModelTestInjection {
                         ApplicationProvider.getApplicationContext<Application>().resources
                     )
                 ).apply {
-                    this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
+                    this.forceUpdate(
+                        listOf(
+                            PaymentMethod.Type.Card.code,
+                            PaymentMethod.Type.USBankAccount.code
+                        ),
+                        null
+                    )
                 }
             ),
             mock(),
@@ -119,11 +127,8 @@ internal open class PaymentSheetViewModelTestInjection {
         lpmRepository: LpmRepository,
         addressRepository: AddressRepository,
         formViewModel: FormViewModel = FormViewModel(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
-            config = mock(),
-            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
-            transformSpecToElement = mock()
+            elementsFlow = mock(),
+            showCheckboxFlow = mock()
         )
     ) {
         injector = object : Injector {
@@ -131,7 +136,8 @@ internal open class PaymentSheetViewModelTestInjection {
                 (injectable as? PaymentSheetViewModel.Factory)?.let {
                     val mockBuilder = mock<PaymentSheetViewModelSubcomponent.Builder>()
                     val mockSubcomponent = mock<PaymentSheetViewModelSubcomponent>()
-                    val mockSubComponentBuilderProvider = mock<Provider<PaymentSheetViewModelSubcomponent.Builder>>()
+                    val mockSubComponentBuilderProvider =
+                        mock<Provider<PaymentSheetViewModelSubcomponent.Builder>>()
 
                     whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
                     whenever(mockBuilder.savedStateHandle(any())).thenReturn(mockBuilder)
@@ -143,11 +149,11 @@ internal open class PaymentSheetViewModelTestInjection {
                 (injectable as? FormViewModel.Factory)?.let {
                     val mockBuilder = mock<FormViewModelSubcomponent.Builder>()
                     val mockSubcomponent = mock<FormViewModelSubcomponent>()
-                    val mockSubComponentBuilderProvider = mock<Provider<FormViewModelSubcomponent.Builder>>()
+                    val mockSubComponentBuilderProvider =
+                        mock<Provider<FormViewModelSubcomponent.Builder>>()
 
                     whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
                     whenever(mockBuilder.formFragmentArguments(any())).thenReturn(mockBuilder)
-                    whenever(mockBuilder.paymentMethodCode(any())).thenReturn(mockBuilder)
                     whenever(mockSubcomponent.viewModel).thenReturn(formViewModel)
                     whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider

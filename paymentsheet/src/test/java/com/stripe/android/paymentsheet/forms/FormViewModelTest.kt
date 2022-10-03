@@ -21,6 +21,7 @@ import com.stripe.android.ui.core.elements.AddressElement
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
@@ -38,6 +39,7 @@ import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepositor
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.runTest
@@ -71,17 +73,30 @@ internal class FormViewModelTest {
             ApplicationProvider.getApplicationContext<Context>().resources
         )
     )
+    val elementsFlow = MutableStateFlow<List<FormElement>?>(null)
+    val showCheckboxFlow = MutableStateFlow(false)
 
     @Test
     fun `Factory gets initialized by Injector when Injector is available`() {
+        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
+        val config = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            injectorKey = injectorKey
+        )
+
         val mockBuilder = mock<FormViewModelSubcomponent.Builder>()
         val mockSubcomponent = mock<FormViewModelSubcomponent>()
-        val mockViewModel = mock<FormViewModel>()
+        // The reason the ViewModel cannot be mocked here is because
+        // AbstractSavedStateViewModelFactory will call viewmodel.setTagIfAbsent, which accesses
+        // ViewModel.mBagOfTags that's initialized in base class.
+        // Mocking it would leave this field null, causing an NPE.
+        val vmToBeReturned = createViewModel()
 
         whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
-        whenever(mockBuilder.paymentMethodCode(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.formFragmentArguments(any())).thenReturn(mockBuilder)
-        whenever(mockSubcomponent.viewModel).thenReturn(mockViewModel)
+        whenever(mockBuilder.elementsFlow(any())).thenReturn(mockBuilder)
+        whenever(mockBuilder.showCheckboxFlow(any())).thenReturn(mockBuilder)
+        whenever(mockSubcomponent.viewModel).thenReturn(vmToBeReturned)
 
         val injector = object : Injector {
             override fun inject(injectable: Injectable<*>) {
@@ -89,17 +104,17 @@ internal class FormViewModelTest {
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
             }
         }
-        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
-        val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = injectorKey)
         WeakMapInjectorRegistry.register(injector, injectorKey)
         val factory = FormViewModel.Factory(
             config,
-            PaymentMethod.Type.Sofort.code
-        ) { ApplicationProvider.getApplicationContext<Application>() }
+            elementsFlow,
+            showCheckboxFlow,
+            contextSupplier = { ApplicationProvider.getApplicationContext<Application>() }
+        )
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(FormViewModel::class.java)
         verify(factorySpy, times(0)).fallbackInitialize(any())
-        assertThat(createdViewModel).isEqualTo(mockViewModel)
+        assertThat(createdViewModel).isEqualTo(vmToBeReturned)
 
         WeakMapInjectorRegistry.clear()
     }
@@ -110,8 +125,10 @@ internal class FormViewModelTest {
         val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = DUMMY_INJECTOR_KEY)
         val factory = FormViewModel.Factory(
             config,
-            PaymentMethod.Type.Sofort.code
-        ) { ApplicationProvider.getApplicationContext<Application>() }
+            elementsFlow,
+            showCheckboxFlow,
+            contextSupplier = { ApplicationProvider.getApplicationContext<Application>() }
+        )
         val factorySpy = spy(factory)
         assertNotNull(factorySpy.create(FormViewModel::class.java))
         verify(factorySpy).fallbackInitialize(
@@ -145,20 +162,24 @@ internal class FormViewModelTest {
 
     @Test
     fun `Verify setting save for future use value is updated in flowable`() = runTest {
-        val args = COMPOSE_FRAGMENT_ARGS
-
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.Card.code,
-            args,
-            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    EmailSpec(),
-                    SaveForFutureUseSpec()
-                )
-            ),
-            addressResourceRepository = addressResourceRepository,
-            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code
+        )
+        val formViewModel = createViewModel()
+        showCheckboxFlow.emit(true)
+        elementsFlow.emit(
+            FormViewModel.getElements(
+                context,
+                formFragmentArguments = args,
+                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.Card,
+                    LayoutSpec.create(
+                        EmailSpec(),
+                        SaveForFutureUseSpec()
+                    )
+                ),
+                addressResourceRepository = addressResourceRepository
+            )
         )
 
         // Set all the card fields, billing is set in the args
@@ -191,18 +212,23 @@ internal class FormViewModelTest {
 
     @Test
     fun `Verify setting save for future use visibility removes it from completed values`() {
-        val args = COMPOSE_FRAGMENT_ARGS
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.Card.code,
-            args,
-            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    SaveForFutureUseSpec()
-                )
-            ),
-            addressResourceRepository = addressResourceRepository,
-            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code
+        )
+        val formViewModel = createViewModel()
+        showCheckboxFlow.tryEmit(true)
+        elementsFlow.tryEmit(
+            FormViewModel.getElements(
+                context,
+                formFragmentArguments = args,
+                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.Card,
+                    LayoutSpec.create(
+                        SaveForFutureUseSpec()
+                    )
+                ),
+                addressResourceRepository = addressResourceRepository
+            )
         )
 
         val values = mutableListOf<Set<IdentifierSpec>>()
@@ -212,7 +238,7 @@ internal class FormViewModelTest {
             }
         assertThat(values[0]).isEmpty()
 
-        formViewModel.saveForFutureUseVisible.value = false
+        showCheckboxFlow.tryEmit(false)
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
@@ -225,18 +251,22 @@ internal class FormViewModelTest {
     @Test
     fun `Verify if there are no text fields, there is no last text field id`() = runTest {
         // Here we have just a country, no text fields.
-        val args = COMPOSE_FRAGMENT_ARGS
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.Card.code,
-            args,
-            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    CountrySpec()
-                )
-            ),
-            addressResourceRepository = addressResourceRepository,
-            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code
+        )
+        val formViewModel = createViewModel()
+        elementsFlow.tryEmit(
+            FormViewModel.getElements(
+                context,
+                formFragmentArguments = args,
+                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.Card,
+                    LayoutSpec.create(
+                        CountrySpec()
+                    )
+                ),
+                addressResourceRepository = addressResourceRepository
+            )
         )
 
         // Verify formFieldValues does not contain email
@@ -247,51 +277,60 @@ internal class FormViewModelTest {
 
     @ExperimentalCoroutinesApi
     @Test
-    fun `Verify if the last text field is hidden the second to last text field is the last text field id`() = runTest {
-        // Here we have one hidden (email) and one required field (name), country will always be in the result,
-        //  and email only if it is not hidden
-        val args = COMPOSE_FRAGMENT_ARGS
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.P24.code,
-            args,
-            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.P24,
-                LayoutSpec.create(
-                    NameSpec(),
-                    EmailSpec(),
-                    CountrySpec()
+    fun `Verify if the last text field is hidden the second to last text field is the last text field id`() =
+        runTest {
+            // Here we have one hidden (email) and one required field (name), country will always be in the result,
+            //  and email only if it is not hidden
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                paymentMethodCode = PaymentMethod.Type.P24.code
+            )
+            val formViewModel = createViewModel()
+            elementsFlow.tryEmit(
+                FormViewModel.getElements(
+                    context,
+                    formFragmentArguments = args,
+                    lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
+                        PaymentMethod.Type.P24,
+                        LayoutSpec.create(
+                            NameSpec(),
+                            EmailSpec(),
+                            CountrySpec()
+                        )
+                    ),
+                    addressResourceRepository = addressResourceRepository
                 )
-            ),
-            addressResourceRepository = addressResourceRepository,
-            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
-        )
+            )
 
-        formViewModel.addHiddenIdentifiers(setOf(IdentifierSpec.Email))
+            formViewModel.addHiddenIdentifiers(setOf(IdentifierSpec.Email))
 
-        // Verify formFieldValues does not contain email
-        assertThat(formViewModel.lastTextFieldIdentifier.first()?.v1).isEqualTo(
-            IdentifierSpec.Name.v1
-        )
-    }
+            // Verify formFieldValues does not contain email
+            assertThat(formViewModel.lastTextFieldIdentifier.first()?.v1).isEqualTo(
+                IdentifierSpec.Name.v1
+            )
+        }
 
     @ExperimentalCoroutinesApi
     @Test
     fun `Verify if a field is hidden and valid it is not in the completeFormValues`() = runTest {
         // Here we have one hidden (email) and one required field (name), bank will always be in the result,
         //  and name only if not hidden
-        val args = COMPOSE_FRAGMENT_ARGS
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.Card.code,
-            args,
-            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    EmailSpec(),
-                    CountrySpec()
-                )
-            ),
-            addressResourceRepository = addressResourceRepository,
-            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code
+        )
+        val formViewModel = createViewModel()
+        elementsFlow.tryEmit(
+            FormViewModel.getElements(
+                context,
+                formFragmentArguments = args,
+                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.Card,
+                    LayoutSpec.create(
+                        EmailSpec(),
+                        CountrySpec()
+                    )
+                ),
+                addressResourceRepository = addressResourceRepository
+            )
         )
 
         val emailController =
@@ -314,46 +353,51 @@ internal class FormViewModelTest {
 
     @ExperimentalCoroutinesApi
     @Test
-    fun `Hidden invalid fields arent in the formViewValue and has no effect on complete state`() = runTest {
-        // Here we have one hidden (email) and one required field (name), bank will always be in the result,
-        //  and email only if not hidden
-        val args = COMPOSE_FRAGMENT_ARGS
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.Card.code,
-            args,
-            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    EmailSpec(),
-                    CountrySpec(),
-                    SaveForFutureUseSpec()
+    fun `Hidden invalid fields arent in the formViewValue and has no effect on complete state`() =
+        runTest {
+            // Here we have one hidden (email) and one required field (name), bank will always be in the result,
+            //  and email only if not hidden
+            val args = COMPOSE_FRAGMENT_ARGS.copy(
+                paymentMethodCode = PaymentMethod.Type.Card.code
+            )
+            val formViewModel = createViewModel()
+            elementsFlow.tryEmit(
+                FormViewModel.getElements(
+                    context,
+                    formFragmentArguments = args,
+                    lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
+                        PaymentMethod.Type.Card,
+                        LayoutSpec.create(
+                            EmailSpec(),
+                            CountrySpec(),
+                            SaveForFutureUseSpec()
+                        )
+                    ),
+                    addressResourceRepository = addressResourceRepository
                 )
-            ),
-            addressResourceRepository = addressResourceRepository,
-            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
-        )
+            )
 
-        val emailController =
-            getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
+            val emailController =
+                getSectionFieldTextControllerWithLabel(formViewModel, R.string.email)
 
-        // Add text to the email to make it invalid
-        emailController?.onValueChange("joe")
+            // Add text to the email to make it invalid
+            emailController?.onValueChange("joe")
 
-        // Verify formFieldValues is null because the email is required and invalid
-        assertThat(formViewModel.completeFormValues.first()).isNull()
+            // Verify formFieldValues is null because the email is required and invalid
+            assertThat(formViewModel.completeFormValues.first()).isNull()
 
-        formViewModel.addHiddenIdentifiers(setOf(IdentifierSpec.Email))
+            formViewModel.addHiddenIdentifiers(setOf(IdentifierSpec.Email))
 
-        // Verify formFieldValues is not null even though the card number is invalid
-        // (because it is not required)
-        val completeFormFieldValues = formViewModel.completeFormValues.first()
-        assertThat(
-            completeFormFieldValues
-        ).isNotNull()
-        assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
-            IdentifierSpec.Email
-        )
-    }
+            // Verify formFieldValues is not null even though the card number is invalid
+            // (because it is not required)
+            val completeFormFieldValues = formViewModel.completeFormValues.first()
+            assertThat(
+                completeFormFieldValues
+            ).isNotNull()
+            assertThat(formViewModel.completeFormValues.first()?.fieldValuePairs).doesNotContainKey(
+                IdentifierSpec.Email
+            )
+        }
 
     /**
      * This is serving as more of an integration test of forms from
@@ -363,24 +407,36 @@ internal class FormViewModelTest {
     @Test
     fun `Verify params are set when element flows are complete`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.P24.code,
             billingDetails = null,
             showCheckbox = true,
             showCheckboxControlledFields = true
         )
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.P24.code,
-            args,
-            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.P24,
-                LayoutSpec.create(
-                    NameSpec(),
-                    EmailSpec(),
-                    CountrySpec(allowedCountryCodes = setOf("AT", "BE", "DE", "ES", "IT", "NL")),
-                    SaveForFutureUseSpec()
-                )
-            ),
-            addressResourceRepository = addressResourceRepository,
-            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
+        val formViewModel = createViewModel()
+        elementsFlow.tryEmit(
+            FormViewModel.getElements(
+                context,
+                formFragmentArguments = args,
+                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.P24,
+                    LayoutSpec.create(
+                        NameSpec(),
+                        EmailSpec(),
+                        CountrySpec(
+                            allowedCountryCodes = setOf(
+                                "AT",
+                                "BE",
+                                "DE",
+                                "ES",
+                                "IT",
+                                "NL"
+                            )
+                        ),
+                        SaveForFutureUseSpec()
+                    )
+                ),
+                addressResourceRepository = addressResourceRepository
+            )
         )
 
         val nameElement =
@@ -414,31 +470,34 @@ internal class FormViewModelTest {
     @Test
     fun `Verify params are set when element address fields are complete`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
             showCheckbox = false,
             showCheckboxControlledFields = true,
             billingDetails = null
         )
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.SepaDebit.code,
-            args,
-            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.SepaDebit,
-                LayoutSpec.create(
-                    NameSpec(),
-                    EmailSpec(),
-                    IbanSpec(),
-                    AddressSpec(
-                        IdentifierSpec.Generic("address"),
-                        allowedCountryCodes = setOf("US", "JP")
-                    ),
-                    MandateTextSpec(
-                        IdentifierSpec.Generic("mandate"),
-                        R.string.sepa_mandate
+        val formViewModel = createViewModel()
+        elementsFlow.tryEmit(
+            FormViewModel.getElements(
+                context,
+                formFragmentArguments = args,
+                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.SepaDebit,
+                    LayoutSpec.create(
+                        NameSpec(),
+                        EmailSpec(),
+                        IbanSpec(),
+                        AddressSpec(
+                            IdentifierSpec.Generic("address"),
+                            allowedCountryCodes = setOf("US", "JP")
+                        ),
+                        MandateTextSpec(
+                            IdentifierSpec.Generic("mandate"),
+                            R.string.sepa_mandate
+                        )
                     )
-                )
-            ),
-            addressResourceRepository = addressResourceRepository,
-            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
+                ),
+                addressResourceRepository = addressResourceRepository
+            )
         )
 
         getSectionFieldTextControllerWithLabel(
@@ -503,29 +562,32 @@ internal class FormViewModelTest {
          * Using sepa debit as a complex enough example to test the address portion.
          */
         val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
             billingDetails = null
         )
-        val formViewModel = FormViewModel(
-            PaymentMethod.Type.SepaDebit.code,
-            args,
-            lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.SepaDebit,
-                LayoutSpec.create(
-                    NameSpec(),
-                    EmailSpec(),
-                    IbanSpec(),
-                    AddressSpec(
-                        IdentifierSpec.Generic("address"),
-                        allowedCountryCodes = setOf("US", "JP")
-                    ),
-                    MandateTextSpec(
-                        IdentifierSpec.Generic("mandate"),
-                        R.string.sepa_mandate
+        val formViewModel = createViewModel()
+        elementsFlow.tryEmit(
+            FormViewModel.getElements(
+                context,
+                formFragmentArguments = args,
+                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.SepaDebit,
+                    LayoutSpec.create(
+                        NameSpec(),
+                        EmailSpec(),
+                        IbanSpec(),
+                        AddressSpec(
+                            IdentifierSpec.Generic("address"),
+                            allowedCountryCodes = setOf("US", "JP")
+                        ),
+                        MandateTextSpec(
+                            IdentifierSpec.Generic("mandate"),
+                            R.string.sepa_mandate
+                        )
                     )
-                )
-            ),
-            addressResourceRepository = addressResourceRepository,
-            transformSpecToElement = TransformSpecToElement(addressResourceRepository, args, context)
+                ),
+                addressResourceRepository = addressResourceRepository
+            )
         )
 
         getSectionFieldTextControllerWithLabel(
@@ -589,7 +651,7 @@ internal class FormViewModelTest {
         formViewModel: FormViewModel,
         @StringRes label: Int
     ) =
-        formViewModel.elements.first()!!
+        formViewModel.elementsFlow.first()!!
             .filterIsInstance<SectionElement>()
             .flatMap { it.fields }
             .filterIsInstance<SectionSingleFieldElement>()
@@ -634,7 +696,7 @@ internal class FormViewModelTest {
             formViewModel: FormViewModel,
             @StringRes label: Int
         ): TextFieldController? {
-            val addressElementFields = formViewModel.elements.first()!!
+            val addressElementFields = formViewModel.elementsFlow.first()!!
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<AddressElement>()
@@ -654,11 +716,16 @@ internal class FormViewModelTest {
                     ?.firstOrNull { it?.label?.first() == label }
         }
     }
+
+    fun createViewModel() = FormViewModel(
+        elementsFlow = elementsFlow,
+        showCheckboxFlow = showCheckboxFlow
+    )
 }
 
 @OptIn(FlowPreview::class)
 internal suspend fun FormViewModel.setSaveForFutureUse(value: Boolean) {
-    elements
+    elementsFlow
         .firstOrNull()
         ?.filterIsInstance<SaveForFutureUseElement>()
         ?.firstOrNull()?.controller?.onValueChange(value)
