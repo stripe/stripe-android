@@ -33,7 +33,7 @@ internal fun FinancialConnectionsButton(
     content: @Composable (RowScope.() -> Unit)
 ) {
     Button(
-        onClick = onClick,
+        onClick = { if (!loading) onClick() },
         modifier = modifier,
         enabled = enabled,
         shape = RoundedCornerShape(size = size.radius),

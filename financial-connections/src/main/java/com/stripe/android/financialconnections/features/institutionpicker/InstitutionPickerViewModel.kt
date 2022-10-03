@@ -49,6 +49,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 featuredInstitutions = featuredInstitutions(
                     clientSecret = configuration.financialConnectionsSessionClientSecret
                 ),
+                searchDisabled = manifest.institutionSearchDisabled,
                 allowManualEntry = kotlin
                     .runCatching { manifest.allowManualEntry }
                     .getOrElse { false }
@@ -151,6 +152,7 @@ internal data class InstitutionPickerState(
 ) : MavericksState {
     data class Payload(
         val featuredInstitutions: InstitutionResponse,
-        val allowManualEntry: Boolean
+        val allowManualEntry: Boolean,
+        val searchDisabled: Boolean
     )
 }

@@ -69,7 +69,8 @@ internal class InstitutionPickerStates :
 
         private fun payload() = InstitutionPickerState.Payload(
             featuredInstitutions = institutionResponse(),
-            allowManualEntry = true
+            allowManualEntry = true,
+            searchDisabled = false
         )
         private fun institutionResponse() = InstitutionResponse(
             listOf(

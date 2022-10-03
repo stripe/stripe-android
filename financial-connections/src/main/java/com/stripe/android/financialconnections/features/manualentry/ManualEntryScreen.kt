@@ -48,9 +48,9 @@ internal fun ManualEntryScreen() {
     val state: State<ManualEntryState> = viewModel.collectAsState()
 
     ManualEntryContent(
-        routing = state.value.routing,
-        account = state.value.account,
-        accountConfirm = state.value.accountConfirm,
+        routing = state.value.routing to state.value.routingError,
+        account = state.value.account to state.value.accountError,
+        accountConfirm = state.value.accountConfirm to state.value.accountConfirmError,
         isValidForm = state.value.isValidForm,
         verifyWithMicrodeposits = state.value.verifyWithMicrodeposits,
         linkPaymentAccountStatus = state.value.linkPaymentAccount,

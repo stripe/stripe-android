@@ -23,12 +23,12 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.utils.UriComparator
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -55,8 +55,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         val manifest = getManifest()
                         setState { copy(viewEffect = OpenUrl(manifest.hostedAuthUrl)) }
                     }
-                    Message.Finish -> {
-                        setState { copy(viewEffect = Finish) }
+                    is Message.Finish -> {
+                        setState { copy(viewEffect = Finish(message.result)) }
                     }
                     Message.ClearPartnerWebAuth -> {
                         setState { copy(webAuthFlow = Uninitialized) }
@@ -78,7 +78,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             val receivedUrl: String? = intent?.data?.toString()
             when {
                 receivedUrl == null -> setState {
-                    copy(webAuthFlow = Fail(WebAuthFlowFailedException(receivedUrl)))
+                    copy(webAuthFlow = Fail(WebAuthFlowFailedException(url = null)))
                 }
                 uriComparator.compareSchemeAuthorityAndPath(receivedUrl, SUCCESS_URL) -> setState {
                     copy(webAuthFlow = Success(receivedUrl))
@@ -138,17 +138,18 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      */
     fun onBackPressed() = close()
 
-    @OptIn(DelicateCoroutinesApi::class)
     private fun close() {
-        // Asynchronously complete the session while activity is closing.
-        // Using [GlobalScope] to prevent the call from cancel while activity finishes.
         logger.debug("User intentionally closed the AuthFlow.")
-        GlobalScope.launch {
+        viewModelScope.launch {
             kotlin
                 .runCatching { completeFinancialConnectionsSession() }
-                .onFailure { logger.error("Error completing session before closing", it) }
+                .onFailure {
+                    logger.error("Error completing session before closing", it)
+                }
+                .onSuccess {
+                    setState { copy(viewEffect = Finish(Canceled)) }
+                }
         }
-        setState { copy(viewEffect = Finish) }
     }
 
     companion object :
@@ -208,5 +209,7 @@ internal sealed interface FinancialConnectionsSheetNativeViewEffect {
     /**
      * Finish the container activity.
      */
-    object Finish : FinancialConnectionsSheetNativeViewEffect
+    data class Finish(
+        val result: FinancialConnectionsSheetActivityResult
+    ) : FinancialConnectionsSheetNativeViewEffect
 }

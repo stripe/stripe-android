@@ -117,9 +117,8 @@ private fun SuccessContent(
             Spacer(modifier = Modifier.weight(1f))
             if (showLinkAnotherAccount) {
                 FinancialConnectionsButton(
-                    loading = loading,
-                    type = FinancialConnectionsButton.Type.Secondary,
                     enabled = loading.not(),
+                    type = FinancialConnectionsButton.Type.Secondary,
                     onClick = onLinkAnotherAccountClick,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -129,7 +128,6 @@ private fun SuccessContent(
             }
             FinancialConnectionsButton(
                 loading = loading,
-                enabled = loading.not(),
                 onClick = onDoneClick,
                 modifier = Modifier
                     .fillMaxWidth()

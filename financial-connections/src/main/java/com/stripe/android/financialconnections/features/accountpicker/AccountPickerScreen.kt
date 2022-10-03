@@ -111,7 +111,8 @@ private fun AccountPickerContent(
                 // if account selection should be skipped.
                 true -> AccountPickerLoading()
                 false -> AccountPickerLoaded(
-                    loading = state.isLoading,
+                    submitEnabled = state.submitEnabled,
+                    submitLoading = state.submitLoading,
                     accounts = payload().accounts,
                     selectedIds = state.selectedIds,
                     onAccountClicked = onAccountClicked,
@@ -149,7 +150,8 @@ private fun AccountPickerLoading() {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun AccountPickerLoaded(
-    loading: Boolean,
+    submitEnabled: Boolean,
+    submitLoading: Boolean,
     accounts: List<PartnerAccountUI>,
     accessibleDataCalloutModel: AccessibleDataCalloutModel?,
     selectionMode: SelectionMode,
@@ -194,7 +196,8 @@ private fun AccountPickerLoaded(
         accessibleDataCalloutModel?.let { AccessibleDataCallout(it) }
         Spacer(modifier = Modifier.size(12.dp))
         FinancialConnectionsButton(
-            loading = loading,
+            enabled = submitEnabled,
+            loading = submitLoading,
             onClick = onSelectAccounts,
             modifier = Modifier
                 .fillMaxWidth()

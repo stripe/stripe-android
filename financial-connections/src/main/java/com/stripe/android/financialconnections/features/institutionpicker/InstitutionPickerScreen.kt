@@ -147,13 +147,15 @@ private fun LoadedContent(
             )
         }
         Spacer(modifier = Modifier.size(16.dp))
-        FinancialConnectionsSearchRow(
-            query = query,
-            searchMode = searchMode,
-            onQueryChanged = onQueryChanged,
-            onSearchFocused = onSearchFocused,
-            onCancelSearchClick = onCancelSearchClick
-        )
+        if (payload()?.searchDisabled == false) {
+            FinancialConnectionsSearchRow(
+                query = query,
+                searchMode = searchMode,
+                onQueryChanged = onQueryChanged,
+                onSearchFocused = onSearchFocused,
+                onCancelSearchClick = onCancelSearchClick
+            )
+        }
         if (query.isNotEmpty()) {
             SearchInstitutionsList(
                 institutionsProvider = institutionsProvider,

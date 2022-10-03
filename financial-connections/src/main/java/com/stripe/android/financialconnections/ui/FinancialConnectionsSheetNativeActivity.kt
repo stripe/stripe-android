@@ -84,8 +84,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                             uri = Uri.parse(viewEffect.url)
                         )
                     )
-                    Finish -> {
-                        setResult(Activity.RESULT_OK)
+                    is Finish -> {
+                        setResult(
+                            Activity.RESULT_OK,
+                            Intent().putExtra(EXTRA_RESULT, viewEffect.result)
+                        )
                         finish()
                     }
                 }
@@ -183,6 +186,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 inclusive = true
             }
         }
+    }
+
+    internal companion object {
+        internal const val EXTRA_RESULT = "result"
     }
 }
 

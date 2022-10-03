@@ -10,6 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Finish
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
@@ -27,7 +28,7 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
     }
 
     private fun logErrors() {
-        onAsync(ManualEntrySuccessState::completeAuthSession, onFail = {
+        onAsync(ManualEntrySuccessState::completeSession, onFail = {
             logger.error("Error completing session", it)
         })
     }
@@ -35,9 +36,13 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
     fun onSubmit() {
         suspend {
             completeFinancialConnectionsSession().also {
-                nativeAuthFlowCoordinator().emit(Finish)
+                val result = Completed(
+                    financialConnectionsSession = it,
+                    token = it.parsedToken
+                )
+                nativeAuthFlowCoordinator().emit(Finish(result))
             }
-        }.execute { copy(completeAuthSession = it) }
+        }.execute { copy(completeSession = it) }
     }
 
     companion object :
@@ -59,5 +64,5 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
 }
 
 internal data class ManualEntrySuccessState(
-    val completeAuthSession: Async<FinancialConnectionsSession> = Uninitialized
+    val completeSession: Async<FinancialConnectionsSession> = Uninitialized
 ) : MavericksState
