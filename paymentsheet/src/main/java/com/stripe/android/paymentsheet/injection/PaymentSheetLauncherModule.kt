@@ -12,8 +12,7 @@ import javax.inject.Singleton
 
 @Module(
     subcomponents = [
-        PaymentSheetViewModelSubcomponent::class,
-        FormViewModelSubcomponent::class
+        PaymentSheetViewModelSubcomponent::class
     ]
 )
 internal abstract class PaymentSheetLauncherModule {

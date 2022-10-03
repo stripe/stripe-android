@@ -9,7 +9,6 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetLauncherComponent
 import org.jetbrains.annotations.TestOnly
@@ -105,9 +104,6 @@ internal class DefaultPaymentSheetLauncher(
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is PaymentSheetViewModel.Factory -> {
-                paymentSheetLauncherComponent.inject(injectable)
-            }
-            is FormViewModel.Factory -> {
                 paymentSheetLauncherComponent.inject(injectable)
             }
             else -> {

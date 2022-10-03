@@ -2,13 +2,7 @@ package com.stripe.android.paymentsheet.forms
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
-import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
@@ -31,8 +25,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
-import javax.inject.Provider
 
 /**
  * This class stores the visual field layout for the [Form] and then sets up the controller
@@ -43,40 +35,20 @@ import javax.inject.Provider
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 @FlowPreview
-internal class FormViewModel @Inject internal constructor(
-    val elementsFlow: Flow<List<FormElement>?>,
-    val showCheckboxFlow: Flow<Boolean>
-) : ViewModel() {
-    internal class Factory(
-        val config: FormFragmentArguments,
-        val elementsFlow: Flow<List<FormElement>?>,
-        val showCheckboxFlow: Flow<Boolean>,
-        private val contextSupplier: () -> Context
-    ) : ViewModelProvider.Factory,
-        Injectable<Factory.FallbackInitializeParam> {
-        internal data class FallbackInitializeParam(
-            val context: Context
-        )
-
-        @Inject
-        lateinit var subComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
-
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val context = contextSupplier()
-            injectWithFallback(config.injectorKey, FallbackInitializeParam(context))
-            return subComponentBuilderProvider.get()
-                .formFragmentArguments(config)
-                .elementsFlow(elementsFlow)
-                .showCheckboxFlow(showCheckboxFlow)
-                .build().viewModel as T
+internal class FormController internal constructor(
+    val context: Context,
+    val argumentsFlow: Flow<FormFragmentArguments?>,
+    val lpmResourceRepository: ResourceRepository<LpmRepository>,
+    val addressResourceRepository: ResourceRepository<AddressRepository>
+) {
+    val elementsFlow: Flow<List<FormElement>?> = argumentsFlow.map { args ->
+        args?.let {
+            getElements(it)
         }
+    }
 
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            DaggerFormViewModelComponent.builder()
-                .context(arg.context)
-                .build()
-                .inject(this)
-        }
+    val showCheckboxFlow: Flow<Boolean> = argumentsFlow.map { args ->
+        args?.showCheckbox ?: false
     }
 
     private val saveForFutureUseElement = elementsFlow
@@ -163,21 +135,20 @@ internal class FormViewModel @Inject internal constructor(
             }
         }.flattenConcat()
 
-    val completeFormValues =
-        CompleteFormFieldValueFilter(
-            elementsFlow.filterNotNull().map { elementsList ->
-                combine(
-                    elementsList.map {
-                        it.getFormFieldValueFlow()
-                    }
-                ) {
-                    it.toList().flatten().toMap()
+    val completeFormValues = CompleteFormFieldValueFilter(
+        elementsFlow.filterNotNull().map { elementsList ->
+            combine(
+                elementsList.map {
+                    it.getFormFieldValueFlow()
                 }
-            }.flattenConcat(),
-            hiddenIdentifiers,
-            showingMandate,
-            userRequestedReuse
-        ).filterFlow()
+            ) {
+                it.toList().flatten().toMap()
+            }
+        }.flattenConcat(),
+        hiddenIdentifiers,
+        showingMandate,
+        userRequestedReuse
+    ).filterFlow()
 
     private val textFieldControllerIdsFlow = elementsFlow.filterNotNull().map { elementsList ->
         combine(elementsList.map { it.getTextFieldIdentifiers() }) {
@@ -194,25 +165,21 @@ internal class FormViewModel @Inject internal constructor(
         }
     }
 
-    companion object {
-        fun getElements(
-            context: Context,
-            formFragmentArguments: FormFragmentArguments,
-            lpmResourceRepository: ResourceRepository<LpmRepository>,
-            addressResourceRepository: ResourceRepository<AddressRepository>
-        ) = TransformSpecToElements(
-            addressResourceRepository = addressResourceRepository,
-            initialValues = formFragmentArguments.getInitialValuesMap(),
-            amount = formFragmentArguments.amount,
-            saveForFutureUseInitialValue = formFragmentArguments.showCheckboxControlledFields,
-            merchantName = formFragmentArguments.merchantName,
-            context = context,
-            shippingValues = formFragmentArguments.shippingDetails
-                ?.toIdentifierMap(formFragmentArguments.billingDetails)
-        ).transform(
-            requireNotNull(
-                lpmResourceRepository.getRepository().fromCode(formFragmentArguments.paymentMethodCode)
-            ).formSpec.items
-        )
-    }
+    private fun getElements(
+        formFragmentArguments: FormFragmentArguments
+    ) = TransformSpecToElements(
+        addressResourceRepository = addressResourceRepository,
+        initialValues = formFragmentArguments.getInitialValuesMap(),
+        amount = formFragmentArguments.amount,
+        saveForFutureUseInitialValue = formFragmentArguments.showCheckboxControlledFields,
+        merchantName = formFragmentArguments.merchantName,
+        context = context,
+        shippingValues = formFragmentArguments.shippingDetails
+            ?.toIdentifierMap(formFragmentArguments.billingDetails)
+    ).transform(
+        requireNotNull(
+            lpmResourceRepository.getRepository()
+                .fromCode(formFragmentArguments.paymentMethodCode)
+        ).formSpec.items
+    )
 }

@@ -12,8 +12,7 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
+import com.stripe.android.paymentsheet.forms.FormController
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
@@ -85,7 +84,7 @@ internal open class PaymentOptionsViewModelTestInjection {
         @InjectorKey injectorKey: String,
         viewModel: PaymentOptionsViewModel,
         lpmRepository: LpmRepository = mock(),
-        formViewModel: FormViewModel = FormViewModel(
+        formController: FormController = FormController(
             elementsFlow = mock(),
             showCheckboxFlow = mock()
         )
@@ -105,7 +104,7 @@ internal open class PaymentOptionsViewModelTestInjection {
         val mockFormSubComponentBuilderProvider = mock<Provider<FormViewModelSubcomponent.Builder>>()
         whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
         whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
-        whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
+        whenever(mockFormSubcomponent.viewModel).thenReturn(formController)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
         injector = object : Injector {
@@ -113,7 +112,7 @@ internal open class PaymentOptionsViewModelTestInjection {
                 (injectable as? PaymentOptionsViewModel.Factory)?.let {
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider
                 }
-                (injectable as? FormViewModel.Factory)?.let {
+                (injectable as? FormController.Factory)?.let {
                     injectable.subComponentBuilderProvider = mockFormSubComponentBuilderProvider
                 }
             }

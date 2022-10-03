@@ -7,7 +7,7 @@ import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
-import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.forms.FormController
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -27,7 +27,6 @@ import javax.inject.Singleton
 )
 internal interface PaymentSheetLauncherComponent {
     fun inject(factory: PaymentSheetViewModel.Factory)
-    fun inject(factory: FormViewModel.Factory)
 
     @Component.Builder
     interface Builder {
