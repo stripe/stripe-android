@@ -54,6 +54,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.validate
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -61,6 +62,7 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -86,6 +88,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @InjectorKey private val injectorKey: String,
     // Properties provided through injection
     private val flowControllerInitializer: FlowControllerInitializer,
+    private val customerApiRepository: CustomerApiRepository,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
@@ -466,26 +469,30 @@ internal class DefaultFlowController @Inject internal constructor(
             } else {
                 null
             }
-            val accountStatus = linkLauncher.setup(
-                configuration = LinkPaymentLauncher.Configuration(
-                    stripeIntent = initData.stripeIntent,
-                    merchantName = config.merchantDisplayName,
-                    customerEmail = config.defaultBillingDetails?.email,
-                    customerPhone = customerPhone,
-                    customerName = config.defaultBillingDetails?.name,
-                    shippingValues = shippingAddress
-                ),
-                coroutineScope = lifecycleScope
+            val customerEmail = config.defaultBillingDetails?.email ?: config.customer?.let {
+                customerApiRepository.retrieveCustomer(
+                    it.id,
+                    it.ephemeralKeySecret
+                )?.email
+            }
+            val linkConfig = LinkPaymentLauncher.Configuration(
+                stripeIntent = initData.stripeIntent,
+                merchantName = config.merchantDisplayName,
+                customerEmail = customerEmail,
+                customerPhone = customerPhone,
+                customerName = config.defaultBillingDetails?.name,
+                shippingValues = shippingAddress
             )
+            val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
             // If a returning user is paying with a new card inline, launch Link to complete payment
             (paymentSelection as? PaymentSelection.New.LinkInline)?.takeIf {
                 accountStatus == AccountStatus.Verified
             }?.linkPaymentDetails?.originalParams?.let {
-                linkLauncher.present(linkActivityResultLauncher, it)
+                linkLauncher.present(linkConfig, linkActivityResultLauncher, it)
             } ?: run {
                 if (paymentSelection is PaymentSelection.Link) {
                     // User selected Link as the payment method, not inline
-                    linkLauncher.present(linkActivityResultLauncher)
+                    linkLauncher.present(linkConfig, linkActivityResultLauncher)
                 } else {
                     // New user paying inline, complete without launching Link
                     confirmPaymentSelection(paymentSelection, initData)

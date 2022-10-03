@@ -22,34 +22,41 @@ import kotlinx.coroutines.flow.Flow
 
 @FlowPreview
 @Composable
-internal fun Form(formViewModel: FormViewModel) {
+internal fun Form(
+    formViewModel: FormViewModel,
+    modifier: Modifier = Modifier
+) {
     FormInternal(
         formViewModel.hiddenIdentifiers,
         formViewModel.enabled,
         formViewModel.elements,
-        formViewModel.lastTextFieldIdentifier
+        formViewModel.lastTextFieldIdentifier,
+        modifier
     )
 }
 
 @Composable
 internal fun FormInternal(
-    hiddenIdentifiersFlow: Flow<List<IdentifierSpec>>,
+    hiddenIdentifiersFlow: Flow<Set<IdentifierSpec>>,
     enabledFlow: Flow<Boolean>,
     elementsFlow: Flow<List<FormElement>?>,
-    lastTextFieldIdentifierFlow: Flow<IdentifierSpec?>
+    lastTextFieldIdentifierFlow: Flow<IdentifierSpec?>,
+    modifier: Modifier = Modifier
 ) {
     FormUI(
-        hiddenIdentifiersFlow,
-        enabledFlow,
-        elementsFlow,
-        lastTextFieldIdentifierFlow
-    ) {
-        Loading()
-    }
+        hiddenIdentifiersFlow = hiddenIdentifiersFlow,
+        enabledFlow = enabledFlow,
+        elementsFlow = elementsFlow,
+        lastTextFieldIdentifierFlow = lastTextFieldIdentifierFlow,
+        loadingComposable = {
+            Loading()
+        },
+        modifier = modifier
+    )
 }
 
 @Composable
-private fun Loading() {
+internal fun Loading() {
     Row(
         modifier = Modifier
             .height(

@@ -1,10 +1,13 @@
 package com.stripe.android.identity.navigation
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -12,11 +15,8 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONFIRMATION
-import com.stripe.android.identity.databinding.ConfirmationFragmentBinding
-import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
-import com.stripe.android.identity.utils.setHtmlString
+import com.stripe.android.identity.ui.ConfirmationScreen
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -31,57 +31,25 @@ internal class ConfirmationFragment(
         identityViewModelFactory
     }
 
-    private lateinit var binding: ConfirmationFragmentBinding
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = ConfirmationFragmentBinding.inflate(inflater, container, false)
-        binding.kontinue.setOnClickListener {
-            lifecycleScope.launch {
-                identityViewModel.analyticsState.collectLatest {
-                    identityViewModel.sendAnalyticsRequest(
-                        identityViewModel.identityAnalyticsRequestFactory.verificationSucceeded(
-                            isFromFallbackUrl = false,
-                            scanType = it.scanType,
-                            requireSelfie = it.requireSelfie,
-                            docFrontRetryTimes = it.docFrontRetryTimes,
-                            docBackRetryTimes = it.docBackRetryTimes,
-                            selfieRetryTimes = it.selfieRetryTimes,
-                            docFrontUploadType = it.docFrontUploadType,
-                            docBackUploadType = it.docBackUploadType,
-                            docFrontModelScore = it.docFrontModelScore,
-                            docBackModelScore = it.docBackModelScore,
-                            selfieModelScore = it.selfieModelScore
-                        )
-                    )
-                }
+    ) = ComposeView(requireContext()).apply {
+        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        setContent {
+            val verificationPage by identityViewModel.verificationPage.observeAsState()
+            ConfirmationScreen(verificationPage) {
+                identityViewModel.sendSucceededAnalyticsRequestForNative()
+                verificationFlowFinishable.finishWithResult(
+                    IdentityVerificationSheet.VerificationFlowResult.Completed
+                )
             }
-            identityViewModel.sendSucceededAnalyticsRequestForNative()
-            verificationFlowFinishable.finishWithResult(
-                IdentityVerificationSheet.VerificationFlowResult.Completed
-            )
         }
-        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        identityViewModel.observeForVerificationPage(
-            viewLifecycleOwner,
-            onSuccess = { verificationPage ->
-                binding.titleText.text = verificationPage.success.title
-                binding.contentText.setHtmlString(verificationPage.success.body)
-                binding.kontinue.text = verificationPage.success.buttonText
-            },
-            onFailure = {
-                Log.e(TAG, "Failed to get VerificationPage")
-                navigateToDefaultErrorFragment(it)
-            }
-        )
 
         lifecycleScope.launch(identityViewModel.workContext) {
             identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONFIRMATION)
@@ -92,9 +60,5 @@ internal class ConfirmationFragment(
                 screenName = SCREEN_NAME_CONFIRMATION
             )
         )
-    }
-
-    private companion object {
-        val TAG: String = ConfirmationFragment::class.java.simpleName
     }
 }

@@ -10,8 +10,6 @@
   <string name="log_out">Cerrar la sesión de Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="pm_set_as_default">Establecer como método de pago predeterminado</string>
-  <!-- Text of a label indicating that a payment method is the default. -->
-  <string name="pm_your_default">Este es tu valor predeterminado</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="show_menu">Mostrar menú</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->

@@ -52,9 +52,9 @@ fun LinkVerificationDialog(
         composable(LinkScreen.VerificationDialog.route) {
             var openDialog by remember { mutableStateOf(true) }
 
-            val injector = requireNotNull(linkLauncher.injector)
-            val linkAccount = linkLauncher.linkAccountManager.linkAccount.collectAsState()
-            val linkEventsReporter = linkLauncher.linkEventsReporter
+            val component = requireNotNull(linkLauncher.component)
+            val linkAccount = component.linkAccountManager.linkAccount.collectAsState()
+            val linkEventsReporter = component.linkEventsReporter
 
             val onDismiss = {
                 openDialog = false
@@ -101,7 +101,7 @@ fun LinkVerificationDialog(
                                         messageStringResId = R.string.verification_message,
                                         showChangeEmailMessage = false,
                                         linkAccount = account,
-                                        injector = injector,
+                                        injector = component.injector,
                                         onVerificationCompleted = {
                                             openDialog = false
                                             verificationCallback(true)

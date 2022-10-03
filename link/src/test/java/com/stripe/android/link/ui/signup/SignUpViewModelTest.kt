@@ -8,6 +8,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -51,13 +52,16 @@ import kotlin.test.BeforeTest
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class SignUpViewModelTest {
-    private val defaultArgs = LinkActivityContract.Args(
+    val config = LinkPaymentLauncher.Configuration(
         StripeIntentFixtures.PI_SUCCEEDED,
         MERCHANT_NAME,
+        CUSTOMER_NAME,
         CUSTOMER_EMAIL,
         CUSTOMER_PHONE,
-        CUSTOMER_NAME,
         null,
+    )
+    private val defaultArgs = LinkActivityContract.Args(
+        config,
         null,
         LinkActivityContract.Args.InjectionParams(
             INJECTOR_KEY,
@@ -362,10 +366,12 @@ class SignUpViewModelTest {
         countryCode: CountryCode = CountryCode.US
     ): SignUpViewModel {
         val argsWithCountryCode = args.copy(
-            stripeIntent = when (val intent = args.stripeIntent) {
-                is PaymentIntent -> intent.copy(countryCode = countryCode.value)
-                is SetupIntent -> intent.copy(countryCode = countryCode.value)
-            }
+            configuration = config.copy(
+                stripeIntent = when (val intent = args.stripeIntent) {
+                    is PaymentIntent -> intent.copy(countryCode = countryCode.value)
+                    is SetupIntent -> intent.copy(countryCode = countryCode.value)
+                }
+            )
         )
         return SignUpViewModel(
             args = argsWithCountryCode,

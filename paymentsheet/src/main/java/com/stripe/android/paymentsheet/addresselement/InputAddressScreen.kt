@@ -115,18 +115,19 @@ internal fun InputAddressScreen(
                 onCloseClick = { viewModel.navigator.dismiss() },
                 formContent = {
                     FormUI(
-                        it.hiddenIdentifiers,
-                        viewModel.formEnabled,
-                        it.elements,
-                        it.lastTextFieldIdentifier
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            CircularProgressIndicator()
+                        hiddenIdentifiersFlow = it.hiddenIdentifiers,
+                        enabledFlow = viewModel.formEnabled,
+                        elementsFlow = it.elements,
+                        lastTextFieldIdentifierFlow = it.lastTextFieldIdentifier,
+                        loadingComposable = {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                CircularProgressIndicator()
+                            }
                         }
-                    }
+                    )
                 },
                 checkboxContent = {
                     viewModel.args.config?.additionalFields?.checkboxLabel?.let { label ->

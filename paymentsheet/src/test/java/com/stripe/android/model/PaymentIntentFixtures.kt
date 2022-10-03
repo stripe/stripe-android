@@ -319,7 +319,10 @@ internal object PaymentIntentFixtures {
             "setup_future_usage": null,
             "shipping": null,
             "source": null,
-            "status": "requires_payment_method"
+            "status": "requires_payment_method",
+            "link_funding_sources": [
+              "CARD", "BANK_ACCOUNT"
+            ]
         }
             """.trimIndent()
         )

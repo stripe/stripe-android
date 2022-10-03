@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.combine
  */
 internal class CompleteFormFieldValueFilter(
     private val currentFieldValueMap: Flow<Map<IdentifierSpec, FormFieldEntry>>,
-    private val hiddenIdentifiers: Flow<List<IdentifierSpec>>,
+    private val hiddenIdentifiers: Flow<Set<IdentifierSpec>>,
     val showingMandate: Flow<Boolean>,
     private val userRequestedReuse: Flow<PaymentSelection.CustomerRequestedSave>
 ) {
@@ -32,7 +32,7 @@ internal class CompleteFormFieldValueFilter(
 
     private fun filterFlow(
         idFieldSnapshotMap: Map<IdentifierSpec, FormFieldEntry>,
-        hiddenIdentifiers: List<IdentifierSpec>,
+        hiddenIdentifiers: Set<IdentifierSpec>,
         showingMandate: Boolean,
         userRequestedReuse: PaymentSelection.CustomerRequestedSave
     ): FormFieldValues? {
