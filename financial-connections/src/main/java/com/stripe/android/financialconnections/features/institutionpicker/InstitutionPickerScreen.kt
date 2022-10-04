@@ -239,6 +239,7 @@ private fun SearchInstitutionsList(
                         modifier = Modifier.fillMaxWidth()
                     ) { LoadingSpinner() }
                 }
+
                 is Success -> {
                     if (institutions().data.isEmpty()) {
                         item {
@@ -376,13 +377,14 @@ private fun FeaturedInstitutionsGrid(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         content = {
             when (payload) {
-                Uninitialized, is Loading, is Fail -> {
+                Uninitialized, is Loading -> {
                     item(span = { GridItemSpan(2) }) {
                         LoadingSpinner()
                     }
                 }
-
-                is Success -> items(payload().featuredInstitutions.data) { institution ->
+                // Show empty featured institutions grid. Users will be able to search using search bar.
+                is Fail -> Unit
+                is Success -> items(payload().featuredInstitutions) { institution ->
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
