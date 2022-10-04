@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.Info100
 
 @Composable
 internal fun SearchFooter(
@@ -40,10 +42,11 @@ internal fun SearchFooter(
             val uriHandler = LocalUriHandler.current
             Text(
                 text = stringResource(id = R.string.stripe_institutionpicker_footer_title),
-                style = FinancialConnectionsTheme.typography.caption.copy(
+                style = FinancialConnectionsTheme.typography.subheading.copy(
                     color = FinancialConnectionsTheme.colors.textSecondary
                 )
             )
+            Box(modifier = Modifier.size(16.dp))
             SearchFooterRow(
                 title = stringResource(id = R.string.stripe_institutionpicker_footer_item_spelling),
                 titleColor = FinancialConnectionsTheme.colors.textPrimary,
@@ -56,7 +59,7 @@ internal fun SearchFooter(
                     title = stringResource(id = R.string.stripe_institutionpicker_footer_item_manualentry),
                     titleColor = FinancialConnectionsTheme.colors.textBrand,
                     icon = R.drawable.stripe_ic_edit,
-                    iconColor = FinancialConnectionsTheme.colors.iconBrand,
+                    iconColor = Info100,
                     iconBackgroundColor = FinancialConnectionsTheme.colors.borderFocus,
                     modifier = Modifier.clickable { onManualEntryClick() }
                 )
@@ -66,7 +69,7 @@ internal fun SearchFooter(
                 titleColor = FinancialConnectionsTheme.colors.textBrand,
                 icon = R.drawable.stripe_ic_mail,
                 iconColor = FinancialConnectionsTheme.colors.iconBrand,
-                iconBackgroundColor = FinancialConnectionsTheme.colors.borderFocus,
+                iconBackgroundColor = Info100,
                 modifier = Modifier.clickable {
                     uriHandler.openUri(FinancialConnectionsUrlResolver.supportUrl)
                 }
