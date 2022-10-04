@@ -155,18 +155,8 @@ internal class LinkActivity : ComponentActivity() {
                                 }
                             }
 
-                            composable(
-                                LinkScreen.SignUp.route,
-                                arguments = listOf(
-                                    navArgument(LinkScreen.SignUp.emailArg) {
-                                        type = NavType.StringType
-                                        nullable = true
-                                    }
-                                )
-                            ) { backStackEntry ->
-                                val email =
-                                    backStackEntry.arguments?.getString(LinkScreen.SignUp.emailArg)
-                                SignUpBody(viewModel.injector, email)
+                            composable(LinkScreen.SignUp.route) {
+                                SignUpBody(viewModel.injector)
                             }
 
                             composable(LinkScreen.Verification.route) {
@@ -256,7 +246,7 @@ internal class LinkActivity : ComponentActivity() {
                                     LinkScreen.Verification
                                 AccountStatus.SignedOut,
                                 AccountStatus.Error ->
-                                    LinkScreen.SignUp(starterArgs.customerEmail)
+                                    LinkScreen.SignUp
                             },
                             clearBackStack = true
                         )

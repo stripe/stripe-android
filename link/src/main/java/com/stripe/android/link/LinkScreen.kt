@@ -34,15 +34,7 @@ internal sealed class LinkScreen(
         }
     }
 
-    class SignUp(email: String? = null) :
-        LinkScreen("SignUp${email?.let { "?$emailArg=${it.urlEncode()}" } ?: ""}") {
-        override val route = super.route
-
-        companion object {
-            const val emailArg = "email"
-            const val route = "SignUp?$emailArg={$emailArg}"
-        }
-    }
+    object SignUp : LinkScreen("SignUp")
 }
 
 private fun String.urlEncode(): String = URLEncoder.encode(this, StandardCharsets.UTF_8.name())

@@ -127,7 +127,7 @@ internal class VerificationViewModel @Inject constructor(
 
     fun onChangeEmailClicked() {
         clearError()
-        navigator.navigateTo(LinkScreen.SignUp(), clearBackStack = true)
+        navigator.navigateTo(LinkScreen.SignUp, clearBackStack = true)
         linkAccountManager.logout()
     }
 

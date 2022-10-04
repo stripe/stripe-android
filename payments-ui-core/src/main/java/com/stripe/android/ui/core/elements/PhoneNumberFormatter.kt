@@ -195,6 +195,27 @@ internal sealed class PhoneNumberFormatter {
                 WithRegion(it)
             } ?: UnknownRegion(countryCode)
 
+        fun forPrefix(phoneNumber: String): PhoneNumberFormatter? {
+            var charIndex = 1
+
+            // Find the regions that match the phone number prefix, then pick the top match from the
+            // device's locales
+            while (charIndex < phoneNumber.length - 1 && charIndex < 4) {
+                charIndex++
+
+                val country = findBestCountryForPrefix(
+                    prefix = phoneNumber.substring(0, charIndex),
+                    userLocales = LocaleListCompat.getAdjustedDefault(),
+                )
+
+                if (country != null) {
+                    return forCountry(country)
+                }
+            }
+
+            return null
+        }
+
         fun findBestCountryForPrefix(prefix: String, userLocales: LocaleListCompat) =
             countryCodesForPrefix(prefix).takeIf { it.isNotEmpty() }?.let {
                 for (i in 0 until userLocales.size()) {

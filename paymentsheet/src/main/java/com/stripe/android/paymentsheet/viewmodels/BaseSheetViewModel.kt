@@ -493,6 +493,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             customerEmail = customerEmail,
             customerPhone = customerPhone,
             customerName = config?.defaultBillingDetails?.name,
+            customerBillingCountryCode = config?.defaultBillingDetails?.address?.country,
             shippingValues = shippingAddress
         )
     }

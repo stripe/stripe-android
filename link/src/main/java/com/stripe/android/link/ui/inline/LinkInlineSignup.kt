@@ -106,7 +106,7 @@ fun LinkInlineSignup(
         }
 
         LinkInlineSignup(
-            merchantName = viewModel.merchantName,
+            merchantName = viewState.merchantName,
             emailController = viewModel.emailController,
             phoneNumberController = viewModel.phoneController,
             nameController = viewModel.nameController,

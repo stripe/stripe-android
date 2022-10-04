@@ -120,37 +120,29 @@ class PhoneNumberController internal constructor(
             initialValue: String = "",
             initiallySelectedCountryCode: String? = null
         ): PhoneNumberController {
-            // Find the regions that match the phone number prefix, then pick the top match from the
-            // device's locales
-            if (initiallySelectedCountryCode == null && initialValue.startsWith("+")) {
-                var charIndex = 1
-                while (charIndex < initialValue.length - 1 && charIndex < 4) {
-                    charIndex++
-                    PhoneNumberFormatter.findBestCountryForPrefix(
-                        initialValue.substring(0, charIndex),
-                        LocaleListCompat.getAdjustedDefault()
-                    )?.let {
-                        return PhoneNumberController(
-                            initialPhoneNumber = initialValue.substring(charIndex),
-                            initiallySelectedCountryCode = it
-                        )
-                    }
-                }
+            val hasCountryPrefix = initialValue.startsWith("+")
+
+            val formatter = if (initiallySelectedCountryCode == null && hasCountryPrefix) {
+                PhoneNumberFormatter.forPrefix(initialValue)
+            } else if (initiallySelectedCountryCode != null) {
+                PhoneNumberFormatter.forCountry(initiallySelectedCountryCode)
+            } else {
+                null
             }
 
-            // Clean up if initial country is set and country prefix is in initial phone number
-            if (initiallySelectedCountryCode != null && initialValue.startsWith("+")) {
-                val prefix = PhoneNumberFormatter.forCountry(initiallySelectedCountryCode).prefix
-                return PhoneNumberController(
-                    initialPhoneNumber = initialValue.removePrefix(prefix),
+            return if (formatter != null) {
+                val prefix = formatter.prefix
+                val value = formatter.toE164Format(initialValue.removePrefix(prefix))
+                PhoneNumberController(
+                    initialPhoneNumber = value.removePrefix(prefix),
+                    initiallySelectedCountryCode = formatter.countryCode,
+                )
+            } else {
+                PhoneNumberController(
+                    initialPhoneNumber = initialValue,
                     initiallySelectedCountryCode = initiallySelectedCountryCode
                 )
             }
-
-            return PhoneNumberController(
-                initialPhoneNumber = initialValue,
-                initiallySelectedCountryCode = initiallySelectedCountryCode
-            )
         }
     }
 }
