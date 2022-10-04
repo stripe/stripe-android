@@ -55,7 +55,12 @@ internal class SignUpViewModel @Inject constructor(
     val merchantName: String = args.merchantName
 
     val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
-    val phoneController = PhoneNumberController.createPhoneNumberController(prefilledPhone)
+
+    val phoneController = PhoneNumberController.createPhoneNumberController(
+        initialValue = prefilledPhone,
+        initiallySelectedCountryCode = args.configuration.customerBillingCountryCode,
+    )
+
     val nameController = SimpleTextFieldController.createNameSectionController(prefilledName)
 
     /**
