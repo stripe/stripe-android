@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.FormUI
-import com.stripe.android.ui.core.elements.FormElement
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 
@@ -21,7 +20,6 @@ internal fun PaymentMethodForm(
     args: FormFragmentArguments,
     enabled: Boolean,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
-    elementsFlow: Flow<List<FormElement>?>,
     showCheckboxFlow: Flow<Boolean>,
     modifier: Modifier = Modifier
 ) {
@@ -30,7 +28,6 @@ internal fun PaymentMethodForm(
         key = args.paymentMethodCode,
         factory = FormViewModel.Factory(
             config = args,
-            elementsFlow = elementsFlow,
             showCheckboxFlow = showCheckboxFlow,
             contextSupplier = { context }
         )

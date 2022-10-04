@@ -1,27 +1,21 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.app.Application
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.AddressElement
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
@@ -35,6 +29,7 @@ import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,19 +38,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
-import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
 @FlowPreview
@@ -73,70 +61,7 @@ internal class FormViewModelTest {
             ApplicationProvider.getApplicationContext<Context>().resources
         )
     )
-    val elementsFlow = MutableStateFlow<List<FormElement>?>(null)
     val showCheckboxFlow = MutableStateFlow(false)
-
-    @Test
-    fun `Factory gets initialized by Injector when Injector is available`() {
-        val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
-        val config = COMPOSE_FRAGMENT_ARGS.copy(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
-            injectorKey = injectorKey
-        )
-
-        val mockBuilder = mock<FormViewModelSubcomponent.Builder>()
-        val mockSubcomponent = mock<FormViewModelSubcomponent>()
-        // The reason the ViewModel cannot be mocked here is because
-        // AbstractSavedStateViewModelFactory will call viewmodel.setTagIfAbsent, which accesses
-        // ViewModel.mBagOfTags that's initialized in base class.
-        // Mocking it would leave this field null, causing an NPE.
-        val vmToBeReturned = createViewModel()
-
-        whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
-        whenever(mockBuilder.formFragmentArguments(any())).thenReturn(mockBuilder)
-        whenever(mockBuilder.elementsFlow(any())).thenReturn(mockBuilder)
-        whenever(mockBuilder.showCheckboxFlow(any())).thenReturn(mockBuilder)
-        whenever(mockSubcomponent.viewModel).thenReturn(vmToBeReturned)
-
-        val injector = object : Injector {
-            override fun inject(injectable: Injectable<*>) {
-                val factory = injectable as FormViewModel.Factory
-                factory.subComponentBuilderProvider = Provider { mockBuilder }
-            }
-        }
-        WeakMapInjectorRegistry.register(injector, injectorKey)
-        val factory = FormViewModel.Factory(
-            config,
-            elementsFlow,
-            showCheckboxFlow,
-            contextSupplier = { ApplicationProvider.getApplicationContext<Application>() }
-        )
-        val factorySpy = spy(factory)
-        val createdViewModel = factorySpy.create(FormViewModel::class.java)
-        verify(factorySpy, times(0)).fallbackInitialize(any())
-        assertThat(createdViewModel).isEqualTo(vmToBeReturned)
-
-        WeakMapInjectorRegistry.clear()
-    }
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
-        val config = COMPOSE_FRAGMENT_ARGS.copy(injectorKey = DUMMY_INJECTOR_KEY)
-        val factory = FormViewModel.Factory(
-            config,
-            elementsFlow,
-            showCheckboxFlow,
-            contextSupplier = { ApplicationProvider.getApplicationContext<Application>() }
-        )
-        val factorySpy = spy(factory)
-        assertNotNull(factorySpy.create(FormViewModel::class.java))
-        verify(factorySpy).fallbackInitialize(
-            argWhere {
-                it.context == ApplicationProvider.getApplicationContext<Application>()
-            }
-        )
-    }
 
     private fun createLpmRepositorySupportedPaymentMethod(
         paymentMethodType: PaymentMethod.Type,
@@ -165,22 +90,17 @@ internal class FormViewModelTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code
         )
-        val formViewModel = createViewModel()
-        showCheckboxFlow.emit(true)
-        elementsFlow.emit(
-            FormViewModel.getElements(
-                context,
-                formFragmentArguments = args,
-                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                    PaymentMethod.Type.Card,
-                    LayoutSpec.create(
-                        EmailSpec(),
-                        SaveForFutureUseSpec()
-                    )
-                ),
-                addressResourceRepository = addressResourceRepository
+        val formViewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LayoutSpec.create(
+                    EmailSpec(),
+                    SaveForFutureUseSpec()
+                )
             )
         )
+        showCheckboxFlow.emit(true)
 
         // Set all the card fields, billing is set in the args
         val emailController =
@@ -215,21 +135,16 @@ internal class FormViewModelTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code
         )
-        val formViewModel = createViewModel()
-        showCheckboxFlow.tryEmit(true)
-        elementsFlow.tryEmit(
-            FormViewModel.getElements(
-                context,
-                formFragmentArguments = args,
-                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                    PaymentMethod.Type.Card,
-                    LayoutSpec.create(
-                        SaveForFutureUseSpec()
-                    )
-                ),
-                addressResourceRepository = addressResourceRepository
+        val formViewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LayoutSpec.create(
+                    SaveForFutureUseSpec()
+                )
             )
         )
+        showCheckboxFlow.tryEmit(true)
 
         val values = mutableListOf<Set<IdentifierSpec>>()
         formViewModel.hiddenIdentifiers.asLiveData()
@@ -254,18 +169,13 @@ internal class FormViewModelTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code
         )
-        val formViewModel = createViewModel()
-        elementsFlow.tryEmit(
-            FormViewModel.getElements(
-                context,
-                formFragmentArguments = args,
-                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                    PaymentMethod.Type.Card,
-                    LayoutSpec.create(
-                        CountrySpec()
-                    )
-                ),
-                addressResourceRepository = addressResourceRepository
+        val formViewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LayoutSpec.create(
+                    CountrySpec()
+                )
             )
         )
 
@@ -284,20 +194,15 @@ internal class FormViewModelTest {
             val args = COMPOSE_FRAGMENT_ARGS.copy(
                 paymentMethodCode = PaymentMethod.Type.P24.code
             )
-            val formViewModel = createViewModel()
-            elementsFlow.tryEmit(
-                FormViewModel.getElements(
-                    context,
-                    formFragmentArguments = args,
-                    lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                        PaymentMethod.Type.P24,
-                        LayoutSpec.create(
-                            NameSpec(),
-                            EmailSpec(),
-                            CountrySpec()
-                        )
-                    ),
-                    addressResourceRepository = addressResourceRepository
+            val formViewModel = createViewModel(
+                args,
+                createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.P24,
+                    LayoutSpec.create(
+                        NameSpec(),
+                        EmailSpec(),
+                        CountrySpec()
+                    )
                 )
             )
 
@@ -317,19 +222,14 @@ internal class FormViewModelTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code
         )
-        val formViewModel = createViewModel()
-        elementsFlow.tryEmit(
-            FormViewModel.getElements(
-                context,
-                formFragmentArguments = args,
-                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                    PaymentMethod.Type.Card,
-                    LayoutSpec.create(
-                        EmailSpec(),
-                        CountrySpec()
-                    )
-                ),
-                addressResourceRepository = addressResourceRepository
+        val formViewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.Card,
+                LayoutSpec.create(
+                    EmailSpec(),
+                    CountrySpec()
+                )
             )
         )
 
@@ -360,20 +260,15 @@ internal class FormViewModelTest {
             val args = COMPOSE_FRAGMENT_ARGS.copy(
                 paymentMethodCode = PaymentMethod.Type.Card.code
             )
-            val formViewModel = createViewModel()
-            elementsFlow.tryEmit(
-                FormViewModel.getElements(
-                    context,
-                    formFragmentArguments = args,
-                    lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                        PaymentMethod.Type.Card,
-                        LayoutSpec.create(
-                            EmailSpec(),
-                            CountrySpec(),
-                            SaveForFutureUseSpec()
-                        )
-                    ),
-                    addressResourceRepository = addressResourceRepository
+            val formViewModel = createViewModel(
+                args,
+                createLpmRepositorySupportedPaymentMethod(
+                    PaymentMethod.Type.Card,
+                    LayoutSpec.create(
+                        EmailSpec(),
+                        CountrySpec(),
+                        SaveForFutureUseSpec()
+                    )
                 )
             )
 
@@ -412,30 +307,25 @@ internal class FormViewModelTest {
             showCheckbox = true,
             showCheckboxControlledFields = true
         )
-        val formViewModel = createViewModel()
-        elementsFlow.tryEmit(
-            FormViewModel.getElements(
-                context,
-                formFragmentArguments = args,
-                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                    PaymentMethod.Type.P24,
-                    LayoutSpec.create(
-                        NameSpec(),
-                        EmailSpec(),
-                        CountrySpec(
-                            allowedCountryCodes = setOf(
-                                "AT",
-                                "BE",
-                                "DE",
-                                "ES",
-                                "IT",
-                                "NL"
-                            )
-                        ),
-                        SaveForFutureUseSpec()
-                    )
-                ),
-                addressResourceRepository = addressResourceRepository
+        val formViewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.P24,
+                LayoutSpec.create(
+                    NameSpec(),
+                    EmailSpec(),
+                    CountrySpec(
+                        allowedCountryCodes = setOf(
+                            "AT",
+                            "BE",
+                            "DE",
+                            "ES",
+                            "IT",
+                            "NL"
+                        )
+                    ),
+                    SaveForFutureUseSpec()
+                )
             )
         )
 
@@ -475,28 +365,23 @@ internal class FormViewModelTest {
             showCheckboxControlledFields = true,
             billingDetails = null
         )
-        val formViewModel = createViewModel()
-        elementsFlow.tryEmit(
-            FormViewModel.getElements(
-                context,
-                formFragmentArguments = args,
-                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                    PaymentMethod.Type.SepaDebit,
-                    LayoutSpec.create(
-                        NameSpec(),
-                        EmailSpec(),
-                        IbanSpec(),
-                        AddressSpec(
-                            IdentifierSpec.Generic("address"),
-                            allowedCountryCodes = setOf("US", "JP")
-                        ),
-                        MandateTextSpec(
-                            IdentifierSpec.Generic("mandate"),
-                            R.string.sepa_mandate
-                        )
+        val formViewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.SepaDebit,
+                LayoutSpec.create(
+                    NameSpec(),
+                    EmailSpec(),
+                    IbanSpec(),
+                    AddressSpec(
+                        IdentifierSpec.Generic("address"),
+                        allowedCountryCodes = setOf("US", "JP")
+                    ),
+                    MandateTextSpec(
+                        IdentifierSpec.Generic("mandate"),
+                        R.string.sepa_mandate
                     )
-                ),
-                addressResourceRepository = addressResourceRepository
+                )
             )
         )
 
@@ -565,28 +450,23 @@ internal class FormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
             billingDetails = null
         )
-        val formViewModel = createViewModel()
-        elementsFlow.tryEmit(
-            FormViewModel.getElements(
-                context,
-                formFragmentArguments = args,
-                lpmResourceRepository = createLpmRepositorySupportedPaymentMethod(
-                    PaymentMethod.Type.SepaDebit,
-                    LayoutSpec.create(
-                        NameSpec(),
-                        EmailSpec(),
-                        IbanSpec(),
-                        AddressSpec(
-                            IdentifierSpec.Generic("address"),
-                            allowedCountryCodes = setOf("US", "JP")
-                        ),
-                        MandateTextSpec(
-                            IdentifierSpec.Generic("mandate"),
-                            R.string.sepa_mandate
-                        )
+        val formViewModel = createViewModel(
+            args,
+            createLpmRepositorySupportedPaymentMethod(
+                PaymentMethod.Type.SepaDebit,
+                LayoutSpec.create(
+                    NameSpec(),
+                    EmailSpec(),
+                    IbanSpec(),
+                    AddressSpec(
+                        IdentifierSpec.Generic("address"),
+                        allowedCountryCodes = setOf("US", "JP")
+                    ),
+                    MandateTextSpec(
+                        IdentifierSpec.Generic("mandate"),
+                        R.string.sepa_mandate
                     )
-                ),
-                addressResourceRepository = addressResourceRepository
+                )
             )
         )
 
@@ -717,8 +597,14 @@ internal class FormViewModelTest {
         }
     }
 
-    fun createViewModel() = FormViewModel(
-        elementsFlow = elementsFlow,
+    fun createViewModel(
+        arguments: FormFragmentArguments,
+        lpmResourceRepository: ResourceRepository<LpmRepository>
+    ) = FormViewModel(
+        context = context,
+        formFragmentArguments = arguments,
+        lpmResourceRepository = lpmResourceRepository,
+        addressResourceRepository = addressResourceRepository,
         showCheckboxFlow = showCheckboxFlow
     )
 }

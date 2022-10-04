@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -127,7 +128,10 @@ internal open class PaymentSheetViewModelTestInjection {
         lpmRepository: LpmRepository,
         addressRepository: AddressRepository,
         formViewModel: FormViewModel = FormViewModel(
-            elementsFlow = mock(),
+            context = context,
+            formFragmentArguments = mock(),
+            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
+            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
             showCheckboxFlow = mock()
         )
     ) {

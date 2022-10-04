@@ -14,7 +14,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArgumen
 import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
-import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -44,12 +43,14 @@ import javax.inject.Provider
  */
 @FlowPreview
 internal class FormViewModel @Inject internal constructor(
-    val elementsFlow: Flow<List<FormElement>?>,
+    context: Context,
+    formFragmentArguments: FormFragmentArguments,
+    lpmResourceRepository: ResourceRepository<LpmRepository>,
+    addressResourceRepository: ResourceRepository<AddressRepository>,
     val showCheckboxFlow: Flow<Boolean>
 ) : ViewModel() {
     internal class Factory(
         val config: FormFragmentArguments,
-        val elementsFlow: Flow<List<FormElement>?>,
         val showCheckboxFlow: Flow<Boolean>,
         private val contextSupplier: () -> Context
     ) : ViewModelProvider.Factory,
@@ -66,7 +67,6 @@ internal class FormViewModel @Inject internal constructor(
             injectWithFallback(config.injectorKey, FallbackInitializeParam(context))
             return subComponentBuilderProvider.get()
                 .formFragmentArguments(config)
-                .elementsFlow(elementsFlow)
                 .showCheckboxFlow(showCheckboxFlow)
                 .build().viewModel as T
         }
@@ -79,9 +79,27 @@ internal class FormViewModel @Inject internal constructor(
         }
     }
 
+    val elementsFlow = flowOf(
+        TransformSpecToElements(
+            addressResourceRepository = addressResourceRepository,
+            initialValues = formFragmentArguments.getInitialValuesMap(),
+            amount = formFragmentArguments.amount,
+            saveForFutureUseInitialValue = formFragmentArguments.showCheckboxControlledFields,
+            merchantName = formFragmentArguments.merchantName,
+            context = context,
+            shippingValues = formFragmentArguments.shippingDetails
+                ?.toIdentifierMap(formFragmentArguments.billingDetails)
+        ).transform(
+            requireNotNull(
+                lpmResourceRepository.getRepository()
+                    .fromCode(formFragmentArguments.paymentMethodCode)
+            ).formSpec.items
+        )
+    )
+
     private val saveForFutureUseElement = elementsFlow
         .map { elementsList ->
-            elementsList?.find { element ->
+            elementsList.find { element ->
                 element is SaveForFutureUseElement
             } as? SaveForFutureUseElement
         }
@@ -93,10 +111,10 @@ internal class FormViewModel @Inject internal constructor(
     private val cardBillingElement = elementsFlow
         .map { elementsList ->
             elementsList
-                ?.filterIsInstance<SectionElement>()
-                ?.flatMap { it.fields }
-                ?.filterIsInstance<CardBillingAddressElement>()
-                ?.firstOrNull()
+                .filterIsInstance<SectionElement>()
+                .flatMap { it.fields }
+                .filterIsInstance<CardBillingAddressElement>()
+                .firstOrNull()
         }
     private var externalHiddenIdentifiers = MutableStateFlow(emptySet<IdentifierSpec>())
 
@@ -192,27 +210,5 @@ internal class FormViewModel @Inject internal constructor(
         textFieldControllerIds.lastOrNull {
             !hiddenIds.contains(it)
         }
-    }
-
-    companion object {
-        fun getElements(
-            context: Context,
-            formFragmentArguments: FormFragmentArguments,
-            lpmResourceRepository: ResourceRepository<LpmRepository>,
-            addressResourceRepository: ResourceRepository<AddressRepository>
-        ) = TransformSpecToElements(
-            addressResourceRepository = addressResourceRepository,
-            initialValues = formFragmentArguments.getInitialValuesMap(),
-            amount = formFragmentArguments.amount,
-            saveForFutureUseInitialValue = formFragmentArguments.showCheckboxControlledFields,
-            merchantName = formFragmentArguments.merchantName,
-            context = context,
-            shippingValues = formFragmentArguments.shippingDetails
-                ?.toIdentifierMap(formFragmentArguments.billingDetails)
-        ).transform(
-            requireNotNull(
-                lpmResourceRepository.getRepository().fromCode(formFragmentArguments.paymentMethodCode)
-            ).formSpec.items
-        )
     }
 }

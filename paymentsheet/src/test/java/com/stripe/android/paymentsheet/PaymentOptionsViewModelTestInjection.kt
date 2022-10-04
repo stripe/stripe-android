@@ -86,7 +86,10 @@ internal open class PaymentOptionsViewModelTestInjection {
         viewModel: PaymentOptionsViewModel,
         lpmRepository: LpmRepository = mock(),
         formViewModel: FormViewModel = FormViewModel(
-            elementsFlow = mock(),
+            context = context,
+            formFragmentArguments = mock(),
+            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
+            addressResourceRepository = addressResourceRepository,
             showCheckboxFlow = mock()
         )
     ) {
