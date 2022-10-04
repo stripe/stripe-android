@@ -32,6 +32,12 @@ class EmailConfigTest {
     }
 
     @Test
+    fun `verify email must match full string`() {
+        assertThat(emailConfig.determineState("invalid@email@")).isInstanceOf(Invalid::class.java)
+        assertThat(emailConfig.determineState("a ")).isInstanceOf(Invalid::class.java)
+    }
+
+    @Test
     fun `verify there is no filter`() {
         assertThat(emailConfig.filter("123^@gmail[\uD83E\uDD57.com"))
             .isEqualTo("123^@gmail[\uD83E\uDD57.com")
