@@ -7,12 +7,14 @@ import javax.inject.Inject
 
 internal class CompleteFinancialConnectionsSession @Inject constructor(
     private val repository: FinancialConnectionsRepository,
+    private val fetchPaginatedAccountsForSession: FetchPaginatedAccountsForSession,
     private val configuration: FinancialConnectionsSheet.Configuration
 ) {
 
     suspend operator fun invoke(): FinancialConnectionsSession {
-        return repository.postCompleteFinancialConnectionsSessions(
+        val session = repository.postCompleteFinancialConnectionsSessions(
             clientSecret = configuration.financialConnectionsSessionClientSecret
         )
+        return fetchPaginatedAccountsForSession(session)
     }
 }

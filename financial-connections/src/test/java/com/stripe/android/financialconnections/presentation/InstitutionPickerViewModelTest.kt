@@ -76,7 +76,7 @@ internal class InstitutionPickerViewModelTest {
         val viewModel = buildViewModel(InstitutionPickerState())
 
         withState(viewModel) { state ->
-            assertEquals(state.payload()!!.featuredInstitutions.data, institutionResponse.data)
+            assertEquals(state.payload()!!.featuredInstitutions, institutionResponse.data)
             assertIs<Uninitialized>(state.searchInstitutions)
         }
     }
@@ -118,7 +118,7 @@ internal class InstitutionPickerViewModelTest {
         advanceUntilIdle()
 
         withState(viewModel) { state ->
-            assertEquals(state.payload()!!.featuredInstitutions.data, featuredResults.data)
+            assertEquals(state.payload()!!.featuredInstitutions, featuredResults.data)
             assertEquals(state.searchInstitutions()!!.data, searchResults.data)
         }
     }
