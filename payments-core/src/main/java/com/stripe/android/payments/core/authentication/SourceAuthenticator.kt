@@ -14,6 +14,7 @@ import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.view.AuthActivityStarterHost
+import com.stripe.android.view.runWhenResumed
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
@@ -41,14 +42,16 @@ internal class SourceAuthenticator @Inject constructor(
         authenticatable: Source,
         requestOptions: ApiRequest.Options
     ) {
-        if (authenticatable.flow == Source.Flow.Redirect) {
-            startSourceAuth(
-                paymentBrowserAuthStarterFactory(host),
-                authenticatable,
-                requestOptions
-            )
-        } else {
-            bypassAuth(host, authenticatable, requestOptions.stripeAccount)
+        host.runWhenResumed {
+            if (authenticatable.flow == Source.Flow.Redirect) {
+                startSourceAuth(
+                    paymentBrowserAuthStarterFactory(host),
+                    authenticatable,
+                    requestOptions
+                )
+            } else {
+                bypassAuth(host, authenticatable, requestOptions.stripeAccount)
+            }
         }
     }
 
@@ -60,7 +63,6 @@ internal class SourceAuthenticator @Inject constructor(
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceRedirect)
         )
-
         paymentBrowserAuthStarter.start(
             PaymentBrowserAuthContract.Args(
                 objectId = source.id.orEmpty(),

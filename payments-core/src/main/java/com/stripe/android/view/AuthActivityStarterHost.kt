@@ -2,9 +2,16 @@ package com.stripe.android.view
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.whenResumed
+import com.stripe.android.view.AuthActivityStarterHost.ActivityHost
+import com.stripe.android.view.AuthActivityStarterHost.FragmentHost
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * A representation of an Android component (i.e. [ComponentActivity] or [Fragment]) that can start
@@ -77,5 +84,19 @@ sealed class AuthActivityStarterHost {
                 statusBarColor = activity.window?.statusBarColor
             )
         }
+    }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun AuthActivityStarterHost.runWhenResumed(block: suspend CoroutineScope.() -> Unit) {
+    val lifecycleOwner = when (this) {
+        is AuthActivityStarterHost.ActivityHost -> activity
+        is AuthActivityStarterHost.FragmentHost -> fragment.viewLifecycleOwner
+    }
+
+    Log.d("RelayBug", "Current lifecycle state of host: ${lifecycleOwner.lifecycle.currentState}")
+
+    lifecycleOwner.lifecycleScope.launch {
+        lifecycleOwner.whenResumed(block)
     }
 }

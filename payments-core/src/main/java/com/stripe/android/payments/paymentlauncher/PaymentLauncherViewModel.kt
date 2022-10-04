@@ -1,6 +1,7 @@
 package com.stripe.android.payments.paymentlauncher
 
 import android.app.Application
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
@@ -36,6 +37,7 @@ import com.stripe.android.payments.core.injection.IS_PAYMENT_INTENT
 import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Lazy
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -117,6 +119,9 @@ internal class PaymentLauncherViewModel @Inject constructor(
                             }
                         }
                     }
+                    Log.d("RelayBug", "Confirmed Stripe Intent. Will launch authenticator soon…")
+                    delay(2_000L)
+                    Log.d("RelayBug", "Launching authenticator now")
                     authenticatorRegistry.getAuthenticator(intent).authenticate(
                         host,
                         intent,

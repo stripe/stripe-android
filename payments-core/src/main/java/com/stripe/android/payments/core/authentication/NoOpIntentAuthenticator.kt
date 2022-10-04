@@ -1,9 +1,11 @@
 package com.stripe.android.payments.core.authentication
 
+import android.util.Log
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarterHost
+import com.stripe.android.view.runWhenResumed
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,12 +23,15 @@ internal class NoOpIntentAuthenticator @Inject constructor(
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        paymentRelayStarterFactory(host)
-            .start(
-                PaymentRelayStarter.Args.create(
-                    authenticatable,
-                    requestOptions.stripeAccount
-                )
+        Log.d("RelayBug", "Running NoOpIntentAuthenticator.authenticate")
+
+        host.runWhenResumed {
+            Log.d("RelayBug", "Lifecycle resumed, so launching RelayActivity")
+            val args = PaymentRelayStarter.Args.create(
+                stripeIntent = authenticatable,
+                stripeAccountId = requestOptions.stripeAccount,
             )
+            paymentRelayStarterFactory(host).start(args)
+        }
     }
 }

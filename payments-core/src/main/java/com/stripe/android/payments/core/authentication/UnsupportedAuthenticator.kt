@@ -7,6 +7,7 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.getRequestCode
 import com.stripe.android.view.AuthActivityStarterHost
+import com.stripe.android.view.runWhenResumed
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,13 +39,15 @@ internal class UnsupportedAuthenticator @Inject constructor(
             )
         }
 
-        paymentRelayStarterFactory(host)
-            .start(
-                PaymentRelayStarter.Args.ErrorArgs(
-                    exception = exception,
-                    requestCode = authenticatable.getRequestCode()
+        host.runWhenResumed {
+            paymentRelayStarterFactory(host)
+                .start(
+                    PaymentRelayStarter.Args.ErrorArgs(
+                        exception = exception,
+                        requestCode = authenticatable.getRequestCode()
+                    )
                 )
-            )
+        }
     }
 
     internal companion object {
