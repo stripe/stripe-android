@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.core.os.LocaleListCompat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
