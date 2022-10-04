@@ -131,9 +131,11 @@ class PhoneNumberController internal constructor(
 
             return if (formatter != null) {
                 val prefix = formatter.prefix
-                val value = formatter.toE164Format(initialValue.removePrefix(prefix))
+                val localNumber = initialValue.removePrefix(prefix)
+                // Converting to E164 to get rid of any weird formatting, e.g. leading spaces.
+                val e164Number = formatter.toE164Format(localNumber)
                 PhoneNumberController(
-                    initialPhoneNumber = value.removePrefix(prefix),
+                    initialPhoneNumber = e164Number.removePrefix(prefix),
                     initiallySelectedCountryCode = formatter.countryCode,
                 )
             } else {
