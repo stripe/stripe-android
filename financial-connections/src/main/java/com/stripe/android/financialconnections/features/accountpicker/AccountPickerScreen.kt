@@ -82,7 +82,8 @@ internal fun AccountPickerScreen() {
         onSelectAnotherBank = viewModel::selectAnotherBank,
         onCloseClick = parentViewModel::onCloseWithConfirmationClick,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
-        onLoadAccountsAgain = viewModel::onLoadAccountsAgain
+        onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
 
@@ -94,7 +95,8 @@ private fun AccountPickerContent(
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onLoadAccountsAgain: () -> Unit,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
@@ -121,19 +123,25 @@ private fun AccountPickerContent(
                     accessibleDataCalloutModel = payload().accessibleData
                 )
             }
+
             is Fail -> when (val error = payload.error) {
                 is NoSupportedPaymentMethodTypeAccountsException ->
                     NoSupportedPaymentMethodTypeAccountsErrorContent(
                         error,
                         onSelectAnotherBank
                     )
+
                 is NoAccountsAvailableException ->
                     NoAccountsAvailableErrorContent(
                         exception = error,
                         onEnterDetailsManually = onEnterDetailsManually,
                         onTryAgain = onLoadAccountsAgain
                     )
-                else -> UnclassifiedErrorContent()
+
+                else -> UnclassifiedErrorContent(
+                    error = error,
+                    onCloseFromErrorClick = onCloseFromErrorClick
+                )
             }
         }
     }
@@ -180,11 +188,13 @@ private fun AccountPickerLoaded(
                     selectedIds = selectedIds,
                     onAccountClicked = onAccountClicked
                 )
+
                 SelectionMode.RADIO -> SingleSelectContent(
                     accounts = accounts,
                     selectedIds = selectedIds,
                     onAccountClicked = onAccountClicked
                 )
+
                 SelectionMode.CHECKBOXES -> MultiSelectContent(
                     accounts = accounts,
                     selectedIds = selectedIds,
@@ -425,7 +435,8 @@ internal fun AccountPickerPreviewMultiSelect() {
             onSelectAnotherBank = {},
             onCloseClick = {},
             onEnterDetailsManually = {},
-            onLoadAccountsAgain = {}
+            onLoadAccountsAgain = {},
+            onCloseFromErrorClick = {}
         )
     }
 }
@@ -445,7 +456,8 @@ internal fun AccountPickerPreviewSingleSelect() {
             onSelectAnotherBank = {},
             onCloseClick = {},
             onEnterDetailsManually = {},
-            onLoadAccountsAgain = {}
+            onLoadAccountsAgain = {},
+            onCloseFromErrorClick = {}
         )
     }
 }
@@ -465,7 +477,8 @@ internal fun AccountPickerPreviewDropdown() {
             onSelectAnotherBank = {},
             onCloseClick = {},
             onEnterDetailsManually = {},
-            onLoadAccountsAgain = {}
+            onLoadAccountsAgain = {},
+            onCloseFromErrorClick = {}
         )
     }
 }

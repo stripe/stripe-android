@@ -81,7 +81,7 @@ internal fun ConsentScreen() {
         onContinueClick = viewModel::onContinueClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-        onCloseClick = parentViewModel::onCloseClick
+        onCloseClick = parentViewModel::onCloseNoConfirmationClick
     )
 }
 
@@ -109,7 +109,6 @@ private fun ViewEffect(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ConsentContent(
     state: ConsentState,

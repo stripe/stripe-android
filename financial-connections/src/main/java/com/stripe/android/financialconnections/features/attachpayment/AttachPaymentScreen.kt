@@ -32,7 +32,8 @@ internal fun AttachPaymentScreen() {
         payload = state.value.payload,
         onCloseClick = parentViewModel::onCloseWithConfirmationClick,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
-        onSelectAnotherBank = viewModel::onSelectAnotherBank
+        onSelectAnotherBank = viewModel::onSelectAnotherBank,
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
 
@@ -42,7 +43,8 @@ private fun AttachPaymentContent(
     payload: Async<AttachPaymentState.Payload>,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
@@ -74,7 +76,8 @@ private fun AttachPaymentContent(
             is Fail -> ErrorContent(
                 error = payload.error,
                 onSelectAnotherBank = onSelectAnotherBank,
-                onEnterDetailsManually = onEnterDetailsManually
+                onEnterDetailsManually = onEnterDetailsManually,
+                onCloseFromErrorClick = onCloseFromErrorClick
             )
         }
     }
@@ -84,7 +87,8 @@ private fun AttachPaymentContent(
 private fun ErrorContent(
     error: Throwable,
     onSelectAnotherBank: () -> Unit,
-    onEnterDetailsManually: () -> Unit
+    onEnterDetailsManually: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     when (error) {
         is AccountNumberRetrievalException -> AccountNumberRetrievalErrorContent(
@@ -92,7 +96,10 @@ private fun ErrorContent(
             onSelectAnotherBank = onSelectAnotherBank,
             onEnterDetailsManually = onEnterDetailsManually
         )
-        else -> UnclassifiedErrorContent()
+        else -> UnclassifiedErrorContent(
+            error = error,
+            onCloseFromErrorClick = onCloseFromErrorClick
+        )
     }
 }
 
@@ -109,7 +116,8 @@ internal fun AttachPaymentScreenPreview() {
             ),
             onCloseClick = {},
             onEnterDetailsManually = {},
-            onSelectAnotherBank = {}
+            onSelectAnotherBank = {},
+            onCloseFromErrorClick = {}
         )
     }
 }

@@ -44,11 +44,17 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import java.text.SimpleDateFormat
 
 @Composable
-internal fun UnclassifiedErrorContent() {
+internal fun UnclassifiedErrorContent(
+    error: Throwable,
+    onCloseFromErrorClick: (Throwable) -> Unit
+) {
     ErrorContent(
         painterResource(id = R.drawable.stripe_ic_brandicon_institution),
         title = stringResource(R.string.stripe_error_generic_title),
-        content = stringResource(R.string.stripe_error_generic_desc)
+        content = stringResource(R.string.stripe_error_generic_desc),
+        primaryCta = stringResource(R.string.stripe_error_cta_close) to {
+            onCloseFromErrorClick(error)
+        }
     )
 }
 
@@ -313,7 +319,7 @@ internal fun UnclassifiedErrorContentPreview() {
         FinancialConnectionsScaffold(
             topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
         ) {
-            UnclassifiedErrorContent()
+            UnclassifiedErrorContent(APIException()) {}
         }
     }
 }

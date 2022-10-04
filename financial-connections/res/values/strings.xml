@@ -119,5 +119,6 @@
     <string name="stripe_close_dialog_desc">You haven\'t finished linking your bank account.</string>
     <string name="stripe_close_dialog_confirm">Yes, cancel</string>
     <string name="stripe_close_dialog_back">Back</string>
+    <string name="stripe_error_cta_close">Close</string>
 </resources>
 
