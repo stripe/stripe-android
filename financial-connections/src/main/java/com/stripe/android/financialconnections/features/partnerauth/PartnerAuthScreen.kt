@@ -125,11 +125,13 @@ fun ErrorContent(
             onSelectAnotherBank = onSelectAnotherBank,
             onEnterDetailsManually = onEnterDetailsManually
         )
+
         is InstitutionUnplannedException -> InstitutionUnplannedDowntimeErrorContent(
             exception = error,
             onSelectAnotherBank = onSelectAnotherBank,
             onEnterDetailsManually = onEnterDetailsManually
         )
+
         else -> UnclassifiedErrorContent(error, onCloseFromErrorClick)
     }
 }
@@ -142,16 +144,24 @@ private fun LoadedContent(
     onSelectAnotherBank: () -> Unit
 ) {
     when (authenticationStatus) {
-        is Uninitialized -> PrePaneContent(
-            institutionName = payload.institutionName,
-            flow = payload.flow,
-            showPartnerDisclosure = payload.showPartnerDisclosure,
-            onContinueClick = onContinueClick
-        )
+        is Uninitialized -> when (payload.showPrepane) {
+            true -> PrePaneContent(
+                institutionName = payload.institutionName,
+                flow = payload.flow,
+                showPartnerDisclosure = payload.showPartnerDisclosure,
+                onContinueClick = onContinueClick
+            )
+            false -> LoadingContent(
+                stringResource(id = R.string.stripe_picker_loading_title),
+                stringResource(id = R.string.stripe_picker_loading_desc)
+            )
+        }
+
         is Loading, is Success -> LoadingContent(
             stringResource(id = R.string.stripe_picker_loading_title),
             stringResource(id = R.string.stripe_picker_loading_desc)
         )
+
         is Fail -> {
             // TODO@carlosmuvi translate error type to specific error screen.
             InstitutionUnknownErrorContent(onSelectAnotherBank)
@@ -227,7 +237,8 @@ internal fun PrepaneContentPreview() {
                     PartnerAuthState.Payload(
                         institutionName = "Random bank",
                         flow = Flow.FINICITY_CONNECT_V2_OAUTH,
-                        showPartnerDisclosure = true
+                        showPartnerDisclosure = true,
+                        showPrepane = true
                     )
                 ),
                 authenticationStatus = Uninitialized,

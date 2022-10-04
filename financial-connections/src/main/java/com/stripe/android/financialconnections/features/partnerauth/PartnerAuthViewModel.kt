@@ -44,6 +44,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     init {
         logErrors()
+        launchAuthIfSkipPrepane()
         suspend {
             val manifest = getManifest()
             val authSession = createAuthorizationSession(
@@ -52,12 +53,20 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             Payload(
                 flow = authSession.flow,
+                showPrepane = authSession.flow?.isOAuth() ?: true,
                 showPartnerDisclosure = authSession.showPartnerDisclosure ?: false,
                 institutionName = manifest.activeInstitution.name
             )
         }.execute {
             copy(payload = it)
         }
+    }
+
+    private fun launchAuthIfSkipPrepane() {
+        onAsync(
+            asyncProp = PartnerAuthState::payload,
+            onSuccess = { if (it.showPrepane.not()) onLaunchAuthClick() }
+        )
     }
 
     private fun logErrors() {
@@ -95,6 +104,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                         authSession = authSession
                     )
                 }
+
                 is Fail -> {
                     val authSession = getManifest().activeAuthSession!!
                     when (val error = webStatus.error) {
@@ -185,7 +195,8 @@ internal data class PartnerAuthState(
     data class Payload(
         val institutionName: String,
         val flow: Flow?,
-        val showPartnerDisclosure: Boolean
+        val showPartnerDisclosure: Boolean,
+        val showPrepane: Boolean
     )
 
     val canNavigateBack: Boolean
