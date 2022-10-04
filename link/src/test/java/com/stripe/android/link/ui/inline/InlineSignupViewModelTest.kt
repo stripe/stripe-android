@@ -261,6 +261,21 @@ class InlineSignupViewModelTest {
         assertThat(viewModel.viewState.value.userInput).isEqualTo(expectedInput)
     }
 
+    @Test
+    fun `E-mail is required for user input to be valid`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            countryCode = CountryCode.GB,
+            prefilledName = CUSTOMER_NAME,
+            prefilledPhone = "+44$CUSTOMER_PHONE"
+        )
+
+        viewModel.toggleExpanded()
+        assertThat(viewModel.viewState.value.userInput).isNull()
+
+        viewModel.emailController.onRawValueChange("finally_an_email_address@internet.cool")
+        assertThat(viewModel.viewState.value.userInput).isNotNull()
+    }
+
     private fun createViewModel(
         countryCode: CountryCode = CountryCode.US,
         prefilledEmail: String? = null,

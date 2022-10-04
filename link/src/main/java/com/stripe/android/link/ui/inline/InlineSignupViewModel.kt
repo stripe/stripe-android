@@ -129,6 +129,7 @@ internal class InlineSignupViewModel @Inject constructor(
                             SignUpState.InputtingEmail, SignUpState.VerifyingEmail -> null
                             SignUpState.InputtingPhoneOrName ->
                                 mapToUserInput(
+                                    email = consumerEmail.value,
                                     phoneNumber = consumerPhoneNumber.value,
                                     name = consumerName.value
                                 )
@@ -145,6 +146,7 @@ internal class InlineSignupViewModel @Inject constructor(
 
         viewModelScope.launch {
             combine(
+                consumerEmail,
                 consumerPhoneNumber,
                 consumerName,
                 this@InlineSignupViewModel::mapToUserInput
@@ -157,12 +159,11 @@ internal class InlineSignupViewModel @Inject constructor(
     }
 
     private fun mapToUserInput(
+        email: String?,
         phoneNumber: String?,
         name: String?
     ): UserInput? {
-        return if (phoneNumber != null) {
-            // Email must be valid otherwise phone number and name collection UI would not be visible
-            val email = requireNotNull(consumerEmail.value)
+        return if (email != null && phoneNumber != null) {
             val isNameValid = !requiresNameCollection || !name.isNullOrBlank()
 
             val phone = phoneController.getE164PhoneNumber(phoneNumber)
