@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
@@ -61,11 +62,15 @@ class InlineSignupViewModelTest {
     fun `When email and phone are provided it should prefill all values`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = InlineSignupViewModel(
-                stripeIntent = mockStripeIntent(),
-                merchantName = MERCHANT_NAME,
-                customerEmail = CUSTOMER_EMAIL,
-                customerPhone = CUSTOMER_PHONE,
-                customerName = CUSTOMER_NAME,
+                config = LinkPaymentLauncher.Configuration(
+                    stripeIntent = mockStripeIntent(),
+                    merchantName = MERCHANT_NAME,
+                    customerEmail = CUSTOMER_EMAIL,
+                    customerPhone = CUSTOMER_PHONE,
+                    customerName = CUSTOMER_NAME,
+                    customerBillingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
+                    shippingValues = null,
+                ),
                 linkAccountManager = linkAccountManager,
                 linkEventsReporter = linkEventsReporter,
                 logger = Logger.noop()
@@ -282,11 +287,15 @@ class InlineSignupViewModelTest {
         prefilledName: String? = null,
         prefilledPhone: String? = null
     ) = InlineSignupViewModel(
-        stripeIntent = mockStripeIntent(countryCode),
-        merchantName = MERCHANT_NAME,
-        customerEmail = prefilledEmail,
-        customerName = prefilledName,
-        customerPhone = prefilledPhone,
+        config = LinkPaymentLauncher.Configuration(
+            stripeIntent = mockStripeIntent(countryCode),
+            merchantName = MERCHANT_NAME,
+            customerEmail = prefilledEmail,
+            customerName = prefilledName,
+            customerPhone = prefilledPhone,
+            customerBillingCountryCode = null,
+            shippingValues = null,
+        ),
         linkAccountManager = linkAccountManager,
         linkEventsReporter = linkEventsReporter,
         logger = Logger.noop()
@@ -326,5 +335,6 @@ class InlineSignupViewModelTest {
         const val CUSTOMER_EMAIL = "customer@email.com"
         const val CUSTOMER_PHONE = "1234567890"
         const val CUSTOMER_NAME = "Customer"
+        const val CUSTOMER_BILLING_COUNTRY_CODE = "US"
     }
 }

@@ -19,12 +19,13 @@ import org.robolectric.RobolectricTestRunner
 class LinkPaymentLauncherTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val config = LinkPaymentLauncher.Configuration(
-        StripeIntentFixtures.PI_SUCCEEDED,
-        MERCHANT_NAME,
-        CUSTOMER_NAME,
-        CUSTOMER_EMAIL,
-        CUSTOMER_PHONE,
-        null
+        stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
+        merchantName = MERCHANT_NAME,
+        customerName = CUSTOMER_NAME,
+        customerEmail = CUSTOMER_EMAIL,
+        customerPhone = CUSTOMER_PHONE,
+        customerBillingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
+        shippingValues = null,
     )
 
     private var linkPaymentLauncher = LinkPaymentLauncher(
@@ -69,5 +70,6 @@ class LinkPaymentLauncherTest {
         const val CUSTOMER_EMAIL = "email"
         const val CUSTOMER_PHONE = "phone"
         const val CUSTOMER_NAME = "name"
+        const val CUSTOMER_BILLING_COUNTRY_CODE = "country_code"
     }
 }

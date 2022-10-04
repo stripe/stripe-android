@@ -3,6 +3,7 @@ package com.stripe.android.link.account
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.repositories.LinkRepository
@@ -722,8 +723,15 @@ class LinkAccountManagerTest {
         customerEmail: String? = null,
         stripeIntent: StripeIntent = mock()
     ) = LinkAccountManager(
-        customerEmail,
-        stripeIntent,
+        config = LinkPaymentLauncher.Configuration(
+            stripeIntent = stripeIntent,
+            customerEmail = customerEmail,
+            customerName = null,
+            customerPhone = null,
+            customerBillingCountryCode = null,
+            merchantName = "Merchant",
+            shippingValues = null,
+        ),
         linkRepository,
         cookieStore,
         linkEventsReporter
