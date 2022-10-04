@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.exception.WebAuthFlowFailedExcept
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.utils.UriComparator
@@ -179,7 +180,8 @@ internal data class FinancialConnectionsSheetNativeState(
     val webAuthFlow: Async<String>,
     val configuration: FinancialConnectionsSheet.Configuration,
     val showCloseDialog: Boolean,
-    val viewEffect: FinancialConnectionsSheetNativeViewEffect?
+    val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
+    val initialPane: NextPane
 ) : MavericksState {
 
     /**
@@ -188,6 +190,7 @@ internal data class FinancialConnectionsSheetNativeState(
     @Suppress("Unused")
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
+        initialPane = args.manifest.nextPane,
         configuration = args.configuration,
         showCloseDialog = false,
         viewEffect = null
