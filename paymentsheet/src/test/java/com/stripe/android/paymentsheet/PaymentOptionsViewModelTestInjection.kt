@@ -15,7 +15,9 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
@@ -87,7 +89,15 @@ internal open class PaymentOptionsViewModelTestInjection {
         lpmRepository: LpmRepository = mock(),
         formViewModel: FormViewModel = FormViewModel(
             context = context,
-            formFragmentArguments = mock(),
+            formFragmentArguments = FormFragmentArguments(
+                PaymentMethod.Type.Card.code,
+                showCheckbox = true,
+                showCheckboxControlledFields = true,
+                merchantName = "Merchant, Inc.",
+                amount = Amount(50, "USD"),
+                injectorKey = "injectorTestKeyFormFragmentArgumentTest",
+                initialPaymentMethodCreateParams = null
+            ),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
             addressResourceRepository = addressResourceRepository,
             showCheckboxFlow = mock()
