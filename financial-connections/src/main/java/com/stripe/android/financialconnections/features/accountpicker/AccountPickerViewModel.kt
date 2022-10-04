@@ -96,7 +96,7 @@ internal class AccountPickerViewModel @Inject constructor(
     ): Pair<Set<String>, SelectionMode> =
         when {
             manifest.singleAccount -> when {
-                manifest.activeAuthSession?.skipAccountSelection == true &&
+                manifest.activeAuthSession?.institutionSkipAccountSelection == true &&
                     manifest.activeAuthSession.flow?.isOAuth() == true -> Pair(
                     setOfNotNull(accounts.firstOrNull { it.enabled }?.account?.id),
                     SelectionMode.DROPDOWN
