@@ -5,32 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -51,12 +29,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArgumen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.elements.H6Text
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
-import com.stripe.android.ui.core.elements.SectionCard
-import com.stripe.android.ui.core.elements.SimpleDialogElementUI
-import com.stripe.android.ui.core.elements.TextFieldSection
-import com.stripe.android.ui.core.paymentsColors
 import kotlinx.coroutines.launch
 
 /**
@@ -210,6 +183,7 @@ internal class USBankAccountFormFragment : Fragment() {
         setContent {
             PaymentsTheme {
                 val currentScreenState by viewModel.currentScreenState.collectAsState()
+                val processing by viewModel.processing.collectAsState(false)
 
                 LaunchedEffect(currentScreenState) {
                     sheetViewModel?.onError(currentScreenState.error)
@@ -219,7 +193,7 @@ internal class USBankAccountFormFragment : Fragment() {
                             completePayment
                     val enabled = if (
                         currentScreenState is
-                        USBankAccountFormScreenState.NameAndEmailCollection
+                            USBankAccountFormScreenState.NameAndEmailCollection
                     ) {
                         viewModel.requiredFields.value
                     } else {
@@ -238,20 +212,25 @@ internal class USBankAccountFormFragment : Fragment() {
                     updateMandateText(currentScreenState.mandateText)
                 }
 
-                when (val screenState = currentScreenState) {
-                    is USBankAccountFormScreenState.NameAndEmailCollection -> {
-                        NameAndEmailCollectionScreen(screenState)
+                USBankAccountScreen(
+                    currentScreenState = currentScreenState,
+                    enabled = !processing,
+                    saveForFutureUseUI = { saveForFutureUsage ->
+                        if (formArgs.showCheckbox) {
+                            SaveForFutureUseElementUI(
+                                true,
+                                viewModel.saveForFutureUseElement.apply {
+                                    this.controller.onValueChange(saveForFutureUsage)
+                                }
+                            )
+                        }
+                    },
+                    nameController = viewModel.nameController,
+                    emailController = viewModel.emailController,
+                    onConfirm = {
+                        viewModel.reset()
                     }
-                    is USBankAccountFormScreenState.MandateCollection -> {
-                        MandateCollectionScreen(screenState)
-                    }
-                    is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
-                        VerifyWithMicrodepositsScreen(screenState)
-                    }
-                    is USBankAccountFormScreenState.SavedAccount -> {
-                        SavedAccountScreen(screenState)
-                    }
-                }
+                )
             }
         }
     }
@@ -261,191 +240,6 @@ internal class USBankAccountFormFragment : Fragment() {
         sheetViewModel?.updatePrimaryButtonUIState(null)
         viewModel.onDestroy()
         super.onDetach()
-    }
-
-    @Composable
-    private fun NameAndEmailCollectionScreen(
-        screenState: USBankAccountFormScreenState.NameAndEmailCollection
-    ) {
-        Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm(screenState.name, screenState.email)
-        }
-    }
-
-    @Composable
-    private fun MandateCollectionScreen(
-        screenState: USBankAccountFormScreenState.MandateCollection
-    ) {
-        Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm(screenState.name, screenState.email)
-            AccountDetailsForm(
-                screenState.paymentAccount.institutionName,
-                screenState.paymentAccount.last4,
-                screenState.saveForFutureUsage
-            )
-        }
-    }
-
-    @Composable
-    private fun VerifyWithMicrodepositsScreen(
-        screenState: USBankAccountFormScreenState.VerifyWithMicrodeposits
-    ) {
-        Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm(screenState.name, screenState.email)
-            AccountDetailsForm(
-                screenState.paymentAccount.bankName,
-                screenState.paymentAccount.last4,
-                screenState.saveForFutureUsage
-            )
-        }
-    }
-
-    @Composable
-    private fun SavedAccountScreen(
-        screenState: USBankAccountFormScreenState.SavedAccount
-    ) {
-        Column(Modifier.fillMaxWidth()) {
-            NameAndEmailForm(screenState.name, screenState.email)
-            AccountDetailsForm(
-                screenState.bankName,
-                screenState.last4,
-                screenState.saveForFutureUsage
-            )
-        }
-    }
-
-    @Composable
-    private fun NameAndEmailForm(
-        name: String,
-        email: String?
-    ) {
-        val processing = viewModel.processing.collectAsState(false)
-        Column(Modifier.fillMaxWidth()) {
-            H6Text(
-                text = stringResource(R.string.stripe_paymentsheet_pay_with_bank_title),
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(0.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                TextFieldSection(
-                    textFieldController = viewModel.nameController.apply {
-                        onRawValueChange(name)
-                    },
-                    imeAction = ImeAction.Next,
-                    enabled = !processing.value
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(0.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                TextFieldSection(
-                    textFieldController = viewModel.emailController.apply {
-                        onRawValueChange(email ?: "")
-                    },
-                    imeAction = ImeAction.Done,
-                    enabled = !processing.value
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun AccountDetailsForm(
-        bankName: String?,
-        last4: String?,
-        saveForFutureUsage: Boolean
-    ) {
-        val openDialog = remember { mutableStateOf(false) }
-        val bankIcon = TransformToBankIcon(bankName)
-        val processing = viewModel.processing.collectAsState(false)
-
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp)
-        ) {
-            H6Text(
-                text = stringResource(R.string.title_bank_account),
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            SectionCard(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(all = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            painter = painterResource(bankIcon),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .height(40.dp)
-                                .width(56.dp)
-                        )
-                        Text(
-                            text = "$bankName ••••$last4",
-                            modifier = Modifier.alpha(if (processing.value) 0.5f else 1f),
-                            color = MaterialTheme.paymentsColors.onComponent
-                        )
-                    }
-                    Image(
-                        painter = painterResource(R.drawable.stripe_ic_clear),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .height(20.dp)
-                            .width(20.dp)
-                            .alpha(if (processing.value) 0.5f else 1f)
-                            .clickable {
-                                if (!processing.value) {
-                                    openDialog.value = true
-                                }
-                            }
-                    )
-                }
-            }
-            if (formArgs.showCheckbox) {
-                SaveForFutureUseElementUI(
-                    true,
-                    viewModel.saveForFutureUseElement.apply {
-                        this.controller.onValueChange(saveForFutureUsage)
-                    }
-                )
-            }
-        }
-        last4?.let {
-            SimpleDialogElementUI(
-                openDialog = openDialog,
-                titleText = stringResource(
-                    id = R.string.stripe_paymentsheet_remove_bank_account_title
-                ),
-                messageText = stringResource(
-                    id = R.string.bank_account_ending_in,
-                    last4
-                ),
-                confirmText = stringResource(
-                    id = R.string.remove
-                ),
-                dismissText = stringResource(
-                    id = R.string.cancel
-                ),
-                onConfirmListener = {
-                    openDialog.value = false
-                    viewModel.reset()
-                },
-                onDismissListener = {
-                    openDialog.value = false
-                }
-            )
-        }
     }
 
     private fun updatePrimaryButton(
@@ -482,7 +276,7 @@ internal class USBankAccountFormFragment : Fragment() {
         val microdepositsText =
             if (
                 viewModel.currentScreenState.value
-                is USBankAccountFormScreenState.VerifyWithMicrodeposits
+                    is USBankAccountFormScreenState.VerifyWithMicrodeposits
             ) {
                 getString(
                     R.string.stripe_paymentsheet_microdeposit,

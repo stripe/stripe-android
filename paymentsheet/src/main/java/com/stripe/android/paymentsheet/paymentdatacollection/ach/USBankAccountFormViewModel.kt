@@ -144,6 +144,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         )
     }
 
+    fun setLauncher(
+        launcher: CollectBankAccountLauncher
+    ): (CollectBankAccountResult) -> Unit {
+        collectBankAccountLauncher = launcher
+        return ::handleCollectBankAccountResult
+    }
+
     @VisibleForTesting
     fun handleCollectBankAccountResult(result: CollectBankAccountResult) {
         hasLaunched = false

@@ -13,7 +13,6 @@ import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
@@ -37,7 +36,6 @@ internal interface FlowControllerComponent {
     val flowController: DefaultFlowController
 
     fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
-    fun inject(factory: FormViewModel.Factory)
 
     @Component.Builder
     interface Builder {
