@@ -187,7 +187,9 @@ internal sealed class PhoneNumberFormatter {
     )
 
     companion object {
-        const val E164_MAX_DIGITS = 15
+        private const val E164_MAX_DIGITS = 15
+        private const val COUNTRY_PREFIX_MAX_LENGTH = 5
+
         val VALID_INPUT_RANGE = ('0'..'9')
 
         fun forCountry(countryCode: String) =
@@ -200,7 +202,7 @@ internal sealed class PhoneNumberFormatter {
 
             // Find the regions that match the phone number prefix, then pick the top match from the
             // device's locales
-            while (charIndex < phoneNumber.length - 1 && charIndex < 4) {
+            while (charIndex < phoneNumber.lastIndex && charIndex < COUNTRY_PREFIX_MAX_LENGTH - 1) {
                 charIndex++
 
                 val country = findBestCountryForPrefix(
@@ -216,7 +218,7 @@ internal sealed class PhoneNumberFormatter {
             return null
         }
 
-        fun findBestCountryForPrefix(prefix: String, userLocales: LocaleListCompat) =
+        private fun findBestCountryForPrefix(prefix: String, userLocales: LocaleListCompat) =
             countryCodesForPrefix(prefix).takeIf { it.isNotEmpty() }?.let {
                 for (i in 0 until userLocales.size()) {
                     val locale = userLocales.get(i)!!
