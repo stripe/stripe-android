@@ -32,6 +32,8 @@ internal class ConsentViewModel @Inject constructor(
             setState {
                 copy(
                     manualEntryEnabled = manifest.allowManualEntry,
+                    manualEntryShowBusinessDaysNotice =
+                    !manifest.customManualEntryHandling && manifest.manualEntryUsesMicrodeposits,
                     disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest),
                     faqUrl = FinancialConnectionsUrlResolver.getFAQUrl(manifest),
                     dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest),
@@ -64,18 +66,25 @@ internal class ConsentViewModel @Inject constructor(
         when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
             ConsentClickableText.TERMS ->
                 setState { copy(viewEffect = OpenUrl(stripeToSUrl)) }
+
             ConsentClickableText.PRIVACY ->
                 setState { copy(viewEffect = OpenUrl(FinancialConnectionsUrls.StripePrivacyPolicy)) }
+
             ConsentClickableText.DISCONNECT ->
                 setState { copy(viewEffect = OpenUrl(disconnectUrl)) }
+
             ConsentClickableText.DATA ->
                 setState { copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet) }
+
             ConsentClickableText.PRIVACY_CENTER ->
                 setState { copy(viewEffect = OpenUrl(privacyCenterUrl)) }
+
             ConsentClickableText.DATA_ACCESS ->
                 setState { copy(viewEffect = OpenUrl(dataPolicyUrl)) }
+
             ConsentClickableText.MANUAL_ENTRY ->
                 navigationManager.navigate(NavigationDirections.manualEntry)
+
             null -> logger.error("Unrecognized clickable text: $tag")
         }
     }

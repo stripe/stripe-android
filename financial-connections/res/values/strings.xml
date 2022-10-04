@@ -2,6 +2,7 @@
 <resources>
     <string name="consent_pane_tc">You agree to Stripe\'s <annotation clickable="terms">Terms</annotation> and <annotation clickable="privacy">Privacy Policy</annotation>. <annotation clickable="privacy_center">Learn more</annotation></string>
     <string name="consent_pane_manual_entry"><annotation clickable="manual_entry">Enter account details manually instead</annotation></string>
+    <string name="consent_pane_manual_entry_microdeposits"><annotation clickable="manual_entry">Enter account details manually instead</annotation> (takes 1–2 business days)</string>
     <string name="stripe_consent_pane_title">%1$s works with Stripe to link your accounts</string>
     <string name="stripe_consent_pane_title_no_businessname">This business works with Stripe to link your accounts</string>
     <string name="stripe_consent_pane_title_connected_account">%1$s and %2%s work with Stripe to link your accounts</string>

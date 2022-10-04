@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.ui.TextResource
 internal data class ConsentState(
     val title: TextResource = TextResource.Text(""),
     val manualEntryEnabled: Boolean = false,
+    val manualEntryShowBusinessDaysNotice: Boolean = false,
     val disconnectUrl: String = "",
     val stripeToSUrl: String = "",
     val faqUrl: String = "",
