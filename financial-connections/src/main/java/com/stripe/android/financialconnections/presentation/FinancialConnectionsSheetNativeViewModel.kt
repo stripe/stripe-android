@@ -143,11 +143,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     /**
      * There's at least three types of close cases:
-     * 1. User closes when getting an error. In that case `error != nil`. That's an error.
-     * 2. User closes, there is no error,
+     * 1. User closes (with or without an error),
      *    and fetching accounts returns accounts (or `paymentAccount`). That's a success.
-     * 3. User closes, there is no error,
-     *    and fetching accounts returns NO accounts. That's a cancel.
+     * 2. User closes with an error, and fetching accounts returns NO accounts. That's an error.
+     * 3. User closes without an error, and fetching accounts returns NO accounts. That's a cancel.
      */
     private fun closeAuthFlow(
         closeAuthFlowError: Throwable? = null
@@ -157,22 +156,21 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 .runCatching { completeFinancialConnectionsSession() }
                 .onSuccess { session ->
                     when {
-                        closeAuthFlowError != null ->
-                            setState { copy(viewEffect = Finish(Failed(closeAuthFlowError))) }
-                        else -> when {
-                            session.accounts.data.isNotEmpty() ||
-                                session.paymentAccount != null ||
-                                session.bankAccountToken != null -> {
-                                val result = Completed(
-                                    financialConnectionsSession = session,
-                                    token = session.parsedToken
-                                )
-                                setState { copy(viewEffect = Finish(result)) }
-                            }
-                            else -> {
-                                // TODO@carlosmuvi handle terminal errors
-                                setState { copy(viewEffect = Finish(Canceled)) }
-                            }
+                        session.accounts.data.isNotEmpty() ||
+                            session.paymentAccount != null ||
+                            session.bankAccountToken != null -> {
+                            val result = Completed(
+                                financialConnectionsSession = session,
+                                token = session.parsedToken
+                            )
+                            setState { copy(viewEffect = Finish(result)) }
+                        }
+
+                        closeAuthFlowError != null -> setState {
+                            copy(viewEffect = Finish(Failed(closeAuthFlowError)))
+                        }
+                        else -> setState {
+                            copy(viewEffect = Finish(Canceled))
                         }
                     }
                 }

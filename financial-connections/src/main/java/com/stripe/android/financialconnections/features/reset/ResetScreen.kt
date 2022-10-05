@@ -21,10 +21,10 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun ResetScreen() {
     val viewModel: ResetViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
-    val state = viewModel.collectAsState()
+    val payload = viewModel.collectAsState { it.payload }
     BackHandler(enabled = true) {}
     ResetContent(
-        payload = state.value.payload,
+        payload = payload.value,
         onCloseClick = parentViewModel::onCloseNoConfirmationClick,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
