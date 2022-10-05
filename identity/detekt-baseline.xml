@@ -66,7 +66,6 @@
     <ID>ReturnCount:AddressSection.kt$private fun isValidAddress(addressMap: Map&lt;IdentifierSpec, FormFieldEntry>): Boolean</ID>
     <ID>ReturnCount:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>
     <ID>ReturnCount:IDNumberSection.kt$BRVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
-    <ID>SpreadOperator:AddressSection.kt$( it.errorMessage, *args )</ID>
     <ID>SwallowedException:IdentityTheme.kt$e: ReflectiveOperationException</ID>
     <ID>ThrowsCount:DefaultIdentityRepository.kt$DefaultIdentityRepository$private suspend fun &lt;Response : StripeModel> executeRequestWithModelJsonParser( request: StripeRequest, responseJsonParser: ModelJsonParser&lt;Response>, onSuccessExecutionTimeBlock: (Long) -> Unit = {} ): Response</ID>
     <ID>TooManyFunctions:IdentityAnalyticsRequestFactory.kt$IdentityAnalyticsRequestFactory</ID>

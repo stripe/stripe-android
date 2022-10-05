@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.SectionMultiFieldElement
+import com.stripe.android.uicore.elements.convertTo4DigitDate
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

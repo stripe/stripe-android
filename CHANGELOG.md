@@ -16,6 +16,7 @@
 
 ### PaymentSheet
 * [ADDED][6283](https://github.com/stripe/stripe-android/pull/6283) Added support for Zip payments.
+* [ADDED][5672](https://github.com/stripe/stripe-android/pull/5672) Added support for credit card autofill.
 
 ### Identity
 * [ADDED] ID/Address verification

@@ -22,16 +22,23 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillNode
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalAutofill
+import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -92,6 +99,7 @@ fun TextFieldSection(
  * attribute of [textFieldController] is also taken into account to decide if the UI should be
  * enabled.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TextField(
     textFieldController: TextFieldController,
@@ -124,6 +132,19 @@ fun TextField(
         }
     }
 
+    val autofillNode = remember {
+        AutofillNode(
+            autofillTypes = textFieldController.autofillTypes,
+            onFill = { textFieldController.onValueChange(it) }
+        )
+    }
+    val autofill = LocalAutofill.current
+    val autofillTree = LocalAutofillTree.current
+
+    LaunchedEffect(autofillNode) {
+        autofillTree += autofillNode
+    }
+
     TextField(
         value = value,
         onValueChange = { newValue ->
@@ -150,11 +171,21 @@ fun TextField(
                     false
                 }
             }
+            .onGloballyPositioned {
+                autofillNode.boundingBox = it.boundsInWindow()
+            }
             .onFocusChanged {
                 if (hasFocus != it.isFocused) {
                     textFieldController.onFocusChange(it.isFocused)
                 }
                 hasFocus = it.isFocused
+                autofill?.run {
+                    if (it.isFocused) {
+                        requestAutofillForNode(autofillNode)
+                    } else {
+                        cancelAutofillForNode(autofillNode)
+                    }
+                }
             }
             .semantics {
                 this.contentDescription = contentDescription

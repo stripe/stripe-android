@@ -1,6 +1,9 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
-internal fun convertTo4DigitDate(input: String) =
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun convertTo4DigitDate(input: String) =
     "0$input".takeIf {
         (input.isNotBlank() && !(input[0] == '0' || input[0] == '1')) ||
             ((input.length > 1) && (input[0] == '1' && requireNotNull(input[1].digitToInt()) > 2))

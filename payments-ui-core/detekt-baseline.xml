@@ -38,10 +38,6 @@
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$4</ID>
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$7</ID>
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$9</ID>
-    <ID>MagicNumber:DateConfig.kt$DateConfig$4</ID>
-    <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$100</ID>
-    <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$12</ID>
-    <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$50</ID>
     <ID>MagicNumber:IbanConfig.kt$IbanConfig$10</ID>
     <ID>MagicNumber:IbanConfig.kt$IbanConfig$4</ID>
     <ID>MagicNumber:LpmRepository.kt$LpmRepository$20</ID>
@@ -70,7 +66,6 @@
     <ID>ReturnCount:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
     <ID>ReturnCount:IbanConfig.kt$IbanConfig$override fun determineState(input: String): TextFieldState</ID>
     <ID>SpreadOperator:BsbElementUI.kt$( it.errorMessage, *args )</ID>
-    <ID>SpreadOperator:SectionElementUI.kt$( it.errorMessage, *args )</ID>
     <ID>TooGenericExceptionCaught:LpmSerializer.kt$LpmSerializer$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PlacesClientProxy.kt$DefaultPlacesClientProxy$e: Exception</ID>
     <ID>UnnecessaryAbstractClass:FormControllerModule.kt$FormControllerModule$FormControllerModule</ID>
