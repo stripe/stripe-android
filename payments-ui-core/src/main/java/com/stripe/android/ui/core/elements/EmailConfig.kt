@@ -28,7 +28,7 @@ class EmailConfig : TextFieldConfig {
      * This will allow all characters, but will show as invalid if it doesn't match
      * the regular expression.
      */
-    override fun filter(userTyped: String) = userTyped
+    override fun filter(userTyped: String) = userTyped.filterNot { it == ' ' }
 
     override fun convertToRaw(displayName: String) = displayName
 
@@ -48,7 +48,7 @@ class EmailConfig : TextFieldConfig {
         Regex(".*@.*\\..+")
     )
 
-    private fun cannotBecomeValid(str: String) = str.count { it == '@' } > 1 || str.contains(" ")
+    private fun cannotBecomeValid(str: String) = str.count { it == '@' } > 1
 
     companion object {
         // This is copied from Patterns.EMAIL_ADDRESS because it is not defined for unit tests
