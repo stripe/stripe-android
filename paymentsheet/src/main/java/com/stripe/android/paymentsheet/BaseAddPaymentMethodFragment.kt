@@ -60,17 +60,20 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = ComposeView(requireContext()).apply {
+        val showCheckboxFlow = MutableStateFlow(false)
+
         setContent {
             PaymentsTheme {
-                AddPaymentMethod()
+                AddPaymentMethod(showCheckboxFlow)
             }
         }
     }
 
     @Composable
-    internal fun AddPaymentMethod() {
-        val showCheckboxFlow = MutableStateFlow(false)
-        val isRepositoryReady by sheetViewModel.isResourceRepositoryReady.observeAsState(false)
+    internal fun AddPaymentMethod(
+        showCheckboxFlow: MutableStateFlow<Boolean>
+    ) {
+        val isRepositoryReady by sheetViewModel.isResourceRepositoryReady.observeAsState()
         val processing by sheetViewModel.processing.observeAsState(false)
 
         val linkConfig by sheetViewModel.linkConfiguration.observeAsState()
@@ -80,22 +83,19 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
         if (isRepositoryReady == true) {
             var selectedPaymentMethodCode: String by rememberSaveable {
-                mutableStateOf(
-                    sheetViewModel.newPaymentSelection?.paymentMethodCreateParams?.typeCode
-                        ?: sheetViewModel.supportedPaymentMethods.first().code
-                )
+                mutableStateOf(getInitiallySelectedPaymentMethodType())
             }
+
             val selectedItem = remember(selectedPaymentMethodCode) {
                 sheetViewModel.supportedPaymentMethods.first {
                     it.code == selectedPaymentMethodCode
                 }
             }
 
-            val showLinkInlineSignup = sheetViewModel.isLinkEnabled.value == true &&
-                sheetViewModel.stripeIntent.value
-                ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
-                selectedItem.code == PaymentMethod.Type.Card.code &&
-                linkAccountStatus == AccountStatus.SignedOut
+            val showLinkInlineSignup = showLinkInlineSignupView(
+                selectedPaymentMethodCode,
+                linkAccountStatus
+            )
 
             val arguments = remember(selectedItem, showLinkInlineSignup) {
                 createFormArguments(selectedItem, showLinkInlineSignup)
@@ -199,6 +199,34 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         )
     }
 
+    private fun getInitiallySelectedPaymentMethodType() =
+        when (val selection = sheetViewModel.newPaymentSelection) {
+            is PaymentSelection.New.LinkInline -> PaymentMethod.Type.Card.code
+            is PaymentSelection.New.Card,
+            is PaymentSelection.New.USBankAccount,
+            is PaymentSelection.New.GenericPaymentMethod ->
+                selection.paymentMethodCreateParams.typeCode
+            else -> sheetViewModel.supportedPaymentMethods.first().code
+        }
+
+    private fun showLinkInlineSignupView(
+        paymentMethodCode: String,
+        linkAccountStatus: AccountStatus?
+    ): Boolean {
+        return sheetViewModel.isLinkEnabled.value == true &&
+            sheetViewModel.stripeIntent.value
+                ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
+            paymentMethodCode == PaymentMethod.Type.Card.code &&
+            (
+                linkAccountStatus in setOf(
+                    AccountStatus.NeedsVerification,
+                    AccountStatus.VerificationStarted,
+                    AccountStatus.SignedOut
+                ) ||
+                    sheetViewModel.newPaymentSelection is PaymentSelection.New.LinkInline
+                )
+    }
+
     private fun onLinkSignupStateChanged(
         config: LinkPaymentLauncher.Configuration,
         viewState: InlineSignupViewState
@@ -294,7 +322,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             amount: Amount? = null,
             @InjectorKey injectorKey: String,
             newLpm: PaymentSelection.New?,
-            isShowingLinkInlineSignup: Boolean = false
+            isShowingLinkInlineSignup: Boolean
         ): FormFragmentArguments {
             val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
 
@@ -311,15 +339,19 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 shippingDetails = config?.shippingDetails,
                 injectorKey = injectorKey,
                 initialPaymentMethodCreateParams =
-                newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
-                    it == showPaymentMethod.code
-                }?.let {
-                    when (newLpm) {
-                        is PaymentSelection.New.GenericPaymentMethod ->
-                            newLpm.paymentMethodCreateParams
-                        is PaymentSelection.New.Card ->
-                            newLpm.paymentMethodCreateParams
-                        else -> null
+                if (newLpm is PaymentSelection.New.LinkInline) {
+                    newLpm.linkPaymentDetails.originalParams
+                } else {
+                    newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
+                        it == showPaymentMethod.code
+                    }?.let {
+                        when (newLpm) {
+                            is PaymentSelection.New.GenericPaymentMethod ->
+                                newLpm.paymentMethodCreateParams
+                            is PaymentSelection.New.Card ->
+                                newLpm.paymentMethodCreateParams
+                            else -> null
+                        }
                     }
                 }
             )
