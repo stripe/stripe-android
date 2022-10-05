@@ -83,7 +83,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 
     fun onSelectAnotherBank() {
-        navigationManager.navigate(NavigationDirections.institutionPicker)
+        navigationManager.navigate(NavigationDirections.reset)
     }
 
     fun onWebAuthFlowFinished(

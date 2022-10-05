@@ -83,7 +83,7 @@ internal fun AccountPickerScreen() {
         onCloseClick = parentViewModel::onCloseWithConfirmationClick,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
-        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
     )
 }
 
@@ -130,14 +130,12 @@ private fun AccountPickerContent(
                         error,
                         onSelectAnotherBank
                     )
-
-                is NoAccountsAvailableException ->
-                    NoAccountsAvailableErrorContent(
-                        exception = error,
-                        onEnterDetailsManually = onEnterDetailsManually,
-                        onTryAgain = onLoadAccountsAgain
-                    )
-
+                is NoAccountsAvailableException -> NoAccountsAvailableErrorContent(
+                    exception = error,
+                    onEnterDetailsManually = onEnterDetailsManually,
+                    onTryAgain = onLoadAccountsAgain,
+                    onSelectAnotherBank = onSelectAnotherBank
+                )
                 else -> UnclassifiedErrorContent(
                     error = error,
                     onCloseFromErrorClick = onCloseFromErrorClick

@@ -44,8 +44,12 @@ internal class AccountPickerViewModel @Inject constructor(
 
     private fun loadAccounts() {
         suspend {
+            val state = awaitState()
             val manifest = getManifest()
-            val partnerAccountList = pollAuthorizationSessionAccounts(manifest)
+            val partnerAccountList = pollAuthorizationSessionAccounts(
+                manifest = manifest,
+                canRetry = state.canRetry
+            )
             val accounts = partnerAccountList.data.map { account ->
                 AccountPickerState.PartnerAccountUI(
                     account = account,
@@ -146,11 +150,14 @@ internal class AccountPickerViewModel @Inject constructor(
         }
     }
 
-    fun selectAnotherBank() = navigationManager.navigate(NavigationDirections.institutionPicker)
+    fun selectAnotherBank() = navigationManager.navigate(NavigationDirections.reset)
 
     fun onEnterDetailsManually() = navigationManager.navigate(NavigationDirections.manualEntry)
 
-    fun onLoadAccountsAgain() = loadAccounts()
+    fun onLoadAccountsAgain() {
+        setState { copy(canRetry = false) }
+        loadAccounts()
+    }
 
     companion object :
         MavericksViewModelFactory<AccountPickerViewModel, AccountPickerState> {
@@ -172,6 +179,7 @@ internal class AccountPickerViewModel @Inject constructor(
 
 internal data class AccountPickerState(
     val payload: Async<Payload> = Uninitialized,
+    val canRetry: Boolean = true,
     val selectAccounts: Async<PartnerAccountsList> = Uninitialized,
     val selectedIds: Set<String> = emptySet()
 ) : MavericksState {

@@ -25,6 +25,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
 ) {
 
     suspend operator fun invoke(
+        canRetry: Boolean,
         manifest: FinancialConnectionsSessionManifest
     ): PartnerAccountsList {
         return retryOnException(
@@ -41,6 +42,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
                     throw NoAccountsAvailableException(
                         institution = requireNotNull(manifest.activeInstitution),
                         allowManualEntry = manifest.allowManualEntry,
+                        canRetry = canRetry,
                         stripeException = APIException()
                     )
                 } else {
@@ -50,6 +52,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
                 throw e.toDomainException(
                     institution = requireNotNull(manifest.activeInstitution),
                     businessName = ConsentTextBuilder.getBusinessName(manifest),
+                    canRetry = canRetry,
                     allowManualEntry = manifest.allowManualEntry
                 )
             }
@@ -59,6 +62,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
     private fun StripeException.toDomainException(
         institution: FinancialConnectionsInstitution,
         businessName: String?,
+        canRetry: Boolean,
         allowManualEntry: Boolean
     ): StripeException =
         when {
@@ -74,6 +78,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
             else -> NoAccountsAvailableException(
                 allowManualEntry = allowManualEntry,
                 institution = institution,
+                canRetry = canRetry,
                 stripeException = this
             )
         }

@@ -66,7 +66,7 @@ internal class AttachPaymentViewModel @Inject constructor(
 
     fun onEnterDetailsManually() = navigationManager.navigate(NavigationDirections.manualEntry)
 
-    fun onSelectAnotherBank() = navigationManager.navigate(NavigationDirections.institutionPicker)
+    fun onSelectAnotherBank() = navigationManager.navigate(NavigationDirections.reset)
 
     companion object : MavericksViewModelFactory<AttachPaymentViewModel, AttachPaymentState> {
 

@@ -162,31 +162,50 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
 @Composable
 internal fun NoAccountsAvailableErrorContent(
     exception: NoAccountsAvailableException,
+    onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onTryAgain: () -> Unit
 ) {
+    // primary and (optional) secondary button to show.
+    val (primaryCta: Pair<Int, () -> Unit>, secondaryCta: Pair<Int, () -> Unit>?) = remember(
+        exception.allowManualEntry,
+        exception.canRetry
+    ) {
+        when {
+            exception.canRetry -> Pair(
+                first = R.string.stripe_error_cta_retry to onTryAgain,
+                second = R.string.stripe_error_cta_select_another_bank to onSelectAnotherBank,
+            )
+
+            exception.allowManualEntry -> Pair(
+                first = R.string.stripe_error_cta_manual_entry to onEnterDetailsManually,
+                second = R.string.stripe_error_cta_select_another_bank to onSelectAnotherBank,
+            )
+
+            else -> Pair(
+                first = R.string.stripe_error_cta_select_another_bank to onSelectAnotherBank,
+                second = null
+            )
+        }
+    }
+    // description to show.
+    val description = remember(exception.allowManualEntry, exception.canRetry) {
+        when {
+            exception.canRetry -> R.string.stripe_accounts_error_desc_retry
+            exception.allowManualEntry -> R.string.stripe_accounts_error_desc_manualentry
+            else -> R.string.stripe_accounts_error_desc_no_retry
+        }
+    }
+
     ErrorContent(
         painterResource(id = R.drawable.stripe_ic_brandicon_institution),
         title = stringResource(
             R.string.stripe_account_picker_error_no_account_available_title,
             exception.institution.name
         ),
-        content = stringResource(
-            R.string.stripe_account_picker_error_no_account_available_desc,
-            exception.institution.name
-        ),
-        primaryCta = Pair(
-            stringResource(R.string.stripe_error_cta_select_another_bank),
-            onTryAgain
-        ),
-        secondaryCta = if (exception.allowManualEntry) {
-            Pair(
-                stringResource(R.string.stripe_error_cta_manual_entry),
-                onEnterDetailsManually
-            )
-        } else {
-            null
-        }
+        content = stringResource(description),
+        primaryCta = stringResource(primaryCta.first) to primaryCta.second,
+        secondaryCta = secondaryCta?.let { stringResource(it.first) to it.second }
     )
 }
 
@@ -372,9 +391,11 @@ internal fun NoAccountsAvailableErrorContentPreview() {
                         mobileHandoffCapable = false
                     ),
                     allowManualEntry = true,
-                    stripeException = APIException()
+                    stripeException = APIException(),
+                    canRetry = true
                 ),
                 onEnterDetailsManually = {},
+                onSelectAnotherBank = {},
                 onTryAgain = {}
             )
         }

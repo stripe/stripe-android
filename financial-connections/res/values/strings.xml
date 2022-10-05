@@ -47,6 +47,7 @@
     <string name="stripe_error_planned_downtime_title">%1$s is undergoing maintenance</string>
     <string name="stripe_error_planned_downtime_desc">Maintenance is scheduled to end at %1$s. Please select another bank or try again later.</string>
     <string name="stripe_error_cta_select_another_bank">Select another bank</string>
+    <string name="stripe_error_cta_retry">Try again</string>
     <string name="stripe_error_cta_manual_entry">Enter bank details manually</string>
     <string name="stripe_account_picker_loading_title">Retrieving accounts</string>
     <string name="stripe_account_picker_loading_desc">Please wait while we retrieve your accounts</string>
@@ -120,6 +121,9 @@
     <string name="stripe_close_dialog_back">Back</string>
     <string name="stripe_error_cta_close">Close</string>
     <string name="stripe_success_infobox_accounts">%1$d accounts</string>
+    <string name="stripe_accounts_error_desc_retry">Please select another bank or try again.</string>
+    <string name="stripe_accounts_error_desc_manualentry">Please enter your bank details manually or select another bank.</string>
+    <string name="stripe_accounts_error_desc_no_retry">Please select another bank.</string>
     <plurals name="stripe_success_desc">
         <item quantity="zero" />
         <item quantity="one">Your account was successfully linked to %1$s through Stripe.</item>
