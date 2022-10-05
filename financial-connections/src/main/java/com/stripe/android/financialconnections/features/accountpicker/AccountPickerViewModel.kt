@@ -25,7 +25,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 internal class AccountPickerViewModel @Inject constructor(
     initialState: AccountPickerState,
     private val selectAccounts: SelectAccounts,
@@ -38,7 +38,7 @@ internal class AccountPickerViewModel @Inject constructor(
 
     init {
         logErrors()
-        navigateIfSkipAccountSelection()
+        onPayloadLoaded()
         loadAccounts()
     }
 
@@ -57,7 +57,9 @@ internal class AccountPickerViewModel @Inject constructor(
                 )
             }.sortedBy { it.enabled }
             val (preselectedIds, selectionMode) = selectionConfig(accounts, manifest)
+            val activeAuthSession = requireNotNull(manifest.activeAuthSession)
             AccountPickerState.Payload(
+                skipAccountSelection = activeAuthSession.skipAccountSelection == true,
                 accounts = accounts,
                 selectionMode = selectionMode,
                 accessibleData = AccessibleDataCalloutModel(
@@ -67,14 +69,28 @@ internal class AccountPickerViewModel @Inject constructor(
                     dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
                 ),
                 selectedIds = preselectedIds,
-                skipAccountSelection = manifest.activeAuthSession?.skipAccountSelection == true
+                singleAccount = manifest.singleAccount,
+                institutionSkipAccountSelection = activeAuthSession.institutionSkipAccountSelection == true
             )
         }.execute { copy(payload = it) }
     }
 
-    private fun navigateIfSkipAccountSelection() {
-        onAsync(AccountPickerState::payload, onSuccess = {
-            if (it.skipAccountSelection) navigationManager.navigate(NavigationDirections.success)
+    private fun onPayloadLoaded() {
+        onAsync(AccountPickerState::payload, onSuccess = { payload ->
+            when {
+                // Navigate to success right away instead of allowing the user to select accounts.
+                payload.skipAccountSelection -> {
+                    navigationManager.navigate(NavigationDirections.success)
+                }
+                // the user saw an OAuth account selection screen and selected
+                // just one to send back in a single-account context. treat these as if
+                // we had done account selection, and submit.
+                payload.singleAccount &&
+                    payload.institutionSkipAccountSelection &&
+                    payload.accounts.size == 1 -> {
+                    submitAccounts(selectedIds = setOf(payload.accounts.first().account.id))
+                }
+            }
         })
     }
 
@@ -105,8 +121,10 @@ internal class AccountPickerViewModel @Inject constructor(
                     setOfNotNull(accounts.firstOrNull { it.enabled }?.account?.id),
                     SelectionMode.DROPDOWN
                 )
+
                 else -> emptySet<String>() to SelectionMode.RADIO
             }
+
             else -> emptySet<String>() to SelectionMode.CHECKBOXES
         }
 
@@ -120,33 +138,35 @@ internal class AccountPickerViewModel @Inject constructor(
             when (state.payload()?.selectionMode) {
                 SelectionMode.DROPDOWN,
                 SelectionMode.RADIO -> setState { copy(selectedIds = setOf(account.id)) }
+
                 SelectionMode.CHECKBOXES -> if (state.selectedIds.contains(account.id)) {
                     setState { copy(selectedIds = selectedIds - account.id) }
                 } else {
                     setState { copy(selectedIds = selectedIds + account.id) }
                 }
+
                 null -> logger.error("account clicked without available payload.")
             }
         }
     }
 
-    fun selectAccounts() {
-        withState { state ->
-            state.payload()?.accounts?.let { accounts ->
-                suspend {
-                    val manifest = getManifest()
-                    val accountsList: PartnerAccountsList = selectAccounts(
-                        selectedAccounts = accounts
-                            .filter { state.selectedIds.contains(it.account.id) }
-                            .map { it.account },
-                        sessionId = manifest.activeAuthSession!!.id
-                    )
-                    goNext(accountsList.nextPane)
-                    accountsList
-                }.execute {
-                    copy(selectAccounts = it)
-                }
-            }
+    fun onSubmit() {
+        withState { state -> submitAccounts(state.selectedIds) }
+    }
+
+    private fun submitAccounts(
+        selectedIds: Set<String>
+    ) {
+        suspend {
+            val manifest = getManifest()
+            val accountsList: PartnerAccountsList = selectAccounts(
+                selectedAccountIds = selectedIds,
+                sessionId = manifest.activeAuthSession!!.id
+            )
+            goNext(accountsList.nextPane)
+            accountsList
+        }.execute {
+            copy(selectAccounts = it)
         }
     }
 
@@ -195,7 +215,9 @@ internal data class AccountPickerState(
         val accounts: List<PartnerAccountUI>,
         val selectionMode: SelectionMode,
         val accessibleData: AccessibleDataCalloutModel,
-        val selectedIds: Set<String>
+        val selectedIds: Set<String>,
+        val singleAccount: Boolean,
+        val institutionSkipAccountSelection: Boolean
     )
 
     data class PartnerAccountUI(

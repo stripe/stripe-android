@@ -78,7 +78,7 @@ internal fun AccountPickerScreen() {
     AccountPickerContent(
         state = state.value,
         onAccountClicked = viewModel::onAccountClicked,
-        onSelectAccounts = viewModel::selectAccounts,
+        onSelectAccounts = viewModel::onSubmit,
         onSelectAnotherBank = viewModel::selectAnotherBank,
         onCloseClick = parentViewModel::onCloseWithConfirmationClick,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,

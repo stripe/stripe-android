@@ -22,11 +22,13 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
         fun multiSelect() = AccountPickerState(
             payload = Success(
                 AccountPickerState.Payload(
-                    selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
+                    skipAccountSelection = false,
                     accounts = partnerAccountList(),
+                    selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
                     accessibleData = accessibleCallout(),
                     selectedIds = setOf("id1"),
-                    skipAccountSelection = false
+                    singleAccount = false,
+                    institutionSkipAccountSelection = false
                 )
             )
         )
@@ -34,11 +36,13 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
         fun singleSelect() = AccountPickerState(
             payload = Success(
                 AccountPickerState.Payload(
-                    selectionMode = AccountPickerState.SelectionMode.RADIO,
+                    skipAccountSelection = false,
                     accounts = partnerAccountList(),
+                    selectionMode = AccountPickerState.SelectionMode.RADIO,
                     accessibleData = accessibleCallout(),
                     selectedIds = setOf("id1"),
-                    skipAccountSelection = false
+                    singleAccount = false,
+                    institutionSkipAccountSelection = false
                 )
             )
         )
@@ -46,11 +50,13 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
         fun dropdown() = AccountPickerState(
             payload = Success(
                 AccountPickerState.Payload(
-                    selectionMode = AccountPickerState.SelectionMode.DROPDOWN,
+                    skipAccountSelection = false,
                     accounts = partnerAccountList(),
+                    selectionMode = AccountPickerState.SelectionMode.DROPDOWN,
                     accessibleData = accessibleCallout(),
                     selectedIds = setOf("id1"),
-                    skipAccountSelection = false
+                    singleAccount = false,
+                    institutionSkipAccountSelection = false
                 )
             )
         )
