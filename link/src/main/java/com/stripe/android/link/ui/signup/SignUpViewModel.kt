@@ -9,7 +9,6 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
@@ -33,7 +32,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 
 /**
  * ViewModel that handles user sign up logic.
@@ -256,15 +254,12 @@ internal class SignUpViewModel @Inject constructor(
     ) : ViewModelProvider.Factory, NonFallbackInjectable {
 
         @Inject
-        lateinit var subComponentBuilderProvider:
-            Provider<SignUpViewModelSubcomponent.Builder>
+        lateinit var signUpViewModel: SignUpViewModel
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             injector.inject(this)
-            return subComponentBuilderProvider.get()
-                .build()
-                .signUpViewModel as T
+            return signUpViewModel as T
         }
     }
 

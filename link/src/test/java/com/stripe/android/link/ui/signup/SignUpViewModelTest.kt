@@ -12,7 +12,6 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.StripeIntentFixtures
@@ -45,7 +44,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
@@ -329,12 +327,7 @@ class SignUpViewModelTest {
 
     @Test
     fun `Factory gets initialized by Injector when Injector is available`() {
-        val mockBuilder = mock<SignUpViewModelSubcomponent.Builder>()
-        val mockSubComponent = mock<SignUpViewModelSubcomponent>()
         val vmToBeReturned = mock<SignUpViewModel>()
-
-        whenever(mockBuilder.build()).thenReturn(mockSubComponent)
-        whenever((mockSubComponent.signUpViewModel)).thenReturn(vmToBeReturned)
 
         val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
         val mockSavedStateRegistry = mock<SavedStateRegistry>()
@@ -347,13 +340,11 @@ class SignUpViewModelTest {
         val injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 val factory = injectable as SignUpViewModel.Factory
-                factory.subComponentBuilderProvider = Provider { mockBuilder }
+                factory.signUpViewModel = vmToBeReturned
             }
         }
 
-        val factory = SignUpViewModel.Factory(
-            injector,
-        )
+        val factory = SignUpViewModel.Factory(injector)
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(SignUpViewModel::class.java)
         assertThat(createdViewModel).isEqualTo(vmToBeReturned)
