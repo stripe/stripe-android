@@ -489,7 +489,7 @@ public final class com/stripe/android/link/ui/signup/SignUpViewModel_Factory_Mem
 	public static fun create (Ljavax/inject/Provider;)Ldagger/MembersInjector;
 	public fun injectMembers (Lcom/stripe/android/link/ui/signup/SignUpViewModel$Factory;)V
 	public synthetic fun injectMembers (Ljava/lang/Object;)V
-	public static fun injectSubComponentBuilderProvider (Lcom/stripe/android/link/ui/signup/SignUpViewModel$Factory;Ljavax/inject/Provider;)V
+	public static fun injectSignUpViewModel (Lcom/stripe/android/link/ui/signup/SignUpViewModel$Factory;Lcom/stripe/android/link/ui/signup/SignUpViewModel;)V
 }
 
 public final class com/stripe/android/link/ui/verification/ComposableSingletons$VerificationScreenKt {
