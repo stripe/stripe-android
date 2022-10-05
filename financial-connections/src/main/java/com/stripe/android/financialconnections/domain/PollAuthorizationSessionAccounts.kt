@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
@@ -32,15 +33,24 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
             retryCondition = { exception -> exception.shouldRetry }
         ) {
             try {
-                repository.postAuthorizationSessionAccounts(
+                val accounts = repository.postAuthorizationSessionAccounts(
                     clientSecret = configuration.financialConnectionsSessionClientSecret,
                     sessionId = manifest.activeAuthSession!!.id
                 )
+                if (accounts.data.isEmpty()) {
+                    throw NoAccountsAvailableException(
+                        institution = requireNotNull(manifest.activeInstitution),
+                        allowManualEntry = manifest.allowManualEntry,
+                        stripeException = APIException()
+                    )
+                } else {
+                    accounts
+                }
             } catch (@Suppress("SwallowedException") e: StripeException) {
                 throw e.toDomainException(
-                    requireNotNull(manifest.activeInstitution),
-                    ConsentTextBuilder.getBusinessName(manifest),
-                    manifest.allowManualEntry
+                    institution = requireNotNull(manifest.activeInstitution),
+                    businessName = ConsentTextBuilder.getBusinessName(manifest),
+                    allowManualEntry = manifest.allowManualEntry
                 )
             }
         }

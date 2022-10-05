@@ -168,7 +168,8 @@ internal fun NoAccountsAvailableErrorContent(
     ErrorContent(
         painterResource(id = R.drawable.stripe_ic_brandicon_institution),
         title = stringResource(
-            R.string.stripe_account_picker_error_no_account_available_title
+            R.string.stripe_account_picker_error_no_account_available_title,
+            exception.institution.name
         ),
         content = stringResource(
             R.string.stripe_account_picker_error_no_account_available_desc,
