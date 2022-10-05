@@ -113,7 +113,11 @@ class TestFieldPopulation {
         saveForFutureUseCheckboxVisible = false,
         useBrowser = Browser.Chrome,
         authorizationAction = AuthorizeAction.Authorize,
-        merchantCountryCode = "GB"
+        merchantCountryCode = "GB",
+        supportedPaymentMethods = listOf(
+            PaymentMethod.Type.Card.code,
+            PaymentMethod.Type.Bancontact.code,
+        ),
     )
 
     @Ignore("Testing of dropdowns is not yet supported")
@@ -168,11 +172,7 @@ class TestFieldPopulation {
 
     @Test
     fun testSinglePaymentMethodWithoutGooglePayAndKeyboardInput() {
-        testDriver.confirmNewOrGuestComplete(
-            bancontact.copy(
-                supportedPaymentMethods = listOf(PaymentMethod.Type.Bancontact.code)
-            )
-        ) {
+        testDriver.confirmNewOrGuestComplete(bancontact) {
             composeTestRule.waitForIdle()
             val node = composeTestRule.onNodeWithText("Full name")
             node.performClick()
