@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions", "LongMethod")
+
 package com.stripe.android.financialconnections.features.common
 
 import androidx.compose.foundation.Image
@@ -29,12 +31,15 @@ import com.stripe.android.financialconnections.features.consent.ConsentTextBuild
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.Permissions
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+
+private const val COLLAPSE_ACCOUNTS_THRESHOLD = 5
 
 @Composable
 internal fun AccessibleDataCallout(
@@ -48,31 +53,62 @@ internal fun AccessibleDataCallout(
 @Composable
 internal fun AccessibleDataCalloutWithAccounts(
     model: AccessibleDataCalloutModel,
+    institution: FinancialConnectionsInstitution,
     accounts: List<PartnerAccount>
 ) {
     AccessibleDataCalloutBox {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            accounts.forEach {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clip(RoundedCornerShape(4.dp))
+            if (accounts.count() >= COLLAPSE_ACCOUNTS_THRESHOLD) {
+                AccountRow(
+                    text = institution.name,
+                    subText = stringResource(
+                        id = R.string.stripe_success_infobox_accounts,
+                        accounts.count()
                     )
-                    Text(
-                        it.fullName,
-                        style = FinancialConnectionsTheme.typography.captionTightEmphasized,
-                        color = FinancialConnectionsTheme.colors.textSecondary
-                    )
-                }
+                )
+            } else {
+                accounts.forEach { AccountRow(it.fullName) }
             }
+
             Divider(color = FinancialConnectionsTheme.colors.backgroundBackdrop)
             AccessibleDataText(model)
+        }
+    }
+}
+
+@Composable
+private fun AccountRow(
+    text: String,
+    subText: String? = null
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(RoundedCornerShape(4.dp))
+            )
+            Text(
+                text,
+                style = FinancialConnectionsTheme.typography.captionTightEmphasized,
+                color = FinancialConnectionsTheme.colors.textSecondary
+            )
+        }
+        if (subText != null) {
+            Text(
+                subText,
+                style = FinancialConnectionsTheme.typography.captionTightEmphasized,
+                color = FinancialConnectionsTheme.colors.textSecondary
+            )
         }
     }
 }
@@ -90,6 +126,7 @@ private fun AccessibleDataText(
                     null -> R.string.data_accessible_callout_through_stripe_no_business
                     else -> R.string.data_accessible_callout_through_stripe
                 }
+
                 false -> when (model.businessName) {
                     null -> R.string.data_accessible_callout_no_business
                     else -> R.string.data_accessible_callout
@@ -154,6 +191,7 @@ private fun List<Permissions>.toStringRes(): List<Int> = mapNotNull {
         Permissions.OWNERSHIP -> R.string.data_accessible_type_ownership
         Permissions.PAYMENT_METHOD,
         Permissions.ACCOUNT_NUMBERS -> R.string.data_accessible_type_accountdetails
+
         Permissions.TRANSACTIONS -> R.string.data_accessible_type_transactions
         Permissions.UNKNOWN -> null
     }
@@ -199,6 +237,78 @@ internal fun AccessibleDataCalloutPreview() {
 
 @Preview
 @Composable
+@Suppress("LongMethod")
+internal fun AccessibleDataCalloutWithManyAccountsPreview() {
+    FinancialConnectionsTheme {
+        AccessibleDataCalloutWithAccounts(
+            AccessibleDataCalloutModel(
+                businessName = "My business",
+                permissions = listOf(
+                    Permissions.PAYMENT_METHOD,
+                    Permissions.BALANCES,
+                    Permissions.OWNERSHIP,
+                    Permissions.TRANSACTIONS
+                ),
+                isStripeDirect = true,
+                dataPolicyUrl = ""
+            ),
+            accounts = listOf(
+                PartnerAccount(
+                    authorization = "Authorization",
+                    institutionName = "Random bank",
+                    category = FinancialConnectionsAccount.Category.CASH,
+                    id = "id1",
+                    name = "Account 1 - no acct numbers",
+                    subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+                    supportedPaymentMethodTypes = emptyList()
+                ),
+                PartnerAccount(
+                    authorization = "Authorization",
+                    category = FinancialConnectionsAccount.Category.CASH,
+                    id = "id2",
+                    name = "Account 2 - no acct numbers",
+                    subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+                    supportedPaymentMethodTypes = emptyList()
+                ),
+                PartnerAccount(
+                    authorization = "Authorization",
+                    category = FinancialConnectionsAccount.Category.CASH,
+                    id = "id3",
+                    name = "Account 3 - no acct numbers",
+                    subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+                    supportedPaymentMethodTypes = emptyList()
+                ),
+                PartnerAccount(
+                    authorization = "Authorization",
+                    category = FinancialConnectionsAccount.Category.CASH,
+                    id = "id4",
+                    name = "Account 4 - no acct numbers",
+                    subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+                    supportedPaymentMethodTypes = emptyList()
+                ),
+                PartnerAccount(
+                    authorization = "Authorization",
+                    category = FinancialConnectionsAccount.Category.CASH,
+                    id = "id5",
+                    name = "Account 5 - no acct numbers",
+                    subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+                    supportedPaymentMethodTypes = emptyList()
+                )
+            ),
+            institution = FinancialConnectionsInstitution(
+                id = "id",
+                name = "name",
+                url = "url",
+                featured = true,
+                featuredOrder = null,
+                mobileHandoffCapable = false
+            )
+        )
+    }
+}
+
+@Preview
+@Composable
 internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
     FinancialConnectionsTheme {
         AccessibleDataCalloutWithAccounts(
@@ -234,6 +344,14 @@ internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                     supportedPaymentMethodTypes = emptyList()
                 )
+            ),
+            institution = FinancialConnectionsInstitution(
+                id = "id",
+                name = "name",
+                url = "url",
+                featured = true,
+                featuredOrder = null,
+                mobileHandoffCapable = false
             )
         )
     }
@@ -267,6 +385,14 @@ internal fun AccessibleDataCalloutWithOneAccountPreview() {
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
                 )
+            ),
+            institution = FinancialConnectionsInstitution(
+                id = "id",
+                name = "name",
+                url = "url",
+                featured = true,
+                featuredOrder = null,
+                mobileHandoffCapable = false
             )
         )
     }

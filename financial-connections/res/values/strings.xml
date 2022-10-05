@@ -67,7 +67,6 @@
     <string name="data_accessible_type_balances">balances</string>
     <string name="data_accessible_type_transactions">transactions</string>
     <string name="data_accessible_type_ownership">account ownership details</string>
-    <string name="data_accessible_callout_connected_accounts">%1$s - %2$s accounts</string>
     <string name="success_pane_done">Done</string>
     <string name="success_pane_disconnect">You can <annotation clickable="disconnect">disconnect your account any time.</annotation></string>
     <string name="stripe_prepane_partner_callout">Stripe works with partners like %1$s to reliably offer access to thousands of financial institutions. <annotation clickable="privacy_center">Learn more</annotation></string>
@@ -120,5 +119,6 @@
     <string name="stripe_close_dialog_confirm">Yes, cancel</string>
     <string name="stripe_close_dialog_back">Back</string>
     <string name="stripe_error_cta_close">Close</string>
+    <string name="stripe_success_infobox_accounts">%1$d accounts</string>
 </resources>
 

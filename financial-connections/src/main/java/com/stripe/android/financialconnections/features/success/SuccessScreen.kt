@@ -24,6 +24,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutWithAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.TextResource
@@ -49,7 +50,8 @@ internal fun SuccessScreen() {
             onDoneClick = viewModel::onDoneClick,
             onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
             onCloseClick = parentViewModel::onCloseWithConfirmationClick,
-            showLinkAnotherAccount = payload.showLinkAnotherAccount
+            showLinkAnotherAccount = payload.showLinkAnotherAccount,
+            institution = payload.institution
         )
     }
 }
@@ -60,6 +62,7 @@ private fun SuccessContent(
     accessibleDataModel: AccessibleDataCalloutModel,
     disconnectUrl: String,
     accounts: List<PartnerAccount>,
+    institution: FinancialConnectionsInstitution,
     loading: Boolean,
     onDoneClick: () -> Unit,
     onLinkAnotherAccountClick: () -> Unit,
@@ -100,7 +103,8 @@ private fun SuccessContent(
             )
             AccessibleDataCalloutWithAccounts(
                 model = accessibleDataModel,
-                accounts = accounts
+                accounts = accounts,
+                institution = institution,
             )
             AnnotatedText(
                 text = TextResource.StringId(R.string.success_pane_disconnect),
@@ -187,7 +191,15 @@ internal fun SuccessScreenPreview() {
             onDoneClick = {},
             onLinkAnotherAccountClick = {},
             showLinkAnotherAccount = true,
-            onCloseClick = {}
+            onCloseClick = {},
+            institution = FinancialConnectionsInstitution(
+                id = "id",
+                name = "name",
+                url = "url",
+                featured = true,
+                featuredOrder = null,
+                mobileHandoffCapable = false
+            )
         )
     }
 }
