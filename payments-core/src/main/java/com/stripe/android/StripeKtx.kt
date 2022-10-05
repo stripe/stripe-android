@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.content.Intent
+import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -21,6 +22,7 @@ import com.stripe.android.model.CvcTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
 import com.stripe.android.model.RadarSession
@@ -954,6 +956,35 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
     stripeRepository.verifySetupIntentWithMicrodeposits(
         clientSecret = clientSecret,
         descriptorCode = descriptorCode,
+        requestOptions = ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId
+        )
+    )
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Throws(
+    AuthenticationException::class,
+    InvalidRequestException::class,
+    APIConnectionException::class,
+    APIException::class
+)
+suspend fun Stripe.getPaymentMethodMessaging(
+    paymentMethods: List<String>,
+    amount: Int,
+    currency: String,
+    country: String,
+    locale: String,
+    logoColor: String
+): PaymentMethodMessage? = runApiRequest {
+    return stripeRepository.getPaymentMethodMessaging(
+        paymentMethods = paymentMethods,
+        amount = amount,
+        currency = currency,
+        country = country,
+        locale = locale,
+        logoColor = logoColor,
         requestOptions = ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId

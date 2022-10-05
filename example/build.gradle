@@ -31,6 +31,7 @@ def getAccountId() {
 
 dependencies {
     implementation project(':payments')
+    implementation project(':payments-ui-core')
     implementation project(':financial-connections')
     implementation project(':stripe-ui-core')
 

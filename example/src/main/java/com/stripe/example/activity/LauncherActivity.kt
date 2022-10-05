@@ -165,11 +165,15 @@ class LauncherActivity : AppCompatActivity() {
                 activity.getString(R.string.manual_us_bank_account_example),
                 ManualUSBankAccountPaymentMethodActivity::class.java
             ),
-            // This is for internal use so as not to confuse the user.
             Item(
-                "StripeImage Example",
-                StripeImageActivity::class.java
-            )
+                activity.getString(R.string.messaging_element_example),
+                PaymentMethodMessagingExampleActivity::class.java
+            ),
+            // This is for internal use so as not to confuse the user.
+//            Item(
+//                "StripeImage Example",
+//                StripeImageActivity::class.java
+//            )
         )
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ExamplesViewHolder {

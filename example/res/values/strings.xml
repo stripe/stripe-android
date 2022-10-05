@@ -33,6 +33,9 @@
     <string name="netbanking_example">Netbanking Confirmation Example</string>
     <string name="manual_us_bank_account_example">"Manual US Bank Account Example"</string>
     <string name="card_brands">Card Brands</string>
+    <string name="messaging_element_example">Messaging Element Example</string>
+    <string name="messaging_element_example_view">Messaging Element View Example</string>
+    <string name="messaging_element_example_compose">Messaging Element Compose Example</string>
 
     <string name="select_add_card">Select or add card</string>
     <string name="selected_card">Selected card:</string>

@@ -14,6 +14,7 @@ import com.stripe.android.R
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.browser.BrowserCapabilities
 import com.stripe.android.core.browser.BrowserCapabilitiesSupplier
+import com.stripe.android.core.browser.BrowserLauncher
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -39,37 +40,13 @@ internal class StripeBrowserLauncherViewModel(
     ): Intent {
         val shouldUseCustomTabs = browserCapabilities == BrowserCapabilities.CustomTabs
         logCapabilities(shouldUseCustomTabs)
-
-        val url = Uri.parse(args.url)
-        return if (shouldUseCustomTabs) {
-            val customTabColorSchemeParams = args.statusBarColor?.let { statusBarColor ->
-                CustomTabColorSchemeParams.Builder()
-                    .setToolbarColor(statusBarColor)
-                    .build()
-            }
-
-            // use Custom Tabs
-            val customTabsIntent = CustomTabsIntent.Builder()
-                .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-                .also {
-                    if (customTabColorSchemeParams != null) {
-                        it.setDefaultColorSchemeParams(customTabColorSchemeParams)
-                    }
-                }
-                .build()
-            customTabsIntent.intent.data = url
-
-            Intent.createChooser(
-                customTabsIntent.intent,
-                intentChooserTitle
-            )
-        } else {
-            // use default device browser
-            Intent.createChooser(
-                Intent(Intent.ACTION_VIEW, url),
-                intentChooserTitle
-            )
-        }
+        val launcher = BrowserLauncher(
+            capabilities = browserCapabilities,
+            statusBarColor = args.statusBarColor,
+            url = args.url,
+            title = intentChooserTitle
+        )
+        return launcher.createLaunchIntent()
     }
 
     fun getResultIntent(args: PaymentBrowserAuthContract.Args): Intent {

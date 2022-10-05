@@ -5,7 +5,6 @@
     <ID>ComplexCondition:OTPElementUI.kt$index != 0 &amp;&amp; event.type == KeyEventType.KeyDown &amp;&amp; event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &amp;&amp; value.isEmpty()</ID>
     <ID>ComplexMethod:FormItemSpec.kt$FormItemSpecSerializer$override fun selectDeserializer(element: JsonElement): DeserializationStrategy&lt;out FormItemSpec></ID>
     <ID>ComplexMethod:FormUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun FormUI( hiddenIdentifiers: Set&lt;IdentifierSpec>, enabled: Boolean, elements: List&lt;FormElement>?, lastTextFieldIdentifier: IdentifierSpec?, loadingComposable: @Composable ColumnScope.() -> Unit, modifier: Modifier = Modifier )</ID>
-    <ID>ComplexMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
     <ID>ComplexMethod:IdentifierSpec.kt$IdentifierSpec.Companion$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) fun get(value: String)</ID>
     <ID>ComplexMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod(sharedDataSpec: SharedDataSpec)</ID>
     <ID>ComplexMethod:TextFieldUI.kt$@Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
@@ -26,7 +25,6 @@
     <ID>ImplicitDefaultLocale:DateConfigTest.kt$DateConfigTest$String.format( "%d%d", get1BasedCurrentMonth(), Calendar.getInstance().get(Calendar.YEAR) % 100 )</ID>
     <ID>ImplicitDefaultLocale:DateConfigTest.kt$DateConfigTest$String.format( "%d%d", previousMonth, Calendar.getInstance().get(Calendar.YEAR) % 100 )</ID>
     <ID>LongMethod:DropdownFieldUI.kt$@Composable internal fun DropDown( controller: DropdownFieldController, enabled: Boolean, modifier: Modifier = Modifier )</ID>
-    <ID>LongMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
     <ID>LongMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod(sharedDataSpec: SharedDataSpec)</ID>
     <ID>LongMethod:Menu.kt$@Suppress("ModifierParameter") @Composable internal fun DropdownMenuContent( expandedStates: MutableTransitionState&lt;Boolean>, transformOriginState: MutableState&lt;TransformOrigin>, initialFirstVisibleItemIndex: Int, modifier: Modifier = Modifier, content: LazyListScope.() -> Unit )</ID>
     <ID>LongMethod:OTPElementUI.kt$@OptIn(ExperimentalMaterialApi::class) @Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun OTPElementUI( enabled: Boolean, element: OTPElement, modifier: Modifier = Modifier, colors: OTPElementColors = OTPElementColors( selectedBorder = MaterialTheme.colors.primary, placeholder = MaterialTheme.paymentsColors.placeholderText ), focusRequester: FocusRequester = remember { FocusRequester() } )</ID>
@@ -67,15 +65,14 @@
     <ID>MagicNumber:DropdownFieldUI.kt$.8f</ID>
     <ID>MagicNumber:DropdownFieldUI.kt$.9f</ID>
     <ID>MagicNumber:DropdownFieldUI.kt$8.9f</ID>
-    <ID>MagicNumber:Html.kt$0.1f</ID>
     <ID>MagicNumber:IbanConfig.kt$IbanConfig$10</ID>
     <ID>MagicNumber:IbanConfig.kt$IbanConfig$4</ID>
     <ID>MagicNumber:LpmRepository.kt$LpmRepository$20</ID>
     <ID>MagicNumber:Menu.kt$0.8f</ID>
+    <ID>MagicNumber:PaymentMethodMessagingView.kt$0x33787880</ID>
     <ID>MagicNumber:PaymentsTheme.kt$0.15</ID>
     <ID>MagicNumber:PaymentsTheme.kt$0.32</ID>
     <ID>MagicNumber:PaymentsTheme.kt$3</ID>
-    <ID>MagicNumber:PhoneNumberController.kt$PhoneNumberController.Companion$4</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$3</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$5</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$6</ID>
@@ -105,7 +102,6 @@
     <ID>ReturnCount:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
     <ID>ReturnCount:IbanConfig.kt$IbanConfig$override fun determineState(input: String): TextFieldState</ID>
     <ID>ReturnCount:OTPController.kt$OTPController$fun onValueChanged(index: Int, text: String): Int</ID>
-    <ID>ReturnCount:PhoneNumberController.kt$PhoneNumberController.Companion$fun createPhoneNumberController( initialValue: String = "", initiallySelectedCountryCode: String? = null ): PhoneNumberController</ID>
     <ID>ReturnCount:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>
     <ID>ReturnCount:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
     <ID>SpreadOperator:BsbElementUI.kt$( it.errorMessage, *args )</ID>
@@ -115,7 +111,6 @@
     <ID>ThrowingExceptionsWithoutMessageOrCause:TransformAddressToElement.kt$IllegalArgumentException()</ID>
     <ID>TooGenericExceptionCaught:LpmSerializer.kt$LpmSerializer$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PlacesClientProxy.kt$DefaultPlacesClientProxy$e: Exception</ID>
-    <ID>TooManyFunctions:LpmRepository.kt$LpmRepository</ID>
     <ID>TooManyFunctions:PaymentsTheme.kt$com.stripe.android.ui.core.PaymentsTheme.kt</ID>
     <ID>UnnecessaryAbstractClass:FormControllerModule.kt$FormControllerModule$FormControllerModule</ID>
     <ID>UnnecessaryAbstractClass:ResourceRepositoryModule.kt$ResourceRepositoryModule$ResourceRepositoryModule</ID>

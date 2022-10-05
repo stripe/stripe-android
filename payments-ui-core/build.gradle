@@ -6,6 +6,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
 dependencies {
     implementation project(":stripe-core")
+    implementation project(":stripe-ui-core")
     implementation project(":payments-core")
     implementation project(":stripe-ui-core")
     compileOnly project(":stripecardscan")
@@ -28,6 +29,7 @@ dependencies {
     implementation "androidx.compose.material:material-icons-core:$androidxComposeVersion"
     // Integration with activities
     implementation "androidx.activity:activity-compose:$androidxActivityVersion"
+    implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
     implementation "com.google.accompanist:accompanist-flowlayout:$accompanistVersion"

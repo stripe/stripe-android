@@ -58,6 +58,7 @@ import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
@@ -79,6 +80,7 @@ import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.IssuingCardPinJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.model.parsers.PaymentMethodMessageJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceForPaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceForSetupIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceJsonParser
@@ -1689,6 +1691,35 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override suspend fun getPaymentMethodMessaging(
+        paymentMethods: List<String>,
+        amount: Int,
+        currency: String,
+        country: String,
+        locale: String,
+        logoColor: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentMethodMessage? {
+        return fetchStripeModel(
+            apiRequestFactory.createGet(
+                url = getPaymentMethodMessagingUrl(),
+                options = requestOptions,
+                params = mapOf<String, Any>(
+                    "amount" to amount,
+                    "client" to "android",
+                    "country" to country,
+                    "currency" to currency,
+                    "locale" to locale,
+                ) + paymentMethods.mapIndexed { index, paymentMethod ->
+                    Pair("payment_methods[${index}]", paymentMethod)
+                }
+            ),
+            PaymentMethodMessageJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
     /**
      * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
      */
@@ -2227,6 +2258,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 "setup_intents/%s/verify_microdeposits",
                 clientSecret
             )
+        }
+
+        /**
+         * @return `https://ppm.stripe.com/content`
+         */
+        @VisibleForTesting
+        @JvmSynthetic
+        internal fun getPaymentMethodMessagingUrl(): String {
+            return "https://ppm.stripe.com/content"
         }
 
         /**
