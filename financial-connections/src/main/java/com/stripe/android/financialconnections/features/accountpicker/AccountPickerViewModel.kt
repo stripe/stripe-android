@@ -8,6 +8,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
@@ -23,6 +24,7 @@ import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.ui.TextResource
 import javax.inject.Inject
 
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -70,7 +72,9 @@ internal class AccountPickerViewModel @Inject constructor(
                 ),
                 selectedIds = preselectedIds,
                 singleAccount = manifest.singleAccount,
-                institutionSkipAccountSelection = activeAuthSession.institutionSkipAccountSelection == true
+                institutionSkipAccountSelection = activeAuthSession.institutionSkipAccountSelection == true,
+                businessName = manifest.businessName,
+                stripeDirect = manifest.isStripeDirect ?: false
             )
         }.execute { copy(payload = it) }
     }
@@ -217,8 +221,27 @@ internal data class AccountPickerState(
         val accessibleData: AccessibleDataCalloutModel,
         val selectedIds: Set<String>,
         val singleAccount: Boolean,
+        val stripeDirect: Boolean,
+        val businessName: String?,
         val institutionSkipAccountSelection: Boolean
-    )
+    ) {
+
+        val subtitle: TextResource?
+            get() = when {
+                selectionMode != SelectionMode.DROPDOWN || singleAccount.not() -> null
+                stripeDirect -> TextResource.StringId(
+                    R.string.stripe_accountpicker_singleaccount_description_withstripe
+                )
+                businessName != null -> TextResource.StringId(
+                    R.string.stripe_accountpicker_singleaccount_description,
+                    listOf(businessName)
+                )
+
+                else -> TextResource.StringId(
+                    R.string.stripe_accountpicker_singleaccount_description_nobusinessname
+                )
+            }
+    }
 
     data class PartnerAccountUI(
         val account: PartnerAccount,

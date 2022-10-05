@@ -28,7 +28,9 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     accessibleData = accessibleCallout(),
                     selectedIds = setOf("id1"),
                     singleAccount = false,
-                    institutionSkipAccountSelection = false
+                    institutionSkipAccountSelection = false,
+                    businessName = "Random business",
+                    stripeDirect = false,
                 )
             )
         )
@@ -42,7 +44,9 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     accessibleData = accessibleCallout(),
                     selectedIds = setOf("id1"),
                     singleAccount = false,
-                    institutionSkipAccountSelection = false
+                    institutionSkipAccountSelection = false,
+                    businessName = "Random business",
+                    stripeDirect = false,
                 )
             )
         )
@@ -55,8 +59,10 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     selectionMode = AccountPickerState.SelectionMode.DROPDOWN,
                     accessibleData = accessibleCallout(),
                     selectedIds = setOf("id1"),
-                    singleAccount = false,
-                    institutionSkipAccountSelection = false
+                    singleAccount = true,
+                    institutionSkipAccountSelection = true,
+                    businessName = "Random business",
+                    stripeDirect = true,
                 )
             )
         )

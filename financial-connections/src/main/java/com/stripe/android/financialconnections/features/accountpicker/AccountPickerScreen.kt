@@ -1,4 +1,4 @@
-@file:Suppress("TooManyFunctions")
+@file:Suppress("TooManyFunctions", "LongMethod")
 
 package com.stripe.android.financialconnections.features.accountpicker
 
@@ -63,6 +63,7 @@ import com.stripe.android.financialconnections.features.common.NoSupportedPaymen
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -116,11 +117,13 @@ private fun AccountPickerContent(
                     submitEnabled = state.submitEnabled,
                     submitLoading = state.submitLoading,
                     accounts = payload().accounts,
+                    subtitle = payload().subtitle,
                     selectedIds = state.selectedIds,
                     onAccountClicked = onAccountClicked,
                     onSelectAccounts = onSelectAccounts,
                     selectionMode = payload().selectionMode,
-                    accessibleDataCalloutModel = payload().accessibleData
+                    accessibleDataCalloutModel = payload().accessibleData,
+
                 )
             }
 
@@ -130,12 +133,14 @@ private fun AccountPickerContent(
                         error,
                         onSelectAnotherBank
                     )
+
                 is NoAccountsAvailableException -> NoAccountsAvailableErrorContent(
                     exception = error,
                     onEnterDetailsManually = onEnterDetailsManually,
                     onTryAgain = onLoadAccountsAgain,
                     onSelectAnotherBank = onSelectAnotherBank
                 )
+
                 else -> UnclassifiedErrorContent(
                     error = error,
                     onCloseFromErrorClick = onCloseFromErrorClick
@@ -163,7 +168,8 @@ private fun AccountPickerLoaded(
     selectionMode: SelectionMode,
     selectedIds: Set<String>,
     onAccountClicked: (PartnerAccount) -> Unit,
-    onSelectAccounts: () -> Unit
+    onSelectAccounts: () -> Unit,
+    subtitle: TextResource?
 ) {
     Column(
         Modifier
@@ -180,6 +186,15 @@ private fun AccountPickerLoaded(
                 text = stringResource(R.string.stripe_account_picker_multiselect_account),
                 style = FinancialConnectionsTheme.typography.subtitle
             )
+            Spacer(modifier = Modifier.size(16.dp))
+            subtitle?.let {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = it.toText().toString(),
+                    style = FinancialConnectionsTheme.typography.body
+                )
+            }
             when (selectionMode) {
                 SelectionMode.DROPDOWN -> DropdownContent(
                     accounts = accounts,

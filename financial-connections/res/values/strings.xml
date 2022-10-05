@@ -124,6 +124,9 @@
     <string name="stripe_accounts_error_desc_retry">Please select another bank or try again.</string>
     <string name="stripe_accounts_error_desc_manualentry">Please enter your bank details manually or select another bank.</string>
     <string name="stripe_accounts_error_desc_no_retry">Please select another bank.</string>
+    <string name="stripe_accountpicker_singleaccount_description_withstripe">Stripe only needs one account at this time.</string>
+    <string name="stripe_accountpicker_singleaccount_description">%1$s only needs one account at this time.</string>
+    <string name="stripe_accountpicker_singleaccount_description_nobusinessname">This merchant only needs one account at this time.</string>
     <plurals name="stripe_success_desc">
         <item quantity="zero" />
         <item quantity="one">Your account was successfully linked to %1$s through Stripe.</item>
