@@ -11,6 +11,7 @@ import com.stripe.android.camera.framework.image.toJpeg
 import com.stripe.android.camera.framework.image.toWebP
 import com.stripe.android.camera.framework.util.scaleAndCenterWithin
 import com.stripe.android.stripecardscan.framework.util.ImageFormat
+import com.stripe.android.stripecardscan.framework.util.ImageSettings
 
 /**
  * Convert a [Bitmap] to an [MLImage] for use in ML models.
@@ -27,10 +28,10 @@ internal fun Bitmap.toMLImage(mean: ImageTransformValues, std: ImageTransformVal
 
 internal fun Bitmap.toImageFormat(
     format: ImageFormat,
-    imageSettings: Pair<Double, Size>
+    imageSettings: ImageSettings
 ): Pair<ByteArray, Rect> {
     // Size and crop the image per the settings.
-    val maxImageSize = imageSettings.second
+    val maxImageSize = imageSettings.imageSize
 
     val cropRect = maxImageSize
         .scaleAndCenterWithin(this.size())
@@ -40,7 +41,7 @@ internal fun Bitmap.toImageFormat(
         .constrainToSize(maxImageSize)
 
     // Now convert formats with the compression ratio from settings.
-    val compressionRatio = imageSettings.first
+    val compressionRatio = imageSettings.compressionRatio
 
     // Convert to 0..100
     val convertedRatio = compressionRatio.times(100.0).toInt()

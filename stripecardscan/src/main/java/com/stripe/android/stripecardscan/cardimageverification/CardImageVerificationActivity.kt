@@ -233,7 +233,7 @@ internal open class CardImageVerificationActivity :
                     cameraAdapter.unbindFromLifecycle(this@CardImageVerificationActivity)
                     resultListener.cardReadyForVerification(
                         pan = result.pan,
-                        frames = scanFlow.selectCompletionLoopFrames(result.savedFrames)
+                        frames = scanFlow.selectCompletionLoopFrames(result.savedFrames, imageConfigs)
                     )
                 }.let { }
             }

@@ -38,7 +38,8 @@ internal enum class CardImageVerificationDetailsFormat {
 @Serializable
 internal data class CardImageVerificationDetailsImageSettings(
     @SerialName("compression_ratio") val compressionRatio: Double? = null,
-    @SerialName("image_size") val imageSize: DoubleArray? = null
+    @SerialName("image_size") val imageSize: List<Double>? = null,
+    @SerialName("image_count") val imageCount: Int? = null
 )
 
 @Serializable
@@ -52,5 +53,5 @@ internal data class CardImageVerificationDetailsAcceptedImageConfigs(
             CardImageVerificationDetailsImageSettings?>? = null,
 
     @SerialName("preferred_formats")
-    val preferredFormats: Array<CardImageVerificationDetailsFormat>? = null
+    val preferredFormats: List<CardImageVerificationDetailsFormat>? = null
 )
