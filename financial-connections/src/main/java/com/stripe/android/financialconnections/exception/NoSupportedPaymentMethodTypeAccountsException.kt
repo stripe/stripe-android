@@ -4,6 +4,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 
 internal class NoSupportedPaymentMethodTypeAccountsException(
+    val allowManualEntry: Boolean,
     val accountsCount: Int,
     val institution: FinancialConnectionsInstitution,
     val merchantName: String,

@@ -126,14 +126,15 @@ private fun AccountPickerContent(
                     selectionMode = payload().selectionMode,
                     accessibleDataCalloutModel = payload().accessibleData,
 
-                )
+                    )
             }
 
             is Fail -> when (val error = payload.error) {
                 is NoSupportedPaymentMethodTypeAccountsException ->
                     NoSupportedPaymentMethodTypeAccountsErrorContent(
-                        error,
-                        onSelectAnotherBank
+                        exception = error,
+                        onSelectAnotherBank = onSelectAnotherBank,
+                        onEnterDetailsManually = onEnterDetailsManually
                     )
 
                 is NoAccountsAvailableException -> NoAccountsAvailableErrorContent(

@@ -155,7 +155,15 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
         primaryCta = Pair(
             stringResource(R.string.stripe_error_cta_select_another_bank),
             onSelectAnotherBank
-        )
+        ),
+        secondaryCta = if (exception.allowManualEntry) {
+            Pair(
+                stringResource(R.string.stripe_error_cta_manual_entry),
+                onEnterDetailsManually
+            )
+        } else {
+            null
+        }
     )
 }
 

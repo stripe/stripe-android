@@ -68,6 +68,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
         when {
             stripeError?.extraFields?.get("reason") == "no_supported_payment_method_type_accounts_found" ->
                 NoSupportedPaymentMethodTypeAccountsException(
+                    allowManualEntry = allowManualEntry,
                     accountsCount = stripeError?.extraFields?.get("total_accounts_count")?.toInt()
                         ?: 0,
                     institution = institution,
