@@ -33,7 +33,6 @@ import com.stripe.android.test.core.IntentType
 import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
-import com.stripe.android.ui.core.elements.AdministrativeAreaConfig
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import java.util.Locale
 

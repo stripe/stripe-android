@@ -40,5 +40,6 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent> {
 
     override fun onLauncherInvalidated() {
         pollingLauncher?.unregister()
+        pollingLauncher = null
     }
 }

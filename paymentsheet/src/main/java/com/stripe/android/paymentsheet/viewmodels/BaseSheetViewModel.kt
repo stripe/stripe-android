@@ -38,7 +38,6 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
-import com.stripe.android.paymentsheet.paymentdatacollection.ComposeFormDataCollectionFragment
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -127,16 +126,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     internal val headerText = MutableLiveData<String>()
     internal val googlePayDividerVisibilility: MutableLiveData<Boolean> = MutableLiveData(false)
-
-    internal var addFragmentSelectedLPM
-        get() = requireNotNull(
-            lpmResourceRepository.getRepository().fromCode(
-                savedStateHandle.get<PaymentMethodCode>(
-                    SAVE_SELECTED_ADD_LPM
-                ) ?: newPaymentSelection?.paymentMethodCreateParams?.typeCode
-            ) ?: supportedPaymentMethods.first()
-        )
-        set(value) = savedStateHandle.set(SAVE_SELECTED_ADD_LPM, value.code)
 
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
@@ -409,15 +398,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         updateBelowButtonText(null)
     }
 
-    fun getAddFragmentSelectedLpm() =
-        savedStateHandle.getLiveData(
-            SAVE_SELECTED_ADD_LPM,
-            newPaymentSelection?.paymentMethodCreateParams?.typeCode
-        ).map {
-            lpmResourceRepository.getRepository().fromCode(it)
-                ?: supportedPaymentMethods.first()
-        }
-
     fun setEditing(isEditing: Boolean) {
         editing.value = isEditing
     }
@@ -617,7 +597,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         internal const val SAVE_STRIPE_INTENT = "stripe_intent"
         internal const val SAVE_PAYMENT_METHODS = "customer_payment_methods"
         internal const val SAVE_AMOUNT = "amount"
-        internal const val SAVE_SELECTED_ADD_LPM = "selected_add_lpm"
         internal const val LPM_SERVER_SPEC_STRING = "lpm_server_spec_string"
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_SAVED_SELECTION = "saved_selection"
