@@ -205,7 +205,10 @@ internal fun LinkInlineSignup(
                         visible = expanded
                     ) {
                         Column {
-                            Divider()
+                            Divider(
+                                color =
+                                MaterialTheme.paymentsColors.componentBorder.copy(alpha = 0.1f)
+                            )
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -270,7 +273,10 @@ internal fun LinkInlineSignup(
                                     }
                                 }
                             }
-                            Divider()
+                            Divider(
+                                color =
+                                MaterialTheme.paymentsColors.componentBorder.copy(alpha = 0.1f)
+                            )
                             Row(modifier = Modifier.padding(16.dp)) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_link_logo),
