@@ -215,7 +215,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     ): Boolean {
         return sheetViewModel.isLinkEnabled.value == true &&
             sheetViewModel.stripeIntent.value
-                ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
+            ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
             paymentMethodCode == PaymentMethod.Type.Card.code &&
             (
                 linkAccountStatus in setOf(
