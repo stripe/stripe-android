@@ -120,5 +120,15 @@
     <string name="stripe_close_dialog_back">Back</string>
     <string name="stripe_error_cta_close">Close</string>
     <string name="stripe_success_infobox_accounts">%1$d accounts</string>
+    <plurals name="stripe_success_desc">
+        <item quantity="zero" />
+        <item quantity="one">Your account was successfully linked to %1$s through Stripe.</item>
+        <item quantity="other">Your accounts were successfully linked to %1 through Stripe.</item>
+    </plurals>
+    <plurals name="stripe_success_desc_no_business">
+        <item quantity="zero" />
+        <item quantity="one">Your account was successfully linked through Stripe.</item>
+        <item quantity="other">Your accounts were successfully linked through Stripe.</item>
+    </plurals>
 </resources>
 

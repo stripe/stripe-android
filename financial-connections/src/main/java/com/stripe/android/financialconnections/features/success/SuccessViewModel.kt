@@ -42,6 +42,7 @@ internal class SuccessViewModel @Inject constructor(
                 accessibleData = AccessibleDataCalloutModel.fromManifest(manifest),
                 accounts = getAuthorizationSessionAccounts(manifest.activeAuthSession!!.id),
                 institution = manifest.activeInstitution!!,
+                businessName = manifest.businessName,
                 disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest),
                 showLinkAnotherAccount = manifest.singleAccount.not() &&
                     manifest.disableLinkMoreAccounts.not() &&
@@ -103,6 +104,7 @@ internal data class SuccessState(
         val showLinkAnotherAccount: Boolean,
         val institution: FinancialConnectionsInstitution,
         val accounts: PartnerAccountsList,
-        val disconnectUrl: String
+        val disconnectUrl: String,
+        val businessName: String?
     )
 }
