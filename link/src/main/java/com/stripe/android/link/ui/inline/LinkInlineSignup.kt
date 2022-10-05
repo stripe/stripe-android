@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -28,7 +30,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +43,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
@@ -196,69 +202,85 @@ internal fun LinkInlineSignup(
                     }
 
                     AnimatedVisibility(
-                        visible = expanded,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        visible = expanded
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp)
-                        ) {
-                            EmailCollectionSection(
-                                enabled = enabled,
-                                emailController = emailController,
-                                signUpState = signUpState,
-                                focusRequester = focusRequester
-                            )
-
-                            AnimatedVisibility(
-                                visible = signUpState != SignUpState.InputtingPhoneOrName &&
-                                    errorMessage != null
+                        Column {
+                            Divider()
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
                             ) {
-                                ErrorText(
-                                    text = errorMessage?.getMessage(LocalContext.current.resources)
-                                        .orEmpty(),
-                                    modifier = Modifier.fillMaxWidth()
+                                EmailCollectionSection(
+                                    enabled = enabled,
+                                    emailController = emailController,
+                                    signUpState = signUpState,
+                                    focusRequester = focusRequester
                                 )
-                            }
 
-                            AnimatedVisibility(
-                                visible = signUpState == SignUpState.InputtingPhoneOrName
-                            ) {
-                                Column(modifier = Modifier.fillMaxWidth()) {
-                                    PhoneNumberCollectionSection(
-                                        enabled = enabled,
-                                        phoneNumberController = phoneNumberController,
-                                        requestFocusWhenShown =
-                                        phoneNumberController.initialPhoneNumber.isEmpty(),
-                                        imeAction = if (requiresNameCollection) {
-                                            ImeAction.Next
-                                        } else {
-                                            ImeAction.Done
-                                        }
-                                    )
-
-                                    if (requiresNameCollection) {
-                                        TextFieldSection(
-                                            textFieldController = nameController,
-                                            imeAction = ImeAction.Done,
-                                            enabled = enabled
-                                        )
-                                    }
-
-                                    AnimatedVisibility(visible = errorMessage != null) {
-                                        ErrorText(
-                                            text = errorMessage?.getMessage(LocalContext.current.resources)
-                                                .orEmpty(),
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
-                                    }
-
-                                    LinkTerms(
-                                        modifier = Modifier.padding(top = 8.dp),
-                                        textAlign = TextAlign.Left
+                                AnimatedVisibility(
+                                    visible = signUpState != SignUpState.InputtingPhoneOrName &&
+                                        errorMessage != null
+                                ) {
+                                    ErrorText(
+                                        text = errorMessage
+                                            ?.getMessage(LocalContext.current.resources)
+                                            .orEmpty(),
+                                        modifier = Modifier.fillMaxWidth()
                                     )
                                 }
+
+                                AnimatedVisibility(
+                                    visible = signUpState == SignUpState.InputtingPhoneOrName
+                                ) {
+                                    Column(modifier = Modifier.fillMaxWidth()) {
+                                        PhoneNumberCollectionSection(
+                                            enabled = enabled,
+                                            phoneNumberController = phoneNumberController,
+                                            requestFocusWhenShown =
+                                            phoneNumberController.initialPhoneNumber.isEmpty(),
+                                            imeAction = if (requiresNameCollection) {
+                                                ImeAction.Next
+                                            } else {
+                                                ImeAction.Done
+                                            }
+                                        )
+
+                                        if (requiresNameCollection) {
+                                            TextFieldSection(
+                                                textFieldController = nameController,
+                                                imeAction = ImeAction.Done,
+                                                enabled = enabled
+                                            )
+                                        }
+
+                                        AnimatedVisibility(visible = errorMessage != null) {
+                                            ErrorText(
+                                                text = errorMessage
+                                                    ?.getMessage(LocalContext.current.resources)
+                                                    .orEmpty(),
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
+
+                                        LinkTerms(
+                                            modifier = Modifier.padding(top = 8.dp),
+                                            textAlign = TextAlign.Left
+                                        )
+                                    }
+                                }
+                            }
+                            Divider()
+                            Row(modifier = Modifier.padding(16.dp)) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_link_logo),
+                                    contentDescription = stringResource(id = R.string.link),
+                                    modifier = Modifier
+                                        .semantics {
+                                            testTag = "LinkLogoIcon"
+                                        },
+                                    tint = MaterialTheme.linkColors.inlineLinkLogo
+                                )
                             }
                         }
                     }
