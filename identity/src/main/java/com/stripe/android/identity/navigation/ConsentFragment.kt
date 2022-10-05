@@ -74,6 +74,7 @@ internal class ConsentFragment(
                 onError = this@ConsentFragment::logErrorAndNavigateToError,
                 onConsentAgreed = this@ConsentFragment::agreeConsentAndPost,
                 onConsentDeclined = this@ConsentFragment::declineConsentAndPost
+            fdas
             )
         }
     }
