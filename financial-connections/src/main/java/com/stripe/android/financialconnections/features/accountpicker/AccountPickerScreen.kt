@@ -69,6 +69,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import java.text.NumberFormat
+import java.util.Currency
 
 @Composable
 internal fun AccountPickerScreen() {
@@ -277,26 +279,53 @@ private fun DropdownContent(
                 expanded = false
             }
         ) {
-            accounts.forEach { selectedAccount ->
-                DropdownMenuItem(
-                    onClick = {
-                        onAccountClicked(selectedAccount.account)
+            accounts.forEach { account ->
+                AccountDropdownItem(
+                    onAccountClicked = {
                         expanded = false
-                    }
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        InstitutionIcon()
-                        Spacer(modifier = Modifier.size(8.dp))
-                        Text(
-                            text = "${selectedAccount.account.name} ${selectedAccount.account.encryptedNumbers}",
-                            color = if (selectedAccount.enabled) {
-                                FinancialConnectionsTheme.colors.textPrimary
-                            } else {
-                                FinancialConnectionsTheme.colors.textDisabled
-                            },
-                            style = FinancialConnectionsTheme.typography.bodyEmphasized
-                        )
-                    }
+                        onAccountClicked(it)
+                    },
+                    account = account
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccountDropdownItem(
+    onAccountClicked: (PartnerAccount) -> Unit,
+    account: PartnerAccountUI
+) {
+    DropdownMenuItem(
+        onClick = {
+            onAccountClicked(account.account)
+        }
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            InstitutionIcon()
+            Spacer(modifier = Modifier.size(8.dp))
+            val (title, subtitle) = getAccountTexts(
+                account = account.account,
+                enabled = account.enabled
+            )
+            Column {
+                Text(
+                    text = title,
+                    color = if (account.enabled) {
+                        FinancialConnectionsTheme.colors.textPrimary
+                    } else {
+                        FinancialConnectionsTheme.colors.textDisabled
+                    },
+                    style = FinancialConnectionsTheme.typography.body
+                )
+                subtitle?.let {
+                    Spacer(Modifier.size(4.dp))
+                    Text(
+                        text = it,
+                        color = FinancialConnectionsTheme.colors.textDisabled,
+                        style = FinancialConnectionsTheme.typography.caption
+                    )
                 }
             }
         }
@@ -405,10 +434,14 @@ private fun AccountItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             selectorContent()
+            val (title, subtitle) = getAccountTexts(
+                account = account,
+                enabled = enabled
+            )
             Spacer(modifier = Modifier.size(16.dp))
             Column {
                 Text(
-                    text = account.name,
+                    text = title,
                     color = if (enabled) {
                         FinancialConnectionsTheme.colors.textPrimary
                     } else {
@@ -416,21 +449,41 @@ private fun AccountItem(
                     },
                     style = FinancialConnectionsTheme.typography.bodyEmphasized
                 )
-                Spacer(modifier = Modifier.size(4.dp))
-                account.displayableAccountNumbers?.let {
+                subtitle?.let {
+                    Spacer(modifier = Modifier.size(4.dp))
                     Text(
-                        text = "········$it",
-                        color = if (enabled) {
-                            FinancialConnectionsTheme.colors.textSecondary
-                        } else {
-                            FinancialConnectionsTheme.colors.textDisabled
-                        },
+                        text = it,
+                        color = FinancialConnectionsTheme.colors.textDisabled,
                         style = FinancialConnectionsTheme.typography.body
                     )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun getAccountTexts(
+    account: PartnerAccount,
+    enabled: Boolean
+): Pair<String, String?> {
+    val balance = if (account.balanceAmount != null && account.currency != null) {
+        NumberFormat
+            .getCurrencyInstance()
+            .also { it.currency = Currency.getInstance(account.currency) }
+            .format(account.balanceAmount)
+    } else null
+    val title = when {
+        balance != null -> "${account.name} ${account.encryptedNumbers}"
+        else -> account.name
+    }
+    val subtitle = when {
+        enabled.not() -> stringResource(id = R.string.stripe_account_picker_must_be_bank_account)
+        balance != null -> balance
+        account.encryptedNumbers.isNotEmpty() -> account.encryptedNumbers
+        else -> null
+    }
+    return title to subtitle
 }
 
 @Preview(
