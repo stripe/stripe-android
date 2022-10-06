@@ -196,6 +196,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      */
     abstract var newPaymentSelection: PaymentSelection.New?
 
+    open var linkInlineSelection = MutableLiveData<PaymentSelection.New.LinkInline?>(null)
+
     abstract fun onFatal(throwable: Throwable)
 
     val buttonsEnabled = MediatorLiveData<Boolean>().apply {
