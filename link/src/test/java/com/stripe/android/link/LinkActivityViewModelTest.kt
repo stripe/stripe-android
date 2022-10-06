@@ -39,12 +39,13 @@ import kotlin.test.assertNotNull
 @RunWith(RobolectricTestRunner::class)
 class LinkActivityViewModelTest {
     private val config = LinkPaymentLauncher.Configuration(
-        StripeIntentFixtures.PI_SUCCEEDED,
-        MERCHANT_NAME,
-        CUSTOMER_EMAIL,
-        CUSTOMER_PHONE,
-        CUSTOMER_NAME,
-        null,
+        stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
+        merchantName = MERCHANT_NAME,
+        customerName = CUSTOMER_NAME,
+        customerEmail = CUSTOMER_EMAIL,
+        customerPhone = CUSTOMER_PHONE,
+        customerBillingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
+        shippingValues = null,
     )
 
     private val defaultArgs = LinkActivityContract.Args(
@@ -223,5 +224,6 @@ class LinkActivityViewModelTest {
         const val CUSTOMER_EMAIL = "customer@email.com"
         const val CUSTOMER_NAME = "Customer"
         const val CUSTOMER_PHONE = "1234567890"
+        const val CUSTOMER_BILLING_COUNTRY_CODE = "US"
     }
 }

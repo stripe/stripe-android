@@ -22,12 +22,13 @@ class LinkActivityContractTest {
         )
 
         val config = LinkPaymentLauncher.Configuration(
-            StripeIntentFixtures.PI_SUCCEEDED,
-            "Merchant, Inc",
-            "Name",
-            "customer@email.com",
-            "1234567890",
-            null,
+            stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
+            merchantName = "Merchant, Inc",
+            customerName = "Name",
+            customerEmail = "customer@email.com",
+            customerPhone = "1234567890",
+            customerBillingCountryCode = "US",
+            shippingValues = null,
         )
 
         val args = LinkActivityContract.Args(

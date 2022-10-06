@@ -15,6 +15,7 @@ import com.stripe.android.link.ui.signup.SignUpState
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class InlineSignupViewState internal constructor(
     val userInput: UserInput?,
+    val merchantName: String,
     internal val isExpanded: Boolean,
     internal val apiFailed: Boolean,
     internal val signUpState: SignUpState

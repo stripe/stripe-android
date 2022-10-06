@@ -12,7 +12,6 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.injection.SignUpViewModelSubcomponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.StripeIntentFixtures
@@ -45,30 +44,30 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class SignUpViewModelTest {
-    val config = LinkPaymentLauncher.Configuration(
-        StripeIntentFixtures.PI_SUCCEEDED,
-        MERCHANT_NAME,
-        CUSTOMER_NAME,
-        CUSTOMER_EMAIL,
-        CUSTOMER_PHONE,
-        null,
+    private val config = LinkPaymentLauncher.Configuration(
+        stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
+        merchantName = MERCHANT_NAME,
+        customerName = CUSTOMER_NAME,
+        customerEmail = CUSTOMER_EMAIL,
+        customerPhone = CUSTOMER_PHONE,
+        customerBillingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
+        shippingValues = null,
     )
     private val defaultArgs = LinkActivityContract.Args(
-        config,
-        null,
-        LinkActivityContract.Args.InjectionParams(
-            INJECTOR_KEY,
-            setOf(PRODUCT_USAGE),
-            true,
-            PUBLISHABLE_KEY,
-            STRIPE_ACCOUNT_ID
+        configuration = config,
+        prefilledCardParams = null,
+        injectionParams = LinkActivityContract.Args.InjectionParams(
+            injectorKey = INJECTOR_KEY,
+            productUsage = setOf(PRODUCT_USAGE),
+            enableLogging = true,
+            publishableKey = PUBLISHABLE_KEY,
+            stripeAccountId = STRIPE_ACCOUNT_ID,
         )
     )
     private val linkAccountManager = mock<LinkAccountManager>()
@@ -328,13 +327,7 @@ class SignUpViewModelTest {
 
     @Test
     fun `Factory gets initialized by Injector when Injector is available`() {
-        val mockBuilder = mock<SignUpViewModelSubcomponent.Builder>()
-        val mockSubComponent = mock<SignUpViewModelSubcomponent>()
         val vmToBeReturned = mock<SignUpViewModel>()
-
-        whenever(mockBuilder.prefilledEmail(anyOrNull())).thenReturn(mockBuilder)
-        whenever(mockBuilder.build()).thenReturn(mockSubComponent)
-        whenever((mockSubComponent.signUpViewModel)).thenReturn(vmToBeReturned)
 
         val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
         val mockSavedStateRegistry = mock<SavedStateRegistry>()
@@ -347,14 +340,11 @@ class SignUpViewModelTest {
         val injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 val factory = injectable as SignUpViewModel.Factory
-                factory.subComponentBuilderProvider = Provider { mockBuilder }
+                factory.signUpViewModel = vmToBeReturned
             }
         }
 
-        val factory = SignUpViewModel.Factory(
-            injector,
-            email = null
-        )
+        val factory = SignUpViewModel.Factory(injector)
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(SignUpViewModel::class.java)
         assertThat(createdViewModel).isEqualTo(vmToBeReturned)
@@ -370,12 +360,12 @@ class SignUpViewModelTest {
                 stripeIntent = when (val intent = args.stripeIntent) {
                     is PaymentIntent -> intent.copy(countryCode = countryCode.value)
                     is SetupIntent -> intent.copy(countryCode = countryCode.value)
-                }
+                },
+                customerEmail = prefilledEmail,
             )
         )
         return SignUpViewModel(
             args = argsWithCountryCode,
-            customerEmail = prefilledEmail,
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = Logger.noop(),
@@ -414,6 +404,7 @@ class SignUpViewModelTest {
         const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "customer@email.com"
         const val CUSTOMER_PHONE = "1234567890"
+        const val CUSTOMER_BILLING_COUNTRY_CODE = "US"
         const val CUSTOMER_NAME = "Customer"
     }
 }
