@@ -83,18 +83,18 @@ internal class AccountPickerViewModel @Inject constructor(
     private fun onPayloadLoaded() {
         onAsync(AccountPickerState::payload, onSuccess = { payload ->
             when {
-                // Navigate to success right away instead of allowing the user to select accounts.
-                payload.skipAccountSelection -> {
-                    navigationManager.navigate(NavigationDirections.success)
-                }
+                // If account selection has to be skipped, submit all selectable accounts.
+                payload.skipAccountSelection -> submitAccounts(
+                    selectedIds = payload.selectableAccounts.map { it.account.id }.toSet()
+                )
                 // the user saw an OAuth account selection screen and selected
                 // just one to send back in a single-account context. treat these as if
                 // we had done account selection, and submit.
                 payload.singleAccount &&
                     payload.institutionSkipAccountSelection &&
-                    payload.accounts.size == 1 -> {
-                    submitAccounts(selectedIds = setOf(payload.accounts.first().account.id))
-                }
+                    payload.accounts.size == 1 -> submitAccounts(
+                    selectedIds = setOf(payload.accounts.first().account.id)
+                )
             }
         })
     }
