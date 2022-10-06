@@ -3,7 +3,6 @@ package com.stripe.android.link
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewTreeObserver
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -77,8 +76,6 @@ internal class LinkActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // TODO(brnunes-stripe): Migrate to androidx.compose.foundation 1.2.0 when out of beta
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         overridePendingTransition(R.anim.slide_up, 0)
 
         setContent {
