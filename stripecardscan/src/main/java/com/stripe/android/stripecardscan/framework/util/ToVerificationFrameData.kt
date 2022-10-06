@@ -44,7 +44,9 @@ internal fun Collection<SavedFrame>.toVerificationFrameData(
     val payloadInfo = PayloadInfo(
         imageCompressionType = imageFormat.string,
         imageCompressionQuality = imageSettings.compressionRatio.toFloat(),
-        imagePayloadSizeInBytes = imagePayloadSize
+        imagePayloadSizeInBytes = imagePayloadSize,
+        imagePayloadCount = verificationFramesData.size,
+        imagePayloadMaxCount = imageSettings.imageCount
     )
 
     return Pair(verificationFramesData, payloadInfo)

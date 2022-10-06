@@ -366,7 +366,7 @@ internal open class CardImageVerificationActivity :
                     CardVerificationFlowParameters(
                         cardIssuer = getIssuerByDisplayName(expectedCard.issuer),
                         lastFour = expectedCard.lastFour,
-                        strictModeFrames = params.configuration.strictModeFrames.count
+                        strictModeFrames = params.configuration.strictModeFrames.count(imageConfigs.getImageSettings().second.imageCount)
                     )
                 } else {
                     launch(Dispatchers.Main) {
@@ -648,7 +648,7 @@ internal open class CardImageVerificationActivity :
             appDetails = AppDetails.fromContext(this),
             scanStatistics = ScanStatistics.fromStats(),
             scanConfig = ScanConfig(
-                strictModeFrameCount = params.configuration.strictModeFrames.count
+                strictModeFrameCount = params.configuration.strictModeFrames.count(imageConfigs.getImageSettings().second.imageCount)
             ),
             payloadInfo = currentScanPayloadInfo
         )

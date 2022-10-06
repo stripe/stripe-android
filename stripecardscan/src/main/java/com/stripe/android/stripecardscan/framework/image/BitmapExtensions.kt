@@ -2,7 +2,6 @@ package com.stripe.android.stripecardscan.framework.image
 
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.util.Size
 import androidx.annotation.CheckResult
 import com.stripe.android.camera.framework.image.constrainToSize
 import com.stripe.android.camera.framework.image.crop
