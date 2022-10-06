@@ -104,42 +104,40 @@ internal fun calculateViewWidth(
     maxWidth: Dp,
     numberOfPaymentMethods: Int
 ): Dp {
-    val targetWidthDp = maxWidth - (Spacing.carouselOuterPadding * 2)
-    val minItemWidthDp = 100.dp
+    val targetWidth = maxWidth - (Spacing.carouselOuterPadding * 2)
+    val minItemWidth = 100.dp
 
-    val minimumCardsWidth = minItemWidthDp * numberOfPaymentMethods
-    val minimumSpacingWidth = Spacing.carouselInnerPadding * (numberOfPaymentMethods - 1)
-    val minimumContentWidth = minimumCardsWidth + minimumSpacingWidth
+    val minimumCardsWidth = minItemWidth * numberOfPaymentMethods
+    val spacingWidth = Spacing.carouselInnerPadding * (numberOfPaymentMethods - 1)
+    val minimumContentWidth = minimumCardsWidth + spacingWidth
 
-    val viewWidth = if (minimumContentWidth < targetWidthDp) {
+    val viewWidth = if (minimumContentWidth <= targetWidth) {
         // Stretch cards to fill entire width
-        (targetWidthDp - minimumSpacingWidth) / numberOfPaymentMethods
+        (targetWidth - spacingWidth) / numberOfPaymentMethods
     } else {
-        computeMaxWidthOfItem(targetWidthDp, minItemWidthDp, Spacing.carouselInnerPadding)
+        computeItemWidthWhenExceedingMaxWidth(
+            availableWidth = targetWidth,
+            minItemWidth = minItemWidth,
+            spacing = Spacing.carouselInnerPadding,
+        )
     }
     return viewWidth
 }
 
-private fun computeMaxWidthOfItem(
-    maxWidth: Dp,
+private fun computeItemWidthWhenExceedingMaxWidth(
+    availableWidth: Dp,
     minItemWidth: Dp,
     spacing: Dp,
 ): Dp {
-    var widthOfCards = minItemWidth
-    var visibleCards = 1
+    val itemWithSpacing = minItemWidth + spacing
 
-    while (true) {
-        val widthAfterAddingCard = widthOfCards + (spacing + minItemWidth)
-        if (widthAfterAddingCard <= maxWidth) {
-            widthOfCards = widthAfterAddingCard
-            visibleCards += 1
-        } else {
-            break
-        }
-    }
+    val remainingWidthAfterAddingFirstCard = availableWidth - minItemWidth
+    val numberOfAdditionalCards = (remainingWidthAfterAddingFirstCard / itemWithSpacing).toInt()
 
-    val overallSpacing = spacing * (visibleCards - 1)
-    return (maxWidth - overallSpacing) / visibleCards
+    val visibleCards = numberOfAdditionalCards + 1
+    val overallSpacing = spacing * numberOfAdditionalCards
+
+    return (availableWidth - overallSpacing) / visibleCards
 }
 
 @Composable
