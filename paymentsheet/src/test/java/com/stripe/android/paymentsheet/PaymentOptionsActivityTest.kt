@@ -491,22 +491,7 @@ internal class PaymentOptionsActivityTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            lpmResourceRepository = StaticLpmResourceRepository(mock<LpmRepository>().apply {
-                whenever(fromCode(any())).thenReturn(
-                    LpmRepository.SupportedPaymentMethod(
-                        PaymentMethod.Type.Card.code,
-                        false,
-                        com.stripe.android.ui.core.R.string.stripe_paymentsheet_payment_method_card,
-                        com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
-                        true,
-                        PaymentMethodRequirements(emptySet(), emptySet(), true),
-                        LayoutSpec.create(
-                            EmailSpec(),
-                            SaveForFutureUseSpec()
-                        )
-                    )
-                )
-            }),
+            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
             addressResourceRepository = StaticAddressResourceRepository(addressRepository),
             savedStateHandle = SavedStateHandle(),
             linkLauncher = linkPaymentLauncher
