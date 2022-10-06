@@ -111,12 +111,14 @@ private fun SuccessContent(
                 text = getSubtitle(businessName, accounts),
                 style = FinancialConnectionsTheme.typography.body
             )
-            Spacer(modifier = Modifier.size(24.dp))
-            AccessibleDataCalloutWithAccounts(
-                model = accessibleDataModel,
-                accounts = accounts,
-                institution = institution,
-            )
+            if (accounts.isNotEmpty()) {
+                Spacer(modifier = Modifier.size(24.dp))
+                AccessibleDataCalloutWithAccounts(
+                    model = accessibleDataModel,
+                    accounts = accounts,
+                    institution = institution,
+                )
+            }
             Spacer(modifier = Modifier.size(12.dp))
             AnnotatedText(
                 text = TextResource.StringId(R.string.success_pane_disconnect),
