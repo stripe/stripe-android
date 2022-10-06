@@ -34,9 +34,10 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
             retryCondition = { exception -> exception.shouldRetry }
         ) {
             try {
+                val authSession = requireNotNull(manifest.activeAuthSession)
                 val accounts = repository.postAuthorizationSessionAccounts(
                     clientSecret = configuration.financialConnectionsSessionClientSecret,
-                    sessionId = manifest.activeAuthSession!!.id
+                    sessionId = authSession.id
                 )
                 if (accounts.data.isEmpty()) {
                     throw NoAccountsAvailableException(
@@ -50,7 +51,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
                 }
             } catch (@Suppress("SwallowedException") e: StripeException) {
                 throw e.toDomainException(
-                    institution = requireNotNull(manifest.activeInstitution),
+                    institution = manifest.activeInstitution,
                     businessName = ConsentTextBuilder.getBusinessName(manifest),
                     canRetry = canRetry,
                     allowManualEntry = manifest.allowManualEntry
@@ -60,12 +61,13 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
     }
 
     private fun StripeException.toDomainException(
-        institution: FinancialConnectionsInstitution,
+        institution: FinancialConnectionsInstitution?,
         businessName: String?,
         canRetry: Boolean,
         allowManualEntry: Boolean
     ): StripeException =
         when {
+            institution == null -> this
             stripeError?.extraFields?.get("reason") == "no_supported_payment_method_type_accounts_found" ->
                 NoSupportedPaymentMethodTypeAccountsException(
                     allowManualEntry = allowManualEntry,
