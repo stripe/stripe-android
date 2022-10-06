@@ -22,15 +22,15 @@ class CardImageVerificationFlowTest {
         }
 
         val frameMap = mapOf(
-            SavedFrameType(hasCard = true, hasOcr = true) to listOf("A", "B", "C"),
-            SavedFrameType(hasCard = true, hasOcr = false) to listOf("D", "E", "F"),
-            SavedFrameType(hasCard = false, hasOcr = true) to listOf("G", "H", "I"),
-            SavedFrameType(hasCard = false, hasOcr = false) to listOf("J", "K", "L")
+            SavedFrameType(hasCard = true, hasOcr = true) to listOf("A", "B"),
+            SavedFrameType(hasCard = true, hasOcr = false) to listOf("D", "E"),
+            SavedFrameType(hasCard = false, hasOcr = true) to listOf("G", "H"),
+            SavedFrameType(hasCard = false, hasOcr = false) to listOf("J", "K")
         )
 
         val selectedFrames = flow.selectCompletionLoopFrames(frameMap)
         assertEquals(
-            listOf("A", "B", "C", "G", "H"),
+            listOf("A", "B", "G"),
             selectedFrames
         )
     }
