@@ -36,7 +36,8 @@ internal interface FinancialConnectionsAccountsRepository {
     suspend fun postAuthorizationSessionSelectedAccounts(
         clientSecret: String,
         sessionId: String,
-        selectAccounts: List<String>
+        selectAccounts: List<String>,
+        updateLocalCache: Boolean
     ): PartnerAccountsList
 
     companion object {
@@ -63,7 +64,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
 ) : FinancialConnectionsAccountsRepository {
 
     /**
-     * Ensures that manifest accesses via [getOrFetchManifest] suspend until
+     * Ensures that manifest accesses via [getOrFetchAccounts] suspend until
      * current writes are running.
      */
     val mutex = Mutex()
@@ -120,7 +121,8 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     override suspend fun postAuthorizationSessionSelectedAccounts(
         clientSecret: String,
         sessionId: String,
-        selectAccounts: List<String>
+        selectAccounts: List<String>,
+        updateLocalCache: Boolean
     ): PartnerAccountsList {
         val request = apiRequestFactory.createPost(
             url = authorizationSessionSelectedAccountsUrl,
@@ -134,7 +136,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             request,
             PartnerAccountsList.serializer()
         ).also {
-            updateCachedAccounts("postAuthorizationSessionSelectedAccounts", it)
+            if (updateLocalCache) updateCachedAccounts("postAuthorizationSessionSelectedAccounts", it)
         }
     }
 

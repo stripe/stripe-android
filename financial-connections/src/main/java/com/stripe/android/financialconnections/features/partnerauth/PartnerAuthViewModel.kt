@@ -128,18 +128,21 @@ internal class PartnerAuthViewModel @Inject constructor(
         kotlin.runCatching {
             logger.debug("Auth cancelled, cancelling AuthSession")
             setState { copy(authenticationStatus = Loading()) }
-            val authSession = getManifest().activeAuthSession
-            when {
-                authSession != null -> cancelAuthorizationSession(authSession.id)
-                else -> logger.debug("Auth cancelled, cancelling AuthSession")
+            val authSession = requireNotNull(getManifest().activeAuthSession)
+            val result = cancelAuthorizationSession(authSession.id)
+            if (authSession.flow?.isOAuth() == true) {
+                // For OAuth institutions, create a new session and navigate to its nextPane.
+                logger.debug("Creating a new session for this OAuth institution")
+                val manifest = getManifest()
+                val newSession = createAuthorizationSession(
+                    institution = requireNotNull(manifest.activeInstitution),
+                    allowManualEntry = manifest.allowManualEntry
+                )
+                goNext(newSession.nextPane)
+            } else {
+                // For OAuth institutions, navigate to Session cancellation's next pane.
+                goNext(result.nextPane)
             }
-            logger.debug("Creating a new session for this institution")
-            val manifest = getManifest()
-            val newSession = createAuthorizationSession(
-                institution = requireNotNull(manifest.activeInstitution),
-                allowManualEntry = manifest.allowManualEntry
-            )
-            goNext(newSession.nextPane)
         }.onFailure {
             logger.error("failed cancelling session after cancelled web flow", it)
             setState { copy(authenticationStatus = Fail(it)) }

@@ -12,12 +12,14 @@ internal class SelectAccounts @Inject constructor(
 
     suspend operator fun invoke(
         selectedAccountIds: Set<String>,
-        sessionId: String
+        sessionId: String,
+        updateLocalCache: Boolean
     ): PartnerAccountsList {
         return repository.postAuthorizationSessionSelectedAccounts(
             sessionId = sessionId,
             clientSecret = configuration.financialConnectionsSessionClientSecret,
-            selectAccounts = selectedAccountIds.toList()
+            selectAccounts = selectedAccountIds.toList(),
+            updateLocalCache = updateLocalCache
         )
     }
 }

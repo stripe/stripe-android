@@ -85,7 +85,8 @@ internal class AccountPickerViewModel @Inject constructor(
             when {
                 // If account selection has to be skipped, submit all selectable accounts.
                 payload.skipAccountSelection -> submitAccounts(
-                    selectedIds = payload.selectableAccounts.map { it.account.id }.toSet()
+                    selectedIds = payload.selectableAccounts.map { it.account.id }.toSet(),
+                    updateLocalCache = false
                 )
                 // the user saw an OAuth account selection screen and selected
                 // just one to send back in a single-account context. treat these as if
@@ -93,7 +94,8 @@ internal class AccountPickerViewModel @Inject constructor(
                 payload.singleAccount &&
                     payload.institutionSkipAccountSelection &&
                     payload.accounts.size == 1 -> submitAccounts(
-                    selectedIds = setOf(payload.accounts.first().account.id)
+                    selectedIds = setOf(payload.accounts.first().account.id),
+                    updateLocalCache = true
                 )
             }
         })
@@ -166,7 +168,7 @@ internal class AccountPickerViewModel @Inject constructor(
     fun onSubmit() {
         withState { state ->
             state.payload()?.let { payload ->
-                submitAccounts(payload.selectedIds)
+                submitAccounts(payload.selectedIds, updateLocalCache = true)
             } ?: run {
                 logger.error("account clicked without available payload.")
             }
@@ -174,13 +176,15 @@ internal class AccountPickerViewModel @Inject constructor(
     }
 
     private fun submitAccounts(
-        selectedIds: Set<String>
+        selectedIds: Set<String>,
+        updateLocalCache: Boolean
     ) {
         suspend {
             val manifest = getManifest()
             val accountsList: PartnerAccountsList = selectAccounts(
                 selectedAccountIds = selectedIds,
-                sessionId = manifest.activeAuthSession!!.id
+                sessionId = requireNotNull(manifest.activeAuthSession).id,
+                updateLocalCache = updateLocalCache
             )
             goNext(accountsList.nextPane)
             accountsList
