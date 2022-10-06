@@ -2,7 +2,6 @@ package com.stripe.android.view
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
@@ -91,10 +90,8 @@ sealed class AuthActivityStarterHost {
 fun AuthActivityStarterHost.runWhenResumed(block: suspend CoroutineScope.() -> Unit) {
     val lifecycleOwner = when (this) {
         is ActivityHost -> activity
-        is FragmentHost -> fragment.viewLifecycleOwner
+        is FragmentHost -> fragment.requireActivity()
     }
-
-    Log.d("RelayBug", "Current lifecycle state of host: ${lifecycleOwner.lifecycle.currentState}")
 
     lifecycleOwner.lifecycleScope.launch {
         lifecycleOwner.whenResumed(block)
