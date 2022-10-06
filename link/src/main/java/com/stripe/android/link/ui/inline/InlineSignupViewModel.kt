@@ -173,6 +173,7 @@ internal class InlineSignupViewModel @Inject constructor(
 
     private suspend fun lookupConsumerEmail(email: String) {
         clearError()
+        linkAccountManager.logout()
         linkAccountManager.lookupConsumer(email, startSession = false).fold(
             onSuccess = {
                 if (it != null) {
