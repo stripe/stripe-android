@@ -22,18 +22,20 @@ class CardImageVerificationDetailsTest {
                   "image_size": [
                     1080,
                     1920
-                  ]
+                  ],
+                  "image_count": 5
                 },
                 "format_settings": {
                   "heic": {
-                    "compression_ratio": 0.5
+                    "compression_ratio": 0.5,
+                    "image_count": 3
                   },
                   "webp": {
                     "compression_ratio": 0.7
                     "image_size": [
                         2160,
                         1920
-                  ]
+                    ]
                   }
                 },
                 "preferred_formats": [
@@ -51,31 +53,21 @@ class CardImageVerificationDetailsTest {
         val result = Json.decodeFromString<CardImageVerificationDetailsResult>(json)
         assertNotNull(result.acceptedImageConfigs)
 
-        result.acceptedImageConfigs?.let {
-            val acceptedImageConfigs = AcceptedImageConfigs(it)
-            val heicSettings = acceptedImageConfigs.imageSettings(ImageFormat.HEIC)
-            assertNotNull(heicSettings)
+        val acceptedImageConfigs = AcceptedImageConfigs(result.acceptedImageConfigs)
 
-            heicSettings?.let {
-                assertEquals(it.first, 0.5)
-                assertEquals(it.second, Size(1080, 1920))
-            }
+        val heicSettings = acceptedImageConfigs.getImageSettings(ImageFormat.HEIC)
+        assertEquals(heicSettings.compressionRatio, 0.5)
+        assertEquals(heicSettings.imageSize, Size(1080, 1920))
+        assertEquals(heicSettings.imageCount, 3)
 
-            val jpegSettings = acceptedImageConfigs.imageSettings(ImageFormat.JPEG)
-            assertNotNull(jpegSettings)
+        val jpegSettings = acceptedImageConfigs.getImageSettings(ImageFormat.JPEG)
+        assertEquals(jpegSettings.compressionRatio, 0.8)
+        assertEquals(jpegSettings.imageSize, Size(1080, 1920))
+        assertEquals(jpegSettings.imageCount, 5)
 
-            jpegSettings?.let {
-                assertEquals(it.first, 0.8)
-                assertEquals(it.second, Size(1080, 1920))
-            }
-
-            val webpSettings = acceptedImageConfigs.imageSettings(ImageFormat.WEBP)
-            assertNotNull(webpSettings)
-
-            webpSettings?.let {
-                assertEquals(it.first, 0.7)
-                assertEquals(it.second, Size(2160, 1920))
-            }
-        }
+        val webpSettings = acceptedImageConfigs.getImageSettings(ImageFormat.WEBP)
+        assertEquals(webpSettings.compressionRatio, 0.7)
+        assertEquals(webpSettings.imageSize, Size(2160, 1920))
+        assertEquals(webpSettings.imageCount, 5)
     }
 }
