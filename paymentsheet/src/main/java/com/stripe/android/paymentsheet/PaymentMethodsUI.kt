@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,9 +33,11 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPayment
 import com.stripe.android.ui.core.getBorderStroke
 import com.stripe.android.ui.core.paymentsColors
 
-internal const val ADD_PM_DEFAULT_PADDING = 12.0f
-internal const val CARD_HORIZONTAL_PADDING = 6.0f
-internal const val PM_LIST_PADDING = 17.0f
+private object Spacing {
+    val cardLeadingInnerPadding = 12.dp
+    val carouselOuterPadding = 20.dp
+    val carouselInnerPadding = 12.dp
+}
 
 @VisibleForTesting
 const val TEST_TAG_LIST = "PaymentMethodsUITestTag"
@@ -63,7 +66,8 @@ internal fun PaymentMethodsUI(
 
         LazyRow(
             state = state,
-            contentPadding = PaddingValues(horizontal = PM_LIST_PADDING.dp),
+            contentPadding = PaddingValues(horizontal = Spacing.carouselOuterPadding),
+            horizontalArrangement = Arrangement.spacedBy(Spacing.carouselInnerPadding),
             userScrollEnabled = isEnabled,
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
@@ -100,15 +104,42 @@ internal fun calculateViewWidth(
     maxWidth: Dp,
     numberOfPaymentMethods: Int
 ): Dp {
-    val targetWidthDp = maxWidth - (PM_LIST_PADDING.dp * 2)
-    val minItemWidthDp = (100 + (2 * CARD_HORIZONTAL_PADDING)).dp
-    val viewWidth = if ((minItemWidthDp * numberOfPaymentMethods) < targetWidthDp) {
-        targetWidthDp / numberOfPaymentMethods
+    val targetWidthDp = maxWidth - (Spacing.carouselOuterPadding * 2)
+    val minItemWidthDp = 100.dp
+
+    val minimumCardsWidth = minItemWidthDp * numberOfPaymentMethods
+    val minimumSpacingWidth = Spacing.carouselInnerPadding * (numberOfPaymentMethods - 1)
+    val minimumContentWidth = minimumCardsWidth + minimumSpacingWidth
+
+    val viewWidth = if (minimumContentWidth < targetWidthDp) {
+        // Stretch cards to fill entire width
+        (targetWidthDp - minimumSpacingWidth) / numberOfPaymentMethods
     } else {
-        val maxNumVisibleItemsAtMinimumSize = (targetWidthDp / minItemWidthDp).toInt()
-        targetWidthDp / maxNumVisibleItemsAtMinimumSize
+        computeMaxWidthOfItem(targetWidthDp, minItemWidthDp, Spacing.carouselInnerPadding)
     }
     return viewWidth
+}
+
+private fun computeMaxWidthOfItem(
+    maxWidth: Dp,
+    minItemWidth: Dp,
+    spacing: Dp,
+): Dp {
+    var widthOfCards = minItemWidth
+    var visibleCards = 1
+
+    while (true) {
+        val widthAfterAddingCard = widthOfCards + (spacing + minItemWidth)
+        if (widthAfterAddingCard <= maxWidth) {
+            widthOfCards = widthAfterAddingCard
+            visibleCards += 1
+        } else {
+            break
+        }
+    }
+
+    val overallSpacing = spacing * (visibleCards - 1)
+    return (maxWidth - overallSpacing) / visibleCards
 }
 
 @Composable
@@ -134,7 +165,7 @@ internal fun PaymentMethodUI(
             text = title,
             isEnabled = isEnabled,
             textColor = color,
-            modifier = Modifier.padding(top = 6.dp, start = ADD_PM_DEFAULT_PADDING.dp)
+            modifier = Modifier.padding(top = 6.dp, start = Spacing.cardLeadingInnerPadding)
         )
     }
 
@@ -146,12 +177,9 @@ internal fun PaymentMethodUI(
                 .width(
                     maxOf(
                         viewWidth,
-                        lpmSelectorTextWidth +
-                            (CARD_HORIZONTAL_PADDING.dp * 2) +
-                            ADD_PM_DEFAULT_PADDING.dp
+                        lpmSelectorTextWidth + Spacing.cardLeadingInnerPadding
                     )
-                )
-                .padding(horizontal = CARD_HORIZONTAL_PADDING.dp),
+                ),
             shape = MaterialTheme.shapes.medium,
             backgroundColor = MaterialTheme.paymentsColors.component,
             border = MaterialTheme.getBorderStroke(isSelected),
@@ -173,8 +201,10 @@ internal fun PaymentMethodUI(
                     painter = painterResource(iconRes),
                     contentDescription = null,
                     colorFilter = colorFilter,
-                    modifier = Modifier
-                        .padding(top = ADD_PM_DEFAULT_PADDING.dp, start = ADD_PM_DEFAULT_PADDING.dp)
+                    modifier = Modifier.padding(
+                        top = Spacing.cardLeadingInnerPadding,
+                        start = Spacing.cardLeadingInnerPadding,
+                    )
                 )
                 lpmTextSelector()
             }

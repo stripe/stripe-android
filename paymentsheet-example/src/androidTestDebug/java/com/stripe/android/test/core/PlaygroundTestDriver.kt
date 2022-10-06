@@ -253,6 +253,8 @@ class PlaygroundTestDriver(
         launchComplete()
 
         composeTestRule.waitForIdle()
+        device.waitForIdle()
+
         customOperations()
 
         currentActivity[0]?.let {
