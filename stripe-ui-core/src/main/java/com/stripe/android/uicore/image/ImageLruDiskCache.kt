@@ -154,7 +154,7 @@ class ImageLruDiskCache(
         return File(cachePath + File.separator + uniqueName)
     }
 
-    companion object {
+    private companion object {
         private const val TAG = "stripe_image_disk_cache"
         private const val APP_VERSION = 1
         private const val VALUE_COUNT = 1

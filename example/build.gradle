@@ -31,8 +31,6 @@ def getAccountId() {
 
 dependencies {
     implementation project(':payments')
-    //TODO@carlosmuvi delete, here for test purposes.
-    implementation project(':stripe-ui-core')
     implementation project(':financial-connections')
 
     implementation("com.alipay.sdk:alipaysdk-android:15.8.11")

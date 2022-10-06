@@ -5,13 +5,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.LinearProgressIndicator
@@ -22,17 +18,13 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.core.Logger
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.uicore.image.StripeImage
-import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.example.R
 import com.stripe.example.Settings
 import com.stripe.example.module.StripeIntentViewModel
@@ -43,16 +35,8 @@ import com.stripe.example.module.StripeIntentViewModel
 class ComposeExampleActivity : AppCompatActivity() {
     private val viewModel: StripeIntentViewModel by viewModels()
 
-    //TODO@carlosmuvi delete, here for test purposes.
-    private lateinit var imageLoader: StripeImageLoader
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // example image loader setup with just disk cache.
-        imageLoader = StripeImageLoader(
-            context = this,
-            memoryCache = null,
-        )
         setContent {
             ComposeScreen()
         }
@@ -77,21 +61,7 @@ class ComposeExampleActivity : AppCompatActivity() {
         status: String,
         onConfirm: (ConfirmPaymentIntentParams) -> Unit
     ) {
-        val content = List(200) { "https://dummyimage.com/108x108/000/fff&text=test_${('a'..'z').random()}" }
         Column(modifier = Modifier.padding(horizontal = 10.dp)) {
-            LazyRow {
-                items(content) {
-                    Box(modifier = Modifier.size(50.dp)) {
-                        StripeImage(
-                            url = it,
-                            placeholder = painterResource(id = R.drawable.stripe_ic_bank_generic),
-                            imageLoader = imageLoader,
-                            contentDescription = "example image"
-                        )
-                    }
-                }
-            }
-
             if (inProgress) {
                 LinearProgressIndicator(
                     modifier = Modifier.fillMaxWidth()
