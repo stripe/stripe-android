@@ -105,6 +105,17 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 showCheckboxFlow.emit(arguments.showCheckbox)
             }
 
+            val paymentSelection by sheetViewModel.selection.observeAsState()
+            var linkSignupState by remember {
+                mutableStateOf<InlineSignupViewState?>(null)
+            }
+
+            LaunchedEffect(paymentSelection, linkSignupState) {
+                linkSignupState?.let {
+                    onLinkSignupStateChanged(linkConfig!!, it, paymentSelection)
+                }
+            }
+
             Column(modifier = Modifier.fillMaxWidth()) {
                 PaymentElement(
                     enabled = !processing,
@@ -119,7 +130,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                             selectedPaymentMethodCode = selectedLpm.code
                         }
                     },
-                    onLinkSignupStateChanged = ::onLinkSignupStateChanged,
+                    onLinkSignupStateChanged = { _, inlineSignupViewState ->
+                        linkSignupState = inlineSignupViewState
+                    },
                     formArguments = arguments
                 )
             }
@@ -229,13 +242,14 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
     private fun onLinkSignupStateChanged(
         config: LinkPaymentLauncher.Configuration,
-        viewState: InlineSignupViewState
+        viewState: InlineSignupViewState,
+        paymentSelection: PaymentSelection?
     ) {
         sheetViewModel.updatePrimaryButtonUIState(
             if (viewState.useLink) {
                 val userInput = viewState.userInput
                 if (userInput != null &&
-                    sheetViewModel.selection.value != null
+                    paymentSelection != null
                 ) {
                     PrimaryButton.UIState(
                         label = null,
