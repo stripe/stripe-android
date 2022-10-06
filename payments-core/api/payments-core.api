@@ -6172,6 +6172,24 @@ public final class com/stripe/android/model/StripeIntent$NextActionData$SdkData$
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/StripeIntent$NextActionData$UpiAwaitNotification : com/stripe/android/model/StripeIntent$NextActionData {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/model/StripeIntent$NextActionData$UpiAwaitNotification;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/StripeIntent$NextActionData$UpiAwaitNotification$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/StripeIntent$NextActionData$UpiAwaitNotification;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/StripeIntent$NextActionData$UpiAwaitNotification;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/StripeIntent$NextActionData$VerifyWithMicrodeposits : com/stripe/android/model/StripeIntent$NextActionData {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -6212,6 +6230,7 @@ public final class com/stripe/android/model/StripeIntent$NextActionType : java/l
 	public static final field BlikAuthorize Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field DisplayOxxoDetails Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field RedirectToUrl Lcom/stripe/android/model/StripeIntent$NextActionType;
+	public static final field UpiAwaitNotification Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field UseStripeSdk Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field VerifyWithMicrodeposits Lcom/stripe/android/model/StripeIntent$NextActionType;
 	public static final field WeChatPayRedirect Lcom/stripe/android/model/StripeIntent$NextActionType;
@@ -6963,6 +6982,14 @@ public final class com/stripe/android/payments/core/injection/PaymentLauncherMod
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Ljava/util/Map;
 	public static fun provideThreeDs1IntentReturnUrlMap (Lcom/stripe/android/payments/core/injection/PaymentLauncherModule;)Ljava/util/Map;
+}
+
+public final class com/stripe/android/payments/core/injection/PollingAuthenticatorModule_ProvideUpiAuthenticator$payments_core_releaseFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/payments/core/injection/PollingAuthenticatorModule;Ljavax/inject/Provider;)V
+	public static fun create (Lcom/stripe/android/payments/core/injection/PollingAuthenticatorModule;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/injection/PollingAuthenticatorModule_ProvideUpiAuthenticator$payments_core_releaseFactory;
+	public fun get ()Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun provideUpiAuthenticator$payments_core_release (Lcom/stripe/android/payments/core/injection/PollingAuthenticatorModule;Lcom/stripe/android/payments/core/authentication/UnsupportedAuthenticator;)Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;
 }
 
 public final class com/stripe/android/payments/core/injection/Stripe3DSAuthenticatorModule_Companion_ProvidePaymentAuthConfigFactory : dagger/internal/Factory {
@@ -7812,7 +7839,6 @@ public class com/stripe/android/view/StripeEditText : com/google/android/materia
 	public final fun getDefaultErrorColorInt ()I
 	public fun getOnFocusChangeListener ()Landroid/view/View$OnFocusChangeListener;
 	public final fun getShouldShowError ()Z
-	protected final fun isLastKeyDelete ()Z
 	public fun onCreateInputConnection (Landroid/view/inputmethod/EditorInfo;)Landroid/view/inputmethod/InputConnection;
 	public fun onInitializeAccessibilityNodeInfo (Landroid/view/accessibility/AccessibilityNodeInfo;)V
 	public fun onRestoreInstanceState (Landroid/os/Parcelable;)V
@@ -7823,7 +7849,6 @@ public class com/stripe/android/view/StripeEditText : com/google/android/materia
 	public final fun setErrorColor (I)V
 	public final fun setErrorMessage (Ljava/lang/String;)V
 	public final fun setErrorMessageListener (Lcom/stripe/android/view/StripeEditText$ErrorMessageListener;)V
-	protected final fun setLastKeyDelete (Z)V
 	public final fun setOnFocusChangeListener (Landroid/view/View$OnFocusChangeListener;)V
 	public final fun setShouldShowError (Z)V
 	public fun setTextColor (I)V

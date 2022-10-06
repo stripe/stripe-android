@@ -51,7 +51,7 @@ internal class CardBillingAddressElementTest {
 
     @Test
     fun `Verify that when US is selected postal is not hidden`() {
-        val hiddenIdFlowValues = mutableListOf<List<IdentifierSpec>>()
+        val hiddenIdFlowValues = mutableListOf<Set<IdentifierSpec>>()
         cardBillingElement.hiddenIdentifiers.asLiveData()
             .observeForever {
                 hiddenIdFlowValues.add(it)
@@ -63,7 +63,7 @@ internal class CardBillingAddressElementTest {
 
     @Test
     fun `Verify that when GB is selected postal is not hidden`() {
-        val hiddenIdFlowValues = mutableListOf<List<IdentifierSpec>>()
+        val hiddenIdFlowValues = mutableListOf<Set<IdentifierSpec>>()
         cardBillingElement.hiddenIdentifiers.asLiveData()
             .observeForever {
                 hiddenIdFlowValues.add(it)
@@ -75,7 +75,7 @@ internal class CardBillingAddressElementTest {
 
     @Test
     fun `Verify that when CA is selected postal is not hidden`() {
-        val hiddenIdFlowValues = mutableListOf<List<IdentifierSpec>>()
+        val hiddenIdFlowValues = mutableListOf<Set<IdentifierSpec>>()
         cardBillingElement.hiddenIdentifiers.asLiveData()
             .observeForever {
                 hiddenIdFlowValues.add(it)
@@ -87,7 +87,7 @@ internal class CardBillingAddressElementTest {
 
     @Test
     fun `Verify that when DE is selected postal IS hidden`() {
-        val hiddenIdFlowValues = mutableListOf<List<IdentifierSpec>>()
+        val hiddenIdFlowValues = mutableListOf<Set<IdentifierSpec>>()
         cardBillingElement.hiddenIdentifiers.asLiveData()
             .observeForever {
                 hiddenIdFlowValues.add(it)
@@ -97,7 +97,7 @@ internal class CardBillingAddressElementTest {
         verifyPostalHidden(hiddenIdFlowValues[1])
     }
 
-    fun verifyPostalShown(hiddenIdentifiers: List<IdentifierSpec>) {
+    fun verifyPostalShown(hiddenIdentifiers: Set<IdentifierSpec>) {
         Truth.assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
         Truth.assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Country)
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line1)
@@ -106,7 +106,7 @@ internal class CardBillingAddressElementTest {
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
     }
 
-    fun verifyPostalHidden(hiddenIdentifiers: List<IdentifierSpec>) {
+    fun verifyPostalHidden(hiddenIdentifiers: Set<IdentifierSpec>) {
         Truth.assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Country)
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.PostalCode)
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line1)

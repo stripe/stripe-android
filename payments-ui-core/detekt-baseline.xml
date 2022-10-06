@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:OTPElementUI.kt$index != 0 &amp;&amp; event.type == KeyEventType.KeyDown &amp;&amp; event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &amp;&amp; value.isEmpty()</ID>
+    <ID>ComplexMethod:FormItemSpec.kt$FormItemSpecSerializer$override fun selectDeserializer(element: JsonElement): DeserializationStrategy&lt;out FormItemSpec></ID>
+    <ID>ComplexMethod:FormUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun FormUI( hiddenIdentifiers: Set&lt;IdentifierSpec>, enabled: Boolean, elements: List&lt;FormElement>?, lastTextFieldIdentifier: IdentifierSpec?, loadingComposable: @Composable ColumnScope.() -> Unit, modifier: Modifier = Modifier )</ID>
+    <ID>ComplexMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
+    <ID>ComplexMethod:IdentifierSpec.kt$IdentifierSpec.Companion$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) fun get(value: String)</ID>
+    <ID>ComplexMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod(sharedDataSpec: SharedDataSpec)</ID>
+    <ID>ComplexMethod:TextFieldUI.kt$@Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
+    <ID>ComplexMethod:TransformGoogleToStripeAddress.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Place.transformGoogleToStripeAddress( context: Context ): com.stripe.android.model.Address</ID>
+    <ID>ComplexMethod:TransformSpecToElements.kt$TransformSpecToElements$fun transform(list: List&lt;FormItemSpec>): List&lt;FormElement></ID>
+    <ID>ConstructorParameterNaming:AddressElement.kt$AddressElement$_identifier: IdentifierSpec</ID>
+    <ID>ConstructorParameterNaming:CardNumberElement.kt$CardNumberElement$val _identifier: IdentifierSpec</ID>
+    <ID>ConstructorParameterNaming:CvcElement.kt$CvcElement$val _identifier: IdentifierSpec</ID>
+    <ID>ConstructorParameterNaming:RowElement.kt$RowElement$_identifier: IdentifierSpec</ID>
+    <ID>EmptyFunctionBlock:CardNumberViewOnlyController.kt$CardNumberViewOnlyController${}</ID>
+    <ID>ForbiddenComment:LpmRepository.kt$LpmRepository$// TODO: Unconditionally enable this when we release UPI</ID>
+    <ID>ForbiddenComment:Menu.kt$// TODO: Make sure this gets the rounded corner values</ID>
+    <ID>FunctionParameterNaming:IdentifierSpec.kt$IdentifierSpec.Companion$_value: String</ID>
+    <ID>ImplicitDefaultLocale:CurrencyFormatterTest.kt$CurrencyFormatterTest$String.format("%s, ", it.currencyCode)</ID>
+    <ID>ImplicitDefaultLocale:DateConfigTest.kt$DateConfigTest$String.format( "%d%d", get1BasedCurrentMonth() + 1 % 12, Calendar.getInstance().get(Calendar.YEAR) % 100 )</ID>
+    <ID>ImplicitDefaultLocale:DateConfigTest.kt$DateConfigTest$String.format( "%d%d", get1BasedCurrentMonth(), (Calendar.getInstance().get(Calendar.YEAR) + 1) % 100 )</ID>
+    <ID>ImplicitDefaultLocale:DateConfigTest.kt$DateConfigTest$String.format( "%d%d", get1BasedCurrentMonth(), (Calendar.getInstance().get(Calendar.YEAR) - 1) % 100 )</ID>
+    <ID>ImplicitDefaultLocale:DateConfigTest.kt$DateConfigTest$String.format( "%d%d", get1BasedCurrentMonth(), Calendar.getInstance().get(Calendar.YEAR) % 100 )</ID>
+    <ID>ImplicitDefaultLocale:DateConfigTest.kt$DateConfigTest$String.format( "%d%d", previousMonth, Calendar.getInstance().get(Calendar.YEAR) % 100 )</ID>
+    <ID>LongMethod:DropdownFieldUI.kt$@Composable internal fun DropDown( controller: DropdownFieldController, enabled: Boolean, modifier: Modifier = Modifier )</ID>
+    <ID>LongMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
+    <ID>LongMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod(sharedDataSpec: SharedDataSpec)</ID>
+    <ID>LongMethod:Menu.kt$@Suppress("ModifierParameter") @Composable internal fun DropdownMenuContent( expandedStates: MutableTransitionState&lt;Boolean>, transformOriginState: MutableState&lt;TransformOrigin>, initialFirstVisibleItemIndex: Int, modifier: Modifier = Modifier, content: LazyListScope.() -> Unit )</ID>
+    <ID>LongMethod:OTPElementUI.kt$@OptIn(ExperimentalMaterialApi::class) @Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun OTPElementUI( enabled: Boolean, element: OTPElement, modifier: Modifier = Modifier, colors: OTPElementColors = OTPElementColors( selectedBorder = MaterialTheme.colors.primary, placeholder = MaterialTheme.paymentsColors.placeholderText ), focusRequester: FocusRequester = remember { FocusRequester() } )</ID>
+    <ID>LongMethod:PhoneNumberElementUI.kt$@Composable internal fun PhoneNumberElementUI( enabled: Boolean, controller: PhoneNumberController, requestFocusWhenShown: Boolean = false, imeAction: ImeAction = ImeAction.Done )</ID>
+    <ID>LongMethod:SectionFieldElementUI.kt$@Composable internal fun SectionFieldElementUI( enabled: Boolean, field: SectionFieldElement, modifier: Modifier = Modifier, hiddenIdentifiers: Set&lt;IdentifierSpec> = emptySet(), lastTextFieldIdentifier: IdentifierSpec?, nextFocusDirection: FocusDirection = FocusDirection.Down, previousFocusDirection: FocusDirection = FocusDirection.Up )</ID>
+    <ID>LongMethod:TextFieldUI.kt$@Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
+    <ID>LongMethod:TransformGoogleToStripeAddress.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Place.transformGoogleToStripeAddress( context: Context ): com.stripe.android.model.Address</ID>
+    <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test JP address`()</ID>
+    <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test US address with sublocality`()</ID>
+    <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test US address without sublocality`()</ID>
+    <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test should not combine dependent locality - US`()</ID>
+    <ID>MagicNumber:AfterpayClearpayHeaderElement.kt$AfterpayClearpayHeaderElement$3</ID>
+    <ID>MagicNumber:AfterpayClearpayHeaderElement.kt$AfterpayClearpayHeaderElement$4</ID>
+    <ID>MagicNumber:CardDetailsElement.kt$2000</ID>
+    <ID>MagicNumber:CardDetailsElement.kt$4</ID>
+    <ID>MagicNumber:CardNumberController.kt$CardNumberEditableController$3</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$14</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$15</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$16</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$19</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$3</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$4</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation$9</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$11</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$14</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$15</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$19</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$3</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$4</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$7</ID>
+    <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$9</ID>
+    <ID>MagicNumber:CountryConfig.kt$CountryConfig.Companion$0x1F1E6</ID>
+    <ID>MagicNumber:CountryConfig.kt$CountryConfig.Companion$0x41</ID>
+    <ID>MagicNumber:DateConfig.kt$DateConfig$4</ID>
+    <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$100</ID>
+    <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$12</ID>
+    <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$50</ID>
+    <ID>MagicNumber:DropdownFieldUI.kt$.8f</ID>
+    <ID>MagicNumber:DropdownFieldUI.kt$.9f</ID>
+    <ID>MagicNumber:DropdownFieldUI.kt$8.9f</ID>
+    <ID>MagicNumber:Html.kt$0.1f</ID>
+    <ID>MagicNumber:IbanConfig.kt$IbanConfig$10</ID>
+    <ID>MagicNumber:IbanConfig.kt$IbanConfig$4</ID>
+    <ID>MagicNumber:LpmRepository.kt$LpmRepository$20</ID>
+    <ID>MagicNumber:Menu.kt$0.8f</ID>
+    <ID>MagicNumber:PaymentsTheme.kt$0.15</ID>
+    <ID>MagicNumber:PaymentsTheme.kt$0.32</ID>
+    <ID>MagicNumber:PaymentsTheme.kt$3</ID>
+    <ID>MagicNumber:PhoneNumberController.kt$PhoneNumberController.Companion$4</ID>
+    <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$3</ID>
+    <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$5</ID>
+    <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$6</ID>
+    <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$7</ID>
+    <ID>MagicNumber:TextFieldUI.kt$1000</ID>
+    <ID>MaxLineLength:AddressElementTest.kt$AddressElementTest$fun</ID>
+    <ID>MaxLineLength:AndroidMenu.kt$*</ID>
+    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.determineState(CardBrand.Visa, "", CardBrand.Visa.getMaxLengthForCardNumber("")))</ID>
+    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.AMEX_NO_SPACES)).text)</ID>
+    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)).text)</ID>
+    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)).text)</ID>
+    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DISCOVER_NO_SPACES)).text)</ID>
+    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.JCB_NO_SPACES)).text)</ID>
+    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.UNIONPAY_NO_SPACES)).text)</ID>
+    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.VISA_NO_SPACES)).text)</ID>
+    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Unknown, "0", CardBrand.Unknown.getMaxLengthForCardNumber("0"))</ID>
+    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "12", CardBrand.Visa.getMaxLengthForCardNumber("12"))</ID>
+    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "1234567890123456789", CardBrand.Visa.getMaxLengthForCardNumber("1234567890123456789"))</ID>
+    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "4242424242424242", CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242"))</ID>
+    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "4242424242424243", CardBrand.Visa.getMaxLengthForCardNumber("4242424242424243"))</ID>
+    <ID>MaxLineLength:LpmRepository.kt$LpmRepository.SupportedPaymentMethod$/** This describes the image in the LPM selector. These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */</ID>
+    <ID>MaxLineLength:NextActionSpec.kt$PostConfirmHandlingPiStatusSpecsSerializer$override</ID>
+    <ID>MaximumLineLength:com.stripe.android.ui.core.elements.NextActionSpec.kt:63</ID>
+    <ID>ReturnCount:AuBankAccountNumberConfig.kt$AuBankAccountNumberConfig$override fun determineState(input: String): TextFieldState</ID>
+    <ID>ReturnCount:BsbConfig.kt$BsbConfig$override fun determineState(input: String): TextFieldState</ID>
+    <ID>ReturnCount:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>
+    <ID>ReturnCount:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
+    <ID>ReturnCount:IbanConfig.kt$IbanConfig$override fun determineState(input: String): TextFieldState</ID>
+    <ID>ReturnCount:OTPController.kt$OTPController$fun onValueChanged(index: Int, text: String): Int</ID>
+    <ID>ReturnCount:PhoneNumberController.kt$PhoneNumberController.Companion$fun createPhoneNumberController( initialValue: String = "", initiallySelectedCountryCode: String? = null ): PhoneNumberController</ID>
+    <ID>ReturnCount:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>
+    <ID>ReturnCount:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
+    <ID>SpreadOperator:BsbElementUI.kt$( it.errorMessage, *args )</ID>
+    <ID>SpreadOperator:PhoneNumberElementUI.kt$( it.errorMessage, *args )</ID>
+    <ID>SpreadOperator:SectionElementUI.kt$( it.errorMessage, *args )</ID>
+    <ID>SpreadOperator:TextFieldUI.kt$( it.errorMessage, *args )</ID>
+    <ID>ThrowingExceptionsWithoutMessageOrCause:TransformAddressToElement.kt$IllegalArgumentException()</ID>
+    <ID>TooGenericExceptionCaught:LpmSerializer.kt$LpmSerializer$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:PlacesClientProxy.kt$DefaultPlacesClientProxy$e: Exception</ID>
+    <ID>TooManyFunctions:LpmRepository.kt$LpmRepository</ID>
+    <ID>TooManyFunctions:PaymentsTheme.kt$com.stripe.android.ui.core.PaymentsTheme.kt</ID>
+    <ID>UnnecessaryAbstractClass:FormControllerModule.kt$FormControllerModule$FormControllerModule</ID>
+    <ID>UnnecessaryAbstractClass:ResourceRepositoryModule.kt$ResourceRepositoryModule$ResourceRepositoryModule</ID>
+    <ID>UtilityClassWithPublicConstructor:CurrencyFormatter.kt$CurrencyFormatter</ID>
+    <ID>UtilityClassWithPublicConstructor:FieldValuesToParamsMapConverter.kt$FieldValuesToParamsMapConverter</ID>
+    <ID>UtilityClassWithPublicConstructor:FormControllerModule.kt$FormControllerModule</ID>
+  </CurrentIssues>
+</SmellBaseline>

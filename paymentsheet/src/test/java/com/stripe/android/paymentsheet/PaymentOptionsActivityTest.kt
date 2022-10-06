@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -18,6 +17,9 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
@@ -26,10 +28,18 @@ import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
+import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
@@ -39,6 +49,8 @@ import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -46,18 +58,42 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 @ExperimentalCoroutinesApi
+@FlowPreview
 @RunWith(RobolectricTestRunner::class)
-class PaymentOptionsActivityTest {
+internal class PaymentOptionsActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
+    private lateinit var injector: Injector
+    private val addressRepository = AddressRepository(context.resources)
+    private val lpmRepository = mock<LpmRepository>().apply {
+        whenever(fromCode(any())).thenReturn(
+            LpmRepository.SupportedPaymentMethod(
+                PaymentMethod.Type.Card.code,
+                false,
+                com.stripe.android.ui.core.R.string.stripe_paymentsheet_payment_method_card,
+                com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
+                true,
+                PaymentMethodRequirements(emptySet(), emptySet(), true),
+                LayoutSpec.create(
+                    EmailSpec(),
+                    SaveForFutureUseSpec()
+                )
+            )
+        )
+    }
+
     private val viewModel = createViewModel()
 
     private val primaryButtonUIState = PrimaryButton.UIState(
@@ -73,6 +109,11 @@ class PaymentOptionsActivityTest {
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
+    }
+
+    @AfterTest
+    fun cleanup() {
+        WeakMapInjectorRegistry.clear()
     }
 
     @Test
@@ -443,17 +484,10 @@ class PaymentOptionsActivityTest {
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS
     ): PaymentOptionsViewModel {
-        val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)
-        ).apply {
-            this.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
-        }
-        val addressRepository = AddressRepository(
-            ApplicationProvider.getApplicationContext<Application>().resources
-        )
         val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
-            onBlocking { setup(any(), any()) }.thenReturn(AccountStatus.SignedOut)
+            onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
         }
+        registerFormViewModelInjector()
         return PaymentOptionsViewModel(
             args = args,
             prefsRepositoryFactory = { FakePrefsRepository() },
@@ -463,14 +497,47 @@ class PaymentOptionsActivityTest {
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
-            lpmResourceRepository = StaticLpmResourceRepository(
-                lpmRepository
-            ),
-            addressResourceRepository = StaticAddressResourceRepository(
-                addressRepository
-            ),
+            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
+            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
             savedStateHandle = SavedStateHandle(),
             linkLauncher = linkPaymentLauncher
         )
+    }
+
+    fun registerFormViewModelInjector() {
+        val formViewModel = FormViewModel(
+            context = context,
+            formFragmentArguments = FormFragmentArguments(
+                PaymentMethod.Type.Card.code,
+                showCheckbox = true,
+                showCheckboxControlledFields = true,
+                merchantName = "Merchant, Inc.",
+                amount = Amount(50, "USD"),
+                injectorKey = "injectorTestKeyFormFragmentArgumentTest",
+                initialPaymentMethodCreateParams = null
+            ),
+            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
+            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
+            showCheckboxFlow = mock()
+        )
+
+        val mockFormBuilder = mock<FormViewModelSubcomponent.Builder>()
+        val mockFormSubcomponent = mock<FormViewModelSubcomponent>()
+        val mockFormSubComponentBuilderProvider =
+            mock<Provider<FormViewModelSubcomponent.Builder>>()
+        whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
+        whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormBuilder.showCheckboxFlow(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
+        whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
+
+        injector = object : Injector {
+            override fun inject(injectable: Injectable<*>) {
+                (injectable as? FormViewModel.Factory)?.let {
+                    injectable.subComponentBuilderProvider = mockFormSubComponentBuilderProvider
+                }
+            }
+        }
+        WeakMapInjectorRegistry.register(injector, DUMMY_INJECTOR_KEY)
     }
 }

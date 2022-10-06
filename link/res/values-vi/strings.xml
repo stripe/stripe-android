@@ -10,8 +10,6 @@
   <string name="log_out">Đăng xuất khỏi Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="pm_set_as_default">Đặt làm phương thức thanh toán mặc định</string>
-  <!-- Text of a label indicating that a payment method is the default. -->
-  <string name="pm_your_default">Đây là thông tin mặc định của bạn</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="show_menu">Hiển thị trình đơn</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->

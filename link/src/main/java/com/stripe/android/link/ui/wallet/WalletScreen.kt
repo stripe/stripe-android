@@ -392,7 +392,7 @@ internal fun CardDetailsRecollectionForm(
             SectionElementUI(
                 enabled = true,
                 element = SectionElement.wrap(rowElement),
-                hiddenIdentifiers = emptyList(),
+                hiddenIdentifiers = emptySet(),
                 lastTextFieldIdentifier = rowElement.fields.last().identifier
             )
         }

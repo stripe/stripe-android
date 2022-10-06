@@ -53,7 +53,8 @@ internal class ConsentFragmentTest {
                 privacyPolicy = CONSENT_PRIVACY_POLICY,
                 timeEstimate = CONSENT_TIME_ESTIMATE,
                 body = CONSENT_BODY,
-                declineButtonText = CONSENT_DECLINE_TEXT
+                declineButtonText = CONSENT_DECLINE_TEXT,
+                scrollToContinueButtonText = SCROLL_TO_CONTINUE_TEXT
             )
         )
         whenever(it.requirements).thenReturn(
@@ -136,6 +137,7 @@ internal class ConsentFragmentTest {
         const val CONSENT_BODY = "this is the consent body"
         const val CONSENT_ACCEPT_TEXT = "yes"
         const val CONSENT_DECLINE_TEXT = "no"
+        const val SCROLL_TO_CONTINUE_TEXT = "scroll to continue"
 
         const val VERIFICATION_SESSION_ID = "id_5678"
         const val EPHEMERAL_KEY = "eak_5678"

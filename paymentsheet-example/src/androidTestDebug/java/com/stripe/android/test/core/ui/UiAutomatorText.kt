@@ -29,7 +29,15 @@ open class UiAutomatorText(
         device.findObject(selector).click()
     }
 
-    fun exists() = device.findObject(selector).exists()
+    fun exists(): Boolean {
+        val originalClassName = className
+        className = if (device.findObject(selector).exists()) {
+            originalClassName
+        } else {
+            null
+        }
+        return device.findObject(selector).exists()
+    }
 
     fun wait(waitMs: Long) =
         device.wait(Until.findObject(By.text(label)), waitMs)

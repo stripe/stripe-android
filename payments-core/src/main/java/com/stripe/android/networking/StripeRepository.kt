@@ -330,7 +330,8 @@ abstract class StripeRepository {
         APIException::class,
         CardException::class
     )
-    internal abstract suspend fun retrieveCustomer(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
         requestOptions: ApiRequest.Options
@@ -502,7 +503,8 @@ abstract class StripeRepository {
         clientSecret: String,
         paymentIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
     ): PaymentIntent?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -510,7 +512,8 @@ abstract class StripeRepository {
         clientSecret: String,
         setupIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
     ): SetupIntent?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -1,6 +1,5 @@
 package com.stripe.android.identity.ui
 
-import android.graphics.Typeface
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.compose.foundation.Image
@@ -42,6 +41,16 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isUnsupportedClient
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.utils.setHtmlString
+
+internal const val TITLE_TAG = "Title"
+internal const val TIME_ESTIMATE_TAG = "TimeEstimate"
+internal const val PRIVACY_POLICY_TAG = "PrivacyPolicy"
+internal const val DIVIDER_TAG = "divider"
+internal const val BODY_TAG = "Body"
+internal const val ACCEPT_BUTTON_TAG = "Accept"
+internal const val DECLINE_BUTTON_TAG = "Decline"
+internal const val LOADING_SCREEN_TAG = "Loading"
+internal const val SCROLLABLE_COLUMN_TAG = "ScrollableColumn"
 
 @Composable
 internal fun ConsentScreen(
@@ -90,15 +99,6 @@ internal fun ConsentScreen(
     }
 }
 
-internal const val titleTag = "Title"
-internal const val timeEstimateTag = "TimeEstimate"
-internal const val privacyPolicyTag = "PrivacyPolicy"
-internal const val dividerTag = "divider"
-internal const val bodyTag = "Body"
-internal const val acceptButtonTag = "Accept"
-internal const val declineButtonTag = "Decline"
-internal const val loadingScreenTag = "Loading"
-
 @Composable
 private fun SuccessUI(
     verificationPage: VerificationPage,
@@ -119,10 +119,14 @@ private fun SuccessUI(
                 bottom = dimensionResource(id = R.dimen.page_vertical_margin)
             )
     ) {
+        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
+                .semantics {
+                    testTag = SCROLLABLE_COLUMN_TAG
+                }
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -157,14 +161,12 @@ private fun SuccessUI(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        top = dimensionResource(
+                        vertical = dimensionResource(
                             id = R.dimen.item_vertical_margin
-                        ),
-                        bottom = 42.dp
-
+                        )
                     )
                     .semantics {
-                        testTag = titleTag
+                        testTag = TITLE_TAG
                     },
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
@@ -183,39 +185,28 @@ private fun SuccessUI(
                             .fillMaxWidth()
                             .padding(start = 6.dp)
                             .semantics {
-                                testTag = timeEstimateTag
+                                testTag = TIME_ESTIMATE_TAG
                             },
                         factory = { TextView(it) },
                         update = {
-                            it.typeface = Typeface.DEFAULT_BOLD
                             it.text = timeEstimateString
                         }
                     )
                 }
             }
             consentPage.privacyPolicy?.let { privacyPolicyString ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.privacy_policy_icon),
-                        contentDescription = stringResource(id = R.string.description_privacy_policy)
-                    )
-                    AndroidView(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 6.dp)
-                            .semantics {
-                                testTag = privacyPolicyTag
-                            },
-                        factory = { TextView(it) },
-                        update = {
-                            it.typeface = Typeface.DEFAULT_BOLD
-                            it.setHtmlString(privacyPolicyString)
-                        }
-                    )
-                }
+                AndroidView(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
+                        .semantics {
+                            testTag = PRIVACY_POLICY_TAG
+                        },
+                    factory = { TextView(it) },
+                    update = {
+                        it.setHtmlString(privacyPolicyString)
+                    }
+                )
             }
             if (consentPage.timeEstimate != null && consentPage.privacyPolicy != null) {
                 Divider(
@@ -223,16 +214,17 @@ private fun SuccessUI(
                         .fillMaxWidth()
                         .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
                         .semantics {
-                            testTag = dividerTag
+                            testTag = DIVIDER_TAG
                         }
                 )
             }
 
+            // TODO(ccen-stripe): replace with [Html]
             AndroidView(
                 modifier = Modifier
                     .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
                     .semantics {
-                        testTag = bodyTag
+                        testTag = BODY_TAG
                     },
                 factory = { TextView(it) },
                 update = {
@@ -244,12 +236,28 @@ private fun SuccessUI(
         var acceptState by remember { mutableStateOf(LoadingButtonState.Idle) }
         var declineState by remember { mutableStateOf(LoadingButtonState.Idle) }
 
+        var scrolledToBottom by remember { mutableStateOf(false) }
+        LaunchedEffect(scrollState.value) {
+            if (!scrolledToBottom) {
+                scrolledToBottom = scrollState.value == scrollState.maxValue
+            }
+        }
+
         LoadingButton(
             modifier = Modifier
                 .padding(bottom = 10.dp)
-                .semantics { testTag = acceptButtonTag },
-            text = consentPage.acceptButtonText.uppercase(),
-            state = acceptState
+                .semantics { testTag = ACCEPT_BUTTON_TAG },
+            text =
+            if (scrolledToBottom) {
+                consentPage.acceptButtonText.uppercase()
+            } else {
+                consentPage.scrollToContinueButtonText.uppercase()
+            },
+            state = if (scrolledToBottom) {
+                acceptState
+            } else {
+                LoadingButtonState.Disabled
+            }
         ) {
             acceptState = LoadingButtonState.Loading
             declineState = LoadingButtonState.Disabled
@@ -258,7 +266,7 @@ private fun SuccessUI(
 
         LoadingButton(
             modifier = Modifier
-                .semantics { testTag = declineButtonTag },
+                .semantics { testTag = DECLINE_BUTTON_TAG },
             text = consentPage.declineButtonText.uppercase(),
             state = declineState
         ) {
@@ -275,7 +283,7 @@ private fun LoadingUI() {
         modifier = Modifier
             .fillMaxSize()
             .semantics {
-                testTag = loadingScreenTag
+                testTag = LOADING_SCREEN_TAG
             },
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally

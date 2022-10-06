@@ -19,7 +19,6 @@ import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -112,7 +111,7 @@ class VerificationViewModelTest {
         }
 
     @Test
-    fun `When confirmVerification fails then code is cleared and focus requested`() =
+    fun `When confirmVerification fails then code is cleared`() =
         runTest {
             whenever(linkAccountManager.confirmVerification(any()))
                 .thenReturn(Result.failure(RuntimeException("Error")))
@@ -124,18 +123,9 @@ class VerificationViewModelTest {
             }
 
             for (i in 0 until viewModel.otpElement.controller.otpLength) {
-                viewModel.otpElement.controller.onValueChanged(i, i.toString())
+                viewModel.otpElement.controller.onValueChanged(i, "1")
             }
-            assertThat(otp).isEqualTo("012345")
 
-            viewModel.onFocusRequested()
-            assertThat(viewModel.requestFocus.value).isFalse()
-            viewModel.onVerificationCodeEntered("code")
-
-            // Advance past animation
-            advanceTimeBy(1000)
-
-            assertThat(viewModel.requestFocus.value).isTrue()
             assertThat(otp).isEqualTo("")
         }
 

@@ -15,6 +15,7 @@ import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.utils.FakeAndroidKeyStore
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -37,13 +38,18 @@ import kotlin.test.assertNotNull
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class LinkActivityViewModelTest {
+    private val config = LinkPaymentLauncher.Configuration(
+        stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
+        merchantName = MERCHANT_NAME,
+        customerName = CUSTOMER_NAME,
+        customerEmail = CUSTOMER_EMAIL,
+        customerPhone = CUSTOMER_PHONE,
+        customerBillingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
+        shippingValues = null,
+    )
+
     private val defaultArgs = LinkActivityContract.Args(
-        StripeIntentFixtures.PI_SUCCEEDED,
-        MERCHANT_NAME,
-        CUSTOMER_EMAIL,
-        CUSTOMER_PHONE,
-        CUSTOMER_NAME,
-        null,
+        config,
         null,
         LinkActivityContract.Args.InjectionParams(
             INJECTOR_KEY,
@@ -65,26 +71,26 @@ class LinkActivityViewModelTest {
     @Test
     fun `When StripeIntent is missing required fields then it dismisses with error`() = runTest {
         createViewModel(
-            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(clientSecret = null))
+            createArgs(StripeIntentFixtures.PI_SUCCEEDED.copy(clientSecret = null))
         )
         verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
 
         reset(navigator)
         createViewModel(
-            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(id = null))
+            createArgs(StripeIntentFixtures.PI_SUCCEEDED.copy(id = null))
         )
         verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
         reset(navigator)
 
         reset(navigator)
         createViewModel(
-            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(amount = null))
+            createArgs(StripeIntentFixtures.PI_SUCCEEDED.copy(amount = null))
         )
         verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
 
         reset(navigator)
         createViewModel(
-            defaultArgs.copy(StripeIntentFixtures.PI_SUCCEEDED.copy(currency = null))
+            createArgs(StripeIntentFixtures.PI_SUCCEEDED.copy(currency = null))
         )
         verify(navigator).dismiss(argWhere { it is LinkActivityResult.Failed })
     }
@@ -189,6 +195,14 @@ class LinkActivityViewModelTest {
             confirmationManager
         )
 
+    private fun createArgs(
+        stripeIntent: StripeIntent
+    ) = defaultArgs.copy(
+        configuration = config.copy(
+            stripeIntent = stripeIntent
+        )
+    )
+
     private fun setupNavigation(
         hasBackStack: Boolean = false,
         userNavigationEnabled: Boolean = true
@@ -210,5 +224,6 @@ class LinkActivityViewModelTest {
         const val CUSTOMER_EMAIL = "customer@email.com"
         const val CUSTOMER_NAME = "Customer"
         const val CUSTOMER_PHONE = "1234567890"
+        const val CUSTOMER_BILLING_COUNTRY_CODE = "US"
     }
 }

@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -28,7 +30,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +43,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
@@ -81,18 +87,19 @@ private fun Preview() {
 fun LinkInlineSignup(
     linkPaymentLauncher: LinkPaymentLauncher,
     enabled: Boolean,
-    onStateChanged: (InlineSignupViewState) -> Unit
+    onStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    linkPaymentLauncher.injector?.let { injector ->
+    linkPaymentLauncher.component?.let { component ->
         val viewModel: InlineSignupViewModel = viewModel(
-            factory = InlineSignupViewModel.Factory(injector)
+            factory = InlineSignupViewModel.Factory(component.injector)
         )
 
         val viewState by viewModel.viewState.collectAsState()
         val errorMessage by viewModel.errorMessage.collectAsState()
 
         LaunchedEffect(viewState) {
-            onStateChanged(viewState)
+            onStateChanged(component.configuration, viewState)
         }
 
         val focusManager = LocalFocusManager.current
@@ -105,7 +112,7 @@ fun LinkInlineSignup(
         }
 
         LinkInlineSignup(
-            merchantName = viewModel.merchantName,
+            merchantName = viewState.merchantName,
             emailController = viewModel.emailController,
             phoneNumberController = viewModel.phoneController,
             nameController = viewModel.nameController,
@@ -114,7 +121,8 @@ fun LinkInlineSignup(
             expanded = viewState.isExpanded,
             requiresNameCollection = viewModel.requiresNameCollection,
             errorMessage = errorMessage,
-            toggleExpanded = viewModel::toggleExpanded
+            toggleExpanded = viewModel::toggleExpanded,
+            modifier = modifier
         )
     }
 }
@@ -130,7 +138,8 @@ internal fun LinkInlineSignup(
     expanded: Boolean,
     requiresNameCollection: Boolean,
     errorMessage: ErrorMessage?,
-    toggleExpanded: () -> Unit
+    toggleExpanded: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val focusRequester = remember { FocusRequester() }
 
@@ -145,8 +154,7 @@ internal fun LinkInlineSignup(
     ) {
         PaymentsTheme {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = modifier
                     .border(
                         border = MaterialTheme.getBorderStroke(isSelected = false),
                         shape = MaterialTheme.linkShapes.medium
@@ -194,69 +202,91 @@ internal fun LinkInlineSignup(
                     }
 
                     AnimatedVisibility(
-                        visible = expanded,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        visible = expanded
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp)
-                        ) {
-                            EmailCollectionSection(
-                                enabled = enabled,
-                                emailController = emailController,
-                                signUpState = signUpState,
-                                focusRequester = focusRequester
+                        Column {
+                            Divider(
+                                color =
+                                MaterialTheme.paymentsColors.componentBorder.copy(alpha = 0.1f)
                             )
-
-                            AnimatedVisibility(
-                                visible = signUpState != SignUpState.InputtingPhoneOrName &&
-                                    errorMessage != null
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
                             ) {
-                                ErrorText(
-                                    text = errorMessage?.getMessage(LocalContext.current.resources)
-                                        .orEmpty(),
-                                    modifier = Modifier.fillMaxWidth()
+                                EmailCollectionSection(
+                                    enabled = enabled,
+                                    emailController = emailController,
+                                    signUpState = signUpState,
+                                    focusRequester = focusRequester
                                 )
-                            }
 
-                            AnimatedVisibility(
-                                visible = signUpState == SignUpState.InputtingPhoneOrName
-                            ) {
-                                Column(modifier = Modifier.fillMaxWidth()) {
-                                    PhoneNumberCollectionSection(
-                                        enabled = enabled,
-                                        phoneNumberController = phoneNumberController,
-                                        requestFocusWhenShown =
-                                        phoneNumberController.initialPhoneNumber.isEmpty(),
-                                        imeAction = if (requiresNameCollection) {
-                                            ImeAction.Next
-                                        } else {
-                                            ImeAction.Done
-                                        }
-                                    )
-
-                                    if (requiresNameCollection) {
-                                        TextFieldSection(
-                                            textFieldController = nameController,
-                                            imeAction = ImeAction.Done,
-                                            enabled = enabled
-                                        )
-                                    }
-
-                                    AnimatedVisibility(visible = errorMessage != null) {
-                                        ErrorText(
-                                            text = errorMessage?.getMessage(LocalContext.current.resources)
-                                                .orEmpty(),
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
-                                    }
-
-                                    LinkTerms(
-                                        modifier = Modifier.padding(top = 8.dp),
-                                        textAlign = TextAlign.Left
+                                AnimatedVisibility(
+                                    visible = signUpState != SignUpState.InputtingPhoneOrName &&
+                                        errorMessage != null
+                                ) {
+                                    ErrorText(
+                                        text = errorMessage
+                                            ?.getMessage(LocalContext.current.resources)
+                                            .orEmpty(),
+                                        modifier = Modifier.fillMaxWidth()
                                     )
                                 }
+
+                                AnimatedVisibility(
+                                    visible = signUpState == SignUpState.InputtingPhoneOrName
+                                ) {
+                                    Column(modifier = Modifier.fillMaxWidth()) {
+                                        PhoneNumberCollectionSection(
+                                            enabled = enabled,
+                                            phoneNumberController = phoneNumberController,
+                                            requestFocusWhenShown =
+                                            phoneNumberController.initialPhoneNumber.isEmpty(),
+                                            imeAction = if (requiresNameCollection) {
+                                                ImeAction.Next
+                                            } else {
+                                                ImeAction.Done
+                                            }
+                                        )
+
+                                        if (requiresNameCollection) {
+                                            TextFieldSection(
+                                                textFieldController = nameController,
+                                                imeAction = ImeAction.Done,
+                                                enabled = enabled
+                                            )
+                                        }
+
+                                        AnimatedVisibility(visible = errorMessage != null) {
+                                            ErrorText(
+                                                text = errorMessage
+                                                    ?.getMessage(LocalContext.current.resources)
+                                                    .orEmpty(),
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
+
+                                        LinkTerms(
+                                            modifier = Modifier.padding(top = 8.dp),
+                                            textAlign = TextAlign.Left
+                                        )
+                                    }
+                                }
+                            }
+                            Divider(
+                                color =
+                                MaterialTheme.paymentsColors.componentBorder.copy(alpha = 0.1f)
+                            )
+                            Row(modifier = Modifier.padding(16.dp)) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_link_logo),
+                                    contentDescription = stringResource(id = R.string.link),
+                                    modifier = Modifier
+                                        .semantics {
+                                            testTag = "LinkLogoIcon"
+                                        },
+                                    tint = MaterialTheme.linkColors.inlineLinkLogo
+                                )
                             }
                         }
                     }

@@ -34,6 +34,17 @@ class StripeIntentValidatorTest {
     }
 
     @Test
+    fun `requireValid() requires card is accepted`() {
+        assertFails {
+            validator.requireValid(
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("link", "us_bank_account")
+                )
+            )
+        }
+    }
+
+    @Test
     fun `requireValid() Succeeded is not valid`() {
         assertFails {
             validator.requireValid(
