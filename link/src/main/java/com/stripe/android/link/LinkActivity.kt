@@ -77,8 +77,6 @@ internal class LinkActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // TODO(brnunes-stripe): Migrate to androidx.compose.foundation 1.2.0 when out of beta
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         overridePendingTransition(R.anim.slide_up, 0)
 
         setContent {

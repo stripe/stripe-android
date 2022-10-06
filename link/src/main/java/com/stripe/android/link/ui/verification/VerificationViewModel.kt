@@ -16,7 +16,6 @@ import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -90,16 +89,11 @@ internal class VerificationViewModel @Inject constructor(
                     onVerificationCompleted()
                 },
                 onFailure = {
-                    onError(it)
                     linkEventsReporter.on2FAFailure()
-                    viewModelScope.launch {
-                        delay(50)
-                        for (i in 0 until otpElement.controller.otpLength) {
-                            delay(10)
-                            otpElement.controller.onValueChanged(i, "")
-                        }
-                        _requestFocus.value = true
+                    for (i in 0 until otpElement.controller.otpLength) {
+                        otpElement.controller.onValueChanged(i, "")
                     }
+                    onError(it)
                 }
             )
         }
