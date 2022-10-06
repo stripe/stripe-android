@@ -5,6 +5,7 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
@@ -139,23 +140,37 @@ internal class AccountPickerViewModel @Inject constructor(
 
     fun onAccountClicked(account: PartnerAccount) {
         withState { state ->
-            when (state.payload()?.selectionMode) {
-                SelectionMode.DROPDOWN,
-                SelectionMode.RADIO -> setState { copy(selectedIds = setOf(account.id)) }
+            state.payload()?.let { payload ->
+                when (payload.selectionMode) {
+                    SelectionMode.DROPDOWN,
+                    SelectionMode.RADIO -> setState {
+                        copy(payload = Success(payload.copy(selectedIds = setOf(account.id))))
+                    }
 
-                SelectionMode.CHECKBOXES -> if (state.selectedIds.contains(account.id)) {
-                    setState { copy(selectedIds = selectedIds - account.id) }
-                } else {
-                    setState { copy(selectedIds = selectedIds + account.id) }
+                    SelectionMode.CHECKBOXES -> if (payload.selectedIds.contains(account.id)) {
+                        setState {
+                            copy(payload = Success(payload.copy(selectedIds = payload.selectedIds - account.id)))
+                        }
+                    } else {
+                        setState {
+                            copy(payload = Success(payload.copy(selectedIds = payload.selectedIds + account.id)))
+                        }
+                    }
                 }
-
-                null -> logger.error("account clicked without available payload.")
+            } ?: run {
+                logger.error("account clicked without available payload.")
             }
         }
     }
 
     fun onSubmit() {
-        withState { state -> submitAccounts(state.selectedIds) }
+        withState { state ->
+            state.payload()?.let { payload ->
+                submitAccounts(payload.selectedIds)
+            } ?: run {
+                logger.error("account clicked without available payload.")
+            }
+        }
     }
 
     private fun submitAccounts(
@@ -183,6 +198,23 @@ internal class AccountPickerViewModel @Inject constructor(
         loadAccounts()
     }
 
+    fun onSelectAllAccountsClicked() {
+        withState { state ->
+            state.payload()?.let { payload ->
+                if (payload.allAccountsSelected) {
+                    // unselect all accounts
+                    setState { copy(payload = Success(payload.copy(selectedIds = emptySet()))) }
+                } else {
+                    // select all accounts
+                    setState {
+                        val ids = payload.selectableAccounts.map { it.account.id }.toSet()
+                        copy(payload = Success(payload.copy(selectedIds = ids)))
+                    }
+                }
+            }
+        }
+    }
+
     companion object :
         MavericksViewModelFactory<AccountPickerViewModel, AccountPickerState> {
 
@@ -205,14 +237,13 @@ internal data class AccountPickerState(
     val payload: Async<Payload> = Uninitialized,
     val canRetry: Boolean = true,
     val selectAccounts: Async<PartnerAccountsList> = Uninitialized,
-    val selectedIds: Set<String> = emptySet()
 ) : MavericksState {
 
     val submitLoading: Boolean
         get() = payload is Loading || selectAccounts is Loading
 
     val submitEnabled: Boolean
-        get() = selectedIds.isNotEmpty()
+        get() = payload()?.selectedIds?.isNotEmpty() ?: false
 
     data class Payload(
         val skipAccountSelection: Boolean,
@@ -226,12 +257,19 @@ internal data class AccountPickerState(
         val institutionSkipAccountSelection: Boolean
     ) {
 
+        val allAccountsSelected: Boolean
+            get() = selectableAccounts.count() == selectedIds.count()
+
+        val selectableAccounts
+            get() = accounts.filter { it.enabled }
+
         val subtitle: TextResource?
             get() = when {
                 selectionMode != SelectionMode.DROPDOWN || singleAccount.not() -> null
                 stripeDirect -> TextResource.StringId(
                     R.string.stripe_accountpicker_singleaccount_description_withstripe
                 )
+
                 businessName != null -> TextResource.StringId(
                     R.string.stripe_accountpicker_singleaccount_description,
                     listOf(businessName)

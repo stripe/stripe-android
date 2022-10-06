@@ -61,6 +61,7 @@ import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.TextResource
@@ -81,11 +82,12 @@ internal fun AccountPickerScreen() {
     AccountPickerContent(
         state = state.value,
         onAccountClicked = viewModel::onAccountClicked,
-        onSelectAccounts = viewModel::onSubmit,
+        onSubmit = viewModel::onSubmit,
         onSelectAnotherBank = viewModel::selectAnotherBank,
         onCloseClick = parentViewModel::onCloseWithConfirmationClick,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
+        onSelectAllAccountsClicked = viewModel::onSelectAllAccountsClicked,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
     )
 }
@@ -94,7 +96,8 @@ internal fun AccountPickerScreen() {
 private fun AccountPickerContent(
     state: AccountPickerState,
     onAccountClicked: (PartnerAccount) -> Unit,
-    onSelectAccounts: () -> Unit,
+    onSubmit: () -> Unit,
+    onSelectAllAccountsClicked: () -> Unit,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onLoadAccountsAgain: () -> Unit,
@@ -119,14 +122,15 @@ private fun AccountPickerContent(
                     submitEnabled = state.submitEnabled,
                     submitLoading = state.submitLoading,
                     accounts = payload().accounts,
+                    allAccountsSelected = payload().allAccountsSelected,
                     subtitle = payload().subtitle,
-                    selectedIds = state.selectedIds,
+                    selectedIds = payload().selectedIds,
                     onAccountClicked = onAccountClicked,
-                    onSelectAccounts = onSelectAccounts,
+                    onSubmit = onSubmit,
                     selectionMode = payload().selectionMode,
                     accessibleDataCalloutModel = payload().accessibleData,
-
-                    )
+                    onSelectAllAccountsClicked = onSelectAllAccountsClicked,
+                )
             }
 
             is Fail -> when (val error = payload.error) {
@@ -167,11 +171,13 @@ private fun AccountPickerLoaded(
     submitEnabled: Boolean,
     submitLoading: Boolean,
     accounts: List<PartnerAccountUI>,
+    allAccountsSelected: Boolean,
     accessibleDataCalloutModel: AccessibleDataCalloutModel?,
     selectionMode: SelectionMode,
     selectedIds: Set<String>,
     onAccountClicked: (PartnerAccount) -> Unit,
-    onSelectAccounts: () -> Unit,
+    onSelectAllAccountsClicked: () -> Unit,
+    onSubmit: () -> Unit,
     subtitle: TextResource?
 ) {
     Column(
@@ -213,8 +219,10 @@ private fun AccountPickerLoaded(
 
                 SelectionMode.CHECKBOXES -> MultiSelectContent(
                     accounts = accounts,
+                    allAccountsSelected = allAccountsSelected,
                     selectedIds = selectedIds,
-                    onAccountClicked = onAccountClicked
+                    onAccountClicked = onAccountClicked,
+                    onSelectAllAccountsClicked = onSelectAllAccountsClicked
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -224,7 +232,7 @@ private fun AccountPickerLoaded(
         FinancialConnectionsButton(
             enabled = submitEnabled,
             loading = submitLoading,
-            onClick = onSelectAccounts,
+            onClick = onSubmit,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -379,12 +387,39 @@ private fun SingleSelectContent(
 private fun MultiSelectContent(
     accounts: List<PartnerAccountUI>,
     selectedIds: Set<String>,
-    onAccountClicked: (PartnerAccount) -> Unit
+    onAccountClicked: (PartnerAccount) -> Unit,
+    onSelectAllAccountsClicked: () -> Unit,
+    allAccountsSelected: Boolean
 ) {
     LazyColumn(
         contentPadding = PaddingValues(top = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        item("select_all_accounts") {
+            AccountItem(
+                enabled = true,
+                selected = allAccountsSelected,
+                onAccountClicked = { onSelectAllAccountsClicked() },
+                account = PartnerAccount(
+                    id = "select_all_accounts",
+                    authorization = "",
+                    category = FinancialConnectionsAccount.Category.UNKNOWN,
+                    subcategory = FinancialConnectionsAccount.Subcategory.UNKNOWN,
+                    name = stringResource(R.string.stripe_account_picker_select_all_accounts),
+                    supportedPaymentMethodTypes = emptyList()
+                ),
+            ) {
+                Checkbox(
+                    checked = allAccountsSelected,
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = FinancialConnectionsTheme.colors.textBrand,
+                        checkmarkColor = FinancialConnectionsTheme.colors.textWhite,
+                        uncheckedColor = FinancialConnectionsTheme.colors.borderDefault
+                    ),
+                    onCheckedChange = null
+                )
+            }
+        }
         items(accounts, key = { it.account.id }) { account ->
             AccountItem(
                 enabled = account.enabled,
@@ -498,12 +533,13 @@ internal fun AccountPickerPreviewMultiSelect() {
         AccountPickerContent(
             AccountPickerStates.multiSelect(),
             onAccountClicked = {},
-            onSelectAccounts = {},
+            onSubmit = {},
             onSelectAnotherBank = {},
             onCloseClick = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseFromErrorClick = {}
+            onCloseFromErrorClick = {},
+            onSelectAllAccountsClicked = {}
         )
     }
 }
@@ -519,12 +555,13 @@ internal fun AccountPickerPreviewSingleSelect() {
         AccountPickerContent(
             AccountPickerStates.singleSelect(),
             onAccountClicked = {},
-            onSelectAccounts = {},
+            onSubmit = {},
             onSelectAnotherBank = {},
             onCloseClick = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseFromErrorClick = {}
+            onCloseFromErrorClick = {},
+            onSelectAllAccountsClicked = {}
         )
     }
 }
@@ -540,12 +577,13 @@ internal fun AccountPickerPreviewDropdown() {
         AccountPickerContent(
             AccountPickerStates.dropdown(),
             onAccountClicked = {},
-            onSelectAccounts = {},
+            onSubmit = {},
             onSelectAnotherBank = {},
             onCloseClick = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseFromErrorClick = {}
+            onCloseFromErrorClick = {},
+            onSelectAllAccountsClicked = {}
         )
     }
 }
