@@ -19,6 +19,7 @@ sealed class AddressType {
 
     data class ShippingCondensed(
         val googleApiKey: String?,
+        val autocompleteCountries: Set<String>?,
         override val phoneNumberState: PhoneNumberState,
         val onNavigation: () -> Unit
     ) : AddressType()

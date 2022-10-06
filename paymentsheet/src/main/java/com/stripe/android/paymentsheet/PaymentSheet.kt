@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -133,6 +134,7 @@ class PaymentSheet internal constructor(
          * This is used to display a "Billing address is same as shipping" checkbox if `defaultBillingDetails` is not provided.
          * If `name` and `line1` are populated, it's also [attached to the PaymentIntent](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping) during payment.
          */
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val shippingDetails: AddressDetails? = null,
 
         /**

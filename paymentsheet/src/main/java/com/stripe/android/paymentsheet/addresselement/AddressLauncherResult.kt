@@ -3,10 +3,12 @@ package com.stripe.android.paymentsheet.addresselement
 import android.app.Activity
 import android.content.Intent
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.paymentsheet.PaymentOptionResult
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class AddressLauncherResult(
     val resultCode: Int
 ) : Parcelable {

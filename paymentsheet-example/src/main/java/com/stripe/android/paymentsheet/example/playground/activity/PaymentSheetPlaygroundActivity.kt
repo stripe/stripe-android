@@ -263,6 +263,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewModel.readyToCheckout.observe(this) { isReady ->
             if (isReady) {
                 viewBinding.completeCheckoutButton.isEnabled = true
+                viewBinding.shippingAddressButton.isEnabled = true
                 configureCustomCheckout()
             } else {
                 disableViews()

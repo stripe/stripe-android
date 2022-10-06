@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.fragment.app.Fragment
@@ -15,6 +16,7 @@ import kotlinx.parcelize.Parcelize
 /**
  * A drop-in class that presents a bottom sheet to collect a customer's address.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressLauncher internal constructor(
     private val activityResultLauncher: ActivityResultLauncher<AddressElementActivityContract.Args>
 ) {
@@ -72,6 +74,7 @@ class AddressLauncher internal constructor(
 
     /** Configuration for [AddressLauncher] **/
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Configuration @JvmOverloads constructor(
         /**
          * Configuration for the look and feel of the UI
@@ -110,7 +113,16 @@ class AddressLauncher internal constructor(
          * Google Places api key used to provide autocomplete suggestions
          * When null, autocomplete is disabled.
          */
-        val googlePlacesApiKey: String? = null
+        val googlePlacesApiKey: String? = null,
+
+        /**
+         * A list of two-letter country codes that support autocomplete. Defaults to a list of
+         * countries that Stripe has audited to ensure a good autocomplete experience.
+         */
+        val autocompleteCountries: Set<String> = setOf(
+            "AU", "BE", "BR", "CA", "CH", "DE", "ES", "FR", "GB", "IE", "IT", "MX", "NO", "NL",
+            "PL", "RU", "SE", "TR", "US", "ZA"
+        )
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
@@ -123,6 +135,7 @@ class AddressLauncher internal constructor(
             private var additionalFields: AdditionalFieldsConfiguration? = null
             private var title: String? = null
             private var googlePlacesApiKey: String? = null
+            private var autocompleteCountries: Set<String>? = null
 
             fun appearance(appearance: PaymentSheet.Appearance) =
                 apply { this.appearance = appearance }
@@ -145,6 +158,9 @@ class AddressLauncher internal constructor(
             fun googlePlacesApiKey(googlePlacesApiKey: String?) =
                 apply { this.googlePlacesApiKey = googlePlacesApiKey }
 
+            fun autocompleteCountries(autocompleteCountries: Set<String>) =
+                apply { this.autocompleteCountries = autocompleteCountries }
+
             fun build() = Configuration(
                 appearance,
                 address,
@@ -159,13 +175,13 @@ class AddressLauncher internal constructor(
 
     /**
      * @param phone Configuration for the field that collects a phone number. Defaults to
-     * [FieldConfiguration.OPTIONAL]
+     * [FieldConfiguration.HIDDEN]
      * @param checkboxLabel The label of a checkbox displayed below other fields. If null, the
      * checkbox is not displayed. Defaults to null
      */
     @Parcelize
     data class AdditionalFieldsConfiguration @JvmOverloads constructor(
-        val phone: FieldConfiguration = FieldConfiguration.OPTIONAL,
+        val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
         val checkboxLabel: String? = null
     ) : Parcelable {
         @Parcelize
@@ -189,6 +205,7 @@ class AddressLauncher internal constructor(
 
     companion object {
         @Composable
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun rememberLauncher(
             callback: AddressLauncherResultCallback
         ): AddressLauncher {
