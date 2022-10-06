@@ -3,7 +3,6 @@ package com.stripe.android.link
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewTreeObserver
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
