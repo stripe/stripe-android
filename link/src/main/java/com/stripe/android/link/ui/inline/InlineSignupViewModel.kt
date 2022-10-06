@@ -87,6 +87,8 @@ internal class InlineSignupViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
+    val accountEmail = linkAccountManager.linkAccount.map { it?.email }
+
     val requiresNameCollection: Boolean
         get() {
             val countryCode = when (val stripeIntent = config.stripeIntent) {
@@ -109,6 +111,12 @@ internal class InlineSignupViewModel @Inject constructor(
             hasExpanded = true
             watchUserInput()
             linkEventsReporter.onInlineSignupCheckboxChecked()
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            linkAccountManager.logout()
         }
     }
 

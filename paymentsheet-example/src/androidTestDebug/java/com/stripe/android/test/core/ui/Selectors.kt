@@ -45,6 +45,7 @@ class Selectors(
     val composeTestRule: ComposeTestRule,
     testParameters: TestParameters
 ) {
+    val reset = EspressoIdButton(R.id.reset_button)
     val testMode = EspressoIdButton(R.id.testmode)
     val continueButton = EspressoIdButton(R.id.continue_button)
     val complete = EspressoLabelIdButton(R.string.checkout_complete)
@@ -107,6 +108,8 @@ class Selectors(
     val buyButton = BuyButton(device)
 
     val editButton = EditButton(device)
+
+    val addPaymentMethodButton = AddPaymentMethodButton(device)
 
     val selectBrowserPrompt = UiAutomatorText("Verify your payment", device = device)
 

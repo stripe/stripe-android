@@ -22,6 +22,7 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
@@ -175,9 +176,19 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `ContinueButton should be visible when showing add payment method form`() {
-        val scenario = activityScenario()
+        val scenario = activityScenario(
+            createViewModel(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
+                )
+            )
+        )
         scenario.launch(
-            createIntent()
+            createIntent(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
+                )
+            )
         ).use {
             it.onActivity { activity ->
                 assertThat(activity.viewBinding.continueButton.isVisible)
@@ -430,10 +441,17 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `primary button appearance is set`() {
-        val scenario = activityScenario()
+        val scenario = activityScenario(
+            createViewModel(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
+                )
+            )
+        )
         scenario.launch(
             createIntent(
                 args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
                         appearance = PaymentSheet.Appearance(
                             primaryButton = PaymentSheet.PrimaryButton(

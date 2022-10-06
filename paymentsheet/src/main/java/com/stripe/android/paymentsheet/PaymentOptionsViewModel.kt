@@ -82,6 +82,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     // and how to populate that view.
     override var newPaymentSelection = args.newLpm
 
+    override var linkInlineSelection =
+        MutableLiveData<PaymentSelection.New.LinkInline?>(args.newLpm as? PaymentSelection.New.LinkInline)
+
     // This is used in the case where the last card was new and not saved. In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
     // presses the back button, they shouldn't transition to it again
