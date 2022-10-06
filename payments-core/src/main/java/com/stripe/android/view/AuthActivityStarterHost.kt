@@ -90,8 +90,8 @@ sealed class AuthActivityStarterHost {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun AuthActivityStarterHost.runWhenResumed(block: suspend CoroutineScope.() -> Unit) {
     val lifecycleOwner = when (this) {
-        is AuthActivityStarterHost.ActivityHost -> activity
-        is AuthActivityStarterHost.FragmentHost -> fragment.viewLifecycleOwner
+        is ActivityHost -> activity
+        is FragmentHost -> fragment.viewLifecycleOwner
     }
 
     Log.d("RelayBug", "Current lifecycle state of host: ${lifecycleOwner.lifecycle.currentState}")
