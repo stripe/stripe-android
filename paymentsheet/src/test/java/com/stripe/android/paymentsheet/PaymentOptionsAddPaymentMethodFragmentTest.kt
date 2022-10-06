@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.FakeAndroidKeyStore
 import com.stripe.android.utils.TestUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -36,6 +37,7 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
 
     @Before
     fun setup() {
+        FakeAndroidKeyStore.setup()
         PaymentConfiguration.init(
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
@@ -77,7 +79,6 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
         registerInjector: Boolean = true,
         onReady: (
             PaymentOptionsAddPaymentMethodFragment,
-
             PaymentOptionsViewModel
         ) -> Unit
     ): FragmentScenario<PaymentOptionsAddPaymentMethodFragment> {
