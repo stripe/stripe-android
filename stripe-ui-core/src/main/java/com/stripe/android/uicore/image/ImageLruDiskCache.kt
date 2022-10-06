@@ -58,20 +58,22 @@ class ImageLruDiskCache(
         val hashedKey = key.toKey()
         if (containsKey(key)) {
             debug("Image already cached")
-        } else try {
-            editor = diskLruCache.edit(hashedKey)
-            if (editor == null) return
-            if (writeBitmapToFile(data, editor)) {
-                diskLruCache.flush()
-                editor.commit()
-                debug("image put on disk cache $hashedKey")
-            } else {
-                editor.abort()
+        } else {
+            try {
+                editor = diskLruCache.edit(hashedKey)
+                if (editor == null) return
+                if (writeBitmapToFile(data, editor)) {
+                    diskLruCache.flush()
+                    editor.commit()
+                    debug("image put on disk cache $hashedKey")
+                } else {
+                    editor.abort()
+                    Log.e(TAG, "ERROR on: image put on disk cache $hashedKey")
+                }
+            } catch (e: IOException) {
                 Log.e(TAG, "ERROR on: image put on disk cache $hashedKey")
+                kotlin.runCatching { editor?.abort() }
             }
-        } catch (e: IOException) {
-            Log.e(TAG, "ERROR on: image put on disk cache $hashedKey")
-            kotlin.runCatching { editor?.abort() }
         }
     }
 
