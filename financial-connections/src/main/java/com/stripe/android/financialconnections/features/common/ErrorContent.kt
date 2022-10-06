@@ -139,7 +139,8 @@ internal fun InstitutionPlannedDowntimeErrorContent(
 @Composable
 internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
     exception: NoSupportedPaymentMethodTypeAccountsException,
-    onSelectAnotherBank: () -> Unit
+    onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: () -> Unit
 ) {
     ErrorContent(
         painterResource(id = R.drawable.stripe_ic_brandicon_institution),
