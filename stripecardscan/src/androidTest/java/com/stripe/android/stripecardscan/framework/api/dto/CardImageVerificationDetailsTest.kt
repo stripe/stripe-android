@@ -4,8 +4,7 @@ import android.util.Size
 import androidx.test.filters.SmallTest
 import com.stripe.android.stripecardscan.framework.util.AcceptedImageConfigs
 import com.stripe.android.stripecardscan.framework.util.ImageFormat
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
+import com.stripe.android.stripecardscan.framework.util.decodeFromJson
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -23,7 +22,8 @@ class CardImageVerificationDetailsTest {
                     1080,
                     1920
                   ],
-                  "image_count": 5
+                  "image_count": 5,
+                  "unknown_field": "test"
                 },
                 "format_settings": {
                   "heic": {
@@ -50,7 +50,7 @@ class CardImageVerificationDetailsTest {
               }
             }"""
 
-        val result = Json.decodeFromString<CardImageVerificationDetailsResult>(json)
+        val result = decodeFromJson(CardImageVerificationDetailsResult.serializer(), json)
         assertNotNull(result.acceptedImageConfigs)
 
         val acceptedImageConfigs = AcceptedImageConfigs(result.acceptedImageConfigs)
