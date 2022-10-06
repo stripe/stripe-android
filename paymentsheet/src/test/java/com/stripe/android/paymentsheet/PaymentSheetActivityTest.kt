@@ -131,6 +131,7 @@ internal class PaymentSheetActivityTest {
 
     @AfterTest
     fun cleanup() {
+        WeakMapInjectorRegistry.clear()
         Dispatchers.resetMain()
     }
 

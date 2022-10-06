@@ -61,6 +61,7 @@ import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 @ExperimentalCoroutinesApi
@@ -108,6 +109,11 @@ internal class PaymentOptionsActivityTest {
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
+    }
+
+    @AfterTest
+    fun cleanup() {
+        WeakMapInjectorRegistry.clear()
     }
 
     @Test
