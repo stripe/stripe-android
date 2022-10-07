@@ -21,18 +21,20 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun ResetScreen() {
     val viewModel: ResetViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
-    val state = viewModel.collectAsState()
+    val payload = viewModel.collectAsState { it.payload }
     BackHandler(enabled = true) {}
     ResetContent(
-        payload = state.value.payload,
-        onCloseClick = parentViewModel::onCloseClick
+        payload = payload.value,
+        onCloseClick = parentViewModel::onCloseNoConfirmationClick,
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
 
 @Composable
 private fun ResetContent(
     payload: Async<Unit>,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
@@ -40,7 +42,10 @@ private fun ResetContent(
         when (payload) {
             Uninitialized, is Loading -> LoadingContent()
             is Success -> LoadingContent()
-            is Fail -> UnclassifiedErrorContent()
+            is Fail -> UnclassifiedErrorContent(
+                error = payload.error,
+                onCloseFromErrorClick = onCloseFromErrorClick
+            )
         }
     }
 }
@@ -51,7 +56,8 @@ internal fun ResetScreenPreview() {
     FinancialConnectionsTheme {
         ResetContent(
             payload = Uninitialized,
-            onCloseClick = {}
+            onCloseClick = {},
+            onCloseFromErrorClick = {}
         )
     }
 }

@@ -44,11 +44,17 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import java.text.SimpleDateFormat
 
 @Composable
-internal fun UnclassifiedErrorContent() {
+internal fun UnclassifiedErrorContent(
+    error: Throwable,
+    onCloseFromErrorClick: (Throwable) -> Unit
+) {
     ErrorContent(
         painterResource(id = R.drawable.stripe_ic_brandicon_institution),
         title = stringResource(R.string.stripe_error_generic_title),
-        content = stringResource(R.string.stripe_error_generic_desc)
+        content = stringResource(R.string.stripe_error_generic_desc),
+        primaryCta = stringResource(R.string.stripe_error_cta_close) to {
+            onCloseFromErrorClick(error)
+        }
     )
 }
 
@@ -133,7 +139,8 @@ internal fun InstitutionPlannedDowntimeErrorContent(
 @Composable
 internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
     exception: NoSupportedPaymentMethodTypeAccountsException,
-    onSelectAnotherBank: () -> Unit
+    onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: () -> Unit
 ) {
     ErrorContent(
         painterResource(id = R.drawable.stripe_ic_brandicon_institution),
@@ -149,28 +156,6 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
         primaryCta = Pair(
             stringResource(R.string.stripe_error_cta_select_another_bank),
             onSelectAnotherBank
-        )
-    )
-}
-
-@Composable
-internal fun NoAccountsAvailableErrorContent(
-    exception: NoAccountsAvailableException,
-    onEnterDetailsManually: () -> Unit,
-    onTryAgain: () -> Unit
-) {
-    ErrorContent(
-        painterResource(id = R.drawable.stripe_ic_brandicon_institution),
-        title = stringResource(
-            R.string.stripe_account_picker_error_no_account_available_title
-        ),
-        content = stringResource(
-            R.string.stripe_account_picker_error_no_account_available_desc,
-            exception.institution.name
-        ),
-        primaryCta = Pair(
-            stringResource(R.string.stripe_error_cta_select_another_bank),
-            onTryAgain
         ),
         secondaryCta = if (exception.allowManualEntry) {
             Pair(
@@ -180,6 +165,56 @@ internal fun NoAccountsAvailableErrorContent(
         } else {
             null
         }
+    )
+}
+
+@Composable
+internal fun NoAccountsAvailableErrorContent(
+    exception: NoAccountsAvailableException,
+    onSelectAnotherBank: () -> Unit,
+    onEnterDetailsManually: () -> Unit,
+    onTryAgain: () -> Unit
+) {
+    // primary and (optional) secondary button to show.
+    val (primaryCta: Pair<Int, () -> Unit>, secondaryCta: Pair<Int, () -> Unit>?) = remember(
+        exception.allowManualEntry,
+        exception.canRetry
+    ) {
+        when {
+            exception.canRetry -> Pair(
+                first = R.string.stripe_error_cta_retry to onTryAgain,
+                second = R.string.stripe_error_cta_select_another_bank to onSelectAnotherBank,
+            )
+
+            exception.allowManualEntry -> Pair(
+                first = R.string.stripe_error_cta_manual_entry to onEnterDetailsManually,
+                second = R.string.stripe_error_cta_select_another_bank to onSelectAnotherBank,
+            )
+
+            else -> Pair(
+                first = R.string.stripe_error_cta_select_another_bank to onSelectAnotherBank,
+                second = null
+            )
+        }
+    }
+    // description to show.
+    val description = remember(exception.allowManualEntry, exception.canRetry) {
+        when {
+            exception.canRetry -> R.string.stripe_accounts_error_desc_retry
+            exception.allowManualEntry -> R.string.stripe_accounts_error_desc_manualentry
+            else -> R.string.stripe_accounts_error_desc_no_retry
+        }
+    }
+
+    ErrorContent(
+        painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        title = stringResource(
+            R.string.stripe_account_picker_error_no_account_available_title,
+            exception.institution.name
+        ),
+        content = stringResource(description),
+        primaryCta = stringResource(primaryCta.first) to primaryCta.second,
+        secondaryCta = secondaryCta?.let { stringResource(it.first) to it.second }
     )
 }
 
@@ -313,7 +348,7 @@ internal fun UnclassifiedErrorContentPreview() {
         FinancialConnectionsScaffold(
             topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
         ) {
-            UnclassifiedErrorContent()
+            UnclassifiedErrorContent(APIException()) {}
         }
     }
 }
@@ -365,9 +400,11 @@ internal fun NoAccountsAvailableErrorContentPreview() {
                         mobileHandoffCapable = false
                     ),
                     allowManualEntry = true,
-                    stripeException = APIException()
+                    stripeException = APIException(),
+                    canRetry = true
                 ),
                 onEnterDetailsManually = {},
+                onSelectAnotherBank = {},
                 onTryAgain = {}
             )
         }

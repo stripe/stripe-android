@@ -2,6 +2,7 @@
 <resources>
     <string name="consent_pane_tc">You agree to Stripe\'s <annotation clickable="terms">Terms</annotation> and <annotation clickable="privacy">Privacy Policy</annotation>. <annotation clickable="privacy_center">Learn more</annotation></string>
     <string name="consent_pane_manual_entry"><annotation clickable="manual_entry">Enter account details manually instead</annotation></string>
+    <string name="consent_pane_manual_entry_microdeposits"><annotation clickable="manual_entry">Enter account details manually instead</annotation> (takes 1–2 business days)</string>
     <string name="stripe_consent_pane_title">%1$s works with Stripe to link your accounts</string>
     <string name="stripe_consent_pane_title_no_businessname">This business works with Stripe to link your accounts</string>
     <string name="stripe_consent_pane_title_connected_account">%1$s and %2%s work with Stripe to link your accounts</string>
@@ -46,6 +47,7 @@
     <string name="stripe_error_planned_downtime_title">%1$s is undergoing maintenance</string>
     <string name="stripe_error_planned_downtime_desc">Maintenance is scheduled to end at %1$s. Please select another bank or try again later.</string>
     <string name="stripe_error_cta_select_another_bank">Select another bank</string>
+    <string name="stripe_error_cta_retry">Try again</string>
     <string name="stripe_error_cta_manual_entry">Enter bank details manually</string>
     <string name="stripe_account_picker_loading_title">Retrieving accounts</string>
     <string name="stripe_account_picker_loading_desc">Please wait while we retrieve your accounts</string>
@@ -66,7 +68,6 @@
     <string name="data_accessible_type_balances">balances</string>
     <string name="data_accessible_type_transactions">transactions</string>
     <string name="data_accessible_type_ownership">account ownership details</string>
-    <string name="data_accessible_callout_connected_accounts">%1$s - %2$s accounts</string>
     <string name="success_pane_done">Done</string>
     <string name="success_pane_disconnect">You can <annotation clickable="disconnect">disconnect your account any time.</annotation></string>
     <string name="stripe_prepane_partner_callout">Stripe works with partners like %1$s to reliably offer access to thousands of financial institutions. <annotation clickable="privacy_center">Learn more</annotation></string>
@@ -118,5 +119,25 @@
     <string name="stripe_close_dialog_desc">You haven\'t finished linking your bank account.</string>
     <string name="stripe_close_dialog_confirm">Yes, cancel</string>
     <string name="stripe_close_dialog_back">Back</string>
+    <string name="stripe_error_cta_close">Close</string>
+    <string name="stripe_success_infobox_accounts">%1$d accounts</string>
+    <string name="stripe_accounts_error_desc_retry">Please select another bank or try again.</string>
+    <string name="stripe_accounts_error_desc_manualentry">Please enter your bank details manually or select another bank.</string>
+    <string name="stripe_accounts_error_desc_no_retry">Please select another bank.</string>
+    <string name="stripe_accountpicker_singleaccount_description_withstripe">Stripe only needs one account at this time.</string>
+    <string name="stripe_accountpicker_singleaccount_description">%1$s only needs one account at this time.</string>
+    <string name="stripe_accountpicker_singleaccount_description_nobusinessname">This merchant only needs one account at this time.</string>
+    <string name="stripe_account_picker_must_be_bank_account">Must be checking or savings account</string>
+    <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
+    <plurals name="stripe_success_desc">
+        <item quantity="zero" />
+        <item quantity="one">Your account was successfully linked to %1$s through Stripe.</item>
+        <item quantity="other">Your accounts were successfully linked to %1$s through Stripe.</item>
+    </plurals>
+    <plurals name="stripe_success_desc_no_business">
+        <item quantity="zero" />
+        <item quantity="one">Your account was successfully linked through Stripe.</item>
+        <item quantity="other">Your accounts were successfully linked through Stripe.</item>
+    </plurals>
 </resources>
 

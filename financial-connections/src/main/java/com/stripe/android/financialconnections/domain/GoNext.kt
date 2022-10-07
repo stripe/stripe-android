@@ -19,35 +19,36 @@ internal class GoNext @Inject constructor(
         nextPane: NextPane,
         args: Map<String, Any?> = emptyMap()
     ): NavigationCommand {
-        val nextPaneDirection = nextPane.toNavigationCommand(args)
+        val nextPaneDirection = nextPane.toNavigationCommand(logger, args)
         logger.debug("Navigating to next pane: ${nextPaneDirection.destination}")
         navigationManager.navigate(nextPaneDirection)
         return nextPaneDirection
     }
+}
 
-    @Suppress("ComplexMethod")
-    private fun NextPane.toNavigationCommand(
-        args: Map<String, Any?>
-    ): NavigationCommand = when (this) {
-        NextPane.INSTITUTION_PICKER -> NavigationDirections.institutionPicker
-        NextPane.PARTNER_AUTH -> NavigationDirections.partnerAuth
-        NextPane.CONSENT -> NavigationDirections.consent
-        NextPane.ACCOUNT_PICKER -> NavigationDirections.accountPicker
-        NextPane.SUCCESS -> NavigationDirections.success
-        NextPane.MANUAL_ENTRY -> NavigationDirections.manualEntry
-        NextPane.MANUAL_ENTRY_SUCCESS -> NavigationDirections.ManualEntrySuccess(args)
-        NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT -> NavigationDirections.attachLinkedPaymentAccount
-        NextPane.NETWORKING_LINK_SIGNUP_PANE -> {
-            logger.error("Link not supported on native flows yet. Navigating to Success.")
-            NavigationDirections.success
-        }
-        NextPane.AUTH_OPTIONS,
-        NextPane.LINK_CONSENT,
-        NextPane.LINK_LOGIN,
-        NextPane.NETWORKING_LINK_LOGIN_WARMUP,
-        NextPane.NETWORKING_LINK_VERIFICATION,
-        NextPane.UNEXPECTED_ERROR -> {
-            TODO("Unimplemented navigation command: ${this.value}")
-        }
+@Suppress("ComplexMethod")
+internal fun NextPane.toNavigationCommand(
+    logger: Logger,
+    args: Map<String, Any?>
+): NavigationCommand = when (this) {
+    NextPane.INSTITUTION_PICKER -> NavigationDirections.institutionPicker
+    NextPane.PARTNER_AUTH -> NavigationDirections.partnerAuth
+    NextPane.CONSENT -> NavigationDirections.consent
+    NextPane.ACCOUNT_PICKER -> NavigationDirections.accountPicker
+    NextPane.SUCCESS -> NavigationDirections.success
+    NextPane.MANUAL_ENTRY -> NavigationDirections.manualEntry
+    NextPane.MANUAL_ENTRY_SUCCESS -> NavigationDirections.ManualEntrySuccess(args)
+    NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT -> NavigationDirections.attachLinkedPaymentAccount
+    NextPane.NETWORKING_LINK_SIGNUP_PANE -> {
+        logger.error("Link not supported on native flows yet. Navigating to Success.")
+        NavigationDirections.success
+    }
+    NextPane.AUTH_OPTIONS,
+    NextPane.LINK_CONSENT,
+    NextPane.LINK_LOGIN,
+    NextPane.NETWORKING_LINK_LOGIN_WARMUP,
+    NextPane.NETWORKING_LINK_VERIFICATION,
+    NextPane.UNEXPECTED_ERROR -> {
+        TODO("Unimplemented navigation command: ${this.value}")
     }
 }

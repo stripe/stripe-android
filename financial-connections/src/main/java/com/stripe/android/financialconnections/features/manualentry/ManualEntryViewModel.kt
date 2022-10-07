@@ -48,13 +48,13 @@ internal class ManualEntryViewModel @Inject constructor(
         }
         onEach(ManualEntryState::account) { input ->
             if (input != null) setState {
-                val error = ManualEntryInputValidator.getAccountErrorIdOrNull(input ?: "")
+                val error = ManualEntryInputValidator.getAccountErrorIdOrNull(input)
                 copy(accountError = error)
             }
         }
         onEach(ManualEntryState::routing) { input ->
             if (input != null) setState {
-                val error = ManualEntryInputValidator.getRoutingErrorIdOrNull(input ?: "")
+                val error = ManualEntryInputValidator.getRoutingErrorIdOrNull(input)
                 copy(routingError = error)
             }
         }
@@ -90,7 +90,7 @@ internal class ManualEntryViewModel @Inject constructor(
             val manifest = getManifest()
             pollAttachPaymentAccount(
                 allowManualEntry = manifest.allowManualEntry,
-                activeInstitution = requireNotNull(manifest.activeInstitution),
+                activeInstitution = null,
                 params = PaymentAccountParams.BankAccount(
                     routingNumber = requireNotNull(state.routing),
                     accountNumber = requireNotNull(state.account)

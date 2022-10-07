@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterialApi::class)
+@file:OptIn(ExperimentalMaterialApi::class, ExperimentalMaterialApi::class)
 
 package com.stripe.android.financialconnections.features.consent
 
@@ -81,7 +81,7 @@ internal fun ConsentScreen() {
         onContinueClick = viewModel::onContinueClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-        onCloseClick = parentViewModel::onCloseClick
+        onCloseClick = parentViewModel::onCloseNoConfirmationClick
     )
 }
 
@@ -101,6 +101,7 @@ private fun ViewEffect(
                     uri = Uri.parse(viewEffect.url)
                 )
             )
+
             is ViewEffect.OpenBottomSheet -> bottomSheetState.show()
             null -> Unit
         }
@@ -108,7 +109,6 @@ private fun ViewEffect(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ConsentContent(
     state: ConsentState,
@@ -181,6 +181,7 @@ private fun ConsentMainContent(
             }
             ConsentFooter(
                 manualEntryEnabled = state.manualEntryEnabled,
+                manualEntryShowBusinessDaysNotice = state.manualEntryShowBusinessDaysNotice,
                 acceptConsent = state.acceptConsent,
                 onClickableTextClick = onClickableTextClick,
                 onContinueClick = onContinueClick
@@ -194,7 +195,8 @@ private fun ConsentFooter(
     acceptConsent: Async<Unit>,
     manualEntryEnabled: Boolean,
     onClickableTextClick: (String) -> Unit,
-    onContinueClick: () -> Unit
+    onContinueClick: () -> Unit,
+    manualEntryShowBusinessDaysNotice: Boolean
 ) {
     Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
         AnnotatedText(
@@ -218,7 +220,10 @@ private fun ConsentFooter(
             Spacer(modifier = Modifier.size(24.dp))
             AnnotatedText(
                 modifier = Modifier.fillMaxWidth(),
-                text = TextResource.StringId(R.string.consent_pane_manual_entry),
+                text = when (manualEntryShowBusinessDaysNotice) {
+                    true -> TextResource.StringId(R.string.consent_pane_manual_entry_microdeposits)
+                    false -> TextResource.StringId(R.string.consent_pane_manual_entry)
+                },
                 onClickableTextClick = { onClickableTextClick(it) },
                 defaultStyle = FinancialConnectionsTheme.typography.body.copy(
                     textAlign = TextAlign.Center,
@@ -348,6 +353,26 @@ private fun ConsentBullet(
 @Preview(group = "Consent Pane", name = "canonical")
 internal fun ContentPreview(
     state: ConsentState = ConsentStates.canonical()
+) {
+    FinancialConnectionsTheme {
+        ConsentContent(
+            state = state,
+            bottomSheetState = rememberModalBottomSheetState(
+                ModalBottomSheetValue.Hidden,
+                skipHalfExpanded = true
+            ),
+            onContinueClick = {},
+            onClickableTextClick = {},
+            onConfirmModalClick = {},
+            onCloseClick = {}
+        )
+    }
+}
+
+@Composable
+@Preview(group = "Consent Pane", name = "manual entry + microdeposits")
+internal fun ContentManualEntryPlusMicrodeposits(
+    state: ConsentState = ConsentStates.manualEntryPlusMicrodeposits()
 ) {
     FinancialConnectionsTheme {
         ConsentContent(

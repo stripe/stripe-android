@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
@@ -40,6 +41,8 @@ internal class SuccessViewModel @Inject constructor(
             SuccessState.Payload(
                 accessibleData = AccessibleDataCalloutModel.fromManifest(manifest),
                 accounts = getAuthorizationSessionAccounts(manifest.activeAuthSession!!.id),
+                institution = manifest.activeInstitution!!,
+                businessName = manifest.businessName,
                 disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest),
                 showLinkAnotherAccount = manifest.singleAccount.not() &&
                     manifest.disableLinkMoreAccounts.not() &&
@@ -99,7 +102,9 @@ internal data class SuccessState(
     data class Payload(
         val accessibleData: AccessibleDataCalloutModel,
         val showLinkAnotherAccount: Boolean,
+        val institution: FinancialConnectionsInstitution,
         val accounts: PartnerAccountsList,
-        val disconnectUrl: String
+        val disconnectUrl: String,
+        val businessName: String?
     )
 }

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
@@ -24,6 +25,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
 ) {
 
     suspend operator fun invoke(
+        canRetry: Boolean,
         manifest: FinancialConnectionsSessionManifest
     ): PartnerAccountsList {
         return retryOnException(
@@ -32,28 +34,43 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
             retryCondition = { exception -> exception.shouldRetry }
         ) {
             try {
-                repository.postAuthorizationSessionAccounts(
+                val authSession = requireNotNull(manifest.activeAuthSession)
+                val accounts = repository.postAuthorizationSessionAccounts(
                     clientSecret = configuration.financialConnectionsSessionClientSecret,
-                    sessionId = manifest.activeAuthSession!!.id
+                    sessionId = authSession.id
                 )
+                if (accounts.data.isEmpty()) {
+                    throw NoAccountsAvailableException(
+                        institution = requireNotNull(manifest.activeInstitution),
+                        allowManualEntry = manifest.allowManualEntry,
+                        canRetry = canRetry,
+                        stripeException = APIException()
+                    )
+                } else {
+                    accounts
+                }
             } catch (@Suppress("SwallowedException") e: StripeException) {
                 throw e.toDomainException(
-                    requireNotNull(manifest.activeInstitution),
-                    ConsentTextBuilder.getBusinessName(manifest),
-                    manifest.allowManualEntry
+                    institution = manifest.activeInstitution,
+                    businessName = ConsentTextBuilder.getBusinessName(manifest),
+                    canRetry = canRetry,
+                    allowManualEntry = manifest.allowManualEntry
                 )
             }
         }
     }
 
     private fun StripeException.toDomainException(
-        institution: FinancialConnectionsInstitution,
+        institution: FinancialConnectionsInstitution?,
         businessName: String?,
+        canRetry: Boolean,
         allowManualEntry: Boolean
     ): StripeException =
         when {
+            institution == null -> this
             stripeError?.extraFields?.get("reason") == "no_supported_payment_method_type_accounts_found" ->
                 NoSupportedPaymentMethodTypeAccountsException(
+                    allowManualEntry = allowManualEntry,
                     accountsCount = stripeError?.extraFields?.get("total_accounts_count")?.toInt()
                         ?: 0,
                     institution = institution,
@@ -64,6 +81,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
             else -> NoAccountsAvailableException(
                 allowManualEntry = allowManualEntry,
                 institution = institution,
+                canRetry = canRetry,
                 stripeException = this
             )
         }

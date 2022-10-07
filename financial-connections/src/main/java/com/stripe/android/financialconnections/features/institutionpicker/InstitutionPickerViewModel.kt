@@ -45,10 +45,13 @@ internal class InstitutionPickerViewModel @Inject constructor(
         logErrors()
         suspend {
             val manifest = getManifest()
-            Payload(
-                featuredInstitutions = featuredInstitutions(
+            val institutions = kotlin.runCatching {
+                featuredInstitutions(
                     clientSecret = configuration.financialConnectionsSessionClientSecret
-                ),
+                )
+            }.onFailure { logger.error("Error fetching featured institutions") }
+            Payload(
+                featuredInstitutions = institutions.getOrNull()?.data ?: emptyList(),
                 searchDisabled = manifest.institutionSearchDisabled,
                 allowManualEntry = kotlin
                     .runCatching { manifest.allowManualEntry }
@@ -151,7 +154,7 @@ internal data class InstitutionPickerState(
     val searchInstitutions: Async<InstitutionResponse> = Uninitialized
 ) : MavericksState {
     data class Payload(
-        val featuredInstitutions: InstitutionResponse,
+        val featuredInstitutions: List<FinancialConnectionsInstitution>,
         val allowManualEntry: Boolean,
         val searchDisabled: Boolean
     )

@@ -1,4 +1,4 @@
-@file:Suppress("TooManyFunctions")
+@file:Suppress("TooManyFunctions", "LongMethod")
 
 package com.stripe.android.financialconnections.features.accountpicker
 
@@ -61,13 +61,17 @@ import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import java.text.NumberFormat
+import java.util.Currency
 
 @Composable
 internal fun AccountPickerScreen() {
@@ -78,11 +82,13 @@ internal fun AccountPickerScreen() {
     AccountPickerContent(
         state = state.value,
         onAccountClicked = viewModel::onAccountClicked,
-        onSelectAccounts = viewModel::selectAccounts,
+        onSubmit = viewModel::onSubmit,
         onSelectAnotherBank = viewModel::selectAnotherBank,
         onCloseClick = parentViewModel::onCloseWithConfirmationClick,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
-        onLoadAccountsAgain = viewModel::onLoadAccountsAgain
+        onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
+        onSelectAllAccountsClicked = viewModel::onSelectAllAccountsClicked,
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
     )
 }
 
@@ -90,11 +96,13 @@ internal fun AccountPickerScreen() {
 private fun AccountPickerContent(
     state: AccountPickerState,
     onAccountClicked: (PartnerAccount) -> Unit,
-    onSelectAccounts: () -> Unit,
+    onSubmit: () -> Unit,
+    onSelectAllAccountsClicked: () -> Unit,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onLoadAccountsAgain: () -> Unit,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
@@ -114,26 +122,36 @@ private fun AccountPickerContent(
                     submitEnabled = state.submitEnabled,
                     submitLoading = state.submitLoading,
                     accounts = payload().accounts,
-                    selectedIds = state.selectedIds,
+                    allAccountsSelected = payload().allAccountsSelected,
+                    subtitle = payload().subtitle,
+                    selectedIds = payload().selectedIds,
                     onAccountClicked = onAccountClicked,
-                    onSelectAccounts = onSelectAccounts,
+                    onSubmit = onSubmit,
                     selectionMode = payload().selectionMode,
-                    accessibleDataCalloutModel = payload().accessibleData
+                    accessibleDataCalloutModel = payload().accessibleData,
+                    onSelectAllAccountsClicked = onSelectAllAccountsClicked,
                 )
             }
+
             is Fail -> when (val error = payload.error) {
                 is NoSupportedPaymentMethodTypeAccountsException ->
                     NoSupportedPaymentMethodTypeAccountsErrorContent(
-                        error,
-                        onSelectAnotherBank
-                    )
-                is NoAccountsAvailableException ->
-                    NoAccountsAvailableErrorContent(
                         exception = error,
-                        onEnterDetailsManually = onEnterDetailsManually,
-                        onTryAgain = onLoadAccountsAgain
+                        onSelectAnotherBank = onSelectAnotherBank,
+                        onEnterDetailsManually = onEnterDetailsManually
                     )
-                else -> UnclassifiedErrorContent()
+
+                is NoAccountsAvailableException -> NoAccountsAvailableErrorContent(
+                    exception = error,
+                    onEnterDetailsManually = onEnterDetailsManually,
+                    onTryAgain = onLoadAccountsAgain,
+                    onSelectAnotherBank = onSelectAnotherBank
+                )
+
+                else -> UnclassifiedErrorContent(
+                    error = error,
+                    onCloseFromErrorClick = onCloseFromErrorClick
+                )
             }
         }
     }
@@ -153,11 +171,14 @@ private fun AccountPickerLoaded(
     submitEnabled: Boolean,
     submitLoading: Boolean,
     accounts: List<PartnerAccountUI>,
+    allAccountsSelected: Boolean,
     accessibleDataCalloutModel: AccessibleDataCalloutModel?,
     selectionMode: SelectionMode,
     selectedIds: Set<String>,
     onAccountClicked: (PartnerAccount) -> Unit,
-    onSelectAccounts: () -> Unit
+    onSelectAllAccountsClicked: () -> Unit,
+    onSubmit: () -> Unit,
+    subtitle: TextResource?
 ) {
     Column(
         Modifier
@@ -174,21 +195,34 @@ private fun AccountPickerLoaded(
                 text = stringResource(R.string.stripe_account_picker_multiselect_account),
                 style = FinancialConnectionsTheme.typography.subtitle
             )
+            Spacer(modifier = Modifier.size(16.dp))
+            subtitle?.let {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = it.toText().toString(),
+                    style = FinancialConnectionsTheme.typography.body
+                )
+            }
             when (selectionMode) {
                 SelectionMode.DROPDOWN -> DropdownContent(
                     accounts = accounts,
                     selectedIds = selectedIds,
                     onAccountClicked = onAccountClicked
                 )
+
                 SelectionMode.RADIO -> SingleSelectContent(
                     accounts = accounts,
                     selectedIds = selectedIds,
                     onAccountClicked = onAccountClicked
                 )
+
                 SelectionMode.CHECKBOXES -> MultiSelectContent(
                     accounts = accounts,
+                    allAccountsSelected = allAccountsSelected,
                     selectedIds = selectedIds,
-                    onAccountClicked = onAccountClicked
+                    onAccountClicked = onAccountClicked,
+                    onSelectAllAccountsClicked = onSelectAllAccountsClicked
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -198,7 +232,7 @@ private fun AccountPickerLoaded(
         FinancialConnectionsButton(
             enabled = submitEnabled,
             loading = submitLoading,
-            onClick = onSelectAccounts,
+            onClick = onSubmit,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -254,26 +288,53 @@ private fun DropdownContent(
                 expanded = false
             }
         ) {
-            accounts.forEach { selectedAccount ->
-                DropdownMenuItem(
-                    onClick = {
-                        onAccountClicked(selectedAccount.account)
+            accounts.forEach { account ->
+                AccountDropdownItem(
+                    onAccountClicked = {
                         expanded = false
-                    }
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        InstitutionIcon()
-                        Spacer(modifier = Modifier.size(8.dp))
-                        Text(
-                            text = "${selectedAccount.account.name} ${selectedAccount.account.encryptedNumbers}",
-                            color = if (selectedAccount.enabled) {
-                                FinancialConnectionsTheme.colors.textPrimary
-                            } else {
-                                FinancialConnectionsTheme.colors.textDisabled
-                            },
-                            style = FinancialConnectionsTheme.typography.bodyEmphasized
-                        )
-                    }
+                        onAccountClicked(it)
+                    },
+                    account = account
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccountDropdownItem(
+    onAccountClicked: (PartnerAccount) -> Unit,
+    account: PartnerAccountUI
+) {
+    DropdownMenuItem(
+        onClick = {
+            onAccountClicked(account.account)
+        }
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            InstitutionIcon()
+            Spacer(modifier = Modifier.size(8.dp))
+            val (title, subtitle) = getAccountTexts(
+                account = account.account,
+                enabled = account.enabled
+            )
+            Column {
+                Text(
+                    text = title,
+                    color = if (account.enabled) {
+                        FinancialConnectionsTheme.colors.textPrimary
+                    } else {
+                        FinancialConnectionsTheme.colors.textDisabled
+                    },
+                    style = FinancialConnectionsTheme.typography.body
+                )
+                subtitle?.let {
+                    Spacer(Modifier.size(4.dp))
+                    Text(
+                        text = it,
+                        color = FinancialConnectionsTheme.colors.textDisabled,
+                        style = FinancialConnectionsTheme.typography.caption
+                    )
                 }
             }
         }
@@ -326,12 +387,39 @@ private fun SingleSelectContent(
 private fun MultiSelectContent(
     accounts: List<PartnerAccountUI>,
     selectedIds: Set<String>,
-    onAccountClicked: (PartnerAccount) -> Unit
+    onAccountClicked: (PartnerAccount) -> Unit,
+    onSelectAllAccountsClicked: () -> Unit,
+    allAccountsSelected: Boolean
 ) {
     LazyColumn(
         contentPadding = PaddingValues(top = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        item("select_all_accounts") {
+            AccountItem(
+                enabled = true,
+                selected = allAccountsSelected,
+                onAccountClicked = { onSelectAllAccountsClicked() },
+                account = PartnerAccount(
+                    id = "select_all_accounts",
+                    authorization = "",
+                    category = FinancialConnectionsAccount.Category.UNKNOWN,
+                    subcategory = FinancialConnectionsAccount.Subcategory.UNKNOWN,
+                    name = stringResource(R.string.stripe_account_picker_select_all_accounts),
+                    supportedPaymentMethodTypes = emptyList()
+                ),
+            ) {
+                Checkbox(
+                    checked = allAccountsSelected,
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = FinancialConnectionsTheme.colors.textBrand,
+                        checkmarkColor = FinancialConnectionsTheme.colors.textWhite,
+                        uncheckedColor = FinancialConnectionsTheme.colors.borderDefault
+                    ),
+                    onCheckedChange = null
+                )
+            }
+        }
         items(accounts, key = { it.account.id }) { account ->
             AccountItem(
                 enabled = account.enabled,
@@ -382,10 +470,14 @@ private fun AccountItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             selectorContent()
+            val (title, subtitle) = getAccountTexts(
+                account = account,
+                enabled = enabled
+            )
             Spacer(modifier = Modifier.size(16.dp))
             Column {
                 Text(
-                    text = account.name,
+                    text = title,
                     color = if (enabled) {
                         FinancialConnectionsTheme.colors.textPrimary
                     } else {
@@ -393,21 +485,41 @@ private fun AccountItem(
                     },
                     style = FinancialConnectionsTheme.typography.bodyEmphasized
                 )
-                Spacer(modifier = Modifier.size(4.dp))
-                account.displayableAccountNumbers?.let {
+                subtitle?.let {
+                    Spacer(modifier = Modifier.size(4.dp))
                     Text(
-                        text = "········$it",
-                        color = if (enabled) {
-                            FinancialConnectionsTheme.colors.textSecondary
-                        } else {
-                            FinancialConnectionsTheme.colors.textDisabled
-                        },
+                        text = it,
+                        color = FinancialConnectionsTheme.colors.textDisabled,
                         style = FinancialConnectionsTheme.typography.body
                     )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun getAccountTexts(
+    account: PartnerAccount,
+    enabled: Boolean
+): Pair<String, String?> {
+    val balance = if (account.balanceAmount != null && account.currency != null) {
+        NumberFormat
+            .getCurrencyInstance()
+            .also { it.currency = Currency.getInstance(account.currency) }
+            .format(account.balanceAmount)
+    } else null
+    val title = when {
+        balance != null -> "${account.name} ${account.encryptedNumbers}"
+        else -> account.name
+    }
+    val subtitle = when {
+        enabled.not() -> stringResource(id = R.string.stripe_account_picker_must_be_bank_account)
+        balance != null -> balance
+        account.encryptedNumbers.isNotEmpty() -> account.encryptedNumbers
+        else -> null
+    }
+    return title to subtitle
 }
 
 @Preview(
@@ -421,11 +533,13 @@ internal fun AccountPickerPreviewMultiSelect() {
         AccountPickerContent(
             AccountPickerStates.multiSelect(),
             onAccountClicked = {},
-            onSelectAccounts = {},
+            onSubmit = {},
             onSelectAnotherBank = {},
             onCloseClick = {},
             onEnterDetailsManually = {},
-            onLoadAccountsAgain = {}
+            onLoadAccountsAgain = {},
+            onCloseFromErrorClick = {},
+            onSelectAllAccountsClicked = {}
         )
     }
 }
@@ -441,11 +555,13 @@ internal fun AccountPickerPreviewSingleSelect() {
         AccountPickerContent(
             AccountPickerStates.singleSelect(),
             onAccountClicked = {},
-            onSelectAccounts = {},
+            onSubmit = {},
             onSelectAnotherBank = {},
             onCloseClick = {},
             onEnterDetailsManually = {},
-            onLoadAccountsAgain = {}
+            onLoadAccountsAgain = {},
+            onCloseFromErrorClick = {},
+            onSelectAllAccountsClicked = {}
         )
     }
 }
@@ -461,11 +577,13 @@ internal fun AccountPickerPreviewDropdown() {
         AccountPickerContent(
             AccountPickerStates.dropdown(),
             onAccountClicked = {},
-            onSelectAccounts = {},
+            onSubmit = {},
             onSelectAnotherBank = {},
             onCloseClick = {},
             onEnterDetailsManually = {},
-            onLoadAccountsAgain = {}
+            onLoadAccountsAgain = {},
+            onCloseFromErrorClick = {},
+            onSelectAllAccountsClicked = {}
         )
     }
 }

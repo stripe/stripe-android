@@ -20,7 +20,10 @@ import kotlin.test.assertFailsWith
 class FetchFinancialConnectionsSessionTest {
 
     private val repository = FakeFinancialConnectionsRepository()
-    private val getFinancialConnectionsSession = FetchFinancialConnectionsSession(repository)
+    private val getFinancialConnectionsSession = FetchFinancialConnectionsSession(
+        FetchPaginatedAccountsForSession(repository),
+        repository
+    )
 
     @Test
     fun `invoke - when session with no more accounts, should return unmodified session`() =

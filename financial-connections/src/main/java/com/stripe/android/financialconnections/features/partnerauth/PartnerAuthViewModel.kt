@@ -19,9 +19,7 @@ import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOA
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
-import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -44,6 +42,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     init {
         logErrors()
+        launchAuthIfSkipPrepane()
         suspend {
             val manifest = getManifest()
             val authSession = createAuthorizationSession(
@@ -52,12 +51,20 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             Payload(
                 flow = authSession.flow,
+                showPrepane = authSession.flow?.isOAuth() ?: true,
                 showPartnerDisclosure = authSession.showPartnerDisclosure ?: false,
                 institutionName = manifest.activeInstitution.name
             )
         }.execute {
             copy(payload = it)
         }
+    }
+
+    private fun launchAuthIfSkipPrepane() {
+        onAsync(
+            asyncProp = PartnerAuthState::payload,
+            onSuccess = { if (it.showPrepane.not()) onLaunchAuthClick() }
+        )
     }
 
     private fun logErrors() {
@@ -68,13 +75,17 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     fun onLaunchAuthClick() {
         viewModelScope.launch {
-            val authSession = getManifest().activeAuthSession!!
-            setState { copy(url = authSession.url) }
+            kotlin.runCatching { requireNotNull(getManifest().activeAuthSession) }
+                .onSuccess { setState { copy(url = it.url) } }
+                .onFailure {
+                    logger.error("failed retrieving active session from cache", it)
+                    setState { copy(authenticationStatus = Fail(it)) }
+                }
         }
     }
 
     fun onSelectAnotherBank() {
-        navigationManager.navigate(NavigationDirections.institutionPicker)
+        navigationManager.navigate(NavigationDirections.reset)
     }
 
     fun onWebAuthFlowFinished(
@@ -85,21 +96,11 @@ internal class PartnerAuthViewModel @Inject constructor(
             when (webStatus) {
                 is Uninitialized -> {}
                 is Loading -> setState { copy(authenticationStatus = Loading()) }
-                is Success -> {
-                    val authSession = getManifest().activeAuthSession!!
-                    logger.debug("Web AuthFlow completed! waiting for oauth results")
-                    val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
-                    logger.debug("OAuth results received! completing session")
-                    completeAuthorizationSession(
-                        oAuthParams = oAuthResults,
-                        authSession = authSession
-                    )
-                }
+                is Success -> completeAuthorizationSession()
                 is Fail -> {
-                    val authSession = getManifest().activeAuthSession!!
                     when (val error = webStatus.error) {
-                        is WebAuthFlowCancelledException -> onAuthCancelled(authSession)
-                        else -> onAuthFailed(error, authSession)
+                        is WebAuthFlowCancelledException -> onAuthCancelled()
+                        else -> onAuthFailed(error)
                     }
                 }
             }
@@ -107,46 +108,56 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 
     private suspend fun onAuthFailed(
-        error: Throwable,
-        authSession: FinancialConnectionsAuthorizationSession
+        error: Throwable
     ) {
         kotlin.runCatching {
+            logger.debug("Auth failed, cancelling AuthSession")
+            val authSession = getManifest().activeAuthSession
             logger.error("Auth failed, cancelling AuthSession", error)
-            cancelAuthorizationSession(authSession.id)
+            when {
+                authSession != null -> cancelAuthorizationSession(authSession.id)
+                else -> logger.debug("Could not find AuthSession to cancel.")
+            }
             setState { copy(authenticationStatus = Fail(error)) }
         }.onFailure {
             logger.error("failed cancelling session after failed web flow", it)
         }
     }
 
-    private suspend fun onAuthCancelled(
-        authSession: FinancialConnectionsAuthorizationSession
-    ) {
-        setState { copy(authenticationStatus = Loading()) }
+    private suspend fun onAuthCancelled() {
         kotlin.runCatching {
             logger.debug("Auth cancelled, cancelling AuthSession")
-            cancelAuthorizationSession(authSession.id)
-            logger.debug("Session cancelled, creating a new one for same institution")
-            val manifest = getManifest()
-            val newSession = createAuthorizationSession(
-                institution = manifest.activeInstitution!!,
-                allowManualEntry = manifest.allowManualEntry
-            )
-            goNext(newSession.nextPane)
+            setState { copy(authenticationStatus = Loading()) }
+            val authSession = requireNotNull(getManifest().activeAuthSession)
+            val result = cancelAuthorizationSession(authSession.id)
+            if (authSession.flow?.isOAuth() == true) {
+                // For OAuth institutions, create a new session and navigate to its nextPane.
+                logger.debug("Creating a new session for this OAuth institution")
+                val manifest = getManifest()
+                val newSession = createAuthorizationSession(
+                    institution = requireNotNull(manifest.activeInstitution),
+                    allowManualEntry = manifest.allowManualEntry
+                )
+                goNext(newSession.nextPane)
+            } else {
+                // For OAuth institutions, navigate to Session cancellation's next pane.
+                goNext(result.nextPane)
+            }
         }.onFailure {
             logger.error("failed cancelling session after cancelled web flow", it)
             setState { copy(authenticationStatus = Fail(it)) }
         }
     }
 
-    private suspend fun completeAuthorizationSession(
-        oAuthParams: MixedOAuthParams,
-        authSession: FinancialConnectionsAuthorizationSession
-    ) {
+    private suspend fun completeAuthorizationSession() {
         kotlin.runCatching {
+            val authSession = requireNotNull(getManifest().activeAuthSession)
+            logger.debug("Web AuthFlow completed! waiting for oauth results")
+            val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
+            logger.debug("OAuth results received! completing session")
             val updatedSession = completeAuthorizationSession(
                 authorizationSessionId = authSession.id,
-                publicToken = oAuthParams.memberGuid
+                publicToken = oAuthResults.memberGuid
             )
             logger.debug("Session authorized!")
             goNext(updatedSession.nextPane)
@@ -185,7 +196,8 @@ internal data class PartnerAuthState(
     data class Payload(
         val institutionName: String,
         val flow: Flow?,
-        val showPartnerDisclosure: Boolean
+        val showPartnerDisclosure: Boolean,
+        val showPrepane: Boolean
     )
 
     val canNavigateBack: Boolean

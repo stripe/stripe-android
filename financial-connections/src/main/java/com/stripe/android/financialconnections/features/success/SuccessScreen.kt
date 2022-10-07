@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.features.success
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,9 +10,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,6 +25,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutWithAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.TextResource
@@ -45,11 +47,13 @@ internal fun SuccessScreen() {
             accessibleDataModel = payload.accessibleData,
             disconnectUrl = payload.disconnectUrl,
             accounts = payload.accounts.data,
+            businessName = payload.businessName,
             loading = state.value.completeSession is Loading,
             onDoneClick = viewModel::onDoneClick,
             onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
             onCloseClick = parentViewModel::onCloseWithConfirmationClick,
-            showLinkAnotherAccount = payload.showLinkAnotherAccount
+            showLinkAnotherAccount = payload.showLinkAnotherAccount,
+            institution = payload.institution
         )
     }
 }
@@ -60,6 +64,8 @@ private fun SuccessContent(
     accessibleDataModel: AccessibleDataCalloutModel,
     disconnectUrl: String,
     accounts: List<PartnerAccount>,
+    institution: FinancialConnectionsInstitution,
+    businessName: String?,
     loading: Boolean,
     onDoneClick: () -> Unit,
     onLinkAnotherAccountClick: () -> Unit,
@@ -76,7 +82,6 @@ private fun SuccessContent(
         }
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
@@ -92,16 +97,29 @@ private fun SuccessContent(
                 contentDescription = null,
                 tint = FinancialConnectionsTheme.colors.textSuccess
             )
+            Spacer(modifier = Modifier.size(16.dp))
             Text(
                 modifier = Modifier
                     .fillMaxWidth(),
                 text = stringResource(R.string.stripe_success_title),
                 style = FinancialConnectionsTheme.typography.subtitle
             )
-            AccessibleDataCalloutWithAccounts(
-                model = accessibleDataModel,
-                accounts = accounts
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                text = getSubtitle(businessName, accounts),
+                style = FinancialConnectionsTheme.typography.body
             )
+            if (accounts.isNotEmpty()) {
+                Spacer(modifier = Modifier.size(24.dp))
+                AccessibleDataCalloutWithAccounts(
+                    model = accessibleDataModel,
+                    accounts = accounts,
+                    institution = institution,
+                )
+            }
+            Spacer(modifier = Modifier.size(12.dp))
             AnnotatedText(
                 text = TextResource.StringId(R.string.success_pane_disconnect),
                 onClickableTextClick = { uriHandler.openUri(disconnectUrl) },
@@ -125,6 +143,7 @@ private fun SuccessContent(
                 ) {
                     Text(text = stringResource(R.string.success_pane_link_more_accounts))
                 }
+                Spacer(modifier = Modifier.size(8.dp))
             }
             FinancialConnectionsButton(
                 loading = loading,
@@ -138,8 +157,27 @@ private fun SuccessContent(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun getSubtitle(
+    businessName: String?,
+    accounts: List<PartnerAccount>
+) = when {
+    businessName != null -> pluralStringResource(
+        R.plurals.stripe_success_desc,
+        accounts.count(),
+        businessName
+    )
+
+    else -> pluralStringResource(
+        R.plurals.stripe_success_desc_no_business,
+        accounts.count()
+    )
+}
+
 @Composable
 @Preview
+@Suppress("LongMethod")
 internal fun SuccessScreenPreview() {
     FinancialConnectionsTheme {
         SuccessContent(
@@ -185,9 +223,18 @@ internal fun SuccessScreenPreview() {
             ),
             loading = false,
             onDoneClick = {},
+            businessName = "Random business",
             onLinkAnotherAccountClick = {},
             showLinkAnotherAccount = true,
-            onCloseClick = {}
+            onCloseClick = {},
+            institution = FinancialConnectionsInstitution(
+                id = "id",
+                name = "name",
+                url = "url",
+                featured = true,
+                featuredOrder = null,
+                mobileHandoffCapable = false
+            )
         )
     }
 }

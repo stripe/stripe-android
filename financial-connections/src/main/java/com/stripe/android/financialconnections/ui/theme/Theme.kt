@@ -53,8 +53,8 @@ private val Typography = FinancialConnectionsTypography(
         fontWeight = FontWeight.W700
     ),
     subheading = TextStyle(
-        fontSize = 18.sp,
-        lineHeight = 24.sp,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
         fontWeight = FontWeight.W600
     ),
     kicker = TextStyle(

@@ -45,5 +45,10 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
                 R.string.stripe_consent_requested_data_title_no_businessname
             )
         )
+
+        fun manualEntryPlusMicrodeposits() = canonical().copy(
+            manualEntryEnabled = true,
+            manualEntryShowBusinessDaysNotice = true
+        )
     }
 }

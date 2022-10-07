@@ -68,8 +68,9 @@ internal fun PartnerAuthScreen() {
         state = state.value,
         onContinueClick = viewModel::onLaunchAuthClick,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
-        onCloseClick = parentViewModel::onCloseClick,
-        onEnterDetailsManually = viewModel::onEnterDetailsManuallyClick
+        onCloseClick = parentViewModel::onCloseNoConfirmationClick,
+        onEnterDetailsManually = viewModel::onEnterDetailsManuallyClick,
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
 
@@ -79,7 +80,8 @@ private fun PartnerAuthScreenContent(
     onContinueClick: () -> Unit,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
@@ -97,7 +99,8 @@ private fun PartnerAuthScreenContent(
             is Fail -> ErrorContent(
                 error = payload.error,
                 onSelectAnotherBank = onSelectAnotherBank,
-                onEnterDetailsManually = onEnterDetailsManually
+                onEnterDetailsManually = onEnterDetailsManually,
+                onCloseFromErrorClick = onCloseFromErrorClick
             )
             is Success -> LoadedContent(
                 authenticationStatus = state.authenticationStatus,
@@ -113,7 +116,8 @@ private fun PartnerAuthScreenContent(
 fun ErrorContent(
     error: Throwable,
     onSelectAnotherBank: () -> Unit,
-    onEnterDetailsManually: (() -> Unit)
+    onEnterDetailsManually: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     when (error) {
         is InstitutionPlannedException -> InstitutionPlannedDowntimeErrorContent(
@@ -121,12 +125,14 @@ fun ErrorContent(
             onSelectAnotherBank = onSelectAnotherBank,
             onEnterDetailsManually = onEnterDetailsManually
         )
+
         is InstitutionUnplannedException -> InstitutionUnplannedDowntimeErrorContent(
             exception = error,
             onSelectAnotherBank = onSelectAnotherBank,
             onEnterDetailsManually = onEnterDetailsManually
         )
-        else -> UnclassifiedErrorContent()
+
+        else -> UnclassifiedErrorContent(error, onCloseFromErrorClick)
     }
 }
 
@@ -138,16 +144,24 @@ private fun LoadedContent(
     onSelectAnotherBank: () -> Unit
 ) {
     when (authenticationStatus) {
-        is Uninitialized -> PrePaneContent(
-            institutionName = payload.institutionName,
-            flow = payload.flow,
-            showPartnerDisclosure = payload.showPartnerDisclosure,
-            onContinueClick = onContinueClick
-        )
+        is Uninitialized -> when (payload.showPrepane) {
+            true -> PrePaneContent(
+                institutionName = payload.institutionName,
+                flow = payload.flow,
+                showPartnerDisclosure = payload.showPartnerDisclosure,
+                onContinueClick = onContinueClick
+            )
+            false -> LoadingContent(
+                stringResource(id = R.string.stripe_picker_loading_title),
+                stringResource(id = R.string.stripe_picker_loading_desc)
+            )
+        }
+
         is Loading, is Success -> LoadingContent(
             stringResource(id = R.string.stripe_picker_loading_title),
             stringResource(id = R.string.stripe_picker_loading_desc)
         )
+
         is Fail -> {
             // TODO@carlosmuvi translate error type to specific error screen.
             InstitutionUnknownErrorContent(onSelectAnotherBank)
@@ -223,7 +237,8 @@ internal fun PrepaneContentPreview() {
                     PartnerAuthState.Payload(
                         institutionName = "Random bank",
                         flow = Flow.FINICITY_CONNECT_V2_OAUTH,
-                        showPartnerDisclosure = true
+                        showPartnerDisclosure = true,
+                        showPrepane = true
                     )
                 ),
                 authenticationStatus = Uninitialized,
@@ -232,7 +247,8 @@ internal fun PrepaneContentPreview() {
             onContinueClick = {},
             onSelectAnotherBank = {},
             onCloseClick = {},
-            onEnterDetailsManually = {}
+            onEnterDetailsManually = {},
+            onCloseFromErrorClick = {}
         )
     }
 }

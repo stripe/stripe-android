@@ -5,6 +5,8 @@ package com.stripe.android.financialconnections.ui.theme
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
+internal val Info100 = Color(0xffCFF5F6)
+
 internal val Neutral50 = Color(0xffF6F8FA)
 internal val Neutral150 = Color(0xffE0E6EB)
 internal val Neutral200 = Color(0xffC0C8D2)

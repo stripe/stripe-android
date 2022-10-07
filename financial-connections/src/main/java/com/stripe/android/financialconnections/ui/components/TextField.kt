@@ -11,6 +11,7 @@ import androidx.compose.material.ExposedDropdownMenuDefaults.outlinedTextFieldCo
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
@@ -22,6 +23,7 @@ internal fun FinancialConnectionsOutlinedTextField(
     onValueChange: (String) -> Unit,
     readOnly: Boolean = false,
     isError: Boolean = false,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     label: @Composable (() -> Unit)? = null
@@ -31,6 +33,7 @@ internal fun FinancialConnectionsOutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
+        visualTransformation = visualTransformation,
         readOnly = readOnly,
         isError = isError,
         value = value,

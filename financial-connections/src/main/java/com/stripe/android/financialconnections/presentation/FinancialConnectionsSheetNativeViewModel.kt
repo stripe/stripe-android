@@ -25,14 +25,17 @@ import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledExc
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.utils.UriComparator
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     /**
      * Exposes parent dagger component (activity viewModel scoped so that it survives config changes)
@@ -55,9 +58,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         val manifest = getManifest()
                         setState { copy(viewEffect = OpenUrl(manifest.hostedAuthUrl)) }
                     }
+
                     is Message.Finish -> {
                         setState { copy(viewEffect = Finish(message.result)) }
                     }
+
                     Message.ClearPartnerWebAuth -> {
                         setState { copy(webAuthFlow = Uninitialized) }
                     }
@@ -80,9 +85,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 receivedUrl == null -> setState {
                     copy(webAuthFlow = Fail(WebAuthFlowFailedException(url = null)))
                 }
+
                 uriComparator.compareSchemeAuthorityAndPath(receivedUrl, SUCCESS_URL) -> setState {
                     copy(webAuthFlow = Success(receivedUrl))
                 }
+
                 else -> setState {
                     copy(webAuthFlow = Fail(WebAuthFlowFailedException(receivedUrl)))
                 }
@@ -118,36 +125,64 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    fun onCloseWithConfirmationClick() {
-        setState { copy(showCloseDialog = true) }
-    }
+    fun onCloseWithConfirmationClick() = setState { copy(showCloseDialog = true) }
 
-    fun onCloseClick() {
-        close()
-    }
+    fun onCloseNoConfirmationClick() = closeAuthFlow(closeAuthFlowError = null)
 
-    fun onCloseConfirm() = close()
+    fun onCloseFromErrorClick(error: Throwable) = closeAuthFlow(closeAuthFlowError = error)
 
-    fun onCloseDismiss() {
-        setState { copy(showCloseDialog = false) }
-    }
+    fun onCloseConfirm() = closeAuthFlow(closeAuthFlowError = null)
+
+    fun onCloseDismiss() = setState { copy(showCloseDialog = false) }
 
     /**
      * [NavHost] handles back presses except for when backstack is empty, where it delegates
      * to the container activity. [onBackPressed] will be triggered on these empty backstack cases.
      */
-    fun onBackPressed() = close()
+    fun onBackPressed() = closeAuthFlow(closeAuthFlowError = null)
 
-    private fun close() {
-        logger.debug("User intentionally closed the AuthFlow.")
+    /**
+     * There's at least three types of close cases:
+     * 1. User closes (with or without an error),
+     *    and fetching accounts returns accounts (or `paymentAccount`). That's a success.
+     * 2. User closes with an error, and fetching accounts returns NO accounts. That's an error.
+     * 3. User closes without an error, and fetching accounts returns NO accounts. That's a cancel.
+     */
+    private fun closeAuthFlow(
+        closeAuthFlowError: Throwable? = null
+    ) {
         viewModelScope.launch {
             kotlin
                 .runCatching { completeFinancialConnectionsSession() }
-                .onFailure {
-                    logger.error("Error completing session before closing", it)
+                .onSuccess { session ->
+                    when {
+                        session.accounts.data.isNotEmpty() ||
+                            session.paymentAccount != null ||
+                            session.bankAccountToken != null -> {
+                            val result = Completed(
+                                financialConnectionsSession = session,
+                                token = session.parsedToken
+                            )
+                            setState { copy(viewEffect = Finish(result)) }
+                        }
+
+                        closeAuthFlowError != null -> setState {
+                            copy(viewEffect = Finish(Failed(closeAuthFlowError)))
+                        }
+                        else -> setState {
+                            copy(viewEffect = Finish(Canceled))
+                        }
+                    }
                 }
-                .onSuccess {
-                    setState { copy(viewEffect = Finish(Canceled)) }
+                .onFailure { completeSessionError ->
+                    logger.error("Error completing session before closing", completeSessionError)
+                    setState {
+                        copy(
+                            viewEffect = Finish(
+                                Failed(closeAuthFlowError ?: completeSessionError)
+                            )
+                        )
+                    }
                 }
         }
     }
@@ -179,7 +214,8 @@ internal data class FinancialConnectionsSheetNativeState(
     val webAuthFlow: Async<String>,
     val configuration: FinancialConnectionsSheet.Configuration,
     val showCloseDialog: Boolean,
-    val viewEffect: FinancialConnectionsSheetNativeViewEffect?
+    val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
+    val initialPane: NextPane
 ) : MavericksState {
 
     /**
@@ -188,6 +224,7 @@ internal data class FinancialConnectionsSheetNativeState(
     @Suppress("Unused")
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
+        initialPane = args.manifest.nextPane,
         configuration = args.configuration,
         showCloseDialog = false,
         viewEffect = null

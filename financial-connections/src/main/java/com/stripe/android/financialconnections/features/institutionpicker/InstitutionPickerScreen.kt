@@ -28,7 +28,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -79,7 +78,7 @@ internal fun InstitutionPickerScreen() {
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCancelSearchClick = viewModel::onCancelSearchClick,
-        onCloseClick = parentViewModel::onCloseClick,
+        onCloseClick = parentViewModel::onCloseNoConfirmationClick,
         onSearchFocused = viewModel::onSearchFocused,
         onManualEntryClick = viewModel::onManualEntryClick
     )
@@ -239,6 +238,7 @@ private fun SearchInstitutionsList(
                         modifier = Modifier.fillMaxWidth()
                     ) { LoadingSpinner() }
                 }
+
                 is Success -> {
                     if (institutions().data.isEmpty()) {
                         item {
@@ -288,7 +288,7 @@ private fun SearchInstitutionsFailedRow(
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Icon(
-            imageVector = Icons.Filled.Warning,
+            painter = painterResource(R.drawable.stripe_ic_warning),
             contentDescription = "Warning icon",
             tint = FinancialConnectionsTheme.colors.textSecondary
         )
@@ -376,13 +376,14 @@ private fun FeaturedInstitutionsGrid(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         content = {
             when (payload) {
-                Uninitialized, is Loading, is Fail -> {
+                Uninitialized, is Loading -> {
                     item(span = { GridItemSpan(2) }) {
                         LoadingSpinner()
                     }
                 }
-
-                is Success -> items(payload().featuredInstitutions.data) { institution ->
+                // Show empty featured institutions grid. Users will be able to search using search bar.
+                is Fail -> Unit
+                is Success -> items(payload().featuredInstitutions) { institution ->
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier

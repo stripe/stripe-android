@@ -18,7 +18,8 @@ internal class PollAttachPaymentAccount @Inject constructor(
 
     suspend operator fun invoke(
         allowManualEntry: Boolean,
-        activeInstitution: FinancialConnectionsInstitution,
+        // null, when attaching via manual entry.
+        activeInstitution: FinancialConnectionsInstitution?,
         params: PaymentAccountParams
     ): LinkAccountSessionPaymentAccount {
         return retryOnException(
@@ -43,10 +44,11 @@ internal class PollAttachPaymentAccount @Inject constructor(
     }
 
     private fun StripeException.toDomainException(
-        institution: FinancialConnectionsInstitution,
+        institution: FinancialConnectionsInstitution?,
         allowManualEntry: Boolean
     ): StripeException =
         when {
+            institution == null -> this
             stripeError?.extraFields?.get("reason") == "account_number_retrieval_failed" ->
                 AccountNumberRetrievalException(
                     allowManualEntry = allowManualEntry,

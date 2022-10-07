@@ -40,6 +40,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.visualtransformation.NumbersOnlyTransformation
 
 @Composable
 internal fun ManualEntryScreen() {
@@ -58,7 +59,7 @@ internal fun ManualEntryScreen() {
         onAccountEntered = viewModel::onAccountEntered,
         onAccountConfirmEntered = viewModel::onAccountConfirmEntered,
         onSubmit = viewModel::onSubmit,
-        onCloseClick = parentViewModel::onCloseClick
+        onCloseClick = parentViewModel::onCloseNoConfirmationClick
     )
 }
 
@@ -191,11 +192,13 @@ private fun InputWithError(
     onFocusGained: () -> Unit,
     onInputChanged: (String) -> Unit
 ) {
+    var text by remember { mutableStateOf("") }
     FinancialConnectionsOutlinedTextField(
         label = { Text(stringResource(label)) },
-        value = inputWithError.first ?: "",
+        value = text,
+        visualTransformation = NumbersOnlyTransformation(),
         isError = inputWithError.second != null,
-        onValueChange = onInputChanged,
+        onValueChange = { text = it; onInputChanged(it) },
         modifier = Modifier.onFocusChanged { if (it.isFocused) onFocusGained() }
     )
     if (inputWithError.second != null) {

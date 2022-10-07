@@ -5,6 +5,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 
 internal class NoAccountsAvailableException(
     val allowManualEntry: Boolean,
+    val canRetry: Boolean,
     val institution: FinancialConnectionsInstitution,
     stripeException: StripeException
 ) : StripeException(
