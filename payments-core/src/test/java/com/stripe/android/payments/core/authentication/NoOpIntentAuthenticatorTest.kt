@@ -1,8 +1,6 @@
 package com.stripe.android.payments.core.authentication
 
 import android.os.Bundle
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.FakeActivityResultLauncher
@@ -21,7 +19,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -30,12 +27,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 class NoOpIntentAuthenticatorTest {
-
-    private val lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.RESUMED)
-
-    private val host = mock<AuthActivityStarterHost> {
-        on { lifecycleOwner } doReturn lifecycleOwner
-    }
+    private val host = mock<AuthActivityStarterHost>()
 
     private val paymentRelayStarterFactory =
         mock<(AuthActivityStarterHost) -> PaymentRelayStarter>()
