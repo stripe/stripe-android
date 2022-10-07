@@ -6,12 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenResumed
 import com.stripe.android.view.AuthActivityStarterHost.ActivityHost
 import com.stripe.android.view.AuthActivityStarterHost.FragmentHost
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 /**
  * A representation of an Android component (i.e. [ComponentActivity] or [Fragment]) that can start

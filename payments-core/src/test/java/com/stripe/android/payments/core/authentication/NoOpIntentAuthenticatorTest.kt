@@ -16,7 +16,6 @@ import com.stripe.android.view.AuthActivityStarterHost
 import com.stripe.android.view.PaymentRelayActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
@@ -55,7 +54,7 @@ class NoOpIntentAuthenticatorTest {
             )
         )
 
-        authenticator.authenticate(
+        authenticator.performAuthentication(
             host,
             PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
             REQUEST_OPTIONS
@@ -79,7 +78,7 @@ class NoOpIntentAuthenticatorTest {
                 host
             )
         )
-        authenticator.authenticate(
+        authenticator.performAuthentication(
             host,
             PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
             REQUEST_OPTIONS

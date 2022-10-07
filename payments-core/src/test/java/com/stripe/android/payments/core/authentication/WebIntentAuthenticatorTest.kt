@@ -138,7 +138,7 @@ class WebIntentAuthenticatorTest {
         expectedShouldCancelIntentOnUserNavigation: Boolean = true,
         expectedAnalyticsEvent: PaymentAnalyticsEvent?
     ) = runTest {
-        authenticator.authenticate(
+        authenticator.performAuthentication(
             host,
             stripeIntent,
             REQUEST_OPTIONS

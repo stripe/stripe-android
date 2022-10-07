@@ -45,7 +45,7 @@ class Stripe3DS2AuthenticatorTest {
         runTest {
             val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
 
-            authenticator.authenticate(
+            authenticator.performAuthentication(
                 host,
                 paymentIntent,
                 REQUEST_OPTIONS
@@ -69,7 +69,7 @@ class Stripe3DS2AuthenticatorTest {
             authenticator.stripe3ds2CompletionLauncher = mockLauncher
 
             val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2
-            authenticator.authenticate(
+            authenticator.performAuthentication(
                 host,
                 paymentIntent,
                 REQUEST_OPTIONS

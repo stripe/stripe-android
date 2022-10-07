@@ -18,7 +18,7 @@ import com.stripe.android.view.AuthActivityStarterHost
  * [PaymentAuthenticator] implementation to authenticate through WeChatPay SDK.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent> {
+class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent>() {
     /**
      * [weChatPayAuthLauncher] is mutable and might be updated during
      * through [onNewActivityResultCaller]
