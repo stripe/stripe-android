@@ -88,3 +88,6 @@ com.stripe.android.stripecardscan.cardscan
 com.stripe.android.stripecardscan.cardscan.exception
 com.stripe.android.stripecardscan.payment.card
 com.stripe.android.stripecardscan.scanui
+module:wechatpay
+com.stripe.android.payments.wechatpay
+com.stripe.android.payments.wechatpay.reflection

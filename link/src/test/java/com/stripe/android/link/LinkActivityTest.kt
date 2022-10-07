@@ -33,12 +33,13 @@ import org.robolectric.RobolectricTestRunner
 class LinkActivityTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val config = LinkPaymentLauncher.Configuration(
-        StripeIntentFixtures.PI_SUCCEEDED,
-        "Example, Inc.",
-        "Name",
-        "email@stripe.com",
-        null,
-        null
+        stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
+        merchantName = "Example, Inc.",
+        customerName = "Name",
+        customerEmail = "email@stripe.com",
+        customerPhone = null,
+        customerBillingCountryCode = null,
+        shippingValues = null,
     )
     private val args = LinkActivityContract.Args(config)
     private val intent = LinkActivityContract().createIntent(context, args)

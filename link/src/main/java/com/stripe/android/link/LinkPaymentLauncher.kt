@@ -197,6 +197,7 @@ class LinkPaymentLauncher @Inject internal constructor(
         val customerName: String?,
         val customerEmail: String?,
         val customerPhone: String?,
+        val customerBillingCountryCode: String?,
         val shippingValues: Map<IdentifierSpec, String?>?
     ) : Parcelable
 

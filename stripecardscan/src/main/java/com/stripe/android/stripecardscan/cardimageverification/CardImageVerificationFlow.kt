@@ -43,7 +43,7 @@ internal abstract class CardImageVerificationFlow(
         /**
          * The maximum number of frames to process
          */
-        const val MAX_COMPLETION_LOOP_FRAMES = 5
+        const val MAX_COMPLETION_LOOP_FRAMES = 3
     }
 
     /**

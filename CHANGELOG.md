@@ -1,6 +1,10 @@
 # CHANGELOG
 
-## X.X.X - 2022-XX-XX
+## XX.XX.XX - 2022-XX-XX
+
+## 20.14.1 - 2022-10-03
+
+This release expands the `payment_method` field on ACH requests and fixes a formatting error in `CardInputWidget`, `CardMultilineWidget`, and `CardFormView`.
 
 ### Payments
 
