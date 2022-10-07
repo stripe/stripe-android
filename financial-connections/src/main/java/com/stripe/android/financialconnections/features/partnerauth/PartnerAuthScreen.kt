@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,19 +31,23 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.InstitutionPlannedException
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
+import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
 import com.stripe.android.financialconnections.features.common.InstitutionPlannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.InstitutionUnknownErrorContent
 import com.stripe.android.financialconnections.features.common.InstitutionUnplannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PartnerCallout
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.image.StripeImage
 
 @Composable
 internal fun PartnerAuthScreen() {
@@ -96,12 +99,14 @@ private fun PartnerAuthScreenContent(
                 stringResource(id = R.string.stripe_picker_loading_title),
                 stringResource(id = R.string.stripe_picker_loading_desc)
             )
+
             is Fail -> ErrorContent(
                 error = payload.error,
                 onSelectAnotherBank = onSelectAnotherBank,
                 onEnterDetailsManually = onEnterDetailsManually,
                 onCloseFromErrorClick = onCloseFromErrorClick
             )
+
             is Success -> LoadedContent(
                 authenticationStatus = state.authenticationStatus,
                 payload = payload(),
@@ -146,11 +151,12 @@ private fun LoadedContent(
     when (authenticationStatus) {
         is Uninitialized -> when (payload.showPrepane) {
             true -> PrePaneContent(
-                institutionName = payload.institutionName,
+                institution = payload.institution,
                 flow = payload.flow,
                 showPartnerDisclosure = payload.showPartnerDisclosure,
                 onContinueClick = onContinueClick
             )
+
             false -> LoadingContent(
                 stringResource(id = R.string.stripe_picker_loading_title),
                 stringResource(id = R.string.stripe_picker_loading_desc)
@@ -171,7 +177,7 @@ private fun LoadedContent(
 
 @Composable
 private fun PrePaneContent(
-    institutionName: String,
+    institution: FinancialConnectionsInstitution,
     flow: Flow?,
     showPartnerDisclosure: Boolean,
     onContinueClick: () -> Unit
@@ -185,21 +191,23 @@ private fun PrePaneContent(
                 bottom = 16.dp
             )
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        StripeImage(
+            url = institution.icon?.default ?: "",
             contentDescription = null,
+            imageLoader = LocalImageLoader.current,
+            errorContent = { InstitutionPlaceholder() },
             modifier = Modifier
                 .size(36.dp)
                 .clip(RoundedCornerShape(6.dp))
         )
         Spacer(modifier = Modifier.size(16.dp))
         Text(
-            text = stringResource(R.string.stripe_prepane_title, institutionName),
+            text = stringResource(R.string.stripe_prepane_title, institution.name),
             style = FinancialConnectionsTheme.typography.subtitle
         )
         Spacer(modifier = Modifier.size(16.dp))
         Text(
-            text = stringResource(R.string.stripe_prepane_desc, institutionName),
+            text = stringResource(R.string.stripe_prepane_desc, institution.name),
             style = FinancialConnectionsTheme.typography.body
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -235,7 +243,16 @@ internal fun PrepaneContentPreview() {
             state = PartnerAuthState(
                 payload = Success(
                     PartnerAuthState.Payload(
-                        institutionName = "Random bank",
+                        institution = FinancialConnectionsInstitution(
+                            id = "id",
+                            name = "name",
+                            url = "url",
+                            featured = true,
+                            icon = null,
+                            logo = null,
+                            featuredOrder = null,
+                            mobileHandoffCapable = false
+                        ),
                         flow = Flow.FINICITY_CONNECT_V2_OAUTH,
                         showPartnerDisclosure = true,
                         showPrepane = true

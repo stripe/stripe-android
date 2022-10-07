@@ -3,7 +3,6 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +49,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -339,12 +339,7 @@ private fun InstitutionResultTile(
     ) {
         StripeImage(
             url = institution.icon?.default ?: "",
-            errorContent = {
-                Image(
-                    painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
-                    contentDescription = "Bank icon placeholder"
-                )
-            },
+            errorContent = { InstitutionPlaceholder() },
             contentScale = ContentScale.Crop,
             contentDescription = null,
             imageLoader = LocalImageLoader.current,

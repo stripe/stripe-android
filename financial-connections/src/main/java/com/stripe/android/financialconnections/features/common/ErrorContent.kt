@@ -420,7 +420,7 @@ internal fun NoAccountsAvailableErrorContentPreview() {
 }
 
 @Composable
-private fun InstitutionPlaceholder() {
+internal fun InstitutionPlaceholder() {
     Image(
         painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
         contentDescription = "Bank icon placeholder"
