@@ -300,6 +300,8 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
                 name = "name",
                 url = "url",
                 featured = true,
+                icon = null,
+                logo = null,
                 featuredOrder = null,
                 mobileHandoffCapable = false
             )
@@ -350,6 +352,8 @@ internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
                 name = "name",
                 url = "url",
                 featured = true,
+                icon = null,
+                logo = null,
                 featuredOrder = null,
                 mobileHandoffCapable = false
             )
@@ -392,6 +396,8 @@ internal fun AccessibleDataCalloutWithOneAccountPreview() {
                 url = "url",
                 featured = true,
                 featuredOrder = null,
+                icon = null,
+                logo = null,
                 mobileHandoffCapable = false
             )
         )

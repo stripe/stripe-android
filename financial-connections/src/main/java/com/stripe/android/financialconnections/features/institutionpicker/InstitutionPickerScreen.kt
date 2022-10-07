@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -54,12 +55,14 @@ import com.stripe.android.financialconnections.features.institutionpicker.Instit
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.image.StripeImage
 
 @Composable
 internal fun InstitutionPickerScreen() {
@@ -334,9 +337,17 @@ private fun InstitutionResultTile(
                 horizontal = 16.dp
             )
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        StripeImage(
+            url = institution.icon?.default ?: "",
+            errorContent = {
+                Image(
+                    painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+                    contentDescription = "Bank icon placeholder"
+                )
+            },
+            contentScale = ContentScale.Crop,
             contentDescription = null,
+            imageLoader = LocalImageLoader.current,
             modifier = Modifier
                 .size(36.dp)
                 .clip(RoundedCornerShape(6.dp))
@@ -389,19 +400,28 @@ private fun FeaturedInstitutionsGrid(
                         modifier = Modifier
                             .height(80.dp)
                             .fillMaxWidth()
+                            .clip(RoundedCornerShape(6.dp))
                             .border(
                                 width = 1.dp,
                                 color = FinancialConnectionsTheme.colors.borderDefault,
                                 shape = RoundedCornerShape(4.dp)
                             )
                             .clickable { onInstitutionSelected(institution) }
-                            .padding(8.dp)
                     ) {
-                        Text(
-                            text = institution.name,
-                            color = FinancialConnectionsTheme.colors.textPrimary,
-                            style = FinancialConnectionsTheme.typography.bodyEmphasized,
-                            textAlign = TextAlign.Center
+                        StripeImage(
+                            modifier = Modifier.fillMaxSize(),
+                            url = institution.logo?.default ?: "",
+                            imageLoader = LocalImageLoader.current,
+                            contentScale = ContentScale.Crop,
+                            errorContent = {
+                                Text(
+                                    text = institution.name,
+                                    color = FinancialConnectionsTheme.colors.textPrimary,
+                                    style = FinancialConnectionsTheme.typography.bodyEmphasized,
+                                    textAlign = TextAlign.Center
+                                )
+                            },
+                            contentDescription = "Institution logo"
                         )
                     }
                 }

@@ -233,6 +233,8 @@ internal fun SuccessScreenPreview() {
                 url = "url",
                 featured = true,
                 featuredOrder = null,
+                icon = null,
+                logo = null,
                 mobileHandoffCapable = false
             )
         )

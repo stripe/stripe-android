@@ -37,10 +37,12 @@ import com.stripe.android.financialconnections.exception.InstitutionUnplannedExc
 import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
 import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.image.StripeImage
 import java.text.SimpleDateFormat
 
 @Composable
@@ -49,7 +51,7 @@ internal fun UnclassifiedErrorContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     ErrorContent(
-        painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        null, //TODO show warning icon.
         title = stringResource(R.string.stripe_error_generic_title),
         content = stringResource(R.string.stripe_error_generic_desc),
         primaryCta = stringResource(R.string.stripe_error_cta_close) to {
@@ -63,7 +65,7 @@ internal fun InstitutionUnknownErrorContent(
     onSelectAnotherBank: () -> Unit
 ) {
     ErrorContent(
-        iconPainter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        iconUrl = null, //TODO show institution icon.
         title = stringResource(R.string.stripe_error_generic_title),
         content = stringResource(R.string.stripe_error_unplanned_downtime_desc),
         primaryCta = Pair(
@@ -80,7 +82,7 @@ internal fun InstitutionUnplannedDowntimeErrorContent(
     onEnterDetailsManually: () -> Unit
 ) {
     ErrorContent(
-        iconPainter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        iconUrl = exception.institution.icon?.default ?: "",
         title = stringResource(
             R.string.stripe_error_unplanned_downtime_title,
             exception.institution.name
@@ -112,7 +114,7 @@ internal fun InstitutionPlannedDowntimeErrorContent(
         SimpleDateFormat("dd/MM/yyyy HH:mm", javaLocale).format(exception.backUpAt)
     }
     ErrorContent(
-        iconPainter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        iconUrl = exception.institution.icon?.default ?: "",
         title = stringResource(
             R.string.stripe_error_planned_downtime_title,
             exception.institution.name
@@ -143,7 +145,7 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
     onEnterDetailsManually: () -> Unit
 ) {
     ErrorContent(
-        painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        iconUrl = exception.institution.icon?.default ?: "",
         title = stringResource(
             R.string.stripe_account_picker_error_no_payment_method_title
         ),
@@ -207,7 +209,7 @@ internal fun NoAccountsAvailableErrorContent(
     }
 
     ErrorContent(
-        painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        iconUrl = exception.institution.icon?.default ?: "",
         title = stringResource(
             R.string.stripe_account_picker_error_no_account_available_title,
             exception.institution.name
@@ -225,7 +227,7 @@ internal fun AccountNumberRetrievalErrorContent(
     onEnterDetailsManually: () -> Unit
 ) {
     ErrorContent(
-        painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        iconUrl = exception.institution.icon?.default ?: "",
         title = stringResource(
             R.string.stripe_attachlinkedpaymentaccount_error_title
         ),
@@ -252,7 +254,7 @@ internal fun AccountNumberRetrievalErrorContent(
 
 @Composable
 internal fun ErrorContent(
-    iconPainter: Painter,
+    iconUrl: String?,
     badge: Pair<Painter, Shape> = Pair(
         painterResource(id = R.drawable.stripe_ic_warning_circle),
         CircleShape
@@ -273,7 +275,7 @@ internal fun ErrorContent(
                 .weight(1f)
                 .verticalScroll(scrollState)
         ) {
-            BadgedImage(iconPainter, badge)
+            BadgedInstitutionImage(iconUrl, badge)
             Spacer(modifier = Modifier.size(16.dp))
             Text(
                 text = title,
@@ -310,16 +312,18 @@ internal fun ErrorContent(
 }
 
 @Composable
-private fun BadgedImage(
-    iconPainter: Painter,
+private fun BadgedInstitutionImage(
+    institutionIconUrl: String?,
     badge: Pair<Painter, Shape>
 ) {
     Box(
         modifier = Modifier
             .size(40.dp)
     ) {
-        Image(
-            painter = iconPainter,
+        StripeImage(
+            url = institutionIconUrl ?: "",
+            imageLoader = LocalImageLoader.current,
+            errorContent = { InstitutionPlaceholder() },
             contentDescription = null,
             modifier = Modifier
                 .size(36.dp)
@@ -368,6 +372,8 @@ internal fun InstitutionPlannedDowntimeErrorContentPreview() {
                         url = "RandomInstitution url",
                         featured = false,
                         featuredOrder = null,
+                        icon = null,
+                        logo = null,
                         mobileHandoffCapable = false
                     ),
                     allowManualEntry = true,
@@ -397,6 +403,8 @@ internal fun NoAccountsAvailableErrorContentPreview() {
                         url = "RandomInstitution url",
                         featured = false,
                         featuredOrder = null,
+                        icon = null,
+                        logo = null,
                         mobileHandoffCapable = false
                     ),
                     allowManualEntry = true,
@@ -409,4 +417,12 @@ internal fun NoAccountsAvailableErrorContentPreview() {
             )
         }
     }
+}
+
+@Composable
+private fun InstitutionPlaceholder() {
+    Image(
+        painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        contentDescription = "Bank icon placeholder"
+    )
 }

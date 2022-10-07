@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.di
 
+import android.app.Application
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
@@ -17,6 +18,7 @@ import com.stripe.android.financialconnections.network.FinancialConnectionsReque
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
+import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -43,6 +45,14 @@ internal class FinancialConnectionsSheetNativeModule {
     @Provides
     fun providesNavigationManager() = NavigationManager(
         CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    )
+
+    @Singleton
+    @Provides
+    fun providesImageLoader(
+        context: Application
+    ) = StripeImageLoader(
+        context = context
     )
 
     @Singleton

@@ -6,18 +6,17 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.IntSize.Companion.Zero
+import com.stripe.android.uicore.image.StripeImageState.Success
 import kotlinx.coroutines.launch
 
 /**
@@ -30,7 +29,8 @@ import kotlinx.coroutines.launch
  *  and does not represent a meaningful action that a user can take.
  * @param imageLoader The [StripeImageLoader] that will be used to execute the request.
  * @param modifier Modifier used to adjust the layout algorithm or draw decoration content.
- * @param placeholder A [Painter] that is displayed while the image is loading.
+ * @param errorContent content to render when image loading fails.
+ * @param loadingContent content to render when image loads.
  * @param contentScale Optional scale parameter used to determine the aspect ratio scaling to be
  *  used if the bounds are a different size from the intrinsic size of the painter.
  */
@@ -38,33 +38,39 @@ import kotlinx.coroutines.launch
 @Composable
 fun StripeImage(
     url: String,
-    placeholder: Painter,
     imageLoader: StripeImageLoader,
     contentDescription: String?,
     modifier: Modifier = Modifier,
+    errorContent: @Composable () -> Unit = {},
+    loadingContent: @Composable () -> Unit = {},
     contentScale: ContentScale = ContentScale.Fit
 ) {
     BoxWithConstraints(modifier) {
         val (width, height) = calculateBoxSize()
-        var painter: Painter by remember {
-            mutableStateOf(BitmapPainter(ImageBitmap(width, height)))
-        }
+        val state: MutableState<StripeImageState> =
+            remember { mutableStateOf(StripeImageState.Loading) }
         LaunchedEffect(url) {
             launch {
                 imageLoader
                     .load(url, width, height)
-                    .fold(
-                        onSuccess = { bitmap -> BitmapPainter(bitmap.asImageBitmap()) },
-                        onFailure = { placeholder }
-                    ).let { painter = it }
+                    .onSuccess { bitmap ->
+                        state.value = Success(BitmapPainter(bitmap.asImageBitmap()))
+                    }
+                    .onFailure {
+                        state.value = StripeImageState.Error
+                    }
             }
         }
-        Image(
-            modifier = modifier,
-            contentDescription = contentDescription,
-            contentScale = contentScale,
-            painter = painter
-        )
+        when (val result = state.value) {
+            StripeImageState.Error -> errorContent()
+            StripeImageState.Loading -> loadingContent()
+            is Success -> Image(
+                modifier = modifier,
+                contentDescription = contentDescription,
+                contentScale = contentScale,
+                painter = result.painter
+            )
+        }
     }
 }
 
@@ -91,4 +97,11 @@ private fun BoxWithConstraintsScope.calculateBoxSize(): Pair<Int, Int> {
     if (width == -1) width = height
     if (height == -1) height = width
     return Pair(width, height)
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class StripeImageState {
+    object Loading : StripeImageState()
+    data class Success(val painter: Painter) : StripeImageState()
+    object Error : StripeImageState()
 }
