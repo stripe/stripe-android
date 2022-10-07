@@ -473,7 +473,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         const val USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA = "UseSnapshotReturningCustomer"
         const val SUPPORTED_PAYMENT_METHODS_EXTRA = "SupportedPaymentMethods"
         private const val merchantName = "Example, Inc."
-        private const val sharedPreferencesName = "playgroundToggles"
 
         /**
          * This is a pairing of the countries to their default currency
