@@ -170,7 +170,10 @@ class TestFieldPopulation {
     fun testSinglePaymentMethodWithoutGooglePayAndKeyboardInput() {
         testDriver.confirmNewOrGuestComplete(
             bancontact.copy(
-                supportedPaymentMethods = listOf(PaymentMethod.Type.Bancontact.code)
+                supportedPaymentMethods = listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.Bancontact.code
+                )
             )
         ) {
             composeTestRule.waitForIdle()
