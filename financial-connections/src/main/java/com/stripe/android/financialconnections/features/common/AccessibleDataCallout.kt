@@ -2,7 +2,6 @@
 
 package com.stripe.android.financialconnections.features.common
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,10 +32,12 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.image.StripeImage
 
 private const val COLLAPSE_ACCOUNTS_THRESHOLD = 5
 
@@ -60,6 +60,7 @@ internal fun AccessibleDataCalloutWithAccounts(
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (accounts.count() >= COLLAPSE_ACCOUNTS_THRESHOLD) {
                 AccountRow(
+                    iconUrl = institution.icon?.default,
                     text = institution.name,
                     subText = stringResource(
                         id = R.string.stripe_success_infobox_accounts,
@@ -67,7 +68,12 @@ internal fun AccessibleDataCalloutWithAccounts(
                     )
                 )
             } else {
-                accounts.forEach { AccountRow(it.fullName) }
+                accounts.forEach {
+                    AccountRow(
+                        iconUrl = institution.icon?.default,
+                        text = it.fullName
+                    )
+                }
             }
 
             Divider(color = FinancialConnectionsTheme.colors.backgroundBackdrop)
@@ -79,7 +85,8 @@ internal fun AccessibleDataCalloutWithAccounts(
 @Composable
 private fun AccountRow(
     text: String,
-    subText: String? = null
+    subText: String? = null,
+    iconUrl: String?
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -90,8 +97,10 @@ private fun AccountRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+            StripeImage(
+                url = iconUrl ?: "",
+                imageLoader = LocalImageLoader.current,
+                errorContent = { InstitutionPlaceholder() },
                 contentDescription = null,
                 modifier = Modifier
                     .size(24.dp)

@@ -51,7 +51,7 @@ internal fun UnclassifiedErrorContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     ErrorContent(
-        null, //TODO show warning icon.
+        null, // TODO show warning icon.
         title = stringResource(R.string.stripe_error_generic_title),
         content = stringResource(R.string.stripe_error_generic_desc),
         primaryCta = stringResource(R.string.stripe_error_cta_close) to {
@@ -65,7 +65,7 @@ internal fun InstitutionUnknownErrorContent(
     onSelectAnotherBank: () -> Unit
 ) {
     ErrorContent(
-        iconUrl = null, //TODO show institution icon.
+        iconUrl = null, // TODO show institution icon.
         title = stringResource(R.string.stripe_error_generic_title),
         content = stringResource(R.string.stripe_error_unplanned_downtime_desc),
         primaryCta = Pair(

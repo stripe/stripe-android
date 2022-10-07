@@ -41,8 +41,8 @@ fun StripeImage(
     imageLoader: StripeImageLoader,
     contentDescription: String?,
     modifier: Modifier = Modifier,
-    errorContent: @Composable () -> Unit = {},
-    loadingContent: @Composable () -> Unit = {},
+    errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
+    loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
     contentScale: ContentScale = ContentScale.Fit
 ) {
     BoxWithConstraints(modifier) {

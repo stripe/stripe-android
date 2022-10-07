@@ -80,7 +80,8 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = true
+                enabled = true,
+                institutionIcon = null
             ),
             PartnerAccountUI(
                 PartnerAccount(
@@ -91,7 +92,8 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = true
+                enabled = true,
+                institutionIcon = null
             ),
             PartnerAccountUI(
                 PartnerAccount(
@@ -103,7 +105,8 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = false
+                enabled = false,
+                institutionIcon = null
             ),
             PartnerAccountUI(
                 PartnerAccount(
@@ -115,7 +118,8 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = false
+                enabled = false,
+                institutionIcon = null
             )
         )
 
