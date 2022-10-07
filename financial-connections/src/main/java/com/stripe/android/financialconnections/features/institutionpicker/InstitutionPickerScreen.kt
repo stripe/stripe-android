@@ -339,14 +339,13 @@ private fun InstitutionResultTile(
     ) {
         StripeImage(
             url = institution.icon?.default ?: "",
-            errorContent = { InstitutionPlaceholder() },
-            contentScale = ContentScale.Crop,
-            contentDescription = null,
             imageLoader = LocalImageLoader.current,
+            contentDescription = null,
             modifier = Modifier
                 .size(36.dp)
-                .clip(RoundedCornerShape(6.dp))
-
+                .clip(RoundedCornerShape(6.dp)),
+            contentScale = ContentScale.Crop,
+            errorContent = { InstitutionPlaceholder() }
         )
         Spacer(modifier = Modifier.size(8.dp))
         Column {
@@ -410,6 +409,7 @@ private fun FeaturedInstitutionsGrid(
                             contentScale = ContentScale.Crop,
                             errorContent = {
                                 Text(
+                                    modifier = Modifier.align(Alignment.Center),
                                     text = institution.name,
                                     color = FinancialConnectionsTheme.colors.textPrimary,
                                     style = FinancialConnectionsTheme.typography.bodyEmphasized,

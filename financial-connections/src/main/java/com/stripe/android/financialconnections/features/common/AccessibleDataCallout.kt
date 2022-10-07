@@ -100,11 +100,11 @@ private fun AccountRow(
             StripeImage(
                 url = iconUrl ?: "",
                 imageLoader = LocalImageLoader.current,
-                errorContent = { InstitutionPlaceholder() },
                 contentDescription = null,
                 modifier = Modifier
                     .size(24.dp)
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(RoundedCornerShape(4.dp)),
+                errorContent = { InstitutionPlaceholder() }
             )
             Text(
                 text,

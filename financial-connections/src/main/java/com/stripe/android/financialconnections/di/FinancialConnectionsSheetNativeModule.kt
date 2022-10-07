@@ -52,7 +52,8 @@ internal class FinancialConnectionsSheetNativeModule {
     fun providesImageLoader(
         context: Application
     ) = StripeImageLoader(
-        context = context
+        context = context,
+        diskCache = null,
     )
 
     @Singleton

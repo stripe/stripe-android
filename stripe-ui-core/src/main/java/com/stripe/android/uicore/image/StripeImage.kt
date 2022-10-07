@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.IntSize.Companion.Zero
+import com.stripe.android.uicore.image.StripeImageState.Error
+import com.stripe.android.uicore.image.StripeImageState.Loading
 import com.stripe.android.uicore.image.StripeImageState.Success
 import kotlinx.coroutines.launch
 
@@ -41,14 +43,14 @@ fun StripeImage(
     imageLoader: StripeImageLoader,
     contentDescription: String?,
     modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Fit,
     errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
-    loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
-    contentScale: ContentScale = ContentScale.Fit
+    loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {}
 ) {
     BoxWithConstraints(modifier) {
         val (width, height) = calculateBoxSize()
         val state: MutableState<StripeImageState> =
-            remember { mutableStateOf(StripeImageState.Loading) }
+            remember { mutableStateOf(Loading) }
         LaunchedEffect(url) {
             launch {
                 imageLoader
@@ -57,13 +59,13 @@ fun StripeImage(
                         state.value = Success(BitmapPainter(bitmap.asImageBitmap()))
                     }
                     .onFailure {
-                        state.value = StripeImageState.Error
+                        state.value = Error
                     }
             }
         }
         when (val result = state.value) {
-            StripeImageState.Error -> errorContent()
-            StripeImageState.Loading -> loadingContent()
+            Error -> errorContent()
+            Loading -> loadingContent()
             is Success -> Image(
                 modifier = modifier,
                 contentDescription = contentDescription,

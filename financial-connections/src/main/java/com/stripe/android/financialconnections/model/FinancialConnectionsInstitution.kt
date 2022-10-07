@@ -33,7 +33,7 @@ internal data class FinancialConnectionsInstitution(
 
     // TODO@carlosmuvi remove hardcoded images.
     // @SerialName(value = "logo")
-    val logo: Image? = null,
+    val logo: Image? = Image("https://play-lh.googleusercontent.com/KFPSKyRk3oZQvTPR1BJ2nzGQZFcAfsNWUZ-MQQM_ixEbxs4_-MYHo4cVQOlDU8lrG3BE"),
 
     @SerialName(value = "featured_order") val featuredOrder: Int? = null,
 
