@@ -6830,11 +6830,6 @@ public final class com/stripe/android/payments/core/authentication/OxxoAuthentic
 	public static fun newInstance (Lcom/stripe/android/payments/core/authentication/WebIntentAuthenticator;Lcom/stripe/android/payments/core/authentication/NoOpIntentAuthenticator;)Lcom/stripe/android/payments/core/authentication/OxxoAuthenticator;
 }
 
-public final class com/stripe/android/payments/core/authentication/PaymentAuthenticator$DefaultImpls {
-	public static fun onLauncherInvalidated (Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;)V
-	public static fun onNewActivityResultCaller (Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;Landroidx/activity/result/ActivityResultCaller;Landroidx/activity/result/ActivityResultCallback;)V
-}
-
 public final class com/stripe/android/payments/core/authentication/PaymentAuthenticatorRegistry$DefaultImpls {
 	public static fun onLauncherInvalidated (Lcom/stripe/android/payments/core/authentication/PaymentAuthenticatorRegistry;)V
 	public static fun onNewActivityResultCaller (Lcom/stripe/android/payments/core/authentication/PaymentAuthenticatorRegistry;Landroidx/activity/result/ActivityResultCaller;Landroidx/activity/result/ActivityResultCallback;)V
