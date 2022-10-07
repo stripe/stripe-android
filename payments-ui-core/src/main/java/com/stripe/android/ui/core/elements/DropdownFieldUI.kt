@@ -20,7 +20,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,8 +33,10 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.InputMode
 import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMaxWidth
@@ -43,6 +44,17 @@ import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMinHeight
 import com.stripe.android.ui.core.paymentsColors
 import kotlin.math.max
 import kotlin.math.min
+
+@Preview
+@Composable
+private fun DropDownPreview() {
+    DropDown(
+        controller = DropdownFieldController(
+            CountryConfig(tinyMode = true)
+        ),
+        enabled = true
+    )
+}
 
 /**
  * This composable will handle the display of dropdown items
@@ -103,10 +115,10 @@ internal fun DropDown(
                         color = currentTextColor
                     )
                     Icon(
-                        Icons.Filled.ArrowDropDown,
+                        painter = painterResource(id = R.drawable.ic_chevron_down),
                         contentDescription = null,
                         modifier = Modifier.height(24.dp),
-                        tint = currentTextColor
+                        tint = MaterialTheme.paymentsColors.placeholderText
                     )
                 }
             } else {
@@ -136,7 +148,7 @@ internal fun DropDown(
                     }
                     Column(modifier = Modifier.align(Alignment.CenterVertically)) {
                         Icon(
-                            Icons.Filled.ArrowDropDown,
+                            painter = painterResource(id = R.drawable.ic_chevron_down),
                             contentDescription = null,
                             modifier = Modifier.height(24.dp),
                             tint = currentTextColor

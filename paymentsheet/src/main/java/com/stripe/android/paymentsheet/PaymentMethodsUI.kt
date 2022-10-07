@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,8 +28,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.ui.core.MeasureComposableWidth
-import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
+import com.stripe.android.ui.core.getBorderStroke
 import com.stripe.android.ui.core.paymentsColors
 
 internal const val ADD_PM_DEFAULT_PADDING = 12.0f
@@ -138,8 +139,7 @@ internal fun PaymentMethodUI(
     }
 
     MeasureComposableWidth(composable = lpmTextSelector) { lpmSelectorTextWidth ->
-        SectionCard(
-            isSelected = isSelected,
+        Card(
             modifier = modifier
                 .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
                 .height(60.dp)
@@ -151,7 +151,11 @@ internal fun PaymentMethodUI(
                             ADD_PM_DEFAULT_PADDING.dp
                     )
                 )
-                .padding(horizontal = CARD_HORIZONTAL_PADDING.dp)
+                .padding(horizontal = CARD_HORIZONTAL_PADDING.dp),
+            shape = MaterialTheme.shapes.medium,
+            backgroundColor = MaterialTheme.paymentsColors.component,
+            border = MaterialTheme.getBorderStroke(isSelected),
+            elevation = if (isSelected) 1.5.dp else 0.dp
         ) {
             Column(
                 modifier = Modifier
