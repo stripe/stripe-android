@@ -67,13 +67,6 @@ internal abstract class BasePaymentMethodsListFragment(
         isEditing = savedInstanceState?.getBoolean(IS_EDITING) ?: false
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        sheetViewModel.headerText.value =
-            getString(R.string.stripe_paymentsheet_select_payment_method)
-    }
-
     @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.paymentsheet_payment_methods_list, menu)
