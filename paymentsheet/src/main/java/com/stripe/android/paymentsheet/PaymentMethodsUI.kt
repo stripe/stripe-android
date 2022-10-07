@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -28,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
-import com.stripe.android.ui.core.MeasureComposableWidth
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.getBorderStroke
 import com.stripe.android.ui.core.paymentsColors
@@ -76,7 +75,7 @@ internal fun PaymentMethodsUI(
                     modifier = Modifier.testTag(
                         TEST_TAG_LIST + stringResource(item.displayNameResource)
                     ),
-                    viewWidth = viewWidth,
+                    minViewWidth = viewWidth,
                     iconRes = item.iconResource,
                     title = stringResource(item.displayNameResource),
                     isSelected = index == selectedIndex,
@@ -142,7 +141,7 @@ private fun computeItemWidthWhenExceedingMaxWidth(
 
 @Composable
 internal fun PaymentMethodUI(
-    viewWidth: Dp,
+    minViewWidth: Dp,
     iconRes: Int,
     title: String,
     isSelected: Boolean,
@@ -158,54 +157,49 @@ internal fun PaymentMethodUI(
         MaterialTheme.paymentsColors.onComponent
     }
 
-    val lpmTextSelector: @Composable () -> Unit = {
-        LpmSelectorText(
-            text = title,
-            isEnabled = isEnabled,
-            textColor = color,
-            modifier = Modifier.padding(top = 6.dp, start = Spacing.cardLeadingInnerPadding)
-        )
-    }
-
-    MeasureComposableWidth(composable = lpmTextSelector) { lpmSelectorTextWidth ->
-        Card(
-            modifier = modifier
-                .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
-                .height(60.dp)
-                .width(
-                    maxOf(
-                        viewWidth,
-                        lpmSelectorTextWidth + Spacing.cardLeadingInnerPadding
-                    )
-                ),
-            shape = MaterialTheme.shapes.medium,
-            backgroundColor = MaterialTheme.paymentsColors.component,
-            border = MaterialTheme.getBorderStroke(isSelected),
-            elevation = if (isSelected) 1.5.dp else 0.dp
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .selectable(
-                        selected = isSelected,
-                        enabled = isEnabled,
-                        onClick = {
-                            onItemSelectedListener(itemIndex)
-                        }
-                    )
-            ) {
-                val colorFilter = if (tintOnSelected) ColorFilter.tint(color) else null
-                Image(
-                    painter = painterResource(iconRes),
-                    contentDescription = null,
-                    colorFilter = colorFilter,
-                    modifier = Modifier.padding(
-                        top = Spacing.cardLeadingInnerPadding,
-                        start = Spacing.cardLeadingInnerPadding,
-                    )
+    Card(
+        modifier = modifier
+            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+            .height(60.dp)
+            .widthIn(min = minViewWidth),
+        shape = MaterialTheme.shapes.medium,
+        backgroundColor = MaterialTheme.paymentsColors.component,
+        border = MaterialTheme.getBorderStroke(isSelected),
+        elevation = if (isSelected) 1.5.dp else 0.dp
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .selectable(
+                    selected = isSelected,
+                    enabled = isEnabled,
+                    onClick = {
+                        onItemSelectedListener(itemIndex)
+                    }
                 )
-                lpmTextSelector()
-            }
+        ) {
+            val colorFilter = if (tintOnSelected) ColorFilter.tint(color) else null
+
+            Image(
+                painter = painterResource(iconRes),
+                contentDescription = null,
+                colorFilter = colorFilter,
+                modifier = Modifier.padding(
+                    top = Spacing.cardLeadingInnerPadding,
+                    start = Spacing.cardLeadingInnerPadding,
+                )
+            )
+
+            LpmSelectorText(
+                text = title,
+                isEnabled = isEnabled,
+                textColor = color,
+                modifier = Modifier.padding(
+                    top = 6.dp,
+                    start = Spacing.cardLeadingInnerPadding,
+                    end = Spacing.cardLeadingInnerPadding,
+                )
+            )
         }
     }
 }
