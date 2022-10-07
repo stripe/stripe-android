@@ -79,14 +79,10 @@ class PlaygroundTestDriver(
             selectors.addPaymentMethodButton.isDisplayed()
         }
 
-        composeTestRule.onNodeWithText("+ Add").assertExists()
-        composeTestRule.onNodeWithText("+ Add").performClick()
-
-        composeTestRule.onNodeWithText("Save my info for secure 1-click checkout").assertExists()
-        composeTestRule.onNodeWithText("Save my info for secure 1-click checkout").performClick()
-
-        composeTestRule.onNodeWithText("Email").assertExists()
-        composeTestRule.onNodeWithText("Email").performTextInput("email@email.com")
+        composeTestRule.onNodeWithText("+ Add").apply {
+            assertExists()
+            performClick()
+        }
 
         val fieldPopulator = FieldPopulator(
             selectors,
@@ -95,6 +91,18 @@ class PlaygroundTestDriver(
             verifyCustomLpmFields
         )
         fieldPopulator.populateFields()
+
+        composeTestRule.onNodeWithText("Save my info for secure 1-click checkout").apply {
+            assertExists()
+            performClick()
+        }
+
+        composeTestRule.onNodeWithText("Email").apply {
+            assertExists()
+            performTextInput("email@email.com")
+        }
+
+        Espresso.closeSoftKeyboard()
 
         composeTestRule.waitUntil(timeoutMillis = 5000L) {
             selectors.continueButton.checkEnabled()
