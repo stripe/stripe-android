@@ -123,7 +123,7 @@ class PlaygroundTestDriver(
 
         waitForPlaygroundActivity()
 
-        selectors.multiStepSelect.click()
+        launchCustom()
 
         waitForNotPlaygroundActivity()
 
