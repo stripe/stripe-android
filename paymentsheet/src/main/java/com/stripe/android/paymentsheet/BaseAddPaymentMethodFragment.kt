@@ -122,10 +122,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                             PrimaryButton.UIState(
                                 label = null,
                                 onClick = {
-                                    sheetViewModel.completeLinkInlinePayment(
+                                    sheetViewModel.payWithLinkInline(
                                         linkConfig!!,
-                                        it.paymentMethodCreateParams,
-                                        false
+                                        null
                                     )
                                 },
                                 enabled = true,
