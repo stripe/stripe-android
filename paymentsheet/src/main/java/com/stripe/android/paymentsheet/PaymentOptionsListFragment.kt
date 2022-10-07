@@ -31,6 +31,13 @@ internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
         sheetViewModel.resolveTransitionTarget(config)
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        sheetViewModel.headerText.value =
+            getString(R.string.stripe_paymentsheet_select_payment_method)
+    }
+
     override fun transitionToAddPaymentMethod() {
         /**
          * Only the [PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull] will add
