@@ -16,8 +16,8 @@ import javax.inject.Singleton
 internal class OxxoAuthenticator @Inject constructor(
     private val webIntentAuthenticator: WebIntentAuthenticator,
     private val noOpIntentAuthenticator: NoOpIntentAuthenticator
-) : PaymentAuthenticator<StripeIntent> {
-    override suspend fun authenticate(
+) : PaymentAuthenticator<StripeIntent>() {
+    override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options

@@ -4,7 +4,6 @@ import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarterHost
-import com.stripe.android.view.runWhenResumed
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,19 +14,17 @@ import javax.inject.Singleton
 @JvmSuppressWildcards
 internal class NoOpIntentAuthenticator @Inject constructor(
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter
-) : PaymentAuthenticator<StripeIntent> {
+) : PaymentAuthenticator<StripeIntent>() {
 
-    override suspend fun authenticate(
+    override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        host.runWhenResumed {
-            val args = PaymentRelayStarter.Args.create(
-                stripeIntent = authenticatable,
-                stripeAccountId = requestOptions.stripeAccount,
-            )
-            paymentRelayStarterFactory(host).start(args)
-        }
+        val args = PaymentRelayStarter.Args.create(
+            stripeIntent = authenticatable,
+            stripeAccountId = requestOptions.stripeAccount,
+        )
+        paymentRelayStarterFactory(host).start(args)
     }
 }

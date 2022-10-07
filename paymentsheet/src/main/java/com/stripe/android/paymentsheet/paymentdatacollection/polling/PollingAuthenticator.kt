@@ -15,11 +15,11 @@ private const val UPI_INITIAL_DELAY_IN_SECONDS = 5
 private const val UPI_MAX_ATTEMPTS = 12
 
 @Singleton
-internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent> {
+internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent>() {
 
     private var pollingLauncher: ActivityResultLauncher<PollingContract.Args>? = null
 
-    override suspend fun authenticate(
+    override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options

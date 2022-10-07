@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
 import com.stripe.android.view.AuthActivityStarterHost.ActivityHost
@@ -26,11 +27,14 @@ sealed class AuthActivityStarterHost {
     )
 
     abstract val statusBarColor: Int?
+    abstract val lifecycleOwner: LifecycleOwner
 
     internal class ActivityHost(
         val activity: ComponentActivity,
         override val statusBarColor: Int?
     ) : AuthActivityStarterHost() {
+
+        override val lifecycleOwner: LifecycleOwner = activity
 
         @Suppress("DEPRECATION")
         override fun startActivityForResult(
@@ -48,6 +52,8 @@ sealed class AuthActivityStarterHost {
         val fragment: Fragment,
         override val statusBarColor: Int?
     ) : AuthActivityStarterHost() {
+
+        override val lifecycleOwner: LifecycleOwner = fragment.requireActivity()
 
         @Suppress("DEPRECATION")
         override fun startActivityForResult(
@@ -83,17 +89,5 @@ sealed class AuthActivityStarterHost {
                 statusBarColor = activity.window?.statusBarColor
             )
         }
-    }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun AuthActivityStarterHost.runWhenResumed(block: suspend CoroutineScope.() -> Unit) {
-    val lifecycleOwner = when (this) {
-        is ActivityHost -> activity
-        is FragmentHost -> fragment.requireActivity()
-    }
-
-    lifecycleOwner.lifecycleScope.launch {
-        lifecycleOwner.whenResumed(block)
     }
 }

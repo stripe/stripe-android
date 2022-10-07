@@ -14,7 +14,6 @@ import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.view.AuthActivityStarterHost
-import com.stripe.android.view.runWhenResumed
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
@@ -35,23 +34,21 @@ internal class SourceAuthenticator @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
-) : PaymentAuthenticator<Source> {
+) : PaymentAuthenticator<Source>() {
 
-    override suspend fun authenticate(
+    override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: Source,
         requestOptions: ApiRequest.Options
     ) {
-        host.runWhenResumed {
-            if (authenticatable.flow == Source.Flow.Redirect) {
-                startSourceAuth(
-                    paymentBrowserAuthStarterFactory(host),
-                    authenticatable,
-                    requestOptions
-                )
-            } else {
-                bypassAuth(host, authenticatable, requestOptions.stripeAccount)
-            }
+        if (authenticatable.flow == Source.Flow.Redirect) {
+            startSourceAuth(
+                paymentBrowserAuthStarterFactory(host),
+                authenticatable,
+                requestOptions
+            )
+        } else {
+            bypassAuth(host, authenticatable, requestOptions.stripeAccount)
         }
     }
 

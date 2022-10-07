@@ -13,7 +13,6 @@ import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.view.AuthActivityStarterHost
-import com.stripe.android.view.runWhenResumed
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
@@ -34,9 +33,9 @@ internal class WebIntentAuthenticator @Inject constructor(
     private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
-) : PaymentAuthenticator<StripeIntent> {
+) : PaymentAuthenticator<StripeIntent>() {
 
-    override suspend fun authenticate(
+    override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
@@ -87,19 +86,17 @@ internal class WebIntentAuthenticator @Inject constructor(
                 throw IllegalArgumentException("WebAuthenticator can't process nextActionData: $nextActionData")
         }
 
-        host.runWhenResumed {
-            beginWebAuth(
-                host,
-                authenticatable,
-                StripePaymentController.getRequestCode(authenticatable),
-                authenticatable.clientSecret.orEmpty(),
-                authUrl,
-                requestOptions.stripeAccount,
-                returnUrl = returnUrl,
-                shouldCancelSource = shouldCancelSource,
-                shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation
-            )
-        }
+        beginWebAuth(
+            host,
+            authenticatable,
+            StripePaymentController.getRequestCode(authenticatable),
+            authenticatable.clientSecret.orEmpty(),
+            authUrl,
+            requestOptions.stripeAccount,
+            returnUrl = returnUrl,
+            shouldCancelSource = shouldCancelSource,
+            shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation
+        )
     }
 
     private suspend fun beginWebAuth(

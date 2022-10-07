@@ -7,7 +7,6 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.getRequestCode
 import com.stripe.android.view.AuthActivityStarterHost
-import com.stripe.android.view.runWhenResumed
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,8 +18,8 @@ import javax.inject.Singleton
 @JvmSuppressWildcards
 internal class UnsupportedAuthenticator @Inject constructor(
     private val paymentRelayStarterFactory: (AuthActivityStarterHost) -> PaymentRelayStarter
-) : PaymentAuthenticator<StripeIntent> {
-    override suspend fun authenticate(
+) : PaymentAuthenticator<StripeIntent>() {
+    override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
@@ -39,15 +38,13 @@ internal class UnsupportedAuthenticator @Inject constructor(
             )
         }
 
-        host.runWhenResumed {
-            paymentRelayStarterFactory(host)
-                .start(
-                    PaymentRelayStarter.Args.ErrorArgs(
-                        exception = exception,
-                        requestCode = authenticatable.getRequestCode()
-                    )
+        paymentRelayStarterFactory(host)
+            .start(
+                PaymentRelayStarter.Args.ErrorArgs(
+                    exception = exception,
+                    requestCode = authenticatable.getRequestCode()
                 )
-        }
+            )
     }
 
     internal companion object {

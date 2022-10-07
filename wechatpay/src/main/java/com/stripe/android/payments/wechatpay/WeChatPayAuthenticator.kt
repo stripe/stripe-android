@@ -52,7 +52,7 @@ class WeChatPayAuthenticator : PaymentAuthenticator<StripeIntent> {
         weChatPayAuthLauncher = null
     }
 
-    override suspend fun authenticate(
+    override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
