@@ -143,6 +143,7 @@ private fun SuccessContent(
                 ) {
                     Text(text = stringResource(R.string.success_pane_link_more_accounts))
                 }
+                Spacer(modifier = Modifier.size(8.dp))
             }
             FinancialConnectionsButton(
                 loading = loading,
