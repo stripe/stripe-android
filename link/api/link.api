@@ -403,6 +403,10 @@ public final class com/stripe/android/link/ui/inline/InlineSignupViewModel_Facto
 	public static fun injectViewModel (Lcom/stripe/android/link/ui/inline/InlineSignupViewModel$Factory;Lcom/stripe/android/link/ui/inline/InlineSignupViewModel;)V
 }
 
+public final class com/stripe/android/link/ui/inline/LinkInlineSignedInKt {
+	public static final fun LinkInlineSignedIn (Lcom/stripe/android/link/LinkPaymentLauncher;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+
 public final class com/stripe/android/link/ui/inline/LinkInlineSignupKt {
 }
 

@@ -30,7 +30,7 @@ import org.junit.rules.Timeout
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class TestCustomers {
+class TestLink {
     @get:Rule
     var globalTimeout: Timeout = Timeout.seconds(INDIVIDUAL_TEST_TIMEOUT_SECONDS)
 
@@ -57,14 +57,14 @@ class TestCustomers {
     fun after() {
     }
 
-    private val bancontactNewUser = TestParameters(
-        lpmRepository.fromCode("bancontact")!!,
+    private val linkNewUser = TestParameters(
+        lpmRepository.fromCode("card")!!,
         Customer.New,
-        LinkState.Off,
+        LinkState.On,
         GooglePayState.On,
-        Currency.EUR,
+        Currency.USD,
         IntentType.Pay,
-        Billing.On,
+        Billing.Off,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
         automatic = Automatic.Off,
@@ -72,23 +72,15 @@ class TestCustomers {
         saveForFutureUseCheckboxVisible = false,
         useBrowser = Browser.Chrome,
         authorizationAction = AuthorizeAction.Authorize,
-        merchantCountryCode = "GB",
+        merchantCountryCode = "US",
     )
 
     @Test
-    fun testAuthorizeGuest() {
-        testDriver.confirmNewOrGuestComplete(
-            bancontactNewUser.copy(
+    fun testLinkInlineCustom() {
+        testDriver.testLinkCustom(
+            linkNewUser.copy(
+                paymentMethod = lpmRepository.fromCode("card")!!,
                 customer = Customer.Guest,
-            )
-        )
-    }
-
-    @Test
-    fun testAuthorizeNew() {
-        testDriver.confirmNewOrGuestComplete(
-            bancontactNewUser.copy(
-                customer = Customer.New,
             )
         )
     }
