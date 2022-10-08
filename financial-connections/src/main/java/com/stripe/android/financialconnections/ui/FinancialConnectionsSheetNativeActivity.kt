@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
@@ -201,8 +200,4 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     internal companion object {
         internal const val EXTRA_RESULT = "result"
     }
-}
-
-internal val LocalNavHostController = staticCompositionLocalOf<NavHostController> {
-    error("No NavHostController provided")
 }

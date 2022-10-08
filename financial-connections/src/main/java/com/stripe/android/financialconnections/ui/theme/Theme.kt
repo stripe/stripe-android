@@ -102,7 +102,27 @@ private val Typography = FinancialConnectionsTypography(
         fontSize = 12.sp,
         lineHeight = 16.sp,
         fontWeight = FontWeight.W600
-    )
+    ),
+    bodyCode = TextStyle(
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        fontWeight = FontWeight.W400
+    ),
+    bodyCodeEmphasized = TextStyle(
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        fontWeight = FontWeight.W700
+    ),
+    captionCode = TextStyle(
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        fontWeight = FontWeight.W400
+    ),
+    captionCodeEmphasized = TextStyle(
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        fontWeight = FontWeight.W700
+    ),
 )
 
 private val TextSelectionColors = TextSelectionColors(

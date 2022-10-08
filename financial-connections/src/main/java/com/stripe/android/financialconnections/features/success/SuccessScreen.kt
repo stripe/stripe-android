@@ -93,7 +93,7 @@ private fun SuccessContent(
         ) {
             Icon(
                 modifier = Modifier.size(40.dp),
-                painter = painterResource(R.drawable.stripe_ic_check_circle),
+                painter = painterResource(R.drawable.stripe_ic_check_circle_emtpy),
                 contentDescription = null,
                 tint = FinancialConnectionsTheme.colors.textSuccess
             )

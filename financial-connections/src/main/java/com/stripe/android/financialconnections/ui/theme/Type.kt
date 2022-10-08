@@ -23,7 +23,12 @@ internal data class FinancialConnectionsTypography(
     val caption: TextStyle,
     val captionEmphasized: TextStyle,
     val captionTight: TextStyle,
-    val captionTightEmphasized: TextStyle
+    val captionTightEmphasized: TextStyle,
+    val bodyCode: TextStyle,
+    val bodyCodeEmphasized: TextStyle,
+    val captionCode: TextStyle,
+    val captionCodeEmphasized: TextStyle,
+
 )
 
 @Composable
