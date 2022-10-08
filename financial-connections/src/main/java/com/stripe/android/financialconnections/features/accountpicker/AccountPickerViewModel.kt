@@ -26,6 +26,8 @@ import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
+import java.text.NumberFormat
+import java.util.Currency
 import javax.inject.Inject
 
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -56,7 +58,14 @@ internal class AccountPickerViewModel @Inject constructor(
             val accounts = partnerAccountList.data.map { account ->
                 AccountPickerState.PartnerAccountUI(
                     account = account,
-                    enabled = account.enabled(manifest)
+                    enabled = account.enabled(manifest),
+                    formattedBalance =
+                    if (account.balanceAmount != null && account.currency != null) {
+                        NumberFormat
+                            .getCurrencyInstance()
+                            .also { it.currency = Currency.getInstance(account.currency) }
+                            .format(account.balanceAmount)
+                    } else null
                 )
             }.sortedBy { it.enabled }
             val (preselectedIds, selectionMode) = selectionConfig(accounts, manifest)
@@ -287,6 +296,7 @@ internal data class AccountPickerState(
 
     data class PartnerAccountUI(
         val account: PartnerAccount,
+        val formattedBalance: String?,
         val enabled: Boolean
     )
 

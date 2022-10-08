@@ -37,6 +37,7 @@ import com.stripe.android.financialconnections.exception.InstitutionUnplannedExc
 import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
 import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -344,7 +345,7 @@ private fun BadgedImage(
 @Composable
 @Preview(group = "Errors", name = "unclassified error")
 internal fun UnclassifiedErrorContentPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
             topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
         ) {
@@ -356,7 +357,7 @@ internal fun UnclassifiedErrorContentPreview() {
 @Composable
 @Preview(group = "Errors", name = "institution down planned error")
 internal fun InstitutionPlannedDowntimeErrorContentPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
             topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
         ) {
@@ -364,8 +365,8 @@ internal fun InstitutionPlannedDowntimeErrorContentPreview() {
                 exception = InstitutionPlannedException(
                     institution = FinancialConnectionsInstitution(
                         id = "3",
-                        name = "RandomInstitution",
-                        url = "RandomInstitution url",
+                        name = "Random Institution",
+                        url = "Random Institution url",
                         featured = false,
                         featuredOrder = null,
                         mobileHandoffCapable = false
@@ -385,7 +386,7 @@ internal fun InstitutionPlannedDowntimeErrorContentPreview() {
 @Composable
 @Preview(group = "Errors", name = "no accounts available error")
 internal fun NoAccountsAvailableErrorContentPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
             topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
         ) {
@@ -393,8 +394,8 @@ internal fun NoAccountsAvailableErrorContentPreview() {
                 exception = NoAccountsAvailableException(
                     institution = FinancialConnectionsInstitution(
                         id = "3",
-                        name = "RandomInstitution",
-                        url = "RandomInstitution url",
+                        name = "Random Institution",
+                        url = "Random Institution url",
                         featured = false,
                         featuredOrder = null,
                         mobileHandoffCapable = false

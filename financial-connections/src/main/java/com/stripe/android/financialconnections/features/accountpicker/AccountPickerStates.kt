@@ -11,7 +11,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
     override val values = sequenceOf(
         multiSelect(),
         singleSelect(),
-        dropdown()
+        dropdown(emptySet())
     )
 
     override val count: Int
@@ -51,14 +51,14 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
             )
         )
 
-        fun dropdown() = AccountPickerState(
+        fun dropdown(selectedIds: Set<String>) = AccountPickerState(
             payload = Success(
                 AccountPickerState.Payload(
                     skipAccountSelection = false,
                     accounts = partnerAccountList(),
                     selectionMode = AccountPickerState.SelectionMode.DROPDOWN,
                     accessibleData = accessibleCallout(),
-                    selectedIds = setOf("id1"),
+                    selectedIds = selectedIds,
                     singleAccount = true,
                     institutionSkipAccountSelection = true,
                     businessName = "Random business",
@@ -73,49 +73,54 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     authorization = "Authorization",
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id1",
-                    name = "Account 1",
+                    name = "With balance",
                     balanceAmount = 1000,
                     displayableAccountNumbers = "1234",
                     currency = "$",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = true
+                enabled = true,
+                formattedBalance = "$1,000"
             ),
             PartnerAccountUI(
                 PartnerAccount(
                     authorization = "Authorization",
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id2",
-                    name = "Account 2 - no acct numbers",
+                    name = "With balance disabled",
+                    balanceAmount = 1000,
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = true
+                enabled = false,
+                formattedBalance = "$1,000"
             ),
             PartnerAccountUI(
                 PartnerAccount(
                     authorization = "Authorization",
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id3",
-                    name = "Account 3",
+                    name = "No balance",
                     displayableAccountNumbers = "1234",
                     subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = false
+                enabled = true,
+                formattedBalance = null
             ),
             PartnerAccountUI(
                 PartnerAccount(
                     authorization = "Authorization",
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id4",
-                    name = "Account 4",
+                    name = "No balance disabled",
                     displayableAccountNumbers = "1234",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = false
+                enabled = false,
+                formattedBalance = null
             )
         )
 

@@ -64,14 +64,13 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import java.text.NumberFormat
-import java.util.Currency
 
 @Composable
 internal fun AccountPickerScreen() {
@@ -263,9 +262,7 @@ private fun DropdownContent(
     Spacer(modifier = Modifier.size(12.dp))
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = {
-            expanded = !expanded
-        }
+        onExpandedChange = { expanded = !expanded }
     ) {
         FinancialConnectionsOutlinedTextField(
             readOnly = true,
@@ -291,8 +288,10 @@ private fun DropdownContent(
             accounts.forEach { account ->
                 AccountDropdownItem(
                     onAccountClicked = {
-                        expanded = false
-                        onAccountClicked(it)
+                        if (account.enabled) {
+                            expanded = false
+                            onAccountClicked(it)
+                        }
                     },
                     account = account
                 )
@@ -307,17 +306,12 @@ private fun AccountDropdownItem(
     account: PartnerAccountUI
 ) {
     DropdownMenuItem(
-        onClick = {
-            onAccountClicked(account.account)
-        }
+        onClick = { onAccountClicked(account.account) }
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             InstitutionIcon()
             Spacer(modifier = Modifier.size(8.dp))
-            val (title, subtitle) = getAccountTexts(
-                account = account.account,
-                enabled = account.enabled
-            )
+            val (title, subtitle) = getAccountTexts(accountUI = account)
             Column {
                 Text(
                     text = title,
@@ -366,8 +360,7 @@ private fun SingleSelectContent(
             AccountItem(
                 selected = selectedIds.contains(account.account.id),
                 onAccountClicked = onAccountClicked,
-                account = account.account,
-                enabled = account.enabled
+                accountUI = account,
             ) {
                 RadioButton(
                     selected = selectedIds.contains(account.account.id),
@@ -397,17 +390,20 @@ private fun MultiSelectContent(
     ) {
         item("select_all_accounts") {
             AccountItem(
-                enabled = true,
                 selected = allAccountsSelected,
                 onAccountClicked = { onSelectAllAccountsClicked() },
-                account = PartnerAccount(
-                    id = "select_all_accounts",
-                    authorization = "",
-                    category = FinancialConnectionsAccount.Category.UNKNOWN,
-                    subcategory = FinancialConnectionsAccount.Subcategory.UNKNOWN,
-                    name = stringResource(R.string.stripe_account_picker_select_all_accounts),
-                    supportedPaymentMethodTypes = emptyList()
-                ),
+                accountUI = PartnerAccountUI(
+                    PartnerAccount(
+                        id = "select_all_accounts",
+                        authorization = "",
+                        category = FinancialConnectionsAccount.Category.UNKNOWN,
+                        subcategory = FinancialConnectionsAccount.Subcategory.UNKNOWN,
+                        name = stringResource(R.string.stripe_account_picker_select_all_accounts),
+                        supportedPaymentMethodTypes = emptyList()
+                    ),
+                    enabled = true,
+                    formattedBalance = null
+                )
             ) {
                 Checkbox(
                     checked = allAccountsSelected,
@@ -422,10 +418,9 @@ private fun MultiSelectContent(
         }
         items(accounts, key = { it.account.id }) { account ->
             AccountItem(
-                enabled = account.enabled,
                 selected = selectedIds.contains(account.account.id),
                 onAccountClicked = onAccountClicked,
-                account = account.account
+                accountUI = account
             ) {
                 Checkbox(
                     checked = selectedIds.contains(account.account.id),
@@ -443,12 +438,12 @@ private fun MultiSelectContent(
 
 @Composable
 private fun AccountItem(
-    enabled: Boolean,
     selected: Boolean,
     onAccountClicked: (PartnerAccount) -> Unit,
-    account: PartnerAccount,
+    accountUI: PartnerAccountUI,
     selectorContent: @Composable () -> Unit
 ) {
+    val account = accountUI.account
     val padding =
         remember(account) { if (account.displayableAccountNumbers != null) 10.dp else 12.dp }
     Box(
@@ -462,7 +457,7 @@ private fun AccountItem(
                 },
                 shape = RoundedCornerShape(8.dp)
             )
-            .clickable(enabled = enabled) { onAccountClicked(account) }
+            .clickable(enabled = accountUI.enabled) { onAccountClicked(account) }
             .padding(padding)
     ) {
         Row(
@@ -470,15 +465,12 @@ private fun AccountItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             selectorContent()
-            val (title, subtitle) = getAccountTexts(
-                account = account,
-                enabled = enabled
-            )
+            val (title, subtitle) = getAccountTexts(accountUI = accountUI)
             Spacer(modifier = Modifier.size(16.dp))
             Column {
                 Text(
                     text = title,
-                    color = if (enabled) {
+                    color = if (accountUI.enabled) {
                         FinancialConnectionsTheme.colors.textPrimary
                     } else {
                         FinancialConnectionsTheme.colors.textDisabled
@@ -500,22 +492,16 @@ private fun AccountItem(
 
 @Composable
 private fun getAccountTexts(
-    account: PartnerAccount,
-    enabled: Boolean
+    accountUI: PartnerAccountUI,
 ): Pair<String, String?> {
-    val balance = if (account.balanceAmount != null && account.currency != null) {
-        NumberFormat
-            .getCurrencyInstance()
-            .also { it.currency = Currency.getInstance(account.currency) }
-            .format(account.balanceAmount)
-    } else null
+    val account = accountUI.account
     val title = when {
-        balance != null -> "${account.name} ${account.encryptedNumbers}"
+        accountUI.formattedBalance != null -> "${account.name} ${account.encryptedNumbers}"
         else -> account.name
     }
     val subtitle = when {
-        enabled.not() -> stringResource(id = R.string.stripe_account_picker_must_be_bank_account)
-        balance != null -> balance
+        accountUI.enabled.not() -> stringResource(id = R.string.stripe_account_picker_must_be_bank_account)
+        accountUI.formattedBalance != null -> accountUI.formattedBalance
         account.encryptedNumbers.isNotEmpty() -> account.encryptedNumbers
         else -> null
     }
@@ -529,7 +515,7 @@ private fun getAccountTexts(
 )
 @Composable
 internal fun AccountPickerPreviewMultiSelect() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         AccountPickerContent(
             AccountPickerStates.multiSelect(),
             onAccountClicked = {},
@@ -551,7 +537,7 @@ internal fun AccountPickerPreviewMultiSelect() {
 )
 @Composable
 internal fun AccountPickerPreviewSingleSelect() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         AccountPickerContent(
             AccountPickerStates.singleSelect(),
             onAccountClicked = {},
@@ -573,10 +559,13 @@ internal fun AccountPickerPreviewSingleSelect() {
 )
 @Composable
 internal fun AccountPickerPreviewDropdown() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
+        var selectedAccount by remember {
+            mutableStateOf("")
+        }
         AccountPickerContent(
-            AccountPickerStates.dropdown(),
-            onAccountClicked = {},
+            AccountPickerStates.dropdown(setOf(selectedAccount)),
+            onAccountClicked = { selectedAccount = it.id },
             onSubmit = {},
             onSelectAnotherBank = {},
             onCloseClick = {},
