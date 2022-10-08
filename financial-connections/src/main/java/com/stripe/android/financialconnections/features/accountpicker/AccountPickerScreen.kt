@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Fail
@@ -71,6 +72,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.Success100
 
 @Composable
 internal fun AccountPickerScreen() {
@@ -88,6 +90,19 @@ internal fun AccountPickerScreen() {
         onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
         onSelectAllAccountsClicked = viewModel::onSelectAllAccountsClicked,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
+    )
+}
+
+@Composable
+private fun LinkedAccountBadge() {
+    Text(
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .background(color = Success100)
+            .padding(horizontal = 4.dp, vertical = 2.dp),
+        text = "Linked",
+        color = FinancialConnectionsTheme.colors.textSuccess,
+        style = FinancialConnectionsTheme.typography.caption
     )
 }
 
@@ -467,9 +482,13 @@ private fun AccountItem(
             selectorContent()
             val (title, subtitle) = getAccountTexts(accountUI = accountUI)
             Spacer(modifier = Modifier.size(16.dp))
-            Column {
+            Column(
+                Modifier.weight(0.7f)
+            ) {
                 Text(
                     text = title,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
                     color = if (accountUI.enabled) {
                         FinancialConnectionsTheme.colors.textPrimary
                     } else {
@@ -481,10 +500,15 @@ private fun AccountItem(
                     Spacer(modifier = Modifier.size(4.dp))
                     Text(
                         text = it,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
                         color = FinancialConnectionsTheme.colors.textDisabled,
                         style = FinancialConnectionsTheme.typography.body
                     )
                 }
+            }
+            if (accountUI.account.linkedAccountId != null) {
+                LinkedAccountBadge()
             }
         }
     }

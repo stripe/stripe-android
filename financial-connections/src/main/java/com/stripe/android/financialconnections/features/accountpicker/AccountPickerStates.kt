@@ -121,6 +121,20 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                 ),
                 enabled = false,
                 formattedBalance = null
+            ),
+            PartnerAccountUI(
+                PartnerAccount(
+                    authorization = "Authorization",
+                    category = FinancialConnectionsAccount.Category.CASH,
+                    id = "id5",
+                    name = "Already linked",
+                    displayableAccountNumbers = "1234",
+                    linkedAccountId = "linkedAccountId",
+                    subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+                    supportedPaymentMethodTypes = emptyList()
+                ),
+                enabled = true,
+                formattedBalance = null
             )
         )
 
