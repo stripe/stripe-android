@@ -121,9 +121,12 @@ class PlaygroundTestDriver(
 
         composeTestRule.onNodeWithTag("OTP-0").performTextInput("123456")
 
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
         waitForPlaygroundActivity()
 
-        launchCustom()
+        selectors.multiStepSelect.click()
 
         waitForNotPlaygroundActivity()
 
