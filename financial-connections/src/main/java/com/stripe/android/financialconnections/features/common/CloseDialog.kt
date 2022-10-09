@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
@@ -53,7 +54,7 @@ internal fun CloseDialog(
 @Composable
 @Preview
 internal fun CloseDialogPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         CloseDialog(
             {}, {}
         )

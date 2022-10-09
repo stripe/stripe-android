@@ -13,9 +13,9 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun ResetScreen() {
@@ -53,7 +53,7 @@ private fun ResetContent(
 @Composable
 @Preview
 internal fun ResetScreenPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         ResetContent(
             payload = Uninitialized,
             onCloseClick = {},

@@ -34,6 +34,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
@@ -217,7 +218,7 @@ internal data class AccessibleDataCalloutModel(
 @Preview
 @Composable
 internal fun AccessibleDataCalloutPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         AccessibleDataCallout(
             AccessibleDataCalloutModel(
                 businessName = "My business",
@@ -239,7 +240,7 @@ internal fun AccessibleDataCalloutPreview() {
 @Composable
 @Suppress("LongMethod")
 internal fun AccessibleDataCalloutWithManyAccountsPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         AccessibleDataCalloutWithAccounts(
             AccessibleDataCalloutModel(
                 businessName = "My business",
@@ -310,7 +311,7 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
 @Preview
 @Composable
 internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         AccessibleDataCalloutWithAccounts(
             AccessibleDataCalloutModel(
                 businessName = "My business",
@@ -360,7 +361,7 @@ internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
 @Preview
 @Composable
 internal fun AccessibleDataCalloutWithOneAccountPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         AccessibleDataCalloutWithAccounts(
             AccessibleDataCalloutModel(
                 businessName = "My business",

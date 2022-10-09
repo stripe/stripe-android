@@ -28,6 +28,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -179,7 +180,7 @@ private fun getSubtitle(
 @Preview
 @Suppress("LongMethod")
 internal fun SuccessScreenPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         SuccessContent(
             accessibleDataModel = AccessibleDataCalloutModel(
                 businessName = "My business",

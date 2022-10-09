@@ -41,6 +41,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -354,7 +355,7 @@ private fun ConsentBullet(
 internal fun ContentPreview(
     state: ConsentState = ConsentStates.canonical()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         ConsentContent(
             state = state,
             bottomSheetState = rememberModalBottomSheetState(
@@ -374,7 +375,7 @@ internal fun ContentPreview(
 internal fun ContentManualEntryPlusMicrodeposits(
     state: ConsentState = ConsentStates.manualEntryPlusMicrodeposits()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         ConsentContent(
             state = state,
             bottomSheetState = rememberModalBottomSheetState(

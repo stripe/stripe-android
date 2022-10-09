@@ -41,6 +41,7 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -230,7 +231,7 @@ private fun PrePaneContent(
 @Composable
 @Preview
 internal fun PrepaneContentPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         PartnerAuthScreenContent(
             state = PartnerAuthState(
                 payload = Success(

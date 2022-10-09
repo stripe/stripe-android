@@ -54,6 +54,7 @@ import com.stripe.android.financialconnections.features.institutionpicker.Instit
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
@@ -411,11 +412,31 @@ private fun FeaturedInstitutionsGrid(
 }
 
 @Composable
+@Preview(group = "Institutions Pane", name = "initialLoading")
+internal fun InitialLoading(
+    state: InstitutionPickerState = InstitutionPickerStates.initialLoading()
+) {
+    FinancialConnectionsPreview {
+        InstitutionPickerContent(
+            payload = state.payload,
+            institutionsProvider = { state.searchInstitutions },
+            searchMode = state.searchMode,
+            query = state.query,
+            onQueryChanged = {},
+            onInstitutionSelected = {},
+            onCancelSearchClick = {},
+            onCloseClick = {},
+            onSearchFocused = {}
+        ) {}
+    }
+}
+
+@Composable
 @Preview(group = "Institutions Pane", name = "searchModeSearchingInstitutions")
 internal fun SearchModeSearchingInstitutions(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeSearchingInstitutions()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
@@ -435,7 +456,7 @@ internal fun SearchModeSearchingInstitutions(
 internal fun SearchModeWithResults(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeWithResults()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
@@ -455,7 +476,7 @@ internal fun SearchModeWithResults(
 internal fun SearchModeNoResults(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeNoResults()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
@@ -475,7 +496,7 @@ internal fun SearchModeNoResults(
 internal fun SearchModeFailed(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeFailed()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
@@ -495,7 +516,7 @@ internal fun SearchModeFailed(
 internal fun SearchModeNoQuery(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeNoQuery()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
@@ -515,7 +536,7 @@ internal fun SearchModeNoQuery(
 internal fun NoSearchMode(
     state: InstitutionPickerState = InstitutionPickerStates.noSearchMode()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },

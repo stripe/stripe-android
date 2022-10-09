@@ -93,7 +93,13 @@ internal fun ManualEntrySuccessContent(
             Text(
                 modifier = Modifier
                     .fillMaxWidth(),
-                text = stringResource(R.string.stripe_manualentrysuccess_title),
+                text = when (microdepositVerificationMethod) {
+                    MicrodepositVerificationMethod.UNKNOWN,
+                    MicrodepositVerificationMethod.AMOUNTS ->
+                        stringResource(R.string.stripe_manualentrysuccess_title)
+                    MicrodepositVerificationMethod.DESCRIPTOR_CODE ->
+                        stringResource(R.string.stripe_manualentrysuccess_title_descriptorcode)
+                },
                 style = FinancialConnectionsTheme.typography.subtitle.copy(
                     color = FinancialConnectionsTheme.colors.textPrimary
                 )

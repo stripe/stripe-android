@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
@@ -57,7 +58,7 @@ internal fun FinancialConnectionsTopAppBar(
 @Composable
 @Preview(group = "Components", name = "TopAppBar - idle")
 internal fun FinancialConnectionsTopAppBarPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         FinancialConnectionsTopAppBar(
             title = {},
             onCloseClick = {}

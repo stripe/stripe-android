@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 
@@ -138,7 +139,7 @@ internal object FinancialConnectionsButton {
 @Composable
 @Preview(group = "Components", name = "Button - primary - idle")
 internal fun FinancialConnectionsButtonPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         FinancialConnectionsButton(
             loading = false,
             onClick = { }
@@ -151,7 +152,7 @@ internal fun FinancialConnectionsButtonPreview() {
 @Composable
 @Preview(group = "Components", name = "Button - primary - loading")
 internal fun FinancialConnectionsButtonLoadingPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         FinancialConnectionsButton(
             loading = true,
             onClick = { }
@@ -164,7 +165,7 @@ internal fun FinancialConnectionsButtonLoadingPreview() {
 @Composable
 @Preview(group = "Components", name = "Button - secondary - idle")
 internal fun FinancialConnectionsButtonSecondaryPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         FinancialConnectionsButton(
             type = FinancialConnectionsButton.Type.Secondary,
             loading = false,
@@ -178,7 +179,7 @@ internal fun FinancialConnectionsButtonSecondaryPreview() {
 @Composable
 @Preview(group = "Components", name = "Button - secondary - disabled")
 internal fun FinancialConnectionsButtonSecondaryDisabledPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         FinancialConnectionsButton(
             type = FinancialConnectionsButton.Type.Secondary,
             loading = false,
@@ -193,7 +194,7 @@ internal fun FinancialConnectionsButtonSecondaryDisabledPreview() {
 @Composable
 @Preview(group = "Components", name = "Pill button - critical - disabled")
 internal fun FinancialConnectionsButtonCriticalPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         FinancialConnectionsButton(
             type = FinancialConnectionsButton.Type.Critical,
             size = FinancialConnectionsButton.Size.Pill,

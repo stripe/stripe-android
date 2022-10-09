@@ -35,6 +35,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -214,7 +215,7 @@ private fun InputWithError(
 @Preview
 @Composable
 internal fun ManualEntryScreenPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         ManualEntryContent(
             routing = "" to null,
             account = "" to null,
@@ -233,7 +234,7 @@ internal fun ManualEntryScreenPreview() {
 @Preview
 @Composable
 internal fun ManualEntryScreenErrorPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         ManualEntryContent(
             routing = "" to null,
             account = "" to null,
