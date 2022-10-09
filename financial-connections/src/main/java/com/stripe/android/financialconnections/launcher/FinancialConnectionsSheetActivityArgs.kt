@@ -50,6 +50,8 @@ sealed class FinancialConnectionsSheetActivityArgs constructor(
         }
     }
 
+    internal fun isValid(): Boolean = kotlin.runCatching { validate() }.isSuccess
+
     companion object {
         internal fun fromIntent(intent: Intent): FinancialConnectionsSheetActivityArgs? {
             return intent.getParcelableExtra(Mavericks.KEY_ARG)
