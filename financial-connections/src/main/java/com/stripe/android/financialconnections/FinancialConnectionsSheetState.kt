@@ -4,7 +4,6 @@ import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.PersistState
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 
 /**
