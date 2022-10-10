@@ -345,14 +345,15 @@ private fun AccountDropdownItem(
 
 @Composable
 private fun InstitutionIcon(institutionIcon: String?) {
+    val modifier = Modifier
+        .size(36.dp)
+        .clip(RoundedCornerShape(6.dp))
     StripeImage(
         url = institutionIcon ?: "",
-        errorContent = { InstitutionPlaceholder() },
+        errorContent = { InstitutionPlaceholder(modifier) },
         imageLoader = LocalImageLoader.current,
         contentDescription = null,
-        modifier = Modifier
-            .size(36.dp)
-            .clip(RoundedCornerShape(6.dp))
+        modifier = modifier
     )
 }
 

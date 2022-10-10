@@ -27,13 +27,11 @@ internal data class FinancialConnectionsInstitution(
 
     @SerialName(value = "name") val name: String,
 
-    // TODO@carlosmuvi remove hardcoded images.
-    // @SerialName(value = "icon")
-    val icon: Image? = Image("https://pbs.twimg.com/profile_images/748885874516094980/ywt_aKRx_400x400.jpg"),
+    @SerialName(value = "icon")
+    val icon: Image? = null,
 
-    // TODO@carlosmuvi remove hardcoded images.
-    // @SerialName(value = "logo")
-    val logo: Image? = Image("https://play-lh.googleusercontent.com/KFPSKyRk3oZQvTPR1BJ2nzGQZFcAfsNWUZ-MQQM_ixEbxs4_-MYHo4cVQOlDU8lrG3BE"),
+    @SerialName(value = "logo")
+    val logo: Image? = null,
 
     @SerialName(value = "featured_order") val featuredOrder: Int? = null,
 

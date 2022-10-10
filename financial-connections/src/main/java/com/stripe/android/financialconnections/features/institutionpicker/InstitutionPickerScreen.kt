@@ -1,8 +1,9 @@
-@file:Suppress("TooManyFunctions")
+@file:Suppress("TooManyFunctions", "LongMethod")
 
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,6 +51,7 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
+import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -337,15 +339,16 @@ private fun InstitutionResultTile(
                 horizontal = 16.dp
             )
     ) {
+        val modifier = Modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(6.dp))
         StripeImage(
             url = institution.icon?.default ?: "",
             imageLoader = LocalImageLoader.current,
             contentDescription = null,
-            modifier = Modifier
-                .size(36.dp)
-                .clip(RoundedCornerShape(6.dp)),
+            modifier = modifier,
             contentScale = ContentScale.Crop,
-            errorContent = { InstitutionPlaceholder() }
+            errorContent = { InstitutionPlaceholder(modifier) }
         )
         Spacer(modifier = Modifier.size(8.dp))
         Column {
@@ -403,10 +406,24 @@ private fun FeaturedInstitutionsGrid(
                             .clickable { onInstitutionSelected(institution) }
                     ) {
                         StripeImage(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp),
                             url = institution.logo?.default ?: "",
                             imageLoader = LocalImageLoader.current,
-                            contentScale = ContentScale.Crop,
+                            contentScale = ContentScale.Fit,
+                            loadingContent = {
+                                LoadingShimmerEffect { shimmer ->
+                                    Spacer(
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .height(20.dp)
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .fillMaxWidth(fraction = 0.5f)
+                                            .background(shimmer)
+                                    )
+                                }
+                            },
                             errorContent = {
                                 Text(
                                     modifier = Modifier.align(Alignment.Center),

@@ -191,14 +191,15 @@ private fun PrePaneContent(
                 bottom = 16.dp
             )
     ) {
+        val modifier = Modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(6.dp))
         StripeImage(
             url = institution.icon?.default ?: "",
             contentDescription = null,
             imageLoader = LocalImageLoader.current,
-            errorContent = { InstitutionPlaceholder() },
-            modifier = Modifier
-                .size(36.dp)
-                .clip(RoundedCornerShape(6.dp))
+            errorContent = { InstitutionPlaceholder(modifier) },
+            modifier = modifier
         )
         Spacer(modifier = Modifier.size(16.dp))
         Text(

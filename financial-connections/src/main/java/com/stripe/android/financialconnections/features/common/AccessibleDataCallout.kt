@@ -97,14 +97,15 @@ private fun AccountRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            val modifier = Modifier
+                .size(24.dp)
+                .clip(RoundedCornerShape(4.dp))
             StripeImage(
                 url = iconUrl ?: "",
                 imageLoader = LocalImageLoader.current,
                 contentDescription = null,
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                errorContent = { InstitutionPlaceholder() }
+                modifier = modifier,
+                errorContent = { InstitutionPlaceholder(modifier) }
             )
             Text(
                 text,

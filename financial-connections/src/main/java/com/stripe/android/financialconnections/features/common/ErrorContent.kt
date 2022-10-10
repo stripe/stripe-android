@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
@@ -320,15 +321,16 @@ private fun BadgedInstitutionImage(
         modifier = Modifier
             .size(40.dp)
     ) {
+        val modifier = Modifier
+            .size(36.dp)
+            .align(Alignment.BottomStart)
+            .clip(RoundedCornerShape(6.dp))
         StripeImage(
             url = institutionIconUrl ?: "",
             imageLoader = LocalImageLoader.current,
-            errorContent = { InstitutionPlaceholder() },
+            errorContent = { InstitutionPlaceholder(modifier) },
             contentDescription = null,
-            modifier = Modifier
-                .size(36.dp)
-                .align(Alignment.BottomStart)
-                .clip(RoundedCornerShape(6.dp))
+            modifier = modifier
         )
         Icon(
             painter = badge.first,
@@ -420,9 +422,11 @@ internal fun NoAccountsAvailableErrorContentPreview() {
 }
 
 @Composable
-internal fun InstitutionPlaceholder() {
+internal fun InstitutionPlaceholder(modifier: Modifier) {
     Image(
+        modifier = modifier,
         painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
-        contentDescription = "Bank icon placeholder"
+        contentDescription = "Bank icon placeholder",
+        contentScale = ContentScale.Crop
     )
 }
