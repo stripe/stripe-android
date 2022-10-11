@@ -8,8 +8,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
-import com.stripe.android.paymentsheet.ui.getCardBrandIcon
+import com.stripe.android.paymentsheet.R
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -52,7 +51,7 @@ sealed class PaymentSelection : Parcelable {
             @IgnoredOnParcel
             val last4: String = (
                 (paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>)!!
-                ["number"] as String
+                    ["number"] as String
                 )
                 .takeLast(4)
         }
@@ -84,16 +83,14 @@ sealed class PaymentSelection : Parcelable {
 
             @IgnoredOnParcel
             @DrawableRes
-            val iconResource = when (paymentDetails) {
-                is ConsumerPaymentDetails.Card -> paymentDetails.brand.getCardBrandIcon()
-                is ConsumerPaymentDetails.BankAccount ->
-                    TransformToBankIcon(paymentDetails.bankName)
-            }
+            val iconResource = R.drawable.stripe_ic_paymentsheet_link
 
             @IgnoredOnParcel
             val label = when (paymentDetails) {
-                is ConsumerPaymentDetails.Card -> paymentDetails.last4
-                is ConsumerPaymentDetails.BankAccount -> paymentDetails.last4
+                is ConsumerPaymentDetails.Card ->
+                    "····${paymentDetails.last4}"
+                is ConsumerPaymentDetails.BankAccount ->
+                    "····${paymentDetails.last4}"
             }
         }
 
