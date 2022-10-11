@@ -51,7 +51,7 @@ sealed class PaymentSelection : Parcelable {
             @IgnoredOnParcel
             val last4: String = (
                 (paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>)!!
-                    ["number"] as String
+                ["number"] as String
                 )
                 .takeLast(4)
         }
