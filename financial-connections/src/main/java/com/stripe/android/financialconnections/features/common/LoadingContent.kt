@@ -25,7 +25,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 
 @Composable
 @Suppress("MagicNumber")
-fun LoadingShimmerEffect(
+internal fun LoadingShimmerEffect(
     content: @Composable (Brush) -> Unit
 ) {
     val gradient = listOf(
@@ -103,7 +103,7 @@ internal fun LoadingSpinner() {
 private const val LOADING_SPINNER_ROTATION_MS = 1000
 
 @Composable
-@Preview()
+@Preview
 internal fun LoadingSpinnerPreview() {
     LoadingSpinner()
 }
