@@ -4,7 +4,7 @@
 
 ### Payments
 
-* [FIXED][5701](https://github.com/stripe/stripe-android/pull/5701) Treat empty fields as invalid in `ShippingInfoWidget`.
+* [FIXED][5701](https://github.com/stripe/stripe-android/pull/5701) Treat blank fields as invalid in `ShippingInfoWidget`.
 
 ## 20.15.0 - 2022-10-11
 
