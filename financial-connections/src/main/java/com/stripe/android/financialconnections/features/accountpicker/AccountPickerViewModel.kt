@@ -10,6 +10,8 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
@@ -20,6 +22,7 @@ import com.stripe.android.financialconnections.features.consent.ConsentTextBuild
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.features.partnerauth.isOAuth
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
@@ -31,6 +34,7 @@ import javax.inject.Inject
 @Suppress("LongParameterList", "TooManyFunctions")
 internal class AccountPickerViewModel @Inject constructor(
     initialState: AccountPickerState,
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val selectAccounts: SelectAccounts,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
@@ -104,9 +108,11 @@ internal class AccountPickerViewModel @Inject constructor(
     }
 
     private fun logErrors() {
-        onAsync(AccountPickerState::payload, onFail = {
-            logger.error("Error retrieving accounts", it)
-        })
+        onAsync(
+            AccountPickerState::payload,
+            onFail = { logger.error("Error retrieving accounts", it) },
+            onSuccess = { eventTracker.track(PaneLoaded(NextPane.ACCOUNT_PICKER)) }
+        )
         onAsync(AccountPickerState::selectAccounts, onFail = {
             logger.error("Error selecting accounts", it)
         })

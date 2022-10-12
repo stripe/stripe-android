@@ -12,12 +12,15 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -33,6 +36,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private val searchInstitutions: SearchInstitutions,
     private val featuredInstitutions: FeaturedInstitutions,
     private val getManifest: GetManifest,
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val updateLocalManifest: UpdateLocalManifest,
     private val logger: Logger,
@@ -61,9 +65,11 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     private fun logErrors() {
-        onAsync(InstitutionPickerState::payload, onFail = {
-            logger.error("Error fetching initial payload", it)
-        })
+        onAsync(
+            InstitutionPickerState::payload,
+            onSuccess = { eventTracker.track(PaneLoaded(NextPane.INSTITUTION_PICKER)) },
+            onFail = { logger.error("Error fetching initial payload", it) }
+        )
         onAsync(InstitutionPickerState::searchInstitutions, onFail = {
             logger.error("Error searching institutions", it)
         })

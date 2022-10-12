@@ -7,6 +7,8 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -17,6 +19,7 @@ import com.stripe.android.financialconnections.features.consent.FinancialConnect
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -28,10 +31,11 @@ internal class SuccessViewModel @Inject constructor(
     initialState: SuccessState,
     getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
     getManifest: GetManifest,
-    val logger: Logger,
-    val navigationManager: NavigationManager,
-    val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
-    val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val logger: Logger,
+    private val navigationManager: NavigationManager,
+    private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
+    private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
 ) : MavericksViewModel<SuccessState>(initialState) {
 
     init {
@@ -54,9 +58,11 @@ internal class SuccessViewModel @Inject constructor(
     }
 
     private fun logErrors() {
-        onAsync(SuccessState::payload, onFail = {
-            logger.error("Error retrieving payload", it)
-        })
+        onAsync(
+            SuccessState::payload,
+            onFail = { logger.error("Error retrieving payload", it) },
+            onSuccess = { eventTracker.track(PaneLoaded(NextPane.SUCCESS)) }
+        )
         onAsync(SuccessState::completeSession, onFail = {
             logger.error("Error completing session", it)
         })

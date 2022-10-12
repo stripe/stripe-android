@@ -4,11 +4,14 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
@@ -22,6 +25,7 @@ internal class ConsentViewModel @Inject constructor(
     private val goNext: GoNext,
     private val getManifest: GetManifest,
     private val navigationManager: NavigationManager,
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger
 ) : MavericksViewModel<ConsentState>(initialState) {
 
@@ -45,6 +49,8 @@ internal class ConsentViewModel @Inject constructor(
                     requestedDataBullets = ConsentTextBuilder.getRequestedDataBullets(manifest)
                 )
             }
+            // TODO move to payload onSuccess once dynamic consent is in place.
+            eventTracker.track(FinancialConnectionsEvent.PaneLoaded(NextPane.CONSENT))
         }
     }
 

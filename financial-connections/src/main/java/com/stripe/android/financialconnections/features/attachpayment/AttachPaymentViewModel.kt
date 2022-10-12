@@ -7,6 +7,8 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
@@ -23,6 +25,7 @@ import javax.inject.Inject
 internal class AttachPaymentViewModel @Inject constructor(
     initialState: AttachPaymentState,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
     private val navigationManager: NavigationManager,
     private val getManifest: GetManifest,
@@ -56,9 +59,11 @@ internal class AttachPaymentViewModel @Inject constructor(
     }
 
     private fun logErrors() {
-        onAsync(AttachPaymentState::payload, onFail = {
-            logger.error("Error retrieving accounts to attach payment", it)
-        })
+        onAsync(
+            AttachPaymentState::payload,
+            onFail = { logger.error("Error retrieving accounts to attach payment", it) },
+            onSuccess = { eventTracker.track(PaneLoaded(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT)) }
+        )
         onAsync(AttachPaymentState::linkPaymentAccount, onFail = {
             logger.error("Error Attaching payment account", it)
         })

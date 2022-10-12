@@ -7,6 +7,8 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
@@ -20,17 +22,20 @@ import javax.inject.Inject
 @Suppress("LongParameterList")
 internal class ManualEntryViewModel @Inject constructor(
     initialState: ManualEntryState,
-    val pollAttachPaymentAccount: PollAttachPaymentAccount,
-    val getManifest: GetManifest,
-    val goNext: GoNext,
-    val logger: Logger
+    private val pollAttachPaymentAccount: PollAttachPaymentAccount,
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val getManifest: GetManifest,
+    private val goNext: GoNext,
+    private val logger: Logger
 ) : MavericksViewModel<ManualEntryState>(initialState) {
 
     init {
         logErrors()
         observeInputs()
         suspend {
-            getManifest().manualEntryUsesMicrodeposits
+            getManifest().manualEntryUsesMicrodeposits.also {
+                eventTracker.track(PaneLoaded(NextPane.MANUAL_ENTRY))
+            }
         }.execute {
             copy(verifyWithMicrodeposits = it() ?: false)
         }
@@ -61,9 +66,10 @@ internal class ManualEntryViewModel @Inject constructor(
     }
 
     private fun logErrors() {
-        onAsync(ManualEntryState::linkPaymentAccount, onFail = {
-            logger.error("Error linking payment account", it)
-        })
+        onAsync(
+            ManualEntryState::linkPaymentAccount,
+            onFail = { logger.error("Error linking payment account", it) },
+        )
     }
 
     fun onRoutingEntered(input: String) {

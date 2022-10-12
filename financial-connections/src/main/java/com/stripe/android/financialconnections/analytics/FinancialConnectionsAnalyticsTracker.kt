@@ -46,13 +46,13 @@ internal class FinancialConnectionsAnalyticsTracker @Inject constructor(
                 additionalParams = eventParams + commonParams,
                 includeSDKParams = true
             )
-            //stripeNetworkClient.executeRequest(eventRequest)
+            // stripeNetworkClient.executeRequest(eventRequest)
         }.onFailure {
             logger.error("Exception while making analytics request", it)
         }
     }
 
-    private suspend fun commonParams(): Map<String, Any?> {
+    private suspend fun commonParams(): Map<String, String?> {
         val manifest = getManifest()
         return mapOf(
             "las_client_secret" to configuration.financialConnectionsSessionClientSecret,
@@ -63,17 +63,17 @@ internal class FinancialConnectionsAnalyticsTracker @Inject constructor(
             "stripe_account" to configuration.stripeAccountId,
             "logger_id" to loggerId,
             "navigator_language" to locale.language,
-            "is_webview" to false,
-            "livemode" to manifest.livemode,
-            "product" to manifest.product,
-            "is_stripe_direct" to manifest.isStripeDirect,
-            "single_account" to manifest.singleAccount,
-            "allow_manual_entry" to manifest.allowManualEntry,
+            "is_webview" to false.toString(),
+            "livemode" to manifest.livemode.toString(),
+            "product" to manifest.product.value,
+            "is_stripe_direct" to manifest.isStripeDirect.toString(),
+            "single_account" to manifest.singleAccount.toString(),
+            "allow_manual_entry" to manifest.allowManualEntry.toString(),
             "account_holder_id" to manifest.accountHolderToken,
         )
     }
 
-    //TODO@carlosmuvi temporary configuration 
+    // TODO@carlosmuvi temporary configuration
     internal companion object {
         const val CLIENT_ID = "mobile-financialconnections-sdk"
         const val ORIGIN = "stripe-financialconnections-android"

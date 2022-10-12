@@ -19,6 +19,15 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class PaneLoaded(
+        pane: FinancialConnectionsSessionManifest.NextPane,
+    ) : FinancialConnectionsEvent(
+        "pane.loaded",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
     override fun toString(): String {
         return "FinancialConnectionsEvent(name='$name', params=$params)"
     }

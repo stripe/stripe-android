@@ -7,24 +7,32 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Finish
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Suppress("LongParameterList")
 internal class ManualEntrySuccessViewModel @Inject constructor(
     initialState: ManualEntrySuccessState,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val logger: Logger
 ) : MavericksViewModel<ManualEntrySuccessState>(initialState) {
 
     init {
         logErrors()
+        viewModelScope.launch {
+            eventTracker.track(PaneLoaded(NextPane.MANUAL_ENTRY_SUCCESS))
+        }
     }
 
     private fun logErrors() {
