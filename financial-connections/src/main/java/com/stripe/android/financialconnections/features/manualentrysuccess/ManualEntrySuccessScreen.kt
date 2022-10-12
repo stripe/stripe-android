@@ -31,11 +31,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
+import com.stripe.android.financialconnections.navigation.NavigationDirections.ManualEntrySuccess
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -44,8 +46,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 
 @Composable
 internal fun ManualEntrySuccessScreen(
-    microdepositVerificationMethod: MicrodepositVerificationMethod,
-    last4: String?
+    backStackEntry: NavBackStackEntry,
 ) {
     val parentViewModel = parentViewModel()
     val viewModel: ManualEntrySuccessViewModel = mavericksViewModel()
@@ -53,8 +54,8 @@ internal fun ManualEntrySuccessScreen(
     val completeAuthSessionAsync = viewModel
         .collectAsState(ManualEntrySuccessState::completeSession)
     ManualEntrySuccessContent(
-        microdepositVerificationMethod = microdepositVerificationMethod,
-        last4 = last4,
+        microdepositVerificationMethod = ManualEntrySuccess.microdeposits(backStackEntry),
+        last4 = ManualEntrySuccess.last4(backStackEntry),
         loading = completeAuthSessionAsync.value is Loading,
         onCloseClick = parentViewModel::onCloseWithConfirmationClick,
         onDoneClick = viewModel::onSubmit

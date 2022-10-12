@@ -3,7 +3,9 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
@@ -45,6 +47,18 @@ internal class FinancialConnectionsSheetNativeModule {
     @Provides
     fun providesNavigationManager() = NavigationManager(
         CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    )
+
+    @Singleton
+    @Provides
+    fun providesAnalyticsTracker(
+        context: Application,
+        logger: Logger,
+        stripeNetworkClient: StripeNetworkClient
+    ) = FinancialConnectionsAnalyticsTracker(
+        context = context,
+        logger = logger,
+        stripeNetworkClient = stripeNetworkClient
     )
 
     @Singleton

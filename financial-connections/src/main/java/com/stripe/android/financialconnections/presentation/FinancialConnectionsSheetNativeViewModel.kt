@@ -15,6 +15,8 @@ import com.airbnb.mvrx.ViewModelContext
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
@@ -46,6 +48,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val uriComparator: UriComparator,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
+    private val financialConnectionsAnalyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
@@ -184,6 +187,14 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+    }
+
+    fun onPaneLaunched(pane: NextPane) {
+        viewModelScope.launch {
+            financialConnectionsAnalyticsTracker.track(
+                FinancialConnectionsEvent.PaneLaunched(pane.name)
+            )
         }
     }
 

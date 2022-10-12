@@ -122,42 +122,53 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         ) {
             NavHost(navController, startDestination = initialDestination) {
                 composable(NavigationDirections.consent.destination) {
+                    LaunchedPane(NextPane.CONSENT)
                     ConsentScreen()
                 }
                 composable(NavigationDirections.manualEntry.destination) {
+                    LaunchedPane(NextPane.MANUAL_ENTRY)
                     ManualEntryScreen()
                 }
                 composable(
                     route = NavigationDirections.ManualEntrySuccess.route,
                     arguments = NavigationDirections.ManualEntrySuccess.arguments
                 ) {
-                    ManualEntrySuccessScreen(
-                        microdepositVerificationMethod = NavigationDirections
-                            .ManualEntrySuccess.microdeposits(it),
-                        last4 = NavigationDirections
-                            .ManualEntrySuccess.last4(it)
-                    )
+                    LaunchedPane(NextPane.MANUAL_ENTRY_SUCCESS)
+                    ManualEntrySuccessScreen(it)
                 }
                 composable(NavigationDirections.institutionPicker.destination) {
+                    LaunchedPane(NextPane.INSTITUTION_PICKER)
                     InstitutionPickerScreen()
                 }
                 composable(NavigationDirections.partnerAuth.destination) {
+                    LaunchedPane(NextPane.PARTNER_AUTH)
                     PartnerAuthScreen()
                 }
                 composable(NavigationDirections.accountPicker.destination) {
+                    LaunchedPane(NextPane.ACCOUNT_PICKER)
                     AccountPickerScreen()
                 }
                 composable(NavigationDirections.success.destination) {
+                    LaunchedPane(NextPane.SUCCESS)
                     SuccessScreen()
                 }
                 composable(NavigationDirections.reset.destination) {
+                    LaunchedPane(NextPane.RESET)
                     ResetScreen()
                 }
                 composable(NavigationDirections.attachLinkedPaymentAccount.destination) {
+                    LaunchedPane(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT)
                     AttachPaymentScreen()
                 }
             }
         }
+    }
+
+    @Composable
+    private fun LaunchedPane(
+        pane: NextPane
+    ) {
+        LaunchedEffect(Unit) { viewModel.onPaneLaunched(pane) }
     }
 
     /**
