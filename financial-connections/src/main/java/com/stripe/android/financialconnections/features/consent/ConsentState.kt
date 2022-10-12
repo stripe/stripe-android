@@ -3,20 +3,12 @@ package com.stripe.android.financialconnections.features.consent
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.Uninitialized
-import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.model.ConsentScreen
 
 internal data class ConsentState(
-    val title: TextResource = TextResource.Text(""),
     val manualEntryEnabled: Boolean = false,
     val manualEntryShowBusinessDaysNotice: Boolean = false,
-    val disconnectUrl: String = "",
-    val stripeToSUrl: String = "",
-    val faqUrl: String = "",
-    val dataPolicyUrl: String = "",
-    val privacyCenterUrl: String = "",
-    val bullets: List<Pair<Int, TextResource>> = emptyList(),
-    val requestedDataTitle: TextResource = TextResource.Text(""),
-    val requestedDataBullets: List<Pair<TextResource, TextResource>> = emptyList(),
+    val consent: Async<ConsentScreen> = Uninitialized,
     val acceptConsent: Async<Unit> = Uninitialized,
     val viewEffect: ViewEffect? = null
 ) : MavericksState {

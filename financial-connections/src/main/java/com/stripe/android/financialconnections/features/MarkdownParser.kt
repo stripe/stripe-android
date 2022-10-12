@@ -1,10 +1,5 @@
 package com.stripe.android.financialconnections.features
 
-import android.os.Build
-import android.text.Html
-import android.text.Spanned
-
-
 internal object MarkdownParser {
     private val markDownToHtmlRegex = listOf(
         // bold, italics rules
@@ -17,20 +12,11 @@ internal object MarkdownParser {
         "\\[([^]]+)]\\(([^)]+)\\)".toRegex() to "<a href=\"$2\">$1</a>"
     )
 
-    fun toSpanned(text: String): Spanned {
-        var newText = text
+    internal fun toHtml(string: String): String {
+        var newText = string
         markDownToHtmlRegex.forEach { (regex, replacement) ->
             newText = newText.replace(regex, replacement)
         }
-        return fromHtml(newText)
-    }
-
-    @SuppressWarnings("deprecation")
-    private fun fromHtml(source: String?): Spanned {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Html.fromHtml(source, Html.FROM_HTML_MODE_LEGACY)
-        } else {
-            Html.fromHtml(source)
-        }
+        return newText
     }
 }

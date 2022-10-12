@@ -3,9 +3,9 @@ package com.stripe.android.financialconnections.features
 import com.google.common.truth.Truth
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
+import org.robolectric.ParameterizedRobolectricTestRunner
 
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedRobolectricTestRunner::class)
 class MarkdownParserTest(
     private val paramOne: String,
     private val paramTwo: String
@@ -13,21 +13,21 @@ class MarkdownParserTest(
 
     companion object {
         @JvmStatic
-        @Parameterized.Parameters
+        @ParameterizedRobolectricTestRunner.Parameters
         fun data() = listOf(
             arrayOf(
                 "this **is** some markdown with a [Link text Here](https://link-url-here.org)",
-                "this <annotation bold=\"\">is</annotation> some markdown with a <annotation clickable=https://link-url-here.org>Link text Here</annotation>"
+                "this <b>is</b> some markdown with a <a href=\"https://link-url-here.org\">Link text Here</a>"
             ),
             arrayOf(
                 "**hola**",
-                "<annotation bold=\"\">hola</annotation>"
+                "<b>hola</b>"
             ),
         )
     }
 
     @Test
     fun toSpanned() {
-        Truth.assertThat(MarkdownParser.toSpanned(paramOne)).isEqualTo(paramTwo)
+        Truth.assertThat(MarkdownParser.toHtml(paramOne)).isEqualTo(paramTwo)
     }
 }

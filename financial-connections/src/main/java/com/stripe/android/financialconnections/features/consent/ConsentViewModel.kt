@@ -9,13 +9,13 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.features.MarkdownParser
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.model.Body
+import com.stripe.android.financialconnections.model.ConsentScreen
+import com.stripe.android.financialconnections.model.DataDialog
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.model.sampleConsent
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import com.stripe.android.financialconnections.ui.TextResource
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class ConsentViewModel @Inject constructor(
@@ -29,31 +29,45 @@ internal class ConsentViewModel @Inject constructor(
 
     init {
         logErrors()
-        viewModelScope.launch {
+        suspend {
             val manifest = getManifest()
-            val result = MarkdownParser.toSpanned(
-                "this **is** some markdown with a [Link text Here](https://link-url-here.org)"
-            )
-            setState {
-                copy(
-                    manualEntryEnabled = manifest.allowManualEntry,
-                    manualEntryShowBusinessDaysNotice =
-                    !manifest.customManualEntryHandling && manifest.manualEntryUsesMicrodeposits,
-                    disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest),
-                    faqUrl = FinancialConnectionsUrlResolver.getFAQUrl(manifest),
-                    dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest),
-                    stripeToSUrl = FinancialConnectionsUrlResolver.getStripeTOSUrl(manifest),
-                    privacyCenterUrl = FinancialConnectionsUrlResolver.getPrivacyCenterUrl(manifest),
-                    title = TextResource.Text(result),
-                    bullets = ConsentTextBuilder.getBullets(manifest),
-                    requestedDataTitle = ConsentTextBuilder.getDataRequestedTitle(manifest),
-                    requestedDataBullets = ConsentTextBuilder.getRequestedDataBullets(manifest)
-                )
-            }
-        }
+            val consent: ConsentScreen = sampleConsent.toHtml()
+//            manualEntryEnabled = manifest.allowManualEntry,
+//            manualEntryShowBusinessDaysNotice =
+//                !manifest.customManualEntryHandling && manifest.manualEntryUsesMicrodeposits,
+            consent
+        }.execute { copy(consent = it) }
     }
 
+    private fun ConsentScreen.toHtml(): ConsentScreen = ConsentScreen(
+        title = MarkdownParser.toHtml(title),
+        body = body.map {
+            Body(
+                iconUrl = it.iconUrl,
+                text = MarkdownParser.toHtml(it.text),
+                subtext = it.subtext?.let(MarkdownParser::toHtml)
+            )
+        },
+        footerText = MarkdownParser.toHtml(footerText),
+        buttonTitle = MarkdownParser.toHtml(buttonTitle),
+        dataDialog = DataDialog(
+            title = MarkdownParser.toHtml(dataDialog.title),
+            body = dataDialog.body.map {
+                Body(
+                    iconUrl = it.iconUrl,
+                    text = MarkdownParser.toHtml(it.text),
+                    subtext = it.subtext?.let(MarkdownParser::toHtml)
+                )
+            },
+            footerText = MarkdownParser.toHtml(dataDialog.footerText),
+            buttonTitle = MarkdownParser.toHtml(dataDialog.buttonTitle),
+        )
+    )
+
     private fun logErrors() {
+        onAsync(ConsentState::consent, onFail = {
+            logger.error("Error retrieving consent content", it)
+        })
         onAsync(ConsentState::acceptConsent, onFail = {
             logger.error("Error accepting consent", it)
         })
@@ -68,30 +82,35 @@ internal class ConsentViewModel @Inject constructor(
     }
 
     fun onClickableTextClick(tag: String) {
-        when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
-            ConsentClickableText.TERMS ->
-                setState { copy(viewEffect = OpenUrl(stripeToSUrl)) }
-
-            ConsentClickableText.PRIVACY ->
-                setState { copy(viewEffect = OpenUrl(FinancialConnectionsUrls.StripePrivacyPolicy)) }
-
-            ConsentClickableText.DISCONNECT ->
-                setState { copy(viewEffect = OpenUrl(disconnectUrl)) }
-
-            ConsentClickableText.DATA ->
-                setState { copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet) }
-
-            ConsentClickableText.PRIVACY_CENTER ->
-                setState { copy(viewEffect = OpenUrl(privacyCenterUrl)) }
-
-            ConsentClickableText.DATA_ACCESS ->
-                setState { copy(viewEffect = OpenUrl(dataPolicyUrl)) }
-
-            ConsentClickableText.MANUAL_ENTRY ->
-                navigationManager.navigate(NavigationDirections.manualEntry)
-
-            null -> logger.error("Unrecognized clickable text: $tag")
+        if (tag == "stripe://data-access-notice") {
+            setState { copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet) }
+        } else {
+            setState { copy(viewEffect = OpenUrl(tag)) }
         }
+//        when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
+//            ConsentClickableText.TERMS ->
+//                setState { copy(viewEffect = OpenUrl(tag)) }
+//
+//            ConsentClickableText.PRIVACY ->
+//                setState { copy(viewEffect = OpenUrl(FinancialConnectionsUrls.StripePrivacyPolicy)) }
+//
+//            ConsentClickableText.DISCONNECT ->
+//                setState { copy(viewEffect = OpenUrl(tag)) }
+//
+//            ConsentClickableText.DATA ->
+//                setState { copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet) }
+//
+//            ConsentClickableText.PRIVACY_CENTER ->
+//                setState { copy(viewEffect = OpenUrl(tag)) }
+//
+//            ConsentClickableText.DATA_ACCESS ->
+//                setState { copy(viewEffect = OpenUrl(tag)) }
+//
+//            ConsentClickableText.MANUAL_ENTRY ->
+//                navigationManager.navigate(NavigationDirections.manualEntry)
+//
+//            null -> logger.error("Unrecognized clickable text: $tag")
+//        }
     }
 
     fun onViewEffectLaunched() {
