@@ -1550,7 +1550,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         paymentIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
     ): PaymentIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
@@ -1559,9 +1560,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     financialConnectionsSessionId
                 ),
                 requestOptions,
-                mapOf(
-                    "client_secret" to clientSecret
-                )
+                mapOf("client_secret" to clientSecret)
+                    .plus(createExpandParam(expandFields))
             ),
             PaymentIntentJsonParser()
         ) {
@@ -1576,7 +1576,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         setupIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
     ): SetupIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
@@ -1585,9 +1586,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     financialConnectionsSessionId
                 ),
                 requestOptions,
-                mapOf(
-                    "client_secret" to clientSecret
-                )
+                mapOf("client_secret" to clientSecret)
+                    .plus(createExpandParam(expandFields))
             ),
             SetupIntentJsonParser()
         ) {

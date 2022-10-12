@@ -3,7 +3,6 @@ package com.stripe.android.link
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewTreeObserver
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -77,8 +76,6 @@ internal class LinkActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // TODO(brnunes-stripe): Migrate to androidx.compose.foundation 1.2.0 when out of beta
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         overridePendingTransition(R.anim.slide_up, 0)
 
         setContent {
@@ -155,18 +152,8 @@ internal class LinkActivity : ComponentActivity() {
                                 }
                             }
 
-                            composable(
-                                LinkScreen.SignUp.route,
-                                arguments = listOf(
-                                    navArgument(LinkScreen.SignUp.emailArg) {
-                                        type = NavType.StringType
-                                        nullable = true
-                                    }
-                                )
-                            ) { backStackEntry ->
-                                val email =
-                                    backStackEntry.arguments?.getString(LinkScreen.SignUp.emailArg)
-                                SignUpBody(viewModel.injector, email)
+                            composable(LinkScreen.SignUp.route) {
+                                SignUpBody(viewModel.injector)
                             }
 
                             composable(LinkScreen.Verification.route) {
@@ -254,8 +241,9 @@ internal class LinkActivity : ComponentActivity() {
                                 AccountStatus.NeedsVerification,
                                 AccountStatus.VerificationStarted ->
                                     LinkScreen.Verification
-                                AccountStatus.SignedOut ->
-                                    LinkScreen.SignUp(starterArgs.customerEmail)
+                                AccountStatus.SignedOut,
+                                AccountStatus.Error ->
+                                    LinkScreen.SignUp
                             },
                             clearBackStack = true
                         )

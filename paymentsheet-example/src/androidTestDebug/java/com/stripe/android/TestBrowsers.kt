@@ -11,6 +11,7 @@ import com.stripe.android.test.core.Browser
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
+import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
@@ -46,6 +47,9 @@ class TestBrowsers {
     @get:Rule
     val testWatcher = TestWatcher()
 
+    @get:Rule
+    val disableAnimations = DisableAnimationsRule()
+
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
     private val screenshotProcessor = MyScreenCaptureProcessor()
@@ -70,7 +74,7 @@ class TestBrowsers {
         Billing.On,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
-        automatic = Automatic.On,
+        automatic = Automatic.Off,
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = Browser.Chrome,
@@ -112,7 +116,7 @@ class TestBrowsers {
                 InstrumentationRegistry.getInstrumentation().targetContext.resources
             )
         ).apply {
-            forceUpdate(LpmRepository.exposedPaymentMethods, null)
+            forceUpdate(this.supportedPaymentMethods, null)
         }
     }
 }

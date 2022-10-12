@@ -1,10 +1,42 @@
 # CHANGELOG
 
-## X.X.X - 2022-XX-XX
+## XX.XX.XX - 2022-XX-XX
+
+## 20.15.0 - 2022-10-11
+
+This release adds Link as a payment method to the SDK and fixes a minor issue with CardScan.
 
 ### PaymentSheet
 
-* [FIXED][5592](https://github.com/stripe/stripe-android/pull/5592) Fix deletion of the last used payment method.
+* [ADDED][5692](https://github.com/stripe/stripe-android/pull/5692) Enable Link as a payment method.
+
+### CardScan
+
+* [CHANGED][5679](https://github.com/stripe/stripe-android/pull/5679) Fix oversized verification_frames payloads leading to failed scans.
+
+## 20.14.1 - 2022-10-03
+
+This release expands the `payment_method` field on ACH requests and fixes a formatting error in `CardInputWidget`, `CardMultilineWidget`, and `CardFormView`.
+
+### Payments
+
+* [FIXED][5547](https://github.com/stripe/stripe-android/pull/5547) Expiry dates in `CardInputWidget`, `CardMultilineWidget`, and `CardFormView` are no longer formatted incorrectly on certain devices.
+
+### PaymentSheet
+
+* [FIXED][5624](https://github.com/stripe/stripe-android/pull/5624) `CollectBankAccountResult` included intents will now contain the expanded `payment_method` field.
+
+## 20.14.0 - 2022-09-26
+This release fixes a payment-method related error in `PaymentSheet` and manages missing permissions
+on Financial Connections.
+
+### PaymentSheet
+
+* [FIXED][5592](https://github.com/stripe/stripe-android/pull/5592)[5613](https://github.com/stripe/stripe-android/pull/5613) Fix deletion of the last used payment method.
+
+### Financial Connections
+
+* [CHANGED][5583](https://github.com/stripe/stripe-android/pull/5583) Adds support for `account_numbers` permission.
 
 ## 20.13.0 - 2022-09-19
 This release makes the `PaymentMethod.Card.networks` field public, fixes the Alipay integration and the card scan form encoding.

@@ -32,8 +32,13 @@ class EmailConfigTest {
     }
 
     @Test
-    fun `verify there is no filter`() {
-        assertThat(emailConfig.filter("123^@gmail[\uD83E\uDD57.com"))
+    fun `verify more than one @ is invalid`() {
+        assertThat(emailConfig.determineState("invalid@email@")).isInstanceOf(Invalid::class.java)
+    }
+
+    @Test
+    fun `verify filters spaces`() {
+        assertThat(emailConfig.filter("12 3^@gm ail[\uD83E\uDD57 .com"))
             .isEqualTo("123^@gmail[\uD83E\uDD57.com")
     }
 }

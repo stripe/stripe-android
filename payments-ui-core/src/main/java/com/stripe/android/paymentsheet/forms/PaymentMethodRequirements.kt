@@ -295,3 +295,9 @@ internal val USBankAccountRequirement = PaymentMethodRequirements(
     siRequirements = setOf(Delayed),
     confirmPMFromCustomer = true
 )
+
+internal val UpiRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)

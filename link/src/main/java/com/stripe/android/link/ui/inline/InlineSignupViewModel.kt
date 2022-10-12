@@ -6,20 +6,15 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.injection.CUSTOMER_EMAIL
-import com.stripe.android.link.injection.CUSTOMER_NAME
-import com.stripe.android.link.injection.CUSTOMER_PHONE
-import com.stripe.android.link.injection.LINK_INTENT
-import com.stripe.android.link.injection.MERCHANT_NAME
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
@@ -33,27 +28,27 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 
 internal class InlineSignupViewModel @Inject constructor(
-    @Named(LINK_INTENT) val stripeIntent: StripeIntent,
-    @Named(MERCHANT_NAME) val merchantName: String,
-    @Named(CUSTOMER_EMAIL) customerEmail: String?,
-    @Named(CUSTOMER_PHONE) customerPhone: String?,
-    @Named(CUSTOMER_NAME) customerName: String?,
+    private val config: LinkPaymentLauncher.Configuration,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger
 ) : ViewModel() {
-    private val prefilledEmail =
-        if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
-    private val prefilledPhone =
-        customerPhone?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) } ?: ""
-    private val prefilledName =
-        customerName?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) }
+
+    private val isLoggedOut = linkAccountManager.hasUserLoggedOut(config.customerEmail)
+
+    private val prefilledEmail = config.customerEmail.takeUnless { isLoggedOut }
+    private val prefilledPhone = config.customerPhone?.takeUnless { isLoggedOut }.orEmpty()
+    private val prefilledName = config.customerName?.takeUnless { isLoggedOut }
 
     val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
-    val phoneController = PhoneNumberController.createPhoneNumberController(prefilledPhone)
+
+    val phoneController = PhoneNumberController.createPhoneNumberController(
+        initialValue = prefilledPhone,
+        initiallySelectedCountryCode = config.customerBillingCountryCode,
+    )
+
     val nameController = SimpleTextFieldController.createNameSectionController(prefilledName)
 
     /**
@@ -81,6 +76,7 @@ internal class InlineSignupViewModel @Inject constructor(
         MutableStateFlow(
             InlineSignupViewState(
                 userInput = null,
+                merchantName = config.merchantName,
                 isExpanded = false,
                 apiFailed = false,
                 signUpState = SignUpState.InputtingEmail
@@ -91,9 +87,11 @@ internal class InlineSignupViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
+    val accountEmail = linkAccountManager.linkAccount.map { it?.email }
+
     val requiresNameCollection: Boolean
         get() {
-            val countryCode = when (stripeIntent) {
+            val countryCode = when (val stripeIntent = config.stripeIntent) {
                 is PaymentIntent -> stripeIntent.countryCode
                 is SetupIntent -> stripeIntent.countryCode
             }
@@ -116,6 +114,12 @@ internal class InlineSignupViewModel @Inject constructor(
         }
     }
 
+    fun logout() {
+        viewModelScope.launch {
+            linkAccountManager.logout()
+        }
+    }
+
     private fun watchUserInput() {
         debouncer.startWatching(
             coroutineScope = viewModelScope,
@@ -129,6 +133,7 @@ internal class InlineSignupViewModel @Inject constructor(
                             SignUpState.InputtingEmail, SignUpState.VerifyingEmail -> null
                             SignUpState.InputtingPhoneOrName ->
                                 mapToUserInput(
+                                    email = consumerEmail.value,
                                     phoneNumber = consumerPhoneNumber.value,
                                     name = consumerName.value
                                 )
@@ -145,6 +150,7 @@ internal class InlineSignupViewModel @Inject constructor(
 
         viewModelScope.launch {
             combine(
+                consumerEmail,
                 consumerPhoneNumber,
                 consumerName,
                 this@InlineSignupViewModel::mapToUserInput
@@ -157,12 +163,11 @@ internal class InlineSignupViewModel @Inject constructor(
     }
 
     private fun mapToUserInput(
+        email: String?,
         phoneNumber: String?,
         name: String?
     ): UserInput? {
-        return if (phoneNumber != null) {
-            // Email must be valid otherwise phone number and name collection UI would not be visible
-            val email = requireNotNull(consumerEmail.value)
+        return if (email != null && phoneNumber != null) {
             val isNameValid = !requiresNameCollection || !name.isNullOrBlank()
 
             val phone = phoneController.getE164PhoneNumber(phoneNumber)
@@ -176,6 +181,7 @@ internal class InlineSignupViewModel @Inject constructor(
 
     private suspend fun lookupConsumerEmail(email: String) {
         clearError()
+        linkAccountManager.logout()
         linkAccountManager.lookupConsumer(email, startSession = false).fold(
             onSuccess = {
                 if (it != null) {

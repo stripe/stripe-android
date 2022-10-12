@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.ui.core.elements.SimpleTextFieldConfig
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
@@ -17,6 +16,7 @@ import com.stripe.android.ui.core.elements.TextFieldIcon
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
+import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

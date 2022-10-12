@@ -83,8 +83,7 @@
     </fragment>
     <fragment
         android:id="@+id/confirmationFragment"
-        android:name="com.stripe.android.identity.navigation.ConfirmationFragment"
-        tools:layout="@layout/confirmation_fragment" />
+        android:name="com.stripe.android.identity.navigation.ConfirmationFragment" />
     <fragment
         android:id="@+id/docSelectionFragment"
         android:name="com.stripe.android.identity.navigation.DocSelectionFragment">

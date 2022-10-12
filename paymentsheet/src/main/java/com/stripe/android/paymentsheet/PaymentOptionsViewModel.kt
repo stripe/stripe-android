@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -80,6 +81,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
     override var newPaymentSelection = args.newLpm
+
+    override var linkInlineSelection =
+        MutableLiveData<PaymentSelection.New.LinkInline?>(args.newLpm as? PaymentSelection.New.LinkInline)
 
     // This is used in the case where the last card was new and not saved. In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
@@ -169,7 +173,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
             stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
         ) {
             viewModelScope.launch {
-                val accountStatus = linkLauncher.setup(createLinkConfiguration(stripeIntent), this)
+                val configuration = createLinkConfiguration(stripeIntent).also {
+                    _linkConfiguration.value = it
+                }
+                val accountStatus = linkLauncher.getAccountStatusFlow(configuration).first()
                 when (accountStatus) {
                     AccountStatus.Verified,
                     AccountStatus.VerificationStarted,
@@ -177,10 +184,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
                         // If account exists, select link by default
                         savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
                     }
-                    AccountStatus.SignedOut -> {}
+                    AccountStatus.SignedOut,
+                    AccountStatus.Error -> {}
                 }
                 activeLinkSession.value = accountStatus == AccountStatus.Verified
-                _isLinkEnabled.value = true
+                _isLinkEnabled.value = accountStatus != AccountStatus.Error
             }
         } else {
             _isLinkEnabled.value = false

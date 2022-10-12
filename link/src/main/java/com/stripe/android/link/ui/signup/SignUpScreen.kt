@@ -70,13 +70,9 @@ private fun SignUpBodyPreview() {
 @Composable
 internal fun SignUpBody(
     injector: NonFallbackInjector,
-    email: String?
 ) {
     val signUpViewModel: SignUpViewModel = viewModel(
-        factory = SignUpViewModel.Factory(
-            injector,
-            email
-        )
+        factory = SignUpViewModel.Factory(injector)
     )
 
     val signUpState by signUpViewModel.signUpState.collectAsState()

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 
@@ -7,6 +8,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
  * Interface for fetching and modifying information about a Customer.
  */
 internal interface CustomerRepository {
+    /**
+     * Retrieve a Customer by ID using an ephemeral key.
+     */
+    suspend fun retrieveCustomer(
+        customerId: String,
+        ephemeralKeySecret: String
+    ): Customer?
+
     /**
      * Retrieve a Customer's payment methods of all types requested.
      * Silently handle failures by returning an empty list for the payment method types that failed.

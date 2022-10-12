@@ -13,14 +13,10 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkPaymentLauncherComponent
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.cardedit.CardEditViewModel
-import com.stripe.android.link.ui.inline.InlineSignupViewModel
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
@@ -37,9 +33,6 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
@@ -62,7 +55,6 @@ class LinkPaymentLauncher @Inject internal constructor(
     stripeRepository: StripeRepository,
     addressResourceRepository: ResourceRepository<AddressRepository>
 ) : NonFallbackInjectable {
-    private var configuration: Configuration? = null
     private val launcherComponentBuilder = DaggerLinkPaymentLauncherComponent.builder()
         .context(context)
         .ioContext(ioContext)
@@ -81,70 +73,34 @@ class LinkPaymentLauncher @Inject internal constructor(
         requireNotNull(LinkPaymentLauncher::class.simpleName)
     )
 
-    private lateinit var linkComponentBuilder: LinkComponent.Builder
-
     /**
-     * The dependency injector for all injectable classes in Link.
-     * This is safe to hold here because [LinkPaymentLauncher] lives only for as long as
-     * PaymentSheet's ViewModel is alive.
+     * The dependency injector Component for all injectable classes in Link while in an embedded
+     * environment.
      */
-    internal var injector: NonFallbackInjector? = null
+    internal var component: LinkPaymentLauncherComponent? = null
 
     /**
-     * The [LinkAccountManager], exposed here so that classes that are not injected (like LinkButton
-     * or LinkInlineSignup) can access it and share the account status with all other components.
+     * Fetch the customer's account status, initializing the dependencies if they haven't been
+     * initialized yet.
      */
-    internal lateinit var linkAccountManager: LinkAccountManager
-
-    internal lateinit var linkEventsReporter: LinkEventsReporter
-
-    /**
-     * Publicly visible account status, used by PaymentSheet to display the correct UI.
-     */
-    lateinit var accountStatus: StateFlow<AccountStatus>
+    fun getAccountStatusFlow(configuration: Configuration) =
+        getLinkPaymentLauncherComponent(configuration).linkAccountManager.accountStatus
 
     /**
-     * Sets up Link to process the given [Configuration.stripeIntent].
+     * Launch the Link UI to process a payment.
      *
-     * This will fetch the user's account if they're already logged in, or lookup the email passed
-     * in during instantiation.
-     *
-     * @param configuration the [LinkPaymentLauncher.Configuration], containing the parameters
-     *                      required to process a payment.
-     * @param coroutineScope the coroutine scope used to collect the account status flow.
-     */
-    suspend fun setup(
-        configuration: Configuration,
-        coroutineScope: CoroutineScope
-    ): AccountStatus {
-        val component = buildLinkPaymentLauncherComponent(configuration)
-        accountStatus = component.linkAccountManager.accountStatus.stateIn(coroutineScope)
-        linkAccountManager = component.linkAccountManager
-        linkEventsReporter = component.linkEventsReporter
-        linkComponentBuilder = component.linkComponentBuilder
-        this.configuration = configuration
-        return accountStatus.value
-    }
-
-    /**
-     * Launch the Link UI to process the Stripe Intent sent in [setup].
-     *
+     * @param configuration The payment and customer settings
+     * @param activityResultLauncher Launcher that will receive the payment result.
      * @param prefilledNewCardParams The card information prefilled by the user. If non null, Link
      *  will launch into adding a new card, with the card information pre-filled.
      */
     fun present(
+        configuration: Configuration,
         activityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>,
         prefilledNewCardParams: PaymentMethodCreateParams? = null
     ) {
-        val configuration = requireNotNull(configuration) { "Must call setup before presenting" }
-
         val args = LinkActivityContract.Args(
-            configuration.stripeIntent,
-            configuration.merchantName,
-            configuration.customerEmail,
-            configuration.customerPhone,
-            configuration.customerName,
-            configuration.shippingValues,
+            configuration,
             prefilledNewCardParams,
             LinkActivityContract.Args.InjectionParams(
                 injectorKey,
@@ -154,7 +110,7 @@ class LinkPaymentLauncher @Inject internal constructor(
                 stripeAccountIdProvider()
             )
         )
-        buildLinkComponent(args)
+        buildLinkComponent(getLinkPaymentLauncherComponent(configuration), args)
         activityResultLauncher.launch(args)
     }
 
@@ -162,8 +118,13 @@ class LinkPaymentLauncher @Inject internal constructor(
      * Trigger Link sign in with the input collected from the user inline in PaymentSheet, whether
      * it's a new or existing account.
      */
-    suspend fun signInWithUserInput(userInput: UserInput) =
-        linkAccountManager.signInWithUserInput(userInput).map { true }
+    suspend fun signInWithUserInput(
+        configuration: Configuration,
+        userInput: UserInput
+    ) = getLinkPaymentLauncherComponent(configuration)
+        .linkAccountManager
+        .signInWithUserInput(userInput)
+        .map { true }
 
     /**
      * Attach a new Card to the currently signed in Link account.
@@ -172,48 +133,34 @@ class LinkPaymentLauncher @Inject internal constructor(
      *          PaymentDetails.
      */
     suspend fun attachNewCardToAccount(
+        configuration: Configuration,
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.New> =
-        linkAccountManager.createCardPaymentDetails(
-            paymentMethodCreateParams
-        )
+        getLinkPaymentLauncherComponent(configuration)
+            .linkAccountManager
+            .createCardPaymentDetails(paymentMethodCreateParams)
 
     /**
-     * Set up [LinkPaymentLauncherComponent], responsible for injecting into classes used by inline
-     * sign up.
+     * Create or get the existing [LinkPaymentLauncherComponent], responsible for injecting all
+     * injectable classes in Link while in an embedded environment.
      */
-    private fun buildLinkPaymentLauncherComponent(
-        configuration: Configuration
-    ): LinkPaymentLauncherComponent {
-        val component = launcherComponentBuilder
-            .merchantName(configuration.merchantName)
-            .customerEmail(configuration.customerEmail)
-            .customerPhone(configuration.customerPhone)
-            .customerName(configuration.customerName)
-            .stripeIntent(configuration.stripeIntent)
-            .build()
-
-        val injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*>) {
-                when (injectable) {
-                    is VerificationViewModel.Factory -> component.inject(injectable)
-                    is InlineSignupViewModel.Factory -> component.inject(injectable)
-                    else -> {
-                        throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-                    }
+    private fun getLinkPaymentLauncherComponent(configuration: Configuration) =
+        component?.takeIf { it.configuration == configuration }
+            ?: launcherComponentBuilder
+                .configuration(configuration)
+                .build()
+                .also {
+                    component = it
                 }
-            }
-        }
-
-        this.injector = injector
-        return component
-    }
 
     /**
      * Set up [LinkComponent], responsible for injecting all dependencies into the Link app.
      */
-    private fun buildLinkComponent(args: LinkActivityContract.Args) {
-        val linkComponent = linkComponentBuilder.starterArgs(args).build()
+    private fun buildLinkComponent(
+        component: LinkPaymentLauncherComponent,
+        args: LinkActivityContract.Args
+    ) {
+        val linkComponent = component.linkComponentBuilder.starterArgs(args).build()
         val injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 when (injectable) {
@@ -232,20 +179,31 @@ class LinkPaymentLauncher @Inject internal constructor(
         WeakMapInjectorRegistry.register(injector, injectorKey)
     }
 
+    /**
+     * Arguments for launching [LinkActivity] to confirm a payment with Link.
+     *
+     * @param stripeIntent The Stripe Intent that is being processed
+     * @param merchantName The customer-facing business name.
+     * @param customerName Name of the customer, used to pre-fill the form.
+     * @param customerEmail Email of the customer, used to pre-fill the form.
+     * @param customerPhone Phone number of the customer, used to pre-fill the form.
+     * @param shippingValues The initial shipping values for [FormController].
+     */
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Configuration(
         val stripeIntent: StripeIntent,
         val merchantName: String,
+        val customerName: String?,
         val customerEmail: String?,
         val customerPhone: String?,
-        val customerName: String?,
+        val customerBillingCountryCode: String?,
         val shippingValues: Map<IdentifierSpec, String?>?
     ) : Parcelable
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        val LINK_ENABLED = false
+        const val LINK_ENABLED = true
         val supportedFundingSources = SupportedPaymentMethod.allTypes
     }
 }

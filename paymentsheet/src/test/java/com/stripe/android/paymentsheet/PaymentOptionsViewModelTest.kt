@@ -7,6 +7,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -21,13 +23,17 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
@@ -42,6 +48,7 @@ internal class PaymentOptionsViewModelTest {
     private val customerRepository = FakeCustomerRepository()
     private val paymentMethodRepository = FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
     private val lpmResourceRepository = StaticLpmResourceRepository(mock())
+    private val linkLauncher = mock<LinkPaymentLauncher>()
 
     @Test
     fun `onUserSelection() when selection has been made should set the view state to process result`() {
@@ -190,6 +197,23 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
+    fun `Removing selected payment method clears selection`() = runTest {
+        val cards = PaymentMethodFixtures.createCards(3)
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(paymentMethods = cards)
+        )
+
+        val selection = PaymentSelection.Saved(cards[1])
+        viewModel.updateSelection(selection)
+        assertThat(viewModel.selection.value).isEqualTo(selection)
+
+        viewModel.removePaymentMethod(selection.paymentMethod)
+        idleLooper()
+
+        assertThat(viewModel.selection.value).isNull()
+    }
+
+    @Test
     fun `when paymentMethods is empty, primary button and text below button are gone`() = runTest {
         val paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT
         val viewModel = createViewModel(
@@ -207,6 +231,68 @@ internal class PaymentOptionsViewModelTest {
         assertThat(viewModel.notesText.value).isNull()
     }
 
+    @Test
+    @Ignore("Disabled until Link is enabled")
+    fun `setupLink() selects Link when account status is Verified`() = runTest {
+        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
+        val viewModel = createViewModel()
+
+        viewModel.setupLink(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+
+        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
+        assertThat(viewModel.activeLinkSession.value).isTrue()
+        assertThat(viewModel.isLinkEnabled.value).isTrue()
+    }
+
+    @Test
+    @Ignore("Disabled until Link is enabled")
+    fun `setupLink() selects Link when account status is VerificationStarted`() = runTest {
+        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.VerificationStarted))
+        val viewModel = createViewModel()
+
+        viewModel.setupLink(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+
+        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
+        assertThat(viewModel.activeLinkSession.value).isFalse()
+        assertThat(viewModel.isLinkEnabled.value).isTrue()
+    }
+
+    @Test
+    @Ignore("Disabled until Link is enabled")
+    fun `setupLink() selects Link when account status is NeedsVerification`() = runTest {
+        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.NeedsVerification))
+        val viewModel = createViewModel()
+
+        viewModel.setupLink(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+
+        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
+        assertThat(viewModel.activeLinkSession.value).isFalse()
+        assertThat(viewModel.isLinkEnabled.value).isTrue()
+    }
+
+    @Test
+    @Ignore("Disabled until Link is enabled")
+    fun `setupLink() enables Link when account status is SignedOut`() = runTest {
+        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
+        val viewModel = createViewModel()
+
+        viewModel.setupLink(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+
+        assertThat(viewModel.activeLinkSession.value).isFalse()
+        assertThat(viewModel.isLinkEnabled.value).isTrue()
+    }
+
+    @Test
+    fun `setupLink() disables Link when account status is Error`() = runTest {
+        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Error))
+        val viewModel = createViewModel()
+
+        viewModel.setupLink(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+
+        assertThat(viewModel.activeLinkSession.value).isFalse()
+        assertThat(viewModel.isLinkEnabled.value).isFalse()
+    }
+
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS
     ) = PaymentOptionsViewModel(
@@ -221,7 +307,7 @@ internal class PaymentOptionsViewModelTest {
         lpmResourceRepository = lpmResourceRepository,
         addressResourceRepository = mock(),
         savedStateHandle = SavedStateHandle(),
-        linkLauncher = mock()
+        linkLauncher = linkLauncher
     )
 
     private companion object {

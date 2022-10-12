@@ -10,8 +10,6 @@
   <string name="log_out">退出 Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="pm_set_as_default">设置为默认支付方式</string>
-  <!-- Text of a label indicating that a payment method is the default. -->
-  <string name="pm_your_default">这是您的默认地址</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="show_menu">显示菜单</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->

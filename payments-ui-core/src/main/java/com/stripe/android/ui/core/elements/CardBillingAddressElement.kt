@@ -35,17 +35,19 @@ class CardBillingAddressElement(
 ) {
     // Save for future use puts this in the controller rather than element
     // card and achv2 uses save for future use
-    val hiddenIdentifiers: Flow<List<IdentifierSpec>> =
+    val hiddenIdentifiers: Flow<Set<IdentifierSpec>> =
         countryDropdownFieldController.rawFieldValue.map { countryCode ->
             when (countryCode) {
                 "US", "GB", "CA" -> {
                     FieldType.values()
                         .filterNot { it == FieldType.PostalCode }
                         .map { it.identifierSpec }
+                        .toSet()
                 }
                 else -> {
                     FieldType.values()
                         .map { it.identifierSpec }
+                        .toSet()
                 }
             }
         }

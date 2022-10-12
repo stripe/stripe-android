@@ -3,9 +3,8 @@ package com.stripe.android.link.account
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.injection.CUSTOMER_EMAIL
-import com.stripe.android.link.injection.LINK_INTENT
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
@@ -21,7 +20,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -29,8 +27,7 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class LinkAccountManager @Inject constructor(
-    @Named(CUSTOMER_EMAIL) private val customerEmail: String?,
-    @Named(LINK_INTENT) private val stripeIntent: StripeIntent,
+    private val config: LinkPaymentLauncher.Configuration,
     private val linkRepository: LinkRepository,
     private val cookieStore: CookieStore,
     private val linkEventsReporter: LinkEventsReporter
@@ -50,19 +47,31 @@ internal class LinkAccountManager @Inject constructor(
                 ?: (
                     // If consumer has previously logged in, fetch their account
                     cookieStore.getAuthSessionCookie()?.let {
-                        lookupConsumer(null).getOrNull()?.accountStatus
+                        lookupConsumer(null).map {
+                            it?.accountStatus
+                        }.getOrElse {
+                            AccountStatus.Error
+                        }
                     }
                         // If the user recently signed up on this device, use their email
                         ?: cookieStore.getNewUserEmail()?.let {
-                            lookupConsumer(it).getOrNull()?.accountStatus
+                            lookupConsumer(it).map {
+                                it?.accountStatus
+                            }.getOrElse {
+                                AccountStatus.Error
+                            }
                         }
                         // If a customer email was passed in, lookup the account,
                         // unless the user has logged out of this account
-                        ?: customerEmail?.let {
-                            if (hasUserLoggedOut(it)) {
+                        ?: config.customerEmail?.let { customerEmail ->
+                            if (hasUserLoggedOut(customerEmail)) {
                                 AccountStatus.SignedOut
                             } else {
-                                lookupConsumer(customerEmail).getOrNull()?.accountStatus
+                                lookupConsumer(customerEmail).map {
+                                    it?.accountStatus
+                                }.getOrElse {
+                                    AccountStatus.Error
+                                }
                             }
                         } ?: AccountStatus.SignedOut
                     )
@@ -219,7 +228,7 @@ internal class LinkAccountManager @Inject constructor(
             createCardPaymentDetails(
                 paymentMethodCreateParams,
                 account.email,
-                stripeIntent
+                config.stripeIntent
             )
         } ?: Result.failure(
             IllegalStateException("A non-null Link account is needed to create payment details")

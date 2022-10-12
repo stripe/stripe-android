@@ -319,6 +319,40 @@ internal object PaymentIntentFixtures {
             "setup_future_usage": null,
             "shipping": null,
             "source": null,
+            "status": "requires_payment_method",
+            "link_funding_sources": [
+              "CARD", "BANK_ACCOUNT"
+            ]
+        }
+            """.trimIndent()
+        )
+    )!!
+
+    val PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK = PARSER.parse(
+        org.json.JSONObject(
+            """
+        {
+            "id": "pi_1F7J1aCRMbs6FrXfaJcvbxF6",
+            "object": "payment_intent",
+            "amount": 1099,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "manual",
+            "client_secret": "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
+            "confirmation_method": "automatic",
+            "created": 1565775850,
+            "currency": "usd",
+            "description": "Example PaymentIntent",
+            "livemode": false,
+            "next_action": null,
+            "payment_method": null,
+            "payment_method_types": [
+                "card"
+            ],
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": null,
+            "source": null,
             "status": "requires_payment_method"
         }
             """.trimIndent()

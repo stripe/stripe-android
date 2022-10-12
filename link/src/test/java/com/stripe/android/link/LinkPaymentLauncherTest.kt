@@ -1,28 +1,32 @@
 package com.stripe.android.link
 
 import android.content.Context
-import androidx.activity.result.ActivityResultLauncher
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.model.StripeIntentFixtures
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.FakeAndroidKeyStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.job
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class LinkPaymentLauncherTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val mockHostActivityLauncher = mock<ActivityResultLauncher<LinkActivityContract.Args>>()
+    private val config = LinkPaymentLauncher.Configuration(
+        stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
+        merchantName = MERCHANT_NAME,
+        customerName = CUSTOMER_NAME,
+        customerEmail = CUSTOMER_EMAIL,
+        customerPhone = CUSTOMER_PHONE,
+        customerBillingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
+        shippingValues = null,
+    )
 
     private var linkPaymentLauncher = LinkPaymentLauncher(
         context,
@@ -43,43 +47,19 @@ class LinkPaymentLauncherTest {
     }
 
     @Test
-    fun `verify present() launches LinkActivity with correct arguments`() =
-        runTest {
-            launch {
-                val stripeIntent = StripeIntentFixtures.PI_SUCCEEDED
-                linkPaymentLauncher.setup(
-                    configuration = LinkPaymentLauncher.Configuration(
-                        stripeIntent,
-                        MERCHANT_NAME,
-                        CUSTOMER_EMAIL,
-                        CUSTOMER_PHONE,
-                        CUSTOMER_NAME,
-                        null,
-                    ),
-                    coroutineScope = this
-                )
-                linkPaymentLauncher.present(mockHostActivityLauncher)
+    fun `verify component is reused for same configuration`() = runTest {
+        linkPaymentLauncher.getAccountStatusFlow(config)
+        val component = linkPaymentLauncher.component
+        linkPaymentLauncher.signInWithUserInput(config, mock<UserInput.SignIn>())
+        assertThat(linkPaymentLauncher.component).isEqualTo(component)
+    }
 
-                verify(mockHostActivityLauncher).launch(
-                    argWhere { arg ->
-                        arg.stripeIntent == stripeIntent &&
-                            arg.merchantName == MERCHANT_NAME &&
-                            arg.customerEmail == CUSTOMER_EMAIL &&
-                            arg.customerPhone == CUSTOMER_PHONE &&
-                            arg.customerName == CUSTOMER_NAME &&
-                            arg.injectionParams != null &&
-                            arg.injectionParams.productUsage == setOf(PRODUCT_USAGE) &&
-                            arg.injectionParams.injectorKey == LinkPaymentLauncher::class.simpleName + WeakMapInjectorRegistry.CURRENT_REGISTER_KEY.get() &&
-                            arg.injectionParams.enableLogging &&
-                            arg.injectionParams.publishableKey == PUBLISHABLE_KEY &&
-                            arg.injectionParams.stripeAccountId.equals(STRIPE_ACCOUNT_ID)
-                    }
-                )
-
-                // Need to cancel because the coroutine scope is still collecting the account status
-                this.coroutineContext.job.cancel()
-            }
-        }
+    @Test
+    fun `verify component is recreated for different configuration`() {
+        val component = linkPaymentLauncher.component
+        linkPaymentLauncher.getAccountStatusFlow(config.copy(merchantName = "anotherName"))
+        assertThat(linkPaymentLauncher.component).isNotEqualTo(component)
+    }
 
     companion object {
         const val PRODUCT_USAGE = "productUsage"
@@ -90,5 +70,6 @@ class LinkPaymentLauncherTest {
         const val CUSTOMER_EMAIL = "email"
         const val CUSTOMER_PHONE = "phone"
         const val CUSTOMER_NAME = "name"
+        const val CUSTOMER_BILLING_COUNTRY_CODE = "country_code"
     }
 }

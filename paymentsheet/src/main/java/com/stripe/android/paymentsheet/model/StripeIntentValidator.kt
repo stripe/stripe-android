@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.model
 
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import javax.inject.Inject
@@ -46,6 +47,14 @@ internal class StripeIntentValidator @Inject constructor() {
                     """
                         PaymentSheet cannot set up a SetupIntent in status '${stripeIntent.status}'.
                         See https://stripe.com/docs/api/setup_intents/object#setup_intent_object-status
+                    """.trimIndent()
+                )
+            }
+            !stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Card.code) -> {
+                error(
+                    """
+                        Payment method type 'card' is required.
+                        Accepted payment methods: (${stripeIntent.paymentMethodTypes})."
                     """.trimIndent()
                 )
             }

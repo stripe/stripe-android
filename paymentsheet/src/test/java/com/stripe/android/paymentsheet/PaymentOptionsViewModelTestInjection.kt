@@ -10,18 +10,23 @@ import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
@@ -36,6 +41,7 @@ internal open class PaymentOptionsViewModelTestInjection {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
+    private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
     private val addressResourceRepository = StaticAddressResourceRepository(
         AddressRepository(ApplicationProvider.getApplicationContext<Context>().resources)
@@ -75,7 +81,9 @@ internal open class PaymentOptionsViewModelTestInjection {
             savedStateHandle = SavedStateHandle().apply {
                 set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
             },
-            linkLauncher = mock()
+            linkLauncher = mock<LinkPaymentLauncher>().apply {
+                whenever(getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
+            }
         )
     }
 
@@ -85,11 +93,19 @@ internal open class PaymentOptionsViewModelTestInjection {
         viewModel: PaymentOptionsViewModel,
         lpmRepository: LpmRepository = mock(),
         formViewModel: FormViewModel = FormViewModel(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
-            config = mock(),
+            context = context,
+            formFragmentArguments = FormFragmentArguments(
+                PaymentMethod.Type.Card.code,
+                showCheckbox = true,
+                showCheckboxControlledFields = true,
+                merchantName = "Merchant, Inc.",
+                amount = Amount(50, "USD"),
+                injectorKey = "injectorTestKeyFormFragmentArgumentTest",
+                initialPaymentMethodCreateParams = null
+            ),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
             addressResourceRepository = addressResourceRepository,
-            transformSpecToElement = mock()
+            showCheckboxFlow = mock()
         )
     ) {
         val mockBuilder = mock<PaymentOptionsViewModelSubcomponent.Builder>()
@@ -107,7 +123,6 @@ internal open class PaymentOptionsViewModelTestInjection {
         val mockFormSubComponentBuilderProvider = mock<Provider<FormViewModelSubcomponent.Builder>>()
         whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
         whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
-        whenever(mockFormBuilder.paymentMethodCode(any())).thenReturn(mockFormBuilder)
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 

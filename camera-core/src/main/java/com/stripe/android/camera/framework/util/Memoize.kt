@@ -622,7 +622,11 @@ fun <Input, Result> ((Input) -> Result).memoized(validFor: Duration): (Input) ->
 fun <Input1, Input2, Result> ((Input1, Input2) -> Result).memoized(validFor: Duration): (Input1, Input2) -> Result =
     MemoizeExpiring2(validFor, this)
 
-fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result).memoized(validFor: Duration): (Input1, Input2, Input3) -> Result =
+fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result).memoized(validFor: Duration): (
+    Input1,
+    Input2,
+    Input3
+) -> Result =
     MemoizeExpiring3(validFor, this)
 
 /* mark: memoizeSuspend function extensions */
@@ -732,8 +736,8 @@ fun <Input, Result> ((Input) -> Result).cachedFirstResult(): (Input) -> Result =
 fun <Input1, Input2, Result> ((Input1, Input2) -> Result).cachedFirstResult(): (Input1, Input2) -> Result =
     CachedFirstResult2(this)
 
-fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result).cachedFirstResult(): (Input1, Input2, Input3) -> Result =
-    CachedFirstResult3(this)
+fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result).cachedFirstResult():
+    (Input1, Input2, Input3) -> Result = CachedFirstResult3(this)
 
 /* mark: extensions to suspend functions */
 fun <Result> (suspend () -> Result).cachedFirstResultSuspend() = MemoizeSuspend0(this).memoize()

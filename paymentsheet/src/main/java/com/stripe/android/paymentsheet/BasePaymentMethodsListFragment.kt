@@ -26,8 +26,9 @@ internal abstract class BasePaymentMethodsListFragment(
 ) {
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
+    @VisibleForTesting
+    lateinit var adapter: PaymentOptionsAdapter
     protected lateinit var config: FragmentConfig
-    private lateinit var adapter: PaymentOptionsAdapter
     private var editMenuItem: MenuItem? = null
 
     @VisibleForTesting
@@ -66,13 +67,6 @@ internal abstract class BasePaymentMethodsListFragment(
         isEditing = savedInstanceState?.getBoolean(IS_EDITING) ?: false
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        sheetViewModel.headerText.value =
-            getString(R.string.stripe_paymentsheet_select_payment_method)
-    }
-
     @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.paymentsheet_payment_methods_list, menu)
@@ -96,6 +90,7 @@ internal abstract class BasePaymentMethodsListFragment(
                 color = Color(appearance.getColors(context.isSystemDarkTheme()).appBarIcon),
                 fontFamily = appearance.typography.fontResId
             )
+            isVisible = adapter.hasSavedItems()
         }
     }
 
@@ -163,8 +158,12 @@ internal abstract class BasePaymentMethodsListFragment(
         sheetViewModel.updateSelection(paymentSelection)
     }
 
-    private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) {
+    @VisibleForTesting
+    fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) {
         sheetViewModel.removePaymentMethod(item.paymentMethod)
+        if (!adapter.hasSavedItems()) {
+            isEditing = false
+        }
     }
 
     private companion object {
