@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.analytics
 
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 
 /**
@@ -10,11 +11,11 @@ internal sealed class FinancialConnectionsEvent(
     val params: Map<String, String>? = null
 ) {
     class PaneLaunched(
-        pane: String,
+        pane: FinancialConnectionsSessionManifest.NextPane,
     ) : FinancialConnectionsEvent(
         "pane.launched",
         mapOf(
-            "pane" to pane,
+            "pane" to pane.value,
         ).filterNotNullValues()
     )
 

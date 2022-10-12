@@ -6,6 +6,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
@@ -26,6 +27,7 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import java.util.Locale
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -54,10 +56,15 @@ internal class FinancialConnectionsSheetNativeModule {
     fun providesAnalyticsTracker(
         context: Application,
         logger: Logger,
+        getManifest: GetManifest,
+        configuration: FinancialConnectionsSheet.Configuration,
         stripeNetworkClient: StripeNetworkClient
     ) = FinancialConnectionsAnalyticsTracker(
         context = context,
+        configuration = configuration,
+        getManifest = getManifest,
         logger = logger,
+        locale = Locale.getDefault(),
         stripeNetworkClient = stripeNetworkClient
     )
 

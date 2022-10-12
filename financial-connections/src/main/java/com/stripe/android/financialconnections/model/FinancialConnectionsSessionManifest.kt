@@ -140,6 +140,9 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName(value = "is_stripe_direct")
     val isStripeDirect: Boolean? = null,
 
+    @SerialName(value = "accountholder_token")
+    val accountHolderToken: String? = null,
+
     @SerialName(value = "modal_customization")
     val modalCustomization: Map<String, Boolean>? = null,
 
