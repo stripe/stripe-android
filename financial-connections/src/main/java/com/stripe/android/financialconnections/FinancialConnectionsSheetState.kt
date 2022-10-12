@@ -10,7 +10,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
  *  Class containing all of the data needed to represent the screen.
  */
 internal data class FinancialConnectionsSheetState(
-    val initialArgs: FinancialConnectionsSheetActivityArgs,
+    val initialArgs: FinancialConnectionsSheetActivityArgs = emptyArgs(),
     val activityRecreated: Boolean = false,
     @PersistState val manifest: FinancialConnectionsSessionManifest? = null,
     @PersistState val webAuthFlowActive: Boolean = false,
@@ -26,6 +26,17 @@ internal data class FinancialConnectionsSheetState(
     constructor(args: FinancialConnectionsSheetActivityArgs) : this(
         initialArgs = args
     )
+
+    private companion object {
+        fun emptyArgs(): FinancialConnectionsSheetActivityArgs {
+            return FinancialConnectionsSheetActivityArgs.ForData(
+                FinancialConnectionsSheet.Configuration(
+                    financialConnectionsSessionClientSecret = "",
+                    publishableKey = ""
+                )
+            )
+        }
+    }
 }
 
 /**
@@ -51,7 +62,7 @@ internal sealed class FinancialConnectionsSheetViewEffect {
     ) : FinancialConnectionsSheetViewEffect()
 
     /**
-     * Finish [FinancialConnectionsSheetActivity] with the given FinancialConnectionsSheetActivityResult]
+     * Finish [FinancialConnectionsSheetActivity] with a given [FinancialConnectionsSheetActivityResult]
      */
     data class FinishWithResult(
         val result: FinancialConnectionsSheetActivityResult

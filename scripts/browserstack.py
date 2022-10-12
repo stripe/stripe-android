@@ -146,7 +146,7 @@ def executeTests(appUrl, testUrl):
          "enableSpoonFramework": False,
          "project": "Mobile Payments",
          "shards": {
-            "numberOfShards": 4,
+            "numberOfShards": 5,
             "mapping": [
                 {
                    "name": "Shard 1",
@@ -167,6 +167,11 @@ def executeTests(appUrl, testUrl):
                    "name": "Shard 4",
                    "strategy": "class",
                    "values": ["com.stripe.android.TestMultiStepFieldsReloaded"]
+                },
+                {
+                   "name": "Shard 5",
+                   "strategy": "class",
+                   "values": ["com.stripe.android.TestLink"]
                 },
             ]
          }

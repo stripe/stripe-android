@@ -59,7 +59,7 @@ class TestMultiStepFieldsReloaded {
         Billing.Off,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
-        automatic = Automatic.On,
+        automatic = Automatic.Off,
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = null,
