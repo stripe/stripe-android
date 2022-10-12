@@ -31,6 +31,26 @@ class PollingViewModelTest {
     }
 
     @Test
+    fun `Remaining time is updated every second`() = runBlocking {
+        val timeLimit = 5.minutes
+
+        val viewModel = createPollingViewModel(
+            timeLimit = timeLimit,
+            dispatcher = testDispatcher,
+        )
+
+        assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(timeLimit)
+
+        testDispatcher.scheduler.advanceTimeBy(1.seconds.inWholeMilliseconds + 1)
+
+        assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(timeLimit - 1.seconds)
+
+        testDispatcher.scheduler.advanceTimeBy(1.seconds.inWholeMilliseconds)
+
+        assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(timeLimit - 2.seconds)
+    }
+
+    @Test
     fun `Reflects cancellation in UI state`() = runBlocking {
         val fakePoller = FakeIntentStatusPoller()
 

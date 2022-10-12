@@ -136,9 +136,9 @@ internal class PollingViewModel @Inject constructor(
     }
 
     private suspend fun observeCountdown(timeLimit: Duration) {
-        countdownFlow(timeLimit).collect { secondsRemaining ->
+        countdownFlow(timeLimit).collect { duration ->
             _uiState.update {
-                it.copy(durationRemaining = secondsRemaining)
+                it.copy(durationRemaining = duration)
             }
         }
     }
@@ -168,9 +168,9 @@ private fun countdownFlow(duration: Duration) = flow {
     var remainingDuration = duration
     emit(remainingDuration)
 
-    while (remainingDuration.inWholeSeconds > 0) {
+    while (remainingDuration > ZERO) {
         delay(1.seconds)
-        remainingDuration = duration.minus(1.seconds)
+        remainingDuration -= 1.seconds
         emit(remainingDuration)
     }
 }
