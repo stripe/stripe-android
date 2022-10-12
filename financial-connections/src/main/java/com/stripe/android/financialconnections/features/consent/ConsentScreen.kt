@@ -164,12 +164,18 @@ private fun ConsentMainContent(
                     .verticalScroll(scrollState)
                     .padding(24.dp)
             ) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = state.title.toText().toString(),
-                    textAlign = TextAlign.Center,
-                    color = FinancialConnectionsTheme.colors.textPrimary,
-                    style = FinancialConnectionsTheme.typography.subtitle
+                AnnotatedText(
+                    text = state.title,
+                    onClickableTextClick = { onClickableTextClick(it) },
+                    defaultStyle = FinancialConnectionsTheme.typography.subtitle,
+                    annotationStyles = mapOf(
+                        StringAnnotation.BOLD to FinancialConnectionsTheme.typography.heading
+                            .toSpanStyle()
+                            .copy(color = FinancialConnectionsTheme.colors.textSecondary),
+                        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                            .toSpanStyle()
+                            .copy(color = FinancialConnectionsTheme.colors.textBrand),
+                    )
                 )
                 Spacer(modifier = Modifier.size(24.dp))
                 state.bullets.forEach { (icon, text) ->

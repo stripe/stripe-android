@@ -7,12 +7,14 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.features.MarkdownParser
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,6 +31,9 @@ internal class ConsentViewModel @Inject constructor(
         logErrors()
         viewModelScope.launch {
             val manifest = getManifest()
+            val result = MarkdownParser.toSpanned(
+                "this **is** some markdown with a [Link text Here](https://link-url-here.org)"
+            )
             setState {
                 copy(
                     manualEntryEnabled = manifest.allowManualEntry,
@@ -39,7 +44,7 @@ internal class ConsentViewModel @Inject constructor(
                     dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest),
                     stripeToSUrl = FinancialConnectionsUrlResolver.getStripeTOSUrl(manifest),
                     privacyCenterUrl = FinancialConnectionsUrlResolver.getPrivacyCenterUrl(manifest),
-                    title = ConsentTextBuilder.getConsentTitle(manifest),
+                    title = TextResource.Text(result),
                     bullets = ConsentTextBuilder.getBullets(manifest),
                     requestedDataTitle = ConsentTextBuilder.getDataRequestedTitle(manifest),
                     requestedDataBullets = ConsentTextBuilder.getRequestedDataBullets(manifest)
