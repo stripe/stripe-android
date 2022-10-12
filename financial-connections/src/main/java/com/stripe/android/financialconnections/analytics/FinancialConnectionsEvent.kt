@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.analytics
 
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 
@@ -28,7 +29,33 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class Complete(
+        exception: Throwable?,
+        connectedAccounts: Int?
+    ) : FinancialConnectionsEvent(
+        name = "complete",
+        mapOf("num_linked_accounts" to connectedAccounts?.toString())
+            .plus(exception?.toEventParams() ?: emptyMap())
+            .filterNotNullValues()
+    )
+
     override fun toString(): String {
         return "FinancialConnectionsEvent(name='$name', params=$params)"
+    }
+}
+
+private fun Throwable.toEventParams(): Map<String, String?> {
+    return when (this) {
+        is StripeException -> mapOf(
+            "error_type" to (stripeError?.type ?: this::class.toString()),
+            "error_message" to (stripeError?.message ?: this.message),
+            "code" to (stripeError?.code ?: this.statusCode.toString())
+        )
+
+        else -> mapOf(
+            "error_type" to this::class.toString(),
+            "error_message" to this.message,
+            "code" to null
+        )
     }
 }

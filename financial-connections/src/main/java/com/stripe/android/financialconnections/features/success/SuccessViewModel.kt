@@ -8,6 +8,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
@@ -63,7 +64,20 @@ internal class SuccessViewModel @Inject constructor(
             onFail = { logger.error("Error retrieving payload", it) },
             onSuccess = { eventTracker.track(PaneLoaded(NextPane.SUCCESS)) }
         )
-        onAsync(SuccessState::completeSession, onFail = {
+        onAsync(SuccessState::completeSession, onSuccess = {
+            eventTracker.track(
+                Complete(
+                    connectedAccounts = it.accounts.data.count(),
+                    exception = null
+                )
+            )
+        }, onFail = {
+            eventTracker.track(
+                Complete(
+                    connectedAccounts = null,
+                    exception = it
+                )
+            )
             logger.error("Error completing session", it)
         })
     }

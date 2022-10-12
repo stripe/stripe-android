@@ -17,6 +17,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
@@ -48,7 +49,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val uriComparator: UriComparator,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
-    private val financialConnectionsAnalyticsTracker: FinancialConnectionsAnalyticsTracker,
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
@@ -158,6 +159,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             kotlin
                 .runCatching { completeFinancialConnectionsSession() }
                 .onSuccess { session ->
+                    eventTracker.track(
+                        Complete(
+                            exception = null,
+                            connectedAccounts = session.accounts.data.count()
+                        )
+                    )
                     when {
                         session.accounts.data.isNotEmpty() ||
                             session.paymentAccount != null ||
@@ -179,6 +186,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 }
                 .onFailure { completeSessionError ->
                     logger.error("Error completing session before closing", completeSessionError)
+                    eventTracker.track(
+                        Complete(
+                            exception = completeSessionError,
+                            connectedAccounts = null
+                        )
+                    )
                     setState {
                         copy(
                             viewEffect = Finish(
@@ -192,7 +205,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     fun onPaneLaunched(pane: NextPane) {
         viewModelScope.launch {
-            financialConnectionsAnalyticsTracker.track(
+            eventTracker.track(
                 FinancialConnectionsEvent.PaneLaunched(pane)
             )
         }
