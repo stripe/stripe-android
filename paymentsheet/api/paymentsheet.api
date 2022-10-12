@@ -1528,12 +1528,28 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/polling
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/paymentsheet/paymentdatacollection/polling/DefaultTimeProvider_Factory : dagger/internal/Factory {
+	public fun <init> ()V
+	public static fun create ()Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/DefaultTimeProvider_Factory;
+	public fun get ()Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/DefaultTimeProvider;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance ()Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/DefaultTimeProvider;
+}
+
 public final class com/stripe/android/paymentsheet/paymentdatacollection/polling/PollingContract$Args$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/PollingContract$Args;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/PollingContract$Args;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/paymentdatacollection/polling/PollingViewModel_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/PollingViewModel_Factory;
+	public fun get ()Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/PollingViewModel;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/PollingViewModel$Args;Lcom/stripe/android/polling/IntentStatusPoller;Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/TimeProvider;Lkotlinx/coroutines/CoroutineDispatcher;Landroidx/lifecycle/SavedStateHandle;)Lcom/stripe/android/paymentsheet/paymentdatacollection/polling/PollingViewModel;
 }
 
 public final class com/stripe/android/paymentsheet/repositories/CustomerApiRepository_Factory : dagger/internal/Factory {
