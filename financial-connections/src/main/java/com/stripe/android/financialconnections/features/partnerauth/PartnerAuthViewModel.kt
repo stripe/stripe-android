@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOA
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -46,14 +47,14 @@ internal class PartnerAuthViewModel @Inject constructor(
         suspend {
             val manifest = getManifest()
             val authSession = createAuthorizationSession(
-                institution = manifest.activeInstitution!!,
+                institution = requireNotNull(manifest.activeInstitution),
                 allowManualEntry = manifest.allowManualEntry
             )
             Payload(
                 flow = authSession.flow,
                 showPrepane = authSession.flow?.isOAuth() ?: true,
                 showPartnerDisclosure = authSession.showPartnerDisclosure ?: false,
-                institutionName = manifest.activeInstitution.name
+                institution = manifest.activeInstitution
             )
         }.execute {
             copy(payload = it)
@@ -194,7 +195,7 @@ internal data class PartnerAuthState(
     val authenticationStatus: Async<String> = Uninitialized
 ) : MavericksState {
     data class Payload(
-        val institutionName: String,
+        val institution: FinancialConnectionsInstitution,
         val flow: Flow?,
         val showPartnerDisclosure: Boolean,
         val showPrepane: Boolean

@@ -27,8 +27,22 @@ internal data class FinancialConnectionsInstitution(
 
     @SerialName(value = "name") val name: String,
 
+    @SerialName(value = "icon")
+    val icon: Image? = null,
+
+    @SerialName(value = "logo")
+    val logo: Image? = null,
+
     @SerialName(value = "featured_order") val featuredOrder: Int? = null,
 
     @SerialName(value = "url") val url: String? = null
+
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class Image(
+
+    @SerialName(value = "default") val default: String
 
 ) : Parcelable
