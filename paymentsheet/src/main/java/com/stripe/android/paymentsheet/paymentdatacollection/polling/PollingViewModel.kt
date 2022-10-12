@@ -69,9 +69,7 @@ internal class PollingViewModel @Inject constructor(
         }
 
         viewModelScope.launch(dispatcher) {
-            // Wait until the deadline arrives
-            // TODO: Need to use timeRemaining?
-            delay(args.timeLimit)
+            delay(timeRemaining)
             handleTimeLimitReached()
         }
 
