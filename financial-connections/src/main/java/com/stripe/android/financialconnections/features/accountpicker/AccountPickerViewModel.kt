@@ -11,7 +11,9 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLinkAccounts
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAccountsSucceeded
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
@@ -29,6 +31,8 @@ import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.utils.measureTimeMillis
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -54,9 +58,18 @@ internal class AccountPickerViewModel @Inject constructor(
             val state = awaitState()
             val manifest = getManifest()
             val activeInstitution = manifest.activeInstitution
-            val partnerAccountList = pollAuthorizationSessionAccounts(
-                manifest = manifest,
-                canRetry = state.canRetry
+            val activeAuthSession = requireNotNull(manifest.activeAuthSession)
+            val (partnerAccountList, millis) = measureTimeMillis {
+                pollAuthorizationSessionAccounts(
+                    manifest = manifest,
+                    canRetry = state.canRetry
+                )
+            }
+            eventTracker.track(
+                PollAccountsSucceeded(
+                    authSessionId = activeAuthSession.id,
+                    duration = millis
+                )
             )
             val accounts = partnerAccountList.data.map { account ->
                 AccountPickerState.PartnerAccountUI(
@@ -66,7 +79,6 @@ internal class AccountPickerViewModel @Inject constructor(
                 )
             }.sortedBy { it.enabled }
             val (preselectedIds, selectionMode) = selectionConfig(accounts, manifest)
-            val activeAuthSession = requireNotNull(manifest.activeAuthSession)
             AccountPickerState.Payload(
                 skipAccountSelection = activeAuthSession.skipAccountSelection == true,
                 accounts = accounts,
@@ -174,6 +186,9 @@ internal class AccountPickerViewModel @Inject constructor(
     }
 
     fun onSubmit() {
+        viewModelScope.launch {
+            eventTracker.track(ClickLinkAccounts(NextPane.ACCOUNT_PICKER))
+        }
         withState { state ->
             state.payload()?.let { payload ->
                 submitAccounts(payload.selectedIds, updateLocalCache = true)

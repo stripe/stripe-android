@@ -72,13 +72,35 @@ internal sealed class FinancialConnectionsEvent(
     class SearchSucceeded(
         pane: NextPane,
         query: String,
+        duration: Long,
         resultCount: Int
     ) : FinancialConnectionsEvent(
         name = "search.succeeded",
         mapOf(
             "pane" to pane.value,
             "query" to query,
+            "duration" to duration.toString(),
             "result_count" to resultCount.toString()
+        ).filterNotNullValues()
+    )
+
+    class PollAccountsSucceeded(
+        authSessionId: String,
+        duration: Long
+    ) : FinancialConnectionsEvent(
+        name = "polling.accounts.success",
+        mapOf(
+            "authSessionId" to authSessionId,
+            "duration" to duration.toString(),
+        ).filterNotNullValues()
+    )
+
+    class ClickLinkAccounts(
+        pane: NextPane,
+    ) : FinancialConnectionsEvent(
+        name = "click.link_accounts",
+        mapOf(
+            "pane" to pane.value,
         ).filterNotNullValues()
     )
 

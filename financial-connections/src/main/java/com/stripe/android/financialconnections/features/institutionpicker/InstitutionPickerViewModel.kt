@@ -28,6 +28,7 @@ import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
+import com.stripe.android.financialconnections.utils.measureTimeMillis
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import javax.inject.Inject
@@ -82,18 +83,21 @@ internal class InstitutionPickerViewModel @Inject constructor(
         setState { copy(query = query) }
         searchJob += suspend {
             delay(SEARCH_DEBOUNCE_MS)
-            searchInstitutions(
-                clientSecret = configuration.financialConnectionsSessionClientSecret,
-                query = query
-            ).also {
-                eventTracker.track(
-                    SearchSucceeded(
-                        pane = NextPane.INSTITUTION_PICKER,
-                        query = query,
-                        resultCount = it.data.count()
-                    )
+            val (result, millis) = measureTimeMillis {
+                searchInstitutions(
+                    clientSecret = configuration.financialConnectionsSessionClientSecret,
+                    query = query
                 )
             }
+            eventTracker.track(
+                SearchSucceeded(
+                    pane = NextPane.INSTITUTION_PICKER,
+                    query = query,
+                    duration = millis,
+                    resultCount = result.data.count()
+                )
+            )
+            result
         }.execute {
             copy(searchInstitutions = if (it.isCancellationError()) Loading() else it)
         }
