@@ -98,7 +98,7 @@ private fun InstitutionPickerContent(
     searchMode: Boolean,
     query: String,
     onQueryChanged: (String) -> Unit,
-    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
+    onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     onCancelSearchClick: () -> Unit,
     onCloseClick: () -> Unit,
     onBackClick: () -> Unit,
@@ -137,7 +137,7 @@ private fun LoadedContent(
     onSearchFocused: () -> Unit,
     onCancelSearchClick: () -> Unit,
     institutionsProvider: () -> Async<InstitutionResponse>,
-    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
+    onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     payload: Async<Payload>,
     onManualEntryClick: () -> Unit
 ) {
@@ -223,7 +223,7 @@ private fun FinancialConnectionsSearchRow(
 @Composable
 private fun SearchInstitutionsList(
     institutionsProvider: () -> Async<InstitutionResponse>,
-    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
+    onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     query: String,
     onManualEntryClick: () -> Unit,
     manualEntryEnabled: Boolean
@@ -263,7 +263,7 @@ private fun SearchInstitutionsList(
                         }
                     } else {
                         items(institutions().data, key = { it.id }) { institution ->
-                            InstitutionResultTile(onInstitutionSelected, institution)
+                            InstitutionResultTile({ onInstitutionSelected(it, false) }, institution)
                         }
                     }
                     item {
@@ -375,7 +375,7 @@ private fun InstitutionResultTile(
 @Composable
 private fun FeaturedInstitutionsGrid(
     payload: Async<Payload>,
-    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit
+    onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -407,7 +407,7 @@ private fun FeaturedInstitutionsGrid(
                                 color = FinancialConnectionsTheme.colors.borderDefault,
                                 shape = RoundedCornerShape(4.dp)
                             )
-                            .clickable { onInstitutionSelected(institution) }
+                            .clickable { onInstitutionSelected(institution, true) }
                     ) {
                         StripeImage(
                             modifier = Modifier
@@ -458,7 +458,7 @@ internal fun SearchModeSearchingInstitutions(
             searchMode = state.searchMode,
             query = state.query,
             onQueryChanged = {},
-            onInstitutionSelected = {},
+            onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {},
@@ -479,7 +479,7 @@ internal fun SearchModeWithResults(
             searchMode = state.searchMode,
             query = state.query,
             onQueryChanged = {},
-            onInstitutionSelected = {},
+            onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {},
@@ -500,7 +500,7 @@ internal fun SearchModeNoResults(
             searchMode = state.searchMode,
             query = state.query,
             onQueryChanged = {},
-            onInstitutionSelected = {},
+            onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {},
@@ -521,7 +521,7 @@ internal fun SearchModeFailed(
             searchMode = state.searchMode,
             query = state.query,
             onQueryChanged = {},
-            onInstitutionSelected = {},
+            onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {},
@@ -542,7 +542,7 @@ internal fun SearchModeNoQuery(
             searchMode = state.searchMode,
             query = state.query,
             onQueryChanged = {},
-            onInstitutionSelected = {},
+            onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {},
@@ -563,7 +563,7 @@ internal fun NoSearchMode(
             searchMode = state.searchMode,
             query = state.query,
             onQueryChanged = {},
-            onInstitutionSelected = {},
+            onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {},

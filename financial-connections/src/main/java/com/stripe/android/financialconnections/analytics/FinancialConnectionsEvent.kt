@@ -62,6 +62,26 @@ internal sealed class FinancialConnectionsEvent(
         emptyMap()
     )
 
+    class InstitutionSelected(pane: NextPane, fromFeatured: Boolean) : FinancialConnectionsEvent(
+        name = if (fromFeatured) "search.featured_institution_selected" else "search.search_result_selected",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class SearchSucceeded(
+        pane: NextPane,
+        query: String,
+        resultCount: Int
+    ) : FinancialConnectionsEvent(
+        name = "search.succeeded",
+        mapOf(
+            "pane" to pane.value,
+            "query" to query,
+            "result_count" to resultCount.toString()
+        ).filterNotNullValues()
+    )
+
     object ConsentAgree : FinancialConnectionsEvent(
         name = "click.agree",
         mapOf("pane" to NextPane.CONSENT.value)

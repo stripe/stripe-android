@@ -13,7 +13,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.InstitutionSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.SearchSucceeded
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SearchInstitutions
@@ -70,9 +72,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
             onSuccess = { eventTracker.track(PaneLoaded(NextPane.INSTITUTION_PICKER)) },
             onFail = { logger.error("Error fetching initial payload", it) }
         )
-        onAsync(InstitutionPickerState::searchInstitutions, onFail = {
-            logger.error("Error searching institutions", it)
-        })
+        onAsync(
+            InstitutionPickerState::searchInstitutions,
+            onFail = { logger.error("Error searching institutions", it) }
+        )
     }
 
     fun onQueryChanged(query: String) {
@@ -82,7 +85,15 @@ internal class InstitutionPickerViewModel @Inject constructor(
             searchInstitutions(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 query = query
-            )
+            ).also {
+                eventTracker.track(
+                    SearchSucceeded(
+                        pane = NextPane.INSTITUTION_PICKER,
+                        query = query,
+                        resultCount = it.data.count()
+                    )
+                )
+            }
         }.execute {
             copy(searchInstitutions = if (it.isCancellationError()) Loading() else it)
         }
@@ -99,9 +110,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
         else -> false
     }
 
-    fun onInstitutionSelected(institution: FinancialConnectionsInstitution) {
+    fun onInstitutionSelected(institution: FinancialConnectionsInstitution, fromFeatured: Boolean) {
         clearSearch()
         suspend {
+            eventTracker.track(InstitutionSelected(NextPane.INSTITUTION_PICKER, fromFeatured))
             // updates local manifest with active institution
             updateLocalManifest { it.copy(activeInstitution = institution) }
             // navigate to next step
