@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -179,6 +180,26 @@ class PollingViewModelTest {
 
         val remainingTime = timeLimit - alreadyPassed
         assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(remainingTime)
+    }
+
+    @Test
+    fun `Stops poller when encountering failed result`() = runTest(testDispatcher) {
+        val fakePoller = FakeIntentStatusPoller()
+
+        val viewModel = createPollingViewModel(
+            timeLimit = 5.minutes,
+            poller = fakePoller,
+            initialDelay = ZERO,
+            dispatcher = testDispatcher,
+        )
+
+        assertThat(fakePoller.isActive).isTrue()
+
+        // Anything that's not succeeded or requires_action is considered failure
+        fakePoller.emitNextPollResult(StripeIntent.Status.RequiresPaymentMethod)
+
+        assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Failed)
+        assertThat(fakePoller.isActive).isFalse()
     }
 }
 

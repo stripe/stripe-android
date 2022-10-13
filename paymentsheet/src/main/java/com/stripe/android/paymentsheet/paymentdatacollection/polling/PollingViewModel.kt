@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -145,7 +146,14 @@ internal class PollingViewModel @Inject constructor(
 
     private suspend fun observePollingResults() {
         poller.state
-            .map { it?.toPollingState() ?: PollingState.Active }
+            .map { intentStatus ->
+                intentStatus?.toPollingState() ?: PollingState.Active
+            }
+            .onEach { pollingState ->
+                if (pollingState == PollingState.Failed) {
+                    poller.stopPolling()
+                }
+            }
             .collect(this::updatePollingState)
     }
 
