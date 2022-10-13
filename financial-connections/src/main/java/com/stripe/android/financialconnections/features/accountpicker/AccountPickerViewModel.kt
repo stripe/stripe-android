@@ -95,7 +95,9 @@ internal class AccountPickerViewModel @Inject constructor(
                 institutionSkipAccountSelection = activeAuthSession.institutionSkipAccountSelection == true,
                 businessName = manifest.businessName,
                 stripeDirect = manifest.isStripeDirect ?: false
-            )
+            ).also {
+                eventTracker.track(PaneLoaded(NextPane.ACCOUNT_PICKER))
+            }
         }.execute { copy(payload = it) }
     }
 
@@ -127,7 +129,6 @@ internal class AccountPickerViewModel @Inject constructor(
                 eventTracker.track(Error(it))
                 logger.error("Error retrieving accounts", it)
             },
-            onSuccess = { eventTracker.track(PaneLoaded(NextPane.ACCOUNT_PICKER)) }
         )
         onAsync(
             AccountPickerState::selectAccounts,

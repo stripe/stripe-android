@@ -7,8 +7,6 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.GetManifest
 import java.util.Locale
-import java.util.UUID
-import javax.inject.Inject
 
 /**
  * Event tracker for Financial Connections.
