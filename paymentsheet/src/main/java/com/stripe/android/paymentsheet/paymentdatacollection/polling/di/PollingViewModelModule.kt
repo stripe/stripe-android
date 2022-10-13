@@ -17,13 +17,13 @@ import dagger.Provides
 import javax.inject.Named
 
 @Module(subcomponents = [PollingViewModelSubcomponent::class])
-internal abstract class PollingViewModelModule {
+internal interface PollingViewModelModule {
 
     @Binds
-    abstract fun bindsIntentStatusPoller(impl: DefaultIntentStatusPoller): IntentStatusPoller
+    fun bindsIntentStatusPoller(impl: DefaultIntentStatusPoller): IntentStatusPoller
 
     @Binds
-    abstract fun bindsTimeProvider(impl: DefaultTimeProvider): TimeProvider
+    fun bindsTimeProvider(impl: DefaultTimeProvider): TimeProvider
 
     companion object {
 

@@ -63,7 +63,7 @@ internal fun PollingScreen(
     PollingScreen(
         uiState = uiState,
         onCancel = viewModel::handleCancel,
-        modifier = modifier.fillMaxHeight(0.5f),
+        modifier = modifier.fillMaxHeight(fraction = 0.5f),
     )
 }
 
@@ -88,28 +88,6 @@ private fun PollingScreen(
                 onCancel = onCancel,
                 modifier = modifier,
             )
-        }
-    }
-}
-
-@Composable
-private fun rememberActivePollingMessage(
-    remainingDuration: Duration,
-): AnnotatedString {
-    val context = LocalContext.current
-    val primaryColor = MaterialTheme.colors.primary
-
-    return remember(remainingDuration) {
-        val remainingTime = remainingDuration.toComponents { minutes, seconds, _ ->
-            val paddedSeconds = seconds.toString().padStart(length = 2, padChar = '0')
-            "$minutes:$paddedSeconds"
-        }
-
-        val message = context.getString(R.string.upi_polling_message, remainingTime)
-
-        buildAnnotatedString {
-            append(message.removeSuffix(remainingTime))
-            append(AnnotatedString(remainingTime, SpanStyle(primaryColor)))
         }
     }
 }
@@ -198,6 +176,28 @@ private fun FailedPolling(
     }
 }
 
+@Composable
+private fun rememberActivePollingMessage(
+    remainingDuration: Duration,
+): AnnotatedString {
+    val context = LocalContext.current
+    val primaryColor = MaterialTheme.colors.primary
+
+    return remember(remainingDuration) {
+        val remainingTime = remainingDuration.toComponents { minutes, seconds, _ ->
+            val paddedSeconds = seconds.toString().padStart(length = 2, padChar = '0')
+            "$minutes:$paddedSeconds"
+        }
+
+        val message = context.getString(R.string.upi_polling_message, remainingTime)
+
+        buildAnnotatedString {
+            append(message.removeSuffix(remainingTime))
+            append(AnnotatedString(remainingTime, SpanStyle(primaryColor)))
+        }
+    }
+}
+
 private class PollingLifecycleObserver(
     private val viewModel: PollingViewModel,
 ) : DefaultLifecycleObserver {
@@ -214,7 +214,7 @@ private class PollingLifecycleObserver(
 
 @Preview(heightDp = 400)
 @Composable
-private fun PollingScreenPreview_Active() {
+private fun ActivePollingScreenPreview() {
     PaymentsTheme {
         Surface {
             PollingScreen(
@@ -230,7 +230,7 @@ private fun PollingScreenPreview_Active() {
 
 @Preview(heightDp = 400)
 @Composable
-private fun PollingScreenPreview_Error() {
+private fun FailedPollingScreenPreview() {
     PaymentsTheme {
         Surface {
             PollingScreen(
