@@ -40,6 +40,7 @@ import com.stripe.android.financialconnections.features.common.PartnerCallout
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.LocalImageLoader
@@ -71,7 +72,8 @@ internal fun PartnerAuthScreen() {
         state = state.value,
         onContinueClick = viewModel::onLaunchAuthClick,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
-        onCloseClick = parentViewModel::onCloseNoConfirmationClick,
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.PARTNER_AUTH) },
+        onBackClick = { parentViewModel.onBackClick(NextPane.PARTNER_AUTH) },
         onEnterDetailsManually = viewModel::onEnterDetailsManuallyClick,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
@@ -84,12 +86,14 @@ private fun PartnerAuthScreenContent(
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onCloseClick: () -> Unit,
+    onBackClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
                 onCloseClick = onCloseClick,
+                onBackClick = onBackClick,
                 showBack = state.canNavigateBack
             )
         }
@@ -266,7 +270,8 @@ internal fun PrepaneContentPreview() {
             onSelectAnotherBank = {},
             onCloseClick = {},
             onEnterDetailsManually = {},
-            onCloseFromErrorClick = {}
+            onCloseFromErrorClick = {},
+            onBackClick = {}
         )
     }
 }

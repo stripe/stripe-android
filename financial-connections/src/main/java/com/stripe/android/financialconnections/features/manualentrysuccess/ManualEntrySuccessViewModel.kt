@@ -37,7 +37,8 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
     }
 
     private fun logErrors() {
-        onAsync(ManualEntrySuccessState::completeSession,
+        onAsync(
+            ManualEntrySuccessState::completeSession,
             onSuccess = {
                 eventTracker.track(
                     Complete(

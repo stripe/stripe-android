@@ -72,14 +72,14 @@ internal class SuccessViewModel @Inject constructor(
                 )
             )
         }, onFail = {
-            eventTracker.track(
-                Complete(
-                    connectedAccounts = null,
-                    exception = it
+                eventTracker.track(
+                    Complete(
+                        connectedAccounts = null,
+                        exception = it
+                    )
                 )
-            )
-            logger.error("Error completing session", it)
-        })
+                logger.error("Error completing session", it)
+            })
     }
 
     fun onDoneClick() {

@@ -55,6 +55,7 @@ import com.stripe.android.financialconnections.features.common.LoadingShimmerEff
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.LocalImageLoader
@@ -83,9 +84,10 @@ internal fun InstitutionPickerScreen() {
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCancelSearchClick = viewModel::onCancelSearchClick,
-        onCloseClick = parentViewModel::onCloseNoConfirmationClick,
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.INSTITUTION_PICKER) },
+        onBackClick = { parentViewModel.onBackClick(NextPane.INSTITUTION_PICKER) },
         onSearchFocused = viewModel::onSearchFocused,
-        onManualEntryClick = viewModel::onManualEntryClick
+        onManualEntryClick = viewModel::onManualEntryClick,
     )
 }
 
@@ -99,6 +101,7 @@ private fun InstitutionPickerContent(
     onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
     onCancelSearchClick: () -> Unit,
     onCloseClick: () -> Unit,
+    onBackClick: () -> Unit,
     onSearchFocused: () -> Unit,
     onManualEntryClick: () -> Unit
 ) {
@@ -106,7 +109,8 @@ private fun InstitutionPickerContent(
         topBar = {
             if (!searchMode) {
                 FinancialConnectionsTopAppBar(
-                    onCloseClick = onCloseClick
+                    onCloseClick = onCloseClick,
+                    onBackClick = onBackClick
                 )
             }
         }
@@ -457,7 +461,8 @@ internal fun SearchModeSearchingInstitutions(
             onInstitutionSelected = {},
             onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {}
+            onSearchFocused = {},
+            onBackClick = {},
         ) {}
     }
 }
@@ -477,7 +482,8 @@ internal fun SearchModeWithResults(
             onInstitutionSelected = {},
             onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {}
+            onSearchFocused = {},
+            onBackClick = {},
         ) {}
     }
 }
@@ -497,7 +503,8 @@ internal fun SearchModeNoResults(
             onInstitutionSelected = {},
             onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {}
+            onSearchFocused = {},
+            onBackClick = {},
         ) {}
     }
 }
@@ -517,7 +524,8 @@ internal fun SearchModeFailed(
             onInstitutionSelected = {},
             onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {}
+            onSearchFocused = {},
+            onBackClick = {},
         ) {}
     }
 }
@@ -537,7 +545,8 @@ internal fun SearchModeNoQuery(
             onInstitutionSelected = {},
             onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {}
+            onSearchFocused = {},
+            onBackClick = {},
         ) {}
     }
 }
@@ -557,7 +566,8 @@ internal fun NoSearchMode(
             onInstitutionSelected = {},
             onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {}
+            onSearchFocused = {},
+            onBackClick = {},
         ) {}
     }
 }

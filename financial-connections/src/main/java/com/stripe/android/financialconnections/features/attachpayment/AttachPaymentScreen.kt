@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.exception.AccountNumberRetrievalE
 import com.stripe.android.financialconnections.features.common.AccountNumberRetrievalErrorContent
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -30,7 +31,8 @@ internal fun AttachPaymentScreen() {
     BackHandler(enabled = true) {}
     AttachPaymentContent(
         payload = state.value.payload,
-        onCloseClick = parentViewModel::onCloseWithConfirmationClick,
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(ATTACH_LINKED_PAYMENT_ACCOUNT) },
+        onBackClick = { parentViewModel.onBackClick(ATTACH_LINKED_PAYMENT_ACCOUNT) },
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
@@ -43,6 +45,7 @@ private fun AttachPaymentContent(
     payload: Async<AttachPaymentState.Payload>,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
+    onBackClick: () -> Unit,
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
@@ -50,6 +53,7 @@ private fun AttachPaymentContent(
         topBar = {
             FinancialConnectionsTopAppBar(
                 onCloseClick = onCloseClick,
+                onBackClick = onBackClick,
                 showBack = false
             )
         }
@@ -66,6 +70,7 @@ private fun AttachPaymentContent(
                         id = R.plurals.stripe_attachlinkedpaymentaccount_desc,
                         count = payload().accountsCount
                     )
+
                     else -> pluralStringResource(
                         id = R.plurals.stripe_attachlinkedpaymentaccount_desc,
                         count = payload().accountsCount,
@@ -73,6 +78,7 @@ private fun AttachPaymentContent(
                     )
                 }
             )
+
             is Fail -> ErrorContent(
                 error = payload.error,
                 onSelectAnotherBank = onSelectAnotherBank,
@@ -96,6 +102,7 @@ private fun ErrorContent(
             onSelectAnotherBank = onSelectAnotherBank,
             onEnterDetailsManually = onEnterDetailsManually
         )
+
         else -> UnclassifiedErrorContent(
             error = error,
             onCloseFromErrorClick = onCloseFromErrorClick
@@ -117,7 +124,8 @@ internal fun AttachPaymentScreenPreview() {
             onCloseClick = {},
             onEnterDetailsManually = {},
             onSelectAnotherBank = {},
-            onCloseFromErrorClick = {}
+            onCloseFromErrorClick = {},
+            onBackClick = {}
         )
     }
 }

@@ -33,6 +33,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -59,7 +60,8 @@ internal fun ManualEntryScreen() {
         onAccountEntered = viewModel::onAccountEntered,
         onAccountConfirmEntered = viewModel::onAccountConfirmEntered,
         onSubmit = viewModel::onSubmit,
-        onCloseClick = parentViewModel::onCloseNoConfirmationClick
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.MANUAL_ENTRY) },
+        onBackClick = { parentViewModel.onBackClick(NextPane.MANUAL_ENTRY) },
     )
 }
 
@@ -76,11 +78,17 @@ private fun ManualEntryContent(
     onAccountEntered: (String) -> Unit,
     onAccountConfirmEntered: (String) -> Unit,
     onSubmit: () -> Unit,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                onCloseClick = onCloseClick,
+                onBackClick = onBackClick
+            )
+        }
     ) {
         Column(
             Modifier.fillMaxSize()
@@ -225,8 +233,10 @@ internal fun ManualEntryScreenPreview() {
             onRoutingEntered = {},
             onAccountEntered = {},
             onAccountConfirmEntered = {},
-            onSubmit = {}
-        ) {}
+            onSubmit = {},
+            {},
+            {},
+        )
     }
 }
 
@@ -246,7 +256,9 @@ internal fun ManualEntryScreenErrorPreview() {
             onRoutingEntered = {},
             onAccountEntered = {},
             onAccountConfirmEntered = {},
-            onSubmit = {}
-        ) {}
+            onSubmit = {},
+            {},
+            {},
+        )
     }
 }

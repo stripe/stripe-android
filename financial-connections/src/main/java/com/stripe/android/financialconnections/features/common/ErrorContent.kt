@@ -352,7 +352,7 @@ private fun BadgedInstitutionImage(
 internal fun UnclassifiedErrorContentPreview() {
     FinancialConnectionsTheme {
         FinancialConnectionsScaffold(
-            topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
+            topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }, onBackClick = {}) }
         ) {
             UnclassifiedErrorContent(APIException()) {}
         }
@@ -364,7 +364,7 @@ internal fun UnclassifiedErrorContentPreview() {
 internal fun InstitutionPlannedDowntimeErrorContentPreview() {
     FinancialConnectionsTheme {
         FinancialConnectionsScaffold(
-            topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
+            topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }, onBackClick = {}) }
         ) {
             InstitutionPlannedDowntimeErrorContent(
                 exception = InstitutionPlannedException(
@@ -395,7 +395,7 @@ internal fun InstitutionPlannedDowntimeErrorContentPreview() {
 internal fun NoAccountsAvailableErrorContentPreview() {
     FinancialConnectionsTheme {
         FinancialConnectionsScaffold(
-            topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
+            topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }, onBackClick = {}) }
         ) {
             NoAccountsAvailableErrorContent(
                 exception = NoAccountsAvailableException(

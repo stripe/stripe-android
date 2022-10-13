@@ -17,6 +17,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarBack
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarClose
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
@@ -129,9 +131,25 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    fun onCloseWithConfirmationClick() = setState { copy(showCloseDialog = true) }
+    fun onCloseWithConfirmationClick(pane: NextPane) {
+        viewModelScope.launch {
+            eventTracker.track(ClickNavBarClose(pane))
+            setState { copy(showCloseDialog = true) }
+        }
+    }
 
-    fun onCloseNoConfirmationClick() = closeAuthFlow(closeAuthFlowError = null)
+    fun onBackClick(pane: NextPane) {
+        viewModelScope.launch {
+            eventTracker.track(ClickNavBarBack(pane))
+        }
+    }
+
+    fun onCloseNoConfirmationClick(pane: NextPane) {
+        viewModelScope.launch {
+            eventTracker.track(ClickNavBarClose(pane))
+        }
+        closeAuthFlow(closeAuthFlowError = null)
+    }
 
     fun onCloseFromErrorClick(error: Throwable) = closeAuthFlow(closeAuthFlowError = error)
 
@@ -143,7 +161,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      * [NavHost] handles back presses except for when backstack is empty, where it delegates
      * to the container activity. [onBackPressed] will be triggered on these empty backstack cases.
      */
-    fun onBackPressed() = closeAuthFlow(closeAuthFlowError = null)
+    fun onBackPressed() {
+        closeAuthFlow(closeAuthFlowError = null)
+    }
 
     /**
      * There's at least three types of close cases:
@@ -179,6 +199,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         closeAuthFlowError != null -> setState {
                             copy(viewEffect = Finish(Failed(closeAuthFlowError)))
                         }
+
                         else -> setState {
                             copy(viewEffect = Finish(Canceled))
                         }

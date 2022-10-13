@@ -36,6 +36,7 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
 import com.stripe.android.financialconnections.navigation.NavigationDirections.ManualEntrySuccess
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -57,7 +58,8 @@ internal fun ManualEntrySuccessScreen(
         microdepositVerificationMethod = ManualEntrySuccess.microdeposits(backStackEntry),
         last4 = ManualEntrySuccess.last4(backStackEntry),
         loading = completeAuthSessionAsync.value is Loading,
-        onCloseClick = parentViewModel::onCloseWithConfirmationClick,
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(NextPane.MANUAL_ENTRY_SUCCESS) },
+        onBackClick = { parentViewModel.onBackClick(NextPane.MANUAL_ENTRY_SUCCESS) },
         onDoneClick = viewModel::onSubmit
     )
 }
@@ -68,13 +70,15 @@ internal fun ManualEntrySuccessContent(
     last4: String?,
     loading: Boolean,
     onCloseClick: () -> Unit,
+    onBackClick: () -> Unit,
     onDoneClick: () -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
                 onCloseClick = onCloseClick,
-                showBack = false
+                onBackClick = onBackClick,
+                showBack = false,
             )
         }
     ) {
@@ -131,13 +135,16 @@ internal fun resolveText(
         last4 != null -> stringResource(R.string.stripe_manualentrysuccess_desc, last4)
         else -> stringResource(R.string.stripe_manualentrysuccess_desc_noaccount)
     }
+
     MicrodepositVerificationMethod.DESCRIPTOR_CODE -> when {
         last4 != null -> stringResource(
             R.string.stripe_manualentrysuccess_desc_descriptorcode,
             last4
         )
+
         else -> stringResource(R.string.stripe_manualentrysuccess_desc_noaccount_descriptorcode)
     }
+
     MicrodepositVerificationMethod.UNKNOWN -> TODO()
 }
 
@@ -215,11 +222,13 @@ private fun buildTableRows(
             Triple("SMXXXX" to highlightColor, "$0.01" to rowColor, "ACH CREDIT" to rowColor),
             Triple("GROCERIES" to rowColor, "$56.12" to rowColor, "VISA" to rowColor)
         )
+
         MicrodepositVerificationMethod.AMOUNTS -> listOf(
             Triple("AMTS" to rowColor, "$0.XX" to highlightColor, "ACH CREDIT" to rowColor),
             Triple("AMTS" to rowColor, "$0.XX" to highlightColor, "ACH CREDIT" to rowColor),
             Triple("GROCERIES" to rowColor, "$56.12" to rowColor, "VISA" to rowColor)
         )
+
         MicrodepositVerificationMethod.UNKNOWN -> error("Unknown microdeposits type")
     }
 }
@@ -248,6 +257,7 @@ internal fun ManualEntrySuccessScreenPreviewAmount() {
             MicrodepositVerificationMethod.AMOUNTS,
             last4 = "1234",
             onCloseClick = {},
+            onBackClick = {},
             onDoneClick = {},
             loading = false
         )
@@ -262,6 +272,7 @@ internal fun ManualEntrySuccessScreenPreviewDescriptor() {
             MicrodepositVerificationMethod.DESCRIPTOR_CODE,
             last4 = "1234",
             onCloseClick = {},
+            onBackClick = {},
             onDoneClick = {},
             loading = false
         )
@@ -276,6 +287,7 @@ internal fun ManualEntrySuccessScreenPreviewAmountNoAccount() {
             MicrodepositVerificationMethod.AMOUNTS,
             last4 = null,
             onCloseClick = {},
+            onBackClick = {},
             onDoneClick = {},
             loading = false
         )
@@ -290,6 +302,7 @@ internal fun ManualEntrySuccessScreenPreviewDescriptorNoAccount() {
             MicrodepositVerificationMethod.DESCRIPTOR_CODE,
             last4 = null,
             onCloseClick = {},
+            onBackClick = {},
             onDoneClick = {},
             loading = false
         )

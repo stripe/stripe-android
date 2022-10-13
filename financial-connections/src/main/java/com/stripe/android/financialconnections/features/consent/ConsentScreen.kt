@@ -39,6 +39,7 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.TextResource
@@ -81,7 +82,8 @@ internal fun ConsentScreen() {
         onContinueClick = viewModel::onContinueClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-        onCloseClick = parentViewModel::onCloseNoConfirmationClick
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.CONSENT) },
+        onBackClick = { parentViewModel.onBackClick(NextPane.CONSENT) },
     )
 }
 
@@ -116,7 +118,8 @@ private fun ConsentContent(
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     ModalBottomSheetLayout(
@@ -138,7 +141,8 @@ private fun ConsentContent(
                 state = state,
                 onClickableTextClick = onClickableTextClick,
                 onContinueClick = onContinueClick,
-                onCloseClick = onCloseClick
+                onCloseClick = onCloseClick,
+                onBackClick = onBackClick
             )
         }
     )
@@ -150,10 +154,16 @@ private fun ConsentMainContent(
     state: ConsentState,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                onCloseClick = onCloseClick,
+                onBackClick = onBackClick
+            )
+        }
     ) {
         Column(
             Modifier.fillMaxSize()
@@ -364,7 +374,8 @@ internal fun ContentPreview(
             onContinueClick = {},
             onClickableTextClick = {},
             onConfirmModalClick = {},
-            onCloseClick = {}
+            onCloseClick = {},
+            onBackClick = {},
         )
     }
 }
@@ -384,7 +395,8 @@ internal fun ContentManualEntryPlusMicrodeposits(
             onContinueClick = {},
             onClickableTextClick = {},
             onConfirmModalClick = {},
-            onCloseClick = {}
+            onCloseClick = {},
+            onBackClick = {},
         )
     }
 }

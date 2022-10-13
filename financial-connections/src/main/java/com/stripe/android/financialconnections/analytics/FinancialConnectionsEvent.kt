@@ -29,6 +29,24 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class ClickNavBarBack(
+        pane: FinancialConnectionsSessionManifest.NextPane,
+    ) : FinancialConnectionsEvent(
+        name = "click.nav_bar.back",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class ClickNavBarClose(
+        pane: FinancialConnectionsSessionManifest.NextPane,
+    ) : FinancialConnectionsEvent(
+        name = "click.nav_bar.close",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
     class Complete(
         exception: Throwable?,
         connectedAccounts: Int?

@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.features.common.AccessibleDataCal
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutWithAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.TextResource
@@ -51,7 +52,8 @@ internal fun SuccessScreen() {
             loading = state.value.completeSession is Loading,
             onDoneClick = viewModel::onDoneClick,
             onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
-            onCloseClick = parentViewModel::onCloseWithConfirmationClick,
+            onCloseClick = { parentViewModel.onCloseWithConfirmationClick(NextPane.SUCCESS) },
+            onBackClick = { parentViewModel.onBackClick(NextPane.SUCCESS) },
             showLinkAnotherAccount = payload.showLinkAnotherAccount,
             institution = payload.institution
         )
@@ -70,13 +72,15 @@ private fun SuccessContent(
     onDoneClick: () -> Unit,
     onLinkAnotherAccountClick: () -> Unit,
     showLinkAnotherAccount: Boolean,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    onBackClick: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
                 onCloseClick = onCloseClick,
+                onBackClick = onBackClick,
                 showBack = false
             )
         }
@@ -223,6 +227,7 @@ internal fun SuccessScreenPreview() {
             ),
             loading = false,
             onDoneClick = {},
+            onBackClick = {},
             businessName = "Random business",
             onLinkAnotherAccountClick = {},
             showLinkAnotherAccount = true,
@@ -236,7 +241,7 @@ internal fun SuccessScreenPreview() {
                 icon = null,
                 logo = null,
                 mobileHandoffCapable = false
-            )
+            ),
         )
     }
 }

@@ -61,6 +61,7 @@ import com.stripe.android.financialconnections.features.common.NoAccountsAvailab
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.LocalImageLoader
@@ -85,7 +86,8 @@ internal fun AccountPickerScreen() {
         onAccountClicked = viewModel::onAccountClicked,
         onSubmit = viewModel::onSubmit,
         onSelectAnotherBank = viewModel::selectAnotherBank,
-        onCloseClick = parentViewModel::onCloseWithConfirmationClick,
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(NextPane.ACCOUNT_PICKER) },
+        onBackClick = { parentViewModel.onBackClick(NextPane.ACCOUNT_PICKER) },
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
         onSelectAllAccountsClicked = viewModel::onSelectAllAccountsClicked,
@@ -103,13 +105,15 @@ private fun AccountPickerContent(
     onEnterDetailsManually: () -> Unit,
     onLoadAccountsAgain: () -> Unit,
     onCloseClick: () -> Unit,
+    onBackClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
                 onCloseClick = onCloseClick,
-                showBack = false
+                showBack = false,
+                onBackClick = onBackClick
             )
         }
     ) {
@@ -544,6 +548,7 @@ internal fun AccountPickerPreviewMultiSelect() {
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
             onCloseFromErrorClick = {},
+            onBackClick = {},
             onSelectAllAccountsClicked = {}
         )
     }
@@ -566,6 +571,7 @@ internal fun AccountPickerPreviewSingleSelect() {
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
             onCloseFromErrorClick = {},
+            onBackClick = {},
             onSelectAllAccountsClicked = {}
         )
     }
@@ -588,6 +594,7 @@ internal fun AccountPickerPreviewDropdown() {
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
             onCloseFromErrorClick = {},
+            onBackClick = {},
             onSelectAllAccountsClicked = {}
         )
     }
