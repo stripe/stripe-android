@@ -55,8 +55,9 @@ class StripePaymentLauncher @AssistedInject internal constructor(
             .productUsage(productUsage)
             .build()
 
-    val authenticatorRegistry: PaymentAuthenticatorRegistry =
+    val authenticatorRegistry: PaymentAuthenticatorRegistry by lazy {
         paymentLauncherComponent.authenticatorRegistry
+    }
 
     @InjectorKey
     private val injectorKey: String =
