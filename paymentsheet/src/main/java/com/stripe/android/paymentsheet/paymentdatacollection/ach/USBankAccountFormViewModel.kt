@@ -4,7 +4,6 @@ import android.app.Application
 import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -137,14 +136,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
         set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 
-    fun registerFragment(fragment: Fragment) {
-        collectBankAccountLauncher = CollectBankAccountLauncher.create(
-            fragment,
-            ::handleCollectBankAccountResult
-        )
+    fun registerLauncher(launcher: CollectBankAccountLauncher) {
+        this.collectBankAccountLauncher = launcher
     }
 
-    @VisibleForTesting
     fun handleCollectBankAccountResult(result: CollectBankAccountResult) {
         hasLaunched = false
         when (result) {
@@ -484,7 +479,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     /**
-     * Arguments for launching [USBankAccountFormFragment]
+     * Arguments for creating [USBankAccountFormViewModel]
      *
      * @param formArgs The form arguments supplied by the payment sheet
      * @param isCompleteFlow Whether the payment should be completed, or the selected payment

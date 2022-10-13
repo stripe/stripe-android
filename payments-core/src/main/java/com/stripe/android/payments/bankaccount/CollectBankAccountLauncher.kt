@@ -2,7 +2,10 @@ package com.stripe.android.payments.bankaccount
 
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.fragment.app.Fragment
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
@@ -62,6 +65,22 @@ interface CollectBankAccountLauncher {
                     callback(it)
                 }
             )
+        }
+
+        @Composable
+        fun rememberLauncher(
+            callback: (CollectBankAccountResult) -> Unit
+        ): CollectBankAccountLauncher {
+            val launcher = rememberLauncherForActivityResult(
+                contract = CollectBankAccountContract(),
+                onResult = callback,
+            )
+
+            return remember {
+                StripeCollectBankAccountLauncher(
+                    hostActivityLauncher = launcher,
+                )
+            }
         }
     }
 }

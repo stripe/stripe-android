@@ -21,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.core.injection.InjectorKey
@@ -33,12 +32,11 @@ import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.databinding.FragmentAchBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getPMAddForm
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
-import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
 import com.stripe.android.paymentsheet.ui.Loading
 import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -200,10 +198,11 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             }
 
             if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
-                (activity as BaseSheetActivity<*>).formArgs = formArguments
-                Column(modifier = Modifier.padding(horizontal = horizontalPadding)) {
-                    AndroidViewBinding(FragmentAchBinding::inflate)
-                }
+                USBankAccountForm(
+                    args = formArguments,
+                    sheetViewModel = sheetViewModel,
+                    modifier = Modifier.padding(horizontal = horizontalPadding)
+                )
             } else {
                 PaymentMethodForm(
                     args = formArguments,
