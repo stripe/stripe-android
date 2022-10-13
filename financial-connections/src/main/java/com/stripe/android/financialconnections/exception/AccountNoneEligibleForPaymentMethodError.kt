@@ -3,10 +3,20 @@ package com.stripe.android.financialconnections.exception
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 
-internal class AccountNumberRetrievalException(
+internal class AccountNoneEligibleForPaymentMethodError(
     val allowManualEntry: Boolean,
+    val accountsCount: Int,
     val institution: FinancialConnectionsInstitution,
-    stripeException: StripeException
+    val merchantName: String,
+    stripeException: StripeException,
+) : FinancialConnectionsError(
+    name = "AccountNoneEligibleForPaymentMethodError",
+    stripeException = stripeException
+)
+
+abstract class FinancialConnectionsError(
+    val name: String,
+    stripeException: StripeException,
 ) : StripeException(
     stripeException.stripeError,
     stripeException.requestId,

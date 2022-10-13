@@ -13,7 +13,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.exception.AccountNumberRetrievalException
+import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
 import com.stripe.android.financialconnections.features.common.AccountNumberRetrievalErrorContent
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
@@ -97,7 +97,7 @@ private fun ErrorContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     when (error) {
-        is AccountNumberRetrievalException -> AccountNumberRetrievalErrorContent(
+        is AccountNumberRetrievalError -> AccountNumberRetrievalErrorContent(
             exception = error,
             onSelectAnotherBank = onSelectAnotherBank,
             onEnterDetailsManually = onEnterDetailsManually

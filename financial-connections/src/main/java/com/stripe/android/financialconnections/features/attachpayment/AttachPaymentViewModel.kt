@@ -8,6 +8,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAttachPaymentsSucceeded
 import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
@@ -67,12 +68,19 @@ internal class AttachPaymentViewModel @Inject constructor(
     private fun logErrors() {
         onAsync(
             AttachPaymentState::payload,
-            onFail = { logger.error("Error retrieving accounts to attach payment", it) },
+            onFail = {
+                logger.error("Error retrieving accounts to attach payment", it)
+                eventTracker.track(Error(it))
+            },
             onSuccess = { eventTracker.track(PaneLoaded(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT)) }
         )
-        onAsync(AttachPaymentState::linkPaymentAccount, onFail = {
-            logger.error("Error Attaching payment account", it)
-        })
+        onAsync(
+            AttachPaymentState::linkPaymentAccount,
+            onFail = {
+                eventTracker.track(Error(it))
+                logger.error("Error Attaching payment account", it)
+            }
+        )
     }
 
     fun onEnterDetailsManually() = navigationManager.navigate(NavigationDirections.manualEntry)

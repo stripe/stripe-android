@@ -13,6 +13,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.InstitutionSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.SearchSucceeded
@@ -71,11 +72,17 @@ internal class InstitutionPickerViewModel @Inject constructor(
         onAsync(
             InstitutionPickerState::payload,
             onSuccess = { eventTracker.track(PaneLoaded(NextPane.INSTITUTION_PICKER)) },
-            onFail = { logger.error("Error fetching initial payload", it) }
+            onFail = {
+                logger.error("Error fetching initial payload", it)
+                eventTracker.track(FinancialConnectionsEvent.Error(it))
+            }
         )
         onAsync(
             InstitutionPickerState::searchInstitutions,
-            onFail = { logger.error("Error searching institutions", it) }
+            onFail = {
+                logger.error("Error searching institutions", it)
+                eventTracker.track(FinancialConnectionsEvent.Error(it))
+            }
         )
     }
 

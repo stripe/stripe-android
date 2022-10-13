@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.financialconnections.exception.FinancialConnectionsError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 
@@ -133,6 +134,13 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class Error(
+        exception: Throwable
+    ) : FinancialConnectionsEvent(
+        name = if (exception is FinancialConnectionsError) "error.expected" else "error.unexpected",
+        params = exception.toEventParams().filterNotNullValues()
+    )
+
     object ConsentAgree : FinancialConnectionsEvent(
         name = "click.agree",
         mapOf("pane" to NextPane.CONSENT.value)
@@ -143,18 +151,23 @@ internal sealed class FinancialConnectionsEvent(
     }
 }
 
-private fun Throwable.toEventParams(): Map<String, String?> {
-    return when (this) {
-        is StripeException -> mapOf(
-            "error_type" to (stripeError?.type ?: this::class.toString()),
-            "error_message" to (stripeError?.message ?: this.message),
-            "code" to (stripeError?.code ?: this.statusCode.toString())
-        )
+private fun Throwable.toEventParams(): Map<String, String?> = when (this) {
+    is FinancialConnectionsError -> mapOf(
+        "error" to this.name,
+        "error_type" to this.name,
+        "error_message" to (stripeError?.message ?: this.message),
+        "code" to (stripeError?.code ?: this.statusCode.toString())
+    )
 
-        else -> mapOf(
-            "error_type" to this::class.toString(),
-            "error_message" to this.message,
-            "code" to null
-        )
-    }
+    is StripeException -> mapOf(
+        "error_type" to (stripeError?.type ?: this::class.java.simpleName),
+        "error_message" to (stripeError?.message ?: this.message)?.take(100),
+        "code" to (stripeError?.code ?: this.statusCode.toString())
+    )
+
+    else -> mapOf(
+        "error_type" to this::class.java.simpleName,
+        "error_message" to this.message?.take(100),
+        "code" to null
+    )
 }

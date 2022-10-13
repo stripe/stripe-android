@@ -5,8 +5,8 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.exception.InstitutionPlannedException
-import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
+import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
+import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.networking.FakeFinancialConnectionsManifestRepository
 import kotlinx.coroutines.test.runTest
@@ -54,8 +54,8 @@ internal class PostAuthorizationSessionTest {
         }
             .exceptionOrNull()!!
 
-        assertThat(result).isInstanceOf(InstitutionUnplannedException::class.java)
-        val exception = result as InstitutionUnplannedException
+        assertThat(result).isInstanceOf(InstitutionUnplannedDowntimeError::class.java)
+        val exception = result as InstitutionUnplannedDowntimeError
         assertThat(exception.institution).isEqualTo(selectedInstitution)
     }
 
@@ -83,8 +83,8 @@ internal class PostAuthorizationSessionTest {
         }
             .exceptionOrNull()!!
 
-        assertThat(result).isInstanceOf(InstitutionPlannedException::class.java)
-        val exception = result as InstitutionPlannedException
+        assertThat(result).isInstanceOf(InstitutionPlannedDowntimeError::class.java)
+        val exception = result as InstitutionPlannedDowntimeError
         assertThat(exception.institution).isEqualTo(selectedInstitution)
         assertThat(exception.backUpAt).isEqualTo(upTime * 1000)
     }

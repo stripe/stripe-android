@@ -11,6 +11,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
@@ -73,7 +74,10 @@ internal class PartnerAuthViewModel @Inject constructor(
     private fun logErrors() {
         onAsync(
             PartnerAuthState::payload,
-            onFail = { logger.error("Error fetching payload / posting AuthSession", it) },
+            onFail = {
+                logger.error("Error fetching payload / posting AuthSession", it)
+                eventTracker.track(FinancialConnectionsEvent.Error(it))
+            },
             onSuccess = { eventTracker.track(PaneLoaded(NextPane.PARTNER_AUTH)) }
         )
     }
@@ -83,6 +87,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             kotlin.runCatching { requireNotNull(getManifest().activeAuthSession) }
                 .onSuccess { setState { copy(url = it.url) } }
                 .onFailure {
+                    eventTracker.track(FinancialConnectionsEvent.Error(it))
                     logger.error("failed retrieving active session from cache", it)
                     setState { copy(authenticationStatus = Fail(it)) }
                 }

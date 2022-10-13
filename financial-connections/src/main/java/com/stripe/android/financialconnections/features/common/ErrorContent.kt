@@ -32,11 +32,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.exception.AccountNumberRetrievalException
-import com.stripe.android.financialconnections.exception.InstitutionPlannedException
-import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
+import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
+import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
+import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
+import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
-import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -78,7 +78,7 @@ internal fun InstitutionUnknownErrorContent(
 
 @Composable
 internal fun InstitutionUnplannedDowntimeErrorContent(
-    exception: InstitutionUnplannedException,
+    exception: InstitutionUnplannedDowntimeError,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit
 ) {
@@ -106,7 +106,7 @@ internal fun InstitutionUnplannedDowntimeErrorContent(
 
 @Composable
 internal fun InstitutionPlannedDowntimeErrorContent(
-    exception: InstitutionPlannedException,
+    exception: InstitutionPlannedDowntimeError,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit
 ) {
@@ -141,7 +141,7 @@ internal fun InstitutionPlannedDowntimeErrorContent(
 
 @Composable
 internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
-    exception: NoSupportedPaymentMethodTypeAccountsException,
+    exception: AccountNoneEligibleForPaymentMethodError,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit
 ) {
@@ -223,7 +223,7 @@ internal fun NoAccountsAvailableErrorContent(
 
 @Composable
 internal fun AccountNumberRetrievalErrorContent(
-    exception: AccountNumberRetrievalException,
+    exception: AccountNumberRetrievalError,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit
 ) {
@@ -367,7 +367,7 @@ internal fun InstitutionPlannedDowntimeErrorContentPreview() {
             topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }, onBackClick = {}) }
         ) {
             InstitutionPlannedDowntimeErrorContent(
-                exception = InstitutionPlannedException(
+                exception = InstitutionPlannedDowntimeError(
                     institution = FinancialConnectionsInstitution(
                         id = "3",
                         name = "RandomInstitution",

@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ConsentAgree
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
@@ -54,12 +55,14 @@ internal class ConsentViewModel @Inject constructor(
                 )
             }
             // TODO move to payload onSuccess once dynamic consent is in place.
+            // TODO log error on payload onError
             eventTracker.track(FinancialConnectionsEvent.PaneLoaded(NextPane.CONSENT))
         }
     }
 
     private fun logErrors() {
         onAsync(ConsentState::acceptConsent, onFail = {
+            eventTracker.track(Error(it))
             logger.error("Error accepting consent", it)
         })
     }

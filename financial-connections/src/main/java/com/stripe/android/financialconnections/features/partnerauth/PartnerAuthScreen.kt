@@ -29,8 +29,8 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.exception.InstitutionPlannedException
-import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
+import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
+import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
 import com.stripe.android.financialconnections.features.common.InstitutionPlannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.InstitutionUnknownErrorContent
@@ -129,13 +129,13 @@ fun ErrorContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     when (error) {
-        is InstitutionPlannedException -> InstitutionPlannedDowntimeErrorContent(
+        is InstitutionPlannedDowntimeError -> InstitutionPlannedDowntimeErrorContent(
             exception = error,
             onSelectAnotherBank = onSelectAnotherBank,
             onEnterDetailsManually = onEnterDetailsManually
         )
 
-        is InstitutionUnplannedException -> InstitutionUnplannedDowntimeErrorContent(
+        is InstitutionUnplannedDowntimeError -> InstitutionUnplannedDowntimeErrorContent(
             exception = error,
             onSelectAnotherBank = onSelectAnotherBank,
             onEnterDetailsManually = onEnterDetailsManually
