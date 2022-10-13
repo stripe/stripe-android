@@ -77,11 +77,12 @@ internal class ConsentViewModel @Inject constructor(
     }
 
     fun onClickableTextClick(tag: String) {
-        viewModelScope.launch {
-            uriUtils
-                .getQueryParameter(tag, "eventName")
-                ?.let { eventTracker.track(Click(it)) }
+        val logClick: (String) -> Unit = {
+            viewModelScope.launch {
+                eventTracker.track(Click(it, pane = NextPane.CONSENT))
+            }
         }
+        uriUtils.getQueryParameter(tag, "eventName")?.let { logClick(it) }
         when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
             ConsentClickableText.TERMS ->
                 setState { copy(viewEffect = OpenUrl(stripeToSUrl)) }
@@ -92,8 +93,10 @@ internal class ConsentViewModel @Inject constructor(
             ConsentClickableText.DISCONNECT ->
                 setState { copy(viewEffect = OpenUrl(disconnectUrl)) }
 
-            ConsentClickableText.DATA ->
+            ConsentClickableText.DATA -> {
+                logClick("click.data_requested")
                 setState { copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet) }
+            }
 
             ConsentClickableText.PRIVACY_CENTER ->
                 setState { copy(viewEffect = OpenUrl(privacyCenterUrl)) }
@@ -101,8 +104,10 @@ internal class ConsentViewModel @Inject constructor(
             ConsentClickableText.DATA_ACCESS ->
                 setState { copy(viewEffect = OpenUrl(dataPolicyUrl)) }
 
-            ConsentClickableText.MANUAL_ENTRY ->
+            ConsentClickableText.MANUAL_ENTRY -> {
+                logClick("click.manual_entry")
                 navigationManager.navigate(NavigationDirections.manualEntry)
+            }
 
             null -> logger.error("Unrecognized clickable text: $tag")
         }

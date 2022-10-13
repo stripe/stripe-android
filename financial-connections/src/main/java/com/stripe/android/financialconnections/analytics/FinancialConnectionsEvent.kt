@@ -58,9 +58,14 @@ internal sealed class FinancialConnectionsEvent(
             .filterNotNullValues()
     )
 
-    class Click(eventName: String) : FinancialConnectionsEvent(
+    class Click(
+        eventName: String,
+        pane: NextPane
+    ) : FinancialConnectionsEvent(
         name = eventName,
-        emptyMap()
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
     )
 
     class InstitutionSelected(pane: NextPane, fromFeatured: Boolean) : FinancialConnectionsEvent(
