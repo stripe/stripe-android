@@ -3,7 +3,6 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -57,6 +55,7 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
@@ -64,12 +63,14 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.image.StripeImage
 import java.text.NumberFormat
 import java.util.Currency
 
@@ -255,10 +256,9 @@ private fun DropdownContent(
     onAccountClicked: (PartnerAccount) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val selectedOptionText: String? = remember(selectedIds) {
+    val selectedOption: PartnerAccountUI? = remember(selectedIds) {
         accounts
             .firstOrNull { selectedIds.contains(it.account.id) }
-            ?.let { "${it.account.name} ${it.account.encryptedNumbers}" }
     }
     Spacer(modifier = Modifier.size(12.dp))
     ExposedDropdownMenuBox(
@@ -269,10 +269,12 @@ private fun DropdownContent(
     ) {
         FinancialConnectionsOutlinedTextField(
             readOnly = true,
-            value = selectedOptionText
+            value = selectedOption?.let { "${it.account.name} ${it.account.encryptedNumbers}" }
                 ?: stringResource(id = R.string.stripe_account_picker_dropdown_hint),
             onValueChange = { },
-            leadingIcon = { if (selectedOptionText != null) InstitutionIcon() },
+            leadingIcon = {
+                if (selectedOption != null) InstitutionIcon(selectedOption.institutionIcon)
+            },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
                     expanded = expanded
@@ -312,7 +314,7 @@ private fun AccountDropdownItem(
         }
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            InstitutionIcon()
+            InstitutionIcon(account.institutionIcon)
             Spacer(modifier = Modifier.size(8.dp))
             val (title, subtitle) = getAccountTexts(
                 account = account.account,
@@ -342,13 +344,16 @@ private fun AccountDropdownItem(
 }
 
 @Composable
-private fun InstitutionIcon() {
-    Image(
-        painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+private fun InstitutionIcon(institutionIcon: String?) {
+    val modifier = Modifier
+        .size(36.dp)
+        .clip(RoundedCornerShape(6.dp))
+    StripeImage(
+        url = institutionIcon ?: "",
+        errorContent = { InstitutionPlaceholder(modifier) },
+        imageLoader = LocalImageLoader.current,
         contentDescription = null,
-        modifier = Modifier
-            .size(36.dp)
-            .clip(RoundedCornerShape(6.dp))
+        modifier = modifier
     )
 }
 

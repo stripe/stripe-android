@@ -49,6 +49,7 @@ internal class AccountPickerViewModel @Inject constructor(
         suspend {
             val state = awaitState()
             val manifest = getManifest()
+            val activeInstitution = manifest.activeInstitution
             val partnerAccountList = pollAuthorizationSessionAccounts(
                 manifest = manifest,
                 canRetry = state.canRetry
@@ -56,6 +57,7 @@ internal class AccountPickerViewModel @Inject constructor(
             val accounts = partnerAccountList.data.map { account ->
                 AccountPickerState.PartnerAccountUI(
                     account = account,
+                    institutionIcon = activeInstitution?.icon?.default,
                     enabled = account.enabled(manifest)
                 )
             }.sortedBy { it.enabled }
@@ -287,7 +289,8 @@ internal data class AccountPickerState(
 
     data class PartnerAccountUI(
         val account: PartnerAccount,
-        val enabled: Boolean
+        val enabled: Boolean,
+        val institutionIcon: String?
     )
 
     enum class SelectionMode {

@@ -45,6 +45,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.image.StripeImageLoader
 import javax.inject.Inject
 
 internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), MavericksView {
@@ -56,6 +57,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     @Inject
     lateinit var logger: Logger
+
+    @Inject
+    lateinit var imageLoader: StripeImageLoader
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -114,6 +118,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         NavigationEffect(navController)
         CompositionLocalProvider(
             LocalNavHostController provides navController,
+            LocalImageLoader provides imageLoader,
         ) {
             NavHost(navController, startDestination = initialDestination) {
                 composable(NavigationDirections.consent.destination) {
@@ -205,4 +210,8 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
 internal val LocalNavHostController = staticCompositionLocalOf<NavHostController> {
     error("No NavHostController provided")
+}
+
+internal val LocalImageLoader = staticCompositionLocalOf<StripeImageLoader> {
+    error("No ImageLoader provided")
 }

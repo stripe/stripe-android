@@ -10,7 +10,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPayment
 data class TestParameters(
     val paymentMethod: SupportedPaymentMethod,
     val customer: Customer,
-    val linkState: LinkState,
+    val linkState: LinkState = LinkState.Off,
     val googlePayState: GooglePayState,
     val currency: Currency,
     val intentType: IntentType,

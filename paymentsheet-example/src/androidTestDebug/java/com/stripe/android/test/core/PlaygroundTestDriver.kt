@@ -7,6 +7,11 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
@@ -58,6 +63,83 @@ class PlaygroundTestDriver(
         override fun onActivityResumed(activity: Activity) {
             currentActivity[0] = activity
         }
+    }
+
+    fun testLinkCustom(
+        testParameters: TestParameters,
+        populateCustomLpmFields: () -> Unit = {},
+        verifyCustomLpmFields: () -> Unit = {}
+    ) {
+        setup(testParameters)
+        launchCustom()
+
+        composeTestRule.waitForIdle()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000L) {
+            selectors.addPaymentMethodButton.isDisplayed()
+        }
+
+        composeTestRule.onNodeWithText("+ Add").apply {
+            assertExists()
+            performClick()
+        }
+
+        val fieldPopulator = FieldPopulator(
+            selectors,
+            testParameters,
+            populateCustomLpmFields,
+            verifyCustomLpmFields
+        )
+        fieldPopulator.populateFields()
+
+        composeTestRule.onNodeWithText("Save my info for secure 1-click checkout").apply {
+            assertExists()
+            performClick()
+        }
+
+        composeTestRule.onNodeWithText("Email").apply {
+            assertExists()
+            performTextInput("email@email.com")
+        }
+
+        Espresso.closeSoftKeyboard()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000L) {
+            selectors.continueButton.checkEnabled()
+        }
+
+        composeTestRule.waitForIdle()
+
+        selectors.continueButton.apply {
+            scrollTo()
+            click()
+        }
+
+        composeTestRule.waitUntil(timeoutMillis = 5000L) {
+            composeTestRule.onAllNodesWithTag("OTP-0").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag("OTP-0").performTextInput("123456")
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForPlaygroundActivity()
+
+        selectors.multiStepSelect.click()
+
+        waitForNotPlaygroundActivity()
+
+        composeTestRule.waitUntil(timeoutMillis = 5000L) {
+            composeTestRule.onAllNodesWithTag("SignedInBox").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        fieldPopulator.verifyFields()
+
+        teardown()
     }
 
     fun confirmCustom(
@@ -246,6 +328,7 @@ class PlaygroundTestDriver(
     }
 
     private fun setConfiguration(selectors: Selectors) {
+        selectors.reset.click()
         // Could consider setting these preferences instead of clicking
         // if it is faster (possibly 1-2s)
         selectors.customer.click()

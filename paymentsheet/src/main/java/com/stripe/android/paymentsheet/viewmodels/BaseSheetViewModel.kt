@@ -196,6 +196,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      */
     abstract var newPaymentSelection: PaymentSelection.New?
 
+    open var linkInlineSelection = MutableLiveData<PaymentSelection.New.LinkInline?>(null)
+
     abstract fun onFatal(throwable: Throwable)
 
     val buttonsEnabled = MediatorLiveData<Boolean>().apply {
@@ -478,7 +480,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         )
     }
 
-    fun payWithLinkInline(configuration: LinkPaymentLauncher.Configuration, userInput: UserInput) {
+    fun payWithLinkInline(configuration: LinkPaymentLauncher.Configuration, userInput: UserInput?) {
         (selection.value as? PaymentSelection.New.Card)?.paymentMethodCreateParams?.let { params ->
             savedStateHandle[SAVE_PROCESSING] = true
             updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
@@ -516,17 +518,22 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     AccountStatus.SignedOut,
                     AccountStatus.Error -> {
                         activeLinkSession.value = false
-                        linkLauncher.signInWithUserInput(configuration, userInput).fold(
-                            onSuccess = {
-                                // If successful, the account was fetched or created, so try again
-                                payWithLinkInline(configuration, userInput)
-                            },
-                            onFailure = {
-                                onError(it.localizedMessage)
-                                savedStateHandle[SAVE_PROCESSING] = false
-                                updatePrimaryButtonState(PrimaryButton.State.Ready)
-                            }
-                        )
+                        userInput?.let {
+                            linkLauncher.signInWithUserInput(configuration, userInput).fold(
+                                onSuccess = {
+                                    // If successful, the account was fetched or created, so try again
+                                    payWithLinkInline(configuration, userInput)
+                                },
+                                onFailure = {
+                                    onError(it.localizedMessage)
+                                    savedStateHandle[SAVE_PROCESSING] = false
+                                    updatePrimaryButtonState(PrimaryButton.State.Ready)
+                                }
+                            )
+                        } ?: run {
+                            savedStateHandle[SAVE_PROCESSING] = false
+                            updatePrimaryButtonState(PrimaryButton.State.Ready)
+                        }
                     }
                 }
             }

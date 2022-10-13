@@ -80,6 +80,8 @@ internal class InstitutionPickerStates :
                     url = "institution 1 url",
                     featured = false,
                     featuredOrder = null,
+                    icon = null,
+                    logo = null,
                     mobileHandoffCapable = false
                 ),
                 FinancialConnectionsInstitution(
@@ -88,6 +90,8 @@ internal class InstitutionPickerStates :
                     url = "Institution 2 url",
                     featured = false,
                     featuredOrder = null,
+                    icon = null,
+                    logo = null,
                     mobileHandoffCapable = false
                 ),
                 FinancialConnectionsInstitution(
@@ -96,6 +100,8 @@ internal class InstitutionPickerStates :
                     url = "Institution 3 url",
                     featured = false,
                     featuredOrder = null,
+                    icon = null,
+                    logo = null,
                     mobileHandoffCapable = false
                 )
             )

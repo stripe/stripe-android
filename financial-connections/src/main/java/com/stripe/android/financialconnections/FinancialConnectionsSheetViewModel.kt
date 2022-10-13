@@ -29,6 +29,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
 import kotlinx.coroutines.launch
+import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -44,10 +45,15 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 ) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
 
     init {
-        eventReporter.onPresented(initialState.initialArgs.configuration)
-        // avoid re-fetching manifest if already exists (this will happen on process recreations)
-        if (initialState.manifest == null) {
-            fetchManifest()
+        if (initialState.initialArgs.isValid()) {
+            eventReporter.onPresented(initialState.initialArgs.configuration)
+            // avoid re-fetching manifest if already exists (this will happen on process recreations)
+            if (initialState.manifest == null) fetchManifest()
+        } else {
+            val result = FinancialConnectionsSheetActivityResult.Failed(
+                IllegalStateException("Invalid configuration provided when instantiating activity")
+            )
+            setState { copy(viewEffect = FinishWithResult(result)) }
         }
     }
 
@@ -59,7 +65,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         withState { state ->
             viewModelScope.launch {
                 kotlin.runCatching {
-                    state.initialArgs.validate()
                     generateFinancialConnectionsSessionManifest(
                         clientSecret = state.sessionSecret,
                         applicationId = applicationId

@@ -2,6 +2,18 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+## 20.15.0 - 2022-10-11
+
+This release adds Link as a payment method to the SDK and fixes a minor issue with CardScan.
+
+### PaymentSheet
+
+* [ADDED][5692](https://github.com/stripe/stripe-android/pull/5692) Enable Link as a payment method.
+
+### CardScan
+
+* [CHANGED][5679](https://github.com/stripe/stripe-android/pull/5679) Fix oversized verification_frames payloads leading to failed scans.
+
 ## 20.14.1 - 2022-10-03
 
 This release expands the `payment_method` field on ACH requests and fixes a formatting error in `CardInputWidget`, `CardMultilineWidget`, and `CardFormView`.
