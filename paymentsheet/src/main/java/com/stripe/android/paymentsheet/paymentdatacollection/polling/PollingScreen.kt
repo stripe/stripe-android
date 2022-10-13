@@ -63,7 +63,7 @@ internal fun PollingScreen(
     PollingScreen(
         uiState = uiState,
         onCancel = viewModel::handleCancel,
-        modifier = modifier.fillMaxHeight(fraction = 0.5f),
+        modifier = modifier.fillMaxHeight(fraction = 0.67f),
     )
 }
 
