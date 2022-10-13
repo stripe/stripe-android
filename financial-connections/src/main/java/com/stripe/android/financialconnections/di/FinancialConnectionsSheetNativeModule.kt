@@ -29,6 +29,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import java.util.Locale
+import java.util.UUID
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -66,6 +67,7 @@ internal class FinancialConnectionsSheetNativeModule {
         getManifest = getManifest,
         logger = logger,
         locale = Locale.getDefault(),
+        loggerId = UUID.randomUUID().toString(),
         stripeNetworkClient = stripeNetworkClient
     )
 
