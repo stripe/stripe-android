@@ -49,7 +49,7 @@ sealed class AuthActivityStarterHost {
         override val statusBarColor: Int?
     ) : AuthActivityStarterHost() {
 
-        override val lifecycleOwner: LifecycleOwner = fragment.requireActivity()
+        override val lifecycleOwner: LifecycleOwner = fragment
 
         @Suppress("DEPRECATION")
         override fun startActivityForResult(
