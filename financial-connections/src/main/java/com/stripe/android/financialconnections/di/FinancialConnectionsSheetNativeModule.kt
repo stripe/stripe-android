@@ -6,6 +6,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTrackerImpl
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
@@ -59,7 +60,7 @@ internal class FinancialConnectionsSheetNativeModule {
         getManifest: GetManifest,
         configuration: FinancialConnectionsSheet.Configuration,
         stripeNetworkClient: StripeNetworkClient
-    ) = FinancialConnectionsAnalyticsTracker(
+    ): FinancialConnectionsAnalyticsTracker = FinancialConnectionsAnalyticsTrackerImpl(
         context = context,
         configuration = configuration,
         getManifest = getManifest,

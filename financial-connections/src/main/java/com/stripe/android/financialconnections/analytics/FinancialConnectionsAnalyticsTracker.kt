@@ -13,14 +13,19 @@ import javax.inject.Inject
 /**
  * Event tracker for Financial Connections.
  */
-internal class FinancialConnectionsAnalyticsTracker @Inject constructor(
+internal interface FinancialConnectionsAnalyticsTracker {
+
+    suspend fun track(event: FinancialConnectionsEvent): Result<Unit>
+}
+
+internal class FinancialConnectionsAnalyticsTrackerImpl @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val getManifest: GetManifest,
     private val configuration: FinancialConnectionsSheet.Configuration,
     private val logger: Logger,
     private val locale: Locale,
     context: Context,
-) {
+) : FinancialConnectionsAnalyticsTracker {
 
     // Assumes [FinancialConnectionsAnalyticsTracker] is a singleton.
     private val loggerId = UUID.randomUUID().toString()
@@ -31,7 +36,7 @@ internal class FinancialConnectionsAnalyticsTracker @Inject constructor(
         origin = ORIGIN
     )
 
-    suspend fun track(event: FinancialConnectionsEvent): Result<Unit> {
+    override suspend fun track(event: FinancialConnectionsEvent): Result<Unit> {
         return runCatching {
 
             val eventParams: Map<out String, Any?> = event.params ?: emptyMap()

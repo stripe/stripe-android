@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 
 /**
@@ -12,7 +12,7 @@ internal sealed class FinancialConnectionsEvent(
     val params: Map<String, String>? = null
 ) {
     class PaneLaunched(
-        pane: FinancialConnectionsSessionManifest.NextPane,
+        pane: NextPane,
     ) : FinancialConnectionsEvent(
         "pane.launched",
         mapOf(
@@ -21,7 +21,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class PaneLoaded(
-        pane: FinancialConnectionsSessionManifest.NextPane,
+        pane: NextPane,
     ) : FinancialConnectionsEvent(
         "pane.loaded",
         mapOf(
@@ -30,7 +30,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class ClickNavBarBack(
-        pane: FinancialConnectionsSessionManifest.NextPane,
+        pane: NextPane,
     ) : FinancialConnectionsEvent(
         name = "click.nav_bar.back",
         mapOf(
@@ -39,7 +39,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class ClickNavBarClose(
-        pane: FinancialConnectionsSessionManifest.NextPane,
+        pane: NextPane,
     ) : FinancialConnectionsEvent(
         name = "click.nav_bar.close",
         mapOf(
@@ -55,6 +55,16 @@ internal sealed class FinancialConnectionsEvent(
         mapOf("num_linked_accounts" to connectedAccounts?.toString())
             .plus(exception?.toEventParams() ?: emptyMap())
             .filterNotNullValues()
+    )
+
+    class Click(eventName: String) : FinancialConnectionsEvent(
+        name = eventName,
+        emptyMap()
+    )
+
+    object ConsentAgree : FinancialConnectionsEvent(
+        name = "click.agree",
+        mapOf("pane" to NextPane.CONSENT.value)
     )
 
     override fun toString(): String {

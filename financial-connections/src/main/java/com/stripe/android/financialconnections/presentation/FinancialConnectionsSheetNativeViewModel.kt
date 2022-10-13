@@ -36,7 +36,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
-import com.stripe.android.financialconnections.utils.UriComparator
+import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -49,7 +49,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     val activityRetainedComponent: FinancialConnectionsSheetNativeComponent,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
-    private val uriComparator: UriComparator,
+    private val uriUtils: UriUtils,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
@@ -92,7 +92,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     copy(webAuthFlow = Fail(WebAuthFlowFailedException(url = null)))
                 }
 
-                uriComparator.compareSchemeAuthorityAndPath(receivedUrl, SUCCESS_URL) -> setState {
+                uriUtils.compareSchemeAuthorityAndPath(receivedUrl, SUCCESS_URL) -> setState {
                     copy(webAuthFlow = Success(receivedUrl))
                 }
 

@@ -6,6 +6,8 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Click
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ConsentAgree
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
@@ -16,6 +18,7 @@ import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,6 +29,7 @@ internal class ConsentViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val uriUtils: UriUtils,
     private val logger: Logger
 ) : MavericksViewModel<ConsentState>(initialState) {
 
@@ -62,6 +66,7 @@ internal class ConsentViewModel @Inject constructor(
 
     fun onContinueClick() {
         suspend {
+            eventTracker.track(ConsentAgree)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
             goNext(updatedManifest.nextPane)
             Unit
@@ -69,6 +74,11 @@ internal class ConsentViewModel @Inject constructor(
     }
 
     fun onClickableTextClick(tag: String) {
+        viewModelScope.launch {
+            uriUtils
+                .getQueryParameter(tag, "eventName")
+                ?.let { eventTracker.track(Click(it)) }
+        }
         when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
             ConsentClickableText.TERMS ->
                 setState { copy(viewEffect = OpenUrl(stripeToSUrl)) }

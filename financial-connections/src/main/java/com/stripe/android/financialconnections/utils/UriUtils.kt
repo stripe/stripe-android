@@ -4,7 +4,7 @@ import android.net.Uri
 import com.stripe.android.core.Logger
 import javax.inject.Inject
 
-internal class UriComparator @Inject constructor(
+internal class UriUtils @Inject constructor(
     private val logger: Logger
 ) {
     fun compareSchemeAuthorityAndPath(
@@ -14,13 +14,17 @@ internal class UriComparator @Inject constructor(
         val uri1 = uriString1.toUriOrNull()
         val uri2 = uriString2.toUriOrNull()
         if (uri1 == null || uri2 == null) return false
-        return compareSchemeAuthorityAndPath(uri1, uri2)
-    }
-
-    private fun compareSchemeAuthorityAndPath(uri1: Uri, uri2: Uri): Boolean {
         return uri1.authority.equals(uri2.authority) &&
             uri1.scheme.equals(uri2.scheme) &&
             uri1.path.equals(uri2.path)
+    }
+
+    fun getQueryParameter(uriString: String, param: String): String? {
+        return kotlin.runCatching {
+            uriString.toUriOrNull()?.getQueryParameter(param)
+        }.onFailure {
+            logger.error("Could not extract query param $param from URI $uriString", it)
+        }.getOrNull()
     }
 
     private fun String.toUriOrNull(): Uri? {
