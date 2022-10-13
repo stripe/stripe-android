@@ -95,10 +95,39 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class PollAttachPaymentsSucceeded(
+        authSessionId: String,
+        duration: Long
+    ) : FinancialConnectionsEvent(
+        name = "polling.attachPayment.success",
+        mapOf(
+            "authSessionId" to authSessionId,
+            "duration" to duration.toString(),
+        ).filterNotNullValues()
+    )
+
     class ClickLinkAccounts(
         pane: NextPane,
     ) : FinancialConnectionsEvent(
         name = "click.link_accounts",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class ClickLinkAnotherAccount(
+        pane: NextPane,
+    ) : FinancialConnectionsEvent(
+        name = "click.link_another_account",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
+    class ClickDone(
+        pane: NextPane,
+    ) : FinancialConnectionsEvent(
+        name = "click.done",
         mapOf(
             "pane" to pane.value,
         ).filterNotNullValues()

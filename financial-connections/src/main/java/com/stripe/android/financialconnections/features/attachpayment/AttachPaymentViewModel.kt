@@ -9,6 +9,7 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAttachPaymentsSucceeded
 import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
@@ -19,6 +20,7 @@ import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.measureTimeMillis
 import javax.inject.Inject
 
 @Suppress("LongParameterList")
@@ -50,11 +52,15 @@ internal class AttachPaymentViewModel @Inject constructor(
             val accounts = getAuthorizationSessionAccounts(authSession.id).data
             require(accounts.size == 1)
             val id = accounts.first().linkedAccountId
-            pollAttachPaymentAccount(
-                allowManualEntry = manifest.allowManualEntry,
-                activeInstitution = activeInstitution,
-                params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
-            ).also { goNext(it.nextPane ?: NextPane.SUCCESS) }
+            val (result, millis) = measureTimeMillis {
+                pollAttachPaymentAccount(
+                    allowManualEntry = manifest.allowManualEntry,
+                    activeInstitution = activeInstitution,
+                    params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
+                ).also { goNext(it.nextPane ?: NextPane.SUCCESS) }
+            }
+            eventTracker.track(PollAttachPaymentsSucceeded(authSession.id, millis))
+            result
         }.execute { copy(linkPaymentAccount = it) }
     }
 

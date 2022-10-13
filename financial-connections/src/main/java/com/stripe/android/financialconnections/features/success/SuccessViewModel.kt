@@ -8,6 +8,8 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickDone
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLinkAnotherAccount
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
@@ -25,6 +27,7 @@ import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Suppress("LongParameterList")
@@ -41,6 +44,7 @@ internal class SuccessViewModel @Inject constructor(
 
     init {
         logErrors()
+
         suspend {
             val manifest = getManifest()
             SuccessState.Payload(
@@ -83,6 +87,9 @@ internal class SuccessViewModel @Inject constructor(
     }
 
     fun onDoneClick() {
+        viewModelScope.launch {
+            eventTracker.track(ClickDone(NextPane.SUCCESS))
+        }
         suspend {
             completeFinancialConnectionsSession().also {
                 val result = Completed(
@@ -95,6 +102,9 @@ internal class SuccessViewModel @Inject constructor(
     }
 
     fun onLinkAnotherAccountClick() {
+        viewModelScope.launch {
+            eventTracker.track(ClickLinkAnotherAccount(NextPane.SUCCESS))
+        }
         navigationManager.navigate(NavigationDirections.reset)
     }
 

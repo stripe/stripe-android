@@ -8,6 +8,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickDone
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
@@ -60,6 +61,9 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
     }
 
     fun onSubmit() {
+        viewModelScope.launch {
+            eventTracker.track(ClickDone(NextPane.MANUAL_ENTRY_SUCCESS))
+        }
         suspend {
             completeFinancialConnectionsSession().also {
                 val result = Completed(
