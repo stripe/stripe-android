@@ -16,6 +16,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.injection.DaggerPaymentLauncherComponent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentLauncherComponent
@@ -53,6 +54,9 @@ class StripePaymentLauncher @AssistedInject internal constructor(
             .stripeAccountIdProvider(stripeAccountIdProvider)
             .productUsage(productUsage)
             .build()
+
+    val authenticatorRegistry: PaymentAuthenticatorRegistry =
+        paymentLauncherComponent.authenticatorRegistry
 
     @InjectorKey
     private val injectorKey: String =

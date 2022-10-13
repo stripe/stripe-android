@@ -11,7 +11,6 @@ import com.stripe.android.view.AuthActivityStarterHost
 import javax.inject.Singleton
 
 @Singleton
-@Suppress("unused") // Used via reflection in PollingAuthenticatorModule
 internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent> {
 
     private var pollingLauncher: ActivityResultLauncher<PollingContract.Args>? = null
