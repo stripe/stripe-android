@@ -30,7 +30,7 @@ internal class PollingActivity : AppCompatActivity() {
         }
 
         if (savedInstanceState == null) {
-            val fragment = PollingFragment.newInstance()
+            val fragment = PollingFragment.newInstance(args)
             fragment.isCancelable = false
             fragment.show(supportFragmentManager, fragment.tag)
         }

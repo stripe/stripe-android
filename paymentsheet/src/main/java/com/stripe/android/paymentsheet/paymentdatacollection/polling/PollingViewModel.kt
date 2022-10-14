@@ -1,14 +1,23 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
+import android.app.Application
+import android.os.Bundle
 import android.os.SystemClock
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.DaggerPollingComponent
+import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.PollingViewModelSubcomponent
 import com.stripe.android.polling.IntentStatusPoller
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +27,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.milliseconds
@@ -160,6 +170,56 @@ internal class PollingViewModel @Inject constructor(
     private fun updatePollingState(pollingState: PollingState) {
         _uiState.update {
             it.copy(pollingState = pollingState)
+        }
+    }
+
+    internal class Factory(
+        private val applicationSupplier: () -> Application,
+        private val argsSupplier: () -> Args,
+        owner: SavedStateRegistryOwner,
+        defaultArgs: Bundle? = null
+    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
+        Injectable<Factory.FallbackInitializeParam> {
+        internal data class FallbackInitializeParam(
+            val application: Application
+        )
+
+        @Inject
+        lateinit var subcomponentBuilderProvider: Provider<PollingViewModelSubcomponent.Builder>
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(
+            key: String,
+            modelClass: Class<T>,
+            savedStateHandle: SavedStateHandle
+        ): T {
+            val args = argsSupplier()
+
+            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
+
+            return subcomponentBuilderProvider.get()
+                .args(args)
+                .savedStateHandle(savedStateHandle)
+                .build()
+                .viewModel as T
+        }
+
+        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+            val args = argsSupplier()
+
+            val config = IntentStatusPoller.Config(
+                clientSecret = args.clientSecret,
+                maxAttempts = args.maxAttempts,
+            )
+
+            DaggerPollingComponent
+                .builder()
+                .application(arg.application)
+                .injectorKey(DUMMY_INJECTOR_KEY)
+                .config(config)
+                .ioDispatcher(Dispatchers.IO)
+                .build()
+                .inject(this)
         }
     }
 

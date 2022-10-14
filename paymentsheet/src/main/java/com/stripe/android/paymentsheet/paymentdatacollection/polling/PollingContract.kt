@@ -27,6 +27,9 @@ internal class PollingContract :
     internal data class Args(
         val clientSecret: String,
         @ColorInt val statusBarColor: Int?,
+        val timeLimitInSeconds: Int,
+        val initialDelayInSeconds: Int,
+        val maxAttempts: Int,
     ) : Parcelable {
 
         internal companion object {
