@@ -103,6 +103,7 @@ private fun ActivePolling(
     ) {
         CircularProgressIndicator(
             modifier = Modifier.padding(bottom = 8.dp),
+            color = MaterialTheme.colors.onSurface,
         )
 
         Text(
