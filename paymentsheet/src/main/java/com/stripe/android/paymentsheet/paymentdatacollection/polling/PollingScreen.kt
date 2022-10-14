@@ -15,8 +15,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -24,8 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.dimensionResource
@@ -153,8 +149,7 @@ private fun FailedPolling(
                 ),
         ) {
             Image(
-                imageVector = Icons.Default.Warning,
-                colorFilter = ColorFilter.tint(Color.Red),
+                painter = painterResource(R.drawable.stripe_ic_paymentsheet_polling_failure),
                 contentDescription = null,
                 modifier = Modifier.padding(bottom = 8.dp),
             )
