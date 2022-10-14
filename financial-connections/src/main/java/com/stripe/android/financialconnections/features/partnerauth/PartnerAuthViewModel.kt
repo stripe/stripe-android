@@ -12,15 +12,14 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
-import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -29,14 +28,12 @@ import javax.inject.Inject
 
 @Suppress("LongParameterList")
 internal class PartnerAuthViewModel @Inject constructor(
-    val completeAuthorizationSession: CompleteAuthorizationSession,
     val createAuthorizationSession: PostAuthorizationSession,
     val cancelAuthorizationSession: CancelAuthorizationSession,
     val configuration: FinancialConnectionsSheet.Configuration,
     val getManifest: GetManifest,
     val goNext: GoNext,
     val navigationManager: NavigationManager,
-    val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     val logger: Logger,
     initialState: PartnerAuthState
 ) : MavericksViewModel<PartnerAuthState>(initialState) {
@@ -150,18 +147,9 @@ internal class PartnerAuthViewModel @Inject constructor(
         }
     }
 
-    private suspend fun completeAuthorizationSession() {
+    private fun completeAuthorizationSession() {
         kotlin.runCatching {
-            val authSession = requireNotNull(getManifest().activeAuthSession)
-            logger.debug("Web AuthFlow completed! waiting for oauth results")
-            val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
-            logger.debug("OAuth results received! completing session")
-            val updatedSession = completeAuthorizationSession(
-                authorizationSessionId = authSession.id,
-                publicToken = oAuthResults.memberGuid
-            )
-            logger.debug("Session authorized!")
-            goNext(updatedSession.nextPane)
+            goNext(NextPane.ACCOUNT_PICKER)
         }.onFailure {
             logger.error("failed authorizing session", it)
             setState { copy(authenticationStatus = Fail(it)) }

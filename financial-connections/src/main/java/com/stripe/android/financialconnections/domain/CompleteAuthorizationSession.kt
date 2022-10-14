@@ -13,13 +13,12 @@ internal class CompleteAuthorizationSession @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        authorizationSessionId: String,
-        publicToken: String?
+        authorizationSessionId: String
     ): FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession {
         return repository.completeAuthorizationSession(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
             sessionId = authorizationSessionId,
-            publicToken = publicToken
+            publicToken = null
         ).also { coordinator().emit(Message.ClearPartnerWebAuth) }
     }
 }

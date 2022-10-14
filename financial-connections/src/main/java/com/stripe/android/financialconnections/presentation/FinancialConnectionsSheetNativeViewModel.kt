@@ -15,6 +15,7 @@ import com.airbnb.mvrx.ViewModelContext
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
@@ -34,6 +35,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.utils.UriComparator
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 @Suppress("LongParameterList", "TooManyFunctions")
 internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
@@ -47,6 +49,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val uriComparator: UriComparator,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val logger: Logger,
+    @Named(APPLICATION_ID) private val applicationId: String,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
@@ -86,8 +89,25 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     copy(webAuthFlow = Fail(WebAuthFlowFailedException(url = null)))
                 }
 
-                uriComparator.compareSchemeAuthorityAndPath(receivedUrl, SUCCESS_URL) -> setState {
+                uriComparator.compareSchemeAuthorityAndPath(
+                    receivedUrl,
+                    successUrl(applicationId)
+                ) -> setState {
                     copy(webAuthFlow = Success(receivedUrl))
+                }
+
+                uriComparator.compareSchemeAuthorityAndPath(
+                    receivedUrl,
+                    cancelUrl(applicationId)
+                ) -> setState {
+                    copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
+                }
+
+                uriComparator.compareSchemeAuthorityAndPath(
+                    receivedUrl,
+                    failUrl(applicationId)
+                ) -> setState {
+                    copy(webAuthFlow = Fail(WebAuthFlowFailedException(receivedUrl)))
                 }
 
                 else -> setState {
@@ -169,6 +189,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         closeAuthFlowError != null -> setState {
                             copy(viewEffect = Finish(Failed(closeAuthFlowError)))
                         }
+
                         else -> setState {
                             copy(viewEffect = Finish(Canceled))
                         }
@@ -190,8 +211,14 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     companion object :
         MavericksViewModelFactory<FinancialConnectionsSheetNativeViewModel, FinancialConnectionsSheetNativeState> {
 
-        // TODO@carlosmuvi: temporary redirect url for native.
-        private const val SUCCESS_URL = "stripe-auth://link-accounts/login"
+        private fun successUrl(applicationId: String) =
+            "stripe://auth-redirect/$applicationId/success"
+
+        private fun cancelUrl(applicationId: String) =
+            "stripe://auth-redirect/$applicationId/cancel"
+
+        private fun failUrl(applicationId: String) =
+            "stripe://auth-redirect/$applicationId/fail"
 
         override fun create(
             viewModelContext: ViewModelContext,

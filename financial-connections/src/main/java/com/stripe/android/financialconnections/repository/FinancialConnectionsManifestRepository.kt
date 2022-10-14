@@ -70,7 +70,8 @@ internal interface FinancialConnectionsManifestRepository {
     )
     suspend fun postAuthorizationSession(
         clientSecret: String,
-        institution: FinancialConnectionsInstitution
+        applicationId: String,
+        institution: FinancialConnectionsInstitution,
     ): FinancialConnectionsAuthorizationSession
 
     @Throws(
@@ -198,6 +199,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     override suspend fun postAuthorizationSession(
         clientSecret: String,
+        applicationId: String,
         institution: FinancialConnectionsInstitution
     ): FinancialConnectionsAuthorizationSession {
         val request = apiRequestFactory.createPost(
@@ -206,6 +208,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "use_mobile_handoff" to false,
+                "use_abstract_flow" to true,
+                "return_url" to "auth-redirect/$applicationId",
                 "institution" to institution.id
             )
         )

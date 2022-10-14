@@ -10,6 +10,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
@@ -35,6 +36,7 @@ internal class AccountPickerViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val goNext: GoNext,
     private val navigationManager: NavigationManager,
+    private val completeAuthorizationSession: CompleteAuthorizationSession,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
 ) : MavericksViewModel<AccountPickerState>(initialState) {
@@ -50,9 +52,15 @@ internal class AccountPickerViewModel @Inject constructor(
             val state = awaitState()
             val manifest = getManifest()
             val activeInstitution = manifest.activeInstitution
+            val activeAuthSession = requireNotNull(manifest.activeAuthSession)
+            // poll for accounts
             val partnerAccountList = pollAuthorizationSessionAccounts(
                 manifest = manifest,
                 canRetry = state.canRetry
+            )
+            // authorize the session once accounts are available.
+            completeAuthorizationSession(
+                authorizationSessionId = activeAuthSession.id
             )
             val accounts = partnerAccountList.data.map { account ->
                 AccountPickerState.PartnerAccountUI(
@@ -62,7 +70,6 @@ internal class AccountPickerViewModel @Inject constructor(
                 )
             }.sortedBy { it.enabled }
             val (preselectedIds, selectionMode) = selectionConfig(accounts, manifest)
-            val activeAuthSession = requireNotNull(manifest.activeAuthSession)
             AccountPickerState.Payload(
                 skipAccountSelection = activeAuthSession.skipAccountSelection == true,
                 accounts = accounts,

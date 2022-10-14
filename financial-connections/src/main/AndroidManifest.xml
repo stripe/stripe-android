@@ -24,11 +24,21 @@
                     android:scheme="stripe-auth"
                     android:path="/${applicationId}/cancel" />
 
-                <!--TODO@carlosmuvi use proper deeplink back to app -->
+                <!-- Accepts success/cancel/fail URIs that begin with "stripe-auth://auth-redirect” -->
                 <data
-                    android:host="link-accounts"
-                    android:scheme="stripe-auth"
-                    android:path="/login" />
+                    android:host="auth-redirect"
+                    android:scheme="stripe"
+                    android:path="/${applicationId}/cancel" />
+
+                <data
+                    android:host="auth-redirect"
+                    android:scheme="stripe"
+                    android:path="/${applicationId}/success" />
+
+                <data
+                    android:host="auth-redirect"
+                    android:scheme="stripe"
+                    android:path="/${applicationId}/fail" />
             </intent-filter>
         </activity>
         <activity
