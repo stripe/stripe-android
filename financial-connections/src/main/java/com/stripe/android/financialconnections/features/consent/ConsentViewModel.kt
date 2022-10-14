@@ -9,9 +9,12 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.features.MarkdownParser
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.model.Body
-import com.stripe.android.financialconnections.model.ConsentScreen
-import com.stripe.android.financialconnections.model.DataDialog
+import com.stripe.android.financialconnections.model.ConsentPane
+import com.stripe.android.financialconnections.model.ConsentPaneBody
+import com.stripe.android.financialconnections.model.ConsentPaneBullet
+import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.DataAccessNoticeBody
+import com.stripe.android.financialconnections.model.DataAccessNoticeBullet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.sampleConsent
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -31,7 +34,7 @@ internal class ConsentViewModel @Inject constructor(
         logErrors()
         suspend {
             val manifest = getManifest()
-            val consent: ConsentScreen = sampleConsent.toHtml()
+            val consent: ConsentPane = sampleConsent.toHtml()
 //            manualEntryEnabled = manifest.allowManualEntry,
 //            manualEntryShowBusinessDaysNotice =
 //                !manifest.customManualEntryHandling && manifest.manualEntryUsesMicrodeposits,
@@ -39,28 +42,32 @@ internal class ConsentViewModel @Inject constructor(
         }.execute { copy(consent = it) }
     }
 
-    private fun ConsentScreen.toHtml(): ConsentScreen = ConsentScreen(
+    private fun ConsentPane.toHtml(): ConsentPane = ConsentPane(
         title = MarkdownParser.toHtml(title),
-        body = body.map {
-            Body(
-                iconUrl = it.iconUrl,
-                text = MarkdownParser.toHtml(it.text),
-                subtext = it.subtext?.let(MarkdownParser::toHtml)
-            )
-        },
-        footerText = MarkdownParser.toHtml(footerText),
-        buttonTitle = MarkdownParser.toHtml(buttonTitle),
-        dataDialog = DataDialog(
-            title = MarkdownParser.toHtml(dataDialog.title),
-            body = dataDialog.body.map {
-                Body(
-                    iconUrl = it.iconUrl,
-                    text = MarkdownParser.toHtml(it.text),
-                    subtext = it.subtext?.let(MarkdownParser::toHtml)
+        body = ConsentPaneBody(
+            bullets = body.bullets.map {
+                ConsentPaneBullet(
+                    icon = it.icon,
+                    content = MarkdownParser.toHtml(it.content),
                 )
-            },
-            footerText = MarkdownParser.toHtml(dataDialog.footerText),
-            buttonTitle = MarkdownParser.toHtml(dataDialog.buttonTitle),
+            }
+        ),
+        belowCta = MarkdownParser.toHtml(belowCta),
+        aboveCta = MarkdownParser.toHtml(aboveCta),
+        cta = MarkdownParser.toHtml(cta),
+        dataAccessNotice = DataAccessNotice(
+            title = MarkdownParser.toHtml(dataAccessNotice.title),
+            body = DataAccessNoticeBody(
+                bullets = dataAccessNotice.body.bullets.map { bullet ->
+                    DataAccessNoticeBullet(
+                        icon = bullet.icon,
+                        content = MarkdownParser.toHtml(bullet.content),
+                        title = MarkdownParser.toHtml(bullet.title),
+                    )
+                }
+            ),
+            content = MarkdownParser.toHtml(dataAccessNotice.content),
+            cta = MarkdownParser.toHtml(dataAccessNotice.cta),
         )
     )
 

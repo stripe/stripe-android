@@ -3,12 +3,12 @@ package com.stripe.android.financialconnections.features.consent
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.Uninitialized
-import com.stripe.android.financialconnections.model.ConsentScreen
+import com.stripe.android.financialconnections.model.ConsentPane
 
 internal data class ConsentState(
     val manualEntryEnabled: Boolean = false,
     val manualEntryShowBusinessDaysNotice: Boolean = false,
-    val consent: Async<ConsentScreen> = Uninitialized,
+    val consent: Async<ConsentPane> = Uninitialized,
     val acceptConsent: Async<Unit> = Uninitialized,
     val viewEffect: ViewEffect? = null
 ) : MavericksState {

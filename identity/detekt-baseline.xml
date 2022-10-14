@@ -13,7 +13,7 @@
     <ID>LargeClass:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest</ID>
     <ID>LargeClass:IDScanFragmentTest.kt$IDScanFragmentTest</ID>
     <ID>LongMethod:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( verificationPageState: Resource&lt;VerificationPage>?, onConfirmed: () -> Unit )</ID>
-    <ID>LongMethod:ConsentScreen.kt$@Composable private fun SuccessUI( verificationPage: VerificationPage, onMerchantViewCreated: (ImageView) -> Unit, onConsentAgreed: (Boolean) -> Unit, onConsentDeclined: (Boolean) -> Unit )</ID>
+    <ID>LongMethod:ConsentPane.kt$@Composable private fun SuccessUI( verificationPage: VerificationPage, onMerchantViewCreated: (ImageView) -> Unit, onConsentAgreed: (Boolean) -> Unit, onConsentDeclined: (Boolean) -> Unit )</ID>
     <ID>LongMethod:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - not require selfie - submit`()</ID>
     <ID>LongMethod:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - require selfie - to selfie`()</ID>
     <ID>LongMethod:IDDetectorAnalyzer.kt$IDDetectorAnalyzer$override suspend fun analyze( data: AnalyzerInput, state: IdentityScanState ): AnalyzerOutput</ID>
@@ -95,14 +95,14 @@
     <ID>TooManyFunctions:NavigationUtils.kt$com.stripe.android.identity.utils.NavigationUtils.kt</ID>
     <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationConfirmButtonTag = "ConfirmButton"</ID>
     <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationTitleTag = "ConfirmationTitle"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val acceptButtonTag = "Accept"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val bodyTag = "Body"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val declineButtonTag = "Decline"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val dividerTag = "divider"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val loadingScreenTag = "Loading"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val privacyPolicyTag = "PrivacyPolicy"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val timeEstimateTag = "TimeEstimate"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val titleTag = "Title"</ID>
+    <ID>TopLevelPropertyNaming:ConsentPane.kt$internal const val acceptButtonTag = "Accept"</ID>
+    <ID>TopLevelPropertyNaming:ConsentPane.kt$internal const val bodyTag = "Body"</ID>
+    <ID>TopLevelPropertyNaming:ConsentPane.kt$internal const val declineButtonTag = "Decline"</ID>
+    <ID>TopLevelPropertyNaming:ConsentPane.kt$internal const val dividerTag = "divider"</ID>
+    <ID>TopLevelPropertyNaming:ConsentPane.kt$internal const val loadingScreenTag = "Loading"</ID>
+    <ID>TopLevelPropertyNaming:ConsentPane.kt$internal const val privacyPolicyTag = "PrivacyPolicy"</ID>
+    <ID>TopLevelPropertyNaming:ConsentPane.kt$internal const val timeEstimateTag = "TimeEstimate"</ID>
+    <ID>TopLevelPropertyNaming:ConsentPane.kt$internal const val titleTag = "Title"</ID>
     <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val docSelectionTitleTag = "Title"</ID>
     <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val singleSelectionTag = "SingleSelection"</ID>
     <ID>UnnecessaryAbstractClass:IdentityCommonModule.kt$IdentityCommonModule$IdentityCommonModule</ID>
