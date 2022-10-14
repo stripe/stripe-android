@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.CvcCheck
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,7 +19,8 @@ private val MOCK_CARD = ConsumerPaymentDetails.Card(
     expiryYear = 2032,
     expiryMonth = 12,
     brand = CardBrand.Visa,
-    last4 = "4242"
+    last4 = "4242",
+    cvcCheck = CvcCheck.Pass
 )
 
 private val MOCK_BANK_ACCOUNT = ConsumerPaymentDetails.BankAccount(

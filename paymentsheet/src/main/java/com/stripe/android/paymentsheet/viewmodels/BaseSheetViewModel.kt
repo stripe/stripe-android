@@ -201,6 +201,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             merchantName = merchantName,
             customerEmail = config?.defaultBillingDetails?.email,
             customerPhone = customerPhone,
+            customerName = config?.defaultBillingDetails?.name,
             shippingValues = shippingAddress
         )
     }

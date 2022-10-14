@@ -21,6 +21,12 @@ const val CUSTOMER_EMAIL = "customerEmail"
 const val CUSTOMER_PHONE = "customerPhone"
 
 /**
+ * Identifies the name of the customer using the app, used to pre-fill the form.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val CUSTOMER_NAME = "customerName"
+
+/**
  * Identifies the shipping address passed in from the customer, used to pre-fill address forms.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

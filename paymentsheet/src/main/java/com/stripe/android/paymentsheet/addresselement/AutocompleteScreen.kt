@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Application
+import android.os.Handler
+import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -79,7 +81,10 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
+        val handler = Handler(Looper.getMainLooper())
+        handler.post {
+            focusRequester.requestFocus()
+        }
     }
 
     Scaffold(

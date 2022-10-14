@@ -170,6 +170,7 @@ class PlaygroundTestDriver(
         setup(testParameters)
         launchComplete()
 
+        composeTestRule.waitForIdle()
         customOperations()
 
         currentActivity[0]?.let {
@@ -262,6 +263,9 @@ class PlaygroundTestDriver(
         // billing is not saved to preferences
         selectors.billing.click()
 
+        // billing is not saved to preferences
+        selectors.shipping.click()
+
         // Can't guarantee that google pay will be on the phone
         selectors.googlePayState.click()
     }
@@ -295,7 +299,7 @@ class PlaygroundTestDriver(
                 val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
 
                 // If there are multiple browser there is a browser selector window
-                selectBrowserPrompt.wait(2000)
+                selectBrowserPrompt.wait(4000)
                 if (selectBrowserPrompt.exists()) {
                     browserIconAtPrompt(selectedBrowser).click()
                 }

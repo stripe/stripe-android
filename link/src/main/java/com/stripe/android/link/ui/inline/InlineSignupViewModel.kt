@@ -8,9 +8,12 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.CUSTOMER_EMAIL
+import com.stripe.android.link.injection.CUSTOMER_NAME
 import com.stripe.android.link.injection.CUSTOMER_PHONE
 import com.stripe.android.link.injection.LINK_INTENT
 import com.stripe.android.link.injection.MERCHANT_NAME
+import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.model.PaymentIntent
@@ -35,6 +38,7 @@ internal class InlineSignupViewModel @Inject constructor(
     @Named(MERCHANT_NAME) val merchantName: String,
     @Named(CUSTOMER_EMAIL) customerEmail: String?,
     @Named(CUSTOMER_PHONE) customerPhone: String?,
+    @Named(CUSTOMER_NAME) customerName: String?,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger
@@ -43,10 +47,12 @@ internal class InlineSignupViewModel @Inject constructor(
         if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
     private val prefilledPhone =
         customerPhone?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) } ?: ""
+    private val prefilledName =
+        customerName?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) }
 
     val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
     val phoneController = PhoneNumberController.createPhoneNumberController(prefilledPhone)
-    val nameController = SimpleTextFieldController.createNameSectionController(null) // TODO
+    val nameController = SimpleTextFieldController.createNameSectionController(prefilledName)
 
     /**
      * Emits the email entered in the form if valid, null otherwise.
@@ -73,6 +79,9 @@ internal class InlineSignupViewModel @Inject constructor(
     val signUpState: StateFlow<SignUpState> = _signUpStatus
 
     val isExpanded = MutableStateFlow(false)
+
+    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
+    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
     val requiresNameCollection: Boolean
         get() {
@@ -109,6 +118,7 @@ internal class InlineSignupViewModel @Inject constructor(
             coroutineScope = viewModelScope,
             emailFlow = consumerEmail,
             onStateChanged = {
+                clearError()
                 _signUpStatus.value = it
                 if (it == SignUpState.InputtingEmail || it == SignUpState.VerifyingEmail) {
                     userInput.value = null
@@ -156,6 +166,7 @@ internal class InlineSignupViewModel @Inject constructor(
     }
 
     private suspend fun lookupConsumerEmail(email: String) {
+        clearError()
         linkAccountManager.lookupConsumer(email, startSession = false).fold(
             onSuccess = {
                 if (it != null) {
@@ -167,13 +178,20 @@ internal class InlineSignupViewModel @Inject constructor(
                     linkEventsReporter.onSignupStarted(true)
                 }
             },
-            onFailure = ::onError
+            onFailure = {
+                _signUpStatus.value = SignUpState.InputtingEmail
+                onError(it)
+            }
         )
     }
 
-    private fun onError(error: Throwable) {
-        logger.error(error.localizedMessage ?: "Internal error.")
-        // TODO(brnunes-stripe): Add localized error messages, show them in UI.
+    private fun clearError() {
+        _errorMessage.value = null
+    }
+
+    private fun onError(error: Throwable) = error.getErrorMessage().let {
+        logger.error("Error: ", error)
+        _errorMessage.value = it
     }
 
     internal class Factory(

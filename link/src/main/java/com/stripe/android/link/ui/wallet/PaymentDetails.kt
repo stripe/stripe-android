@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -39,6 +40,7 @@ import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ErrorTextStyle
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails.Card
 
 @Composable
 internal fun PaymentDetailsListItem(
@@ -75,7 +77,19 @@ internal fun PaymentDetailsListItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 PaymentDetails(paymentDetails = paymentDetails, enabled = isSupported)
+
                 Spacer(modifier = Modifier.weight(1f))
+
+                val showWarning = (paymentDetails as? Card)?.isExpired ?: false
+                if (showWarning && !isSelected) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_link_error),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.linkColors.errorText
+                    )
+                }
+
                 if (paymentDetails.isDefault) {
                     Box(
                         modifier = Modifier
@@ -129,7 +143,7 @@ internal fun PaymentDetails(
     enabled: Boolean
 ) {
     when (paymentDetails) {
-        is ConsumerPaymentDetails.Card -> {
+        is Card -> {
             CardInfo(card = paymentDetails, enabled = enabled)
         }
         is ConsumerPaymentDetails.BankAccount -> {
@@ -140,7 +154,7 @@ internal fun PaymentDetails(
 
 @Composable
 internal fun CardInfo(
-    card: ConsumerPaymentDetails.Card,
+    card: Card,
     enabled: Boolean
 ) {
     CompositionLocalProvider(LocalContentAlpha provides if (enabled) 1f else 0.6f) {

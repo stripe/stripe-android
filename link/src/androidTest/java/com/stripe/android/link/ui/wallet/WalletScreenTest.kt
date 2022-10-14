@@ -17,6 +17,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.filterToOne
@@ -35,11 +36,16 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorMessage
-import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.CvcCheck
+import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.DateConfig
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.TextFieldController
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.junit.Rule
 import org.junit.Test
@@ -56,26 +62,29 @@ internal class WalletScreenTest {
         ConsumerPaymentDetails.Card(
             id = "id1",
             isDefault = true,
-            expiryYear = 2022,
+            expiryYear = 2026,
             expiryMonth = 12,
             brand = CardBrand.Visa,
-            last4 = "4242"
+            last4 = "4242",
+            cvcCheck = CvcCheck.Pass
         ),
         ConsumerPaymentDetails.Card(
             id = "id2",
             isDefault = false,
-            expiryYear = 2023,
+            expiryYear = 2020,
             expiryMonth = 11,
             brand = CardBrand.MasterCard,
-            last4 = "4444"
+            last4 = "4444",
+            cvcCheck = CvcCheck.Fail
         ),
         ConsumerPaymentDetails.Card(
             id = "id3",
             isDefault = false,
-            expiryYear = 2023,
+            expiryYear = 2026,
             expiryMonth = 11,
             brand = CardBrand.AmericanExpress,
-            last4 = "0005"
+            last4 = "0005",
+            cvcCheck = CvcCheck.Unchecked
         ),
         ConsumerPaymentDetails.BankAccount(
             id = "id4",
@@ -379,12 +388,64 @@ internal class WalletScreenTest {
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
 
+    @Test
+    fun when_no_payment_method_is_selected_doesnt_show_expiry_date_form() {
+        setContent(
+            isExpanded = false,
+            selectedItem = null
+        )
+
+        composeTestRule.onNodeWithText("MM / YY").assertDoesNotExist()
+        composeTestRule.onNodeWithText("CVC").assertDoesNotExist()
+    }
+
+    @Test
+    fun when_bank_account_is_selected_doesnt_show_expiry_date_form() {
+        setContent(
+            isExpanded = false,
+            selectedItem = paymentDetails[4]
+        )
+
+        composeTestRule.onNodeWithText("MM / YY").assertDoesNotExist()
+        composeTestRule.onNodeWithText("CVC").assertDoesNotExist()
+    }
+
+    @Test
+    fun when_selected_card_is_not_expired_doesnt_show_expiry_date_form() {
+        val initiallySelectedItem = paymentDetails[0]
+        setContent(
+            isExpanded = false,
+            selectedItem = initiallySelectedItem
+        )
+
+        composeTestRule.onNodeWithText("MM / YY").assertDoesNotExist()
+        composeTestRule.onNodeWithText("CVC").assertDoesNotExist()
+    }
+
+    @Test
+    fun when_selected_card_is_expired_shows_expiry_date_form() {
+        val initiallySelectedItem = paymentDetails[1]
+        setContent(
+            isExpanded = false,
+            selectedItem = initiallySelectedItem
+        )
+
+        composeTestRule.onNodeWithText("MM / YY")
+            .assertExists()
+            .assertIsEnabled()
+
+        composeTestRule.onNodeWithText("CVC")
+            .assertExists()
+            .assertIsEnabled()
+    }
+
     private fun setContent(
         supportedTypes: Set<String> = SupportedPaymentMethod.allTypes,
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = paymentDetails.first(),
         isExpanded: Boolean = true,
-        primaryButtonState: PrimaryButtonState = PrimaryButtonState.Enabled,
         errorMessage: ErrorMessage? = null,
+        expiryDateController: TextFieldController = SimpleTextFieldController(DateConfig()),
+        cvcController: CvcController = CvcController(cardBrandFlow = flowOf(CardBrand.Visa)),
         setExpanded: (Boolean) -> Unit = {},
         onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onAddNewPaymentMethodClick: () -> Unit = {},
@@ -419,13 +480,16 @@ internal class WalletScreenTest {
         ) {
             DefaultLinkTheme {
                 WalletBody(
-                    paymentDetailsList = paymentDetailsList,
-                    supportedTypes = supportedTypes,
-                    selectedItem = selectedItem,
-                    isExpanded = isExpanded,
+                    uiState = WalletUiState(
+                        paymentDetailsList = paymentDetailsList,
+                        supportedTypes = supportedTypes,
+                        selectedItem = selectedItem,
+                        isExpanded = isExpanded,
+                        errorMessage = errorMessage
+                    ),
                     primaryButtonLabel = primaryButtonLabel,
-                    primaryButtonState = primaryButtonState,
-                    errorMessage = errorMessage,
+                    expiryDateController = expiryDateController,
+                    cvcController = cvcController,
                     setExpanded = setExpanded,
                     onItemSelected = onItemSelected,
                     onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,

@@ -1,6 +1,9 @@
 package com.stripe.android.ui.core.elements
 
-internal data class CvcElement(
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class CvcElement(
     val _identifier: IdentifierSpec,
     override val controller: CvcController
 ) : SectionSingleFieldElement(_identifier) {
