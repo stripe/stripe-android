@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.app.Application
@@ -101,47 +103,70 @@ internal fun USBankAccountForm(
         )
     }
 
+    USBankAccountFormContent(
+        screenState = currentScreenState,
+        processing = processing,
+        nameController = viewModel.nameController,
+        emailController = viewModel.emailController,
+        saveForFutureUseElement = viewModel.saveForFutureUseElement,
+        showCheckbox = args.showCheckbox,
+        onBankAccountRemoved = viewModel::reset,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun USBankAccountFormContent(
+    screenState: USBankAccountFormScreenState,
+    processing: Boolean,
+    nameController: TextFieldController,
+    emailController: TextFieldController,
+    saveForFutureUseElement: SaveForFutureUseElement,
+    showCheckbox: Boolean,
+    onBankAccountRemoved: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Box(modifier) {
-        when (val screenState = currentScreenState) {
+        when (screenState) {
             is NameAndEmailCollection -> {
                 NameAndEmailCollectionScreen(
                     screenState = screenState,
                     processing = processing,
-                    nameController = viewModel.nameController,
-                    emailController = viewModel.emailController,
+                    nameController = nameController,
+                    emailController = emailController,
                 )
             }
             is USBankAccountFormScreenState.MandateCollection -> {
                 MandateCollectionScreen(
                     screenState = screenState,
                     processing = processing,
-                    nameController = viewModel.nameController,
-                    emailController = viewModel.emailController,
-                    saveForFutureUseElement = viewModel.saveForFutureUseElement,
-                    showCheckbox = args.showCheckbox,
-                    onBankAccountRemoved = viewModel::reset,
+                    nameController = nameController,
+                    emailController = emailController,
+                    saveForFutureUseElement = saveForFutureUseElement,
+                    showCheckbox = showCheckbox,
+                    onBankAccountRemoved = onBankAccountRemoved,
                 )
             }
             is VerifyWithMicrodeposits -> {
                 VerifyWithMicrodepositsScreen(
                     screenState = screenState,
                     processing = processing,
-                    nameController = viewModel.nameController,
-                    emailController = viewModel.emailController,
-                    saveForFutureUseElement = viewModel.saveForFutureUseElement,
-                    showCheckbox = args.showCheckbox,
-                    onBankAccountRemoved = viewModel::reset,
+                    nameController = nameController,
+                    emailController = emailController,
+                    saveForFutureUseElement = saveForFutureUseElement,
+                    showCheckbox = showCheckbox,
+                    onBankAccountRemoved = onBankAccountRemoved,
                 )
             }
             is USBankAccountFormScreenState.SavedAccount -> {
                 SavedAccountScreen(
                     screenState = screenState,
                     processing = processing,
-                    nameController = viewModel.nameController,
-                    emailController = viewModel.emailController,
-                    saveForFutureUseElement = viewModel.saveForFutureUseElement,
-                    showCheckbox = args.showCheckbox,
-                    onBankAccountRemoved = viewModel::reset,
+                    nameController = nameController,
+                    emailController = emailController,
+                    saveForFutureUseElement = saveForFutureUseElement,
+                    showCheckbox = showCheckbox,
+                    onBankAccountRemoved = onBankAccountRemoved,
                 )
             }
         }
@@ -359,6 +384,7 @@ private fun NameAndEmailForm(
     }
 }
 
+@Suppress("LongMethod", "MagicNumber")
 @Composable
 private fun AccountDetailsForm(
     processing: Boolean,

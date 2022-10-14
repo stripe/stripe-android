@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.VerifyWithMicrodeposits
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 
@@ -61,7 +62,7 @@ internal fun BaseSheetViewModel<*>.updateMandateText(
     mandateText: String?,
     viewModel: USBankAccountFormViewModel,
 ) {
-    val microdepositsText = if (viewModel.currentScreenState.value is USBankAccountFormScreenState.VerifyWithMicrodeposits) {
+    val microdepositsText = if (viewModel.currentScreenState.value is VerifyWithMicrodeposits) {
         context.getString(
             R.string.stripe_paymentsheet_microdeposit,
             viewModel.formattedMerchantName()
