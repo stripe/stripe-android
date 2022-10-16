@@ -15,7 +15,7 @@ import java.io.IOException
 /**
  * Given an [Uri], find its [DrawableRes] id and [Resources] based on its authority(package name).
  *
- * This method is borrowed from `ContentResolver#getResourceId`.
+ * This method is borrowed from [ContentResolver#getResourceId].
  * @see <a href="https://android.googlesource.com/platform/frameworks/base/+/9be54d400d68c735013bc8069fbcb66c3f98c3ee/core/java/android/content/ContentResolver.java#470">source</a>
  */
 @SuppressLint("DiscouragedApi")
