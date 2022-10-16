@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.image
 
+import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
 import android.content.res.Resources
@@ -17,6 +18,7 @@ import java.io.IOException
  * This method is borrowed from `ContentResolver#getResourceId`.
  * @see <a href="https://android.googlesource.com/platform/frameworks/base/+/9be54d400d68c735013bc8069fbcb66c3f98c3ee/core/java/android/content/ContentResolver.java#470">source</a>
  */
+@SuppressLint("DiscouragedApi")
 internal fun Context.getResourceId(uri: Uri): Pair<Resources, Int> {
     require(!TextUtils.isEmpty(uri.authority))
     val authority = requireNotNull(uri.authority)
@@ -46,7 +48,6 @@ internal fun Context.getResourceId(uri: Uri): Pair<Resources, Int> {
     }
     return r to id
 }
-
 
 /**
  * Given a local [Uri] created from resource, content or local file, try to create a [Drawable] from it.
