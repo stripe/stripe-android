@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.getValue
@@ -46,6 +47,7 @@ private val MAIN_HANDLER by lazy(LazyThreadSafetyMode.NONE) {
  *
  * Instances are usually retrieved from [rememberDrawablePainter].
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DrawablePainter(
     val drawable: Drawable
 ) : Painter(), RememberObserver {
