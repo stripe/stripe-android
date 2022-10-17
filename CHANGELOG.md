@@ -2,9 +2,16 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+## 20.15.1 - 2022-10-17
+
+This release fixes some bugs in `ShippingInfoWidget` and `PaymentSheet`.
+
 ### Payments
 
 * [FIXED][5701](https://github.com/stripe/stripe-android/pull/5701) Treat blank fields as invalid in `ShippingInfoWidget`.
+
+### PaymentSheet
+
 * [FIXED][5715](https://github.com/stripe/stripe-android/pull/5715) Postal codes for countries other than US and Canada are no longer limited to a single character.
 
 ## 20.15.0 - 2022-10-11
