@@ -15,18 +15,26 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -41,35 +49,36 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
+import com.stripe.android.uicore.image.StripeImage
+import com.stripe.android.uicore.image.StripeImageLoader
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.MutableStateFlow
 
 private const val LINK_TAG = "URL"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class EmbeddableImage(
-    @DrawableRes val id: Int,
-    @StringRes val contentDescription: Int,
-    val colorFilter: androidx.compose.ui.graphics.ColorFilter? = null
-)
+sealed class EmbeddableImage {
+    data class Drawable(
+        @DrawableRes val id: Int,
+        @StringRes val contentDescription: Int,
+        val colorFilter: androidx.compose.ui.graphics.ColorFilter? = null
+    ) : EmbeddableImage()
 
-/**
- * This will display html annotated text in a string.  Images cannot be embedded in
- * <a> link tags.  The following tags are supported: <a>, <b>, <u>, <i>, <img>
- * The source value in the img tab, must map to something in the imageGetter.
- */
+    data class Bitmap(
+        val bitmap: android.graphics.Bitmap
+    ) : EmbeddableImage()
+}
+
 @Composable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun Html(
-    html: String,
-    modifier: Modifier = Modifier,
-    imageGetter: Map<String, EmbeddableImage> = emptyMap(),
-    color: Color = Color.Unspecified,
-    style: TextStyle = LocalTextStyle.current,
-    enabled: Boolean = true,
-    urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline),
-    imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline
-) {
-    val inlineContentMap = imageGetter.entries.associate { (key, value) ->
+private fun rememberDrawableImages(
+    drawableImageLoader: Map<String, EmbeddableImage.Drawable>,
+    imageAlign: PlaceholderVerticalAlign
+): Map<String, InlineTextContent> {
+    return drawableImageLoader.entries.associate { (key, value) ->
         val painter = painterResource(value.id)
         val height = painter.intrinsicSize.height
         val width = painter.intrinsicSize.width
@@ -95,30 +104,184 @@ fun Html(
             }
         )
     }
+}
 
-    val annotatedText = annotatedStringResource(html, imageGetter, urlSpanStyle)
-
-    val context = LocalContext.current
-    ClickableText(
-        annotatedText,
-        color = color,
-        style = style,
-        modifier = modifier
-            .semantics(mergeDescendants = true) {}, // makes it a separate accessible item,
-        inlineContent = inlineContentMap,
-        onClick = {
-            if (enabled) {
-                // Position is the position of the tag in the string
-                annotatedText
-                    .getStringAnnotations(LINK_TAG, it, it)
-                    .firstOrNull()?.let { annotation ->
-                        val openURL = Intent(Intent.ACTION_VIEW)
-                        openURL.data = Uri.parse(annotation.item)
-                        context.startActivity(openURL)
-                    }
-            }
+@Composable
+private fun rememberBitmapImages(
+    bitmapImageLoader: Map<String, EmbeddableImage.Bitmap>,
+    imageAlign: PlaceholderVerticalAlign
+): Map<String, InlineTextContent> {
+    return bitmapImageLoader.entries.associate { (key, image) ->
+        val localDensity = LocalDensity.current
+        val size = with(localDensity) {
+            Size(
+                image.bitmap.width.toFloat(),
+                image.bitmap.height.toFloat()
+            ).times(1 / density)
         }
+        key to InlineTextContent(
+            Placeholder(
+                width = size.width.sp,
+                height = size.height.sp,
+                imageAlign
+            ),
+            children = {
+                Image(
+                    bitmap = image.bitmap.asImageBitmap(),
+                    contentDescription = null
+                )
+            }
+        )
+    }
+}
+
+@Composable
+private fun rememberRemoteImages(
+    annotatedText: AnnotatedString,
+    imageLoader: Map<String, EmbeddableImage>,
+    stripeImageLoader: StripeImageLoader,
+    imageAlign: PlaceholderVerticalAlign,
+    onLoaded: () -> Unit
+): State<Map<String, InlineTextContent>> {
+    val remoteUrls = annotatedText.getStringAnnotations(
+        start = 0,
+        end = annotatedText.length
+    ).filter { !imageLoader.keys.contains(it.item) }
+
+    val remoteImages = remember { MutableStateFlow<Map<String, InlineTextContent>>(emptyMap()) }
+    val localDensity = LocalDensity.current
+
+    if (remoteUrls.isNotEmpty()) {
+        LaunchedEffect(annotatedText) {
+            val deferred = remoteUrls.map { url ->
+                async {
+                    Pair(url.item, stripeImageLoader.load(url.item).getOrNull())
+                }
+            }
+
+            val bitmaps = deferred.awaitAll().mapNotNull { pair ->
+                pair.second?.let { bitmap ->
+                    Pair(pair.first, bitmap)
+                }
+            }.toMap()
+            remoteImages.value = bitmaps.mapValues { entry ->
+                val size = with(localDensity) {
+                    Size(
+                        entry.value.width.toFloat(),
+                        entry.value.height.toFloat()
+                    ).times(1 / density)
+                }
+                InlineTextContent(
+                    placeholder = Placeholder(
+                        width = size.width.sp,
+                        height = size.height.sp,
+                        placeholderVerticalAlign = imageAlign
+                    ),
+                    children = {
+                        StripeImage(
+                            url = entry.key,
+                            imageLoader = stripeImageLoader,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .width(size.width.dp)
+                                .height(size.height.dp)
+                        )
+                    }
+                )
+            }
+            onLoaded()
+        }
+    }
+
+    return remoteImages.collectAsState()
+}
+
+/**
+ * This will display html annotated text in a string.  Images cannot be embedded in
+ * <a> link tags.  The following tags are supported: <a>, <b>, <u>, <i>, <img>
+ * Local/remote sources value in the img tab, must map to something in the imageLoader.
+ *
+ * When an img tag does not map to a EmbeddableImage, then this will use [StripeImageLoader] to
+ * retrieve the images and only renders once the images are downlaoded
+ *
+ * @param html The HTML to render
+ * @param imageLoader data source mapping img tags with images
+ * @param color The color of the text defaults to [Color.Unspecified]
+ * @param enabled Whether URLs should be clickable or not, defaults to true
+ * @param urlSpanStyle The style given to URLs, defaults to [TextDecoration.Underline]
+ * @param imageAlign The vertical alignment for the image in relation to the text, defaults to [PlaceholderVerticalAlign.AboveBaseline]
+ */
+@Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Html(
+    html: String,
+    modifier: Modifier = Modifier,
+    imageLoader: Map<String, EmbeddableImage> = emptyMap(),
+    color: Color = Color.Unspecified,
+    style: TextStyle = LocalTextStyle.current,
+    enabled: Boolean = true,
+    urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline),
+    imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline,
+) {
+    val context = LocalContext.current
+    val annotatedText = annotatedStringResource(html, imageLoader, urlSpanStyle)
+    val remoteImagesLoaded = remember { mutableStateOf(false) }
+    val stripeImageLoader = remember {
+        StripeImageLoader(
+            context = context,
+            diskCache = null
+        )
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    val drawableImages = rememberDrawableImages(
+        drawableImageLoader = imageLoader.filterValues {
+            it is EmbeddableImage.Drawable
+        } as Map<String, EmbeddableImage.Drawable>,
+        imageAlign = imageAlign
     )
+
+    @Suppress("UNCHECKED_CAST")
+    val bitmapImages = rememberBitmapImages(
+        bitmapImageLoader = imageLoader.filterValues {
+            it is EmbeddableImage.Bitmap
+        } as Map<String, EmbeddableImage.Bitmap>,
+        imageAlign = imageAlign
+    )
+
+    val remoteImages = rememberRemoteImages(
+        annotatedText = annotatedText,
+        imageLoader = imageLoader,
+        stripeImageLoader = stripeImageLoader,
+        imageAlign = imageAlign
+    ) {
+        remoteImagesLoaded.value = true
+    }.value
+
+    val shouldRenderImmediately = remoteImages.isEmpty()
+
+    if (shouldRenderImmediately || remoteImagesLoaded.value) {
+        ClickableText(
+            annotatedText,
+            modifier = modifier
+                .semantics(mergeDescendants = true) {}, // makes it a separate accessible item,
+            inlineContent = drawableImages + bitmapImages + remoteImages,
+            color = color,
+            style = style,
+            onClick = {
+                if (enabled) {
+                    // Position is the position of the tag in the string
+                    annotatedText
+                        .getStringAnnotations(LINK_TAG, it, it)
+                        .firstOrNull()?.let { annotation ->
+                            val openURL = Intent(Intent.ACTION_VIEW)
+                            openURL.data = Uri.parse(annotation.item)
+                            context.startActivity(openURL)
+                        }
+                }
+            }
+        )
+    }
 }
 
 /**
@@ -182,7 +345,9 @@ fun annotatedStringResource(
                         is ImageSpan -> {
                             currentStart = end
                             span.source?.let {
-                                requireNotNull(imageGetter.containsKey(span.source!!))
+                                if (imageGetter.isNotEmpty()) {
+                                    requireNotNull(imageGetter.containsKey(span.source!!))
+                                }
                                 appendInlineContent(span.source!!)
                             }
                         }
