@@ -1,8 +1,11 @@
 package com.stripe.android.payments.wechatpay
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.WeChat
 import com.stripe.android.payments.wechatpay.reflection.WeChatPayReflectionHelper
+import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -10,6 +13,7 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -27,6 +31,10 @@ class WeChatPayAuthenticatorTest {
         it.reflectionHelper = mockReflectionHelper
     }
 
+    private val host = mock<AuthActivityStarterHost> {
+        on { lifecycleOwner } doReturn TestLifecycleOwner(initialState = Lifecycle.State.RESUMED)
+    }
+
     @Before
     fun setUpMocks() {
         whenever(mockReflectionHelper.isWeChatPayAvailable()).thenReturn(true)
@@ -42,7 +50,7 @@ class WeChatPayAuthenticatorTest {
                     "${WeChatPayReflectionHelper.WECHAT_PAY_GRADLE_DEP} in app's build.gradle"
             ) {
                 authenticator.authenticate(
-                    mock(),
+                    host,
                     PaymentIntentFixtures.PI_REQUIRES_BLIK_AUTHORIZE,
                     REQUEST_OPTIONS
                 )
@@ -57,7 +65,7 @@ class WeChatPayAuthenticatorTest {
                     "instead it is BlikAuthorize"
             ) {
                 authenticator.authenticate(
-                    mock(),
+                    host,
                     PaymentIntentFixtures.PI_REQUIRES_BLIK_AUTHORIZE,
                     REQUEST_OPTIONS
                 )
@@ -72,7 +80,7 @@ class WeChatPayAuthenticatorTest {
                     "instead it is null"
             ) {
                 authenticator.authenticate(
-                    mock(),
+                    host,
                     PaymentIntentFixtures.PI_NO_NEXT_ACTION_DATA,
                     REQUEST_OPTIONS
                 )
@@ -84,7 +92,7 @@ class WeChatPayAuthenticatorTest {
     fun `wechatPayAuthStarter should start when stripeIntent is WeChatPay`() =
         runTest {
             authenticator.authenticate(
-                mock(),
+                host,
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,
                 REQUEST_OPTIONS
             )
