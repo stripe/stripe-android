@@ -103,7 +103,7 @@ class DrawablePainter(
     }
 
     override fun applyLayoutDirection(layoutDirection: LayoutDirection): Boolean {
-        if (Build.VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return drawable.setLayoutDirection(
                 when (layoutDirection) {
                     LayoutDirection.Ltr -> View.LAYOUT_DIRECTION_LTR
@@ -163,5 +163,4 @@ private val Drawable.intrinsicSize: Size
 
 internal object EmptyPainter : Painter() {
     override val intrinsicSize: Size get() = Size.Unspecified
-    override fun DrawScope.onDraw() {}
 }

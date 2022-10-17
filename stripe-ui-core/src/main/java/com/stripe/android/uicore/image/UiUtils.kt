@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.Context
 import android.content.res.Resources
+import android.content.res.Resources.NotFoundException
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.text.TextUtils
@@ -27,8 +28,7 @@ internal fun Context.getResourceId(uri: Uri): Pair<Resources, Int> {
 
     val path: List<String> = uri.pathSegments
         ?: throw FileNotFoundException("No path: $uri")
-    val len = path.size
-    val id: Int = when (len) {
+    val id: Int = when (path.size) {
         1 -> {
             try {
                 path[0].toInt()
@@ -62,7 +62,7 @@ internal fun Context.getDrawableFromUri(uri: Uri): Drawable? {
             // Load drawable through Resources, to get the source density information
             val (resource, id) = getResourceId(uri)
             return resource.getDrawable(id, theme)
-        } catch (e: Exception) {
+        } catch (e: NotFoundException) {
             Log.e(TAG, "Unable to open content: $uri", e)
         }
     } else if (ContentResolver.SCHEME_CONTENT == scheme || ContentResolver.SCHEME_FILE == scheme) {
