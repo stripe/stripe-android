@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
 import kotlinx.coroutines.sync.Mutex
@@ -100,6 +101,11 @@ internal interface FinancialConnectionsManifestRepository {
         sessionId: String
     ): FinancialConnectionsAuthorizationSession
 
+    suspend fun synchronizeFinancialConnectionsSession(
+        clientSecret: String,
+        applicationId: String
+    ): SynchronizeSessionResponse
+
     companion object {
         operator fun invoke(
             requestExecutor: FinancialConnectionsRequestExecutor,
@@ -159,6 +165,31 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 ).also { updateCachedManifest("get/fetch", it) }
             }
         }
+
+    override suspend fun synchronizeFinancialConnectionsSession(
+        clientSecret: String,
+        applicationId: String
+    ): SynchronizeSessionResponse {
+        val financialConnectionsRequest = apiRequestFactory.createPost(
+            url = synchronizeSessionUrl,
+            options = apiOptions,
+            params = mapOf(
+                "locale" to "en-us",
+                "mobile" to mapOf(
+                    "sdk_type" to "android",
+                    "fullscreen" to true,
+                    "hide_close_button" to true,
+                    "sdk_version" to 1,
+                    NetworkConstants.PARAMS_APPLICATION_ID to applicationId
+                ),
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
+            )
+        )
+        return requestExecutor.execute(
+            financialConnectionsRequest,
+            SynchronizeSessionResponse.serializer()
+        ).also { updateCachedManifest("synchronizing", it.manifest) }
+    }
 
     override suspend fun generateFinancialConnectionsSessionManifest(
         clientSecret: String,
@@ -317,6 +348,9 @@ private class FinancialConnectionsManifestRepositoryImpl(
     companion object {
         internal const val PARAMS_FULLSCREEN = "fullscreen"
         internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
+
+        internal const val synchronizeSessionUrl: String =
+            "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
 
         internal const val generateHostedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/generate_hosted_url"

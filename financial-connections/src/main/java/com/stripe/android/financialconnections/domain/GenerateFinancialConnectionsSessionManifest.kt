@@ -16,9 +16,9 @@ internal class GenerateFinancialConnectionsSessionManifest @Inject constructor(
         clientSecret: String,
         applicationId: String
     ): FinancialConnectionsSessionManifest {
-        return financialConnectionsRepository.generateFinancialConnectionsSessionManifest(
+        return financialConnectionsRepository.synchronizeFinancialConnectionsSession(
             clientSecret = clientSecret,
             applicationId = applicationId
-        )
+        ).manifest
     }
 }
