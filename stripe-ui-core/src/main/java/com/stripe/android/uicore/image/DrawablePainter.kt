@@ -163,4 +163,5 @@ private val Drawable.intrinsicSize: Size
 
 internal object EmptyPainter : Painter() {
     override val intrinsicSize: Size get() = Size.Unspecified
+    override fun DrawScope.onDraw() {}
 }
