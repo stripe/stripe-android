@@ -4,10 +4,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>NextActionSpec</title>
 <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
-const savedDarkMode = storage ? JSON.parse(storage) : false
-if(savedDarkMode === true){
-    document.getElementsByTagName("html")[0].classList.add("theme-dark")
-}</script>
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
 <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
 <link href="../../../styles/style.css" rel="Stylesheet">
 <link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
@@ -18,7 +26,8 @@ if(savedDarkMode === true){
 <script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../../scripts/main.js" defer></script>
-<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
 <body>
 <div class="navigation-wrapper" id="navigation-wrapper">
     <div id="leftToggler"><span class="icon-toggler"></span></div>
@@ -38,10 +47,10 @@ if(savedDarkMode === true){
     </div>
     <div id="main">
 <div class="main-content" id="content" pageids="payments-ui-core::com.stripe.android.ui.core.elements/NextActionSpec///PointingToDeclaration//1608493371">
-  <div class="breadcrumbs"><a href="../../index.html">payments-ui-core</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.ui.core.elements</a><span class="delimiter">/</span><a href="index.html">NextActionSpec</a></div>
+  <div class="breadcrumbs"><a href="../../index.html">payments-ui-core</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.ui.core.elements</a><span class="delimiter">/</span><span class="current">NextActionSpec</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Next</span><wbr><span>Action</span><wbr><span><span>Spec</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">NextActionSpec</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>confirmResponseStatusSpecs<span class="token operator">: </span><a href="../-confirm-status-spec-association/index.html">ConfirmStatusSpecAssociation</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>postConfirmHandlingPiStatusSpecs<span class="token operator">: </span><a href="../-post-confirm-status-spec-association/index.html">PostConfirmStatusSpecAssociation</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">NextActionSpec</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>confirmResponseStatusSpecs<span class="token operator">: </span><a href="../-confirm-status-spec-association/index.html">ConfirmStatusSpecAssociation</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>postConfirmHandlingPiStatusSpecs<span class="token operator">: </span><a href="../-post-confirm-status-spec-association/index.html">PostConfirmStatusSpecAssociation</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Constructors">Constructors</button><button class="section-tab" data-togglable="Properties">Properties</button><button class="section-tab" data-togglable="Extensions">Extensions</button></div>
@@ -57,7 +66,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-next-action-spec.html"><span class="token function">NextActionSpec</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">confirmResponseStatusSpecs<span class="token operator">: </span><a href="../-confirm-status-spec-association/index.html">ConfirmStatusSpecAssociation</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">postConfirmHandlingPiStatusSpecs<span class="token operator">: </span><a href="../-post-confirm-status-spec-association/index.html">PostConfirmStatusSpecAssociation</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-next-action-spec.html"><span class="token function">NextActionSpec</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">confirmResponseStatusSpecs<span class="token operator">: </span><a href="../-confirm-status-spec-association/index.html">ConfirmStatusSpecAssociation</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">postConfirmHandlingPiStatusSpecs<span class="token operator">: </span><a href="../-post-confirm-status-spec-association/index.html">PostConfirmStatusSpecAssociation</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span></div></div></div>
               </div>
             </div>
           </div>
@@ -74,7 +83,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-1165190723%2FProperties%2F1608493371" anchor-label="confirmResponseStatusSpecs" id="-1165190723%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="confirm-response-status-specs.html">confirmResponseStatusSpecs</a><span class="token operator">: </span><a href="../-confirm-status-spec-association/index.html">ConfirmStatusSpecAssociation</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-1165190723%2FProperties%2F1608493371" anchor-label="confirmResponseStatusSpecs" id="-1165190723%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="confirm-response-status-specs.html">confirmResponseStatusSpecs</a><span class="token operator">: </span><a href="../-confirm-status-spec-association/index.html">ConfirmStatusSpecAssociation</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
               </div>
             </div>
           </div>
@@ -89,7 +98,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-773469126%2FProperties%2F1608493371" anchor-label="postConfirmHandlingPiStatusSpecs" id="-773469126%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="post-confirm-handling-pi-status-specs.html">postConfirmHandlingPiStatusSpecs</a><span class="token operator">: </span><a href="../-post-confirm-status-spec-association/index.html">PostConfirmStatusSpecAssociation</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-773469126%2FProperties%2F1608493371" anchor-label="postConfirmHandlingPiStatusSpecs" id="-773469126%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="post-confirm-handling-pi-status-specs.html">postConfirmHandlingPiStatusSpecs</a><span class="token operator">: </span><a href="../-post-confirm-status-spec-association/index.html">PostConfirmStatusSpecAssociation</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
               </div>
             </div>
           </div>
@@ -106,7 +115,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">NextActionSpec</a><span class="token operator">?</span><span class="token punctuation">.</span><a href="../transform.html"><span class="token function">transform</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../payments-core/com.stripe.android.model/-luxe-post-confirm-action-repository/-luxe-action/index.html">LuxePostConfirmActionRepository.LuxeAction</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html">NextActionSpec</a><span class="token operator">?</span><span class="token punctuation">.</span><a href="../transform.html"><span class="token function">transform</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../../payments-core/com.stripe.android.model/-luxe-post-confirm-action-repository/-luxe-action/index.html">LuxePostConfirmActionRepository.LuxeAction</a></div></div></div>
               </div>
             </div>
           </div>
