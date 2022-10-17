@@ -37,6 +37,7 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
 
     override suspend fun postAuthorizationSession(
         clientSecret: String,
+        applicationId: String,
         institution: FinancialConnectionsInstitution
     ): FinancialConnectionsAuthorizationSession = postAuthorizationSessionProvider()
 
