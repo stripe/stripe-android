@@ -1,5 +1,7 @@
 package com.stripe.android.payments.core.authentication
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.FakeActivityResultLauncher
@@ -19,6 +21,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -33,6 +36,10 @@ class UnsupportedAuthenticatorTest {
         paymentRelayStarterFactory
     )
 
+    private val host = mock<AuthActivityStarterHost> {
+        on { lifecycleOwner } doReturn TestLifecycleOwner(initialState = Lifecycle.State.RESUMED)
+    }
+
     private val launcher = FakeActivityResultLauncher(PaymentRelayContract())
 
     @Before
@@ -46,8 +53,8 @@ class UnsupportedAuthenticatorTest {
 
     @Test
     fun verifyWeChat() = runTest {
-        authenticator.performAuthentication(
-            mock(),
+        authenticator.authenticate(
+            host,
             PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,
             REQUEST_OPTIONS
         )
@@ -70,8 +77,8 @@ class UnsupportedAuthenticatorTest {
 
     @Test
     fun verifyNullNextActionType() = runTest {
-        authenticator.performAuthentication(
-            mock(),
+        authenticator.authenticate(
+            host,
             PI_SUCCEEDED,
             REQUEST_OPTIONS
         )

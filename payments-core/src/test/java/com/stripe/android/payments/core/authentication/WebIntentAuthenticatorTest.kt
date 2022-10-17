@@ -1,6 +1,8 @@
 package com.stripe.android.payments.core.authentication
 
 import android.content.Context
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -27,6 +29,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -45,7 +48,9 @@ class WebIntentAuthenticatorTest {
     )
 
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val host = mock<AuthActivityStarterHost>()
+    private val host = mock<AuthActivityStarterHost> {
+        on { lifecycleOwner } doReturn TestLifecycleOwner(initialState = Lifecycle.State.RESUMED)
+    }
 
     private val paymentBrowserWebStarter = mock<PaymentBrowserAuthStarter>()
 
@@ -138,7 +143,7 @@ class WebIntentAuthenticatorTest {
         expectedShouldCancelIntentOnUserNavigation: Boolean = true,
         expectedAnalyticsEvent: PaymentAnalyticsEvent?
     ) = runTest {
-        authenticator.performAuthentication(
+        authenticator.authenticate(
             host,
             stripeIntent,
             REQUEST_OPTIONS

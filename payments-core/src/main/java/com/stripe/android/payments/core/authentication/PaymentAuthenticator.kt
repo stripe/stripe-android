@@ -2,7 +2,6 @@ package com.stripe.android.payments.core.authentication
 
 import android.app.Activity
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenResumed
@@ -39,8 +38,7 @@ abstract class PaymentAuthenticator<Authenticatable> : ActivityResultLauncherHos
         }
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    abstract suspend fun performAuthentication(
+    protected abstract suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: Authenticatable,
         requestOptions: ApiRequest.Options
