@@ -37,17 +37,17 @@ internal class PostalCodeConfig(
 
         override fun getError(): FieldError? {
             return when {
-                input.isNotBlank() && !isFull() && country == "US" -> {
+                input.isNotBlank() && !isValid() && country == "US" -> {
                     FieldError(R.string.address_zip_invalid)
                 }
-                input.isNotBlank() && !isFull() -> {
+                input.isNotBlank() && !isValid() -> {
                     FieldError(R.string.address_zip_postal_invalid)
                 }
                 else -> null
             }
         }
 
-        override fun isFull(): Boolean = input.length >= format.minimumLength
+        override fun isFull(): Boolean = input.length >= format.maximumLength
 
         override fun isBlank(): Boolean = input.isBlank()
     }

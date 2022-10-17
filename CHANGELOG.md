@@ -5,6 +5,7 @@
 ### Payments
 
 * [FIXED][5701](https://github.com/stripe/stripe-android/pull/5701) Treat blank fields as invalid in `ShippingInfoWidget`.
+* [FIXED][5715](https://github.com/stripe/stripe-android/pull/5715) Postal codes for countries other than US and Canada are no longer limited to a single character.
 
 ## 20.15.0 - 2022-10-11
 
