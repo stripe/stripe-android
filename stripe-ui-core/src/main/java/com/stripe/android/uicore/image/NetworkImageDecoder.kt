@@ -49,8 +49,8 @@ class NetworkImageDecoder {
 
     private fun URL.stream(): InputStream {
         val con: URLConnection = openConnection()
-        con.connectTimeout = 10_000
-        con.readTimeout = 10_000
+        con.connectTimeout = IMAGE_STREAM_TIMEOUT
+        con.readTimeout = IMAGE_STREAM_TIMEOUT
         return con.getInputStream()
     }
 
@@ -72,5 +72,9 @@ class NetworkImageDecoder {
             }
         }
         return inSampleSize
+    }
+
+    private companion object {
+        const val IMAGE_STREAM_TIMEOUT = 10_000
     }
 }
