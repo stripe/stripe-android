@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import androidx.annotation.RestrictTo
 import androidx.annotation.WorkerThread
+import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -115,3 +116,18 @@ class StripeImageLoader(
 
 private fun Context.isDebuggable(): Boolean =
     (0 != (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE))
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+object StripeImageLoaderHolder {
+
+    private var imageLoader: StripeImageLoader? = null
+
+    /**
+     * Get the singleton [StripeImageLoader].
+     */
+    @JvmStatic
+    fun imageLoader(context: Context) = imageLoader ?: StripeImageLoader(context)
+}
+
+inline val Context.imageLoader: StripeImageLoader
+    get() = StripeImageLoaderHolder.imageLoader(this)

@@ -1,6 +1,5 @@
 package com.stripe.android.uicore.image
 
-import android.content.ContentResolver
 import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
@@ -42,10 +41,60 @@ import kotlinx.coroutines.launch
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 fun StripeImage(
-    url: String,
-    imageLoader: StripeImageLoader,
+    model: Any,
     contentDescription: String?,
     modifier: Modifier = Modifier,
+    imageLoader: StripeImageLoader = LocalContext.current.imageLoader,
+    contentScale: ContentScale = ContentScale.Fit,
+    errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
+    loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {}
+) {
+    when (model) {
+        is String -> {
+            StripeImageWithUrl(
+                url = model,
+                contentDescription = contentDescription,
+                modifier = modifier,
+                imageLoader = imageLoader,
+                contentScale = contentScale,
+                errorContent = errorContent,
+                loadingContent = loadingContent
+            )
+        }
+        is Uri -> {
+            if (model.isRemote()) {
+                StripeImageWithUrl(
+                    url = model.toString(),
+                    contentDescription = contentDescription,
+                    modifier = modifier,
+                    imageLoader = imageLoader,
+                    contentScale = contentScale,
+                    errorContent = errorContent,
+                    loadingContent = loadingContent
+                )
+            } else {
+                Image(
+                    modifier = modifier,
+                    contentDescription = contentDescription,
+                    contentScale = contentScale,
+                    painter = rememberDrawablePainter(
+                        drawable = LocalContext.current.getDrawableFromUri(
+                            model
+                        )
+                    )
+                )
+            }
+        }
+    }
+
+}
+
+@Composable
+private fun StripeImageWithUrl(
+    url: String,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    imageLoader: StripeImageLoader,
     contentScale: ContentScale = ContentScale.Fit,
     errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
     loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {}
@@ -74,69 +123,6 @@ fun StripeImage(
                 contentDescription = contentDescription,
                 contentScale = contentScale,
                 painter = result.painter
-            )
-        }
-    }
-}
-
-/**
- * A composable to load a image through [Uri]. Supported Uir schemes are [HTTP], [HTTPS],
- * [ContentResolver.SCHEME_ANDROID_RESOURCE], [ContentResolver.SCHEME_CONTENT] and
- * [ContentResolver.SCHEME_FILE].
- *
- *
- * @param uri to be requested and rendered.
- * @param placeholder A [Painter] that is displayed while the image is loading.
- * @param modifier Modifier used to adjust the layout algorithm or draw decoration content.
- * @param imageLoader The [StripeImageLoader] that will be used to execute the request if this is a remote Uri.
- * @param contentDescription Text used by accessibility services to describe what this image
- *  represents. This should always be provided unless this image is used for decorative purposes,
- *  and does not represent a meaningful action that a user can take.
- * @param contentScale Optional scale parameter used to determine the aspect ratio scaling to be
- *  used if the bounds are a different size from the intrinsic size of the painter.
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Composable
-fun StripeImage(
-    uri: Uri,
-    placeholder: Painter,
-    modifier: Modifier = Modifier,
-    imageLoader: StripeImageLoader = StripeImageLoader(LocalContext.current),
-    contentDescription: String? = null,
-    contentScale: ContentScale = ContentScale.Fit
-) {
-    BoxWithConstraints(modifier) {
-        val (width, height) = calculateBoxSize()
-        if (uri.isRemote()) {
-            var painter: Painter by remember {
-                mutableStateOf(BitmapPainter(ImageBitmap(width, height)))
-            }
-            LaunchedEffect(uri) {
-                launch {
-                    imageLoader
-                        .load(uri.toString(), width, height)
-                        .fold(
-                            onSuccess = { bitmap -> BitmapPainter(bitmap.asImageBitmap()) },
-                            onFailure = { placeholder }
-                        ).let { painter = it }
-                }
-            }
-            Image(
-                modifier = modifier,
-                contentDescription = contentDescription,
-                contentScale = contentScale,
-                painter = painter
-            )
-        } else {
-            Image(
-                modifier = modifier,
-                contentDescription = contentDescription,
-                contentScale = contentScale,
-                painter = rememberDrawablePainter(
-                    drawable = LocalContext.current.getDrawableFromUri(
-                        uri
-                    )
-                )
             )
         }
     }
