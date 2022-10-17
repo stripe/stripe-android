@@ -4,7 +4,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.annotation.RestrictTo
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.InputStream
 import java.net.URL
+import java.net.URLConnection
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -36,13 +38,20 @@ class NetworkImageDecoder {
         url: String
     ): Bitmap? = suspendCancellableCoroutine { cont ->
         kotlin.runCatching {
-            URL(url).openStream()
+            URL(url).stream()
                 .also { stream -> cont.invokeOnCancellation { stream.close() } }
                 .use { BitmapFactory.decodeStream(it, null, this) }
         }.fold(
             onSuccess = { cont.resume(it) },
             onFailure = { cont.resumeWithException(it) }
         )
+    }
+
+    private fun URL.stream(): InputStream {
+        val con: URLConnection = openConnection()
+        con.connectTimeout = IMAGE_STREAM_TIMEOUT
+        con.readTimeout = IMAGE_STREAM_TIMEOUT
+        return con.getInputStream()
     }
 
     private fun calculateInSampleSize(
@@ -63,5 +72,9 @@ class NetworkImageDecoder {
             }
         }
         return inSampleSize
+    }
+
+    private companion object {
+        const val IMAGE_STREAM_TIMEOUT = 10_000
     }
 }
