@@ -34,9 +34,9 @@ internal class SourceAuthenticator @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
-) : PaymentAuthenticator<Source> {
+) : PaymentAuthenticator<Source>() {
 
-    override suspend fun authenticate(
+    override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: Source,
         requestOptions: ApiRequest.Options
@@ -60,7 +60,6 @@ internal class SourceAuthenticator @Inject constructor(
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceRedirect)
         )
-
         paymentBrowserAuthStarter.start(
             PaymentBrowserAuthContract.Args(
                 objectId = source.id.orEmpty(),

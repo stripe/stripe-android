@@ -2,6 +2,8 @@ package com.stripe.android.payments.core.authentication
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleRegistry
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
@@ -15,6 +17,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -23,7 +26,12 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 @ExperimentalCoroutinesApi
 class Stripe3DS2AuthenticatorTest {
-    private val activity: ComponentActivity = mock()
+    private val activity: ComponentActivity = mock {
+        on { lifecycle } doReturn LifecycleRegistry(mock).apply {
+            currentState = Lifecycle.State.RESUMED
+        }
+    }
+
     private val host = AuthActivityStarterHost.create(activity)
 
     private val paymentAuthConfig = PaymentAuthConfig.Builder().set3ds2Config(

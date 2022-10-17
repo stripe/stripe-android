@@ -6,6 +6,7 @@
 
 * [FIXED][5701](https://github.com/stripe/stripe-android/pull/5701) Treat blank fields as invalid in `ShippingInfoWidget`.
 * [FIXED][5715](https://github.com/stripe/stripe-android/pull/5715) Postal codes for countries other than US and Canada are no longer limited to a single character.
+* [FIXED][5667](https://github.com/stripe/stripe-android/pull/5667) Completed payments are no longer incorrectly reported as having failed if the app is backgrounded during confirmation on Android 10 and 11.
 
 ## 20.15.0 - 2022-10-11
 
