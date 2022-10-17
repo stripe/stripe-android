@@ -5,7 +5,6 @@ import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import androidx.annotation.RestrictTo
 import androidx.annotation.WorkerThread
-import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
