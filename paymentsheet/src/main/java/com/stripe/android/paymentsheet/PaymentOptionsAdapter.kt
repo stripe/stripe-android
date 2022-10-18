@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -605,6 +606,9 @@ internal class PaymentOptionsAdapter(
     }
 }
 
+@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+const val PAYMENT_OPTION_CARD_TEST_TAG = "PAYMENT_OPTION_CARD_TEST_TAG"
+
 @Composable
 internal fun PaymentOptionUi(
     viewWidth: Dp,
@@ -627,9 +631,6 @@ internal fun PaymentOptionUi(
             .padding(top = 12.dp)
             .width(viewWidth)
             .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
-            .selectable(selected = isSelected, enabled = isEnabled, onClick = {
-                onItemSelectedListener()
-            })
     ) {
         val (checkIcon, deleteIcon, label, card) = createRefs()
         SectionCard(
@@ -647,7 +648,14 @@ internal fun PaymentOptionUi(
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .testTag(PAYMENT_OPTION_CARD_TEST_TAG + labelText)
+                    .selectable(
+                        selected = isSelected,
+                        enabled = isEnabled,
+                        onClick = onItemSelectedListener,
+                    ),
             ) {
                 Image(
                     painter = painterResource(iconRes),

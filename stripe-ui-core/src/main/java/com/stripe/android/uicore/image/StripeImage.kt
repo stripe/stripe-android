@@ -101,7 +101,6 @@ private fun BoxWithConstraintsScope.calculateBoxSize(): Pair<Int, Int> {
     return Pair(width, height)
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 private sealed class StripeImageState {
     object Loading : StripeImageState()
     data class Success(val painter: Painter) : StripeImageState()

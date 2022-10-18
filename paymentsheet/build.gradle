@@ -45,6 +45,7 @@ dependencies {
     implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
     implementation "com.google.accompanist:accompanist-flowlayout:$accompanistVersion"
     // Tooling support (Previews, etc.)
+    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeVersion"
     debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"

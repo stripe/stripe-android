@@ -40,12 +40,14 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
+import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
@@ -194,7 +196,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    internal var paymentLauncher: PaymentLauncher? = null
+    private var paymentLauncher: StripePaymentLauncher? = null
 
     init {
         eventReporter.onInit(config)
@@ -409,7 +411,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 PaymentLauncherContract(),
                 ::onPaymentResult
             )
-        )
+        ).also {
+            it.registerPollingAuthenticator()
+        }
     }
 
     /**
@@ -417,6 +421,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * Must be called from the Activity's `onDestroy`.
      */
     fun unregisterFromActivity() {
+        paymentLauncher?.unregisterPollingAuthenticator()
         linkActivityResultLauncher = null
         paymentLauncher = null
     }

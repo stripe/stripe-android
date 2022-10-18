@@ -28,9 +28,9 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -43,6 +43,8 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
+import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerFlowControllerComponent
 import com.stripe.android.paymentsheet.injection.FlowControllerComponent
@@ -118,7 +120,7 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     lateinit var flowControllerComponent: FlowControllerComponent
 
-    private var paymentLauncher: PaymentLauncher? = null
+    private var paymentLauncher: StripePaymentLauncher? = null
 
     private val resourceRepositories = listOf(lpmResourceRepository, addressResourceRepository)
 
@@ -147,10 +149,13 @@ internal class DefaultFlowController @Inject internal constructor(
                             PaymentLauncherContract(),
                             ::onPaymentResult
                         )
-                    )
+                    ).also {
+                        it.registerPollingAuthenticator()
+                    }
                 }
 
                 override fun onDestroy(owner: LifecycleOwner) {
+                    paymentLauncher?.unregisterPollingAuthenticator()
                     paymentLauncher = null
                 }
             }

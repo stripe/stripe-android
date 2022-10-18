@@ -9,6 +9,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
@@ -29,6 +30,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -40,6 +42,9 @@ import kotlin.test.Test
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class USBankAccountFormViewModelTest {
+
+    private val onConfirmStripeIntent: (ConfirmStripeIntentParams) -> Unit = mock()
+    private val onUpdateSelectionAndFinish: (PaymentSelection) -> Unit = mock()
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
         formArgs = FormFragmentArguments(
@@ -54,11 +59,12 @@ class USBankAccountFormViewModelTest {
                 email = CUSTOMER_EMAIL
             )
         ),
-        completePayment = true,
+        isCompleteFlow = true,
         clientSecret = PaymentIntentClientSecret("pi_12345"),
-        savedScreenState = null,
         savedPaymentMethod = null,
-        shippingDetails = null
+        shippingDetails = null,
+        onConfirmStripeIntent = onConfirmStripeIntent,
+        onUpdateSelectionAndFinish = onUpdateSelectionAndFinish
     )
 
     private val stripeRepository = mock<StripeRepository>()
@@ -142,7 +148,9 @@ class USBankAccountFormViewModelTest {
 
             val newScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             assertThat(newScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.ConfirmIntent::class.java)
+                .isInstanceOf(USBankAccountFormScreenState.VerifyWithMicrodeposits::class.java)
+
+            verify(onConfirmStripeIntent).invoke(any())
         }
 
     @Test
@@ -162,17 +170,18 @@ class USBankAccountFormViewModelTest {
 
             val newScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             assertThat(newScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.ConfirmIntent::class.java)
+                .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
+
+            verify(onConfirmStripeIntent).invoke(any())
         }
 
     @Test
     fun `when payment options, unverified bank account, then finished`() =
         runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(defaultArgs.copy(completePayment = false))
+            val viewModel = createViewModel(defaultArgs.copy(isCompleteFlow = false))
+            val bankAccount = mockUnverifiedBankAccount()
 
-            viewModel.handleCollectBankAccountResult(
-                mockUnverifiedBankAccount()
-            )
+            viewModel.handleCollectBankAccountResult(bankAccount)
 
             val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             assertThat(currentScreenState)
@@ -182,17 +191,25 @@ class USBankAccountFormViewModelTest {
 
             val newScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             assertThat(newScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.Finished::class.java)
+                .isInstanceOf(USBankAccountFormScreenState.VerifyWithMicrodeposits::class.java)
+
+            val session = (bankAccount as CollectBankAccountResult.Completed).response.financialConnectionsSession
+            val expectedBankAccount = session.paymentAccount as BankAccount
+
+            val argumentCaptor = argumentCaptor<PaymentSelection>()
+            verify(onUpdateSelectionAndFinish).invoke(argumentCaptor.capture())
+
+            val actualBankAccount = argumentCaptor.firstValue as PaymentSelection.New.USBankAccount
+            assertThat(expectedBankAccount.last4).isEqualTo(actualBankAccount.last4)
         }
 
     @Test
     fun `when payment options, verified bank account, then finished`() =
         runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(defaultArgs.copy(completePayment = false))
+            val viewModel = createViewModel(defaultArgs.copy(isCompleteFlow = false))
+            val bankAccount = mockVerifiedBankAccount()
 
-            viewModel.handleCollectBankAccountResult(
-                mockVerifiedBankAccount()
-            )
+            viewModel.handleCollectBankAccountResult(bankAccount)
 
             val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             assertThat(currentScreenState)
@@ -202,7 +219,16 @@ class USBankAccountFormViewModelTest {
 
             val newScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
             assertThat(newScreenState)
-                .isInstanceOf(USBankAccountFormScreenState.Finished::class.java)
+                .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
+
+            val session = (bankAccount as CollectBankAccountResult.Completed).response.financialConnectionsSession
+            val expectedBankAccount = session.paymentAccount as FinancialConnectionsAccount
+
+            val argumentCaptor = argumentCaptor<PaymentSelection>()
+            verify(onUpdateSelectionAndFinish).invoke(argumentCaptor.capture())
+
+            val actualBankAccount = argumentCaptor.firstValue as PaymentSelection.New.USBankAccount
+            assertThat(expectedBankAccount.last4).isEqualTo(actualBankAccount.last4)
         }
 
     @Test
@@ -249,34 +275,6 @@ class USBankAccountFormViewModelTest {
                         intentId = "1234",
                         paymentMethodCreateParams = mock(),
                         customerRequestedSave = mock()
-                    )
-                )
-            )
-
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
-
-            assertThat(
-                currentScreenState
-            ).isInstanceOf(
-                USBankAccountFormScreenState.SavedAccount::class.java
-            )
-        }
-
-    @Test
-    fun `when saved screen state, saved screen state is emitted`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(
-                defaultArgs.copy(
-                    savedScreenState = USBankAccountFormScreenState.SavedAccount(
-                        name = "Test",
-                        email = "test@email.com",
-                        bankName = "Test",
-                        last4 = "Test",
-                        financialConnectionsSessionId = "1234",
-                        intentId = "1234",
-                        primaryButtonText = "Test",
-                        mandateText = "Test",
-                        saveForFutureUsage = true
                     )
                 )
             )

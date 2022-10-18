@@ -2,6 +2,19 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+## 20.15.1 - 2022-10-17
+
+This release fixes some bugs in `ShippingInfoWidget`, `PaymentSheet`, and when the app is backgrounded during confirmation on Android 10 and 11.
+
+### Payments
+
+* [FIXED][5701](https://github.com/stripe/stripe-android/pull/5701) Treat blank fields as invalid in `ShippingInfoWidget`.
+* [FIXED][5667](https://github.com/stripe/stripe-android/pull/5667) Completed payments are no longer incorrectly reported as having failed if the app is backgrounded during confirmation on Android 10 and 11.
+
+### PaymentSheet
+
+* [FIXED][5715](https://github.com/stripe/stripe-android/pull/5715) Postal codes for countries other than US and Canada are no longer limited to a single character.
+
 ## 20.15.0 - 2022-10-11
 
 This release adds Link as a payment method to the SDK and fixes a minor issue with CardScan.
