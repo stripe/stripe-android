@@ -212,7 +212,7 @@ private fun PrePaneContent(
             style = FinancialConnectionsTheme.typography.body
         )
         Spacer(modifier = Modifier.weight(1f))
-        if (flow != null && showPartnerDisclosure) PartnerCallout(flow = flow)
+        if (flow != null && showPartnerDisclosure) PartnerCallout(flow)
         Spacer(modifier = Modifier.size(16.dp))
         FinancialConnectionsButton(
             onClick = onContinueClick,

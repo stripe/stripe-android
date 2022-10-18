@@ -3,6 +3,7 @@
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
+import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount.SupportedPaymentMethodTypes
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
@@ -104,11 +105,20 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName(value = "accountholder_is_link_consumer")
     val accountholderIsLinkConsumer: Boolean? = null,
 
+    @SerialName(value = "accountholder_phone_number")
+    val accountholderPhoneNumber: String? = null,
+
+    @SerialName(value = "accountholder_token")
+    val accountholderToken: String? = null,
+
     @SerialName(value = "active_auth_session")
     val activeAuthSession: FinancialConnectionsAuthorizationSession? = null,
 
     @SerialName(value = "active_institution")
     val activeInstitution: FinancialConnectionsInstitution? = null,
+
+    @SerialName(value = "assignment_event_id")
+    val assignmentEventId: String? = null,
 
     @SerialName(value = "business_name")
     val businessName: String? = null,
@@ -121,6 +131,12 @@ internal data class FinancialConnectionsSessionManifest(
 
     @SerialName(value = "connected_account_name")
     val connectedAccountName: String? = null,
+
+    @SerialName(value = "experiment_assignments")
+    val experimentAssignments: Map<String, String>? = null,
+
+    @SerialName(value = "features")
+    val features: Map<String, Boolean>? = null,
 
     @SerialName(value = "hosted_auth_url")
     val hostedAuthUrl: String,
@@ -140,21 +156,20 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName(value = "is_stripe_direct")
     val isStripeDirect: Boolean? = null,
 
+    @SerialName(value = "link_account_session_cancellation_behavior")
+    val linkAccountSessionCancellationBehavior: LinkAccountSessionCancellationBehavior? = null,
+
     @SerialName(value = "modal_customization")
     val modalCustomization: Map<String, Boolean>? = null,
 
     @SerialName(value = "payment_method_type")
     val paymentMethodType: SupportedPaymentMethodTypes? = null,
 
+    @SerialName(value = "step_up_authentication_required")
+    val stepUpAuthenticationRequired: Boolean? = null,
+
     @SerialName(value = "success_url")
     val successUrl: String,
-
-    /**
-     * TODO@carlosmuvi mock manifest field to simulate experiment-based authFlow.
-     */
-    @kotlinx.serialization.Transient
-    val nativeAuthFlowEnabled: Boolean = true
-
 ) : Parcelable {
 
     /**
@@ -164,7 +179,7 @@ internal data class FinancialConnectionsSessionManifest(
      * LINK_CONSENT,LINK_LOGIN,MANUAL_ENTRY,MANUAL_ENTRY_SUCCESS,NETWORKING_LINK_LOGIN_WARMUP,
      * NETWORKING_LINK_SIGNUP_PANE,NETWORKING_LINK_VERIFICATION,PARTNER_AUTH,SUCCESS,UNEXPECTED_ERROR
      */
-    @Serializable
+    @Serializable(with = NextPane.Serializer::class)
     enum class NextPane(val value: String) {
         @SerialName(value = "account_picker")
         ACCOUNT_PICKER("account_picker"),
@@ -209,7 +224,14 @@ internal data class FinancialConnectionsSessionManifest(
         SUCCESS("success"),
 
         @SerialName(value = "unexpected_error")
-        UNEXPECTED_ERROR("unexpected_error");
+        UNEXPECTED_ERROR("unexpected_error"),
+
+        // CLIENT SIDE PANES
+        @SerialName(value = "reset")
+        RESET("reset");
+
+        internal object Serializer :
+            EnumIgnoreUnknownSerializer<NextPane>(NextPane.values(), UNEXPECTED_ERROR)
     }
 
     /**
@@ -219,7 +241,7 @@ internal data class FinancialConnectionsSessionManifest(
      * EMERALD,EXPRESS_ONBOARDING,EXTERNAL_API,ISSUING,LCPM,LINK_WITH_NETWORKING,
      * OPAL,PAYMENT_FLOWS,RESERVE_APPEALS,STANDARD_ONBOARDING,STRIPE_CARD,SUPPORT_SITE
      */
-    @Serializable
+    @Serializable(with = Product.Serializer::class)
     @Suppress("unused")
     enum class Product(val value: String) {
         @SerialName(value = "billpay")
@@ -277,7 +299,13 @@ internal data class FinancialConnectionsSessionManifest(
         STRIPE_CARD("stripe_card"),
 
         @SerialName(value = "support_site")
-        SUPPORT_SITE("support_site");
+        SUPPORT_SITE("support_site"),
+
+        @SerialName(value = "unknown")
+        UNKNOWN("unknown");
+
+        internal object Serializer :
+            EnumIgnoreUnknownSerializer<Product>(Product.values(), UNKNOWN)
     }
 
     /**
@@ -285,7 +313,7 @@ internal data class FinancialConnectionsSessionManifest(
      *
      * Values: DASHBOARD,EMAIL,SUPPORT
      */
-    @Serializable
+    @Serializable(with = AccountDisconnectionMethod.Serializer::class)
     enum class AccountDisconnectionMethod(val value: String) {
         @SerialName(value = "dashboard")
         DASHBOARD("dashboard"),
@@ -294,7 +322,16 @@ internal data class FinancialConnectionsSessionManifest(
         EMAIL("email"),
 
         @SerialName(value = "support")
-        SUPPORT("support");
+        SUPPORT("support"),
+
+        @SerialName(value = "unknown")
+        UNKNOWN("unknown");
+
+        internal object Serializer :
+            EnumIgnoreUnknownSerializer<AccountDisconnectionMethod>(
+                AccountDisconnectionMethod.values(),
+                UNKNOWN
+            )
     }
 
     /**
@@ -339,7 +376,7 @@ internal data class FinancialConnectionsSessionManifest(
 
     ) : Parcelable {
 
-        @Serializable
+        @Serializable(with = Flow.Serializer::class)
         enum class Flow(val value: String?) {
             @SerialName("direct")
             DIRECT("direct"),
@@ -396,7 +433,40 @@ internal data class FinancialConnectionsSessionManifest(
             WELLS_FARGO("wells_fargo"),
 
             @SerialName("wells_fargo_webview")
-            WELLS_FARGO_WEBVIEW("wells_fargo_webview");
+            WELLS_FARGO_WEBVIEW("wells_fargo_webview"),
+
+            @SerialName(value = "unknown")
+            UNKNOWN("unknown");
+
+            internal object Serializer :
+                EnumIgnoreUnknownSerializer<Flow>(Flow.values(), UNKNOWN)
         }
     }
+
+    /**
+     *
+     *
+     * Values: SILENT_SUCCESS,USER_ERROR
+     */
+    @Serializable(with = LinkAccountSessionCancellationBehavior.Serializer::class)
+    enum class LinkAccountSessionCancellationBehavior(val value: String) {
+        @SerialName(value = "treat_as_silent_success")
+        SILENT_SUCCESS("treat_as_silent_success"),
+
+        @SerialName(value = "treat_as_user_error")
+        USER_ERROR("treat_as_user_error"),
+
+        @SerialName(value = "unknown")
+        UNKNOWN("unknown");
+
+        internal object Serializer :
+            EnumIgnoreUnknownSerializer<LinkAccountSessionCancellationBehavior>(
+                LinkAccountSessionCancellationBehavior.values(),
+                UNKNOWN
+            )
+    }
 }
+
+internal val FinancialConnectionsSessionManifest.nativeAuthFlowEnabled: Boolean
+    get() = true
+// get() = this.experimentAssignments?.any { it.key == "native" && it.value == "true" } ?: false

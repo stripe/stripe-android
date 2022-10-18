@@ -11,11 +11,14 @@ internal object FinancialConnectionsUrlResolver {
     fun getDisconnectUrl(manifest: FinancialConnectionsSessionManifest): String {
         return when (manifest.accountDisconnectionMethod) {
             AccountDisconnectionMethod.DASHBOARD -> FinancialConnectionsUrls.Disconnect.dashboard
-            AccountDisconnectionMethod.SUPPORT -> when (manifest.isEndUserFacing ?: false) {
+            AccountDisconnectionMethod.SUPPORT,
+            AccountDisconnectionMethod.UNKNOWN -> when (manifest.isEndUserFacing ?: false) {
                 true -> FinancialConnectionsUrls.Disconnect.supportEndUser
                 false -> FinancialConnectionsUrls.Disconnect.supportMerchantUser
             }
-            AccountDisconnectionMethod.EMAIL, null -> FinancialConnectionsUrls.Disconnect.email
+
+            AccountDisconnectionMethod.EMAIL,
+            null -> FinancialConnectionsUrls.Disconnect.email
         }
     }
 

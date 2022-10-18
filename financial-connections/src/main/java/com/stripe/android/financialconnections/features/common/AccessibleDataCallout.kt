@@ -152,7 +152,7 @@ private fun AccessibleDataText(
             color = FinancialConnectionsTheme.colors.textSecondary
         ),
         annotationStyles = mapOf(
-            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption
                 .toSpanStyle()
                 .copy(color = FinancialConnectionsTheme.colors.textBrand),
             StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
