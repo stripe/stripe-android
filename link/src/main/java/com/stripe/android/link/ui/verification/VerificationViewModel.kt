@@ -111,10 +111,7 @@ internal class VerificationViewModel @Inject constructor(
 
     fun startVerification() {
         updateViewState {
-            it.copy(
-                isSendingNewCode = true,
-                errorMessage = null,
-            )
+            it.copy(errorMessage = null)
         }
 
         viewModelScope.launch {
@@ -129,6 +126,11 @@ internal class VerificationViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun resendCode() {
+        updateViewState { it.copy(isSendingNewCode = true) }
+        startVerification()
     }
 
     fun didShowCodeSentNotification() {

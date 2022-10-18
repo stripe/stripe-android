@@ -156,7 +156,7 @@ internal fun VerificationBody(
         focusRequester = focusRequester,
         onBack = viewModel::onBack,
         onChangeEmailClick = viewModel::onChangeEmailClicked,
-        onResendCodeClick = viewModel::startVerification
+        onResendCodeClick = viewModel::resendCode,
     )
 }
 

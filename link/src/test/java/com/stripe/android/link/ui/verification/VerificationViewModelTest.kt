@@ -143,6 +143,34 @@ class VerificationViewModelTest {
     }
 
     @Test
+    fun `Resending code is reflected in state`() = runTest {
+        whenever(linkAccountManager.startVerification()).thenReturn(Result.success(mock()))
+
+        val viewModel = createViewModel().apply {
+            resendCode()
+        }
+
+        val state = viewModel.viewState.value
+        assertThat(state.isSendingNewCode).isFalse()
+        assertThat(state.didSendNewCode).isTrue()
+    }
+
+    @Test
+    fun `Failing to resend code is reflected in state`() = runTest {
+        whenever(linkAccountManager.startVerification())
+            .thenReturn(Result.failure(RuntimeException("error")))
+
+        val viewModel = createViewModel().apply {
+            resendCode()
+        }
+
+        val state = viewModel.viewState.value
+        assertThat(state.isSendingNewCode).isFalse()
+        assertThat(state.didSendNewCode).isFalse()
+        assertThat(state.errorMessage).isEqualTo(ErrorMessage.Raw("error"))
+    }
+
+    @Test
     fun `Factory gets initialized by Injector`() {
         val mockBuilder = mock<SignedInViewModelSubcomponent.Builder>()
         val mockSubComponent = mock<SignedInViewModelSubcomponent>()
