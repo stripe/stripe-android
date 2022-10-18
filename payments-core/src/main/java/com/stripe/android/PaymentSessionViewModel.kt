@@ -100,15 +100,22 @@ internal class PaymentSessionViewModel(
         onComplete: () -> Unit
     ) {
         if (isInitialFetch) {
-            fetchCustomerPaymentMethod(
-                paymentMethodId = paymentSessionPrefs.getPaymentMethodId(customerId)
-            ) { paymentMethod ->
-                paymentMethod?.let {
+            paymentSessionPrefs.getPaymentMethod(customerId)?.let {
+                if (it is PaymentSessionPrefs.SelectedPaymentMethod.GooglePay) {
                     paymentSessionData = paymentSessionData.copy(
-                        paymentMethod = it
+                        useGooglePay = true
                     )
+                    onComplete()
+                } else {
+                    fetchCustomerPaymentMethod(it.stringValue) { paymentMethod ->
+                        paymentMethod?.let {
+                            paymentSessionData = paymentSessionData.copy(
+                                paymentMethod = it
+                            )
+                        }
+                        onComplete()
+                    }
                 }
-                onComplete()
             }
         } else {
             onComplete()
@@ -150,16 +157,18 @@ internal class PaymentSessionViewModel(
     }
 
     @JvmSynthetic
-    fun getSelectedPaymentMethodId(userSelectedPaymentMethodId: String? = null): String? {
+    fun getSelectedPaymentMethod(userSelectedPaymentMethodId: String? = null): PaymentSessionPrefs.SelectedPaymentMethod? {
         return if (paymentSessionData.useGooglePay) {
             null
         } else {
-            userSelectedPaymentMethodId
+            PaymentSessionPrefs.SelectedPaymentMethod.fromString(userSelectedPaymentMethodId)
                 ?: if (paymentSessionData.paymentMethod != null) {
-                    paymentSessionData.paymentMethod?.id
+                    PaymentSessionPrefs.SelectedPaymentMethod.fromString(
+                        paymentSessionData.paymentMethod?.id
+                    )
                 } else {
                     customerSession.cachedCustomer?.id?.let { customerId ->
-                        paymentSessionPrefs.getPaymentMethodId(customerId)
+                        paymentSessionPrefs.getPaymentMethod(customerId)
                     }
                 }
         }
@@ -178,7 +187,19 @@ internal class PaymentSessionViewModel(
         useGooglePay: Boolean
     ) {
         customerSession.cachedCustomer?.id?.let { customerId ->
-            paymentSessionPrefs.savePaymentMethodId(customerId, paymentMethod?.id)
+            val selectedPaymentMethod = if (useGooglePay) {
+                PaymentSessionPrefs.SelectedPaymentMethod.GooglePay
+            } else {
+                paymentMethod?.id?.let {
+                    PaymentSessionPrefs.SelectedPaymentMethod.Saved(
+                        it
+                    )
+                }
+            }
+            paymentSessionPrefs.savePaymentMethod(
+                customerId,
+                selectedPaymentMethod
+            )
         }
         paymentSessionData = paymentSessionData.copy(
             paymentMethod = paymentMethod,
