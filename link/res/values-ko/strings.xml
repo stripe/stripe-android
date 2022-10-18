@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[Link에 참여하면 <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 동의하는 것입니다.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">이메일 변경</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">코드 전송 완료</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">확인 코드 입력</string>
   <!-- Two factor authentication screen heading -->

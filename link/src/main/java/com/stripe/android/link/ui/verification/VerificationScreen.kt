@@ -138,7 +138,7 @@ internal fun VerificationBody(
 
     LaunchedEffect(viewState.didSendNewCode) {
         if (viewState.didSendNewCode) {
-            Toast.makeText(context, "Code sent", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.verification_code_sent, Toast.LENGTH_SHORT).show()
             viewModel.didShowCodeSentNotification()
         }
     }

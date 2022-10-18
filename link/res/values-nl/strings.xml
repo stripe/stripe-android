@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[Door Link te gebruiken ga je akkoord met de <terms>voorwaarden</terms> en het <privacy>privacybeleid</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">E-mailadres wijzigen</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">Code verstuurd</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">Voer je verificatiecode in.</string>
   <!-- Two factor authentication screen heading -->

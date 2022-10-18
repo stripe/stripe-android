@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[Al unirte a Link, aceptas las <terms>Condiciones de servicio</terms> y la <privacy>Política de privacidad</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">Cambiar correo electrónico</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">Código enviado</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">Escribe el código de verificación</string>
   <!-- Two factor authentication screen heading -->

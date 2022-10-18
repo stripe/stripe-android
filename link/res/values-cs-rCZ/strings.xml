@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[Připojením se ke službám Link vyjadřujete zároveň svůj souhlas s <terms>Podmínkami</terms> a <privacy>Zásadami ochrany osobních údajů</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">Změnit e-mail</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">Kód odeslán</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">Zadejte svůj ověřovací kód</string>
   <!-- Two factor authentication screen heading -->
