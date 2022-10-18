@@ -115,18 +115,3 @@ class StripeImageLoader(
 
 private fun Context.isDebuggable(): Boolean =
     (0 != (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE))
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object StripeImageLoaderHolder {
-
-    private var imageLoader: StripeImageLoader? = null
-
-    /**
-     * Get the singleton [StripeImageLoader].
-     */
-    @JvmStatic
-    fun imageLoader(context: Context) = imageLoader ?: StripeImageLoader(context)
-}
-
-inline val Context.imageLoader: StripeImageLoader
-    get() = StripeImageLoaderHolder.imageLoader(this)
