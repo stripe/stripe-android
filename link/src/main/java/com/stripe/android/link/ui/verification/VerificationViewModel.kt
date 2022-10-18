@@ -36,6 +36,7 @@ internal data class VerificationViewState(
 /**
  * ViewModel that handles user verification confirmation logic.
  */
+@Suppress("TooManyFunctions")
 internal class VerificationViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,

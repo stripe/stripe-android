@@ -205,32 +205,13 @@ internal fun VerificationBody(
                 focusRequester = focusRequester
             )
         }
+
         if (showChangeEmailMessage) {
-            Row(
-                modifier = Modifier.padding(vertical = 14.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = stringResource(id = R.string.verification_not_email, email),
-                    modifier = Modifier.weight(weight = 1f, fill = false),
-                    color = MaterialTheme.colors.onSecondary,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                    style = MaterialTheme.typography.body2
-                )
-                Text(
-                    text = stringResource(id = R.string.verification_change_email),
-                    modifier = Modifier
-                        .padding(start = 4.dp)
-                        .clickable(
-                            enabled = !isProcessing,
-                            onClick = onChangeEmailClick
-                        ),
-                    color = MaterialTheme.linkColors.actionLabel,
-                    maxLines = 1,
-                    style = MaterialTheme.typography.body2
-                )
-            }
+            ChangeEmailRow(
+                email = email,
+                isProcessing = isProcessing,
+                onChangeEmailClick = onChangeEmailClick,
+            )
         }
 
         AnimatedVisibility(visible = errorMessage != null) {
@@ -240,45 +221,91 @@ internal fun VerificationBody(
             )
         }
 
-        Box(
+        ResendCodeButton(
+            isProcessing = isProcessing,
+            isSendingNewCode = isSendingNewCode,
+            onClick = onResendCodeClick,
+        )
+    }
+}
+
+@Composable
+private fun ChangeEmailRow(
+    email: String,
+    isProcessing: Boolean,
+    onChangeEmailClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.padding(vertical = 14.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(id = R.string.verification_not_email, email),
+            modifier = Modifier.weight(weight = 1f, fill = false),
+            color = MaterialTheme.colors.onSecondary,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            style = MaterialTheme.typography.body2
+        )
+        Text(
+            text = stringResource(id = R.string.verification_change_email),
             modifier = Modifier
-                .padding(top = 12.dp)
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.linkColors.componentBorder,
-                    shape = MaterialTheme.linkShapes.extraSmall,
-                )
-                .clip(shape = MaterialTheme.linkShapes.extraSmall)
+                .padding(start = 4.dp)
                 .clickable(
-                    enabled = !isProcessing && !isSendingNewCode,
-                    onClick = onResendCodeClick,
+                    enabled = !isProcessing,
+                    onClick = onChangeEmailClick
                 ),
-            contentAlignment = Alignment.Center
-        ) {
-            val textAlpha = if (isProcessing) {
-                ContentAlpha.disabled
-            } else if (isSendingNewCode) {
-                0f
-            } else {
-                ContentAlpha.high
-            }
+            color = MaterialTheme.linkColors.actionLabel,
+            maxLines = 1,
+            style = MaterialTheme.typography.body2
+        )
+    }
+}
 
-            Text(
-                text = stringResource(id = R.string.verification_resend),
-                style = MaterialTheme.typography.button,
-                color = MaterialTheme.colors.onPrimary,
-                modifier = Modifier
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
-                    .alpha(textAlpha),
+@Composable
+private fun ResendCodeButton(
+    isProcessing: Boolean,
+    isSendingNewCode: Boolean,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .padding(top = 12.dp)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.linkColors.componentBorder,
+                shape = MaterialTheme.linkShapes.extraSmall,
             )
-
-            CircularProgressIndicator(
-                color = MaterialTheme.colors.onPrimary,
-                strokeWidth = 2.dp,
-                modifier = Modifier
-                    .size(18.dp)
-                    .alpha(if (isSendingNewCode) 1f else 0f),
-            )
+            .clip(shape = MaterialTheme.linkShapes.extraSmall)
+            .clickable(
+                enabled = !isProcessing && !isSendingNewCode,
+                onClick = onClick,
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        val textAlpha = if (isProcessing) {
+            ContentAlpha.disabled
+        } else if (isSendingNewCode) {
+            0f
+        } else {
+            ContentAlpha.high
         }
+
+        Text(
+            text = stringResource(id = R.string.verification_resend),
+            style = MaterialTheme.typography.button,
+            color = MaterialTheme.colors.onPrimary,
+            modifier = Modifier
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+                .alpha(textAlpha),
+        )
+
+        CircularProgressIndicator(
+            color = MaterialTheme.colors.onPrimary,
+            strokeWidth = 2.dp,
+            modifier = Modifier
+                .size(18.dp)
+                .alpha(if (isSendingNewCode) 1f else 0f),
+        )
     }
 }
