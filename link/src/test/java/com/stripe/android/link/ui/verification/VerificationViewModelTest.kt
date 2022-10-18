@@ -80,7 +80,7 @@ class VerificationViewModelTest {
         val viewModel = createViewModel()
         viewModel.startVerification()
 
-        assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorMessage))
+        assertThat(viewModel.viewState.value.errorMessage).isEqualTo(ErrorMessage.Raw(errorMessage))
     }
 
     @Test
@@ -106,7 +106,7 @@ class VerificationViewModelTest {
             val viewModel = createViewModel()
             viewModel.onVerificationCodeEntered("code")
 
-            assertThat(viewModel.errorMessage.value).isEqualTo(ErrorMessage.Raw(errorMessage))
+            assertThat(viewModel.viewState.value.errorMessage).isEqualTo(ErrorMessage.Raw(errorMessage))
             verify(linkEventsReporter).on2FAFailure()
         }
 

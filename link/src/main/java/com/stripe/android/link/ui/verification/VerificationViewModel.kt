@@ -21,8 +21,15 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+internal data class VerificationViewState(
+    val isProcessing: Boolean = false,
+    val requestFocus: Boolean = true,
+    val errorMessage: ErrorMessage? = null,
+)
 
 /**
  * ViewModel that handles user verification confirmation logic.
@@ -35,14 +42,8 @@ internal class VerificationViewModel @Inject constructor(
 ) : ViewModel() {
     lateinit var linkAccount: LinkAccount
 
-    private val _isProcessing = MutableStateFlow(false)
-    val isProcessing: StateFlow<Boolean> = _isProcessing
-
-    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
-    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
-
-    private val _requestFocus = MutableStateFlow(true)
-    val requestFocus: StateFlow<Boolean> = _requestFocus
+    private val _viewState = MutableStateFlow(VerificationViewState())
+    val viewState: StateFlow<VerificationViewState> = _viewState
 
     /**
      * Callback when user has successfully verified their account. If not overridden, defaults to
@@ -78,13 +79,20 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     fun onVerificationCodeEntered(code: String) {
-        _isProcessing.value = true
-        clearError()
+        updateViewState {
+            it.copy(
+                isProcessing = true,
+                errorMessage = null,
+            )
+        }
 
         viewModelScope.launch {
             linkAccountManager.confirmVerification(code).fold(
                 onSuccess = {
-                    _isProcessing.value = false
+                    updateViewState {
+                        it.copy(isProcessing = false)
+                    }
+
                     linkEventsReporter.on2FAComplete()
                     onVerificationCompleted()
                 },
@@ -126,17 +134,30 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     fun onFocusRequested() {
-        _requestFocus.value = false
+        updateViewState {
+            it.copy(requestFocus = false)
+        }
     }
 
     private fun clearError() {
-        _errorMessage.value = null
+        updateViewState {
+            it.copy(errorMessage = null)
+        }
     }
 
-    private fun onError(error: Throwable) = error.getErrorMessage().let {
+    private fun onError(error: Throwable) = error.getErrorMessage().let { message ->
         logger.error("Error: ", error)
-        _isProcessing.value = false
-        _errorMessage.value = it
+
+        updateViewState {
+            it.copy(
+                isProcessing = false,
+                errorMessage = message,
+            )
+        }
+    }
+
+    private fun updateViewState(block: (VerificationViewState) -> VerificationViewState) {
+        _viewState.update(block)
     }
 
     internal class Factory(

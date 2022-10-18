@@ -103,9 +103,7 @@ internal fun VerificationBody(
         )
     )
 
-    val isProcessing by viewModel.isProcessing.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
-    val requestFocus by viewModel.requestFocus.collectAsState()
+    val viewState by viewModel.viewState.collectAsState()
 
     onVerificationCompleted?.let {
         viewModel.onVerificationCompleted = it
@@ -115,15 +113,15 @@ internal fun VerificationBody(
     val focusRequester: FocusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    LaunchedEffect(isProcessing) {
-        if (isProcessing) {
+    LaunchedEffect(viewState.isProcessing) {
+        if (viewState.isProcessing) {
             focusManager.clearFocus(true)
             keyboardController?.hide()
         }
     }
 
-    LaunchedEffect(requestFocus) {
-        if (requestFocus) {
+    LaunchedEffect(viewState.requestFocus) {
+        if (viewState.requestFocus) {
             // Workaround for keyboard not being shown when focus is requested in a Dialog
             // https://issuetracker.google.com/issues/204502668
             delay(200)
@@ -140,8 +138,8 @@ internal fun VerificationBody(
         redactedPhoneNumber = viewModel.linkAccount.redactedPhoneNumber,
         email = viewModel.linkAccount.email,
         otpElement = viewModel.otpElement,
-        isProcessing = isProcessing,
-        errorMessage = errorMessage,
+        isProcessing = viewState.isProcessing,
+        errorMessage = viewState.errorMessage,
         focusRequester = focusRequester,
         onBack = viewModel::onBack,
         onChangeEmailClick = viewModel::onChangeEmailClicked,
