@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.image
 
+import android.content.ContentResolver
 import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
@@ -28,23 +29,23 @@ import kotlinx.coroutines.launch
  * provided [StripeImageLoader] and renders the result.
  *
  * @param model to be requested and rendered, could be a url String or [Uri].
+ * @param imageLoader The [StripeImageLoader] that will be used to execute the request.
  * @param contentDescription Text used by accessibility services to describe what this image
  *  represents. This should always be provided unless this image is used for decorative purposes,
  *  and does not represent a meaningful action that a user can take.
  * @param modifier Modifier used to adjust the layout algorithm or draw decoration content.
- * @param imageLoader The [StripeImageLoader] that will be used to execute the request.
- * @param errorContent content to render when image loading fails.
- * @param loadingContent content to render when image loads.
  * @param contentScale Optional scale parameter used to determine the aspect ratio scaling to be
  *  used if the bounds are a different size from the intrinsic size of the painter.
+ * @param errorContent content to render when image loading fails.
+ * @param loadingContent content to render when image loads.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 fun StripeImage(
     model: Any,
+    imageLoader: StripeImageLoader,
     contentDescription: String?,
     modifier: Modifier = Modifier,
-    imageLoader: StripeImageLoader = LocalContext.current.imageLoader,
     contentScale: ContentScale = ContentScale.Fit,
     errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
     loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {}
@@ -89,6 +90,36 @@ fun StripeImage(
             throw IllegalArgumentException("Unsupported model: $model")
         }
     }
+}
+
+/**
+ * A composable that loads a local [Uri]. Supported types are
+ * [ContentResolver.SCHEME_ANDROID_RESOURCE], [ContentResolver.SCHEME_CONTENT] and
+ * [ContentResolver.SCHEME_FILE].
+ *
+ * @param uri to be loaded.
+ * @param contentDescription Text used by accessibility services to describe what this image
+ *  represents. This should always be provided unless this image is used for decorative purposes,
+ *  and does not represent a meaningful action that a user can take.
+ * @param modifier Modifier used to adjust the layout algorithm or draw decoration content.
+ * @param contentScale Optional scale parameter used to determine the aspect ratio scaling to be
+ *  used if the bounds are a different size from the intrinsic size of the painter.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Composable
+fun StripeImageWithLocalUri(
+    uri: Uri,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Fit
+) {
+    StripeImage(
+        model = uri,
+        imageLoader = LocalContext.current.imageLoader,
+        contentDescription = contentDescription,
+        modifier = modifier,
+        contentScale = contentScale
+    )
 }
 
 @Composable
