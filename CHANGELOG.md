@@ -2,6 +2,10 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+### Payments
+
+* [FIXED][5722](https://github.com/stripe/stripe-android/pull/5722) Fix saving and restoring Google Pay selection in `PaymentSession`.
+
 ## 20.15.1 - 2022-10-17
 
 This release fixes some bugs in `ShippingInfoWidget`, `PaymentSheet`, and when the app is backgrounded during confirmation on Android 10 and 11.
