@@ -26,13 +26,13 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     accounts = partnerAccountList(),
                     selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
                     accessibleData = accessibleCallout(),
-                    selectedIds = setOf("id1"),
                     singleAccount = false,
                     institutionSkipAccountSelection = false,
                     businessName = "Random business",
                     stripeDirect = false,
                 )
-            )
+            ),
+            selectedIds = setOf("id1"),
         )
 
         fun singleSelect() = AccountPickerState(
@@ -42,13 +42,13 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     accounts = partnerAccountList(),
                     selectionMode = AccountPickerState.SelectionMode.RADIO,
                     accessibleData = accessibleCallout(),
-                    selectedIds = setOf("id1"),
                     singleAccount = false,
                     institutionSkipAccountSelection = false,
                     businessName = "Random business",
                     stripeDirect = false,
                 )
-            )
+            ),
+            selectedIds = setOf("id1"),
         )
 
         fun dropdown() = AccountPickerState(
@@ -58,13 +58,13 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     accounts = partnerAccountList(),
                     selectionMode = AccountPickerState.SelectionMode.DROPDOWN,
                     accessibleData = accessibleCallout(),
-                    selectedIds = setOf("id1"),
                     singleAccount = true,
                     institutionSkipAccountSelection = true,
                     businessName = "Random business",
                     stripeDirect = true,
                 )
-            )
+            ),
+            selectedIds = setOf("id1"),
         )
 
         private fun partnerAccountList() = listOf(
