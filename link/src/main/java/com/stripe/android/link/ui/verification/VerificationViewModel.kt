@@ -29,6 +29,8 @@ internal data class VerificationViewState(
     val isProcessing: Boolean = false,
     val requestFocus: Boolean = true,
     val errorMessage: ErrorMessage? = null,
+    val isSendingNewCode: Boolean = false,
+    val didSendNewCode: Boolean = false,
 )
 
 /**
@@ -108,15 +110,30 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     fun startVerification() {
-        clearError()
+        updateViewState {
+            it.copy(
+                isSendingNewCode = true,
+                errorMessage = null,
+            )
+        }
 
         viewModelScope.launch {
-            linkAccountManager.startVerification().fold(
-                onSuccess = {
-                    logger.info("Verification code sent")
-                },
-                onFailure = ::onError
-            )
+            val result = linkAccountManager.startVerification()
+            val error = result.exceptionOrNull()
+
+            updateViewState {
+                it.copy(
+                    isSendingNewCode = false,
+                    didSendNewCode = error == null,
+                    errorMessage = error?.getErrorMessage(),
+                )
+            }
+        }
+    }
+
+    fun didShowCodeSentNotification() {
+        updateViewState {
+            it.copy(didSendNewCode = false)
         }
     }
 

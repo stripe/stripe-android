@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.verification
 
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
@@ -10,13 +11,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,6 +25,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -62,6 +65,7 @@ private fun VerificationBodyPreview() {
                 email = "test@stripe.com",
                 otpElement = OTPSpec.transform(),
                 isProcessing = false,
+                isSendingNewCode = false,
                 errorMessage = null,
                 focusRequester = remember { FocusRequester() },
                 onBack = { },
@@ -109,6 +113,7 @@ internal fun VerificationBody(
         viewModel.onVerificationCompleted = it
     }
 
+    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val focusRequester: FocusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -131,6 +136,13 @@ internal fun VerificationBody(
         }
     }
 
+    LaunchedEffect(viewState.didSendNewCode) {
+        if (viewState.didSendNewCode) {
+            Toast.makeText(context, "Code sent", Toast.LENGTH_SHORT).show()
+            viewModel.didShowCodeSentNotification()
+        }
+    }
+
     VerificationBody(
         headerStringResId = headerStringResId,
         messageStringResId = messageStringResId,
@@ -139,6 +151,7 @@ internal fun VerificationBody(
         email = viewModel.linkAccount.email,
         otpElement = viewModel.otpElement,
         isProcessing = viewState.isProcessing,
+        isSendingNewCode = viewState.isSendingNewCode,
         errorMessage = viewState.errorMessage,
         focusRequester = focusRequester,
         onBack = viewModel::onBack,
@@ -156,6 +169,7 @@ internal fun VerificationBody(
     email: String,
     otpElement: OTPElement,
     isProcessing: Boolean,
+    isSendingNewCode: Boolean,
     errorMessage: ErrorMessage?,
     focusRequester: FocusRequester,
     onBack: () -> Unit,
@@ -218,37 +232,53 @@ internal fun VerificationBody(
                 )
             }
         }
+
         AnimatedVisibility(visible = errorMessage != null) {
             ErrorText(
                 text = errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
                 modifier = Modifier.fillMaxWidth()
             )
         }
+
         Box(
             modifier = Modifier
                 .padding(top = 12.dp)
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.linkColors.componentBorder,
-                    shape = MaterialTheme.linkShapes.extraSmall
+                    shape = MaterialTheme.linkShapes.extraSmall,
                 )
+                .clip(shape = MaterialTheme.linkShapes.extraSmall)
                 .clickable(
-                    enabled = !isProcessing,
-                    onClick = onResendCodeClick
+                    enabled = !isProcessing && !isSendingNewCode,
+                    onClick = onResendCodeClick,
                 ),
             contentAlignment = Alignment.Center
         ) {
-            CompositionLocalProvider(
-                LocalContentAlpha provides if (isProcessing) ContentAlpha.disabled else ContentAlpha.high
-            ) {
-                Text(
-                    text = stringResource(id = R.string.verification_resend),
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.button,
-                    color = MaterialTheme.colors.onPrimary
-                        .copy(alpha = LocalContentAlpha.current)
-                )
+            val textAlpha = if (isProcessing) {
+                ContentAlpha.disabled
+            } else if (isSendingNewCode) {
+                0f
+            } else {
+                ContentAlpha.high
             }
+
+            Text(
+                text = stringResource(id = R.string.verification_resend),
+                style = MaterialTheme.typography.button,
+                color = MaterialTheme.colors.onPrimary,
+                modifier = Modifier
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                    .alpha(textAlpha),
+            )
+
+            CircularProgressIndicator(
+                color = MaterialTheme.colors.onPrimary,
+                strokeWidth = 2.dp,
+                modifier = Modifier
+                    .size(18.dp)
+                    .alpha(if (isSendingNewCode) 1f else 0f),
+            )
         }
     }
 }
