@@ -1,5 +1,12 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues />
+  <CurrentIssues>
+    <ID>EmptyFunctionBlock:DrawablePainter.kt$EmptyPainter${}</ID>
+    <ID>MagicNumber:DrawablePainter.kt$DrawablePainter$255</ID>
+    <ID>MaxLineLength:DrawablePainter.kt$*</ID>
+    <ID>MaxLineLength:UiUtils.kt$*</ID>
+    <ID>ReturnCount:UiUtils.kt$internal fun Context.getDrawableFromUri(uri: Uri): Drawable?</ID>
+    <ID>ThrowsCount:UiUtils.kt$@SuppressLint("DiscouragedApi") internal fun Context.getResourceId(uri: Uri): Pair&lt;Resources, Int></ID>
+  </CurrentIssues>
 </SmellBaseline>
