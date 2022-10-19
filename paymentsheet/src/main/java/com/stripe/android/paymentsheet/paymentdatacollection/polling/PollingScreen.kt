@@ -39,6 +39,12 @@ import com.stripe.android.ui.core.PaymentsTheme
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
+private object Spacing {
+    val extended = 12.dp
+    val normal = 8.dp
+    const val lineHeightMultiplier = 1.3f
+}
+
 @Composable
 internal fun PollingScreen(
     viewModel: PollingViewModel,
@@ -98,10 +104,13 @@ private fun ActivePolling(
         verticalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(
+                vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top),
+                horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
+            ),
     ) {
         CircularProgressIndicator(
-            modifier = Modifier.padding(bottom = 12.dp),
+            modifier = Modifier.padding(bottom = Spacing.extended),
             color = MaterialTheme.colors.onSurface,
         )
 
@@ -109,14 +118,14 @@ private fun ActivePolling(
             text = stringResource(R.string.upi_polling_header),
             style = MaterialTheme.typography.h4,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 8.dp),
+            modifier = Modifier.padding(bottom = Spacing.normal),
         )
 
         Text(
             text = rememberActivePollingMessage(remainingDuration),
             textAlign = TextAlign.Center,
-            lineHeight = MaterialTheme.typography.body1.fontSize * 1.3,
-            modifier = Modifier.padding(bottom = 8.dp),
+            lineHeight = MaterialTheme.typography.body1.fontSize * Spacing.lineHeightMultiplier,
+            modifier = Modifier.padding(bottom = Spacing.normal),
         )
 
         TextButton(onClick = onCancel) {
@@ -166,20 +175,20 @@ private fun FailedPolling(
                 Image(
                     painter = painterResource(R.drawable.stripe_ic_paymentsheet_polling_failure),
                     contentDescription = null,
-                    modifier = Modifier.padding(bottom = 12.dp),
+                    modifier = Modifier.padding(bottom = Spacing.extended),
                 )
 
                 Text(
                     text = stringResource(R.string.upi_polling_payment_failed_title),
                     style = MaterialTheme.typography.h4,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 8.dp),
+                    modifier = Modifier.padding(bottom = Spacing.normal),
                 )
 
                 Text(
                     text = stringResource(R.string.upi_polling_payment_failed_message),
                     textAlign = TextAlign.Center,
-                    lineHeight = MaterialTheme.typography.body1.fontSize * 1.3,
+                    lineHeight = MaterialTheme.typography.body1.fontSize * Spacing.lineHeightMultiplier,
                 )
             }
 
