@@ -10,6 +10,7 @@ import android.net.Uri
 import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import java.io.FileNotFoundException
 import java.io.IOException
 
@@ -55,7 +56,8 @@ internal fun Context.getResourceId(uri: Uri): Pair<Resources, Int> {
  * This method is partially borrowed from [ImageView#getDrawableFromUri].
  * @see <a href="https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/widget/ImageView.java#1002">source</a>
  */
-internal fun Context.getDrawableFromUri(uri: Uri): Drawable? {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Context.getDrawableFromUri(uri: Uri): Drawable? {
     val scheme = uri.scheme
     if (ContentResolver.SCHEME_ANDROID_RESOURCE == scheme) {
         try {

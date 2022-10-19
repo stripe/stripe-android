@@ -21,3 +21,9 @@ public final class com/stripe/android/uicore/image/DrawablePainterKt {
 public final class com/stripe/android/uicore/image/StripeImageKt {
 }
 
+public final class com/stripe/android/uicore/image/UiUtilsKt {
+}
+
+public final class com/stripe/android/uicore/text/HtmlKt {
+}
+
