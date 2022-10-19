@@ -133,7 +133,10 @@ internal data class FinancialConnectionsSessionManifest(
     val connectedAccountName: String? = null,
 
     @SerialName(value = "experiment_assignments")
-    val experimentAssignments: Map<String, String>? = null,
+    // TODO@carlosmuvi revert hardcoded assignments.
+    val experimentAssignments: Map<String, String>? = mapOf(
+        "native" to "true"
+    ),
 
     @SerialName(value = "features")
     val features: Map<String, Boolean>? = null,
@@ -467,6 +470,6 @@ internal data class FinancialConnectionsSessionManifest(
     }
 }
 
+// TODO@carlosmuvi use real assignments for native.
 internal val FinancialConnectionsSessionManifest.nativeAuthFlowEnabled: Boolean
-    get() = true
-// get() = this.experimentAssignments?.any { it.key == "native" && it.value == "true" } ?: false
+    get() = this.experimentAssignments?.any { it.key == "native" && it.value == "true" } ?: false
