@@ -78,7 +78,7 @@ internal class FinancialConnectionsSheetActivity :
                             it.putExtra(
                                 Mavericks.KEY_ARG,
                                 FinancialConnectionsSheetNativeActivityArgs(
-                                    manifest = viewEffect.manifest,
+                                    initialSyncResponse = viewEffect.initialSyncResponse,
                                     configuration = viewEffect.configuration
                                 )
                             )

@@ -1,9 +1,8 @@
+@file:Suppress("MaximumLineLength", "MaxLineLength")
+
 package com.stripe.android.financialconnections.model
 
-import kotlinx.serialization.SerialName
-
-@Suppress("MaximumLineLength", "MaxLineLength")
-// TODO DELETE.
+// TODO@carlosmuvi DELETE.
 internal val sampleConsent: ConsentPane =
     ConsentPane(
         title = "Goldilocks works with **Stripe** to link your accounts",
@@ -51,55 +50,3 @@ internal val sampleConsent: ConsentPane =
             cta = "OK"
         )
     )
-
-internal data class ConsentPane(
-    @SerialName("above_cta")
-    val aboveCta: String,
-    @SerialName("below_cta")
-    val belowCta: String,
-    @SerialName("body")
-    val body: ConsentPaneBody,
-    @SerialName("cta")
-    val cta: String,
-    @SerialName("data_access_notice")
-    val dataAccessNotice: DataAccessNotice,
-    @SerialName("title")
-    val title: String
-)
-
-internal data class ConsentPaneBody(
-    @SerialName("bullets")
-    val bullets: List<ConsentPaneBullet>
-)
-
-internal data class DataAccessNotice(
-    @SerialName("body")
-    val body: DataAccessNoticeBody,
-    @SerialName("content")
-    val content: String,
-    @SerialName("title")
-    val title: String,
-    @SerialName("cta")
-    val cta: String,
-)
-
-internal data class ConsentPaneBullet(
-    @SerialName("content")
-    val content: String,
-    @SerialName("icon")
-    val icon: Image
-)
-
-internal data class DataAccessNoticeBody(
-    @SerialName("bullets")
-    val bullets: List<DataAccessNoticeBullet>
-)
-
-internal data class DataAccessNoticeBullet(
-    @SerialName("content")
-    val content: String,
-    @SerialName("icon")
-    val icon: Image,
-    @SerialName("title")
-    val title: String
-)

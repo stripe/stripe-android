@@ -16,7 +16,7 @@ import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
-import com.stripe.android.financialconnections.domain.GenerateFinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForToken
@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
 import kotlinx.coroutines.launch
@@ -36,7 +37,7 @@ import javax.inject.Named
 @Suppress("LongParameterList", "TooManyFunctions")
 internal class FinancialConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
-    private val generateFinancialConnectionsSessionManifest: GenerateFinancialConnectionsSessionManifest,
+    private val synchronizeFinancialConnectionsSession: SynchronizeFinancialConnectionsSession,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
@@ -50,7 +51,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             // avoid re-fetching manifest if already exists (this will happen on process recreations)
             if (initialState.manifest == null) fetchManifest()
         } else {
-            val result = FinancialConnectionsSheetActivityResult.Failed(
+            val result = Failed(
                 IllegalStateException("Invalid configuration provided when instantiating activity")
             )
             setState { copy(viewEffect = FinishWithResult(result)) }
@@ -65,7 +66,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         withState { state ->
             viewModelScope.launch {
                 kotlin.runCatching {
-                    generateFinancialConnectionsSessionManifest(
+                    synchronizeFinancialConnectionsSession(
                         clientSecret = state.sessionSecret,
                         applicationId = applicationId
                     )
@@ -81,17 +82,18 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     /**
      * Builds the ChromeCustomTab intent to launch the hosted auth flow and launches it.
      *
-     * @param manifest the manifest containing the hosted auth flow URL to launch
+     * @param synchronizeSessionResponse with manifest containing the hosted auth flow URL to launch
      *
      */
-    private fun openAuthFlow(manifest: FinancialConnectionsSessionManifest) {
+    private fun openAuthFlow(synchronizeSessionResponse: SynchronizeSessionResponse) {
         // stores manifest in state for future references.
+        val manifest = synchronizeSessionResponse.manifest
         setState {
             copy(
                 manifest = manifest,
                 webAuthFlowActive = manifest.nativeAuthFlowEnabled.not(),
                 viewEffect = if (manifest.nativeAuthFlowEnabled) {
-                    OpenNativeAuthFlow(initialArgs.configuration, manifest)
+                    OpenNativeAuthFlow(initialArgs.configuration, synchronizeSessionResponse)
                 } else {
                     OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
                 }

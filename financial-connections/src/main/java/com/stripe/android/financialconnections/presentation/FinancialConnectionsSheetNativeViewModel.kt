@@ -200,7 +200,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             val args = viewModelContext.args<FinancialConnectionsSheetNativeActivityArgs>()
             return DaggerFinancialConnectionsSheetNativeComponent
                 .builder()
-                .initialManifest(args.manifest)
+                .initialSyncResponse(args.initialSyncResponse)
                 .application(viewModelContext.app())
                 .configuration(state.configuration)
                 .initialState(state)
@@ -224,7 +224,7 @@ internal data class FinancialConnectionsSheetNativeState(
     @Suppress("Unused")
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
-        initialPane = args.manifest.nextPane,
+        initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
         showCloseDialog = false,
         viewEffect = null

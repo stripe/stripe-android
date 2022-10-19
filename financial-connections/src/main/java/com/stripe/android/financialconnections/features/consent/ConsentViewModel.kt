@@ -5,7 +5,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.domain.AcceptConsent
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.features.MarkdownParser
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
@@ -25,7 +25,7 @@ internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
     private val acceptConsent: AcceptConsent,
     private val goNext: GoNext,
-    private val getManifest: GetManifest,
+    private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger
 ) : MavericksViewModel<ConsentState>(initialState) {
@@ -33,11 +33,13 @@ internal class ConsentViewModel @Inject constructor(
     init {
         logErrors()
         suspend {
-            val manifest = getManifest()
+            val sync = getOrFetchSync()
             val consent: ConsentPane = sampleConsent.toHtml()
+            // TODO@carlosmuvi replace consent by sync response.
 //            manualEntryEnabled = manifest.allowManualEntry,
 //            manualEntryShowBusinessDaysNotice =
 //                !manifest.customManualEntryHandling && manifest.manualEntryUsesMicrodeposits,
+//            sync.text
             consent
         }.execute { copy(consent = it) }
     }

@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
@@ -12,7 +11,7 @@ import com.stripe.android.financialconnections.features.manualentry.ManualEntryS
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
 import com.stripe.android.financialconnections.features.reset.ResetSubcomponent
 import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
@@ -60,18 +59,16 @@ internal class FinancialConnectionsSheetNativeModule {
     @Provides
     fun providesFinancialConnectionsManifestRepository(
         requestExecutor: FinancialConnectionsRequestExecutor,
-        configuration: FinancialConnectionsSheet.Configuration,
         apiRequestFactory: ApiRequest.Factory,
         apiOptions: ApiRequest.Options,
         logger: Logger,
-        @Named(INITIAL_MANIFEST) initialManifest: FinancialConnectionsSessionManifest
+        @Named(INITIAL_SYNC_RESPONSE) initialSynchronizeSessionResponse: SynchronizeSessionResponse
     ) = FinancialConnectionsManifestRepository(
         requestExecutor = requestExecutor,
-        configuration = configuration,
         apiRequestFactory = apiRequestFactory,
         apiOptions = apiOptions,
         logger = logger,
-        initialManifest = initialManifest
+        initialSync = initialSynchronizeSessionResponse
     )
 
     @Singleton

@@ -1,5 +1,5 @@
 @file:OptIn(ExperimentalMaterialApi::class, ExperimentalMaterialApi::class)
-
+@file:Suppress("LongMethod", "TooManyFunctions")
 package com.stripe.android.financialconnections.features.consent
 
 import android.net.Uri
