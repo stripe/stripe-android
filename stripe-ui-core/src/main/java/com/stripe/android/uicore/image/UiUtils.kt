@@ -55,7 +55,7 @@ internal fun Context.getResourceId(uri: Uri): Pair<Resources, Int> {
  * This method is partially borrowed from [ImageView#getDrawableFromUri].
  * @see <a href="https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/widget/ImageView.java#1002">source</a>
  */
-internal fun Context.getDrawableFromUri(uri: Uri): Drawable? {
+fun Context.getDrawableFromUri(uri: Uri): Drawable? {
     val scheme = uri.scheme
     if (ContentResolver.SCHEME_ANDROID_RESOURCE == scheme) {
         try {

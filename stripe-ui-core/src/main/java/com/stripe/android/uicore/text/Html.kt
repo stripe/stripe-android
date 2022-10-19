@@ -1,4 +1,5 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.text
+
 
 import android.content.Intent
 import android.graphics.Typeface
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -41,7 +43,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.text.HtmlCompat
-import com.stripe.android.ui.core.paymentsColors
 
 private const val LINK_TAG = "URL"
 
@@ -61,10 +62,10 @@ data class EmbeddableImage(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Html(
     html: String,
-    imageGetter: Map<String, EmbeddableImage>,
-    color: Color,
-    style: TextStyle,
     modifier: Modifier = Modifier,
+    imageGetter: Map<String, EmbeddableImage> = emptyMap(),
+    color: Color = Color.Unspecified,
+    style: TextStyle = LocalTextStyle.current,
     enabled: Boolean = true,
     urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline),
     imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline
@@ -214,8 +215,8 @@ private fun ClickableText(
     text: AnnotatedString,
     modifier: Modifier = Modifier,
     inlineContent: Map<String, InlineTextContent> = mapOf(),
-    color: Color = MaterialTheme.paymentsColors.subtitle,
-    style: TextStyle = MaterialTheme.typography.body2,
+    color: Color,
+    style: TextStyle,
     softWrap: Boolean = true,
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,
