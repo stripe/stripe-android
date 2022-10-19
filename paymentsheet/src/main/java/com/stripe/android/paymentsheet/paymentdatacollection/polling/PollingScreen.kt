@@ -12,9 +12,11 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -128,46 +130,61 @@ private fun FailedPolling(
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier.fillMaxSize()) {
-        IconButton(onClick = onCancel) {
-            Icon(
-                painter = painterResource(R.drawable.stripe_ic_paymentsheet_back_enabled),
-                contentDescription = stringResource(R.string.back),
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {},
+                elevation = 0.dp,
+                backgroundColor = MaterialTheme.colors.surface,
+                navigationIcon = {
+                    IconButton(onClick = onCancel) {
+                        Icon(
+                            painter = painterResource(R.drawable.stripe_ic_paymentsheet_back_enabled),
+                            contentDescription = stringResource(R.string.back),
+                        )
+                    }
+                },
             )
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
+    ) { paddingValues ->
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top),
-                    horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
-                ),
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues),
         ) {
-            Image(
-                painter = painterResource(R.drawable.stripe_ic_paymentsheet_polling_failure),
-                contentDescription = null,
-                modifier = Modifier.padding(bottom = 12.dp),
-            )
+            Spacer(modifier = Modifier.weight(1f))
 
-            Text(
-                text = stringResource(R.string.upi_polling_payment_failed_title),
-                style = MaterialTheme.typography.h4,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top),
+                        horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
+                    ),
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.stripe_ic_paymentsheet_polling_failure),
+                    contentDescription = null,
+                    modifier = Modifier.padding(bottom = 12.dp),
+                )
 
-            Text(
-                text = stringResource(R.string.upi_polling_payment_failed_message),
-                textAlign = TextAlign.Center,
-                lineHeight = MaterialTheme.typography.body1.fontSize * 1.3,
-            )
+                Text(
+                    text = stringResource(R.string.upi_polling_payment_failed_title),
+                    style = MaterialTheme.typography.h4,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
+
+                Text(
+                    text = stringResource(R.string.upi_polling_payment_failed_message),
+                    textAlign = TextAlign.Center,
+                    lineHeight = MaterialTheme.typography.body1.fontSize * 1.3,
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
         }
-
-        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
