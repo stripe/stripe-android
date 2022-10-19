@@ -27,9 +27,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -102,7 +99,7 @@ private fun ActivePolling(
             .padding(32.dp),
     ) {
         CircularProgressIndicator(
-            modifier = Modifier.padding(bottom = 8.dp),
+            modifier = Modifier.padding(bottom = 12.dp),
             color = MaterialTheme.colors.onSurface,
         )
 
@@ -116,6 +113,7 @@ private fun ActivePolling(
         Text(
             text = rememberActivePollingMessage(remainingDuration),
             textAlign = TextAlign.Center,
+            lineHeight = MaterialTheme.typography.body1.fontSize * 1.3,
             modifier = Modifier.padding(bottom = 8.dp),
         )
 
@@ -152,7 +150,7 @@ private fun FailedPolling(
             Image(
                 painter = painterResource(R.drawable.stripe_ic_paymentsheet_polling_failure),
                 contentDescription = null,
-                modifier = Modifier.padding(bottom = 8.dp),
+                modifier = Modifier.padding(bottom = 12.dp),
             )
 
             Text(
@@ -165,6 +163,7 @@ private fun FailedPolling(
             Text(
                 text = stringResource(R.string.upi_polling_payment_failed_message),
                 textAlign = TextAlign.Center,
+                lineHeight = MaterialTheme.typography.body1.fontSize * 1.3,
             )
         }
 
@@ -175,22 +174,15 @@ private fun FailedPolling(
 @Composable
 private fun rememberActivePollingMessage(
     remainingDuration: Duration,
-): AnnotatedString {
+): String {
     val context = LocalContext.current
-    val primaryColor = MaterialTheme.colors.primary
 
     return remember(remainingDuration) {
         val remainingTime = remainingDuration.toComponents { minutes, seconds, _ ->
             val paddedSeconds = seconds.toString().padStart(length = 2, padChar = '0')
             "$minutes:$paddedSeconds"
         }
-
-        val message = context.getString(R.string.upi_polling_message, remainingTime)
-
-        buildAnnotatedString {
-            append(message.removeSuffix(remainingTime))
-            append(AnnotatedString(remainingTime, SpanStyle(primaryColor)))
-        }
+        context.getString(R.string.upi_polling_message, remainingTime)
     }
 }
 
