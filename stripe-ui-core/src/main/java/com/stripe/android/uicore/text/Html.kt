@@ -1,6 +1,5 @@
 package com.stripe.android.uicore.text
 
-
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
