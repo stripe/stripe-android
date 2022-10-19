@@ -15,8 +15,8 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
-import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.text.EmbeddableImage
+import com.stripe.android.uicore.text.Html
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
