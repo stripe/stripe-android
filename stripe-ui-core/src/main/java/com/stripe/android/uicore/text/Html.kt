@@ -101,11 +101,11 @@ fun Html(
     val context = LocalContext.current
     ClickableText(
         annotatedText,
+        color = color,
+        style = style,
         modifier = modifier
             .semantics(mergeDescendants = true) {}, // makes it a separate accessible item,
         inlineContent = inlineContentMap,
-        color = color,
-        style = style,
         onClick = {
             if (enabled) {
                 // Position is the position of the tag in the string
@@ -212,10 +212,10 @@ fun annotatedStringResource(
 @Composable
 private fun ClickableText(
     text: AnnotatedString,
-    modifier: Modifier = Modifier,
-    inlineContent: Map<String, InlineTextContent> = mapOf(),
     color: Color,
     style: TextStyle,
+    modifier: Modifier = Modifier,
+    inlineContent: Map<String, InlineTextContent> = mapOf(),
     softWrap: Boolean = true,
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,
