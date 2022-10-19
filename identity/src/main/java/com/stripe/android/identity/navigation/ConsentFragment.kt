@@ -121,10 +121,11 @@ internal class ConsentFragment(
             postVerificationPageDataAndMaybeSubmit(
                 identityViewModel,
                 collectedDataParam,
-                if (requireSelfie)
+                if (requireSelfie) {
                     ClearDataParam.CONSENT_TO_DOC_SELECT_WITH_SELFIE
-                else
-                    ClearDataParam.CONSENT_TO_DOC_SELECT,
+                } else {
+                    ClearDataParam.CONSENT_TO_DOC_SELECT
+                },
                 fromFragment = R.id.consentFragment,
                 notSubmitBlock = {
                     findNavController().navigate(R.id.action_consentFragment_to_docSelectionFragment)
