@@ -4,6 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asLiveData
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
@@ -18,6 +19,7 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -25,8 +27,10 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -144,30 +148,52 @@ class VerificationViewModelTest {
 
     @Test
     fun `Resending code is reflected in state`() = runTest {
-        whenever(linkAccountManager.startVerification()).thenReturn(Result.success(mock()))
+        linkAccountManager.stub {
+            onBlocking { startVerification() }.doSuspendableAnswer {
+                delay(100)
+                Result.success(mock())
+            }
+        }
 
         val viewModel = createViewModel().apply {
             resendCode()
         }
 
-        val state = viewModel.viewState.value
-        assertThat(state.isSendingNewCode).isFalse()
-        assertThat(state.didSendNewCode).isTrue()
+        viewModel.viewState.test {
+            val intermediateState = awaitItem()
+            assertThat(intermediateState.isSendingNewCode).isTrue()
+            assertThat(intermediateState.didSendNewCode).isFalse()
+
+            val finalState = awaitItem()
+            assertThat(finalState.isSendingNewCode).isFalse()
+            assertThat(finalState.didSendNewCode).isTrue()
+        }
     }
 
     @Test
     fun `Failing to resend code is reflected in state`() = runTest {
-        whenever(linkAccountManager.startVerification())
-            .thenReturn(Result.failure(RuntimeException("error")))
+        linkAccountManager.stub {
+            onBlocking { startVerification() }.doSuspendableAnswer {
+                delay(100)
+                Result.failure(RuntimeException("error"))
+            }
+        }
 
         val viewModel = createViewModel().apply {
             resendCode()
         }
 
-        val state = viewModel.viewState.value
-        assertThat(state.isSendingNewCode).isFalse()
-        assertThat(state.didSendNewCode).isFalse()
-        assertThat(state.errorMessage).isEqualTo(ErrorMessage.Raw("error"))
+        viewModel.viewState.test {
+            val intermediateState = awaitItem()
+            assertThat(intermediateState.isSendingNewCode).isTrue()
+            assertThat(intermediateState.didSendNewCode).isFalse()
+            assertThat(intermediateState.errorMessage).isNull()
+
+            val finalState = awaitItem()
+            assertThat(finalState.isSendingNewCode).isFalse()
+            assertThat(finalState.didSendNewCode).isFalse()
+            assertThat(finalState.errorMessage).isEqualTo(ErrorMessage.Raw("error"))
+        }
     }
 
     @Test
