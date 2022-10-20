@@ -30,7 +30,6 @@ import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsState
-import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
@@ -245,45 +244,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     internal val paymentOptionsState: LiveData<PaymentOptionsState> = paymentOptionsStateMapper()
-
-//    private fun producePaymentOptionsState(): LiveData<PaymentOptionsState> {
-//        return MediatorLiveData<PaymentOptionsState>().apply {
-//            listOf(
-//                paymentMethods,
-//                selection,
-//                savedSelection,
-//                isGooglePayReady,
-//                isLinkEnabled,
-//            ).forEach { source ->
-//                addSource(source) {
-//                    val newState = createPaymentOptionsState()
-//
-//                    if (selection.value == null && newState != null) {
-//                        val selection = newState.selectedItem?.toPaymentSelection()
-//                        updateSelection(selection)
-//                        value = newState
-//                    }
-//                }
-//            }
-//        }.distinctUntilChanged()
-//    }
-
-    private fun createPaymentOptionsState(): PaymentOptionsState? {
-        val paymentMethods = paymentMethods.value ?: return null
-        val initialSelection = savedSelection.value ?: return null
-        val isGooglePayReady = isGooglePayReady.value ?: return null
-        val isLinkEnabled = isLinkEnabled.value ?: return null
-
-        val currentSelection = selection.value
-
-        return PaymentOptionsStateFactory.create(
-            paymentMethods = paymentMethods,
-            showGooglePay = isGooglePayReady && this is PaymentOptionsViewModel,
-            showLink = isLinkEnabled && this is PaymentOptionsViewModel,
-            initialSelection = initialSelection,
-            currentSelection = currentSelection,
-        )
-    }
 
     init {
         if (_savedSelection.value == null) {
