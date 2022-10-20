@@ -111,7 +111,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         ).onFragment { fragment ->
             fragment.isEditing = true
             fragment.adapter.items = fragment.adapter.items.dropLast(1)
-            fragment.deletePaymentMethod(PaymentOptionsAdapter.Item.SavedPaymentMethod(paymentMethod))
+            fragment.deletePaymentMethod(PaymentOptionsItem.SavedPaymentMethod(paymentMethod))
             assertThat(fragment.isEditing).isFalse()
         }
     }
@@ -172,14 +172,15 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
 
     @Test
     fun `updates selection on click`() {
-        val savedPaymentMethod = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val selectedItem = PaymentOptionsItem.SavedPaymentMethod(savedPaymentMethod)
 
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)
             idleLooper()
 
             val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
-            adapter.paymentOptionSelectedListener(savedPaymentMethod, true)
+            adapter.paymentOptionSelected(selectedItem)
             idleLooper()
 
             assertThat(activityViewModel.selection.value)
