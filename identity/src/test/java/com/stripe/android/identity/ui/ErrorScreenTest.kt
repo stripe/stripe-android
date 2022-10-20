@@ -1,0 +1,134 @@
+package com.stripe.android.identity.ui
+
+import android.os.Build
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.junit4.ComposeContentTestRule
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import com.stripe.android.identity.TestApplication
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+
+@RunWith(RobolectricTestRunner::class)
+@Config(application = TestApplication::class, sdk = [Build.VERSION_CODES.Q])
+class ErrorScreenTest {
+    @get:Rule
+    val composeTestRule = createComposeRule()
+
+    private val mockTopButtonClicked: () -> Unit = mock()
+    private val mockBottomButtonClicked: () -> Unit = mock()
+
+    @Test
+    fun `message1 is visible when set`() {
+        setComposeTestRuleWith(
+            message1 = ERROR_MESSAGE1
+        ) {
+            onNodeWithTag(errorTitleTag).assertTextEquals(ERROR_TITLE)
+            onNodeWithTag(errorMessage1Tag).assertTextEquals(ERROR_MESSAGE1)
+            onNodeWithTag(errorMessage2Tag).assertDoesNotExist()
+            onNodeWithTag(errorTopButtonTag).assertDoesNotExist()
+            onNodeWithTag(errorBottomButtonTag).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `message2 is visible when set`() {
+        setComposeTestRuleWith(
+            message2 = ERROR_MESSAGE2
+        ) {
+            onNodeWithTag(errorTitleTag).assertTextEquals(ERROR_TITLE)
+            onNodeWithTag(errorMessage1Tag).assertDoesNotExist()
+            onNodeWithTag(errorMessage2Tag).assertTextEquals(ERROR_MESSAGE2)
+            onNodeWithTag(errorTopButtonTag).assertDoesNotExist()
+            onNodeWithTag(errorBottomButtonTag).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `topButton is correctly set`() {
+        setComposeTestRuleWith(
+            topButton = (ERROR_TOP_BUTTON_TEXT to mockTopButtonClicked)
+        ) {
+            onNodeWithTag(errorTitleTag).assertTextEquals(ERROR_TITLE)
+            onNodeWithTag(errorMessage1Tag).assertDoesNotExist()
+            onNodeWithTag(errorMessage2Tag).assertDoesNotExist()
+            onNodeWithTag(errorTopButtonTag).assertTextEquals(ERROR_TOP_BUTTON_TEXT.uppercase())
+            onNodeWithTag(errorBottomButtonTag).assertDoesNotExist()
+
+            onNodeWithTag(errorTopButtonTag).performClick()
+            verify(mockTopButtonClicked).invoke()
+        }
+    }
+
+    @Test
+    fun `bottomButton is correctly set`() {
+        setComposeTestRuleWith(
+            bottomButton = (ERROR_BOTTOM_BUTTON_TEXT to mockBottomButtonClicked)
+        ) {
+            onNodeWithTag(errorTitleTag).assertTextEquals(ERROR_TITLE)
+            onNodeWithTag(errorMessage1Tag).assertDoesNotExist()
+            onNodeWithTag(errorMessage2Tag).assertDoesNotExist()
+            onNodeWithTag(errorTopButtonTag).assertDoesNotExist()
+            onNodeWithTag(errorBottomButtonTag).assertTextEquals(ERROR_BOTTOM_BUTTON_TEXT.uppercase())
+
+            onNodeWithTag(errorBottomButtonTag).performClick()
+            verify(mockBottomButtonClicked).invoke()
+        }
+    }
+
+    @Test
+    fun `all fields are correctly set`() {
+        setComposeTestRuleWith(
+            message1 = ERROR_MESSAGE1,
+            message2 = ERROR_MESSAGE2,
+            topButton = (ERROR_TOP_BUTTON_TEXT to mockTopButtonClicked),
+            bottomButton = (ERROR_BOTTOM_BUTTON_TEXT to mockBottomButtonClicked)
+        ) {
+            onNodeWithTag(errorTitleTag).assertTextEquals(ERROR_TITLE)
+            onNodeWithTag(errorMessage1Tag).assertTextEquals(ERROR_MESSAGE1)
+            onNodeWithTag(errorMessage2Tag).assertTextEquals(ERROR_MESSAGE2)
+            onNodeWithTag(errorTopButtonTag).assertTextEquals(ERROR_TOP_BUTTON_TEXT.uppercase())
+            onNodeWithTag(errorBottomButtonTag).assertTextEquals(ERROR_BOTTOM_BUTTON_TEXT.uppercase())
+
+            onNodeWithTag(errorTopButtonTag).performClick()
+            verify(mockTopButtonClicked).invoke()
+
+            onNodeWithTag(errorBottomButtonTag).performClick()
+            verify(mockBottomButtonClicked).invoke()
+        }
+    }
+
+    private fun setComposeTestRuleWith(
+        message1: String? = null,
+        message2: String? = null,
+        topButton: Pair<String, () -> Unit>? = null,
+        bottomButton: Pair<String, () -> Unit>? = null,
+        testBlock: ComposeContentTestRule.() -> Unit = {}
+    ) {
+        composeTestRule.setContent {
+            ErrorScreen(
+                title = ERROR_TITLE,
+                message1 = message1,
+                message2 = message2,
+                topButton = topButton,
+                bottomButton = bottomButton
+            )
+        }
+
+        with(composeTestRule, testBlock)
+    }
+
+    private companion object {
+        const val ERROR_TITLE = "title"
+        const val ERROR_MESSAGE1 = "message1"
+        const val ERROR_MESSAGE2 = "message2"
+        const val ERROR_TOP_BUTTON_TEXT = "topButtonText"
+        const val ERROR_BOTTOM_BUTTON_TEXT = "bottomButtonText"
+    }
+}

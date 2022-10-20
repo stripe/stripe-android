@@ -1,19 +1,23 @@
 package com.stripe.android.identity.navigation
 
 import android.content.Context
-import android.view.View
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.ViewGroup
 import androidx.annotation.IdRes
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
-import androidx.navigation.fragment.findNavController
+import androidx.navigation.findNavController
 import com.stripe.android.identity.IdentityVerificationSheet
-import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult.Failed
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError.Requirement.Companion.matchesFromFragment
+import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
 
 /**
@@ -23,14 +27,13 @@ internal class ErrorFragment(
     private val verificationFlowFinishable: VerificationFlowFinishable,
     identityViewModelFactory: ViewModelProvider.Factory
 ) : BaseErrorFragment(identityViewModelFactory) {
-    override fun onCustomizingViews() {
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ) = ComposeView(requireContext()).apply {
         val args = requireNotNull(arguments)
-        title.text = args[ARG_ERROR_TITLE] as String
-        message1.text = args[ARG_ERROR_CONTENT] as String
-        message2.visibility = View.GONE
-
-        topButton.visibility = View.GONE
-
         val cause = requireNotNull(args.getSerializable(ARG_CAUSE) as? Throwable) {
             "cause of error is null"
         }
@@ -41,38 +44,37 @@ internal class ErrorFragment(
                 stackTrace = cause.stackTraceToString()
             )
         )
-
-        bottomButton.text = args[ARG_GO_BACK_BUTTON_TEXT] as String
-        bottomButton.visibility = View.VISIBLE
-
-        // If ARG_SHOULD_FAIL is true, clicking bottom button and pressBack would end flow with Failed
-        if (args.getBoolean(ARG_SHOULD_FAIL, false)) {
-            identityViewModel.screenTracker.screenTransitionStart(
-                SCREEN_NAME_ERROR
-            )
-            bottomButton.setOnClickListener {
-                verificationFlowFinishable.finishWithResult(
-                    Failed(cause)
-                )
-            }
-        } else {
-            bottomButton.setOnClickListener {
-                identityViewModel.screenTracker.screenTransitionStart(
-                    SCREEN_NAME_ERROR
-                )
-                val destination = args[ARG_GO_BACK_BUTTON_DESTINATION] as Int
-                if (destination == UNEXPECTED_DESTINATION) {
-                    findNavController().navigate(DEFAULT_BACK_BUTTON_NAVIGATION)
-                } else {
-                    findNavController().let { navController ->
-                        var shouldContinueNavigateUp = true
-                        while (shouldContinueNavigateUp && navController.currentDestination?.id != destination) {
-                            shouldContinueNavigateUp =
-                                navController.navigateUpAndSetArgForUploadFragment()
+        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        setContent {
+            ErrorScreen(
+                title = requireNotNull(args.getString(ARG_ERROR_TITLE)),
+                message1 = requireNotNull(args.getString(ARG_ERROR_CONTENT)),
+                bottomButton = (
+                    requireNotNull(args.getString(ARG_GO_BACK_BUTTON_TEXT)) to {
+                        identityViewModel.screenTracker.screenTransitionStart(
+                            SCREEN_NAME_ERROR
+                        )
+                        if (args.getBoolean(ARG_SHOULD_FAIL, false)) {
+                            verificationFlowFinishable.finishWithResult(
+                                IdentityVerificationSheet.VerificationFlowResult.Failed(cause)
+                            )
+                        } else {
+                            val destination = args.getInt(ARG_GO_BACK_BUTTON_DESTINATION)
+                            if (destination == UNEXPECTED_DESTINATION) {
+                                findNavController().navigate(DEFAULT_BACK_BUTTON_NAVIGATION)
+                            } else {
+                                findNavController().let { navController ->
+                                    var shouldContinueNavigateUp = true
+                                    while (shouldContinueNavigateUp && navController.currentDestination?.id != destination) {
+                                        shouldContinueNavigateUp =
+                                            navController.navigateUpAndSetArgForUploadFragment()
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-            }
+                    )
+            )
         }
     }
 
