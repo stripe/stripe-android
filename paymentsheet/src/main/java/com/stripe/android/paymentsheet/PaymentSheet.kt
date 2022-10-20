@@ -152,7 +152,15 @@ class PaymentSheet internal constructor(
         /**
          * Describes the appearance of Payment Sheet.
          */
-        val appearance: Appearance = Appearance()
+        val appearance: Appearance = Appearance(),
+
+        /**
+         * The custom label to use for the primary buttons.
+         *
+         * If not set, Payment Sheet will display suitable default labels for payment and setup
+         * intents.
+         */
+        val customPrimaryButtonLabel: String? = null,
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
