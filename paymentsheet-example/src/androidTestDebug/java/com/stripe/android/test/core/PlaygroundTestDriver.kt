@@ -489,6 +489,10 @@ class PlaygroundTestDriver(
             testParameters.appearance
         )
         intent.putExtra(
+            PaymentSheetPlaygroundActivity.CUSTOM_PRIMARY_BUTTON_LABEL,
+            testParameters.customPrimaryButtonLabel,
+        )
+        intent.putExtra(
             PaymentSheetPlaygroundActivity.USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA,
             testParameters.snapshotReturningCustomer
         )

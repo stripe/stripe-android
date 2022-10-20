@@ -409,13 +409,16 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         val appearance = intent.extras?.getParcelable(APPEARANCE_EXTRA) ?: AppearanceStore.state
 
+        val customPrimaryButtonLabel: String? = intent.getStringExtra(CUSTOM_PRIMARY_BUTTON_LABEL)
+
         return PaymentSheet.Configuration(
             merchantDisplayName = merchantName,
             customer = viewModel.customerConfig.value,
             googlePay = googlePayConfig,
             defaultBillingDetails = defaultBilling,
             allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked,
-            appearance = appearance
+            appearance = appearance,
+            customPrimaryButtonLabel = customPrimaryButtonLabel,
         )
     }
 
@@ -484,6 +487,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     companion object {
         const val FORCE_DARK_MODE_EXTRA = "ForceDark"
         const val APPEARANCE_EXTRA = "Appearance"
+        const val CUSTOM_PRIMARY_BUTTON_LABEL = "CustomPrimaryButtonLabel"
         const val USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA = "UseSnapshotReturningCustomer"
         const val SUPPORTED_PAYMENT_METHODS_EXTRA = "SupportedPaymentMethods"
         private const val merchantName = "Example, Inc."
