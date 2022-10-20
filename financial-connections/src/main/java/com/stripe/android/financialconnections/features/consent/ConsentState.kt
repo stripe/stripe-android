@@ -20,11 +20,6 @@ internal data class ConsentState(
 }
 
 internal enum class ConsentClickableText(val value: String) {
-    TERMS("terms"),
-    PRIVACY("privacy"),
-    DISCONNECT("disconnect"),
-    DATA("data"),
-    PRIVACY_CENTER("privacy_center"),
-    DATA_ACCESS("data_access"),
-    MANUAL_ENTRY("manual_entry")
+    DATA("stripe://data"),
+    MANUAL_ENTRY("stripe://manual-entry"),
 }

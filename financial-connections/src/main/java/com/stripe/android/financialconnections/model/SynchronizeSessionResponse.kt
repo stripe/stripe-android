@@ -19,7 +19,7 @@ internal data class SynchronizeSessionResponse(
 @Serializable
 @Parcelize
 internal data class TextUpdate(
-    @SerialName("consent")
+    @SerialName("consent_pane")
     val consent: ConsentPane? = null
 ) : Parcelable
 
@@ -29,7 +29,7 @@ internal data class ConsentPane(
     @SerialName("above_cta")
     val aboveCta: String,
     @SerialName("below_cta")
-    val belowCta: String,
+    val belowCta: String? = null,
     @SerialName("body")
     val body: ConsentPaneBody,
     @SerialName("cta")
@@ -42,29 +42,20 @@ internal data class ConsentPane(
 
 @Serializable
 @Parcelize
-internal data class DataAccessNoticeBullet(
-    @SerialName("content")
-    val content: String,
-    @SerialName("icon")
-    val icon: Image,
-    @SerialName("title")
-    val title: String
-) : Parcelable
-
-@Serializable
-@Parcelize
 internal data class DataAccessNoticeBody(
     @SerialName("bullets")
-    val bullets: List<DataAccessNoticeBullet>
+    val bullets: List<Bullet>
 ) : Parcelable
 
 @Serializable
 @Parcelize
-internal data class ConsentPaneBullet(
+internal data class Bullet(
     @SerialName("content")
     val content: String,
     @SerialName("icon")
-    val icon: Image
+    val icon: String,
+    @SerialName("title")
+    val title: String? = null
 ) : Parcelable
 
 @Serializable
@@ -72,17 +63,17 @@ internal data class ConsentPaneBullet(
 internal data class DataAccessNotice(
     @SerialName("body")
     val body: DataAccessNoticeBody,
-    @SerialName("content")
-    val content: String,
     @SerialName("title")
     val title: String,
     @SerialName("cta")
     val cta: String,
+    @SerialName("learn_more")
+    val learnMore: String,
 ) : Parcelable
 
 @Serializable
 @Parcelize
 internal data class ConsentPaneBody(
     @SerialName("bullets")
-    val bullets: List<ConsentPaneBullet>
+    val bullets: List<Bullet>
 ) : Parcelable

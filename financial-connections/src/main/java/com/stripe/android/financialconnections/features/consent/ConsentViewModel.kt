@@ -1,5 +1,7 @@
 package com.stripe.android.financialconnections.features.consent
 
+import android.net.Uri
+import android.webkit.URLUtil
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
@@ -8,15 +10,15 @@ import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.features.MarkdownParser
+import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.model.Bullet
 import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.ConsentPaneBody
-import com.stripe.android.financialconnections.model.ConsentPaneBullet
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.DataAccessNoticeBody
-import com.stripe.android.financialconnections.model.DataAccessNoticeBullet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.sampleConsent
+import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
@@ -34,41 +36,36 @@ internal class ConsentViewModel @Inject constructor(
         logErrors()
         suspend {
             val sync = getOrFetchSync()
-            val consent: ConsentPane = sampleConsent.toHtml()
-            // TODO@carlosmuvi replace consent by sync response.
-//            manualEntryEnabled = manifest.allowManualEntry,
-//            manualEntryShowBusinessDaysNotice =
-//                !manifest.customManualEntryHandling && manifest.manualEntryUsesMicrodeposits,
-//            sync.text
-            consent
+            sync.text!!.consent!!.toHtml()
         }.execute { copy(consent = it) }
     }
 
     private fun ConsentPane.toHtml(): ConsentPane = ConsentPane(
         title = MarkdownParser.toHtml(title),
         body = ConsentPaneBody(
-            bullets = body.bullets.map {
-                ConsentPaneBullet(
-                    icon = it.icon,
-                    content = MarkdownParser.toHtml(it.content),
+            bullets = body.bullets.map { bullet ->
+                Bullet(
+                    icon = bullet.icon,
+                    content = MarkdownParser.toHtml(bullet.content),
+                    title = bullet.title?.let { MarkdownParser.toHtml(it) }
                 )
             }
         ),
-        belowCta = MarkdownParser.toHtml(belowCta),
+        belowCta = belowCta?.let { MarkdownParser.toHtml(it) },
         aboveCta = MarkdownParser.toHtml(aboveCta),
         cta = MarkdownParser.toHtml(cta),
         dataAccessNotice = DataAccessNotice(
             title = MarkdownParser.toHtml(dataAccessNotice.title),
             body = DataAccessNoticeBody(
                 bullets = dataAccessNotice.body.bullets.map { bullet ->
-                    DataAccessNoticeBullet(
+                    Bullet(
                         icon = bullet.icon,
                         content = MarkdownParser.toHtml(bullet.content),
-                        title = MarkdownParser.toHtml(bullet.title),
+                        title = bullet.title?.let { MarkdownParser.toHtml(it) }
                     )
                 }
             ),
-            content = MarkdownParser.toHtml(dataAccessNotice.content),
+            learnMore = MarkdownParser.toHtml(dataAccessNotice.learnMore),
             cta = MarkdownParser.toHtml(dataAccessNotice.cta),
         )
     )
@@ -91,35 +88,23 @@ internal class ConsentViewModel @Inject constructor(
     }
 
     fun onClickableTextClick(tag: String) {
-        if (tag == "stripe://data-access-notice") {
-            setState { copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet) }
-        } else {
-            setState { copy(viewEffect = OpenUrl(tag)) }
+        if (URLUtil.isNetworkUrl(tag)) {
+            kotlin.runCatching {
+                Uri.parse(tag)
+                    .getQueryParameter("eventName")
+                    // TODO@carlosmuvi send event tracker!
+                    ?.let { logger.debug("EVENT: $it") }
+                setState { copy(viewEffect = OpenUrl(tag)) }
+            }
+        } else when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
+            ConsentClickableText.DATA ->
+                setState { copy(viewEffect = ViewEffect.OpenBottomSheet) }
+
+            ConsentClickableText.MANUAL_ENTRY ->
+                navigationManager.navigate(NavigationDirections.manualEntry)
+
+            null -> logger.error("Unrecognized clickable text: $tag")
         }
-//        when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
-//            ConsentClickableText.TERMS ->
-//                setState { copy(viewEffect = OpenUrl(tag)) }
-//
-//            ConsentClickableText.PRIVACY ->
-//                setState { copy(viewEffect = OpenUrl(FinancialConnectionsUrls.StripePrivacyPolicy)) }
-//
-//            ConsentClickableText.DISCONNECT ->
-//                setState { copy(viewEffect = OpenUrl(tag)) }
-//
-//            ConsentClickableText.DATA ->
-//                setState { copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet) }
-//
-//            ConsentClickableText.PRIVACY_CENTER ->
-//                setState { copy(viewEffect = OpenUrl(tag)) }
-//
-//            ConsentClickableText.DATA_ACCESS ->
-//                setState { copy(viewEffect = OpenUrl(tag)) }
-//
-//            ConsentClickableText.MANUAL_ENTRY ->
-//                navigationManager.navigate(NavigationDirections.manualEntry)
-//
-//            null -> logger.error("Unrecognized clickable text: $tag")
-//        }
     }
 
     fun onViewEffectLaunched() {
