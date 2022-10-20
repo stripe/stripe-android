@@ -29,6 +29,8 @@ dependencies {
     implementation "com.jakewharton:disklrucache:2.0.2"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
+    implementation "androidx.compose.material:material:$androidxComposeVersion"
+    implementation "androidx.core:core-ktx:$androidxCoreVersion"
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "com.google.truth:truth:$truthVersion"

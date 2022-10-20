@@ -544,9 +544,6 @@ public final class com/stripe/android/ui/core/elements/H4TextKt {
 public final class com/stripe/android/ui/core/elements/H6TextKt {
 }
 
-public final class com/stripe/android/ui/core/elements/HtmlKt {
-}
-
 public final class com/stripe/android/ui/core/elements/HyperlinkedTextKt {
 }
 
