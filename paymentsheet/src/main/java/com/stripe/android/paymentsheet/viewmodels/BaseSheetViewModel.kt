@@ -29,8 +29,8 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
-import com.stripe.android.paymentsheet.PaymentOptionsFactory
 import com.stripe.android.paymentsheet.PaymentOptionsState
+import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
@@ -43,7 +43,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
@@ -233,29 +232,41 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         get() = savedStateHandle.get<String>(LPM_SERVER_SPEC_STRING)
         set(value) = savedStateHandle.set(LPM_SERVER_SPEC_STRING, value)
 
-    internal val paymentOptionsState: LiveData<PaymentOptionsState> = producePaymentOptionsState()
-
-    private fun producePaymentOptionsState(): LiveData<PaymentOptionsState> {
-        return MediatorLiveData<PaymentOptionsState>().apply {
-            listOf(
-                paymentMethods,
-                selection,
-                savedSelection,
-                isGooglePayReady,
-                isLinkEnabled,
-            ).forEach { source ->
-                addSource(source) {
-                    val newState = createPaymentOptionsState()
-
-                    if (selection.value == null && newState != null) {
-                        val selection = newState.selectedItem?.toPaymentSelection()
-                        updateSelection(selection)
-                        value = newState
-                    }
-                }
-            }
-        }.distinctUntilChanged()
+    private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
+        PaymentOptionsStateMapper(
+            paymentMethods = paymentMethods,
+            initialSelection = savedSelection,
+            currentSelection = selection,
+            isGooglePayReady = isGooglePayReady,
+            isLinkEnabled = isLinkEnabled,
+            isNotPaymentFlow = this is PaymentOptionsViewModel,
+            onInitialSelection = this::updateSelection,
+        )
     }
+
+    internal val paymentOptionsState: LiveData<PaymentOptionsState> = paymentOptionsStateMapper()
+
+//    private fun producePaymentOptionsState(): LiveData<PaymentOptionsState> {
+//        return MediatorLiveData<PaymentOptionsState>().apply {
+//            listOf(
+//                paymentMethods,
+//                selection,
+//                savedSelection,
+//                isGooglePayReady,
+//                isLinkEnabled,
+//            ).forEach { source ->
+//                addSource(source) {
+//                    val newState = createPaymentOptionsState()
+//
+//                    if (selection.value == null && newState != null) {
+//                        val selection = newState.selectedItem?.toPaymentSelection()
+//                        updateSelection(selection)
+//                        value = newState
+//                    }
+//                }
+//            }
+//        }.distinctUntilChanged()
+//    }
 
     private fun createPaymentOptionsState(): PaymentOptionsState? {
         val paymentMethods = paymentMethods.value ?: return null
@@ -265,7 +276,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
         val currentSelection = selection.value
 
-        return PaymentOptionsFactory.create(
+        return PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
             showGooglePay = isGooglePayReady && this is PaymentOptionsViewModel,
             showLink = isLinkEnabled && this is PaymentOptionsViewModel,
@@ -450,12 +461,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         _contentVisible.value = visible
     }
 
-    private fun handleRemovalOfSelectedPaymentMethod() {
-        val selectedItem = paymentOptionsState.value?.selectedItem
-        val newSelection = selectedItem?.toPaymentSelection()
-        _selection.value = newSelection
-    }
-
     fun removePaymentMethod(paymentMethod: PaymentMethod) {
         val paymentMethodId = paymentMethod.id ?: return
 
@@ -464,7 +469,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             val didRemoveSelectedItem = currentSelection == paymentMethodId
 
             if (didRemoveSelectedItem) {
-                handleRemovalOfSelectedPaymentMethod()
+                // Remove the current selection. The new selection will be set when we're computing
+                // the next PaymentOptionsState.
+                _selection.value = null
             }
 
             savedStateHandle[SAVE_PAYMENT_METHODS] = _paymentMethods.value?.filter {

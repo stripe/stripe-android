@@ -13,7 +13,7 @@ internal data class PaymentOptionsState(
         get() = items.getOrNull(selectedIndex)
 }
 
-internal object PaymentOptionsFactory {
+internal object PaymentOptionsStateFactory {
 
     fun create(
         paymentMethods: List<PaymentMethod>,

@@ -6,12 +6,12 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import org.junit.Test
 
-class PaymentOptionsFactoryTest {
+class PaymentOptionsStateFactoryTest {
 
     @Test
     fun `Defaults to Google Pay if Google Pay and Link are available`() {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
-        val state = PaymentOptionsFactory.create(
+        val state = PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
             showGooglePay = true,
             showLink = true,
@@ -24,7 +24,7 @@ class PaymentOptionsFactoryTest {
     @Test
     fun `Defaults to Link if Google Pay is not available`() {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
-        val state = PaymentOptionsFactory.create(
+        val state = PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = true,
@@ -37,7 +37,7 @@ class PaymentOptionsFactoryTest {
     @Test
     fun `Defaults to first saved payment method if Google Pay and Link aren't available`() {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
-        val state = PaymentOptionsFactory.create(
+        val state = PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
@@ -54,7 +54,7 @@ class PaymentOptionsFactoryTest {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
         val savedPaymentMethod = SavedSelection.PaymentMethod(id = paymentMethods[1].id!!)
 
-        val state = PaymentOptionsFactory.create(
+        val state = PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
@@ -70,7 +70,7 @@ class PaymentOptionsFactoryTest {
     fun `Uses current selection over initial selection`() {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
 
-        val state = PaymentOptionsFactory.create(
+        val state = PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
             showGooglePay = true,
             showLink = true,

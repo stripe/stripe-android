@@ -71,9 +71,6 @@ internal class PaymentOptionsAdapter(
     private var selectedItemPosition: Int = NO_POSITION
     private var isEditing = false
 
-    internal val selectedItem: PaymentOptionsItem?
-        get() = items.getOrNull(selectedItemPosition)
-
     internal var isEnabled: Boolean by Delegates.observable(true) { _, oldValue, newValue ->
         if (oldValue != newValue) {
             notifyDataSetChanged()
