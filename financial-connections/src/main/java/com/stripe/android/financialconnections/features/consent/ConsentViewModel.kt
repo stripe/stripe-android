@@ -12,11 +12,6 @@ import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.features.MarkdownParser
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.model.Bullet
-import com.stripe.android.financialconnections.model.ConsentPane
-import com.stripe.android.financialconnections.model.ConsentPaneBody
-import com.stripe.android.financialconnections.model.DataAccessNotice
-import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -36,39 +31,9 @@ internal class ConsentViewModel @Inject constructor(
         logErrors()
         suspend {
             val sync = getOrFetchSync()
-            sync.text!!.consent!!.toHtml()
+            MarkdownParser.toHtml(sync.text!!.consent!!)
         }.execute { copy(consent = it) }
     }
-
-    private fun ConsentPane.toHtml(): ConsentPane = ConsentPane(
-        title = MarkdownParser.toHtml(title),
-        body = ConsentPaneBody(
-            bullets = body.bullets.map { bullet ->
-                Bullet(
-                    icon = bullet.icon,
-                    content = MarkdownParser.toHtml(bullet.content),
-                    title = bullet.title?.let { MarkdownParser.toHtml(it) }
-                )
-            }
-        ),
-        belowCta = belowCta?.let { MarkdownParser.toHtml(it) },
-        aboveCta = MarkdownParser.toHtml(aboveCta),
-        cta = MarkdownParser.toHtml(cta),
-        dataAccessNotice = DataAccessNotice(
-            title = MarkdownParser.toHtml(dataAccessNotice.title),
-            body = DataAccessNoticeBody(
-                bullets = dataAccessNotice.body.bullets.map { bullet ->
-                    Bullet(
-                        icon = bullet.icon,
-                        content = MarkdownParser.toHtml(bullet.content),
-                        title = bullet.title?.let { MarkdownParser.toHtml(it) }
-                    )
-                }
-            ),
-            learnMore = MarkdownParser.toHtml(dataAccessNotice.learnMore),
-            cta = MarkdownParser.toHtml(dataAccessNotice.cta),
-        )
-    )
 
     private fun logErrors() {
         onAsync(ConsentState::consent, onFail = {

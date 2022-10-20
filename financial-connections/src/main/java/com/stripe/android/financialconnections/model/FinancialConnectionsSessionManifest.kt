@@ -132,7 +132,8 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName(value = "connected_account_name")
     val connectedAccountName: String? = null,
 
-    @SerialName(value = "experiment_assignments")
+    // @SerialName(value = "experiment_assignments")
+    @Transient
     // TODO@carlosmuvi revert hardcoded assignments.
     val experimentAssignments: Map<String, String>? = mapOf(
         "native" to "true"

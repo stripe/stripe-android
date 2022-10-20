@@ -69,6 +69,8 @@ internal data class DataAccessNotice(
     val cta: String,
     @SerialName("learn_more")
     val learnMore: String,
+    @SerialName("connected_account_notice")
+    val connectedAccountNotice: String? = null,
 ) : Parcelable
 
 @Serializable
