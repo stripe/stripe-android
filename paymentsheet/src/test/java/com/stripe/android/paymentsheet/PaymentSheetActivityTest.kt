@@ -30,7 +30,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -76,6 +78,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
@@ -98,8 +101,21 @@ internal class PaymentSheetActivityTest {
     private val eventReporter = mock<EventReporter>()
     private val googlePayPaymentMethodLauncherFactory =
         createGooglePayPaymentMethodLauncherFactory()
-    private val stripePaymentLauncherAssistedFactory =
-        mock<StripePaymentLauncherAssistedFactory>()
+
+    private val paymentLauncherFactory = PaymentLauncherFactory(
+        context = context,
+        hostActivityLauncher = mock(),
+    )
+
+    private val paymentLauncher: StripePaymentLauncher by lazy {
+        paymentLauncherFactory.create(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        ) as StripePaymentLauncher
+    }
+
+    private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory> {
+        on { create(any(), any(), any()) } doReturn paymentLauncher
+    }
 
     private val viewModel = createViewModel()
 

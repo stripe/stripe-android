@@ -15,7 +15,7 @@ internal fun exponentialDelayProvider(): () -> Long {
         // Add a minor offset so that we run after the delay has finished,
         // not when it's just about to finish.
         val offset = if (attempt == 1) 1 else 0
-        calculateDelayInMillis(attempts = attempt++) + offset
+        calculateDelay(attempts = attempt++).inWholeMilliseconds + offset
     }
 }
 

@@ -45,9 +45,6 @@ public final class com/stripe/android/ui/core/FormController_Factory : dagger/in
 public final class com/stripe/android/ui/core/FormUIKt {
 }
 
-public final class com/stripe/android/ui/core/MeasureComposableWidthKt {
-}
-
 public final class com/stripe/android/ui/core/PaymentsThemeKt {
 	public static final fun getBorderStroke (Landroidx/compose/material/MaterialTheme;ZLandroidx/compose/runtime/Composer;I)Landroidx/compose/foundation/BorderStroke;
 	public static final fun getLocalColors ()Landroidx/compose/runtime/ProvidableCompositionLocal;

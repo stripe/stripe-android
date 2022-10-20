@@ -19,6 +19,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.fragment.app.Fragment
@@ -181,6 +182,10 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         formArguments: FormFragmentArguments,
         onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     ) {
+        val horizontalPadding = dimensionResource(
+            id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
+        )
+
         Column(modifier = Modifier.fillMaxWidth()) {
             if (supportedPaymentMethods.size > 1) {
                 PaymentMethodsUI(
@@ -190,13 +195,13 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     isEnabled = enabled,
                     paymentMethods = supportedPaymentMethods,
                     onItemSelectedListener = onItemSelectedListener,
-                    modifier = Modifier.padding(top = 20.dp, bottom = 6.dp)
+                    modifier = Modifier.padding(top = 26.dp, bottom = 12.dp),
                 )
             }
 
             if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
                 (activity as BaseSheetActivity<*>).formArgs = formArguments
-                Column(Modifier.padding(horizontal = 20.dp)) {
+                Column(modifier = Modifier.padding(horizontal = horizontalPadding)) {
                     AndroidViewBinding(FragmentAchBinding::inflate)
                 }
             } else {
@@ -205,7 +210,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     enabled = enabled,
                     onFormFieldValuesChanged = onFormFieldValuesChanged,
                     showCheckboxFlow = showCheckboxFlow,
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                    modifier = Modifier.padding(horizontal = horizontalPadding)
                 )
             }
 
@@ -217,7 +222,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                             sheetViewModel.linkInlineSelection.value = null
                         },
                         modifier = Modifier
-                            .padding(horizontal = 20.dp, vertical = 6.dp)
+                            .padding(horizontal = horizontalPadding, vertical = 6.dp)
                             .fillMaxWidth()
                     )
                 } else {
@@ -226,7 +231,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                         enabled = enabled,
                         onStateChanged = onLinkSignupStateChanged,
                         modifier = Modifier
-                            .padding(horizontal = 20.dp, vertical = 6.dp)
+                            .padding(horizontal = horizontalPadding, vertical = 6.dp)
                             .fillMaxWidth()
                     )
                 }
