@@ -299,7 +299,7 @@ class PaymentOptionsAdapterTest {
     fun `initial selected item should reflect SavedSelection`() {
         val savedPaymentMethod = paymentMethods[3]
         val adapter = createAdapter().also {
-            it.setItems(
+            it.update(
                 CONFIG.copy(
                     isGooglePayReady = true,
                     savedSelection = SavedSelection.PaymentMethod(savedPaymentMethod.id!!)
@@ -321,7 +321,7 @@ class PaymentOptionsAdapterTest {
         val savedPaymentMethod = paymentMethods[2]
         val selectedPaymentMethod = paymentMethods[3]
         val adapter = createAdapter().also {
-            it.setItems(
+            it.update(
                 CONFIG.copy(
                     isGooglePayReady = true,
                     savedSelection = SavedSelection.PaymentMethod(savedPaymentMethod.id!!)
@@ -344,7 +344,7 @@ class PaymentOptionsAdapterTest {
         val savedPaymentMethod = paymentMethods[2]
         val selectedPaymentMethod = PaymentMethodFixtures.createCards(1).first()
         val adapter = createAdapter().also {
-            it.setItems(
+            it.update(
                 CONFIG.copy(
                     isGooglePayReady = true,
                     savedSelection = SavedSelection.PaymentMethod(savedPaymentMethod.id!!)
@@ -410,7 +410,7 @@ class PaymentOptionsAdapterTest {
         showLink: Boolean = false
     ): PaymentOptionsAdapter {
         return createAdapter().also {
-            it.setItems(fragmentConfig, paymentMethods, showGooglePay, showLink)
+            it.update(fragmentConfig, paymentMethods, showGooglePay, showLink)
         }
     }
 

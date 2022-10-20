@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.annotation.SuppressLint
-import android.content.res.Resources
 import android.view.ViewGroup
 import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
@@ -44,12 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsAdapter.Companion.PM_OPTIONS_DEFAULT_PADDING
 import com.stripe.android.paymentsheet.PaymentOptionsItem.ViewType
-import com.stripe.android.paymentsheet.model.FragmentConfig
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getLabelIcon
@@ -64,19 +59,17 @@ import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
 internal class PaymentOptionsAdapter(
-    val lpmRepository: LpmRepository,
+    private val lpmRepository: LpmRepository,
     private val canClickSelectedItem: Boolean,
-    val paymentOptionSelectedListener:
-        (paymentSelection: PaymentSelection, isClick: Boolean) -> Unit,
-    val paymentMethodDeleteListener:
-        (paymentMethod: PaymentOptionsItem.SavedPaymentMethod) -> Unit,
-    val addCardClickListener: () -> Unit
+    val paymentOptionSelected: (PaymentOptionsItem) -> Unit,
+    val paymentMethodDeleteListener: (PaymentOptionsItem.SavedPaymentMethod) -> Unit,
+    val addCardClickListener: () -> Unit,
 ) : RecyclerView.Adapter<PaymentOptionsAdapter.PaymentOptionViewHolder>() {
+
     @VisibleForTesting
     internal var items: List<PaymentOptionsItem> = emptyList()
     private var selectedItemPosition: Int = NO_POSITION
     private var isEditing = false
-    private var savedSelection: SavedSelection? = null
 
     internal val selectedItem: PaymentOptionsItem?
         get() = items.getOrNull(selectedItemPosition)
@@ -98,156 +91,27 @@ internal class PaymentOptionsAdapter(
         }
     }
 
-    fun setItems(
-        config: FragmentConfig,
-        paymentMethods: List<PaymentMethod>,
-        showGooglePay: Boolean,
-        showLink: Boolean,
-        paymentSelection: PaymentSelection? = null
+    fun update(
+        items: List<PaymentOptionsItem>,
+        selectedIndex: Int,
     ) {
-        savedSelection = config.savedSelection
-
-        val items = listOfNotNull(
-            PaymentOptionsItem.AddCard,
-            PaymentOptionsItem.GooglePay.takeIf { config.isGooglePayReady && showGooglePay },
-            PaymentOptionsItem.Link.takeIf { showLink }
-        ) + sortedPaymentMethods(paymentMethods, config.savedSelection).map {
-            PaymentOptionsItem.SavedPaymentMethod(it)
-        }
-
         this.items = items
-
-        onItemSelected(
-            position = paymentSelection?.let { findSelectedPosition(it) }.takeIf { it != -1 }
-                ?: findInitialSelectedPosition(config.savedSelection),
-            isClick = false
-        )
-
+        this.selectedItemPosition = selectedIndex
         notifyDataSetChanged()
     }
 
     fun hasSavedItems() = items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().isNotEmpty()
 
-    private fun removeItem(item: PaymentOptionsItem) {
-        val itemIndex = items.indexOf(item)
-        items = items.toMutableList().apply { removeAt(itemIndex) }
-        notifyItemRemoved(itemIndex)
-    }
-
-    /**
-     * The initial selection position follows this prioritization:
-     * 1. The index of [PaymentOptionsItem.SavedPaymentMethod] if it matches the [SavedSelection]
-     * 2. The index of [PaymentOptionsItem.GooglePay] if it exists
-     * 3. The index of the first [PaymentOptionsItem.SavedPaymentMethod]
-     * 4. None (-1)
-     */
-    private fun findInitialSelectedPosition(
-        savedSelection: SavedSelection?
-    ): Int {
-        return listOfNotNull(
-            // saved selection
-            items.indexOfFirst { item ->
-                val b = when (savedSelection) {
-                    SavedSelection.GooglePay -> item is PaymentOptionsItem.GooglePay
-                    SavedSelection.Link -> item is PaymentOptionsItem.Link
-                    is SavedSelection.PaymentMethod -> {
-                        when (item) {
-                            is PaymentOptionsItem.SavedPaymentMethod -> {
-                                savedSelection.id == item.paymentMethod.id
-                            }
-                            else -> false
-                        }
-                    }
-                    SavedSelection.None -> false
-                    else -> false
-                }
-                b
-            }.takeIf { it != -1 },
-
-            // Google Pay
-            items.indexOfFirst { it is PaymentOptionsItem.GooglePay }.takeIf { it != -1 },
-
-            // Link
-            items.indexOfFirst { it is PaymentOptionsItem.Link }.takeIf { it != -1 },
-
-            // the first payment method
-            items.indexOfFirst { it is PaymentOptionsItem.SavedPaymentMethod }.takeIf { it != -1 }
-        ).firstOrNull() ?: NO_POSITION
-    }
-
-    /**
-     * Find the index of [paymentSelection] in the current items. Return -1 if not found.
-     */
-    private fun findSelectedPosition(paymentSelection: PaymentSelection): Int {
-        return items.indexOfFirst { item ->
-            when (paymentSelection) {
-                PaymentSelection.GooglePay -> item is PaymentOptionsItem.GooglePay
-                is PaymentSelection.Saved -> {
-                    when (item) {
-                        is PaymentOptionsItem.SavedPaymentMethod -> {
-                            paymentSelection.paymentMethod.id == item.paymentMethod.id
-                        }
-                        else -> false
-                    }
-                }
-                else -> false
-            }
-        }
-    }
-
-    private fun sortedPaymentMethods(
-        paymentMethods: List<PaymentMethod>,
-        savedSelection: SavedSelection
-    ): List<PaymentMethod> {
-        val primaryPaymentMethodIndex = when (savedSelection) {
-            is SavedSelection.PaymentMethod -> {
-                paymentMethods.indexOfFirst {
-                    it.id == savedSelection.id
-                }
-            }
-            else -> -1
-        }
-        return if (primaryPaymentMethodIndex != -1) {
-            val mutablePaymentMethods = paymentMethods.toMutableList()
-            mutablePaymentMethods.removeAt(primaryPaymentMethodIndex)
-                .also { primaryPaymentMethod ->
-                    mutablePaymentMethods.add(0, primaryPaymentMethod)
-                }
-            mutablePaymentMethods
-        } else {
-            paymentMethods
-        }
-    }
-
     @VisibleForTesting
     internal fun onItemSelected(
         position: Int,
-        isClick: Boolean,
         force: Boolean = false
     ) {
-        if (force || position != NO_POSITION &&
-            (canClickSelectedItem || position != selectedItemPosition) &&
-            !isEditing
-        ) {
-            val previousSelectedIndex = selectedItemPosition
-            selectedItemPosition = position
+        val isAllowed = canClickSelectedItem || position != selectedItemPosition
 
-            notifyItemChanged(previousSelectedIndex)
-            notifyItemChanged(position)
-
-            val newSelectedItem = items[position]
-
-            when (newSelectedItem) {
-                PaymentOptionsItem.AddCard -> null
-                PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay
-                PaymentOptionsItem.Link -> PaymentSelection.Link
-                is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(newSelectedItem.paymentMethod)
-            }?.let { paymentSelection ->
-                paymentOptionSelectedListener(
-                    paymentSelection,
-                    isClick
-                )
-            }
+        if (force || position != NO_POSITION && isAllowed && !isEditing) {
+            val item = items[position]
+            paymentOptionSelected(item)
         }
     }
 
@@ -261,13 +125,16 @@ internal class PaymentOptionsAdapter(
     ): PaymentOptionViewHolder {
         val width = calculateViewWidth(parent)
         return when (ViewType.values()[viewType]) {
-            ViewType.AddCard ->
+            ViewType.AddCard -> {
                 AddNewPaymentMethodViewHolder(parent, width, addCardClickListener)
-            ViewType.GooglePay ->
+            }
+            ViewType.GooglePay -> {
                 GooglePayViewHolder(parent, width, ::onItemSelected)
-            ViewType.Link ->
+            }
+            ViewType.Link -> {
                 LinkViewHolder(parent, width, ::onItemSelected)
-            ViewType.SavedPaymentMethod ->
+            }
+            ViewType.SavedPaymentMethod -> {
                 SavedPaymentMethodViewHolder(
                     parent,
                     width,
@@ -275,18 +142,10 @@ internal class PaymentOptionsAdapter(
                     onItemSelectedListener = ::onItemSelected,
                     onRemoveListener = { position ->
                         val removedItem = items[position] as PaymentOptionsItem.SavedPaymentMethod
-                        removeItem(removedItem)
                         paymentMethodDeleteListener(removedItem)
-                        selectedItemPosition = findInitialSelectedPosition(savedSelection)
-                        if (selectedItemPosition != NO_POSITION) {
-                            onItemSelected(
-                                position = selectedItemPosition,
-                                isClick = false,
-                                force = true
-                            )
-                        }
                     }
                 )
+            }
         }
     }
 
@@ -321,7 +180,7 @@ internal class PaymentOptionsAdapter(
         private val width: Dp,
         private val lpmRepository: LpmRepository,
         @get:VisibleForTesting internal val onRemoveListener: (Int) -> Unit,
-        private val onItemSelectedListener: ((Int, Boolean) -> Unit)
+        private val onItemSelectedListener: (Int) -> Unit
     ) : PaymentOptionViewHolder(
         composeView
     ) {
@@ -329,7 +188,7 @@ internal class PaymentOptionsAdapter(
             parent: ViewGroup,
             width: Dp,
             lpmRepository: LpmRepository,
-            onItemSelectedListener: ((Int, Boolean) -> Unit),
+            onItemSelectedListener: (Int) -> Unit,
             onRemoveListener: (Int) -> Unit
         ) : this(
             composeView = ComposeView(parent.context),
@@ -374,7 +233,7 @@ internal class PaymentOptionsAdapter(
                         onRemoveListener = { onRemoveListener(position) },
                         onRemoveAccessibilityDescription =
                         savedPaymentMethod.getRemoveDescription(itemView.resources),
-                        onItemSelectedListener = { onItemSelectedListener(position, true) }
+                        onItemSelectedListener = { onItemSelectedListener(position) }
                     )
                 }
             }
@@ -433,14 +292,14 @@ internal class PaymentOptionsAdapter(
     internal class GooglePayViewHolder(
         private val composeView: ComposeView,
         private val width: Dp,
-        private val onItemSelectedListener: ((Int, Boolean) -> Unit)
+        private val onItemSelectedListener: (Int) -> Unit
     ) : PaymentOptionViewHolder(
         composeView
     ) {
         constructor(
             parent: ViewGroup,
             width: Dp,
-            onItemSelectedListener: ((Int, Boolean) -> Unit)
+            onItemSelectedListener: (Int) -> Unit
         ) : this(
             composeView = ComposeView(parent.context),
             width = width,
@@ -464,7 +323,7 @@ internal class PaymentOptionsAdapter(
                         iconRes = R.drawable.stripe_google_pay_mark,
                         labelText = itemView.resources.getString(R.string.google_pay),
                         description = itemView.resources.getString(R.string.google_pay),
-                        onItemSelectedListener = { onItemSelectedListener(position, true) }
+                        onItemSelectedListener = { onItemSelectedListener(position) }
                     )
                 }
             }
@@ -475,14 +334,14 @@ internal class PaymentOptionsAdapter(
     internal class LinkViewHolder(
         private val composeView: ComposeView,
         private val width: Dp,
-        private val onItemSelectedListener: ((Int, Boolean) -> Unit)
+        private val onItemSelectedListener: (Int) -> Unit
     ) : PaymentOptionViewHolder(
         composeView
     ) {
         constructor(
             parent: ViewGroup,
             width: Dp,
-            onItemSelectedListener: ((Int, Boolean) -> Unit)
+            onItemSelectedListener: (Int) -> Unit
         ) : this(
             composeView = ComposeView(parent.context),
             width = width,
@@ -506,7 +365,7 @@ internal class PaymentOptionsAdapter(
                         iconRes = R.drawable.stripe_link_mark,
                         labelText = itemView.resources.getString(R.string.link),
                         description = itemView.resources.getString(R.string.link),
-                        onItemSelectedListener = { onItemSelectedListener(position, true) }
+                        onItemSelectedListener = { onItemSelectedListener(position) }
                     )
                 }
             }

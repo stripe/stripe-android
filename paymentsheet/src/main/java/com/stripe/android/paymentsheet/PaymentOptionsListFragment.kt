@@ -49,14 +49,8 @@ internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
         )
     }
 
-    override fun onPaymentOptionSelected(
-        paymentSelection: PaymentSelection,
-        isClick: Boolean
-    ) {
-        super.onPaymentOptionSelected(paymentSelection, isClick)
-        if (isClick) {
-            // this is a click-triggered selection
-            sheetViewModel.onUserSelection()
-        }
+    override fun onPaymentOptionsItemSelected(item: PaymentOptionsItem) {
+        super.onPaymentOptionsItemSelected(item)
+        sheetViewModel.onUserSelection()
     }
 }

@@ -21,6 +21,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.verification.LinkVerificationCallback
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
@@ -28,6 +29,9 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
+import com.stripe.android.paymentsheet.PaymentOptionsFactory
+import com.stripe.android.paymentsheet.PaymentOptionsState
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -39,6 +43,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
@@ -48,7 +53,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
@@ -229,6 +233,47 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         get() = savedStateHandle.get<String>(LPM_SERVER_SPEC_STRING)
         set(value) = savedStateHandle.set(LPM_SERVER_SPEC_STRING, value)
 
+    internal val paymentOptionsState: LiveData<PaymentOptionsState> = producePaymentOptionsState()
+
+    private fun producePaymentOptionsState(): LiveData<PaymentOptionsState> {
+        return MediatorLiveData<PaymentOptionsState>().apply {
+            listOf(
+                paymentMethods,
+                selection,
+                savedSelection,
+                isGooglePayReady,
+                isLinkEnabled,
+            ).forEach { source ->
+                addSource(source) {
+                    val newState = createPaymentOptionsState()
+
+                    if (selection.value == null && newState != null) {
+                        val selection = newState.selectedItem?.toPaymentSelection()
+                        updateSelection(selection)
+                        value = newState
+                    }
+                }
+            }
+        }.distinctUntilChanged()
+    }
+
+    private fun createPaymentOptionsState(): PaymentOptionsState? {
+        val paymentMethods = paymentMethods.value ?: return null
+        val initialSelection = savedSelection.value ?: return null
+        val isGooglePayReady = isGooglePayReady.value ?: return null
+        val isLinkEnabled = isLinkEnabled.value ?: return null
+
+        val currentSelection = selection.value
+
+        return PaymentOptionsFactory.create(
+            paymentMethods = paymentMethods,
+            showGooglePay = isGooglePayReady && this is PaymentOptionsViewModel,
+            showLink = isLinkEnabled && this is PaymentOptionsViewModel,
+            initialSelection = initialSelection,
+            currentSelection = currentSelection,
+        )
+    }
+
     init {
         if (_savedSelection.value == null) {
             viewModelScope.launch {
@@ -405,38 +450,42 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         _contentVisible.value = visible
     }
 
-    fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
-        launch {
-            paymentMethod.id?.let { paymentMethodId ->
-                if (
-                    (selection.value as? PaymentSelection.Saved)
-                        ?.paymentMethod?.id == paymentMethodId
-                ) {
-                    _selection.value = null
-                }
+    private fun handleRemovalOfSelectedPaymentMethod() {
+        val selectedItem = paymentOptionsState.value?.selectedItem
+        val newSelection = selectedItem?.toPaymentSelection()
+        _selection.value = newSelection
+    }
 
-                savedStateHandle[SAVE_PAYMENT_METHODS] = _paymentMethods.value?.filter {
-                    it.id != paymentMethodId
-                }
+    fun removePaymentMethod(paymentMethod: PaymentMethod) {
+        val paymentMethodId = paymentMethod.id ?: return
 
-                customerConfig?.let {
-                    customerRepository.detachPaymentMethod(
-                        it,
-                        paymentMethodId
+        viewModelScope.launch {
+            val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
+            val didRemoveSelectedItem = currentSelection == paymentMethodId
+
+            if (didRemoveSelectedItem) {
+                handleRemovalOfSelectedPaymentMethod()
+            }
+
+            savedStateHandle[SAVE_PAYMENT_METHODS] = _paymentMethods.value?.filter {
+                it.id != paymentMethodId
+            }
+
+            customerConfig?.let {
+                customerRepository.detachPaymentMethod(
+                    it,
+                    paymentMethodId
+                )
+            }
+
+            val hasNoBankAccounts = paymentMethods.value.orEmpty().all { it.type != USBankAccount }
+            if (hasNoBankAccounts) {
+                updatePrimaryButtonUIState(
+                    primaryButtonUIState.value?.copy(
+                        visible = false
                     )
-                }
-
-                if (_paymentMethods.value?.all {
-                    it.type != PaymentMethod.Type.USBankAccount
-                } == true
-                ) {
-                    updatePrimaryButtonUIState(
-                        primaryButtonUIState.value?.copy(
-                            visible = false
-                        )
-                    )
-                    updateBelowButtonText(null)
-                }
+                )
+                updateBelowButtonText(null)
             }
         }
     }

@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsThemeDefaults
@@ -126,22 +125,27 @@ internal abstract class BasePaymentMethodsListFragment(
         }
 
         adapter = PaymentOptionsAdapter(
-            sheetViewModel.lpmResourceRepository.getRepository(),
-            canClickSelectedItem,
-            paymentOptionSelectedListener = ::onPaymentOptionSelected,
+            lpmRepository = sheetViewModel.lpmResourceRepository.getRepository(),
+            canClickSelectedItem = canClickSelectedItem,
+            paymentOptionSelected = ::onPaymentOptionsItemSelected,
             paymentMethodDeleteListener = ::deletePaymentMethod,
             addCardClickListener = ::transitionToAddPaymentMethod
         ).also {
             viewBinding.recycler.adapter = it
         }
 
-        adapter.setItems(
-            config,
-            sheetViewModel.paymentMethods.value.orEmpty(),
-            sheetViewModel is PaymentOptionsViewModel,
-            sheetViewModel is PaymentOptionsViewModel && sheetViewModel.isLinkEnabled.value == true,
-            sheetViewModel.selection.value
-        )
+        sheetViewModel.paymentOptionsState.observe(viewLifecycleOwner) { paymentOptionsState ->
+            adapter.update(
+                items = paymentOptionsState.items,
+                selectedIndex = paymentOptionsState.selectedIndex,
+            )
+        }
+
+        sheetViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
+            if (isEditing && paymentMethods.isEmpty()) {
+                isEditing = false
+            }
+        }
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             adapter.isEnabled = !isProcessing
@@ -151,19 +155,14 @@ internal abstract class BasePaymentMethodsListFragment(
 
     abstract fun transitionToAddPaymentMethod()
 
-    open fun onPaymentOptionSelected(
-        paymentSelection: PaymentSelection,
-        isClick: Boolean
-    ) {
+    open fun onPaymentOptionsItemSelected(item: PaymentOptionsItem) {
+        val paymentSelection = item.toPaymentSelection()
         sheetViewModel.updateSelection(paymentSelection)
     }
 
     @VisibleForTesting
-    fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) {
+    fun deletePaymentMethod(item: PaymentOptionsItem.SavedPaymentMethod) {
         sheetViewModel.removePaymentMethod(item.paymentMethod)
-        if (!adapter.hasSavedItems()) {
-            isEditing = false
-        }
     }
 
     private companion object {
