@@ -155,11 +155,11 @@ private fun FailedPolling(
                     }
                 },
             )
-        }
+        },
+        modifier = modifier,
     ) { paddingValues ->
         Column(
-            modifier = modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
                 .padding(paddingValues),
         ) {
             Spacer(modifier = Modifier.weight(1f))
