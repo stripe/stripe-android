@@ -46,6 +46,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsAdapter.Companion.PM_OPTIONS_DEFAULT_PADDING
+import com.stripe.android.paymentsheet.PaymentOptionsItem.ViewType
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -68,16 +69,17 @@ internal class PaymentOptionsAdapter(
     val paymentOptionSelectedListener:
         (paymentSelection: PaymentSelection, isClick: Boolean) -> Unit,
     val paymentMethodDeleteListener:
-        (paymentMethod: Item.SavedPaymentMethod) -> Unit,
+        (paymentMethod: PaymentOptionsItem.SavedPaymentMethod) -> Unit,
     val addCardClickListener: () -> Unit
 ) : RecyclerView.Adapter<PaymentOptionsAdapter.PaymentOptionViewHolder>() {
     @VisibleForTesting
-    internal var items: List<Item> = emptyList()
+    internal var items: List<PaymentOptionsItem> = emptyList()
     private var selectedItemPosition: Int = NO_POSITION
     private var isEditing = false
     private var savedSelection: SavedSelection? = null
 
-    internal val selectedItem: Item? get() = items.getOrNull(selectedItemPosition)
+    internal val selectedItem: PaymentOptionsItem?
+        get() = items.getOrNull(selectedItemPosition)
 
     internal var isEnabled: Boolean by Delegates.observable(true) { _, oldValue, newValue ->
         if (oldValue != newValue) {
@@ -106,11 +108,11 @@ internal class PaymentOptionsAdapter(
         savedSelection = config.savedSelection
 
         val items = listOfNotNull(
-            Item.AddCard,
-            Item.GooglePay.takeIf { config.isGooglePayReady && showGooglePay },
-            Item.Link.takeIf { showLink }
+            PaymentOptionsItem.AddCard,
+            PaymentOptionsItem.GooglePay.takeIf { config.isGooglePayReady && showGooglePay },
+            PaymentOptionsItem.Link.takeIf { showLink }
         ) + sortedPaymentMethods(paymentMethods, config.savedSelection).map {
-            Item.SavedPaymentMethod(it)
+            PaymentOptionsItem.SavedPaymentMethod(it)
         }
 
         this.items = items
@@ -124,9 +126,9 @@ internal class PaymentOptionsAdapter(
         notifyDataSetChanged()
     }
 
-    fun hasSavedItems() = items.filterIsInstance<Item.SavedPaymentMethod>().isNotEmpty()
+    fun hasSavedItems() = items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().isNotEmpty()
 
-    private fun removeItem(item: Item) {
+    private fun removeItem(item: PaymentOptionsItem) {
         val itemIndex = items.indexOf(item)
         items = items.toMutableList().apply { removeAt(itemIndex) }
         notifyItemRemoved(itemIndex)
@@ -134,9 +136,9 @@ internal class PaymentOptionsAdapter(
 
     /**
      * The initial selection position follows this prioritization:
-     * 1. The index of [Item.SavedPaymentMethod] if it matches the [SavedSelection]
-     * 2. The index of [Item.GooglePay] if it exists
-     * 3. The index of the first [Item.SavedPaymentMethod]
+     * 1. The index of [PaymentOptionsItem.SavedPaymentMethod] if it matches the [SavedSelection]
+     * 2. The index of [PaymentOptionsItem.GooglePay] if it exists
+     * 3. The index of the first [PaymentOptionsItem.SavedPaymentMethod]
      * 4. None (-1)
      */
     private fun findInitialSelectedPosition(
@@ -146,11 +148,11 @@ internal class PaymentOptionsAdapter(
             // saved selection
             items.indexOfFirst { item ->
                 val b = when (savedSelection) {
-                    SavedSelection.GooglePay -> item is Item.GooglePay
-                    SavedSelection.Link -> item is Item.Link
+                    SavedSelection.GooglePay -> item is PaymentOptionsItem.GooglePay
+                    SavedSelection.Link -> item is PaymentOptionsItem.Link
                     is SavedSelection.PaymentMethod -> {
                         when (item) {
-                            is Item.SavedPaymentMethod -> {
+                            is PaymentOptionsItem.SavedPaymentMethod -> {
                                 savedSelection.id == item.paymentMethod.id
                             }
                             else -> false
@@ -163,13 +165,13 @@ internal class PaymentOptionsAdapter(
             }.takeIf { it != -1 },
 
             // Google Pay
-            items.indexOfFirst { it is Item.GooglePay }.takeIf { it != -1 },
+            items.indexOfFirst { it is PaymentOptionsItem.GooglePay }.takeIf { it != -1 },
 
             // Link
-            items.indexOfFirst { it is Item.Link }.takeIf { it != -1 },
+            items.indexOfFirst { it is PaymentOptionsItem.Link }.takeIf { it != -1 },
 
             // the first payment method
-            items.indexOfFirst { it is Item.SavedPaymentMethod }.takeIf { it != -1 }
+            items.indexOfFirst { it is PaymentOptionsItem.SavedPaymentMethod }.takeIf { it != -1 }
         ).firstOrNull() ?: NO_POSITION
     }
 
@@ -179,10 +181,10 @@ internal class PaymentOptionsAdapter(
     private fun findSelectedPosition(paymentSelection: PaymentSelection): Int {
         return items.indexOfFirst { item ->
             when (paymentSelection) {
-                PaymentSelection.GooglePay -> item is Item.GooglePay
+                PaymentSelection.GooglePay -> item is PaymentOptionsItem.GooglePay
                 is PaymentSelection.Saved -> {
                     when (item) {
-                        is Item.SavedPaymentMethod -> {
+                        is PaymentOptionsItem.SavedPaymentMethod -> {
                             paymentSelection.paymentMethod.id == item.paymentMethod.id
                         }
                         else -> false
@@ -236,10 +238,10 @@ internal class PaymentOptionsAdapter(
             val newSelectedItem = items[position]
 
             when (newSelectedItem) {
-                Item.AddCard -> null
-                Item.GooglePay -> PaymentSelection.GooglePay
-                Item.Link -> PaymentSelection.Link
-                is Item.SavedPaymentMethod -> PaymentSelection.Saved(newSelectedItem.paymentMethod)
+                PaymentOptionsItem.AddCard -> null
+                PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay
+                PaymentOptionsItem.Link -> PaymentSelection.Link
+                is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(newSelectedItem.paymentMethod)
             }?.let { paymentSelection ->
                 paymentOptionSelectedListener(
                     paymentSelection,
@@ -272,7 +274,7 @@ internal class PaymentOptionsAdapter(
                     lpmRepository,
                     onItemSelectedListener = ::onItemSelected,
                     onRemoveListener = { position ->
-                        val removedItem = items[position] as Item.SavedPaymentMethod
+                        val removedItem = items[position] as PaymentOptionsItem.SavedPaymentMethod
                         removeItem(removedItem)
                         paymentMethodDeleteListener(removedItem)
                         selectedItemPosition = findInitialSelectedPosition(savedSelection)
@@ -341,10 +343,10 @@ internal class PaymentOptionsAdapter(
             isSelected: Boolean,
             isEnabled: Boolean,
             isEditing: Boolean,
-            item: Item,
+            item: PaymentOptionsItem,
             position: Int
         ) {
-            val savedPaymentMethod = item as Item.SavedPaymentMethod
+            val savedPaymentMethod = item as PaymentOptionsItem.SavedPaymentMethod
             val labelIcon = savedPaymentMethod.paymentMethod.getLabelIcon()
             val labelText = savedPaymentMethod.paymentMethod.getLabel(itemView.resources) ?: return
             val removeTitle = itemView.resources.getString(
@@ -397,7 +399,7 @@ internal class PaymentOptionsAdapter(
             isSelected: Boolean,
             isEnabled: Boolean,
             isEditing: Boolean,
-            item: Item,
+            item: PaymentOptionsItem,
             position: Int
         ) {
             composeView.setContent {
@@ -449,7 +451,7 @@ internal class PaymentOptionsAdapter(
             isSelected: Boolean,
             isEnabled: Boolean,
             isEditing: Boolean,
-            item: Item,
+            item: PaymentOptionsItem,
             position: Int
         ) {
             composeView.setContent {
@@ -491,7 +493,7 @@ internal class PaymentOptionsAdapter(
             isSelected: Boolean,
             isEnabled: Boolean,
             isEditing: Boolean,
-            item: Item,
+            item: PaymentOptionsItem,
             position: Int
         ) {
             composeView.setContent {
@@ -518,7 +520,7 @@ internal class PaymentOptionsAdapter(
             isSelected: Boolean,
             isEnabled: Boolean,
             isEditing: Boolean,
-            item: Item,
+            item: PaymentOptionsItem,
             position: Int
         )
 
@@ -532,60 +534,6 @@ internal class PaymentOptionsAdapter(
             // Dispose the underlying Composition of the ComposeView
             // when RecyclerView has recycled this ViewHolder
             composeView.disposeComposition()
-        }
-    }
-
-    internal enum class ViewType {
-        SavedPaymentMethod,
-        AddCard,
-        GooglePay,
-        Link
-    }
-
-    internal sealed class Item {
-        abstract val viewType: ViewType
-
-        object AddCard : Item() {
-            override val viewType: ViewType = ViewType.AddCard
-        }
-
-        object GooglePay : Item() {
-            override val viewType: ViewType = ViewType.GooglePay
-        }
-
-        object Link : Item() {
-            override val viewType: ViewType = ViewType.Link
-        }
-
-        /**
-         * Represents a [PaymentMethod] that is already saved and attached to the current customer.
-         */
-        data class SavedPaymentMethod(
-            val paymentMethod: PaymentMethod
-        ) : Item() {
-            override val viewType: ViewType = ViewType.SavedPaymentMethod
-
-            fun getDescription(resources: Resources) = when (paymentMethod.type) {
-                PaymentMethod.Type.Card -> resources.getString(
-                    R.string.card_ending_in,
-                    paymentMethod.card?.brand,
-                    paymentMethod.card?.last4
-                )
-                PaymentMethod.Type.SepaDebit -> resources.getString(
-                    R.string.bank_account_ending_in,
-                    paymentMethod.sepaDebit?.last4
-                )
-                PaymentMethod.Type.USBankAccount -> resources.getString(
-                    R.string.bank_account_ending_in,
-                    paymentMethod.usBankAccount?.last4
-                )
-                else -> ""
-            }
-
-            fun getRemoveDescription(resources: Resources) = resources.getString(
-                R.string.stripe_paymentsheet_remove_pm,
-                getDescription(resources)
-            )
         }
     }
 
