@@ -65,7 +65,10 @@ internal class ErrorFragment(
                             } else {
                                 findNavController().let { navController ->
                                     var shouldContinueNavigateUp = true
-                                    while (shouldContinueNavigateUp && navController.currentDestination?.id != destination) {
+                                    while (
+                                        shouldContinueNavigateUp &&
+                                        navController.currentDestination?.id != destination
+                                    ) {
                                         shouldContinueNavigateUp =
                                             navController.navigateUpAndSetArgForUploadFragment()
                                     }

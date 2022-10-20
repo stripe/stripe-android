@@ -68,7 +68,7 @@ internal fun ErrorScreen(
                             top = dimensionResource(id = R.dimen.item_vertical_margin),
                             bottom = 12.dp
                         )
-                        .testTag(errorTitleTag),
+                        .testTag(ErrorTitleTag),
                     fontSize = dimensionResource(id = R.dimen.camera_permission_title_text_size).value.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
@@ -82,7 +82,7 @@ internal fun ErrorScreen(
                             .padding(
                                 bottom = dimensionResource(id = R.dimen.item_vertical_margin)
                             )
-                            .testTag(errorMessage1Tag),
+                            .testTag(ErrorMessage1Tag),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -92,7 +92,7 @@ internal fun ErrorScreen(
                         text = it,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .testTag(errorMessage2Tag),
+                            .testTag(ErrorMessage2Tag),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -104,7 +104,7 @@ internal fun ErrorScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag(
-                            errorTopButtonTag
+                            ErrorTopButtonTag
                         )
                 ) {
                     Text(text = buttonText.uppercase())
@@ -116,7 +116,7 @@ internal fun ErrorScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag(
-                            errorBottomButtonTag
+                            ErrorBottomButtonTag
                         )
                 ) {
                     Text(text = buttonText.uppercase())
@@ -126,8 +126,8 @@ internal fun ErrorScreen(
     }
 }
 
-internal const val errorTitleTag = "ConfirmationTitle"
-internal const val errorMessage1Tag = "Message1"
-internal const val errorMessage2Tag = "Message2"
-internal const val errorTopButtonTag = "TopButton"
-internal const val errorBottomButtonTag = "BottomButton"
+internal const val ErrorTitleTag = "ConfirmationTitle"
+internal const val ErrorMessage1Tag = "Message1"
+internal const val ErrorMessage2Tag = "Message2"
+internal const val ErrorTopButtonTag = "TopButton"
+internal const val ErrorBottomButtonTag = "BottomButton"

@@ -29,11 +29,11 @@ class ErrorScreenTest {
         setComposeTestRuleWith(
             message1 = ERROR_MESSAGE1
         ) {
-            onNodeWithTag(errorTitleTag).assertTextEquals(ERROR_TITLE)
-            onNodeWithTag(errorMessage1Tag).assertTextEquals(ERROR_MESSAGE1)
-            onNodeWithTag(errorMessage2Tag).assertDoesNotExist()
-            onNodeWithTag(errorTopButtonTag).assertDoesNotExist()
-            onNodeWithTag(errorBottomButtonTag).assertDoesNotExist()
+            onNodeWithTag(ErrorTitleTag).assertTextEquals(ERROR_TITLE)
+            onNodeWithTag(ErrorMessage1Tag).assertTextEquals(ERROR_MESSAGE1)
+            onNodeWithTag(ErrorMessage2Tag).assertDoesNotExist()
+            onNodeWithTag(ErrorTopButtonTag).assertDoesNotExist()
+            onNodeWithTag(ErrorBottomButtonTag).assertDoesNotExist()
         }
     }
 
@@ -42,11 +42,11 @@ class ErrorScreenTest {
         setComposeTestRuleWith(
             message2 = ERROR_MESSAGE2
         ) {
-            onNodeWithTag(errorTitleTag).assertTextEquals(ERROR_TITLE)
-            onNodeWithTag(errorMessage1Tag).assertDoesNotExist()
-            onNodeWithTag(errorMessage2Tag).assertTextEquals(ERROR_MESSAGE2)
-            onNodeWithTag(errorTopButtonTag).assertDoesNotExist()
-            onNodeWithTag(errorBottomButtonTag).assertDoesNotExist()
+            onNodeWithTag(ErrorTitleTag).assertTextEquals(ERROR_TITLE)
+            onNodeWithTag(ErrorMessage1Tag).assertDoesNotExist()
+            onNodeWithTag(ErrorMessage2Tag).assertTextEquals(ERROR_MESSAGE2)
+            onNodeWithTag(ErrorTopButtonTag).assertDoesNotExist()
+            onNodeWithTag(ErrorBottomButtonTag).assertDoesNotExist()
         }
     }
 
@@ -55,13 +55,13 @@ class ErrorScreenTest {
         setComposeTestRuleWith(
             topButton = (ERROR_TOP_BUTTON_TEXT to mockTopButtonClicked)
         ) {
-            onNodeWithTag(errorTitleTag).assertTextEquals(ERROR_TITLE)
-            onNodeWithTag(errorMessage1Tag).assertDoesNotExist()
-            onNodeWithTag(errorMessage2Tag).assertDoesNotExist()
-            onNodeWithTag(errorTopButtonTag).assertTextEquals(ERROR_TOP_BUTTON_TEXT.uppercase())
-            onNodeWithTag(errorBottomButtonTag).assertDoesNotExist()
+            onNodeWithTag(ErrorTitleTag).assertTextEquals(ERROR_TITLE)
+            onNodeWithTag(ErrorMessage1Tag).assertDoesNotExist()
+            onNodeWithTag(ErrorMessage2Tag).assertDoesNotExist()
+            onNodeWithTag(ErrorTopButtonTag).assertTextEquals(ERROR_TOP_BUTTON_TEXT.uppercase())
+            onNodeWithTag(ErrorBottomButtonTag).assertDoesNotExist()
 
-            onNodeWithTag(errorTopButtonTag).performClick()
+            onNodeWithTag(ErrorTopButtonTag).performClick()
             verify(mockTopButtonClicked).invoke()
         }
     }
@@ -71,13 +71,13 @@ class ErrorScreenTest {
         setComposeTestRuleWith(
             bottomButton = (ERROR_BOTTOM_BUTTON_TEXT to mockBottomButtonClicked)
         ) {
-            onNodeWithTag(errorTitleTag).assertTextEquals(ERROR_TITLE)
-            onNodeWithTag(errorMessage1Tag).assertDoesNotExist()
-            onNodeWithTag(errorMessage2Tag).assertDoesNotExist()
-            onNodeWithTag(errorTopButtonTag).assertDoesNotExist()
-            onNodeWithTag(errorBottomButtonTag).assertTextEquals(ERROR_BOTTOM_BUTTON_TEXT.uppercase())
+            onNodeWithTag(ErrorTitleTag).assertTextEquals(ERROR_TITLE)
+            onNodeWithTag(ErrorMessage1Tag).assertDoesNotExist()
+            onNodeWithTag(ErrorMessage2Tag).assertDoesNotExist()
+            onNodeWithTag(ErrorTopButtonTag).assertDoesNotExist()
+            onNodeWithTag(ErrorBottomButtonTag).assertTextEquals(ERROR_BOTTOM_BUTTON_TEXT.uppercase())
 
-            onNodeWithTag(errorBottomButtonTag).performClick()
+            onNodeWithTag(ErrorBottomButtonTag).performClick()
             verify(mockBottomButtonClicked).invoke()
         }
     }
@@ -90,16 +90,16 @@ class ErrorScreenTest {
             topButton = (ERROR_TOP_BUTTON_TEXT to mockTopButtonClicked),
             bottomButton = (ERROR_BOTTOM_BUTTON_TEXT to mockBottomButtonClicked)
         ) {
-            onNodeWithTag(errorTitleTag).assertTextEquals(ERROR_TITLE)
-            onNodeWithTag(errorMessage1Tag).assertTextEquals(ERROR_MESSAGE1)
-            onNodeWithTag(errorMessage2Tag).assertTextEquals(ERROR_MESSAGE2)
-            onNodeWithTag(errorTopButtonTag).assertTextEquals(ERROR_TOP_BUTTON_TEXT.uppercase())
-            onNodeWithTag(errorBottomButtonTag).assertTextEquals(ERROR_BOTTOM_BUTTON_TEXT.uppercase())
+            onNodeWithTag(ErrorTitleTag).assertTextEquals(ERROR_TITLE)
+            onNodeWithTag(ErrorMessage1Tag).assertTextEquals(ERROR_MESSAGE1)
+            onNodeWithTag(ErrorMessage2Tag).assertTextEquals(ERROR_MESSAGE2)
+            onNodeWithTag(ErrorTopButtonTag).assertTextEquals(ERROR_TOP_BUTTON_TEXT.uppercase())
+            onNodeWithTag(ErrorBottomButtonTag).assertTextEquals(ERROR_BOTTOM_BUTTON_TEXT.uppercase())
 
-            onNodeWithTag(errorTopButtonTag).performClick()
+            onNodeWithTag(ErrorTopButtonTag).performClick()
             verify(mockTopButtonClicked).invoke()
 
-            onNodeWithTag(errorBottomButtonTag).performClick()
+            onNodeWithTag(ErrorBottomButtonTag).performClick()
             verify(mockBottomButtonClicked).invoke()
         }
     }

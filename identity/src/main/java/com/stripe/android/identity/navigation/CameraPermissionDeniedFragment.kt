@@ -79,9 +79,12 @@ internal class CameraPermissionDeniedFragment(
         @IdRes
         private fun CollectedDataParam.Type.toUploadDestinationId() =
             when (this) {
-                CollectedDataParam.Type.IDCARD -> R.id.action_cameraPermissionDeniedFragment_to_IDUploadFragment
-                CollectedDataParam.Type.DRIVINGLICENSE -> R.id.action_cameraPermissionDeniedFragment_to_driverLicenseUploadFragment
-                CollectedDataParam.Type.PASSPORT -> R.id.action_cameraPermissionDeniedFragment_to_passportUploadFragment
+                CollectedDataParam.Type.IDCARD ->
+                    R.id.action_cameraPermissionDeniedFragment_to_IDUploadFragment
+                CollectedDataParam.Type.DRIVINGLICENSE ->
+                    R.id.action_cameraPermissionDeniedFragment_to_driverLicenseUploadFragment
+                CollectedDataParam.Type.PASSPORT ->
+                    R.id.action_cameraPermissionDeniedFragment_to_passportUploadFragment
             }
     }
 }

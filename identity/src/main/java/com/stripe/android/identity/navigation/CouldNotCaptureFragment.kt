@@ -86,11 +86,16 @@ internal class CouldNotCaptureFragment(
         @IdRes
         private fun IdentityScanState.ScanType.toUploadDestinationId() =
             when (this) {
-                IdentityScanState.ScanType.ID_FRONT -> R.id.action_couldNotCaptureFragment_to_IDUploadFragment
-                IdentityScanState.ScanType.ID_BACK -> R.id.action_couldNotCaptureFragment_to_IDUploadFragment
-                IdentityScanState.ScanType.DL_FRONT -> R.id.action_couldNotCaptureFragment_to_driverLicenseUploadFragment
-                IdentityScanState.ScanType.DL_BACK -> R.id.action_couldNotCaptureFragment_to_driverLicenseUploadFragment
-                IdentityScanState.ScanType.PASSPORT -> R.id.action_couldNotCaptureFragment_to_passportUploadFragment
+                IdentityScanState.ScanType.ID_FRONT ->
+                    R.id.action_couldNotCaptureFragment_to_IDUploadFragment
+                IdentityScanState.ScanType.ID_BACK ->
+                    R.id.action_couldNotCaptureFragment_to_IDUploadFragment
+                IdentityScanState.ScanType.DL_FRONT ->
+                    R.id.action_couldNotCaptureFragment_to_driverLicenseUploadFragment
+                IdentityScanState.ScanType.DL_BACK ->
+                    R.id.action_couldNotCaptureFragment_to_driverLicenseUploadFragment
+                IdentityScanState.ScanType.PASSPORT ->
+                    R.id.action_couldNotCaptureFragment_to_passportUploadFragment
                 IdentityScanState.ScanType.SELFIE -> {
                     throw IllegalArgumentException("SELFIE doesn't support upload")
                 }
@@ -99,12 +104,18 @@ internal class CouldNotCaptureFragment(
         @IdRes
         private fun IdentityScanState.ScanType.toScanDestinationId() =
             when (this) {
-                IdentityScanState.ScanType.ID_FRONT -> R.id.action_couldNotCaptureFragment_to_IDScanFragment
-                IdentityScanState.ScanType.ID_BACK -> R.id.action_couldNotCaptureFragment_to_IDScanFragment
-                IdentityScanState.ScanType.DL_FRONT -> R.id.action_couldNotCaptureFragment_to_driverLicenseScanFragment
-                IdentityScanState.ScanType.DL_BACK -> R.id.action_couldNotCaptureFragment_to_driverLicenseScanFragment
-                IdentityScanState.ScanType.PASSPORT -> R.id.action_couldNotCaptureFragment_to_passportScanFragment
-                IdentityScanState.ScanType.SELFIE -> R.id.action_couldNotCaptureFragment_to_selfieFragment
+                IdentityScanState.ScanType.ID_FRONT ->
+                    R.id.action_couldNotCaptureFragment_to_IDScanFragment
+                IdentityScanState.ScanType.ID_BACK ->
+                    R.id.action_couldNotCaptureFragment_to_IDScanFragment
+                IdentityScanState.ScanType.DL_FRONT ->
+                    R.id.action_couldNotCaptureFragment_to_driverLicenseScanFragment
+                IdentityScanState.ScanType.DL_BACK ->
+                    R.id.action_couldNotCaptureFragment_to_driverLicenseScanFragment
+                IdentityScanState.ScanType.PASSPORT ->
+                    R.id.action_couldNotCaptureFragment_to_passportScanFragment
+                IdentityScanState.ScanType.SELFIE ->
+                    R.id.action_couldNotCaptureFragment_to_selfieFragment
             }
 
         private fun IdentityScanState.ScanType.toShouldStartFromBack() =
