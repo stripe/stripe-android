@@ -43,6 +43,7 @@ internal fun NextPane.toNavigationCommand(
         logger.error("Link not supported on native flows yet. Navigating to Success.")
         NavigationDirections.success
     }
+    NextPane.RESET -> NavigationDirections.reset
     NextPane.AUTH_OPTIONS,
     NextPane.LINK_CONSENT,
     NextPane.LINK_LOGIN,

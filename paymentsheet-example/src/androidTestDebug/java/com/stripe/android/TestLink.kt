@@ -58,13 +58,13 @@ class TestLink {
     }
 
     private val linkNewUser = TestParameters(
-        lpmRepository.fromCode("card")!!,
-        Customer.New,
-        LinkState.On,
-        GooglePayState.On,
-        Currency.USD,
-        IntentType.Pay,
-        Billing.Off,
+        paymentMethod = lpmRepository.fromCode("card")!!,
+        customer = Customer.Guest,
+        linkState = LinkState.On,
+        googlePayState = GooglePayState.On,
+        currency = Currency.USD,
+        intentType = IntentType.Pay,
+        billing = Billing.Off,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
         automatic = Automatic.Off,
@@ -77,12 +77,7 @@ class TestLink {
 
     @Test
     fun testLinkInlineCustom() {
-        testDriver.testLinkCustom(
-            linkNewUser.copy(
-                paymentMethod = lpmRepository.fromCode("card")!!,
-                customer = Customer.Guest,
-            )
-        )
+        testDriver.testLinkCustom(linkNewUser)
     }
 
     companion object {

@@ -63,7 +63,6 @@ import com.stripe.android.model.CvcCheck
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.ui.core.elements.DateConfig
-import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.RowController
 import com.stripe.android.ui.core.elements.RowElement
@@ -74,6 +73,7 @@ import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.injection.NonFallbackInjector
+import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.flow.flowOf
 import java.util.UUID
 

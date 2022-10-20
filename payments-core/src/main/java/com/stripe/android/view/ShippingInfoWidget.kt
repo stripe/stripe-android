@@ -184,22 +184,22 @@ class ShippingInfoWidget @JvmOverloads constructor(
         )
         postalCodeEditText.shouldShowError = !isPostalCodeValid
 
-        val requiredAddressLine1Empty = address.isEmpty() &&
+        val requiredAddressLine1Empty = address.isBlank() &&
             isFieldRequired(CustomizableShippingField.Line1)
         addressEditText.shouldShowError = requiredAddressLine1Empty
 
-        val requiredCityEmpty = city.isEmpty() &&
+        val requiredCityEmpty = city.isBlank() &&
             isFieldRequired(CustomizableShippingField.City)
         cityEditText.shouldShowError = requiredCityEmpty
 
-        val requiredNameEmpty = name.isEmpty()
+        val requiredNameEmpty = name.isBlank()
         nameEditText.shouldShowError = requiredNameEmpty
 
-        val requiredStateEmpty = state.isEmpty() &&
+        val requiredStateEmpty = state.isBlank() &&
             isFieldRequired(CustomizableShippingField.State)
         stateEditText.shouldShowError = requiredStateEmpty
 
-        val requiredPhoneNumberEmpty = phoneNumber.isEmpty() &&
+        val requiredPhoneNumberEmpty = phoneNumber.isBlank() &&
             isFieldRequired(CustomizableShippingField.Phone)
         phoneNumberEditText.shouldShowError = requiredPhoneNumberEmpty
 

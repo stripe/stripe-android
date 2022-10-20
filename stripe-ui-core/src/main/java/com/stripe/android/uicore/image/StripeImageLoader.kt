@@ -19,7 +19,6 @@ import java.util.concurrent.ConcurrentHashMap
  * [StripeImageLoader] is stateful as it holds the memoryCache instance. For
  * memory cache to work the image loader instance needs to be shared.
  *
- * @
  * @param memoryCache, memory cache to be used, or null if no memory cache is desired.
  * @param diskCache, memory cache to be used, or null if no memory cache is desired.
  */

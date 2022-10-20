@@ -13,6 +13,7 @@ import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
@@ -27,6 +28,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+private typealias AuthenticatorKey = Class<out StripeIntent.NextActionData>
+private typealias Authenticator = @JvmSuppressWildcards PaymentAuthenticator<StripeIntent>
+
 /**
  * Default registry to provide look ups for [PaymentAuthenticator].
  * Should be only accessed through [DefaultPaymentAuthenticatorRegistry.createInstance].
@@ -35,16 +39,27 @@ import kotlin.coroutines.CoroutineContext
 internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     private val noOpIntentAuthenticator: NoOpIntentAuthenticator,
     private val sourceAuthenticator: SourceAuthenticator,
-    @IntentAuthenticatorMap
-    private val paymentAuthenticatorMap:
-        Map<Class<out StripeIntent.NextActionData>,
-            @JvmSuppressWildcards PaymentAuthenticator<StripeIntent>>
+    @IntentAuthenticatorMap private val paymentAuthenticators: Map<AuthenticatorKey, Authenticator>
 ) : PaymentAuthenticatorRegistry, Injector {
+
+    private val additionalAuthenticators = mutableMapOf<AuthenticatorKey, Authenticator>()
+
     @VisibleForTesting
-    internal val allAuthenticators = setOf(
-        listOf(noOpIntentAuthenticator, sourceAuthenticator),
-        paymentAuthenticatorMap.values
-    ).flatten()
+    internal val allAuthenticators: Set<PaymentAuthenticator<out StripeModel>>
+        get() = buildSet {
+            add(noOpIntentAuthenticator)
+            add(sourceAuthenticator)
+            addAll(paymentAuthenticators.values)
+            addAll(additionalAuthenticators.values)
+        }
+
+    override fun registerAuthenticator(key: AuthenticatorKey, authenticator: Authenticator) {
+        additionalAuthenticators[key] = authenticator
+    }
+
+    override fun unregisterAuthenticator(key: AuthenticatorKey) {
+        additionalAuthenticators.remove(key)
+    }
 
     /**
      * [AuthenticationComponent] instance is hold to inject into [Activity]s and [ViewModel]s
@@ -73,14 +88,13 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
                 if (!authenticatable.requiresAction()) {
                     return noOpIntentAuthenticator as PaymentAuthenticator<Authenticatable>
                 }
-                return (
-                    authenticatable.nextActionData?.let {
-                        paymentAuthenticatorMap
-                            .getOrElse(it::class.java) { noOpIntentAuthenticator }
-                    } ?: run {
-                        noOpIntentAuthenticator
-                    }
-                    ) as PaymentAuthenticator<Authenticatable>
+
+                val allAuthenticators = paymentAuthenticators + additionalAuthenticators
+                val authenticator = authenticatable.nextActionData?.let {
+                    allAuthenticators[it::class.java]
+                } ?: noOpIntentAuthenticator
+
+                return authenticator as PaymentAuthenticator<Authenticatable>
             }
             is Source -> {
                 sourceAuthenticator as PaymentAuthenticator<Authenticatable>
