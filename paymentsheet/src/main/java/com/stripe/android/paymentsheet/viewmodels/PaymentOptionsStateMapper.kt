@@ -4,11 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.PaymentOptionsState
+import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.toPaymentSelection
 
 internal class PaymentOptionsStateMapper(
     private val paymentMethods: LiveData<List<PaymentMethod>>,
@@ -17,7 +16,6 @@ internal class PaymentOptionsStateMapper(
     private val initialSelection: LiveData<SavedSelection>,
     private val currentSelection: LiveData<PaymentSelection?>,
     private val isNotPaymentFlow: Boolean,
-    private val onInitialSelection: (PaymentSelection?) -> Unit,
 ) {
 
     operator fun invoke(): LiveData<PaymentOptionsState> {
@@ -31,18 +29,15 @@ internal class PaymentOptionsStateMapper(
             ).forEach { source ->
                 addSource(source) {
                     val newState = createPaymentOptionsState()
-
-                    if (currentSelection.value == null && newState != null) {
-                        val selection = newState.selectedItem?.toPaymentSelection()
-                        onInitialSelection(selection)
+                    if (newState != null) {
+                        value = newState
                     }
-
-                    value = newState
                 }
             }
         }.distinctUntilChanged()
     }
 
+    @Suppress("ReturnCount")
     private fun createPaymentOptionsState(): PaymentOptionsState? {
         val paymentMethods = paymentMethods.value ?: return null
         val initialSelection = initialSelection.value ?: return null

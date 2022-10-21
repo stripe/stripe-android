@@ -1,20 +1,18 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoMoreInteractions
 
 class PaymentOptionsStateMapperTest {
 
@@ -27,8 +25,6 @@ class PaymentOptionsStateMapperTest {
     private lateinit var isGooglePayReadyFlow: MutableLiveData<Boolean>
     private lateinit var isLinkEnabledFlow: MutableLiveData<Boolean>
 
-    private lateinit var mockOnNewSelection: (PaymentSelection?) -> Unit
-
     @Before
     fun setup() {
         paymentMethodsFlow = MutableLiveData()
@@ -36,7 +32,6 @@ class PaymentOptionsStateMapperTest {
         currentSelectionFlow = MutableLiveData()
         isGooglePayReadyFlow = MutableLiveData()
         isLinkEnabledFlow = MutableLiveData()
-        mockOnNewSelection = mock()
     }
 
     @Test
@@ -48,12 +43,9 @@ class PaymentOptionsStateMapperTest {
             isGooglePayReady = isGooglePayReadyFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
-            onInitialSelection = mockOnNewSelection,
         )
 
-        val state = mapper().also {
-            it.observeForever {}
-        }
+        val state = mapper.createStateAndObserve()
 
         assertThat(state.value).isNull()
 
@@ -79,12 +71,9 @@ class PaymentOptionsStateMapperTest {
             isGooglePayReady = isGooglePayReadyFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = false,
-            onInitialSelection = mockOnNewSelection,
         )
 
-        val state = mapper().also {
-            it.observeForever {}
-        }
+        val state = mapper.createStateAndObserve()
 
         val cards = PaymentMethodFixtures.createCards(2)
         paymentMethodsFlow.value = cards
@@ -99,35 +88,6 @@ class PaymentOptionsStateMapperTest {
     }
 
     @Test
-    fun `Only updates selection on first emission`() {
-        val mapper = PaymentOptionsStateMapper(
-            paymentMethods = paymentMethodsFlow,
-            initialSelection = initialSelectionFlow,
-            currentSelection = currentSelectionFlow,
-            isGooglePayReady = isGooglePayReadyFlow,
-            isLinkEnabled = isLinkEnabledFlow,
-            isNotPaymentFlow = true,
-            onInitialSelection = mockOnNewSelection,
-        )
-
-        val state = mapper().also {
-            it.observeForever {}
-        }
-
-        paymentMethodsFlow.value = PaymentMethodFixtures.createCards(2)
-        initialSelectionFlow.value = SavedSelection.GooglePay
-        isGooglePayReadyFlow.value = true
-        isLinkEnabledFlow.value = true
-
-        assertThat(state.value).isNotNull()
-        verify(mockOnNewSelection).invoke(eq(PaymentSelection.GooglePay))
-
-        // Simulate user selecting a different payment method
-        currentSelectionFlow.value = PaymentSelection.Link
-        verifyNoMoreInteractions(mockOnNewSelection)
-    }
-
-    @Test
     fun `Removing selected payment option results in saved selection being selected`() {
         val mapper = PaymentOptionsStateMapper(
             paymentMethods = paymentMethodsFlow,
@@ -136,12 +96,9 @@ class PaymentOptionsStateMapperTest {
             isGooglePayReady = isGooglePayReadyFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
-            onInitialSelection = mockOnNewSelection,
         )
 
-        val state = mapper().also {
-            it.observeForever {}
-        }
+        val state = mapper.createStateAndObserve()
 
         val cards = PaymentMethodFixtures.createCards(2)
         val selectedPaymentMethod = PaymentSelection.Saved(paymentMethod = cards.last())
@@ -160,7 +117,6 @@ class PaymentOptionsStateMapperTest {
         paymentMethodsFlow.value = cards - selectedPaymentMethod.paymentMethod
         currentSelectionFlow.value = null
 
-        verify(mockOnNewSelection).invoke(eq(PaymentSelection.Link))
         assertThat(state.value?.selectedItem).isEqualTo(PaymentOptionsItem.Link)
     }
 
@@ -173,12 +129,9 @@ class PaymentOptionsStateMapperTest {
             isGooglePayReady = isGooglePayReadyFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
-            onInitialSelection = mockOnNewSelection,
         )
 
-        val state = mapper().also {
-            it.observeForever {}
-        }
+        val state = mapper.createStateAndObserve()
 
         val cards = PaymentMethodFixtures.createCards(2)
         val selectedPaymentMethod = PaymentSelection.Saved(paymentMethod = cards.last())
@@ -197,7 +150,14 @@ class PaymentOptionsStateMapperTest {
         paymentMethodsFlow.value = cards - selectedPaymentMethod.paymentMethod
         currentSelectionFlow.value = null
 
-        verify(mockOnNewSelection).invoke(eq(PaymentSelection.GooglePay))
         assertThat(state.value?.selectedItem).isEqualTo(PaymentOptionsItem.GooglePay)
+    }
+}
+
+private fun PaymentOptionsStateMapper.createStateAndObserve(): LiveData<PaymentOptionsState> {
+    return this().also {
+        it.observeForever {
+            // Nothing to do here
+        }
     }
 }

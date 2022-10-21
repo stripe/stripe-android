@@ -9,6 +9,9 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -17,6 +20,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.isSystemDarkTheme
+import kotlinx.coroutines.launch
 
 internal abstract class BasePaymentMethodsListFragment(
     private val canClickSelectedItem: Boolean
@@ -134,11 +138,15 @@ internal abstract class BasePaymentMethodsListFragment(
             viewBinding.recycler.adapter = it
         }
 
-        sheetViewModel.paymentOptionsState.observe(viewLifecycleOwner) { paymentOptionsState ->
-            adapter.update(
-                items = paymentOptionsState.items,
-                selectedIndex = paymentOptionsState.selectedIndex,
-            )
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                sheetViewModel.paymentOptionsState.collect { paymentOptionsState ->
+                    adapter.update(
+                        items = paymentOptionsState.items,
+                        selectedIndex = paymentOptionsState.selectedIndex,
+                    )
+                }
+            }
         }
 
         sheetViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->

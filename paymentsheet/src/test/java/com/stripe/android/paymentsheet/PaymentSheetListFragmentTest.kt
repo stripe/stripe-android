@@ -67,7 +67,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             ),
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.sheetViewModel._paymentMethods.value = listOf(paymentMethod)
+            fragment.initializePaymentOptions(paymentMethods = listOf(paymentMethod))
         }.moveToState(Lifecycle.State.STARTED).onFragment {
             assertThat(activityViewModel(it).selection.value)
                 .isEqualTo(paymentSelection)
@@ -91,7 +91,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             ),
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.sheetViewModel._paymentMethods.value = listOf(paymentMethod)
+            fragment.initializePaymentOptions(paymentMethods = listOf(paymentMethod))
         }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
             assertThat(fragment.isEditing).isFalse()
             fragment.isEditing = true
@@ -121,8 +121,11 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         createScenario(
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
-        }.moveToState(Lifecycle.State.STARTED).onFragment {
+            fragment.initializePaymentOptions(
+                isGooglePayReady = false,
+                isLinkEnabled = false,
+            )
+        }.moveToState(Lifecycle.State.RESUMED).onFragment {
             idleLooper()
 
             val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
@@ -137,8 +140,8 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         createScenario(
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
-        }.moveToState(Lifecycle.State.STARTED).onFragment {
+            fragment.initializePaymentOptions()
+        }.moveToState(Lifecycle.State.RESUMED).onFragment {
             val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
             assertThat(item!!.measuredWidth).isEqualTo(114)
         }
@@ -150,8 +153,8 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         createScenario(
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
-        }.moveToState(Lifecycle.State.STARTED).onFragment {
+            fragment.initializePaymentOptions()
+        }.moveToState(Lifecycle.State.RESUMED).onFragment {
             val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
             assertThat(item!!.measuredWidth).isEqualTo(128)
         }
@@ -163,8 +166,8 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         createScenario(
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.sheetViewModel._paymentMethods.value = PAYMENT_METHODS
-        }.moveToState(Lifecycle.State.STARTED).onFragment {
+            fragment.initializePaymentOptions()
+        }.moveToState(Lifecycle.State.RESUMED).onFragment {
             val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
             assertThat(item!!.measuredWidth).isEqualTo(112)
         }
@@ -184,7 +187,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             idleLooper()
 
             assertThat(activityViewModel.selection.value)
-                .isEqualTo(savedPaymentMethod)
+                .isEqualTo(PaymentSelection.Saved(savedPaymentMethod))
         }
     }
 
@@ -269,6 +272,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             initialState = Lifecycle.State.INITIALIZED,
             paymentMethods = emptyList()
         ).moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
+            fragment.initializePaymentOptions()
             idleLooper()
             assertThat(fragment.hasOptionsMenu()).isFalse()
         }
@@ -319,6 +323,18 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             R.style.StripePaymentSheetDefaultTheme,
             initialState = initialState
         )
+    }
+
+    private fun PaymentSheetListFragment.initializePaymentOptions(
+        paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
+        isGooglePayReady: Boolean = false,
+        isLinkEnabled: Boolean = false,
+        savedSelection: SavedSelection = SavedSelection.None,
+    ) {
+        sheetViewModel._paymentMethods.value = paymentMethods
+        sheetViewModel._isGooglePayReady.value = isGooglePayReady
+        sheetViewModel._isLinkEnabled.value = isLinkEnabled
+        sheetViewModel.savedStateHandle["saved_selection"] = savedSelection
     }
 
     private companion object {

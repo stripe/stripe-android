@@ -97,16 +97,15 @@ internal class PaymentOptionsAdapter(
         notifyDataSetChanged()
     }
 
-    fun hasSavedItems() = items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().isNotEmpty()
+    fun hasSavedItems(): Boolean {
+        return items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().isNotEmpty()
+    }
 
     @VisibleForTesting
-    internal fun onItemSelected(
-        position: Int,
-        force: Boolean = false
-    ) {
+    internal fun onItemSelected(position: Int) {
         val isAllowed = canClickSelectedItem || position != selectedItemPosition
 
-        if (force || position != NO_POSITION && isAllowed && !isEditing) {
+        if (position != NO_POSITION && isAllowed && !isEditing) {
             val item = items[position]
             paymentOptionSelected(item)
         }

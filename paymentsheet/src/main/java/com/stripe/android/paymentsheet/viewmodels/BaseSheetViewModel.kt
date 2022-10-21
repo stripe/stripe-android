@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
@@ -49,7 +50,12 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
@@ -239,11 +245,16 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             isGooglePayReady = isGooglePayReady,
             isLinkEnabled = isLinkEnabled,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
-            onInitialSelection = this::updateSelection,
         )
     }
 
-    internal val paymentOptionsState: LiveData<PaymentOptionsState> = paymentOptionsStateMapper()
+    val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()
+        .asFlow()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = PaymentOptionsState(),
+        )
 
     init {
         if (_savedSelection.value == null) {
@@ -277,6 +288,15 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     _isResourceRepositoryReady.postValue(true)
                 }
             }
+        }
+
+        viewModelScope.launch {
+            // If the currently selected payment option has been removed, we set it to the one
+            // determined in the payment options state.
+            paymentOptionsState
+                .mapNotNull { it.selectedItem?.toPaymentSelection() }
+                .filter { it != selection.value }
+                .collect { updateSelection(it) }
         }
     }
 
@@ -325,7 +345,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    open fun transitionTo(target: TransitionTargetType) {
+    fun transitionTo(target: TransitionTargetType) {
         _transition.postValue(Event(target))
     }
 
