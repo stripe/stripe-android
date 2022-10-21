@@ -48,9 +48,7 @@ class FinancialConnectionsSheetViewModelTest {
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
 
-    private val manifest = sessionManifest().copy(
-        nativeAuthFlowEnabled = false
-    )
+    private val manifest = sessionManifest()
 
     private val fetchFinancialConnectionsSession = mock<FetchFinancialConnectionsSession>()
     private val fetchFinancialConnectionsSessionForToken =
@@ -275,7 +273,8 @@ class FinancialConnectionsSheetViewModelTest {
     fun `onResume - when flow is still active and no config changes, finish with Result#Cancelled`() {
         runTest {
             // Given
-            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(generateFinancialConnectionsSessionManifest(any(), any()))
+                .thenReturn(manifest.copy(experimentAssignments = mapOf("native" to "false")))
             val viewModel = createViewModel(defaultInitialState)
 
             // When

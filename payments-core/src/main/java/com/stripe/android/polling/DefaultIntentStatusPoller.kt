@@ -15,8 +15,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.math.pow
-
-private const val MILLIS_PER_SECOND = 1_000L
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultIntentStatusPoller @Inject constructor(
@@ -46,8 +46,7 @@ class DefaultIntentStatusPoller @Inject constructor(
 
             val canTryAgain = attempts < config.maxAttempts
             if (canTryAgain) {
-                val delayInMillis = calculateDelayInMillis(attempts)
-                delay(delayInMillis)
+                delay(calculateDelay(attempts))
                 performPoll()
             }
         }
@@ -67,8 +66,8 @@ class DefaultIntentStatusPoller @Inject constructor(
         return paymentIntent.getOrNull()?.status
     }
 
-    override suspend fun forcePoll() {
-        performPoll(force = true)
+    override suspend fun forcePoll(): StripeIntent.Status? {
+        return fetchIntentStatus()
     }
 
     override fun stopPolling() {
@@ -77,7 +76,7 @@ class DefaultIntentStatusPoller @Inject constructor(
     }
 }
 
-internal fun calculateDelayInMillis(attempts: Int): Long {
-    val seconds = (1.0 + attempts).pow(2)
-    return seconds.toLong() * MILLIS_PER_SECOND
+internal fun calculateDelay(attempts: Int): Duration {
+    val delay = (1.0 + attempts).pow(2)
+    return delay.seconds
 }

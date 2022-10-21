@@ -21,6 +21,7 @@ import androidx.test.runner.screenshot.Screenshot
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
+import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetPlaygroundActivity
 import com.stripe.android.test.core.ui.BrowserUI
@@ -79,7 +80,7 @@ class PlaygroundTestDriver(
             selectors.addPaymentMethodButton.isDisplayed()
         }
 
-        composeTestRule.onNodeWithText("+ Add").apply {
+        composeTestRule.onNodeWithTag("$PAYMENT_OPTION_CARD_TEST_TAG+ Add").apply {
             assertExists()
             performClick()
         }
@@ -253,6 +254,8 @@ class PlaygroundTestDriver(
         launchComplete()
 
         composeTestRule.waitForIdle()
+        device.waitForIdle()
+
         customOperations()
 
         currentActivity[0]?.let {

@@ -21,5 +21,6 @@ internal fun Flow.isOAuth(): Boolean = when (this) {
     Flow.FINICITY_CONNECT_V2_LITE,
     Flow.FINICITY_CONNECT_V2_FIX,
     Flow.MX_CONNECT,
+    Flow.UNKNOWN,
     Flow.TESTMODE -> false
 }

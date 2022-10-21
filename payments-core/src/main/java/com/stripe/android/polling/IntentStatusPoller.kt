@@ -10,7 +10,7 @@ interface IntentStatusPoller {
     val state: StateFlow<StripeIntent.Status?>
 
     fun startPolling(scope: CoroutineScope)
-    suspend fun forcePoll()
+    suspend fun forcePoll(): StripeIntent.Status?
     fun stopPolling()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

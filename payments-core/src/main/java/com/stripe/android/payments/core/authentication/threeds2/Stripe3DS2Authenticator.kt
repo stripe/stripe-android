@@ -29,7 +29,7 @@ internal class Stripe3DS2Authenticator @Inject constructor(
     @InjectorKey private val injectorKey: String,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
-) : PaymentAuthenticator<StripeIntent> {
+) : PaymentAuthenticator<StripeIntent>() {
 
     /**
      * [stripe3ds2CompletionLauncher] is mutable and might be updated during
@@ -60,7 +60,7 @@ internal class Stripe3DS2Authenticator @Inject constructor(
         stripe3ds2CompletionLauncher = null
     }
 
-    override suspend fun authenticate(
+    override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options

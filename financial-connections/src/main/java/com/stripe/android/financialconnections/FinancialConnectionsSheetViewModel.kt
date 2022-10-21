@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.nativeAuthFlowEnabled
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
 import kotlinx.coroutines.launch
@@ -50,7 +51,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             // avoid re-fetching manifest if already exists (this will happen on process recreations)
             if (initialState.manifest == null) fetchManifest()
         } else {
-            val result = FinancialConnectionsSheetActivityResult.Failed(
+            val result = Failed(
                 IllegalStateException("Invalid configuration provided when instantiating activity")
             )
             setState { copy(viewEffect = FinishWithResult(result)) }
