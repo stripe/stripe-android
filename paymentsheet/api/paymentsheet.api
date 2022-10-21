@@ -1,3 +1,30 @@
+public abstract interface class com/stripe/android/elements/PaymentElementController {
+}
+
+public final class com/stripe/android/elements/PaymentElementController$Config {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/model/StripeIntent;Ljava/lang/String;Lcom/stripe/android/paymentsheet/model/PaymentSelection$New;Ljava/lang/String;)V
+	public final fun component1 ()Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
+	public final fun component2 ()Lcom/stripe/android/model/StripeIntent;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Lcom/stripe/android/paymentsheet/model/PaymentSelection$New;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/model/StripeIntent;Ljava/lang/String;Lcom/stripe/android/paymentsheet/model/PaymentSelection$New;Ljava/lang/String;)Lcom/stripe/android/elements/PaymentElementController$Config;
+	public static synthetic fun copy$default (Lcom/stripe/android/elements/PaymentElementController$Config;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/model/StripeIntent;Ljava/lang/String;Lcom/stripe/android/paymentsheet/model/PaymentSelection$New;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/elements/PaymentElementController$Config;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInitialSelection ()Lcom/stripe/android/paymentsheet/model/PaymentSelection$New;
+	public final fun getInjectorKey ()Ljava/lang/String;
+	public final fun getMerchantName ()Ljava/lang/String;
+	public final fun getPaymentSheetConfig ()Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
+	public final fun getStripeIntent ()Lcom/stripe/android/model/StripeIntent;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/elements/PaymentElementKt {
+	public static final fun getPaymentElementHorizontalPadding ()F
+}
+
 public final class com/stripe/android/paymentsheet/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -1094,11 +1121,11 @@ public final class com/stripe/android/paymentsheet/flowcontroller/InitData$Creat
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/forms/FormViewModel_Factory;
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/paymentsheet/forms/FormViewModel_Factory;
 	public fun get ()Lcom/stripe/android/paymentsheet/forms/FormViewModel;
 	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/content/Context;Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lkotlinx/coroutines/flow/Flow;)Lcom/stripe/android/paymentsheet/forms/FormViewModel;
+	public static fun newInstance (Landroid/content/Context;Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;)Lcom/stripe/android/paymentsheet/forms/FormViewModel;
 }
 
 public final class com/stripe/android/paymentsheet/forms/FormViewModel_Factory_MembersInjector : dagger/MembersInjector {
@@ -1171,10 +1198,6 @@ public final class com/stripe/android/paymentsheet/injection/DaggerAddressElemen
 
 public final class com/stripe/android/paymentsheet/injection/DaggerFlowControllerComponent {
 	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/FlowControllerComponent$Builder;
-}
-
-public final class com/stripe/android/paymentsheet/injection/DaggerFormViewModelComponent {
-	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/FormViewModelComponent$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/injection/DaggerPaymentOptionsViewModelFactoryComponent {

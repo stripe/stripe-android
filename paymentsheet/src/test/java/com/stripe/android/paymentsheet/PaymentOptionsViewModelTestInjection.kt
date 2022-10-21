@@ -24,6 +24,7 @@ import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
@@ -104,8 +105,7 @@ internal open class PaymentOptionsViewModelTestInjection {
                 initialPaymentMethodCreateParams = null
             ),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = addressResourceRepository,
-            showCheckboxFlow = mock()
+            addressResourceRepository = addressResourceRepository
         )
     ) {
         val mockBuilder = mock<PaymentOptionsViewModelSubcomponent.Builder>()
@@ -126,7 +126,7 @@ internal open class PaymentOptionsViewModelTestInjection {
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
-        injector = object : Injector {
+        injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 (injectable as? PaymentOptionsViewModel.Factory)?.let {
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider

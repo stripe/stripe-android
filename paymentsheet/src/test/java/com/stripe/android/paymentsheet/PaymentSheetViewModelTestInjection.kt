@@ -10,7 +10,6 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -32,6 +31,7 @@ import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -57,7 +57,7 @@ internal open class PaymentSheetViewModelTestInjection {
         createGooglePayPaymentMethodLauncherFactory()
     private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
 
-    private lateinit var injector: Injector
+    private lateinit var injector: NonFallbackInjector
 
     @After
     open fun after() {
@@ -141,11 +141,10 @@ internal open class PaymentSheetViewModelTestInjection {
                 initialPaymentMethodCreateParams = null
             ),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
-            showCheckboxFlow = mock()
+            addressResourceRepository = StaticAddressResourceRepository(addressRepository)
         )
     ) {
-        injector = object : Injector {
+        injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 (injectable as? PaymentSheetViewModel.Factory)?.let {
                     val mockBuilder = mock<PaymentSheetViewModelSubcomponent.Builder>()
@@ -174,6 +173,7 @@ internal open class PaymentSheetViewModelTestInjection {
                 }
             }
         }
+        viewModel.injector = injector
         WeakMapInjectorRegistry.register(injector, injectorKey)
     }
 }

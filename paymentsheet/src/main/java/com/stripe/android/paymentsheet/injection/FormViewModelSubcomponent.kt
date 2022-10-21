@@ -4,7 +4,6 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import dagger.BindsInstance
 import dagger.Subcomponent
-import kotlinx.coroutines.flow.Flow
 
 @Subcomponent
 internal interface FormViewModelSubcomponent {
@@ -16,9 +15,6 @@ internal interface FormViewModelSubcomponent {
         fun formFragmentArguments(
             config: FormFragmentArguments
         ): Builder
-
-        @BindsInstance
-        fun showCheckboxFlow(saveForFutureUseVisibleFlow: Flow<Boolean>): Builder
 
         fun build(): FormViewModelSubcomponent
     }

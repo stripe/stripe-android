@@ -604,8 +604,7 @@ internal class FormViewModelTest {
         context = context,
         formFragmentArguments = arguments,
         lpmResourceRepository = lpmResourceRepository,
-        addressResourceRepository = addressResourceRepository,
-        showCheckboxFlow = showCheckboxFlow
+        addressResourceRepository = addressResourceRepository
     )
 }
 

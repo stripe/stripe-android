@@ -4,10 +4,7 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
-import com.stripe.android.paymentsheet.injection.DaggerFormViewModelComponent
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
@@ -21,8 +18,9 @@ import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.ui.core.injection.NonFallbackInjectable
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
@@ -46,38 +44,25 @@ internal class FormViewModel @Inject internal constructor(
     context: Context,
     formFragmentArguments: FormFragmentArguments,
     lpmResourceRepository: ResourceRepository<LpmRepository>,
-    addressResourceRepository: ResourceRepository<AddressRepository>,
-    val showCheckboxFlow: Flow<Boolean>
+    addressResourceRepository: ResourceRepository<AddressRepository>
 ) : ViewModel() {
     internal class Factory(
         val config: FormFragmentArguments,
-        val showCheckboxFlow: Flow<Boolean>,
-        private val contextSupplier: () -> Context
-    ) : ViewModelProvider.Factory,
-        Injectable<Factory.FallbackInitializeParam> {
-        internal data class FallbackInitializeParam(
-            val context: Context
-        )
-
+        private val injector: NonFallbackInjector
+    ) : ViewModelProvider.Factory, NonFallbackInjectable {
         @Inject
         lateinit var subComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
 
+        @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val context = contextSupplier()
-            injectWithFallback(config.injectorKey, FallbackInitializeParam(context))
+            injector.inject(this)
             return subComponentBuilderProvider.get()
                 .formFragmentArguments(config)
-                .showCheckboxFlow(showCheckboxFlow)
                 .build().viewModel as T
         }
-
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            DaggerFormViewModelComponent.builder()
-                .context(arg.context)
-                .build()
-                .inject(this)
-        }
     }
+
+    private val showCheckboxFlow = MutableStateFlow(false)
 
     val elementsFlow = flowOf(
         TransformSpecToElements(
@@ -210,5 +195,9 @@ internal class FormViewModel @Inject internal constructor(
         textFieldControllerIds.lastOrNull {
             !hiddenIds.contains(it)
         }
+    }
+
+    fun setShowCheckbox(showCheckbox: Boolean) {
+        showCheckboxFlow.value = showCheckbox
     }
 }

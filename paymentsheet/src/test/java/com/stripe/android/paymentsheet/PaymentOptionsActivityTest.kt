@@ -18,7 +18,6 @@ import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -44,6 +43,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -76,7 +76,7 @@ internal class PaymentOptionsActivityTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
-    private lateinit var injector: Injector
+    private lateinit var injector: NonFallbackInjector
     private val addressRepository = AddressRepository(context.resources)
     private val lpmRepository = mock<LpmRepository>().apply {
         whenever(fromCode(any())).thenReturn(
@@ -519,7 +519,9 @@ internal class PaymentOptionsActivityTest {
             addressResourceRepository = StaticAddressResourceRepository(addressRepository),
             savedStateHandle = SavedStateHandle(),
             linkLauncher = linkPaymentLauncher
-        )
+        ).also {
+            it.injector = injector
+        }
     }
 
     fun registerFormViewModelInjector() {
@@ -536,7 +538,6 @@ internal class PaymentOptionsActivityTest {
             ),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
             addressResourceRepository = StaticAddressResourceRepository(addressRepository),
-            showCheckboxFlow = mock()
         )
 
         val mockFormBuilder = mock<FormViewModelSubcomponent.Builder>()
@@ -545,17 +546,15 @@ internal class PaymentOptionsActivityTest {
             mock<Provider<FormViewModelSubcomponent.Builder>>()
         whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
         whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
-        whenever(mockFormBuilder.showCheckboxFlow(any())).thenReturn(mockFormBuilder)
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
-        injector = object : Injector {
+        injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 (injectable as? FormViewModel.Factory)?.let {
                     injectable.subComponentBuilderProvider = mockFormSubComponentBuilderProvider
                 }
             }
         }
-        WeakMapInjectorRegistry.register(injector, DUMMY_INJECTOR_KEY)
     }
 }

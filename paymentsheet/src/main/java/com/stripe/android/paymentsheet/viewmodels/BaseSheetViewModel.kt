@@ -44,6 +44,7 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -70,6 +71,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     val savedStateHandle: SavedStateHandle,
     val linkLauncher: LinkPaymentLauncher
 ) : AndroidViewModel(application) {
+    /**
+     * This ViewModel exists during the whole user flow, and needs to share the Dagger dependencies
+     * with the other, screen-specific ViewModels. So it holds a reference to the injector which is
+     * passed as a parameter to the other ViewModel factories.
+     */
+    lateinit var injector: NonFallbackInjector
+
     internal val customerConfig = config?.customer
     internal val merchantName = config?.merchantDisplayName
         ?: application.applicationInfo.loadLabel(application.packageManager).toString()
@@ -192,8 +200,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      * the user returns to that payment method type.
      */
     abstract var newPaymentSelection: PaymentSelection.New?
-
-    open var linkInlineSelection = MutableLiveData<PaymentSelection.New.LinkInline?>(null)
 
     abstract fun onFatal(throwable: Throwable)
 
