@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.PaymentSheetP
 
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.playground.activity.AppearancePlaygroundActivity
+import com.stripe.android.paymentsheet.example.samples.activity.PaymentElementActivity
 
 class MainActivity : AppCompatActivity() {
     private val viewBinding by lazy {
@@ -35,6 +36,10 @@ class MainActivity : AppCompatActivity() {
 
         viewBinding.appearanceButton.setOnClickListener {
             startActivity(Intent(this, AppearancePlaygroundActivity::class.java))
+        }
+
+        viewBinding.paymentElementButton.setOnClickListener {
+            startActivity(Intent(this, PaymentElementActivity::class.java))
         }
 
         viewBinding.version.text = StripeSdkVersion.VERSION_NAME

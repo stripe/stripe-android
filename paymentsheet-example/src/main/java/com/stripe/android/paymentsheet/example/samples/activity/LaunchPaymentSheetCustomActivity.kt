@@ -2,10 +2,14 @@ package com.stripe.android.paymentsheet.example.samples.activity
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -59,12 +63,13 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
                         }
                     )
                     BuyButton(
-                        buyButtonEnabled = !isLoadingState && !paymentCompletedState &&
+                        enabled = !isLoadingState && !paymentCompletedState &&
                             selectedPaymentMethod.value != null,
                         onClick = {
                             isLoading.value = true
                             flowController.confirm()
-                        }
+                        },
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp)
                     )
                 }
             }

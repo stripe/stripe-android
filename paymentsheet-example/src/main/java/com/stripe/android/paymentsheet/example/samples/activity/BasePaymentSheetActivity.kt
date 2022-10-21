@@ -99,7 +99,7 @@ const val HOT_DOG_EMOJI = "\uD83C\uDF2D"
 @Composable
 fun Receipt(
     isLoading: Boolean,
-    bottomContent: @Composable () -> Unit
+    bottomContent: @Composable () -> Unit = {}
 ) {
     Surface(color = BACKGROUND_COLOR) {
         Column(
@@ -249,12 +249,13 @@ fun PaymentMethodSelector(
 
 @Composable
 fun BuyButton(
-    buyButtonEnabled: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     TextButton(
-        enabled = buyButtonEnabled,
-        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+        enabled = enabled,
+        modifier = modifier,
         onClick = onClick,
         colors = ButtonDefaults.textButtonColors(
             backgroundColor = BUTTON_COLOR,

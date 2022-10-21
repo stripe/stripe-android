@@ -38,7 +38,10 @@
 
         <activity android:name=".samples.activity.LaunchPaymentSheetCompleteActivity" />
         <activity android:name=".samples.activity.LaunchPaymentSheetCustomActivity" />
-        <activity android:name=".playground.activity.AppearancePlaygroundActivity"/>
+        <activity
+            android:name=".samples.activity.PaymentElementActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".playground.activity.AppearancePlaygroundActivity" />
         <activity android:name=".playground.activity.PaymentSheetPlaygroundActivity" />
     </application>
 
