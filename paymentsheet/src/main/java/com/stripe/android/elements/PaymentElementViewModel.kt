@@ -16,6 +16,7 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -149,7 +150,8 @@ internal class PaymentElementViewModel internal constructor(
         private val supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
         private val paymentElementConfig: PaymentElementController.Config,
         private val context: Context,
-        private val lifecycleScope: CoroutineScope
+        private val lifecycleScope: CoroutineScope,
+        val injector: NonFallbackInjector
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")

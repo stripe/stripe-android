@@ -65,7 +65,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                             initialSelection = sheetViewModel.newPaymentSelection
                         ),
                         context = requireContext(),
-                        lifecycleScope = lifecycleScope
+                        lifecycleScope = lifecycleScope,
+                        injector = sheetViewModel.injector
                     )
                 )
 
