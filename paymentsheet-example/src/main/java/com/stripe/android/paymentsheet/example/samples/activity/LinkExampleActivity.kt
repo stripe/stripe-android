@@ -30,7 +30,7 @@ import com.stripe.android.link.ui.LinkButton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-internal class LinkActivity : BasePaymentSheetActivity() {
+internal class LinkExampleActivity : BasePaymentSheetActivity() {
     private val paymentCompleted = MutableStateFlow(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +45,7 @@ internal class LinkActivity : BasePaymentSheetActivity() {
 
         prepareCheckout { customerConfig, clientSecret ->
             lifecycleScope.launch {
-                linkLauncherFlow.value = LinkPaymentLauncher.create(this@LinkActivity)
+                linkLauncherFlow.value = LinkPaymentLauncher.create(this@LinkExampleActivity)
                     .setupForPaymentIntent(clientSecret, "Link Example, Inc")
             }
         }
