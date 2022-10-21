@@ -369,14 +369,11 @@ public final class com/stripe/android/stripecardscan/cardscan/exception/UnknownS
 }
 
 public final class com/stripe/android/stripecardscan/databinding/ActivityCardscanBinding : androidx/viewbinding/ViewBinding {
+	public final field cameraView Lcom/stripe/android/camera/scanui/CameraView;
 	public final field closeButton Landroid/widget/ImageView;
 	public final field instructions Landroid/widget/TextView;
-	public final field previewFrame Landroid/widget/FrameLayout;
 	public final field swapCameraButton Landroid/widget/ImageView;
 	public final field torchButton Landroid/widget/ImageView;
-	public final field viewFinderBackground Lcom/stripe/android/camera/scanui/ViewFinderBackground;
-	public final field viewFinderBorder Landroid/widget/ImageView;
-	public final field viewFinderWindow Landroid/view/View;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/stripecardscan/databinding/ActivityCardscanBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
@@ -385,13 +382,12 @@ public final class com/stripe/android/stripecardscan/databinding/ActivityCardsca
 }
 
 public final class com/stripe/android/stripecardscan/databinding/FragmentCardscanBinding : androidx/viewbinding/ViewBinding {
+	public final field cameraView Lcom/stripe/android/camera/scanui/CameraView;
 	public final field closeButton Landroid/widget/ImageView;
 	public final field instructions Landroid/widget/TextView;
-	public final field previewFrame Landroid/widget/FrameLayout;
+	public final field swapCameraButton Landroid/widget/ImageView;
 	public final field title Landroid/widget/TextView;
-	public final field viewFinderBackground Lcom/stripe/android/camera/scanui/ViewFinderBackground;
-	public final field viewFinderBorder Landroid/widget/ImageView;
-	public final field viewFinderWindow Landroid/view/View;
+	public final field torchButton Landroid/widget/ImageView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/stripecardscan/databinding/FragmentCardscanBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
