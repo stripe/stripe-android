@@ -42,9 +42,4 @@ internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
             PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull(config)
         )
     }
-
-    override fun onPaymentOptionsItemSelected(item: PaymentOptionsItem) {
-        super.onPaymentOptionsItemSelected(item)
-        sheetViewModel.onUserSelection()
-    }
 }

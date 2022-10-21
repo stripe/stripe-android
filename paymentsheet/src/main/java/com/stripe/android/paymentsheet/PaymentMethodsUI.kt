@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package com.stripe.android.paymentsheet
 
 import androidx.annotation.VisibleForTesting
@@ -32,7 +34,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPayment
 import com.stripe.android.ui.core.getBorderStroke
 import com.stripe.android.ui.core.paymentsColors
 
-private object Spacing {
+internal object PaymentMethodsSpacing {
     val cardLeadingInnerPadding = 12.dp
     val carouselOuterPadding = 20.dp
     val carouselInnerPadding = 12.dp
@@ -65,8 +67,8 @@ internal fun PaymentMethodsUI(
 
         LazyRow(
             state = state,
-            contentPadding = PaddingValues(horizontal = Spacing.carouselOuterPadding),
-            horizontalArrangement = Arrangement.spacedBy(Spacing.carouselInnerPadding),
+            contentPadding = PaddingValues(horizontal = PaymentMethodsSpacing.carouselOuterPadding),
+            horizontalArrangement = Arrangement.spacedBy(PaymentMethodsSpacing.carouselInnerPadding),
             userScrollEnabled = isEnabled,
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
@@ -92,7 +94,7 @@ internal fun PaymentMethodsUI(
 }
 
 @Composable
-private fun rememberViewWidth(
+internal fun rememberViewWidth(
     maxWidth: Dp,
     numberOfPaymentMethods: Int
 ) = remember(maxWidth, numberOfPaymentMethods) {
@@ -103,11 +105,11 @@ internal fun calculateViewWidth(
     maxWidth: Dp,
     numberOfPaymentMethods: Int
 ): Dp {
-    val targetWidth = maxWidth - (Spacing.carouselOuterPadding * 2)
+    val targetWidth = maxWidth - (PaymentMethodsSpacing.carouselOuterPadding * 2)
     val minItemWidth = 100.dp
 
     val minimumCardsWidth = minItemWidth * numberOfPaymentMethods
-    val spacingWidth = Spacing.carouselInnerPadding * (numberOfPaymentMethods - 1)
+    val spacingWidth = PaymentMethodsSpacing.carouselInnerPadding * (numberOfPaymentMethods - 1)
     val minimumContentWidth = minimumCardsWidth + spacingWidth
 
     val viewWidth = if (minimumContentWidth <= targetWidth) {
@@ -117,7 +119,7 @@ internal fun calculateViewWidth(
         computeItemWidthWhenExceedingMaxWidth(
             availableWidth = targetWidth,
             minItemWidth = minItemWidth,
-            spacing = Spacing.carouselInnerPadding,
+            spacing = PaymentMethodsSpacing.carouselInnerPadding,
         )
     }
     return viewWidth
@@ -185,8 +187,8 @@ internal fun PaymentMethodUI(
                 contentDescription = null,
                 colorFilter = colorFilter,
                 modifier = Modifier.padding(
-                    top = Spacing.cardLeadingInnerPadding,
-                    start = Spacing.cardLeadingInnerPadding,
+                    top = PaymentMethodsSpacing.cardLeadingInnerPadding,
+                    start = PaymentMethodsSpacing.cardLeadingInnerPadding,
                 )
             )
 
@@ -196,8 +198,8 @@ internal fun PaymentMethodUI(
                 textColor = color,
                 modifier = Modifier.padding(
                     top = 6.dp,
-                    start = Spacing.cardLeadingInnerPadding,
-                    end = Spacing.cardLeadingInnerPadding,
+                    start = PaymentMethodsSpacing.cardLeadingInnerPadding,
+                    end = PaymentMethodsSpacing.cardLeadingInnerPadding,
                 )
             )
         }

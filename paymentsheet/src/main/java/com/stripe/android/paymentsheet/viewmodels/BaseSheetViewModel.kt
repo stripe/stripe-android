@@ -9,6 +9,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
@@ -51,6 +52,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
@@ -169,7 +171,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     internal val selection: LiveData<PaymentSelection?> = _selection
 
-    private val editing = MutableLiveData(false)
+    private val _isEditing = MutableStateFlow(false)
+    internal val isEditing: StateFlow<Boolean> = _isEditing
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
     internal val _processing = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
@@ -216,11 +219,11 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     val buttonsEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
             processing,
-            editing
+            isEditing.asLiveData(),
         ).forEach { source ->
             addSource(source) {
                 value = processing.value != true &&
-                    editing.value != true
+                    _isEditing.value != true
             }
         }
     }.distinctUntilChanged()
@@ -442,7 +445,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     }
 
     fun setEditing(isEditing: Boolean) {
-        editing.value = isEditing
+        _isEditing.value = isEditing
     }
 
     fun setContentVisible(visible: Boolean) {

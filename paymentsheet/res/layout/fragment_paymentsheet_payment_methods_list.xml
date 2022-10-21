@@ -8,11 +8,9 @@
     android:layout_marginBottom="@dimen/stripe_paymentsheet_paymentoptions_margin_bottom"
     tools:context=".paymentsheet.PaymentSheetListFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler"
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clipToPadding="false"
-        android:paddingHorizontal="17dp" />
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
