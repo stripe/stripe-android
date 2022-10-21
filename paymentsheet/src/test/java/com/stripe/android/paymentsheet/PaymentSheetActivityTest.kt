@@ -1116,7 +1116,6 @@ internal class PaymentSheetActivityTest {
                 showCheckboxControlledFields = true,
                 merchantName = "Merchant, Inc.",
                 amount = Amount(50, "USD"),
-                injectorKey = "injectorTestKeyFormFragmentArgumentTest",
                 initialPaymentMethodCreateParams = null
             ),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),

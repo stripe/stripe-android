@@ -65,7 +65,13 @@ internal open class PaymentOptionsViewModelTestInjection {
     ): PaymentOptionsViewModel = runBlocking {
         val lpmRepository =
             LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources))
-        lpmRepository.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
+        lpmRepository.forceUpdate(
+            listOf(
+                PaymentMethod.Type.Card.code,
+                PaymentMethod.Type.USBankAccount.code
+            ),
+            null
+        )
         PaymentOptionsViewModel(
             args,
             prefsRepositoryFactory = {
@@ -101,7 +107,6 @@ internal open class PaymentOptionsViewModelTestInjection {
                 showCheckboxControlledFields = true,
                 merchantName = "Merchant, Inc.",
                 amount = Amount(50, "USD"),
-                injectorKey = "injectorTestKeyFormFragmentArgumentTest",
                 initialPaymentMethodCreateParams = null
             ),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
@@ -110,7 +115,8 @@ internal open class PaymentOptionsViewModelTestInjection {
     ) {
         val mockBuilder = mock<PaymentOptionsViewModelSubcomponent.Builder>()
         val mockSubcomponent = mock<PaymentOptionsViewModelSubcomponent>()
-        val mockSubComponentBuilderProvider = mock<Provider<PaymentOptionsViewModelSubcomponent.Builder>>()
+        val mockSubComponentBuilderProvider =
+            mock<Provider<PaymentOptionsViewModelSubcomponent.Builder>>()
         whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
         whenever(mockBuilder.savedStateHandle(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.application(any())).thenReturn(mockBuilder)
@@ -120,7 +126,8 @@ internal open class PaymentOptionsViewModelTestInjection {
 
         val mockFormBuilder = mock<FormViewModelSubcomponent.Builder>()
         val mockFormSubcomponent = mock<FormViewModelSubcomponent>()
-        val mockFormSubComponentBuilderProvider = mock<Provider<FormViewModelSubcomponent.Builder>>()
+        val mockFormSubComponentBuilderProvider =
+            mock<Provider<FormViewModelSubcomponent.Builder>>()
         whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
         whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)

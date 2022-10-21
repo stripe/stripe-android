@@ -46,7 +46,7 @@ internal class PaymentElementViewModel internal constructor(
         getFormArgumentsForPaymentMethod(selectedPaymentMethod.value)
     )
 
-    val paymentSelectionFlow = MutableStateFlow<PaymentSelection?>(null)
+    val paymentSelectionFlow = MutableStateFlow<PaymentSelection.New?>(null)
 
     internal fun onFormFieldValuesChanged(values: FormFieldValues?) {
         paymentSelectionFlow.value = values?.let { formFieldValues ->
@@ -112,7 +112,6 @@ internal class PaymentElementViewModel internal constructor(
             },
             billingDetails = paymentElementConfig.paymentSheetConfig?.defaultBillingDetails,
             shippingDetails = paymentElementConfig.paymentSheetConfig?.shippingDetails,
-            injectorKey = paymentElementConfig.injectorKey,
             initialPaymentMethodCreateParams = lastPaymentSelection?.takeIf {
                 it.paymentMethodCreateParams.typeCode == selectedItem.code ||
                     (

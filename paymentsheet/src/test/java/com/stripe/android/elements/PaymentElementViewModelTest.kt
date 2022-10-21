@@ -3,7 +3,6 @@ package com.stripe.android.elements
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -24,8 +23,7 @@ internal class PaymentElementViewModelTest {
         paymentSheetConfig = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         merchantName = "Merchant",
-        initialSelection = null,
-        injectorKey = DUMMY_INJECTOR_KEY
+        initialSelection = null
     )
 
     @Test

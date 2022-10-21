@@ -34,7 +34,6 @@ import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepositor
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.runTest
@@ -61,7 +60,6 @@ internal class FormViewModelTest {
             ApplicationProvider.getApplicationContext<Context>().resources
         )
     )
-    val showCheckboxFlow = MutableStateFlow(false)
 
     private fun createLpmRepositorySupportedPaymentMethod(
         paymentMethodType: PaymentMethod.Type,
@@ -100,7 +98,7 @@ internal class FormViewModelTest {
                 )
             )
         )
-        showCheckboxFlow.emit(true)
+        formViewModel.setShowCheckbox(true)
 
         // Set all the card fields, billing is set in the args
         val emailController =
@@ -144,7 +142,7 @@ internal class FormViewModelTest {
                 )
             )
         )
-        showCheckboxFlow.tryEmit(true)
+        formViewModel.setShowCheckbox(true)
 
         val values = mutableListOf<Set<IdentifierSpec>>()
         formViewModel.hiddenIdentifiers.asLiveData()
@@ -153,7 +151,7 @@ internal class FormViewModelTest {
             }
         assertThat(values[0]).isEmpty()
 
-        showCheckboxFlow.tryEmit(false)
+        formViewModel.setShowCheckbox(false)
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 

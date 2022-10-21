@@ -1,6 +1,5 @@
 package com.stripe.android.elements
 
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -14,7 +13,6 @@ interface PaymentElementController {
         val paymentSheetConfig: PaymentSheet.Configuration?,
         val stripeIntent: StripeIntent,
         val merchantName: String,
-        val initialSelection: PaymentSelection.New?,
-        @InjectorKey val injectorKey: String
+        val initialSelection: PaymentSelection.New?
     )
 }

@@ -62,8 +62,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                             paymentSheetConfig = sheetViewModel.config,
                             stripeIntent = requireNotNull(sheetViewModel.stripeIntent.value),
                             merchantName = sheetViewModel.merchantName,
-                            initialSelection = sheetViewModel.newPaymentSelection,
-                            injectorKey = sheetViewModel.injectorKey
+                            initialSelection = sheetViewModel.newPaymentSelection
                         ),
                         context = requireContext(),
                         lifecycleScope = lifecycleScope
