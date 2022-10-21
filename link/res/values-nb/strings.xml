@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[Ved å bli med i Link, godtar du <terms>vilkårene</terms> og <privacy>personvernerklæringen</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">Endre e-post</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">Kode sendt</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">Skriv inn verifiseringskoden</string>
   <!-- Two factor authentication screen heading -->

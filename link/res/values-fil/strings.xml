@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[Sa pagsali sa Link, sumasang-ayon ka sa <terms>Mga Tuntunin</terms> at <privacy>Patakaran sa Pagkapribado</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">Palitan ang email</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">Naipadala na ang code</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">Ilagay ang iyong verification code.</string>
   <!-- Two factor authentication screen heading -->
