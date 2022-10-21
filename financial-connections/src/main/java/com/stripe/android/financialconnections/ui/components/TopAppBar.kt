@@ -24,18 +24,14 @@ internal fun FinancialConnectionsTopAppBar(
         )
     },
     showBack: Boolean = true,
-    onCloseClick: () -> Unit,
-    onBackClick: () -> Unit
+    onCloseClick: () -> Unit
 ) {
-    val navigation = LocalNavHostController.current
+    val navController = LocalNavHostController.current
     TopAppBar(
         title = title,
-        navigationIcon = if (navigation.previousBackStackEntry != null && showBack) {
+        navigationIcon = if (navController.previousBackStackEntry != null && showBack) {
             {
-                IconButton(onClick = {
-                    navigation.popBackStack()
-                    onBackClick()
-                }) {
+                IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back icon",
@@ -63,9 +59,7 @@ internal fun FinancialConnectionsTopAppBar(
 internal fun FinancialConnectionsTopAppBarPreview() {
     FinancialConnectionsTheme {
         FinancialConnectionsTopAppBar(
-            title = {},
-            onCloseClick = {},
-            onBackClick = {}
-        )
+            title = {}
+        ) {}
     }
 }

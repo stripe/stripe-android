@@ -85,7 +85,6 @@ internal fun InstitutionPickerScreen() {
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCancelSearchClick = viewModel::onCancelSearchClick,
         onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.INSTITUTION_PICKER) },
-        onBackClick = { parentViewModel.onBackClick(NextPane.INSTITUTION_PICKER) },
         onSearchFocused = viewModel::onSearchFocused,
         onManualEntryClick = viewModel::onManualEntryClick,
     )
@@ -101,7 +100,6 @@ private fun InstitutionPickerContent(
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     onCancelSearchClick: () -> Unit,
     onCloseClick: () -> Unit,
-    onBackClick: () -> Unit,
     onSearchFocused: () -> Unit,
     onManualEntryClick: () -> Unit
 ) {
@@ -109,8 +107,7 @@ private fun InstitutionPickerContent(
         topBar = {
             if (!searchMode) {
                 FinancialConnectionsTopAppBar(
-                    onCloseClick = onCloseClick,
-                    onBackClick = onBackClick
+                    onCloseClick = onCloseClick
                 )
             }
         }
@@ -462,7 +459,6 @@ internal fun SearchModeSearchingInstitutions(
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {},
-            onBackClick = {},
         ) {}
     }
 }
@@ -483,7 +479,6 @@ internal fun SearchModeWithResults(
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {},
-            onBackClick = {},
         ) {}
     }
 }
@@ -504,7 +499,6 @@ internal fun SearchModeNoResults(
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {},
-            onBackClick = {},
         ) {}
     }
 }
@@ -525,7 +519,6 @@ internal fun SearchModeFailed(
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {},
-            onBackClick = {},
         ) {}
     }
 }
@@ -546,7 +539,6 @@ internal fun SearchModeNoQuery(
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {},
-            onBackClick = {},
         ) {}
     }
 }
@@ -567,7 +559,6 @@ internal fun NoSearchMode(
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {},
-            onBackClick = {},
         ) {}
     }
 }

@@ -60,9 +60,7 @@ internal fun ManualEntryScreen() {
         onAccountEntered = viewModel::onAccountEntered,
         onAccountConfirmEntered = viewModel::onAccountConfirmEntered,
         onSubmit = viewModel::onSubmit,
-        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.MANUAL_ENTRY) },
-        onBackClick = { parentViewModel.onBackClick(NextPane.MANUAL_ENTRY) },
-    )
+    ) { parentViewModel.onCloseNoConfirmationClick(NextPane.MANUAL_ENTRY) }
 }
 
 @Suppress("LongMethod")
@@ -78,15 +76,13 @@ private fun ManualEntryContent(
     onAccountEntered: (String) -> Unit,
     onAccountConfirmEntered: (String) -> Unit,
     onSubmit: () -> Unit,
-    onCloseClick: () -> Unit,
-    onBackClick: () -> Unit
+    onCloseClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
-                onBackClick = onBackClick
+                onCloseClick = onCloseClick
             )
         }
     ) {
@@ -234,9 +230,7 @@ internal fun ManualEntryScreenPreview() {
             onAccountEntered = {},
             onAccountConfirmEntered = {},
             onSubmit = {},
-            {},
-            {},
-        )
+        ) {}
     }
 }
 
@@ -257,8 +251,6 @@ internal fun ManualEntryScreenErrorPreview() {
             onAccountEntered = {},
             onAccountConfirmEntered = {},
             onSubmit = {},
-            {},
-            {},
-        )
+        ) {}
     }
 }

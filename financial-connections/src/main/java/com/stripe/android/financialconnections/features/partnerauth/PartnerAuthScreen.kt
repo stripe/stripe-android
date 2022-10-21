@@ -72,9 +72,8 @@ internal fun PartnerAuthScreen() {
         state = state.value,
         onContinueClick = viewModel::onLaunchAuthClick,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
-        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.PARTNER_AUTH) },
-        onBackClick = { parentViewModel.onBackClick(NextPane.PARTNER_AUTH) },
         onEnterDetailsManually = viewModel::onEnterDetailsManuallyClick,
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.PARTNER_AUTH) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
@@ -86,15 +85,13 @@ private fun PartnerAuthScreenContent(
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onCloseClick: () -> Unit,
-    onBackClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
-                onBackClick = onBackClick,
-                showBack = state.canNavigateBack
+                showBack = state.canNavigateBack,
+                onCloseClick = onCloseClick
             )
         }
     ) {
@@ -268,10 +265,8 @@ internal fun PrepaneContentPreview() {
             ),
             onContinueClick = {},
             onSelectAnotherBank = {},
-            onCloseClick = {},
             onEnterDetailsManually = {},
-            onCloseFromErrorClick = {},
-            onBackClick = {}
-        )
+            onCloseClick = {}
+        ) {}
     }
 }

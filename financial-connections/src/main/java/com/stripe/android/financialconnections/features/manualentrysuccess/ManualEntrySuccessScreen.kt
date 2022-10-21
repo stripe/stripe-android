@@ -59,7 +59,6 @@ internal fun ManualEntrySuccessScreen(
         last4 = ManualEntrySuccess.last4(backStackEntry),
         loading = completeAuthSessionAsync.value is Loading,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(NextPane.MANUAL_ENTRY_SUCCESS) },
-        onBackClick = { parentViewModel.onBackClick(NextPane.MANUAL_ENTRY_SUCCESS) },
         onDoneClick = viewModel::onSubmit
     )
 }
@@ -70,15 +69,13 @@ internal fun ManualEntrySuccessContent(
     last4: String?,
     loading: Boolean,
     onCloseClick: () -> Unit,
-    onBackClick: () -> Unit,
     onDoneClick: () -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
-                onBackClick = onBackClick,
                 showBack = false,
+                onCloseClick = onCloseClick,
             )
         }
     ) {
@@ -256,11 +253,9 @@ internal fun ManualEntrySuccessScreenPreviewAmount() {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.AMOUNTS,
             last4 = "1234",
-            onCloseClick = {},
-            onBackClick = {},
-            onDoneClick = {},
-            loading = false
-        )
+            loading = false,
+            onCloseClick = {}
+        ) {}
     }
 }
 
@@ -271,11 +266,9 @@ internal fun ManualEntrySuccessScreenPreviewDescriptor() {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.DESCRIPTOR_CODE,
             last4 = "1234",
-            onCloseClick = {},
-            onBackClick = {},
-            onDoneClick = {},
-            loading = false
-        )
+            loading = false,
+            onCloseClick = {}
+        ) {}
     }
 }
 
@@ -286,11 +279,9 @@ internal fun ManualEntrySuccessScreenPreviewAmountNoAccount() {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.AMOUNTS,
             last4 = null,
-            onCloseClick = {},
-            onBackClick = {},
-            onDoneClick = {},
-            loading = false
-        )
+            loading = false,
+            onCloseClick = {}
+        ) {}
     }
 }
 
@@ -301,10 +292,8 @@ internal fun ManualEntrySuccessScreenPreviewDescriptorNoAccount() {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.DESCRIPTOR_CODE,
             last4 = null,
-            onCloseClick = {},
-            onBackClick = {},
-            onDoneClick = {},
-            loading = false
-        )
+            loading = false,
+            onCloseClick = {}
+        ) {}
     }
 }

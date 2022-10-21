@@ -85,12 +85,11 @@ internal fun AccountPickerScreen() {
         state = state.value,
         onAccountClicked = viewModel::onAccountClicked,
         onSubmit = viewModel::onSubmit,
+        onSelectAllAccountsClicked = viewModel::onSelectAllAccountsClicked,
         onSelectAnotherBank = viewModel::selectAnotherBank,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(NextPane.ACCOUNT_PICKER) },
-        onBackClick = { parentViewModel.onBackClick(NextPane.ACCOUNT_PICKER) },
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
-        onSelectAllAccountsClicked = viewModel::onSelectAllAccountsClicked,
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(NextPane.ACCOUNT_PICKER) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
     )
 }
@@ -105,15 +104,13 @@ private fun AccountPickerContent(
     onEnterDetailsManually: () -> Unit,
     onLoadAccountsAgain: () -> Unit,
     onCloseClick: () -> Unit,
-    onBackClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
                 showBack = false,
-                onBackClick = onBackClick
+                onCloseClick = onCloseClick
             )
         }
     ) {
@@ -543,14 +540,12 @@ internal fun AccountPickerPreviewMultiSelect() {
             AccountPickerStates.multiSelect(),
             onAccountClicked = {},
             onSubmit = {},
+            onSelectAllAccountsClicked = {},
             onSelectAnotherBank = {},
-            onCloseClick = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseFromErrorClick = {},
-            onBackClick = {},
-            onSelectAllAccountsClicked = {}
-        )
+            onCloseClick = {}
+        ) {}
     }
 }
 
@@ -566,14 +561,12 @@ internal fun AccountPickerPreviewSingleSelect() {
             AccountPickerStates.singleSelect(),
             onAccountClicked = {},
             onSubmit = {},
+            onSelectAllAccountsClicked = {},
             onSelectAnotherBank = {},
-            onCloseClick = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseFromErrorClick = {},
-            onBackClick = {},
-            onSelectAllAccountsClicked = {}
-        )
+            onCloseClick = {}
+        ) {}
     }
 }
 
@@ -589,13 +582,11 @@ internal fun AccountPickerPreviewDropdown() {
             AccountPickerStates.dropdown(),
             onAccountClicked = {},
             onSubmit = {},
+            onSelectAllAccountsClicked = {},
             onSelectAnotherBank = {},
-            onCloseClick = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseFromErrorClick = {},
-            onBackClick = {},
-            onSelectAllAccountsClicked = {}
-        )
+            onCloseClick = {}
+        ) {}
     }
 }

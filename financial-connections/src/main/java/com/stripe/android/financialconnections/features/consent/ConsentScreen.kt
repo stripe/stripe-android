@@ -82,9 +82,7 @@ internal fun ConsentScreen() {
         onContinueClick = viewModel::onContinueClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.CONSENT) },
-        onBackClick = { parentViewModel.onBackClick(NextPane.CONSENT) },
-    )
+    ) { parentViewModel.onCloseNoConfirmationClick(NextPane.CONSENT) }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -118,8 +116,7 @@ private fun ConsentContent(
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit,
-    onCloseClick: () -> Unit,
-    onBackClick: () -> Unit
+    onCloseClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     ModalBottomSheetLayout(
@@ -141,8 +138,7 @@ private fun ConsentContent(
                 state = state,
                 onClickableTextClick = onClickableTextClick,
                 onContinueClick = onContinueClick,
-                onCloseClick = onCloseClick,
-                onBackClick = onBackClick
+                onCloseClick = onCloseClick
             )
         }
     )
@@ -154,14 +150,12 @@ private fun ConsentMainContent(
     state: ConsentState,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
-    onCloseClick: () -> Unit,
-    onBackClick: () -> Unit
+    onCloseClick: () -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
-                onBackClick = onBackClick
+                onCloseClick = onCloseClick
             )
         }
     ) {
@@ -374,9 +368,7 @@ internal fun ContentPreview(
             onContinueClick = {},
             onClickableTextClick = {},
             onConfirmModalClick = {},
-            onCloseClick = {},
-            onBackClick = {},
-        )
+        ) {}
     }
 }
 
@@ -395,8 +387,6 @@ internal fun ContentManualEntryPlusMicrodeposits(
             onContinueClick = {},
             onClickableTextClick = {},
             onConfirmModalClick = {},
-            onCloseClick = {},
-            onBackClick = {},
-        )
+        ) {}
     }
 }

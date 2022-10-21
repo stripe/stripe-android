@@ -48,15 +48,13 @@ internal fun SuccessScreen() {
             accessibleDataModel = payload.accessibleData,
             disconnectUrl = payload.disconnectUrl,
             accounts = payload.accounts.data,
+            institution = payload.institution,
             businessName = payload.businessName,
             loading = state.value.completeSession is Loading,
             onDoneClick = viewModel::onDoneClick,
             onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
-            onCloseClick = { parentViewModel.onCloseWithConfirmationClick(NextPane.SUCCESS) },
-            onBackClick = { parentViewModel.onBackClick(NextPane.SUCCESS) },
-            showLinkAnotherAccount = payload.showLinkAnotherAccount,
-            institution = payload.institution
-        )
+            showLinkAnotherAccount = payload.showLinkAnotherAccount
+        ) { parentViewModel.onCloseWithConfirmationClick(NextPane.SUCCESS) }
     }
 }
 
@@ -72,16 +70,14 @@ private fun SuccessContent(
     onDoneClick: () -> Unit,
     onLinkAnotherAccountClick: () -> Unit,
     showLinkAnotherAccount: Boolean,
-    onCloseClick: () -> Unit,
-    onBackClick: () -> Unit
+    onCloseClick: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
-                onBackClick = onBackClick,
-                showBack = false
+                showBack = false,
+                onCloseClick = onCloseClick
             )
         }
     ) {
@@ -225,13 +221,6 @@ internal fun SuccessScreenPreview() {
                     supportedPaymentMethodTypes = emptyList()
                 )
             ),
-            loading = false,
-            onDoneClick = {},
-            onBackClick = {},
-            businessName = "Random business",
-            onLinkAnotherAccountClick = {},
-            showLinkAnotherAccount = true,
-            onCloseClick = {},
             institution = FinancialConnectionsInstitution(
                 id = "id",
                 name = "name",
@@ -242,6 +231,11 @@ internal fun SuccessScreenPreview() {
                 logo = null,
                 mobileHandoffCapable = false
             ),
-        )
+            businessName = "Random business",
+            loading = false,
+            onDoneClick = {},
+            onLinkAnotherAccountClick = {},
+            showLinkAnotherAccount = true,
+        ) {}
     }
 }

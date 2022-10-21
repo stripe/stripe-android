@@ -31,10 +31,9 @@ internal fun AttachPaymentScreen() {
     BackHandler(enabled = true) {}
     AttachPaymentContent(
         payload = state.value.payload,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(ATTACH_LINKED_PAYMENT_ACCOUNT) },
-        onBackClick = { parentViewModel.onBackClick(ATTACH_LINKED_PAYMENT_ACCOUNT) },
-        onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
+        onEnterDetailsManually = viewModel::onEnterDetailsManually,
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(ATTACH_LINKED_PAYMENT_ACCOUNT) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
@@ -45,16 +44,14 @@ private fun AttachPaymentContent(
     payload: Async<AttachPaymentState.Payload>,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
-    onBackClick: () -> Unit,
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
-                onBackClick = onBackClick,
-                showBack = false
+                showBack = false,
+                onCloseClick = onCloseClick
             )
         }
     ) {
@@ -121,11 +118,9 @@ internal fun AttachPaymentScreenPreview() {
                     businessName = "Random Business"
                 )
             ),
-            onCloseClick = {},
-            onEnterDetailsManually = {},
             onSelectAnotherBank = {},
-            onCloseFromErrorClick = {},
-            onBackClick = {}
-        )
+            onEnterDetailsManually = {},
+            onCloseClick = {}
+        ) {}
     }
 }

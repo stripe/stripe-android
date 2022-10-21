@@ -27,7 +27,6 @@ internal fun ResetScreen() {
     ResetContent(
         payload = payload.value,
         onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.RESET) },
-        onBackClick = { parentViewModel.onBackClick(NextPane.RESET) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
@@ -36,14 +35,12 @@ internal fun ResetScreen() {
 private fun ResetContent(
     payload: Async<Unit>,
     onCloseClick: () -> Unit,
-    onBackClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
-                onBackClick = onBackClick
+                onCloseClick = onCloseClick
             )
         }
     ) {
@@ -64,9 +61,7 @@ internal fun ResetScreenPreview() {
     FinancialConnectionsTheme {
         ResetContent(
             payload = Uninitialized,
-            onCloseClick = {},
-            onCloseFromErrorClick = {},
-            onBackClick = {}
-        )
+            onCloseClick = {}
+        ) {}
     }
 }
