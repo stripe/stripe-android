@@ -249,6 +249,10 @@ public final class com/stripe/android/link/confirmation/ConfirmationManager_Fact
 	public static fun newInstance (Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncherAssistedFactory;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/link/confirmation/ConfirmationManager;
 }
 
+public final class com/stripe/android/link/injection/DaggerLinkLauncherComponent {
+	public static fun builder ()Lcom/stripe/android/link/injection/LinkLauncherComponent$Builder;
+}
+
 public final class com/stripe/android/link/injection/DaggerLinkPaymentLauncherComponent {
 	public static fun builder ()Lcom/stripe/android/link/injection/LinkPaymentLauncherComponent$Builder;
 }
@@ -263,6 +267,47 @@ public final class com/stripe/android/link/injection/LinkActivityContractArgsMod
 	public fun get ()Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;
 	public synthetic fun get ()Ljava/lang/Object;
 	public static fun provideConfiguration (Lcom/stripe/android/link/LinkActivityContract$Args;)Lcom/stripe/android/link/LinkPaymentLauncher$Configuration;
+}
+
+public final class com/stripe/android/link/injection/LinkLauncherModule {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun provideEnabledLogging ()Z
+	public final fun provideProductUsageTokens ()Ljava/util/Set;
+	public final fun providePublishableKey (Landroid/content/Context;)Lkotlin/jvm/functions/Function0;
+	public final fun provideStripeAccountId (Landroid/content/Context;)Lkotlin/jvm/functions/Function0;
+}
+
+public final class com/stripe/android/link/injection/LinkLauncherModule_ProvideEnabledLoggingFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/link/injection/LinkLauncherModule;)V
+	public static fun create (Lcom/stripe/android/link/injection/LinkLauncherModule;)Lcom/stripe/android/link/injection/LinkLauncherModule_ProvideEnabledLoggingFactory;
+	public fun get ()Ljava/lang/Boolean;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun provideEnabledLogging (Lcom/stripe/android/link/injection/LinkLauncherModule;)Z
+}
+
+public final class com/stripe/android/link/injection/LinkLauncherModule_ProvideProductUsageTokensFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/link/injection/LinkLauncherModule;)V
+	public static fun create (Lcom/stripe/android/link/injection/LinkLauncherModule;)Lcom/stripe/android/link/injection/LinkLauncherModule_ProvideProductUsageTokensFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Ljava/util/Set;
+	public static fun provideProductUsageTokens (Lcom/stripe/android/link/injection/LinkLauncherModule;)Ljava/util/Set;
+}
+
+public final class com/stripe/android/link/injection/LinkLauncherModule_ProvidePublishableKeyFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/link/injection/LinkLauncherModule;Ljavax/inject/Provider;)V
+	public static fun create (Lcom/stripe/android/link/injection/LinkLauncherModule;Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkLauncherModule_ProvidePublishableKeyFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lkotlin/jvm/functions/Function0;
+	public static fun providePublishableKey (Lcom/stripe/android/link/injection/LinkLauncherModule;Landroid/content/Context;)Lkotlin/jvm/functions/Function0;
+}
+
+public final class com/stripe/android/link/injection/LinkLauncherModule_ProvideStripeAccountIdFactory : dagger/internal/Factory {
+	public fun <init> (Lcom/stripe/android/link/injection/LinkLauncherModule;Ljavax/inject/Provider;)V
+	public static fun create (Lcom/stripe/android/link/injection/LinkLauncherModule;Ljavax/inject/Provider;)Lcom/stripe/android/link/injection/LinkLauncherModule_ProvideStripeAccountIdFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Lkotlin/jvm/functions/Function0;
+	public static fun provideStripeAccountId (Lcom/stripe/android/link/injection/LinkLauncherModule;Landroid/content/Context;)Lkotlin/jvm/functions/Function0;
 }
 
 public final class com/stripe/android/link/injection/NamedConstantsKt {
@@ -342,6 +387,10 @@ public final class com/stripe/android/link/ui/ErrorMessage$Raw$Creator : android
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/link/ui/ErrorMessage$Raw;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/link/ui/LinkButtonViewKt {
+	public static final fun LinkButton (Lcom/stripe/android/link/LinkPaymentLauncher;ZLkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/stripe/android/link/ui/cardedit/CardEditViewModel_Factory : dagger/internal/Factory {

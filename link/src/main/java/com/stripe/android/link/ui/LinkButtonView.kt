@@ -54,10 +54,11 @@ private fun LinkButton() {
 }
 
 @Composable
-private fun LinkButton(
+fun LinkButton(
     linkPaymentLauncher: LinkPaymentLauncher,
     enabled: Boolean,
-    onClick: (LinkPaymentLauncher.Configuration) -> Unit
+    onClick: (LinkPaymentLauncher.Configuration) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     linkPaymentLauncher.component?.let { component ->
         val account = component.linkAccountManager.linkAccount.collectAsState()
@@ -67,7 +68,8 @@ private fun LinkButton(
             email = account.value?.email,
             onClick = {
                 onClick(component.configuration)
-            }
+            },
+            modifier = modifier
         )
     }
 }
@@ -76,7 +78,8 @@ private fun LinkButton(
 private fun LinkButton(
     enabled: Boolean,
     email: String?,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     CompositionLocalProvider(
         LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
@@ -84,7 +87,7 @@ private fun LinkButton(
         DefaultLinkTheme {
             Button(
                 onClick = onClick,
-                modifier = Modifier.clip(LinkButtonShape),
+                modifier = modifier.clip(LinkButtonShape),
                 enabled = enabled,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = LinkButtonShape,

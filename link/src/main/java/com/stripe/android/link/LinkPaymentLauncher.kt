@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.content.Context
 import android.os.Parcelable
+import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -13,6 +14,8 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.link.injection.DaggerLinkLauncherComponent
 import com.stripe.android.link.injection.DaggerLinkPaymentLauncherComponent
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkPaymentLauncherComponent
@@ -33,6 +36,7 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.ui.core.injection.NonFallbackInjector
+import kotlinx.coroutines.flow.first
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
@@ -52,7 +56,7 @@ class LinkPaymentLauncher @Inject internal constructor(
     @UIContext uiContext: CoroutineContext,
     paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     analyticsRequestExecutor: AnalyticsRequestExecutor,
-    stripeRepository: StripeRepository,
+    private val stripeRepository: StripeRepository,
     addressResourceRepository: ResourceRepository<AddressRepository>
 ) : NonFallbackInjectable {
     private val launcherComponentBuilder = DaggerLinkPaymentLauncherComponent.builder()
@@ -179,6 +183,37 @@ class LinkPaymentLauncher @Inject internal constructor(
         WeakMapInjectorRegistry.register(injector, injectorKey)
     }
 
+    suspend fun setupForPaymentIntent(
+        paymentIntentClientSecret: String,
+        merchantName: String
+    ): LinkPaymentLauncher {
+        val paymentIntent = requireNotNull(
+            stripeRepository.retrievePaymentIntent(
+                paymentIntentClientSecret,
+                ApiRequest.Options(
+                    publishableKeyProvider.invoke(),
+                    stripeAccountIdProvider.invoke()
+                )
+            )
+        )
+
+        val status = getAccountStatusFlow(
+            configuration = Configuration(
+                stripeIntent = paymentIntent,
+                merchantName = merchantName,
+                customerName = null,
+                customerEmail = null,
+                customerPhone = null,
+                customerBillingCountryCode = null,
+                shippingValues = null
+            )
+        ).first()
+
+        println(status)
+
+        return this
+    }
+
     /**
      * Arguments for launching [LinkActivity] to confirm a payment with Link.
      *
@@ -205,5 +240,11 @@ class LinkPaymentLauncher @Inject internal constructor(
     companion object {
         const val LINK_ENABLED = true
         val supportedFundingSources = SupportedPaymentMethod.allTypes
+
+        fun create(
+            activity: ComponentActivity
+        ) = DaggerLinkLauncherComponent.builder()
+            .appContext(activity.applicationContext)
+            .build().linkPaymentLauncher
     }
 }

@@ -40,6 +40,7 @@
         <activity android:name=".samples.activity.LaunchPaymentSheetCustomActivity" />
         <activity android:name=".playground.activity.AppearancePlaygroundActivity"/>
         <activity android:name=".playground.activity.PaymentSheetPlaygroundActivity" />
+        <activity android:name=".samples.activity.LinkActivity" />
     </application>
 
 </manifest>

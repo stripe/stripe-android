@@ -99,7 +99,7 @@ const val HOT_DOG_EMOJI = "\uD83C\uDF2D"
 @Composable
 fun Receipt(
     isLoading: Boolean,
-    bottomContent: @Composable () -> Unit
+    bottomContent: @Composable () -> Unit = {}
 ) {
     Surface(color = BACKGROUND_COLOR) {
         Column(
