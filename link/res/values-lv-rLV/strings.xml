@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[Pievienojoties Link, jūs piekrītat <terms>noteikumiem</terms> un <privacy>konfidencialitātes politikai</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">Mainīt e-pastu</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">Kods nosūtīts</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">Ievadiet savu verifikācijas kodu</string>
   <!-- Two factor authentication screen heading -->
