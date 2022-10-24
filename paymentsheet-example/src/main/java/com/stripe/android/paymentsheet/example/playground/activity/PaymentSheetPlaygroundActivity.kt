@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.view.KeyboardController
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -175,6 +176,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 setAutomaticPaymentMethods = Toggle.SetAutomaticPaymentMethods.default as Boolean,
                 setDelayedPaymentMethods = Toggle.SetDelayedPaymentMethods.default as Boolean,
             )
+
+            viewBinding.customLabelTextField.text.clear()
         }
 
         viewBinding.reloadButton.setOnClickListener {
@@ -215,6 +218,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         viewBinding.paymentMethod.setOnClickListener {
+            viewBinding.customLabelTextField.clearFocus()
             flowController.presentPaymentOptions()
         }
 
@@ -360,6 +364,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     private fun startCompleteCheckout() {
         val clientSecret = viewModel.clientSecret.value ?: return
+        viewBinding.customLabelTextField.clearFocus()
 
         if (viewModel.checkoutMode == CheckoutMode.Setup) {
             paymentSheet.presentWithSetupIntent(
@@ -409,7 +414,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         val appearance = intent.extras?.getParcelable(APPEARANCE_EXTRA) ?: AppearanceStore.state
 
-        val customPrimaryButtonLabel: String? = intent.getStringExtra(CUSTOM_PRIMARY_BUTTON_LABEL)
+        val customPrimaryButtonLabel = viewBinding.customLabelTextField.text.toString().takeUnless {
+            it.isBlank()
+        }
 
         return PaymentSheet.Configuration(
             merchantDisplayName = merchantName,
@@ -487,7 +494,6 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     companion object {
         const val FORCE_DARK_MODE_EXTRA = "ForceDark"
         const val APPEARANCE_EXTRA = "Appearance"
-        const val CUSTOM_PRIMARY_BUTTON_LABEL = "CustomPrimaryButtonLabel"
         const val USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA = "UseSnapshotReturningCustomer"
         const val SUPPORTED_PAYMENT_METHODS_EXTRA = "SupportedPaymentMethods"
         private const val merchantName = "Example, Inc."

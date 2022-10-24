@@ -355,6 +355,10 @@ class PlaygroundTestDriver(
 
         // Can't guarantee that google pay will be on the phone
         selectors.googlePayState.click()
+
+        testParameters.customPrimaryButtonLabel?.let { customLabel ->
+            selectors.enterCustomPrimaryButtonLabel(text = customLabel)
+        }
     }
 
     internal fun launchComplete() {
@@ -487,10 +491,6 @@ class PlaygroundTestDriver(
         intent.putExtra(
             PaymentSheetPlaygroundActivity.APPEARANCE_EXTRA,
             testParameters.appearance
-        )
-        intent.putExtra(
-            PaymentSheetPlaygroundActivity.CUSTOM_PRIMARY_BUTTON_LABEL,
-            testParameters.customPrimaryButtonLabel,
         )
         intent.putExtra(
             PaymentSheetPlaygroundActivity.USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA,
