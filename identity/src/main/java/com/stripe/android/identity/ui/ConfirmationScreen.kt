@@ -1,6 +1,5 @@
 package com.stripe.android.identity.ui
 
-import android.widget.TextView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -26,16 +25,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.VerificationPage
-import com.stripe.android.identity.utils.setHtmlString
+import com.stripe.android.uicore.text.Html
 
 @Composable
 internal fun ConfirmationScreen(
@@ -91,16 +91,17 @@ internal fun ConfirmationScreen(
                     fontWeight = FontWeight.Bold
                 )
 
-                AndroidView(
+                Html(
+                    html = successPage.body,
                     modifier = Modifier
                         .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
                         .semantics {
                             testTag = BODY_TAG
                         },
-                    factory = { TextView(it) },
-                    update = {
-                        it.setHtmlString(successPage.body)
-                    }
+                    urlSpanStyle = SpanStyle(
+                        textDecoration = TextDecoration.Underline,
+                        color = MaterialTheme.colors.secondary
+                    )
                 )
             }
             Button(

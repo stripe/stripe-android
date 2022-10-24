@@ -8,12 +8,11 @@
     <ID>ComplexMethod:NavigationUtils.kt$internal fun Int.fragmentIdToScreenName(): String</ID>
     <ID>EmptyFunctionBlock:IdentityCameraScanFragmentTest.kt$IdentityCameraScanFragmentTest.TestFragment${ }</ID>
     <ID>EmptyFunctionBlock:IdentityCameraScanFragmentTest.kt$IdentityCameraScanFragmentTest.TestFragment${}</ID>
-    <ID>ForbiddenComment:ConsentScreenTest.kt$ConsentScreenTest$// TODO: assert text after migrating to compose Text</ID>
     <ID>FunctionOnlyReturningConstant:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$private fun isFaceFocused(): Boolean</ID>
     <ID>LargeClass:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest</ID>
     <ID>LargeClass:IDScanFragmentTest.kt$IDScanFragmentTest</ID>
     <ID>LongMethod:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( verificationPageState: Resource&lt;VerificationPage>?, onConfirmed: () -> Unit )</ID>
-    <ID>LongMethod:ConsentScreen.kt$@Composable private fun SuccessUI( verificationPage: VerificationPage, onMerchantViewCreated: (ImageView) -> Unit, onConsentAgreed: (Boolean) -> Unit, onConsentDeclined: (Boolean) -> Unit )</ID>
+    <ID>LongMethod:ConsentScreen.kt$@Composable private fun SuccessUI( merchantLogoUri: Uri, verificationPage: VerificationPage, onConsentAgreed: (Boolean) -> Unit, onConsentDeclined: (Boolean) -> Unit )</ID>
     <ID>LongMethod:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - not require selfie - submit`()</ID>
     <ID>LongMethod:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - require selfie - to selfie`()</ID>
     <ID>LongMethod:IDDetectorAnalyzer.kt$IDDetectorAnalyzer$override suspend fun analyze( data: AnalyzerInput, state: IdentityScanState ): AnalyzerOutput</ID>
@@ -34,7 +33,6 @@
     <ID>MagicNumber:RoundToMaxDecimals.kt$10</ID>
     <ID>MatchingDeclarationName:ComposeLoadingButton.kt$LoadingButtonState</ID>
     <ID>MaxLineLength:CameraPermissionDeniedFragment.kt$CameraPermissionDeniedFragment.Companion$CollectedDataParam.Type.DRIVINGLICENSE -> R.id.action_cameraPermissionDeniedFragment_to_driverLicenseUploadFragment</ID>
-    <ID>MaxLineLength:ConsentFragment.kt$ConsentFragment$if (requireSelfie) ClearDataParam.CONSENT_TO_DOC_SELECT_WITH_SELFIE else ClearDataParam.CONSENT_TO_DOC_SELECT</ID>
     <ID>MaxLineLength:CouldNotCaptureFragment.kt$CouldNotCaptureFragment.Companion$IdentityScanState.ScanType.DL_FRONT -> R.id.action_couldNotCaptureFragment_to_driverLicenseUploadFragment</ID>
     <ID>MaxLineLength:DefaultIdentityRepositoryTest.kt$DefaultIdentityRepositoryTest$fun</ID>
     <ID>MaxLineLength:DocSelectionFragment.kt$DocSelectionFragment$if (requireSelfie) ClearDataParam.DOC_SELECT_TO_UPLOAD_WITH_SELFIE else ClearDataParam.DOC_SELECT_TO_UPLOAD</ID>
@@ -77,7 +75,6 @@
     <ID>MaxLineLength:VerificationPageData.kt$VerificationPageData$* VerificationPageData contains the state of a verification, including what information needs to be collected to complete the verification flow.</ID>
     <ID>MaximumLineLength:com.stripe.android.identity.camera.IdentityScanFlow.kt:34</ID>
     <ID>MaximumLineLength:com.stripe.android.identity.navigation.CameraPermissionDeniedFragment.kt:70</ID>
-    <ID>MaximumLineLength:com.stripe.android.identity.navigation.ConsentFragment.kt:137</ID>
     <ID>MaximumLineLength:com.stripe.android.identity.navigation.CouldNotCaptureFragment.kt:71</ID>
     <ID>MaximumLineLength:com.stripe.android.identity.navigation.DocSelectionFragment.kt:79</ID>
     <ID>MaximumLineLength:com.stripe.android.identity.navigation.IdentityDocumentScanFragment.kt:182</ID>
@@ -95,14 +92,6 @@
     <ID>TooManyFunctions:NavigationUtils.kt$com.stripe.android.identity.utils.NavigationUtils.kt</ID>
     <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationConfirmButtonTag = "ConfirmButton"</ID>
     <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationTitleTag = "ConfirmationTitle"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val acceptButtonTag = "Accept"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val bodyTag = "Body"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val declineButtonTag = "Decline"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val dividerTag = "divider"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val loadingScreenTag = "Loading"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val privacyPolicyTag = "PrivacyPolicy"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val timeEstimateTag = "TimeEstimate"</ID>
-    <ID>TopLevelPropertyNaming:ConsentScreen.kt$internal const val titleTag = "Title"</ID>
     <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val docSelectionTitleTag = "Title"</ID>
     <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val singleSelectionTag = "SingleSelection"</ID>
     <ID>UnnecessaryAbstractClass:IdentityCommonModule.kt$IdentityCommonModule$IdentityCommonModule</ID>
