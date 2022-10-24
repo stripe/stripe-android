@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -325,7 +324,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         config = sheetViewModel.config,
         merchantName = sheetViewModel.merchantName,
         amount = sheetViewModel.amount.value,
-        injectorKey = sheetViewModel.injectorKey,
         newLpm = sheetViewModel.newPaymentSelection,
         isShowingLinkInlineSignup = showLinkInlineSignup
     )
@@ -373,7 +371,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             config: PaymentSheet.Configuration?,
             merchantName: String,
             amount: Amount? = null,
-            @InjectorKey injectorKey: String,
             newLpm: PaymentSelection.New?,
             isShowingLinkInlineSignup: Boolean = false
         ): FormFragmentArguments {
