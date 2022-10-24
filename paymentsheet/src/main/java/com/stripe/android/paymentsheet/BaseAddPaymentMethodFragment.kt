@@ -210,6 +210,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     enabled = enabled,
                     onFormFieldValuesChanged = onFormFieldValuesChanged,
                     showCheckboxFlow = showCheckboxFlow,
+                    injector = sheetViewModel.injector,
                     modifier = Modifier.padding(horizontal = horizontalPadding)
                 )
             }
@@ -389,7 +390,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 amount = amount,
                 billingDetails = config?.defaultBillingDetails,
                 shippingDetails = config?.shippingDetails,
-                injectorKey = injectorKey,
                 initialPaymentMethodCreateParams =
                 if (newLpm is PaymentSelection.New.LinkInline) {
                     newLpm.linkPaymentDetails.originalParams
