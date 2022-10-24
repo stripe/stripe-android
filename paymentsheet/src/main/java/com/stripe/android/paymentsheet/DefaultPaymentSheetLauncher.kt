@@ -7,11 +7,11 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.fragment.app.Fragment
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetLauncherComponent
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import org.jetbrains.annotations.TestOnly
 
 /**
@@ -102,7 +102,7 @@ internal class DefaultPaymentSheetLauncher(
         activityResultLauncher.launch(args)
     }
 
-    override fun inject(injectable: Injectable<*>) {
+    override fun inject(injectable: Injectable<*, *>) {
         when (injectable) {
             is PaymentSheetViewModel.Factory -> {
                 paymentSheetLauncherComponent.inject(injectable)

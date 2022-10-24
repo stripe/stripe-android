@@ -11,12 +11,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
-import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.injection.NonFallbackInjector
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
@@ -37,7 +37,6 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -314,7 +313,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
-        Injectable<Factory.FallbackInitializeParam> {
+        Injectable<Factory.FallbackInitializeParam, NonFallbackInjector> {
         internal data class FallbackInitializeParam(
             val application: Application,
             val productUsage: Set<String>
@@ -324,8 +323,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         lateinit var subComponentBuilderProvider:
             Provider<PaymentOptionsViewModelSubcomponent.Builder>
 
-        private lateinit var injector: NonFallbackInjector
-
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
             key: String,
@@ -334,24 +331,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
         ): T {
             val application = applicationSupplier()
             val starterArgs = starterArgsSupplier()
-            val logger = Logger.getInstance(BuildConfig.DEBUG)
 
-            WeakMapInjectorRegistry.retrieve(starterArgs.injectorKey)?.let {
-                it as? NonFallbackInjector
-            }?.let {
-                logger.info(
-                    "Injector available, " +
-                        "injecting dependencies into ${this::class.java.canonicalName}"
-                )
-                injector = it
-                it.inject(this)
-            } ?: run {
-                logger.info(
-                    "Injector unavailable, " +
-                        "initializing dependencies of ${this::class.java.canonicalName}"
-                )
-                fallbackInitialize(FallbackInitializeParam(application, starterArgs.productUsage))
-            }
+            val injector = injectWithFallback(
+                starterArgs.injectorKey,
+                FallbackInitializeParam(application, starterArgs.productUsage)
+            )
 
             val subcomponent = subComponentBuilderProvider.get()
                 .application(application)
@@ -363,14 +347,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
             return viewModel as T
         }
 
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+        override fun fallbackInitialize(arg: FallbackInitializeParam): NonFallbackInjector {
             val component = DaggerPaymentOptionsViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .productUsage(arg.productUsage)
                 .build()
-
-            injector = object : NonFallbackInjector {
-                override fun inject(injectable: Injectable<*>) {
+            component.inject(this)
+            return object : NonFallbackInjector {
+                override fun inject(injectable: Injectable<*, *>) {
                     when (injectable) {
                         is FormViewModel.Factory -> component.inject(injectable)
                         else -> {
@@ -379,7 +363,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     }
                 }
             }
-            component.inject(this)
         }
     }
 

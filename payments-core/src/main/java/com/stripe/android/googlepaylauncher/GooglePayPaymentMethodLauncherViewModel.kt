@@ -128,7 +128,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
-        Injectable<Factory.FallbackInjectionParams> {
+        Injectable<Factory.FallbackInjectionParams, Unit> {
 
         internal data class FallbackInjectionParams(
             val application: Application,

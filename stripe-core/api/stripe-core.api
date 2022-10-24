@@ -169,6 +169,10 @@ public final class com/stripe/android/core/injection/InjectorKt {
 public final class com/stripe/android/core/injection/NamedConstantsKt {
 }
 
+public final class com/stripe/android/core/injection/NonFallbackInjectable$DefaultImpls {
+	public static fun fallbackInitialize (Lcom/stripe/android/core/injection/NonFallbackInjectable;Lkotlin/Unit;)Ljava/lang/Void;
+}
+
 public final class com/stripe/android/core/model/CountryCode$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/core/model/CountryCode;

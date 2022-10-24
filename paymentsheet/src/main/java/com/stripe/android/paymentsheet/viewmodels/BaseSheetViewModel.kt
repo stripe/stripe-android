@@ -14,6 +14,7 @@ import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -44,7 +45,6 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first

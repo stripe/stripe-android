@@ -5,10 +5,9 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.BuildConfig
-import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.injection.NonFallbackInjector
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason.LoggedOut
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
@@ -21,7 +20,6 @@ import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletViewModel
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import javax.inject.Inject
 
 /**
@@ -82,7 +80,8 @@ internal class LinkActivityViewModel @Inject internal constructor(
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> LinkActivityContract.Args
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+    ) : ViewModelProvider.Factory,
+        Injectable<Factory.FallbackInitializeParam, NonFallbackInjector> {
         internal data class FallbackInitializeParam(
             val application: Application,
             val starterArgs: LinkActivityContract.Args,
@@ -95,43 +94,26 @@ internal class LinkActivityViewModel @Inject internal constructor(
         @Inject
         lateinit var viewModel: LinkActivityViewModel
 
-        private lateinit var injector: NonFallbackInjector
-
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val logger = Logger.getInstance(BuildConfig.DEBUG)
             val starterArgs = starterArgsSupplier()
 
-            starterArgs.injectionParams?.injectorKey?.let {
-                WeakMapInjectorRegistry.retrieve(it)
-            }?.let { it as? NonFallbackInjector }?.let {
-                logger.info(
-                    "Injector available, " +
-                        "injecting dependencies into ${this::class.java.canonicalName}"
+            val injector = injectWithFallback(
+                starterArgs.injectionParams?.injectorKey,
+                FallbackInitializeParam(
+                    applicationSupplier(),
+                    starterArgs,
+                    starterArgs.injectionParams?.enableLogging ?: false,
+                    starterArgs.injectionParams?.publishableKey
+                        ?: PaymentConfiguration.getInstance(applicationSupplier()).publishableKey,
+                    if (starterArgs.injectionParams != null) {
+                        starterArgs.injectionParams.stripeAccountId
+                    } else {
+                        PaymentConfiguration.getInstance(applicationSupplier()).stripeAccountId
+                    },
+                    starterArgs.injectionParams?.productUsage ?: emptySet()
                 )
-                injector = it
-                it.inject(this)
-            } ?: run {
-                logger.info(
-                    "Injector unavailable, " +
-                        "initializing dependencies of ${this::class.java.canonicalName}"
-                )
-                fallbackInitialize(
-                    FallbackInitializeParam(
-                        applicationSupplier(),
-                        starterArgs,
-                        starterArgs.injectionParams?.enableLogging ?: false,
-                        starterArgs.injectionParams?.publishableKey
-                            ?: PaymentConfiguration.getInstance(applicationSupplier()).publishableKey,
-                        if (starterArgs.injectionParams != null) {
-                            starterArgs.injectionParams.stripeAccountId
-                        } else {
-                            PaymentConfiguration.getInstance(applicationSupplier()).stripeAccountId
-                        },
-                        starterArgs.injectionParams?.productUsage ?: emptySet()
-                    )
-                )
-            }
+            )
 
             viewModel.injector = injector
             return viewModel as T
@@ -143,7 +125,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
          * responsible for injecting them not only in itself, but also in the other ViewModel
          * factories of the module.
          */
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+        override fun fallbackInitialize(arg: FallbackInitializeParam): NonFallbackInjector {
             val viewModelComponent = DaggerLinkViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .enableLogging(arg.enableLogging)
@@ -152,9 +134,9 @@ internal class LinkActivityViewModel @Inject internal constructor(
                 .productUsage(arg.productUsage)
                 .starterArgs(arg.starterArgs)
                 .build()
-
-            injector = object : NonFallbackInjector {
-                override fun inject(injectable: Injectable<*>) {
+            viewModelComponent.inject(this)
+            return object : NonFallbackInjector {
+                override fun inject(injectable: Injectable<*, *>) {
                     when (injectable) {
                         is Factory -> viewModelComponent.inject(injectable)
                         is SignUpViewModel.Factory -> viewModelComponent.inject(injectable)
@@ -168,8 +150,6 @@ internal class LinkActivityViewModel @Inject internal constructor(
                     }
                 }
             }
-
-            viewModelComponent.inject(this)
         }
     }
 }

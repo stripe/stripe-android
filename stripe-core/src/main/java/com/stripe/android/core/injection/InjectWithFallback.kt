@@ -9,7 +9,7 @@ import com.stripe.android.core.Logger
  * invoke [Injectable.fallbackInitialize] with [fallbackInitializeParam].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun <FallbackInitializeParam> Injectable<FallbackInitializeParam>.injectWithFallback(
+fun <FallbackInitializeParam> Injectable<FallbackInitializeParam, Unit>.injectWithFallback(
     @InjectorKey injectorKey: String?,
     fallbackInitializeParam: FallbackInitializeParam
 ) {
@@ -23,6 +23,37 @@ fun <FallbackInitializeParam> Injectable<FallbackInitializeParam>.injectWithFall
                 "injecting dependencies into ${this::class.java.canonicalName}"
         )
         it.inject(this)
+    } ?: run {
+        logger.info(
+            "Injector unavailable, " +
+                "initializing dependencies of ${this::class.java.canonicalName}"
+        )
+        fallbackInitialize(fallbackInitializeParam)
+    }
+}
+
+/**
+ * Try use an [InjectorKey] to retrieve an [Injector] and inject, if no [Injector] is found,
+ * invoke [Injectable.fallbackInitialize] with [fallbackInitializeParam].
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun <FallbackInitializeParam> Injectable<FallbackInitializeParam, NonFallbackInjector>.injectWithFallback(
+    @InjectorKey injectorKey: String?,
+    fallbackInitializeParam: FallbackInitializeParam
+): NonFallbackInjector {
+    val logger = Logger.getInstance(BuildConfig.DEBUG)
+
+    return injectorKey?.let {
+        WeakMapInjectorRegistry.retrieve(it)
+    }?.let {
+        it as? NonFallbackInjector
+    }?.let {
+        logger.info(
+            "Injector available, " +
+                "injecting dependencies into ${this::class.java.canonicalName}"
+        )
+        it.inject(this)
+        it
     } ?: run {
         logger.info(
             "Injector unavailable, " +

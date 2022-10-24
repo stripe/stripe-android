@@ -9,6 +9,7 @@ import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -33,7 +34,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -609,7 +609,7 @@ class WalletViewModelTest {
         whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
 
         val injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*>) {
+            override fun inject(injectable: Injectable<*, *>) {
                 val factory = injectable as WalletViewModel.Factory
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
             }

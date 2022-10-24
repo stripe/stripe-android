@@ -8,6 +8,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.account.LinkAccountManager
@@ -16,7 +17,6 @@ import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.utils.FakeAndroidKeyStore
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -100,7 +100,7 @@ class LinkActivityViewModelTest {
         val vmToBeReturned = mock<LinkActivityViewModel>()
 
         val injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*>) {
+            override fun inject(injectable: Injectable<*, *>) {
                 val factory = injectable as LinkActivityViewModel.Factory
                 factory.viewModel = vmToBeReturned
             }

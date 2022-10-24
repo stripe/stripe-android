@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.NonFallbackInjectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkScreen
@@ -18,8 +20,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.injection.NonFallbackInjectable
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

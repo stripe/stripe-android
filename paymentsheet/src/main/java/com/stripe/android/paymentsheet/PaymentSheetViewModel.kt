@@ -16,13 +16,13 @@ import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.injection.NonFallbackInjector
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
@@ -68,7 +68,6 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -469,7 +468,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         _showLinkVerificationDialog.value = true
                     }
                     AccountStatus.SignedOut,
-                    AccountStatus.Error -> {}
+                    AccountStatus.Error -> {
+                    }
                 }
                 activeLinkSession.value = accountStatus == AccountStatus.Verified
                 _isLinkEnabled.value = accountStatus != AccountStatus.Error
@@ -680,7 +680,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
-        Injectable<Factory.FallbackInitializeParam> {
+        Injectable<Factory.FallbackInitializeParam, NonFallbackInjector> {
         internal data class FallbackInitializeParam(
             val application: Application
         )
@@ -689,8 +689,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         lateinit var subComponentBuilderProvider:
             Provider<PaymentSheetViewModelSubcomponent.Builder>
 
-        private lateinit var injector: NonFallbackInjector
-
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
             key: String,
@@ -698,24 +696,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             savedStateHandle: SavedStateHandle
         ): T {
             val args = starterArgsSupplier()
-            val logger = Logger.getInstance(BuildConfig.DEBUG)
 
-            WeakMapInjectorRegistry.retrieve(args.injectorKey)?.let {
-                it as? NonFallbackInjector
-            }?.let {
-                logger.info(
-                    "Injector available, " +
-                        "injecting dependencies into ${this::class.java.canonicalName}"
-                )
-                injector = it
-                it.inject(this)
-            } ?: run {
-                logger.info(
-                    "Injector unavailable, " +
-                        "initializing dependencies of ${this::class.java.canonicalName}"
-                )
-                fallbackInitialize(FallbackInitializeParam(applicationSupplier()))
-            }
+            val injector =
+                injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
 
             val subcomponent = subComponentBuilderProvider.get()
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
@@ -726,15 +709,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             return viewModel as T
         }
 
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+        override fun fallbackInitialize(arg: FallbackInitializeParam): NonFallbackInjector {
             val component = DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(arg.application)
                 .injectorKey(DUMMY_INJECTOR_KEY)
                 .build()
-
-            injector = object : NonFallbackInjector {
-                override fun inject(injectable: Injectable<*>) {
+            component.inject(this)
+            return object : NonFallbackInjector {
+                override fun inject(injectable: Injectable<*, *>) {
                     when (injectable) {
                         is FormViewModel.Factory -> component.inject(injectable)
                         else -> {
@@ -743,8 +726,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     }
                 }
             }
-
-            component.inject(this)
         }
     }
 

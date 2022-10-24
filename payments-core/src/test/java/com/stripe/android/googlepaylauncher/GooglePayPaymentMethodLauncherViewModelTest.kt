@@ -155,7 +155,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             whenever(mockSubcomponent.viewModel).thenReturn(viewModel)
 
             val injector = object : Injector {
-                override fun inject(injectable: Injectable<*>) {
+                override fun inject(injectable: Injectable<*, *>) {
                     val factory = injectable as GooglePayPaymentMethodLauncherViewModel.Factory
                     factory.subComponentBuilder = mockBuilder
                 }

@@ -9,6 +9,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -24,7 +25,6 @@ import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
@@ -135,7 +135,7 @@ internal open class PaymentOptionsViewModelTestInjection {
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
         injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*>) {
+            override fun inject(injectable: Injectable<*, *>) {
                 (injectable as? PaymentOptionsViewModel.Factory)?.let {
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider
                 }
