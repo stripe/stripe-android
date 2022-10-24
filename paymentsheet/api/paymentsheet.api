@@ -1,24 +1,3 @@
-public abstract interface class com/stripe/android/elements/PaymentElementController {
-}
-
-public final class com/stripe/android/elements/PaymentElementController$Config {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/model/StripeIntent;Ljava/lang/String;Lcom/stripe/android/paymentsheet/model/PaymentSelection$New;)V
-	public final fun component1 ()Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
-	public final fun component2 ()Lcom/stripe/android/model/StripeIntent;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Lcom/stripe/android/paymentsheet/model/PaymentSelection$New;
-	public final fun copy (Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/model/StripeIntent;Ljava/lang/String;Lcom/stripe/android/paymentsheet/model/PaymentSelection$New;)Lcom/stripe/android/elements/PaymentElementController$Config;
-	public static synthetic fun copy$default (Lcom/stripe/android/elements/PaymentElementController$Config;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/model/StripeIntent;Ljava/lang/String;Lcom/stripe/android/paymentsheet/model/PaymentSelection$New;ILjava/lang/Object;)Lcom/stripe/android/elements/PaymentElementController$Config;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getInitialSelection ()Lcom/stripe/android/paymentsheet/model/PaymentSelection$New;
-	public final fun getMerchantName ()Ljava/lang/String;
-	public final fun getPaymentSheetConfig ()Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
-	public final fun getStripeIntent ()Lcom/stripe/android/model/StripeIntent;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/elements/PaymentElementKt {
 	public static final fun getPaymentElementHorizontalPadding ()F
 }

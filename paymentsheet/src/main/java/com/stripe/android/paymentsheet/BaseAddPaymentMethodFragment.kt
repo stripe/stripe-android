@@ -24,7 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.map
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.elements.PaymentElement
-import com.stripe.android.elements.PaymentElementController
+import com.stripe.android.elements.PaymentElementConfig
 import com.stripe.android.elements.PaymentElementHorizontalPadding
 import com.stripe.android.elements.PaymentElementViewModel
 import com.stripe.android.link.LinkPaymentLauncher
@@ -58,7 +58,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 val paymentElementViewModel: PaymentElementViewModel = viewModel(
                     factory = PaymentElementViewModel.Factory(
                         supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
-                        paymentElementConfig = PaymentElementController.Config(
+                        paymentElementConfig = PaymentElementConfig(
                             paymentSheetConfig = sheetViewModel.config,
                             stripeIntent = requireNotNull(sheetViewModel.stripeIntent.value),
                             merchantName = sheetViewModel.merchantName,

@@ -19,7 +19,7 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentElementViewModelTest {
-    private val config = PaymentElementController.Config(
+    private val config = PaymentElementConfig(
         paymentSheetConfig = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         merchantName = "Merchant",
@@ -138,7 +138,7 @@ internal class PaymentElementViewModelTest {
     }
 
     private fun createViewModel(
-        paymentElementConfig: PaymentElementController.Config = config,
+        paymentElementConfig: PaymentElementConfig = config,
         supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod> = listOf(
             LpmRepository.HardcodedCard,
             Bancontact,

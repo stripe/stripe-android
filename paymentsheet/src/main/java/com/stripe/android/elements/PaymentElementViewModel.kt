@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.stateIn
  */
 internal class PaymentElementViewModel internal constructor(
     val supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
-    private val paymentElementConfig: PaymentElementController.Config,
+    private val paymentElementConfig: PaymentElementConfig,
     context: Context,
     lifecycleScope: CoroutineScope
 ) : AndroidViewModel(context.applicationContext as Application) {
@@ -147,7 +147,7 @@ internal class PaymentElementViewModel internal constructor(
 
     internal class Factory(
         private val supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
-        private val paymentElementConfig: PaymentElementController.Config,
+        private val paymentElementConfig: PaymentElementConfig,
         private val context: Context,
         private val lifecycleScope: CoroutineScope
     ) : ViewModelProvider.Factory {
