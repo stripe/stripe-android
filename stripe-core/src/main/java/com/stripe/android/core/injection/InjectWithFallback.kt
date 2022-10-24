@@ -35,7 +35,7 @@ fun <FallbackInitializeParam> Injectable<FallbackInitializeParam, Unit>.injectWi
 /**
  * Try to use an [InjectorKey] to retrieve an [Injector] and inject, if no [Injector] is found,
  * invoke [Injectable.fallbackInitialize] with [fallbackInitializeParam].
- * Used by classes that are responsible for providing an [NonFallbackInjector] to other classes.
+ * Used by classes that are responsible for providing a [NonFallbackInjector] to other classes.
  *
  * @return The [NonFallbackInjector] used to inject the dependencies into this class.
  */
