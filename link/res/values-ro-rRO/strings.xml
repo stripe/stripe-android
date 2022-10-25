@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[Prin accesarea link-ului de asociere, sunteți de acord cu <terms>Termenii</terms> și <privacy>Politica de confidențialitate</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">Schimbați adresa de e-mail</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">Codul a fost trimis</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">Introduceți codul de verificare</string>
   <!-- Two factor authentication screen heading -->

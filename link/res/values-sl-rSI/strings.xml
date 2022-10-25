@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[Če se pridružite storitvi Link, se strinjate s <terms>pogoji</terms> in <privacy>pravilnikom o zasebnosti</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">Spremeni e-poštni naslov</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">Koda je bila poslana</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">Vnesite svojo potrditveno kodo</string>
   <!-- Two factor authentication screen heading -->

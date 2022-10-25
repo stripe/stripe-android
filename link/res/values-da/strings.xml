@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[Ved at tilmelde dig Link accepterer du <terms>vilkårene</terms> og <privacy>privatlivspolitikken</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">Skift e-mail</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">Kode sendt</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">Indtast din bekræftelseskode</string>
   <!-- Two factor authentication screen heading -->

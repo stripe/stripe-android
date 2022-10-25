@@ -8,7 +8,6 @@ import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.utils.IdentityIO
-import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import javax.inject.Inject
 
@@ -20,7 +19,6 @@ internal class IdentityFragmentFactory @Inject constructor(
     private val appSettingsOpenable: AppSettingsOpenable,
     private val verificationFlowFinishable: VerificationFlowFinishable,
     private val identityScanViewModelFactory: IdentityScanViewModel.IdentityScanViewModelFactory,
-    private val consentFragmentViewModelFactory: ConsentFragmentViewModel.ConsentFragmentViewModelFactory,
     internal val identityViewModelFactory: ViewModelProvider.Factory,
     private val fallbackUrlLauncher: FallbackUrlLauncher,
     private val identityIO: IdentityIO
@@ -62,7 +60,6 @@ internal class IdentityFragmentFactory @Inject constructor(
             )
             ConsentFragment::class.java.name -> ConsentFragment(
                 identityViewModelFactory,
-                consentFragmentViewModelFactory,
                 fallbackUrlLauncher
             )
             DocSelectionFragment::class.java.name -> DocSelectionFragment(

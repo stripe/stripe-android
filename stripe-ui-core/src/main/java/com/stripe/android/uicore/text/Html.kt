@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.text
 
 import android.content.Intent
 import android.graphics.Typeface
@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -41,7 +42,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.text.HtmlCompat
-import com.stripe.android.ui.core.paymentsColors
 
 private const val LINK_TAG = "URL"
 
@@ -61,10 +61,10 @@ data class EmbeddableImage(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Html(
     html: String,
-    imageGetter: Map<String, EmbeddableImage>,
-    color: Color,
-    style: TextStyle,
     modifier: Modifier = Modifier,
+    imageGetter: Map<String, EmbeddableImage> = emptyMap(),
+    color: Color = Color.Unspecified,
+    style: TextStyle = LocalTextStyle.current,
     enabled: Boolean = true,
     urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline),
     imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline
@@ -101,11 +101,11 @@ fun Html(
     val context = LocalContext.current
     ClickableText(
         annotatedText,
+        color = color,
+        style = style,
         modifier = modifier
             .semantics(mergeDescendants = true) {}, // makes it a separate accessible item,
         inlineContent = inlineContentMap,
-        color = color,
-        style = style,
         onClick = {
             if (enabled) {
                 // Position is the position of the tag in the string
@@ -212,10 +212,10 @@ fun annotatedStringResource(
 @Composable
 private fun ClickableText(
     text: AnnotatedString,
+    color: Color,
+    style: TextStyle,
     modifier: Modifier = Modifier,
     inlineContent: Map<String, InlineTextContent> = mapOf(),
-    color: Color = MaterialTheme.paymentsColors.subtitle,
-    style: TextStyle = MaterialTheme.typography.body2,
     softWrap: Boolean = true,
     overflow: TextOverflow = TextOverflow.Clip,
     maxLines: Int = Int.MAX_VALUE,

@@ -9,6 +9,7 @@ dependencies {
     implementation project(":link")
     implementation project(":payments-core")
     implementation project(':payments-ui-core')
+    implementation project(':stripe-ui-core')
     compileOnly project(':financial-connections')
 
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
