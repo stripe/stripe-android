@@ -130,21 +130,19 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 enabled = enabled,
                 showCheckbox = arguments.showCheckbox && !showLinkInlineSignup,
                 injector = sheetViewModel.injector,
-                modifier = Modifier.padding(top = 26.dp)
+                modifier = Modifier.padding(top = 20.dp)
             )
+
             if (showLinkInlineSignup) {
+                val modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = PaymentElementHorizontalPadding, vertical = 6.dp)
                 if (isLinkInlineActive) {
                     LinkInlineSignedIn(
                         linkPaymentLauncher = sheetViewModel.linkLauncher,
                         onLogout = {
                             isLinkInlineActive = false
                         },
-                        modifier = Modifier
-                            .padding(
-                                horizontal = PaymentElementHorizontalPadding,
-                                vertical = 6.dp
-                            )
-                            .fillMaxWidth()
+                        modifier = modifier
                     )
                 } else {
                     LinkInlineSignup(
@@ -153,12 +151,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                         onStateChanged = { _, inlineSignupViewState ->
                             linkSignupState = inlineSignupViewState
                         },
-                        modifier = Modifier
-                            .padding(
-                                horizontal = PaymentElementHorizontalPadding,
-                                vertical = 6.dp
-                            )
-                            .fillMaxWidth()
+                        modifier = modifier
                     )
                 }
             }

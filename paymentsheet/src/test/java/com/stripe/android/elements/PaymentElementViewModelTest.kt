@@ -27,7 +27,7 @@ internal class PaymentElementViewModelTest {
     )
 
     @Test
-    fun `FormArguments newLPM with customer requested save and Generic`() {
+    fun `when payment method does not support reuse then checkbox is not shown`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodTypes = listOf("card", "bancontact")
         )
@@ -58,30 +58,38 @@ internal class PaymentElementViewModelTest {
 
         assertThat(actualFromArguments.initialPaymentMethodCreateParams)
             .isEqualTo(paymentMethodCreateParams)
-        assertThat(actualFromArguments.showCheckbox)
-            .isFalse()
-        assertThat(actualFromArguments.showCheckboxControlledFields)
-            .isFalse()
+        assertThat(actualFromArguments.showCheckbox).isFalse()
+        assertThat(actualFromArguments.showCheckboxControlledFields).isFalse()
     }
 
     @Test
-    fun `getFormArguments newLPM WITH customer requested save and Card`() {
+    fun `when payment method supports reuse and customer requested reuse then showCheckboxControlledFields is true`() {
         val actualFromArguments = testCardFormArguments(
             PaymentSelection.CustomerRequestedSave.RequestReuse
         )
 
-        assertThat(actualFromArguments.showCheckboxControlledFields)
-            .isTrue()
+        assertThat(actualFromArguments.showCheckbox).isTrue()
+        assertThat(actualFromArguments.showCheckboxControlledFields).isTrue()
     }
 
     @Test
-    fun `getFormArguments newLPM WITH NO customer requested save and Card`() {
+    fun `when payment method supports reuse and customer requested no reuse then showCheckboxControlledFields is false`() {
+        val actualFromArguments = testCardFormArguments(
+            PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        )
+
+        assertThat(actualFromArguments.showCheckbox).isTrue()
+        assertThat(actualFromArguments.showCheckboxControlledFields).isFalse()
+    }
+
+    @Test
+    fun `when payment method supports reuse and customer did not requested reuse then showCheckboxControlledFields is false`() {
         val actualFromArguments = testCardFormArguments(
             PaymentSelection.CustomerRequestedSave.NoRequest
         )
 
-        assertThat(actualFromArguments.showCheckboxControlledFields)
-            .isFalse()
+        assertThat(actualFromArguments.showCheckbox).isTrue()
+        assertThat(actualFromArguments.showCheckboxControlledFields).isFalse()
     }
 
     private fun testCardFormArguments(customerReuse: PaymentSelection.CustomerRequestedSave): FormFragmentArguments {
