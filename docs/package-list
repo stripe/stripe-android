@@ -84,6 +84,7 @@ com.stripe.android.core.utils
 com.stripe.android.core.version
 module:stripe-ui-core
 com.stripe.android.uicore.image
+com.stripe.android.uicore.text
 module:stripecardscan
 com.stripe.android.stripecardscan.cardimageverification
 com.stripe.android.stripecardscan.cardimageverification.exception
