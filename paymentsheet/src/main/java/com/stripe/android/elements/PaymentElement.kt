@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
 import com.stripe.android.paymentsheet.databinding.FragmentAchBinding
@@ -17,7 +18,6 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.FlowPreview
 
 val PaymentElementHorizontalPadding = 20.dp
