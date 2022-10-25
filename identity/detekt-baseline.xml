@@ -15,7 +15,7 @@
     <ID>LongMethod:ConsentScreen.kt$@Composable private fun SuccessUI( merchantLogoUri: Uri, verificationPage: VerificationPage, onConsentAgreed: (Boolean) -> Unit, onConsentDeclined: (Boolean) -> Unit )</ID>
     <ID>LongMethod:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - not require selfie - submit`()</ID>
     <ID>LongMethod:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - require selfie - to selfie`()</ID>
-    <ID>LongMethod:ErrorScreen.kt$@Composable internal fun ErrorScreen( title: String, message1: String? = null, message2: String? = null, topButton: Pair&lt;String, () -> Unit>? = null, bottomButton: Pair&lt;String, () -> Unit>? = null, )</ID>
+    <ID>LongMethod:ErrorScreen.kt$@Composable internal fun ErrorScreen( title: String, modifier: Modifier = Modifier, message1: String? = null, message2: String? = null, topButton: Pair&lt;String, () -> Unit>? = null, bottomButton: Pair&lt;String, () -> Unit>? = null )</ID>
     <ID>LongMethod:IDDetectorAnalyzer.kt$IDDetectorAnalyzer$override suspend fun analyze( data: AnalyzerInput, state: IdentityScanState ): AnalyzerOutput</ID>
     <ID>LongMethod:IDScanFragmentTest.kt$IDScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - not require selfie - submit`()</ID>
     <ID>LongMethod:IDScanFragmentTest.kt$IDScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - require selfie - to selfie`()</ID>
