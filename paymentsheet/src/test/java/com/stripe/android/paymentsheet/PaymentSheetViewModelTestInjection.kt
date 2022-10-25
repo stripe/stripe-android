@@ -11,6 +11,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
@@ -144,7 +145,7 @@ internal open class PaymentSheetViewModelTestInjection {
         )
     ) {
         injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*>) {
+            override fun inject(injectable: Injectable<*, *>) {
                 (injectable as? PaymentSheetViewModel.Factory)?.let {
                     val mockBuilder = mock<PaymentSheetViewModelSubcomponent.Builder>()
                     val mockSubcomponent = mock<PaymentSheetViewModelSubcomponent>()

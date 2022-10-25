@@ -67,7 +67,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
         WeakMapInjectorRegistry.register(this, injectorKey)
     }
 
-    override fun inject(injectable: Injectable<*>) {
+    override fun inject(injectable: Injectable<*, *>) {
         when (injectable) {
             is PaymentLauncherViewModel.Factory -> {
                 paymentLauncherComponent.inject(injectable)

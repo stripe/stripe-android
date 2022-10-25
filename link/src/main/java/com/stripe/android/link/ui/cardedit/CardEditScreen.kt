@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.R
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -36,7 +37,6 @@ import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.ui.forms.Form
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
 import com.stripe.android.ui.core.elements.CheckboxElementUI
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 internal const val DEFAULT_PAYMENT_METHOD_CHECKBOX_TAG = "DEFAULT_PAYMENT_METHOD_CHECKBOX"
 

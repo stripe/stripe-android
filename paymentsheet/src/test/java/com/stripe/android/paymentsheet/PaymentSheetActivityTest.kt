@@ -15,6 +15,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
@@ -1132,7 +1133,7 @@ internal class PaymentSheetActivityTest {
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
         injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*>) {
+            override fun inject(injectable: Injectable<*, *>) {
                 (injectable as FormViewModel.Factory).subComponentBuilderProvider =
                     mockFormSubComponentBuilderProvider
             }

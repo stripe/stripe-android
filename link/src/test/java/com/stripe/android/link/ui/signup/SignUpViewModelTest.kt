@@ -6,6 +6,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
@@ -21,7 +22,6 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -338,7 +338,7 @@ class SignUpViewModelTest {
         whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
 
         val injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*>) {
+            override fun inject(injectable: Injectable<*, *>) {
                 val factory = injectable as SignUpViewModel.Factory
                 factory.signUpViewModel = vmToBeReturned
             }

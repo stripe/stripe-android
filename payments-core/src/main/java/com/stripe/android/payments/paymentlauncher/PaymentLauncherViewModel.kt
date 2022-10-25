@@ -275,7 +275,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
         private val applicationSupplier: () -> Application,
         owner: SavedStateRegistryOwner
     ) : AbstractSavedStateViewModelFactory(owner, null),
-        Injectable<Factory.FallbackInitializeParam> {
+        Injectable<Factory.FallbackInitializeParam, Unit> {
         internal data class FallbackInitializeParam(
             val application: Application,
             val enableLogging: Boolean,

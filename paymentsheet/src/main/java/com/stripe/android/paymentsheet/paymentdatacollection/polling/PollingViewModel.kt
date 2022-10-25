@@ -179,7 +179,7 @@ internal class PollingViewModel @Inject constructor(
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
-        Injectable<Factory.FallbackInitializeParam> {
+        Injectable<Factory.FallbackInitializeParam, Unit> {
         internal data class FallbackInitializeParam(
             val application: Application
         )

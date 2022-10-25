@@ -44,7 +44,7 @@ internal class IdentityActivity :
     CameraPermissionCheckingActivity(),
     VerificationFlowFinishable,
     FallbackUrlLauncher,
-    Injectable<Context> {
+    Injectable<Context, Unit> {
     @VisibleForTesting
     internal lateinit var navController: NavController
 

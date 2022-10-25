@@ -307,7 +307,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
     owner: SavedStateRegistryOwner,
     private val argsSupplier: () -> Stripe3ds2TransactionContract.Args
 ) : AbstractSavedStateViewModelFactory(owner, null),
-    Injectable<Stripe3ds2TransactionViewModelFactory.FallbackInitializeParam> {
+    Injectable<Stripe3ds2TransactionViewModelFactory.FallbackInitializeParam, Unit> {
 
     internal data class FallbackInitializeParam(
         val application: Application,

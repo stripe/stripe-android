@@ -42,7 +42,7 @@ console-reports:
 
 output-reports:
   active: true
-  exclude:
+#  exclude:
   # - 'TxtOutputReport'
   # - 'XmlOutputReport'
   # - 'HtmlOutputReport'

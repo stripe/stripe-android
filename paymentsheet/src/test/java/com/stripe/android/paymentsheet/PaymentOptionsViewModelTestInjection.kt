@@ -134,7 +134,7 @@ internal open class PaymentOptionsViewModelTestInjection {
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
         injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*>) {
+            override fun inject(injectable: Injectable<*, *>) {
                 (injectable as? PaymentOptionsViewModel.Factory)?.let {
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider
                 }

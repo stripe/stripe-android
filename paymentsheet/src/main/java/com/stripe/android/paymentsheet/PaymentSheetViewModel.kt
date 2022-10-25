@@ -22,6 +22,7 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -469,7 +470,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         _showLinkVerificationDialog.value = true
                     }
                     AccountStatus.SignedOut,
-                    AccountStatus.Error -> {}
+                    AccountStatus.Error -> {
+                    }
                 }
                 activeLinkSession.value = accountStatus == AccountStatus.Verified
                 _isLinkEnabled.value = accountStatus != AccountStatus.Error
@@ -680,7 +682,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
-        Injectable<Factory.FallbackInitializeParam> {
+        Injectable<Factory.FallbackInitializeParam, NonFallbackInjector> {
         internal data class FallbackInitializeParam(
             val application: Application
         )
@@ -700,22 +702,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val args = starterArgsSupplier()
             val logger = Logger.getInstance(BuildConfig.DEBUG)
 
-            WeakMapInjectorRegistry.retrieve(args.injectorKey)?.let {
-                it as? NonFallbackInjector
-            }?.let {
-                logger.info(
-                    "Injector available, " +
-                        "injecting dependencies into ${this::class.java.canonicalName}"
-                )
-                injector = it
-                it.inject(this)
-            } ?: run {
-                logger.info(
-                    "Injector unavailable, " +
-                        "initializing dependencies of ${this::class.java.canonicalName}"
-                )
-                fallbackInitialize(FallbackInitializeParam(applicationSupplier()))
-            }
+            val injector =
+                injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
 
             val subcomponent = subComponentBuilderProvider.get()
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
@@ -726,15 +714,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             return viewModel as T
         }
 
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+        override fun fallbackInitialize(arg: FallbackInitializeParam): NonFallbackInjector {
             val component = DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(arg.application)
                 .injectorKey(DUMMY_INJECTOR_KEY)
                 .build()
-
-            injector = object : NonFallbackInjector {
-                override fun inject(injectable: Injectable<*>) {
+            component.inject(this)
+            return object : NonFallbackInjector {
+                override fun inject(injectable: Injectable<*, *>) {
                     when (injectable) {
                         is FormViewModel.Factory -> component.inject(injectable)
                         else -> {
@@ -743,8 +731,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     }
                 }
             }
-
-            component.inject(this)
         }
     }
 

@@ -6,9 +6,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.paymentsheet.injection.DaggerAddressElementViewModelFactoryComponent
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import javax.inject.Inject
 
 internal class AddressElementViewModel @Inject internal constructor(
@@ -20,7 +20,7 @@ internal class AddressElementViewModel @Inject internal constructor(
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> AddressElementActivityContract.Args
-    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam, Unit> {
         internal data class FallbackInitializeParam(
             val application: Application,
             val starterArgs: AddressElementActivityContract.Args
@@ -75,7 +75,7 @@ internal class AddressElementViewModel @Inject internal constructor(
                 .build()
 
             injector = object : NonFallbackInjector {
-                override fun inject(injectable: Injectable<*>) {
+                override fun inject(injectable: Injectable<*, *>) {
                     when (injectable) {
                         is Factory -> viewModelComponent.inject(injectable)
                         is InputAddressViewModel.Factory -> viewModelComponent.inject(injectable)

@@ -13,6 +13,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -124,7 +125,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private val resourceRepositories = listOf(lpmResourceRepository, addressResourceRepository)
 
-    override fun inject(injectable: Injectable<*>) {
+    override fun inject(injectable: Injectable<*, *>) {
         when (injectable) {
             is PaymentOptionsViewModel.Factory -> {
                 flowControllerComponent.inject(injectable)
