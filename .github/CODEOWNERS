@@ -3,11 +3,8 @@
 
 # payment sdk
 /payments/ @brnunes-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
-/payments-core/ @brnunes-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
 /payments-model/ @brnunes-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
 /paymentsheet/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
-/example/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
-/paymentsheet-example/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
 /wechatpay/ @brnunes-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
 /stripe-test-e2e/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
 /link/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
@@ -25,7 +22,6 @@
 /financial-connections-example/ @carlosmuvi-stripe
 
 # shared modules
-/stripe-core/ @ccen-stripe
-/stripe-ui-core/ @carlosmuvi-stripe
-/payments-ui-core/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
 /camera-core/ @ccen-stripe @awush-stripe
+/payments-core/ @brnunes-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
+/payments-ui-core/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
