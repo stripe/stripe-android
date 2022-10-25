@@ -115,7 +115,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         }
 
         LaunchedEffect(selectedItem) {
-            sheetViewModel.updatePrimaryButtonUIState(null)
+            if (selectedItem.code != PaymentMethod.Type.USBankAccount.code) {
+                sheetViewModel.updatePrimaryButtonUIState(null)
+            }
         }
 
         var linkSignupState by remember { mutableStateOf<InlineSignupViewState?>(null) }
