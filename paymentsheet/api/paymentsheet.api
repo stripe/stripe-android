@@ -1173,10 +1173,6 @@ public final class com/stripe/android/paymentsheet/injection/DaggerFlowControlle
 	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/FlowControllerComponent$Builder;
 }
 
-public final class com/stripe/android/paymentsheet/injection/DaggerFormViewModelComponent {
-	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/FormViewModelComponent$Builder;
-}
-
 public final class com/stripe/android/paymentsheet/injection/DaggerPaymentOptionsViewModelFactoryComponent {
 	public static fun builder ()Lcom/stripe/android/paymentsheet/injection/PaymentOptionsViewModelFactoryComponent$Builder;
 }
