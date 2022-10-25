@@ -16,14 +16,13 @@ import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
@@ -690,8 +689,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         lateinit var subComponentBuilderProvider:
             Provider<PaymentSheetViewModelSubcomponent.Builder>
 
-        private lateinit var injector: NonFallbackInjector
-
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
             key: String,
@@ -699,7 +696,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             savedStateHandle: SavedStateHandle
         ): T {
             val args = starterArgsSupplier()
-            val logger = Logger.getInstance(BuildConfig.DEBUG)
 
             val injector =
                 injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
