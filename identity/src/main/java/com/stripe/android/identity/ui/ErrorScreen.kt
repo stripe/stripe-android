@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
@@ -30,14 +30,15 @@ import com.stripe.android.identity.R
 @Composable
 internal fun ErrorScreen(
     title: String,
+    modifier: Modifier = Modifier,
     message1: String? = null,
     message2: String? = null,
     topButton: Pair<String, () -> Unit>? = null,
-    bottomButton: Pair<String, () -> Unit>? = null,
+    bottomButton: Pair<String, () -> Unit>? = null
 ) {
     MdcTheme {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(
                     vertical = dimensionResource(id = R.dimen.page_vertical_margin),
@@ -54,8 +55,7 @@ internal fun ErrorScreen(
                 Image(
                     painter = painterResource(id = R.drawable.ic_exclamation),
                     modifier = Modifier
-                        .width(92.dp)
-                        .height(92.dp)
+                        .size(92.dp)
                         .align(Alignment.CenterHorizontally),
                     contentDescription = stringResource(id = R.string.description_exclamation)
                 )
