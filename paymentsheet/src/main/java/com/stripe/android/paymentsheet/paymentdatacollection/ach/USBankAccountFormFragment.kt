@@ -321,7 +321,7 @@ internal class USBankAccountFormFragment : Fragment() {
         Column(Modifier.fillMaxWidth()) {
             H6Text(
                 text = stringResource(R.string.stripe_paymentsheet_pay_with_bank_title),
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp)
             )
             Box(
                 modifier = Modifier

@@ -69,9 +69,9 @@ internal fun PaymentElement(
                 paymentMethods = supportedPaymentMethods,
                 onItemSelectedListener = onItemSelectedListener
             )
-        }
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+        }
 
         if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
             Column(modifier = Modifier.padding(horizontal = PaymentElementHorizontalPadding)) {

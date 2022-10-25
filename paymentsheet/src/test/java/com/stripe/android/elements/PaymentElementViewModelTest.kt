@@ -63,7 +63,7 @@ internal class PaymentElementViewModelTest {
     }
 
     @Test
-    fun `when payment method supports reuse and customer requested reuse then showCheckboxControlledFields is true`() {
+    fun `when customer requested reuse then showCheckboxControlledFields is true`() {
         val actualFromArguments = testCardFormArguments(
             PaymentSelection.CustomerRequestedSave.RequestReuse
         )
@@ -73,7 +73,7 @@ internal class PaymentElementViewModelTest {
     }
 
     @Test
-    fun `when payment method supports reuse and customer requested no reuse then showCheckboxControlledFields is false`() {
+    fun `when customer requested no reuse then showCheckboxControlledFields is false`() {
         val actualFromArguments = testCardFormArguments(
             PaymentSelection.CustomerRequestedSave.RequestNoReuse
         )
@@ -83,7 +83,7 @@ internal class PaymentElementViewModelTest {
     }
 
     @Test
-    fun `when payment method supports reuse and customer did not requested reuse then showCheckboxControlledFields is false`() {
+    fun `when customer did not requested reuse then showCheckboxControlledFields is false`() {
         val actualFromArguments = testCardFormArguments(
             PaymentSelection.CustomerRequestedSave.NoRequest
         )
@@ -92,7 +92,9 @@ internal class PaymentElementViewModelTest {
         assertThat(actualFromArguments.showCheckboxControlledFields).isFalse()
     }
 
-    private fun testCardFormArguments(customerReuse: PaymentSelection.CustomerRequestedSave): FormFragmentArguments {
+    private fun testCardFormArguments(
+        customerReuse: PaymentSelection.CustomerRequestedSave
+    ): FormFragmentArguments {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodTypes = listOf("card", "bancontact")
         )

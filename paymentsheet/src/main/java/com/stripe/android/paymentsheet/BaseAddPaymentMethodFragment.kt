@@ -121,7 +121,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         var linkSignupState by remember { mutableStateOf<InlineSignupViewState?>(null) }
 
         LaunchedEffect(paymentSelection, linkSignupState, isLinkInlineActive) {
-            updateButtonState(paymentSelection, linkSignupState, isLinkInlineActive, linkConfig)
+            if (selectedItem.code == PaymentMethod.Type.Link.code) {
+                updateButtonState(paymentSelection, linkSignupState, isLinkInlineActive, linkConfig)
+            }
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {
