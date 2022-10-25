@@ -2,6 +2,22 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+## 20.15.2 - 2022-10-25
+
+This release fixes a few bugs in `PaymentSession`, `PaymentSheet` and `CardScan`.
+
+### Payments
+
+* [FIXED][5722](https://github.com/stripe/stripe-android/pull/5722) Fix saving and restoring Google Pay selection in `PaymentSession`.
+
+### PaymentSheet
+
+* [FIXED][5738](https://github.com/stripe/stripe-android/pull/5738) Fix crash on Payment Sheet when integrating with Compose.
+
+### CardScan
+
+* [FIXED][5730](https://github.com/stripe/stripe-android/pull/5730) Fix crash during initialization.
+
 ## 20.15.1 - 2022-10-17
 
 This release fixes some bugs in `ShippingInfoWidget`, `PaymentSheet`, and when the app is backgrounded during confirmation on Android 10 and 11.
