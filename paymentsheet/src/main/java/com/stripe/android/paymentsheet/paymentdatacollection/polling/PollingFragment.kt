@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
@@ -50,7 +52,11 @@ internal class PollingFragment : BottomSheetDialogFragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 PaymentsTheme {
-                    PollingScreen(viewModel)
+                    Surface(
+                        color = MaterialTheme.colors.surface,
+                    ) {
+                        PollingScreen(viewModel)
+                    }
                 }
             }
         }
@@ -102,7 +108,6 @@ internal class PollingFragment : BottomSheetDialogFragment() {
             requestKey = KEY_FRAGMENT_RESULT,
             result = paymentFlowResult.toBundle(),
         )
-        dismiss()
     }
 
     companion object {

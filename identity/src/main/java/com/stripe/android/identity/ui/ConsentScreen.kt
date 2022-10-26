@@ -1,7 +1,6 @@
 package com.stripe.android.identity.ui
 
-import android.widget.ImageView
-import android.widget.TextView
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,15 +24,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.Resource
@@ -40,7 +42,11 @@ import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isUnsupportedClient
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
-import com.stripe.android.identity.utils.setHtmlString
+import com.stripe.android.uicore.image.StripeImage
+import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.getDrawableFromUri
+import com.stripe.android.uicore.image.rememberDrawablePainter
+import com.stripe.android.uicore.text.Html
 
 internal const val TITLE_TAG = "Title"
 internal const val TIME_ESTIMATE_TAG = "TimeEstimate"
@@ -54,8 +60,8 @@ internal const val SCROLLABLE_COLUMN_TAG = "ScrollableColumn"
 
 @Composable
 internal fun ConsentScreen(
+    merchantLogoUri: Uri,
     verificationState: Resource<VerificationPage>,
-    onMerchantViewCreated: (ImageView) -> Unit,
     onSuccess: (VerificationPage) -> Unit,
     onFallbackUrl: (String) -> Unit,
     onError: (Throwable) -> Unit,
@@ -75,8 +81,8 @@ internal fun ConsentScreen(
                     }
                 } else {
                     SuccessUI(
+                        merchantLogoUri,
                         verificationPage,
-                        onMerchantViewCreated,
                         onConsentAgreed,
                         onConsentDeclined
                     )
@@ -101,8 +107,8 @@ internal fun ConsentScreen(
 
 @Composable
 private fun SuccessUI(
+    merchantLogoUri: Uri,
     verificationPage: VerificationPage,
-    onMerchantViewCreated: (ImageView) -> Unit,
     onConsentAgreed: (Boolean) -> Unit,
     onConsentDeclined: (Boolean) -> Unit
 ) {
@@ -132,14 +138,32 @@ private fun SuccessUI(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                AndroidView(
-                    modifier = Modifier
-                        .width(32.dp)
-                        .height(32.dp),
-                    factory = { ImageView(it) },
-                    update = onMerchantViewCreated
-                )
-
+                if (merchantLogoUri.isRemote()) {
+                    val localContext = LocalContext.current
+                    val imageLoader = remember(merchantLogoUri) {
+                        StripeImageLoader(localContext)
+                    }
+                    StripeImage(
+                        url = merchantLogoUri.toString(),
+                        imageLoader = imageLoader,
+                        contentDescription = stringResource(id = R.string.description_merchant_logo),
+                        modifier = Modifier
+                            .width(32.dp)
+                            .height(32.dp)
+                    )
+                } else {
+                    Image(
+                        painter = rememberDrawablePainter(
+                            LocalContext.current.getDrawableFromUri(
+                                merchantLogoUri
+                            )
+                        ),
+                        modifier = Modifier
+                            .width(32.dp)
+                            .height(32.dp),
+                        contentDescription = stringResource(id = R.string.description_merchant_logo)
+                    )
+                }
                 Image(
                     painter = painterResource(id = R.drawable.plus_icon),
                     modifier = Modifier
@@ -180,32 +204,36 @@ private fun SuccessUI(
                         painter = painterResource(id = R.drawable.time_estimate_icon),
                         contentDescription = stringResource(id = R.string.description_time_estimate)
                     )
-                    AndroidView(
+                    Html(
+                        html = timeEstimateString,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 6.dp)
                             .semantics {
                                 testTag = TIME_ESTIMATE_TAG
                             },
-                        factory = { TextView(it) },
-                        update = {
-                            it.text = timeEstimateString
-                        }
+                        color = MaterialTheme.colors.onBackground.copy(alpha = 0.6f),
+                        urlSpanStyle = SpanStyle(
+                            textDecoration = TextDecoration.Underline,
+                            color = MaterialTheme.colors.secondary
+                        )
                     )
                 }
             }
             consentPage.privacyPolicy?.let { privacyPolicyString ->
-                AndroidView(
+                Html(
+                    html = privacyPolicyString,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
                         .semantics {
                             testTag = PRIVACY_POLICY_TAG
                         },
-                    factory = { TextView(it) },
-                    update = {
-                        it.setHtmlString(privacyPolicyString)
-                    }
+                    color = MaterialTheme.colors.onBackground.copy(alpha = 0.6f),
+                    urlSpanStyle = SpanStyle(
+                        textDecoration = TextDecoration.Underline,
+                        color = MaterialTheme.colors.secondary
+                    )
                 )
             }
             if (consentPage.timeEstimate != null && consentPage.privacyPolicy != null) {
@@ -219,17 +247,17 @@ private fun SuccessUI(
                 )
             }
 
-            // TODO(ccen-stripe): replace with [Html]
-            AndroidView(
+            Html(
+                html = consentPage.body,
                 modifier = Modifier
                     .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
                     .semantics {
                         testTag = BODY_TAG
                     },
-                factory = { TextView(it) },
-                update = {
-                    it.setHtmlString(consentPage.body)
-                }
+                urlSpanStyle = SpanStyle(
+                    textDecoration = TextDecoration.Underline,
+                    color = MaterialTheme.colors.secondary
+                )
             )
         }
 
@@ -292,3 +320,5 @@ private fun LoadingUI() {
         Text(text = stringResource(id = R.string.loading), fontSize = 24.sp)
     }
 }
+
+private fun Uri.isRemote() = scheme == "http" || scheme == "https"

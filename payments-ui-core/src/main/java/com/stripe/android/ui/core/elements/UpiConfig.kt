@@ -9,6 +9,8 @@ import com.stripe.android.ui.core.R
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+private const val UPI_MAX_LENGTH = 30
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class UpiConfig : TextFieldConfig {
 
@@ -28,7 +30,7 @@ class UpiConfig : TextFieldConfig {
     override val loading: StateFlow<Boolean> = MutableStateFlow(value = false)
 
     override fun determineState(input: String): TextFieldState {
-        val isValid = upiPattern.matches(input)
+        val isValid = upiPattern.matches(input) && input.length <= UPI_MAX_LENGTH
 
         return if (input.isEmpty()) {
             TextFieldStateConstants.Error.Blank
