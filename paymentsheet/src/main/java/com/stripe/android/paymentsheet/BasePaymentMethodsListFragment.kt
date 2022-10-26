@@ -100,6 +100,9 @@ internal abstract class BasePaymentMethodsListFragment(
 
     private fun toggleEditMenuItem(isVisible: Boolean) {
         editMenuItem?.isVisible = isVisible
+        if (!isVisible) {
+            sheetViewModel.setEditing(false)
+        }
     }
 
     private fun setEditMenuItemText(isEditing: Boolean) {

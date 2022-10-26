@@ -7,7 +7,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
@@ -26,7 +25,8 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.TestUtils.idleLooper
-import org.junit.After
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,17 +34,12 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
-import org.robolectric.annotation.Config
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection() {
     @InjectorKey
     private val injectorKey: String = "PaymentSheetListFragmentTest"
-
-    @After
-    override fun after() {
-        super.after()
-    }
 
     @Before
     fun setup() {
@@ -80,26 +75,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     }
 
     @Test
-    fun `recovers edit state when shown`() {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
-        createScenario(
-            fragmentConfig = FRAGMENT_CONFIG.copy(
-                isGooglePayReady = true,
-                savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
-            ),
-            initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions(paymentMethods = listOf(paymentMethod))
-        }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
-            assertThat(fragment.isEditing).isFalse()
-            fragment.isEditing = true
-        }.recreate().onFragment {
-            assertThat(it.isEditing).isTrue()
-        }
-    }
-
-    @Test
     fun `When last item is deleted then edit menu item is hidden`() {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
@@ -108,106 +83,8 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                 savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
             )
         ).onFragment { fragment ->
-            fragment.isEditing = true
-            fragment.adapter.items = fragment.adapter.items.dropLast(1)
-            fragment.deletePaymentMethod(PaymentOptionsItem.SavedPaymentMethod(paymentMethod))
-            assertThat(fragment.isEditing).isFalse()
-        }
-    }
-
-    @Test
-    fun `sets up adapter`() {
-        createScenario(
-            initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions(
-                isGooglePayReady = false,
-                isLinkEnabled = false,
-            )
-        }.moveToState(Lifecycle.State.RESUMED).onFragment {
-            idleLooper()
-
-            val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
-            assertThat(adapter.itemCount)
-                .isEqualTo(3)
-        }
-    }
-
-    @Test
-    @Config(qualifiers = "w320dp")
-    fun `when screen is 320dp wide, adapter should show 2 and a half items with 114dp width`() {
-        createScenario(
-            initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions()
-        }.moveToState(Lifecycle.State.RESUMED).onFragment {
-            val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
-            assertThat(item!!.measuredWidth).isEqualTo(114)
-        }
-    }
-
-    @Test
-    @Config(qualifiers = "w481dp")
-    fun `when screen is 481dp wide, adapter should show 3 and a half items with 128dp width`() {
-        createScenario(
-            initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions()
-        }.moveToState(Lifecycle.State.RESUMED).onFragment {
-            val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
-            assertThat(item!!.measuredWidth).isEqualTo(128)
-        }
-    }
-
-    @Test
-    @Config(qualifiers = "w482dp")
-    fun `when screen is 482dp wide, adapter should show 4 items with 112dp width`() {
-        createScenario(
-            initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions()
-        }.moveToState(Lifecycle.State.RESUMED).onFragment {
-            val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
-            assertThat(item!!.measuredWidth).isEqualTo(112)
-        }
-    }
-
-    @Test
-    fun `updates selection on click`() {
-        val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val selectedItem = PaymentOptionsItem.SavedPaymentMethod(savedPaymentMethod)
-
-        createScenario().onFragment {
-            val activityViewModel = activityViewModel(it)
-            idleLooper()
-
-            val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
-            adapter.paymentOptionSelected(selectedItem)
-            idleLooper()
-
-            assertThat(activityViewModel.selection.value)
-                .isEqualTo(PaymentSelection.Saved(savedPaymentMethod))
-        }
-    }
-
-    @Test
-    fun `posts transition when add card clicked`() {
-        createScenario().onFragment {
-            val activityViewModel = activityViewModel(it)
-            assertThat(activityViewModel.transition.value?.peekContent()).isNull()
-
-            idleLooper()
-
-            val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
-            adapter.addCardClickListener()
-            idleLooper()
-
-            assertThat(activityViewModel.transition.value?.peekContent())
-                .isEqualTo(
-                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                        FragmentConfigFixtures.DEFAULT
-                    )
-                )
+            fragment.sheetViewModel._paymentMethods.postValue(emptyList())
+            assertThat(fragment.sheetViewModel.isEditing.value).isFalse()
         }
     }
 
@@ -256,16 +133,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     }
 
     @Test
-    fun `when config has saved payment methods then show options menu`() {
-        createScenario(
-            initialState = Lifecycle.State.INITIALIZED,
-            paymentMethods = PAYMENT_METHODS
-        ).moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
-            assertThat(fragment.hasOptionsMenu()).isTrue()
-        }
-    }
-
-    @Test
     fun `when config does not have saved payment methods then show no options menu`() {
         createScenario(
             initialState = Lifecycle.State.INITIALIZED,
@@ -277,8 +144,8 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         }
     }
 
-    private fun recyclerView(it: PaymentSheetListFragment) =
-        it.requireView().findViewById<RecyclerView>(R.id.recycler)
+//    private fun recyclerView(it: PaymentSheetListFragment) =
+//        it.requireView().findViewById<RecyclerView>(R.id.recycler)
 
     private fun activityViewModel(
         fragment: PaymentSheetListFragment
@@ -288,6 +155,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         }.value
     }
 
+    @OptIn(FlowPreview::class)
     private fun createScenario(
         fragmentConfig: FragmentConfig? = FRAGMENT_CONFIG,
         starterArgs: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
