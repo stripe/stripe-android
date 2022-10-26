@@ -37,17 +37,18 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
 
             val eventParams: Map<out String, Any?> = event.params ?: emptyMap()
             val commonParams = commonParams()
-            logger.debug(
-                "tracked event: ${event.name}" +
-                    "\nparams: $eventParams" +
-                    "\ncommonParams: $commonParams"
-            )
-            val eventRequest = requestFactory.createRequest(
+            val request = requestFactory.createRequest(
                 eventName = event.name,
                 additionalParams = eventParams + commonParams,
                 includeSDKParams = true
             )
-            // stripeNetworkClient.executeRequest(eventRequest)
+            stripeNetworkClient.executeRequest(
+                request
+            )
+            logger.debug(
+                "tracked event: ${event.name}" +
+                    "\nparams: ${request.params}"
+            )
         }.onFailure {
             logger.error("Exception while making analytics request", it)
         }
@@ -56,6 +57,7 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
     private suspend fun commonParams(): Map<String, String?> {
         val manifest = getManifest()
         return mapOf(
+            "platform" to "android",
             "las_client_secret" to configuration.financialConnectionsSessionClientSecret,
 //            "las_creator_client_secret": this.linkAccountSessionCreatorClientSecret,
 //        "las_creator_type": this.linkAccountSessionCreatorType,
@@ -76,8 +78,8 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
 
     // TODO@carlosmuvi temporary configuration
     internal companion object {
-        const val CLIENT_ID = "mobile-financialconnections-sdk"
-        const val ORIGIN = "stripe-financialconnections-android"
+        const val CLIENT_ID = "mobile-clients-linked-accounts"
+        const val ORIGIN = "stripe-linked-accounts-android"
         const val ID = "id"
     }
 }
