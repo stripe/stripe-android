@@ -15,7 +15,7 @@ import com.stripe.android.core.Logger
 fun <FallbackInitializeParam> Injectable<FallbackInitializeParam>.injectWithFallback(
     @InjectorKey injectorKey: String?,
     fallbackInitializeParam: FallbackInitializeParam
-) : Injector? {
+): Injector? {
     val logger = Logger.getInstance(BuildConfig.DEBUG)
 
     return injectorKey?.let {

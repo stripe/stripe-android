@@ -120,7 +120,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
          * responsible for injecting them not only in itself, but also in the other ViewModel
          * factories of the module.
          */
-        override fun fallbackInitialize(arg: FallbackInitializeParam) : Injector {
+        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector {
             val viewModelComponent = DaggerLinkViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .enableLogging(arg.enableLogging)
