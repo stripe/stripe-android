@@ -22,8 +22,6 @@ import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.DRI
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.ID_CARD_KEY
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.PASSPORT_KEY
 import com.stripe.android.identity.networking.Resource
-import com.stripe.android.identity.networking.models.ClearDataParam.Companion.DOC_SELECT_TO_UPLOAD
-import com.stripe.android.identity.networking.models.ClearDataParam.Companion.DOC_SELECT_TO_UPLOAD_WITH_SELFIE
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -122,7 +120,7 @@ internal class DocSelectionFragmentTest {
                 whenever(verificationPage.documentSelect).thenReturn(
                     DOC_SELECT_SINGLE_CHOICE_DL
                 )
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
                 // mock file is available
@@ -143,8 +141,7 @@ internal class DocSelectionFragmentTest {
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
                         CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
-                    ),
-                    eq(DOC_SELECT_TO_UPLOAD)
+                    )
                 )
 
                 verify(mockCameraPermissionEnsureable).ensureCameraPermission(
@@ -173,7 +170,7 @@ internal class DocSelectionFragmentTest {
                     DOC_SELECT_SINGLE_CHOICE_DL
                 )
                 whenever(verificationPage.selfieCapture).thenReturn(mock())
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
                 // mock file is available
@@ -194,8 +191,7 @@ internal class DocSelectionFragmentTest {
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
                         CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
-                    ),
-                    eq(DOC_SELECT_TO_UPLOAD_WITH_SELFIE)
+                    )
                 )
 
                 verify(mockCameraPermissionEnsureable).ensureCameraPermission(
@@ -230,7 +226,7 @@ internal class DocSelectionFragmentTest {
                 whenever(verificationPage.documentCapture).thenReturn(
                     mockDocumentCapture
                 )
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
                 // mock file is not available
@@ -248,8 +244,7 @@ internal class DocSelectionFragmentTest {
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
                         CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
-                    ),
-                    eq(DOC_SELECT_TO_UPLOAD)
+                    )
                 )
 
                 verify(mockCameraPermissionEnsureable).ensureCameraPermission(
@@ -293,7 +288,7 @@ internal class DocSelectionFragmentTest {
                 whenever(verificationPage.documentCapture).thenReturn(
                     mockDocumentCapture
                 )
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
                 // mock file is not available
@@ -311,8 +306,7 @@ internal class DocSelectionFragmentTest {
                 verify(mockIdentityViewModel).postVerificationPageData(
                     eq(
                         CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
-                    ),
-                    eq(DOC_SELECT_TO_UPLOAD_WITH_SELFIE)
+                    )
                 )
 
                 verify(mockCameraPermissionEnsureable).ensureCameraPermission(
@@ -355,7 +349,7 @@ internal class DocSelectionFragmentTest {
                 mockDocumentCapture
             )
             runBlocking {
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
             }
@@ -407,7 +401,7 @@ internal class DocSelectionFragmentTest {
                 mockDocumentCapture
             )
             runBlocking {
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
             }
@@ -464,7 +458,7 @@ internal class DocSelectionFragmentTest {
                 mockDocumentCapture
             )
             runBlocking {
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     MISSING_BACK_VERIFICATION_PAGE_DATA
                 )
             }

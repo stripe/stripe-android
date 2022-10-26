@@ -24,7 +24,6 @@ import com.stripe.android.camera.framework.image.mirrorHorizontally
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
 import com.stripe.android.identity.databinding.SelfieScanFragmentBinding
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
@@ -228,8 +227,7 @@ internal class SelfieFragment(
                                         bestFaceScore = faceDetectorTransitioner.bestFaceScore,
                                         numFrames = faceDetectorTransitioner.numFrames
                                     ),
-                                    fromFragment = fragmentId,
-                                    clearDataParam = ClearDataParam.SELFIE_TO_CONFIRM
+                                    fromFragment = fragmentId
                                 )
                             }.onFailure { throwable ->
                                 Log.e(

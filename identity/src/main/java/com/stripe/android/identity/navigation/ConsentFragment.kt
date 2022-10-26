@@ -18,7 +18,6 @@ import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.networking.Resource
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.ui.ConsentScreen
@@ -92,21 +91,19 @@ internal class ConsentFragment(
         navigateToErrorFragmentWithFailedReason(throwable)
     }
 
-    private fun agreeConsentAndPost(requireSelfie: Boolean) {
+    private fun agreeConsentAndPost() {
         postVerificationPageDataAndNavigate(
             CollectedDataParam(
                 biometricConsent = true
-            ),
-            requireSelfie
+            )
         )
     }
 
-    private fun declineConsentAndPost(requireSelfie: Boolean) {
+    private fun declineConsentAndPost() {
         postVerificationPageDataAndNavigate(
             CollectedDataParam(
                 false
-            ),
-            requireSelfie
+            )
         )
     }
 
@@ -114,18 +111,12 @@ internal class ConsentFragment(
      * Post VerificationPageData with the type and navigate base on its result.
      */
     private fun postVerificationPageDataAndNavigate(
-        collectedDataParam: CollectedDataParam,
-        requireSelfie: Boolean
+        collectedDataParam: CollectedDataParam
     ) {
         lifecycleScope.launch {
             postVerificationPageDataAndMaybeSubmit(
                 identityViewModel,
                 collectedDataParam,
-                if (requireSelfie) {
-                    ClearDataParam.CONSENT_TO_DOC_SELECT_WITH_SELFIE
-                } else {
-                    ClearDataParam.CONSENT_TO_DOC_SELECT
-                },
                 fromFragment = R.id.consentFragment,
                 notSubmitBlock = {
                     findNavController().navigate(R.id.action_consentFragment_to_docSelectionFragment)

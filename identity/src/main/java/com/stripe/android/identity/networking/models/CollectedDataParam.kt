@@ -169,5 +169,25 @@ internal data class CollectedDataParam(
                     this.copy(face = null)
             }
         }
+
+        fun CollectedDataParam.collectedRequirements(): Set<Requirement> {
+            val requirements = mutableSetOf<Requirement>()
+            this.biometricConsent?.let {
+                requirements.add(Requirement.BIOMETRICCONSENT)
+            }
+            this.idDocumentType?.let {
+                requirements.add(Requirement.IDDOCUMENTTYPE)
+            }
+            this.idDocumentFront?.let {
+                requirements.add(Requirement.IDDOCUMENTFRONT)
+            }
+            this.idDocumentBack?.let {
+                requirements.add(Requirement.IDDOCUMENTBACK)
+            }
+            this.face?.let {
+                requirements.add(Requirement.FACE)
+            }
+            return requirements
+        }
     }
 }

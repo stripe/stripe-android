@@ -23,7 +23,6 @@ import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithRequirementError
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -54,14 +53,12 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
     identityViewModel: IdentityViewModel,
     collectedDataParam: CollectedDataParam,
-    clearDataParam: ClearDataParam,
     @IdRes fromFragment: Int,
     notSubmitBlock: ((verificationPageData: VerificationPageData) -> Unit)? = null
 ) {
     postVerificationPageData(
         identityViewModel,
         collectedDataParam,
-        clearDataParam,
         fromFragment
     ) { postedVerificationPageData ->
         notSubmitBlock?.invoke(postedVerificationPageData) ?: run {
@@ -135,7 +132,6 @@ internal suspend fun Fragment.submitVerificationPageDataAndNavigate(
 internal suspend fun Fragment.postVerificationPageData(
     identityViewModel: IdentityViewModel,
     collectedDataParam: CollectedDataParam,
-    clearDataParam: ClearDataParam,
     @IdRes fromFragment: Int,
     onCorrectResponse: suspend ((verificationPageDataWithNoError: VerificationPageData) -> Unit)
 ) {
@@ -143,7 +139,7 @@ internal suspend fun Fragment.postVerificationPageData(
         fromFragment.fragmentIdToScreenName()
     )
     runCatching {
-        identityViewModel.postVerificationPageData(collectedDataParam, clearDataParam)
+        identityViewModel.postVerificationPageData(collectedDataParam)
     }.fold(
         onSuccess = { postedVerificationPageData ->
             if (postedVerificationPageData.hasError()) {

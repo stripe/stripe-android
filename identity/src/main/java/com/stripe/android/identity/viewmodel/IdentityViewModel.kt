@@ -41,6 +41,7 @@ import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.clearData
+import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.collectedRequirements
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.mergeWith
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.Requirement
@@ -142,7 +143,7 @@ internal class IdentityViewModel constructor(
      * Keep track of data collected so far.
      */
     private val _collectedData = MutableStateFlow(CollectedDataParam())
-    val collectedData: StateFlow<CollectedDataParam> = _collectedData
+    private val collectedData: StateFlow<CollectedDataParam> = _collectedData
 
     data class PageAndModelFiles(
         val page: VerificationPage,
@@ -691,13 +692,13 @@ internal class IdentityViewModel constructor(
                             "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: " +
                                 "${verificationArgs.ephemeralKeySecret}"
                             ).let { msg ->
-                            _verificationPage.postValue(
-                                Resource.error(
-                                    msg,
-                                    IllegalStateException(msg, it)
+                                _verificationPage.postValue(
+                                    Resource.error(
+                                        msg,
+                                        IllegalStateException(msg, it)
+                                    )
                                 )
-                            )
-                        }
+                            }
                 }
             )
         }
@@ -735,14 +736,13 @@ internal class IdentityViewModel constructor(
         APIException::class
     )
     suspend fun postVerificationPageData(
-        collectedDataParam: CollectedDataParam,
-        clearDataParam: ClearDataParam
+        collectedDataParam: CollectedDataParam
     ): VerificationPageData {
         identityRepository.postVerificationPageData(
             verificationArgs.verificationSessionId,
             verificationArgs.ephemeralKeySecret,
             collectedDataParam,
-            clearDataParam
+            calculateClearDataParam(collectedDataParam)
         ).let {
             _collectedData.update { oldValue ->
                 oldValue.mergeWith(collectedDataParam)
@@ -750,6 +750,13 @@ internal class IdentityViewModel constructor(
             return it
         }
     }
+
+    private fun calculateClearDataParam(dataToBeCollected: CollectedDataParam) =
+        ClearDataParam.createFromRequirements(
+            Requirement.values().toMutableSet().minus(
+                collectedData.value.collectedRequirements()
+            ).minus(dataToBeCollected.collectedRequirements())
+        )
 
     /**
      * Submit the final [VerificationPageData].
