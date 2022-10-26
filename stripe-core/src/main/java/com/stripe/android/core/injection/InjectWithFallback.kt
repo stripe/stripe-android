@@ -9,7 +9,7 @@ import com.stripe.android.core.Logger
  * invoke [Injectable.fallbackInitialize] with [fallbackInitializeParam].
  *
  * @return The [Injector] used to inject the dependencies into this class. Null if the class was
- *      injected by a class that does not implement the [Injector] interface.
+ *      injected by [fallbackInitialize] and the method does not return an [Injector].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun <FallbackInitializeParam> Injectable<FallbackInitializeParam>.injectWithFallback(

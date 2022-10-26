@@ -15,10 +15,12 @@ interface Injectable<FallbackInitializeParam> {
     /**
      * Fallback initialization logic for the dependencies when [Injector] is not available. This
      * could happen when the app process is killed and static [Injector]s are cleared up.
-     * An [Injectable] should check when this happens and calls this function manually.
+     * An [Injectable] should check when this happens and call this function manually to recreate
+     * the Dagger dependency graph.
      *
-     * @return The [Injector] created during fallback. It must be non-null when the [Injectable]
-     * is responsible for injecting into other classes.
+     * @return The [Injector] created during fallback. It must be non-null when the [Injectable] class
+     * is responsible for injecting into other classes. Otherwise, the class might inject its own
+     * dependencies and return null.
      */
     fun fallbackInitialize(arg: FallbackInitializeParam): Injector?
 }
