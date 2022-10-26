@@ -402,7 +402,7 @@ internal class PaymentOptionsActivityTest {
                 assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Some text")
                 assertThat(activity.viewBinding.continueButton.isEnabled).isFalse()
 
-                viewModel.updateSelection(mock())
+                viewModel.updateSelection(mock<PaymentSelection.New.Card>())
                 assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Continue")
                 assertThat(activity.viewBinding.continueButton.isEnabled).isTrue()
             }
