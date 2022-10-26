@@ -102,7 +102,8 @@ enum class Currency {
     USD,
     EUR,
     AUD,
-    GBP
+    GBP,
+    INR,
 }
 
 /**
