@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason.LoggedOut
@@ -76,7 +77,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
         private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> LinkActivityContract.Args
     ) : ViewModelProvider.Factory,
-        Injectable<Factory.FallbackInitializeParam, NonFallbackInjector> {
+        Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application,
             val starterArgs: LinkActivityContract.Args,
@@ -109,8 +110,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
                     starterArgs.injectionParams?.productUsage ?: emptySet()
                 )
             )
-
-            viewModel.injector = injector
+            viewModel.injector = requireNotNull(injector as NonFallbackInjector)
             return viewModel as T
         }
 
@@ -120,7 +120,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
          * responsible for injecting them not only in itself, but also in the other ViewModel
          * factories of the module.
          */
-        override fun fallbackInitialize(arg: FallbackInitializeParam): NonFallbackInjector {
+        override fun fallbackInitialize(arg: FallbackInitializeParam) : Injector {
             val viewModelComponent = DaggerLinkViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .enableLogging(arg.enableLogging)

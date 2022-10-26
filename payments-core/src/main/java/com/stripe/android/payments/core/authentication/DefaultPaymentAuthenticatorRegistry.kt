@@ -132,7 +132,7 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
         paymentBrowserAuthLauncher = null
     }
 
-    override fun inject(injectable: Injectable<*, *>) {
+    override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is Stripe3ds2TransactionViewModelFactory -> authenticationComponent.inject(injectable)
             else -> {

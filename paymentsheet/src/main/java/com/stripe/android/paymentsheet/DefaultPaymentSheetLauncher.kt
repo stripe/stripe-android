@@ -102,7 +102,7 @@ internal class DefaultPaymentSheetLauncher(
         activityResultLauncher.launch(args)
     }
 
-    override fun inject(injectable: Injectable<*, *>) {
+    override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is PaymentSheetViewModel.Factory -> {
                 paymentSheetLauncherComponent.inject(injectable)

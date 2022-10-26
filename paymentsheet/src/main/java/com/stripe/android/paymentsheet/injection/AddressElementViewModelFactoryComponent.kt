@@ -33,7 +33,7 @@ internal abstract class AddressElementViewModelFactoryComponent : NonFallbackInj
     abstract fun inject(factory: InputAddressViewModel.Factory)
     abstract fun inject(factory: AutocompleteViewModel.Factory)
 
-    override fun inject(injectable: Injectable<*, *>) {
+    override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is AddressElementViewModel.Factory -> inject(injectable)
             is InputAddressViewModel.Factory -> inject(injectable)

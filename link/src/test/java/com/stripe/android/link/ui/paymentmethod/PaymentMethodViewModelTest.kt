@@ -468,7 +468,7 @@ class PaymentMethodViewModelTest {
         whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
 
         val injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*, *>) {
+            override fun inject(injectable: Injectable<*>) {
                 val factory = injectable as PaymentMethodViewModel.Factory
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
             }

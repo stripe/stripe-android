@@ -13,6 +13,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.ApiRequest
@@ -449,7 +450,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
-        Injectable<Factory.FallbackInitializeParam, Unit> {
+        Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application
         )
@@ -474,12 +475,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 .build().viewModel as T
         }
 
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector? {
             DaggerUSBankAccountFormComponent
                 .builder()
                 .application(arg.application)
                 .injectorKey(DUMMY_INJECTOR_KEY)
                 .build().inject(this)
+            return null
         }
     }
 

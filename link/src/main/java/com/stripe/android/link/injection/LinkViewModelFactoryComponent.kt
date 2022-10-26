@@ -47,7 +47,7 @@ internal abstract class LinkViewModelFactoryComponent : NonFallbackInjector {
     abstract fun inject(factory: PaymentMethodViewModel.Factory)
     abstract fun inject(factory: CardEditViewModel.Factory)
 
-    override fun inject(injectable: Injectable<*, *>) {
+    override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is LinkActivityViewModel.Factory -> inject(injectable)
             is SignUpViewModel.Factory -> inject(injectable)

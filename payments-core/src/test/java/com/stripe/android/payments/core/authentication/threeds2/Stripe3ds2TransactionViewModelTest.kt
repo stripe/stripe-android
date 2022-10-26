@@ -119,7 +119,7 @@ class Stripe3ds2TransactionViewModelTest {
             whenever(mockSubcomponent.viewModel).thenReturn(viewModel)
 
             val injector = object : Injector {
-                override fun inject(injectable: Injectable<*, *>) {
+                override fun inject(injectable: Injectable<*>) {
                     val factory = injectable as Stripe3ds2TransactionViewModelFactory
                     factory.subComponentBuilder = mockBuilder
                 }

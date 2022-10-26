@@ -11,7 +11,7 @@ import androidx.annotation.RestrictTo
  * @see [Injectable]
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface NonFallbackInjectable : Injectable<Unit, Unit> {
+interface NonFallbackInjectable : Injectable<Unit> {
 
     /**
      * NonFallbackInjectable classes don't implement fallback because they receive the injector

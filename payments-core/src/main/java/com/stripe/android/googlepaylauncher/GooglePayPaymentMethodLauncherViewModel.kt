@@ -18,6 +18,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
@@ -128,7 +129,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
-        Injectable<Factory.FallbackInjectionParams, Unit> {
+        Injectable<Factory.FallbackInjectionParams> {
 
         internal data class FallbackInjectionParams(
             val application: Application,
@@ -171,7 +172,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                 .build().viewModel as T
         }
 
-        override fun fallbackInitialize(arg: FallbackInjectionParams) {
+        override fun fallbackInitialize(arg: FallbackInjectionParams): Injector? {
             DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .enableLogging(arg.enableLogging)
@@ -180,6 +181,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                 .productUsage(arg.productUsage)
                 .googlePayConfig(args.config)
                 .build().inject(this)
+            return null
         }
     }
 

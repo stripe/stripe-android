@@ -30,7 +30,7 @@ internal abstract class PaymentOptionsViewModelFactoryComponent : NonFallbackInj
     abstract fun inject(factory: PaymentOptionsViewModel.Factory)
     abstract fun inject(factory: FormViewModel.Factory)
 
-    override fun inject(injectable: Injectable<*, *>) {
+    override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is PaymentOptionsViewModel.Factory -> inject(injectable)
             is FormViewModel.Factory -> inject(injectable)

@@ -162,7 +162,7 @@ class LinkPaymentLauncher @Inject internal constructor(
     ) {
         val linkComponent = component.linkComponentBuilder.starterArgs(args).build()
         val injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*, *>) {
+            override fun inject(injectable: Injectable<*>) {
                 when (injectable) {
                     is LinkActivityViewModel.Factory -> linkComponent.inject(injectable)
                     is SignUpViewModel.Factory -> linkComponent.inject(injectable)

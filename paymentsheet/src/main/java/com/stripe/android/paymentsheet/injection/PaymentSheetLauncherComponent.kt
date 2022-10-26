@@ -31,7 +31,7 @@ internal abstract class PaymentSheetLauncherComponent : NonFallbackInjector {
     abstract fun inject(factory: PaymentSheetViewModel.Factory)
     abstract fun inject(factory: FormViewModel.Factory)
 
-    override fun inject(injectable: Injectable<*, *>) {
+    override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is PaymentSheetViewModel.Factory -> inject(injectable)
             is FormViewModel.Factory -> inject(injectable)

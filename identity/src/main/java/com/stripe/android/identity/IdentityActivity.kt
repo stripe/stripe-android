@@ -22,6 +22,7 @@ import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.camera.framework.time.asEpochMillisecondsClockMark
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
@@ -44,7 +45,7 @@ internal class IdentityActivity :
     CameraPermissionCheckingActivity(),
     VerificationFlowFinishable,
     FallbackUrlLauncher,
-    Injectable<Context, Unit> {
+    Injectable<Context> {
     @VisibleForTesting
     internal lateinit var navController: NavController
 
@@ -93,10 +94,11 @@ internal class IdentityActivity :
     @IOContext
     lateinit var workContext: CoroutineContext
 
-    override fun fallbackInitialize(arg: Context) {
+    override fun fallbackInitialize(arg: Context): Injector? {
         DaggerIdentityActivityFallbackComponent.builder()
             .context(arg)
             .build().inject(this)
+        return null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

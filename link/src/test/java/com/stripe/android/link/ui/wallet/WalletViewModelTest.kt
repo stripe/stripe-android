@@ -609,7 +609,7 @@ class WalletViewModelTest {
         whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
 
         val injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*, *>) {
+            override fun inject(injectable: Injectable<*>) {
                 val factory = injectable as WalletViewModel.Factory
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
             }
