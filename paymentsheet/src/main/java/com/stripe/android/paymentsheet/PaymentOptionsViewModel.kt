@@ -353,16 +353,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 .productUsage(arg.productUsage)
                 .build()
             component.inject(this)
-            return object : NonFallbackInjector {
-                override fun inject(injectable: Injectable<*, *>) {
-                    when (injectable) {
-                        is FormViewModel.Factory -> component.inject(injectable)
-                        else -> {
-                            throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-                        }
-                    }
-                }
-            }
+            return component
         }
     }
 

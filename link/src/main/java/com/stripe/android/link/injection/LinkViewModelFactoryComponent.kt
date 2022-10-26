@@ -4,6 +4,8 @@ import android.content.Context
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.link.LinkActivityContract
@@ -37,13 +39,27 @@ import javax.inject.Singleton
         ResourceRepositoryModule::class
     ]
 )
-internal interface LinkViewModelFactoryComponent {
-    fun inject(factory: LinkActivityViewModel.Factory)
-    fun inject(factory: SignUpViewModel.Factory)
-    fun inject(factory: VerificationViewModel.Factory)
-    fun inject(factory: WalletViewModel.Factory)
-    fun inject(factory: PaymentMethodViewModel.Factory)
-    fun inject(factory: CardEditViewModel.Factory)
+internal abstract class LinkViewModelFactoryComponent : NonFallbackInjector {
+    abstract fun inject(factory: LinkActivityViewModel.Factory)
+    abstract fun inject(factory: SignUpViewModel.Factory)
+    abstract fun inject(factory: VerificationViewModel.Factory)
+    abstract fun inject(factory: WalletViewModel.Factory)
+    abstract fun inject(factory: PaymentMethodViewModel.Factory)
+    abstract fun inject(factory: CardEditViewModel.Factory)
+
+    override fun inject(injectable: Injectable<*, *>) {
+        when (injectable) {
+            is LinkActivityViewModel.Factory -> inject(injectable)
+            is SignUpViewModel.Factory -> inject(injectable)
+            is VerificationViewModel.Factory -> inject(injectable)
+            is WalletViewModel.Factory -> inject(injectable)
+            is PaymentMethodViewModel.Factory -> inject(injectable)
+            is CardEditViewModel.Factory -> inject(injectable)
+            else -> {
+                throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
+            }
+        }
+    }
 
     @Component.Builder
     interface Builder {

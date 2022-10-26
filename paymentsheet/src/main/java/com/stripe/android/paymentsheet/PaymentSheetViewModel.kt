@@ -716,16 +716,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 .injectorKey(DUMMY_INJECTOR_KEY)
                 .build()
             component.inject(this)
-            return object : NonFallbackInjector {
-                override fun inject(injectable: Injectable<*, *>) {
-                    when (injectable) {
-                        is FormViewModel.Factory -> component.inject(injectable)
-                        else -> {
-                            throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-                        }
-                    }
-                }
-            }
+            return component
         }
     }
 
