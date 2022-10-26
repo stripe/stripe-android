@@ -209,7 +209,9 @@ internal class SelfieFragment(
                             runCatching {
                                 val faceDetectorTransitioner =
                                     requireNotNull(
-                                        identityScanViewModel.finalResult.value?.identityState?.transitioner as? FaceDetectorTransitioner
+                                        identityScanViewModel.finalResult
+                                            .value?.identityState?.transitioner
+                                            as? FaceDetectorTransitioner
                                     ) {
                                         "Failed to retrieve final result for Selfie"
                                     }
@@ -238,7 +240,10 @@ internal class SelfieFragment(
                             }
                         }
                         else -> {
-                            "collectUploadedStateAndUploadForCollectedSelfies reaches unexpected upload state: $it".let { msg ->
+                            (
+                                "collectUploadedStateAndUploadForCollectedSelfies " +
+                                    "reaches unexpected upload state: $it"
+                                ).let { msg ->
                                 Log.e(TAG, msg)
                                 navigateToDefaultErrorFragment(msg)
                             }
