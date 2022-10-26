@@ -1,6 +1,6 @@
 ext.versions = [
         detekt: "1.21.0",
-        mavericks: "2.7.0"
+        mavericks: "3.0.1"
 ]
 
 ext.buildLibs = [
