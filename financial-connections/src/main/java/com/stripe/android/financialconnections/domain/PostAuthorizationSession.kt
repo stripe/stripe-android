@@ -2,11 +2,11 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
-import com.stripe.android.financialconnections.di.APPLICATION_ID
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import javax.inject.Inject
 import javax.inject.Named

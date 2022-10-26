@@ -14,13 +14,15 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
+import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -30,13 +32,14 @@ import javax.inject.Inject
 
 @Suppress("LongParameterList")
 internal class PartnerAuthViewModel @Inject constructor(
+    private val completeAuthorizationSession: CompleteAuthorizationSession,
     private val createAuthorizationSession: PostAuthorizationSession,
     private val cancelAuthorizationSession: CancelAuthorizationSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val configuration: FinancialConnectionsSheet.Configuration,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
     private val navigationManager: NavigationManager,
+    private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
     initialState: PartnerAuthState
 ) : MavericksViewModel<PartnerAuthState>(initialState) {
@@ -52,7 +55,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             Payload(
                 flow = authSession.flow,
-                showPrepane = authSession.flow?.isOAuth() ?: true,
+                showPrepane = authSession.isOAuth,
                 showPartnerDisclosure = authSession.showPartnerDisclosure ?: false,
                 institution = manifest.activeInstitution
             )
@@ -137,7 +140,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             setState { copy(authenticationStatus = Loading()) }
             val authSession = requireNotNull(getManifest().activeAuthSession)
             val result = cancelAuthorizationSession(authSession.id)
-            if (authSession.flow?.isOAuth() == true) {
+            if (authSession.isOAuth) {
                 // For OAuth institutions, create a new session and navigate to its nextPane.
                 logger.debug("Creating a new session for this OAuth institution")
                 val manifest = getManifest()
@@ -156,9 +159,23 @@ internal class PartnerAuthViewModel @Inject constructor(
         }
     }
 
-    private fun completeAuthorizationSession() {
+    private suspend fun completeAuthorizationSession() {
         kotlin.runCatching {
-            goNext(NextPane.ACCOUNT_PICKER)
+            setState { copy(authenticationStatus = Loading()) }
+            val authSession = requireNotNull(getManifest().activeAuthSession)
+            if (authSession.isOAuth) {
+                logger.debug("Web AuthFlow completed! waiting for oauth results")
+                val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
+                logger.debug("OAuth results received! completing session")
+                val updatedSession = completeAuthorizationSession(
+                    authorizationSessionId = authSession.id,
+                    publicToken = oAuthResults.memberGuid
+                )
+                logger.debug("Session authorized!")
+                goNext(updatedSession.nextPane)
+            } else {
+                goNext(NextPane.ACCOUNT_PICKER)
+            }
         }.onFailure {
             logger.error("failed authorizing session", it)
             setState { copy(authenticationStatus = Fail(it)) }

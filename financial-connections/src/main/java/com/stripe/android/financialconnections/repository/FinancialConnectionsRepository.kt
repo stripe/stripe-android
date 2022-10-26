@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.GetFinancialConnectionsAcccountsParams
+import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
 import javax.inject.Inject
@@ -42,6 +43,11 @@ internal interface FinancialConnectionsRepository {
     suspend fun postCompleteFinancialConnectionsSessions(
         clientSecret: String
     ): FinancialConnectionsSession
+
+    suspend fun postAuthorizationSessionOAuthResults(
+        clientSecret: String,
+        sessionId: String
+    ): MixedOAuthParams
 }
 
 internal class FinancialConnectionsRepositoryImpl @Inject constructor(
@@ -96,6 +102,24 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun postAuthorizationSessionOAuthResults(
+        clientSecret: String,
+        sessionId: String
+    ): MixedOAuthParams {
+        val request = apiRequestFactory.createPost(
+            url = authorizationSessionOAuthResultsUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_ID to sessionId,
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            MixedOAuthParams.serializer()
+        )
+    }
+
     internal companion object {
 
         internal const val listAccountsUrl: String =
@@ -109,6 +133,9 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
 
         internal const val completeUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/complete"
+
+        internal const val authorizationSessionOAuthResultsUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/oauth_results"
 
         internal const val authorizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/authorized"

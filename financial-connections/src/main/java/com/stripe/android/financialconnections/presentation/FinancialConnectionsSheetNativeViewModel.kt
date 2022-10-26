@@ -95,21 +95,21 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     copy(webAuthFlow = Fail(WebAuthFlowFailedException(url = null)))
                 }
 
-                uriComparator.compareSchemeAuthorityAndPath(
+                uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     successUrl(applicationId)
                 ) -> setState {
                     copy(webAuthFlow = Success(receivedUrl))
                 }
 
-                uriComparator.compareSchemeAuthorityAndPath(
+                uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     cancelUrl(applicationId)
                 ) -> setState {
                     copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
                 }
 
-                uriComparator.compareSchemeAuthorityAndPath(
+                uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     failUrl(applicationId)
                 ) -> setState {
