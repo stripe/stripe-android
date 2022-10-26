@@ -57,7 +57,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -90,18 +89,19 @@ internal class PaymentSheetViewModelTest {
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val application = ApplicationProvider.getApplicationContext<Application>()
-    private val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(application.resources)).apply {
-        this.forceUpdate(
-            listOf(
-                PaymentMethod.Type.Card.code,
-                PaymentMethod.Type.USBankAccount.code,
-                PaymentMethod.Type.Ideal.code,
-                PaymentMethod.Type.SepaDebit.code,
-                PaymentMethod.Type.Sofort.code
-            ),
-            null
-        )
-    }
+    private val lpmRepository =
+        LpmRepository(LpmRepository.LpmRepositoryArguments(application.resources)).apply {
+            this.forceUpdate(
+                listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.USBankAccount.code,
+                    PaymentMethod.Type.Ideal.code,
+                    PaymentMethod.Type.SepaDebit.code,
+                    PaymentMethod.Type.Sofort.code
+                ),
+                null
+            )
+        }
     private val prefsRepository = FakePrefsRepository()
     private val lpmResourceRepository = StaticLpmResourceRepository(lpmRepository)
     private val linkLauncher = mock<LinkPaymentLauncher>()
@@ -423,7 +423,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    @Ignore("Disabled until Link is enabled")
     fun `setupLink() launches Link when account status is Verified`() = runTest {
         whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
         val viewModel = createViewModel()
@@ -437,7 +436,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    @Ignore("Disabled until Link is enabled")
     fun `setupLink() starts verification when account status is NeedsVerification`() = runTest {
         whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.NeedsVerification))
         val viewModel = createViewModel()
@@ -450,7 +448,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    @Ignore("Disabled until Link is enabled")
     fun `setupLink() starts verification when account status is VerificationStarted`() = runTest {
         whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.VerificationStarted))
         val viewModel = createViewModel()
@@ -463,7 +460,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    @Ignore("Disabled until Link is enabled")
     fun `setupLink() enables Link when account status is SignedOut`() = runTest {
         whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
         val viewModel = createViewModel()

@@ -43,10 +43,14 @@ private const val COLLAPSE_ACCOUNTS_THRESHOLD = 5
 
 @Composable
 internal fun AccessibleDataCallout(
-    model: AccessibleDataCalloutModel
+    model: AccessibleDataCalloutModel,
+    onLearnMoreClick: () -> Unit
 ) {
     AccessibleDataCalloutBox {
-        AccessibleDataText(model)
+        AccessibleDataText(
+            model = model,
+            onLearnMoreClick = onLearnMoreClick
+        )
     }
 }
 
@@ -54,7 +58,8 @@ internal fun AccessibleDataCallout(
 internal fun AccessibleDataCalloutWithAccounts(
     model: AccessibleDataCalloutModel,
     institution: FinancialConnectionsInstitution,
-    accounts: List<PartnerAccount>
+    accounts: List<PartnerAccount>,
+    onLearnMoreClick: () -> Unit
 ) {
     AccessibleDataCalloutBox {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -77,7 +82,10 @@ internal fun AccessibleDataCalloutWithAccounts(
             }
 
             Divider(color = FinancialConnectionsTheme.colors.backgroundBackdrop)
-            AccessibleDataText(model)
+            AccessibleDataText(
+                model = model,
+                onLearnMoreClick = onLearnMoreClick
+            )
         }
     }
 }
@@ -125,7 +133,8 @@ private fun AccountRow(
 
 @Composable
 private fun AccessibleDataText(
-    model: AccessibleDataCalloutModel
+    model: AccessibleDataCalloutModel,
+    onLearnMoreClick: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
     val permissionsReadable = remember(model.permissions) { model.permissions.toStringRes() }
@@ -147,12 +156,15 @@ private fun AccessibleDataText(
                 readableListOfPermissions(permissionsReadable)
             )
         ),
-        onClickableTextClick = { uriHandler.openUri(model.dataPolicyUrl) },
+        onClickableTextClick = {
+            uriHandler.openUri(model.dataPolicyUrl)
+            onLearnMoreClick()
+        },
         defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
             color = FinancialConnectionsTheme.colors.textSecondary
         ),
         annotationStyles = mapOf(
-            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption
                 .toSpanStyle()
                 .copy(color = FinancialConnectionsTheme.colors.textBrand),
             StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
@@ -240,7 +252,8 @@ internal fun AccessibleDataCalloutPreview() {
                 ),
                 isStripeDirect = true,
                 dataPolicyUrl = ""
-            )
+            ),
+            onLearnMoreClick = {}
         )
     }
 }
@@ -314,7 +327,8 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
                 logo = null,
                 featuredOrder = null,
                 mobileHandoffCapable = false
-            )
+            ),
+            onLearnMoreClick = {}
         )
     }
 }
@@ -366,7 +380,8 @@ internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
                 logo = null,
                 featuredOrder = null,
                 mobileHandoffCapable = false
-            )
+            ),
+            onLearnMoreClick = {}
         )
     }
 }
@@ -409,7 +424,8 @@ internal fun AccessibleDataCalloutWithOneAccountPreview() {
                 icon = null,
                 logo = null,
                 mobileHandoffCapable = false
-            )
+            ),
+            onLearnMoreClick = {}
         )
     }
 }

@@ -11,7 +11,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -25,7 +24,6 @@ import com.stripe.android.identity.networking.models.VerificationPage.Companion.
 import com.stripe.android.identity.ui.ConsentScreen
 import com.stripe.android.identity.utils.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
-import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
 
@@ -35,15 +33,10 @@ import kotlinx.coroutines.launch
  */
 internal class ConsentFragment(
     private val identityViewModelFactory: ViewModelProvider.Factory,
-    private val consentViewModelFactory: ViewModelProvider.Factory,
     private val fallbackUrlLauncher: FallbackUrlLauncher
 ) : Fragment() {
     private val identityViewModel: IdentityViewModel by activityViewModels {
         identityViewModelFactory
-    }
-
-    private val consentViewModel: ConsentFragmentViewModel by viewModels {
-        consentViewModelFactory
     }
 
     override fun onCreateView(
@@ -56,13 +49,8 @@ internal class ConsentFragment(
             val verificationState by identityViewModel.verificationPage.observeAsState(Resource.loading())
 
             ConsentScreen(
+                merchantLogoUri = identityViewModel.verificationArgs.brandLogo,
                 verificationState = verificationState,
-                onMerchantViewCreated = {
-                    consentViewModel.loadUriIntoImageView(
-                        identityViewModel.verificationArgs.brandLogo,
-                        it
-                    )
-                },
                 onSuccess = { verificationPage ->
                     identityViewModel.updateAnalyticsState { oldState ->
                         oldState.copy(
@@ -80,7 +68,6 @@ internal class ConsentFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         lifecycleScope.launch(identityViewModel.workContext) {
             identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONSENT)
         }
@@ -134,7 +121,11 @@ internal class ConsentFragment(
             postVerificationPageDataAndMaybeSubmit(
                 identityViewModel,
                 collectedDataParam,
-                if (requireSelfie) ClearDataParam.CONSENT_TO_DOC_SELECT_WITH_SELFIE else ClearDataParam.CONSENT_TO_DOC_SELECT,
+                if (requireSelfie) {
+                    ClearDataParam.CONSENT_TO_DOC_SELECT_WITH_SELFIE
+                } else {
+                    ClearDataParam.CONSENT_TO_DOC_SELECT
+                },
                 fromFragment = R.id.consentFragment,
                 notSubmitBlock = {
                     findNavController().navigate(R.id.action_consentFragment_to_docSelectionFragment)

@@ -61,7 +61,6 @@ class FormFragmentArgumentsTest {
             merchantName = "Merchant, Inc.",
             amount = Amount(50, "USD"),
             billingDetails = billingDetails,
-            injectorKey = "injectorTestKeyFormFragmentArgumentTest",
             initialPaymentMethodCreateParams = paymentMethodCreateParams
         )
 
@@ -94,7 +93,6 @@ class FormFragmentArgumentsTest {
             merchantName = "Merchant, Inc.",
             amount = Amount(50, "USD"),
             billingDetails = billingDetails,
-            injectorKey = "injectorTestKeyFormFragmentArgumentTest",
             initialPaymentMethodCreateParams = null
         )
 

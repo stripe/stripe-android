@@ -6,6 +6,7 @@ import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SearchInstitutions
@@ -37,6 +38,7 @@ internal class InstitutionPickerViewModelTest {
     private val getManifest = mock<GetManifest>()
     private val updateLocalManifest = mock<UpdateLocalManifest>()
     private val navigationManager = mock<NavigationManager>()
+    private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val defaultConfiguration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
@@ -44,16 +46,19 @@ internal class InstitutionPickerViewModelTest {
 
     private fun buildViewModel(
         state: InstitutionPickerState
-    ) = InstitutionPickerViewModel(
-        configuration = defaultConfiguration,
-        searchInstitutions = searchInstitutions,
-        featuredInstitutions = featuredInstitutions,
-        getManifest = getManifest,
-        navigationManager = navigationManager,
-        updateLocalManifest = updateLocalManifest,
-        logger = Logger.noop(),
-        initialState = state
-    )
+    ): InstitutionPickerViewModel {
+        return InstitutionPickerViewModel(
+            configuration = defaultConfiguration,
+            searchInstitutions = searchInstitutions,
+            featuredInstitutions = featuredInstitutions,
+            getManifest = getManifest,
+            navigationManager = navigationManager,
+            updateLocalManifest = updateLocalManifest,
+            logger = Logger.noop(),
+            eventTracker = eventTracker,
+            initialState = state
+        )
+    }
 
     @Test
     fun `init - featured institutions are fetched`() = runTest {
@@ -82,7 +87,7 @@ internal class InstitutionPickerViewModelTest {
     }
 
     @Test
-    fun `onQueryChanged - institutions are searched`() = runTest {
+    fun `onQueryChanged - institutions are searched and event sent`() = runTest {
         val query = "query"
         val searchResults = InstitutionResponse(
             listOf(
@@ -120,6 +125,13 @@ internal class InstitutionPickerViewModelTest {
         withState(viewModel) { state ->
             assertEquals(state.payload()!!.featuredInstitutions, featuredResults.data)
             assertEquals(state.searchInstitutions()!!.data, searchResults.data)
+            eventTracker.assertContainsEvent(
+                expectedEventName = "linked_accounts.search.succeeded",
+                expectedParams = mapOf(
+                    "pane" to "institution_picker",
+                    "query" to query
+                )
+            )
         }
     }
 

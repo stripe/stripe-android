@@ -33,6 +33,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -59,8 +60,7 @@ internal fun ManualEntryScreen() {
         onAccountEntered = viewModel::onAccountEntered,
         onAccountConfirmEntered = viewModel::onAccountConfirmEntered,
         onSubmit = viewModel::onSubmit,
-        onCloseClick = parentViewModel::onCloseNoConfirmationClick
-    )
+    ) { parentViewModel.onCloseNoConfirmationClick(NextPane.MANUAL_ENTRY) }
 }
 
 @Suppress("LongMethod")
@@ -80,7 +80,11 @@ private fun ManualEntryContent(
 ) {
     val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                onCloseClick = onCloseClick
+            )
+        }
     ) {
         Column(
             Modifier.fillMaxSize()
@@ -225,7 +229,7 @@ internal fun ManualEntryScreenPreview() {
             onRoutingEntered = {},
             onAccountEntered = {},
             onAccountConfirmEntered = {},
-            onSubmit = {}
+            onSubmit = {},
         ) {}
     }
 }
@@ -246,7 +250,7 @@ internal fun ManualEntryScreenErrorPreview() {
             onRoutingEntered = {},
             onAccountEntered = {},
             onAccountConfirmEntered = {},
-            onSubmit = {}
+            onSubmit = {},
         ) {}
     }
 }

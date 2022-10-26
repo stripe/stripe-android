@@ -15,7 +15,10 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module(
-    subcomponents = [PaymentOptionsViewModelSubcomponent::class]
+    subcomponents = [
+        PaymentOptionsViewModelSubcomponent::class,
+        FormViewModelSubcomponent::class
+    ]
 )
 internal class PaymentOptionsViewModelModule {
 

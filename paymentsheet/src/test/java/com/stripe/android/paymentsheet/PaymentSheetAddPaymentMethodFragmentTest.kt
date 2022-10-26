@@ -85,7 +85,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             CONFIG_MINIMUM,
             MERCHANT_DISPLAY_NAME,
             Amount(50, "USD"),
-            "testInjectorKey",
             PaymentSelection.New.GenericPaymentMethod(
                 context.getString(R.string.stripe_paymentsheet_payment_method_bancontact),
                 R.drawable.stripe_ic_paymentsheet_pm_bancontact,
@@ -150,7 +149,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             CONFIG_MINIMUM,
             MERCHANT_DISPLAY_NAME,
             Amount(50, "USD"),
-            "testInjectorKey",
             PaymentSelection.New.Card(
                 paymentMethodCreateParams,
                 CardBrand.Visa,

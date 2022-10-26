@@ -39,6 +39,7 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.TextResource
@@ -81,8 +82,7 @@ internal fun ConsentScreen() {
         onContinueClick = viewModel::onContinueClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-        onCloseClick = parentViewModel::onCloseNoConfirmationClick
-    )
+    ) { parentViewModel.onCloseNoConfirmationClick(NextPane.CONSENT) }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -153,7 +153,11 @@ private fun ConsentMainContent(
     onCloseClick: () -> Unit
 ) {
     FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                onCloseClick = onCloseClick
+            )
+        }
     ) {
         Column(
             Modifier.fillMaxSize()
@@ -364,8 +368,7 @@ internal fun ContentPreview(
             onContinueClick = {},
             onClickableTextClick = {},
             onConfirmModalClick = {},
-            onCloseClick = {}
-        )
+        ) {}
     }
 }
 
@@ -384,7 +387,6 @@ internal fun ContentManualEntryPlusMicrodeposits(
             onContinueClick = {},
             onClickableTextClick = {},
             onConfirmModalClick = {},
-            onCloseClick = {}
-        )
+        ) {}
     }
 }

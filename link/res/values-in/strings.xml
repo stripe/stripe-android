@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[Dengan bergabung ke Link, Anda berarti menyetujui <terms>Ketentuan</terms> dan <privacy>Kebijakan Privasi</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">Ubah email</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">Kode dikirim</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">Masukkan kode verifikasi Anda</string>
   <!-- Two factor authentication screen heading -->

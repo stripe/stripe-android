@@ -12,9 +12,11 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -27,9 +29,6 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,8 +36,15 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.ui.core.paymentsColors
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+
+private object Spacing {
+    val extended = 12.dp
+    val normal = 8.dp
+    const val lineHeightMultiplier = 1.3f
+}
 
 @Composable
 internal fun PollingScreen(
@@ -99,23 +105,28 @@ private fun ActivePolling(
         verticalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxSize()
-            .padding(32.dp),
+            .padding(
+                vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top),
+                horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
+            ),
     ) {
         CircularProgressIndicator(
-            modifier = Modifier.padding(bottom = 8.dp),
+            modifier = Modifier.padding(bottom = Spacing.extended),
+            color = MaterialTheme.paymentsColors.appBarIcon,
         )
 
         Text(
             text = stringResource(R.string.upi_polling_header),
             style = MaterialTheme.typography.h4,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 8.dp),
+            modifier = Modifier.padding(bottom = Spacing.normal),
         )
 
         Text(
             text = rememberActivePollingMessage(remainingDuration),
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 8.dp),
+            lineHeight = MaterialTheme.typography.body1.fontSize * Spacing.lineHeightMultiplier,
+            modifier = Modifier.padding(bottom = Spacing.normal),
         )
 
         TextButton(onClick = onCancel) {
@@ -129,67 +140,76 @@ private fun FailedPolling(
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier.fillMaxSize()) {
-        IconButton(onClick = onCancel) {
-            Icon(
-                painter = painterResource(R.drawable.stripe_ic_paymentsheet_back_enabled),
-                contentDescription = stringResource(R.string.back),
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {},
+                elevation = 0.dp,
+                backgroundColor = MaterialTheme.colors.surface,
+                navigationIcon = {
+                    IconButton(onClick = onCancel) {
+                        Icon(
+                            painter = painterResource(R.drawable.stripe_ic_paymentsheet_back_enabled),
+                            contentDescription = stringResource(R.string.back),
+                        )
+                    }
+                },
             )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-
+        },
+        modifier = modifier,
+    ) { paddingValues ->
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top),
-                    horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
-                ),
+            modifier = Modifier.fillMaxSize()
+                .padding(paddingValues),
         ) {
-            Image(
-                painter = painterResource(R.drawable.stripe_ic_paymentsheet_polling_failure),
-                contentDescription = null,
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
+            Spacer(modifier = Modifier.weight(1f))
 
-            Text(
-                text = stringResource(R.string.upi_polling_payment_failed_title),
-                style = MaterialTheme.typography.h4,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top),
+                        horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
+                    ),
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.stripe_ic_paymentsheet_polling_failure),
+                    contentDescription = null,
+                    modifier = Modifier.padding(bottom = Spacing.extended),
+                )
 
-            Text(
-                text = stringResource(R.string.upi_polling_payment_failed_message),
-                textAlign = TextAlign.Center,
-            )
+                Text(
+                    text = stringResource(R.string.upi_polling_payment_failed_title),
+                    style = MaterialTheme.typography.h4,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = Spacing.normal),
+                )
+
+                Text(
+                    text = stringResource(R.string.upi_polling_payment_failed_message),
+                    textAlign = TextAlign.Center,
+                    lineHeight = MaterialTheme.typography.body1.fontSize * Spacing.lineHeightMultiplier,
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
         }
-
-        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
 private fun rememberActivePollingMessage(
     remainingDuration: Duration,
-): AnnotatedString {
+): String {
     val context = LocalContext.current
-    val primaryColor = MaterialTheme.colors.primary
 
     return remember(remainingDuration) {
         val remainingTime = remainingDuration.toComponents { minutes, seconds, _ ->
             val paddedSeconds = seconds.toString().padStart(length = 2, padChar = '0')
             "$minutes:$paddedSeconds"
         }
-
-        val message = context.getString(R.string.upi_polling_message, remainingTime)
-
-        buildAnnotatedString {
-            append(message.removeSuffix(remainingTime))
-            append(AnnotatedString(remainingTime, SpanStyle(primaryColor)))
-        }
+        context.getString(R.string.upi_polling_message, remainingTime)
     }
 }
 

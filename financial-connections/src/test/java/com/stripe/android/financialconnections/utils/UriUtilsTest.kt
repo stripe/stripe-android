@@ -5,14 +5,41 @@ import com.stripe.android.core.Logger
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.ParameterizedRobolectricTestRunner
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+class GetQueryParamsTest {
+
+    private val underTest = UriUtils(Logger.noop())
+
+    @Test
+    fun `getQueryParameter - url with eventName`() {
+        val queryParam = underTest
+            .getQueryParameter(
+                "https://www.stripe.com/terms?eventName=click.terms",
+                "eventName"
+            )
+        assertThat(queryParam).isEqualTo("click.terms")
+    }
+
+    @Test
+    fun `getQueryParameter - stripe uri with eventName`() {
+        val queryParam = underTest
+            .getQueryParameter(
+                "stripe://data-access-notice?eventName=click.terms",
+                "eventName"
+            )
+        assertThat(queryParam).isEqualTo("click.terms")
+    }
+}
 
 @RunWith(ParameterizedRobolectricTestRunner::class)
-class UriComparatorTest(
+class CompareSchemeAuthorityAndPathTest(
     private val uri1: String,
     private val uri2: String,
     private val result: Boolean
 ) {
-    private val underTest = UriComparator(Logger.noop())
+    private val underTest = UriUtils(Logger.noop())
 
     companion object {
         @JvmStatic

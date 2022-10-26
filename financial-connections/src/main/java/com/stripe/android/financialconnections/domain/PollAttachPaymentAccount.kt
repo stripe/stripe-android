@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.exception.AccountNumberRetrievalException
+import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
@@ -50,7 +50,7 @@ internal class PollAttachPaymentAccount @Inject constructor(
         when {
             institution == null -> this
             stripeError?.extraFields?.get("reason") == "account_number_retrieval_failed" ->
-                AccountNumberRetrievalException(
+                AccountNumberRetrievalError(
                     allowManualEntry = allowManualEntry,
                     institution = institution,
                     stripeException = this
