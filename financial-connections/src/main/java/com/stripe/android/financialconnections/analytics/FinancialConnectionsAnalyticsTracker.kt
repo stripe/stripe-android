@@ -38,7 +38,7 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
             val eventParams: Map<out String, Any?> = event.params ?: emptyMap()
             val commonParams = commonParams()
             val request = requestFactory.createRequest(
-                eventName = event.name,
+                eventName = event.eventName,
                 additionalParams = eventParams + commonParams,
                 includeSDKParams = true
             )
@@ -46,7 +46,7 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
                 request
             )
             logger.debug(
-                "tracked event: ${event.name}" +
+                "tracked event: ${event.eventName}" +
                     "\nparams: ${request.params}"
             )
         }.onFailure {

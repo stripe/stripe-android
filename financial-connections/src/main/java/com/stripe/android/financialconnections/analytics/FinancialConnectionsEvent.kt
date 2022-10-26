@@ -9,9 +9,12 @@ import com.stripe.android.financialconnections.utils.filterNotNullValues
  * Event definitions for Financial Connections.
  */
 internal sealed class FinancialConnectionsEvent(
-    val name: String,
+    private val name: String,
     val params: Map<String, String>? = null
 ) {
+
+    val eventName = "$EVENT_PREFIX.$name"
+
     class PaneLaunched(
         pane: NextPane,
     ) : FinancialConnectionsEvent(
@@ -178,3 +181,4 @@ private fun Throwable.toEventParams(): Map<String, String?> = when (this) {
 }
 
 private const val MAX_LOG_LENGTH = 100
+private const val EVENT_PREFIX = "linked_accounts"
