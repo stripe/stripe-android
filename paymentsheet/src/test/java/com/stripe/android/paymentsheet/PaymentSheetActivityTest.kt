@@ -117,7 +117,7 @@ internal class PaymentSheetActivityTest {
         on { create(any(), any(), any()) } doReturn paymentLauncher
     }
 
-    private val viewModel = createViewModel()
+    private lateinit var viewModel: PaymentSheetViewModel
 
     private val contract = PaymentSheetContract()
 
@@ -139,6 +139,7 @@ internal class PaymentSheetActivityTest {
 
     @BeforeTest
     fun before() {
+        viewModel = createViewModel()
         PaymentConfiguration.init(
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
@@ -198,16 +199,10 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `updates buy button state on add payment`() {
-        val scenario = activityScenario()
+        val viewModel = createViewModel(paymentMethods = emptyList())
+        val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
-            // Based on previously run tests the viewModel might have a different selection state saved
-            viewModel.updateSelection(null)
-
-            viewModel.transitionTo(
-                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                    FragmentConfigFixtures.DEFAULT
-                )
-            )
+            // wait for bottom sheet to animate in
             idleLooper()
 
             // Initially empty card
@@ -1043,7 +1038,7 @@ internal class PaymentSheetActivityTest {
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = mock<LpmRepository>()
-        whenever(lpmRepository.fromCode("card")).thenReturn(LpmRepository.HardcodedCard)
+        whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
         whenever(lpmRepository.serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
 
         val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
