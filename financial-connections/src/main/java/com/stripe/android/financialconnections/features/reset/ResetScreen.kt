@@ -12,6 +12,7 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -25,7 +26,7 @@ internal fun ResetScreen() {
     BackHandler(enabled = true) {}
     ResetContent(
         payload = payload.value,
-        onCloseClick = parentViewModel::onCloseNoConfirmationClick,
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.RESET) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
@@ -37,7 +38,11 @@ private fun ResetContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                onCloseClick = onCloseClick
+            )
+        }
     ) {
         when (payload) {
             Uninitialized, is Loading -> LoadingContent()
@@ -56,8 +61,7 @@ internal fun ResetScreenPreview() {
     FinancialConnectionsTheme {
         ResetContent(
             payload = Uninitialized,
-            onCloseClick = {},
-            onCloseFromErrorClick = {}
-        )
+            onCloseClick = {}
+        ) {}
     }
 }
