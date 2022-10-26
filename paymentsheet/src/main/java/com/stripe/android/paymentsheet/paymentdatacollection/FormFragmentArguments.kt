@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
 import android.os.Parcelable
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -20,7 +19,6 @@ internal data class FormFragmentArguments(
     val amount: Amount? = null,
     val billingDetails: PaymentSheet.BillingDetails? = null,
     val shippingDetails: AddressDetails? = null,
-    @InjectorKey val injectorKey: String,
     val initialPaymentMethodCreateParams: PaymentMethodCreateParams? = null
 ) : Parcelable
 

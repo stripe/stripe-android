@@ -1,14 +1,16 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.MenuProvider
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.test.espresso.IdlingResource
@@ -30,10 +32,24 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-
 class PaymentSheetPlaygroundActivity : AppCompatActivity() {
+
     private val viewBinding by lazy {
         ActivityPaymentSheetPlaygroundBinding.inflate(layoutInflater)
+    }
+
+    private val menuProvider: MenuProvider = object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.menu_playground, menu)
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+            when (menuItem.itemId) {
+                R.id.appearance_picker -> showAppearancePicker()
+                else -> Unit
+            }
+            return true
+        }
     }
 
     @VisibleForTesting
@@ -104,10 +120,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private lateinit var paymentSheet: PaymentSheet
     private lateinit var flowController: PaymentSheet.FlowController
 
-    @Nullable
     private var multiStepUIReadyIdlingResource: CountingIdlingResource? = null
 
-    @Nullable
     private var singleStepUIReadyIdlingResource: CountingIdlingResource? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -255,6 +269,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             }
 
         disableViews()
+
+        addMenuProvider(menuProvider)
     }
 
     override fun onResume() {
@@ -391,11 +407,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             phone = "+18008675309"
         ).takeIf { viewBinding.defaultBillingOnButton.isChecked }
 
-        val appearance: PaymentSheet.Appearance = intent.extras?.get(APPEARANCE_EXTRA)?.let {
-            it as PaymentSheet.Appearance
-        } ?: run {
-            PaymentSheet.Appearance()
-        }
+        val appearance = intent.extras?.getParcelable(APPEARANCE_EXTRA) ?: AppearanceStore.state
 
         return PaymentSheet.Configuration(
             merchantDisplayName = merchantName,
@@ -443,29 +455,31 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewModel.status.value = paymentResult.toString()
     }
 
+    private fun showAppearancePicker() {
+        val bottomSheet = AppearanceBottomSheetDialogFragment.newInstance()
+        bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+    }
+
     /**
      * Only called from test, creates and returns a [IdlingResource].
      */
     @VisibleForTesting
-    @NonNull
-    fun getMultiStepReadyIdlingResource(): IdlingResource? {
+    fun getMultiStepReadyIdlingResource(): IdlingResource {
         if (multiStepUIReadyIdlingResource == null) {
             multiStepUIReadyIdlingResource =
                 CountingIdlingResource("multiStepUIReadyIdlingResource")
         }
-        return multiStepUIReadyIdlingResource
+        return multiStepUIReadyIdlingResource!!
     }
 
     @VisibleForTesting
-    @NonNull
-    fun getSingleStepReadyIdlingResource(): IdlingResource? {
+    fun getSingleStepReadyIdlingResource(): IdlingResource {
         if (singleStepUIReadyIdlingResource == null) {
             singleStepUIReadyIdlingResource =
                 CountingIdlingResource("singleStepUIReadyIdlingResource")
         }
-        return singleStepUIReadyIdlingResource
+        return singleStepUIReadyIdlingResource!!
     }
-
 
     companion object {
         const val FORCE_DARK_MODE_EXTRA = "ForceDark"

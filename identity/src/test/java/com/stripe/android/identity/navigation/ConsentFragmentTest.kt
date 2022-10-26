@@ -21,7 +21,6 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.viewModelFactoryFor
-import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -85,8 +84,6 @@ internal class ConsentFragmentTest {
         on { verificationPage } doReturn verificationPageData
     }
 
-    private val mockConsentFragmentViewModel = mock<ConsentFragmentViewModel>()
-
     @Test
     fun `when viewCreated track screen finish`() {
         verificationPageData.postValue(Resource.success(verificationPageWithTimeAndPolicy))
@@ -112,7 +109,6 @@ internal class ConsentFragmentTest {
     ) {
         ConsentFragment(
             viewModelFactoryFor(mockIdentityViewModel),
-            viewModelFactoryFor(mockConsentFragmentViewModel),
             mock()
         )
     }.onFragment {

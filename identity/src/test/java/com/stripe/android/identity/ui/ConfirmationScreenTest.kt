@@ -43,6 +43,7 @@ class ConfirmationScreenTest {
             Resource.success(verificationPage)
         ) {
             onNodeWithTag(confirmationTitleTag).assertTextEquals(CONFIRMATION_TITLE)
+            onNodeWithTag(BODY_TAG).assertTextEquals(CONFIRMATION_BODY)
             onNodeWithTag(confirmationConfirmButtonTag).assertTextEquals(CONFIRMATION_BUTTON_TEXT)
             onNodeWithTag(confirmationConfirmButtonTag).performClick()
             verify(onConfirmedMock).invoke()
