@@ -1,22 +1,27 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -27,9 +32,7 @@ import com.stripe.android.ui.core.isSystemDarkTheme
 
 internal abstract class BasePaymentMethodsListFragment(
     private val canClickSelectedItem: Boolean
-) : Fragment(
-    R.layout.fragment_paymentsheet_payment_methods_list
-) {
+) : Fragment() {
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
     protected lateinit var config: FragmentConfig
@@ -80,22 +83,33 @@ internal abstract class BasePaymentMethodsListFragment(
         )
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val viewBinding = FragmentPaymentsheetPaymentMethodsListBinding.bind(view)
-        setContent(viewBinding)
-    }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val view = ComposeView(requireContext())
 
-    private fun setContent(viewBinding: FragmentPaymentsheetPaymentMethodsListBinding) {
-        viewBinding.content.setContent {
+        view.setContent {
             PaymentOptionsScreen(
                 sheetViewModel = sheetViewModel,
                 canClickSelectedItem = canClickSelectedItem,
                 toggleEditMenuItem = this::toggleEditMenuItem,
                 setEditMenuItemText = this::setEditMenuItemText,
                 transitionToAddPaymentMethod = this::transitionToAddPaymentMethod,
+                modifier = Modifier
+                    .padding(
+                        top = dimensionResource(
+                            id = R.dimen.stripe_paymentsheet_paymentoptions_margin_top,
+                        ),
+                        bottom = dimensionResource(
+                            id = R.dimen.stripe_paymentsheet_paymentoptions_margin_bottom,
+                        ),
+                    )
             )
         }
+
+        return view
     }
 
     private fun toggleEditMenuItem(isVisible: Boolean) {
@@ -133,6 +147,7 @@ private fun PaymentOptionsScreen(
     toggleEditMenuItem: (Boolean) -> Unit,
     setEditMenuItemText: (Boolean) -> Unit,
     transitionToAddPaymentMethod: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
 
@@ -177,6 +192,7 @@ private fun PaymentOptionsScreen(
                     (sheetViewModel as? PaymentOptionsViewModel)?.onUserSelection()
                 }
             },
+            modifier = modifier,
         )
     }
 }
