@@ -1,7 +1,8 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.utils
 
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 
 internal class FakeCustomerRepository(
