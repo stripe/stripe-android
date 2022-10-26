@@ -15,6 +15,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.navigation.IdentityDocumentScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.ErrorScreen
+import com.stripe.android.identity.ui.ErrorScreenButton
 import com.stripe.android.identity.utils.navigateToUploadFragment
 
 /**
@@ -49,32 +50,33 @@ internal class CouldNotCaptureFragment(
                 topButton = if (scanType == IdentityScanState.ScanType.SELFIE) {
                     null
                 } else {
-                    (
-                        stringResource(id = R.string.file_upload) to {
-                            identityViewModel.screenTracker.screenTransitionStart(
-                                SCREEN_NAME_ERROR
-                            )
-                            navigateToUploadFragment(
-                                scanType.toUploadDestinationId(),
-                                shouldShowTakePhoto = true,
-                                shouldShowChoosePhoto = !args.getBoolean(ARG_REQUIRE_LIVE_CAPTURE)
-                            )
-                        }
-                        )
-                },
-                bottomButton = (
-                    stringResource(id = R.string.try_again) to {
+                    ErrorScreenButton(
+                        buttonText = stringResource(id = R.string.file_upload),
+                    ) {
                         identityViewModel.screenTracker.screenTransitionStart(
                             SCREEN_NAME_ERROR
                         )
-                        findNavController().navigate(
-                            scanType.toScanDestinationId(),
-                            bundleOf(
-                                ARG_SHOULD_START_FROM_BACK to scanType.toShouldStartFromBack()
-                            )
+                        navigateToUploadFragment(
+                            scanType.toUploadDestinationId(),
+                            shouldShowTakePhoto = true,
+                            shouldShowChoosePhoto = !args.getBoolean(ARG_REQUIRE_LIVE_CAPTURE)
                         )
                     }
+                },
+                bottomButton =
+                ErrorScreenButton(
+                    buttonText = stringResource(id = R.string.try_again)
+                ) {
+                    identityViewModel.screenTracker.screenTransitionStart(
+                        SCREEN_NAME_ERROR
                     )
+                    findNavController().navigate(
+                        scanType.toScanDestinationId(),
+                        bundleOf(
+                            ARG_SHOULD_START_FROM_BACK to scanType.toShouldStartFromBack()
+                        )
+                    )
+                }
             )
         }
     }

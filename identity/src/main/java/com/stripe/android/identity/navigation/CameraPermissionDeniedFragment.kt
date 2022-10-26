@@ -14,6 +14,7 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.ui.ErrorScreen
+import com.stripe.android.identity.ui.ErrorScreenButton
 import com.stripe.android.identity.utils.navigateToUploadFragment
 
 /**
@@ -39,7 +40,9 @@ internal class CameraPermissionDeniedFragment(
                     stringResource(R.string.upload_file_text, it.getDisplayName())
                 },
                 topButton = scanType?.let {
-                    stringResource(id = R.string.file_upload) to {
+                    ErrorScreenButton(
+                        buttonText = stringResource(id = R.string.file_upload)
+                    ) {
                         identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_ERROR)
                         navigateToUploadFragment(
                             it.toUploadDestinationId(),
@@ -48,14 +51,14 @@ internal class CameraPermissionDeniedFragment(
                         )
                     }
                 },
-                bottomButton = (
-                    stringResource(id = R.string.app_settings) to {
-                        appSettingsOpenable.openAppSettings()
-                        // navigate back to DocSelectFragment, so that when user is back to the app from settings
-                        // the camera permission check can be triggered again from there.
-                        findNavController().navigate(R.id.action_cameraPermissionDeniedFragment_to_docSelectionFragment)
-                    }
-                    )
+                bottomButton = ErrorScreenButton(
+                    buttonText = stringResource(id = R.string.app_settings)
+                ) {
+                    appSettingsOpenable.openAppSettings()
+                    // navigate back to DocSelectFragment, so that when user is back to the app from settings
+                    // the camera permission check can be triggered again from there.
+                    findNavController().navigate(R.id.action_cameraPermissionDeniedFragment_to_docSelectionFragment)
+                }
             )
         }
     }

@@ -18,6 +18,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError.Requirement.Companion.matchesFromFragment
 import com.stripe.android.identity.ui.ErrorScreen
+import com.stripe.android.identity.ui.ErrorScreenButton
 import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
 
 /**
@@ -49,34 +50,34 @@ internal class ErrorFragment(
             ErrorScreen(
                 title = requireNotNull(args.getString(ARG_ERROR_TITLE)),
                 message1 = requireNotNull(args.getString(ARG_ERROR_CONTENT)),
-                bottomButton = (
-                    requireNotNull(args.getString(ARG_GO_BACK_BUTTON_TEXT)) to {
-                        identityViewModel.screenTracker.screenTransitionStart(
-                            SCREEN_NAME_ERROR
+                bottomButton = ErrorScreenButton(
+                    buttonText = requireNotNull(args.getString(ARG_GO_BACK_BUTTON_TEXT))
+                ) {
+                    identityViewModel.screenTracker.screenTransitionStart(
+                        SCREEN_NAME_ERROR
+                    )
+                    if (args.getBoolean(ARG_SHOULD_FAIL, false)) {
+                        verificationFlowFinishable.finishWithResult(
+                            IdentityVerificationSheet.VerificationFlowResult.Failed(cause)
                         )
-                        if (args.getBoolean(ARG_SHOULD_FAIL, false)) {
-                            verificationFlowFinishable.finishWithResult(
-                                IdentityVerificationSheet.VerificationFlowResult.Failed(cause)
-                            )
+                    } else {
+                        val destination = args.getInt(ARG_GO_BACK_BUTTON_DESTINATION)
+                        if (destination == UNEXPECTED_DESTINATION) {
+                            findNavController().navigate(DEFAULT_BACK_BUTTON_NAVIGATION)
                         } else {
-                            val destination = args.getInt(ARG_GO_BACK_BUTTON_DESTINATION)
-                            if (destination == UNEXPECTED_DESTINATION) {
-                                findNavController().navigate(DEFAULT_BACK_BUTTON_NAVIGATION)
-                            } else {
-                                findNavController().let { navController ->
-                                    var shouldContinueNavigateUp = true
-                                    while (
-                                        shouldContinueNavigateUp &&
-                                        navController.currentDestination?.id != destination
-                                    ) {
-                                        shouldContinueNavigateUp =
-                                            navController.navigateUpAndSetArgForUploadFragment()
-                                    }
+                            findNavController().let { navController ->
+                                var shouldContinueNavigateUp = true
+                                while (
+                                    shouldContinueNavigateUp &&
+                                    navController.currentDestination?.id != destination
+                                ) {
+                                    shouldContinueNavigateUp =
+                                        navController.navigateUpAndSetArgForUploadFragment()
                                 }
                             }
                         }
                     }
-                    )
+                }
             )
         }
     }

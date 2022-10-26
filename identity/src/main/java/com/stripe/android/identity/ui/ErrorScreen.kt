@@ -33,8 +33,8 @@ internal fun ErrorScreen(
     modifier: Modifier = Modifier,
     message1: String? = null,
     message2: String? = null,
-    topButton: Pair<String, () -> Unit>? = null,
-    bottomButton: Pair<String, () -> Unit>? = null
+    topButton: ErrorScreenButton? = null,
+    bottomButton: ErrorScreenButton? = null,
 ) {
     MdcTheme {
         Column(
@@ -125,6 +125,11 @@ internal fun ErrorScreen(
         }
     }
 }
+
+internal data class ErrorScreenButton(
+    val buttonText: String,
+    val onButtonClick: () -> Unit
+)
 
 internal const val ErrorTitleTag = "ConfirmationTitle"
 internal const val ErrorMessage1Tag = "Message1"

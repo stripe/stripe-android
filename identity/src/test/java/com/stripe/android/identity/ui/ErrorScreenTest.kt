@@ -53,7 +53,10 @@ class ErrorScreenTest {
     @Test
     fun `topButton is correctly set`() {
         setComposeTestRuleWith(
-            topButton = (ERROR_TOP_BUTTON_TEXT to mockTopButtonClicked)
+            topButton = ErrorScreenButton(
+                buttonText = ERROR_TOP_BUTTON_TEXT,
+                onButtonClick = mockTopButtonClicked
+            )
         ) {
             onNodeWithTag(ErrorTitleTag).assertTextEquals(ERROR_TITLE)
             onNodeWithTag(ErrorMessage1Tag).assertDoesNotExist()
@@ -69,7 +72,10 @@ class ErrorScreenTest {
     @Test
     fun `bottomButton is correctly set`() {
         setComposeTestRuleWith(
-            bottomButton = (ERROR_BOTTOM_BUTTON_TEXT to mockBottomButtonClicked)
+            bottomButton = ErrorScreenButton(
+                buttonText = ERROR_BOTTOM_BUTTON_TEXT,
+                onButtonClick = mockBottomButtonClicked
+            )
         ) {
             onNodeWithTag(ErrorTitleTag).assertTextEquals(ERROR_TITLE)
             onNodeWithTag(ErrorMessage1Tag).assertDoesNotExist()
@@ -87,8 +93,14 @@ class ErrorScreenTest {
         setComposeTestRuleWith(
             message1 = ERROR_MESSAGE1,
             message2 = ERROR_MESSAGE2,
-            topButton = (ERROR_TOP_BUTTON_TEXT to mockTopButtonClicked),
-            bottomButton = (ERROR_BOTTOM_BUTTON_TEXT to mockBottomButtonClicked)
+            topButton = ErrorScreenButton(
+                buttonText = ERROR_TOP_BUTTON_TEXT,
+                onButtonClick = mockTopButtonClicked
+            ),
+            bottomButton = ErrorScreenButton(
+                buttonText = ERROR_BOTTOM_BUTTON_TEXT,
+                onButtonClick = mockBottomButtonClicked
+            )
         ) {
             onNodeWithTag(ErrorTitleTag).assertTextEquals(ERROR_TITLE)
             onNodeWithTag(ErrorMessage1Tag).assertTextEquals(ERROR_MESSAGE1)
@@ -107,8 +119,8 @@ class ErrorScreenTest {
     private fun setComposeTestRuleWith(
         message1: String? = null,
         message2: String? = null,
-        topButton: Pair<String, () -> Unit>? = null,
-        bottomButton: Pair<String, () -> Unit>? = null,
+        topButton: ErrorScreenButton? = null,
+        bottomButton: ErrorScreenButton? = null,
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
         composeTestRule.setContent {
