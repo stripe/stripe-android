@@ -25,10 +25,10 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.DOC_SELECT_TO_UPLOAD
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.DOC_SELECT_TO_UPLOAD_WITH_SELFIE
 import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
-import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentSelectPage
 import com.stripe.android.identity.viewModelFactoryFor
@@ -593,7 +593,7 @@ internal class DocSelectionFragmentTest {
             objectType = "type",
             requirements = VerificationPageDataRequirements(
                 errors = emptyList(),
-                missings = listOf(VerificationPageRequirements.Missing.IDDOCUMENTBACK)
+                missings = listOf(Requirement.IDDOCUMENTBACK)
             ),
             status = VerificationPageData.Status.VERIFIED,
             submitted = false

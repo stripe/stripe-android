@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
@@ -52,9 +53,7 @@ class ConsentScreenTest {
         )
         whenever(it.requirements).thenReturn(
             VerificationPageRequirements(
-                missing = listOf(
-                    VerificationPageRequirements.Missing.BIOMETRICCONSENT
-                )
+                missing = listOf(Requirement.BIOMETRICCONSENT)
             )
         )
         if (CONSENT_REQUIRE_SELFIE) {
@@ -76,9 +75,7 @@ class ConsentScreenTest {
         )
         whenever(it.requirements).thenReturn(
             VerificationPageRequirements(
-                missing = listOf(
-                    VerificationPageRequirements.Missing.BIOMETRICCONSENT
-                )
+                missing = listOf(Requirement.BIOMETRICCONSENT)
             )
         )
         if (CONSENT_REQUIRE_SELFIE) {

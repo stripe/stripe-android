@@ -20,6 +20,7 @@ import com.stripe.android.identity.ERROR_TITLE
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.navigation.ErrorFragment
+import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
@@ -454,7 +455,7 @@ internal class NavigationUtilsTest {
                     VerificationPageDataRequirementError(
                         body = ERROR_BODY,
                         backButtonText = ERROR_BUTTON_TEXT,
-                        requirement = VerificationPageDataRequirementError.Requirement.BIOMETRICCONSENT,
+                        requirement = Requirement.BIOMETRICCONSENT,
                         title = ERROR_TITLE
                     )
                 )
@@ -471,7 +472,7 @@ internal class NavigationUtilsTest {
                     VerificationPageDataRequirementError(
                         body = ERROR_BODY,
                         backButtonText = ERROR_BUTTON_TEXT,
-                        requirement = VerificationPageDataRequirementError.Requirement.IDDOCUMENTBACK,
+                        requirement = Requirement.IDDOCUMENTBACK,
                         title = ERROR_TITLE
                     )
                 )
@@ -488,7 +489,7 @@ internal class NavigationUtilsTest {
                     VerificationPageDataRequirementError(
                         body = ERROR_BODY,
                         backButtonText = ERROR_BUTTON_TEXT,
-                        requirement = VerificationPageDataRequirementError.Requirement.IDDOCUMENTFRONT,
+                        requirement = Requirement.IDDOCUMENTFRONT,
                         title = ERROR_TITLE
                     )
                 )
@@ -505,7 +506,7 @@ internal class NavigationUtilsTest {
                     VerificationPageDataRequirementError(
                         body = ERROR_BODY,
                         backButtonText = ERROR_BUTTON_TEXT,
-                        requirement = VerificationPageDataRequirementError.Requirement.IDDOCUMENTTYPE,
+                        requirement = Requirement.IDDOCUMENTTYPE,
                         title = ERROR_TITLE
                     )
                 )

@@ -40,7 +40,10 @@ import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.clearData
+import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.mergeWith
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
+import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
@@ -134,6 +137,12 @@ internal class IdentityViewModel constructor(
      */
     private val _faceDetectorModelFile = MutableLiveData<Resource<File>>()
     val faceDetectorModelFile: LiveData<Resource<File>> = _faceDetectorModelFile
+
+    /**
+     * Keep track of data collected so far.
+     */
+    private val _collectedData = MutableStateFlow(CollectedDataParam())
+    val collectedData: StateFlow<CollectedDataParam> = _collectedData
 
     data class PageAndModelFiles(
         val page: VerificationPage,
@@ -728,13 +737,19 @@ internal class IdentityViewModel constructor(
     suspend fun postVerificationPageData(
         collectedDataParam: CollectedDataParam,
         clearDataParam: ClearDataParam
-    ) =
+    ): VerificationPageData {
         identityRepository.postVerificationPageData(
             verificationArgs.verificationSessionId,
             verificationArgs.ephemeralKeySecret,
             collectedDataParam,
             clearDataParam
-        )
+        ).let {
+            _collectedData.update { oldValue ->
+                oldValue.mergeWith(collectedDataParam)
+            }
+            return it
+        }
+    }
 
     /**
      * Submit the final [VerificationPageData].
@@ -780,6 +795,12 @@ internal class IdentityViewModel constructor(
                     )
                 )
             }
+        }
+    }
+
+    fun clearCollectedData(field: Requirement) {
+        _collectedData.update {
+            it.clearData(field)
         }
     }
 
