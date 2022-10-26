@@ -57,7 +57,6 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
     private suspend fun commonParams(): Map<String, String?> {
         val manifest = getManifest()
         return mapOf(
-            "platform" to "android",
             "las_client_secret" to configuration.financialConnectionsSessionClientSecret,
 //            "las_creator_client_secret": this.linkAccountSessionCreatorClientSecret,
 //        "las_creator_type": this.linkAccountSessionCreatorType,
@@ -76,10 +75,8 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
         )
     }
 
-    // TODO@carlosmuvi temporary configuration
     internal companion object {
         const val CLIENT_ID = "mobile-clients-linked-accounts"
         const val ORIGIN = "stripe-linked-accounts-android"
-        const val ID = "id"
     }
 }
