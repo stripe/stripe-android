@@ -37,5 +37,13 @@ internal data class ClearDataParam(
             idDocumentBack = requirements.contains(Requirement.IDDOCUMENTBACK),
             face = requirements.contains(Requirement.FACE)
         )
+
+        fun createFromRequirements(requirements: Set<Requirement>) = ClearDataParam(
+            biometricConsent = requirements.contains(Requirement.BIOMETRICCONSENT),
+            idDocumentType = requirements.contains(Requirement.IDDOCUMENTTYPE),
+            idDocumentFront = requirements.contains(Requirement.IDDOCUMENTFRONT),
+            idDocumentBack = requirements.contains(Requirement.IDDOCUMENTBACK),
+            face = requirements.contains(Requirement.FACE)
+        )
     }
 }
