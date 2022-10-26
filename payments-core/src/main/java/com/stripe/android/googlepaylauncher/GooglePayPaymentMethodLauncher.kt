@@ -104,7 +104,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     )
 
     private val injector = object : Injector {
-        override fun inject(injectable: Injectable<*, *>) {
+        override fun inject(injectable: Injectable<*>) {
             when (injectable) {
                 is GooglePayPaymentMethodLauncherViewModel.Factory -> {
                     launcherComponent.inject(injectable)

@@ -33,7 +33,7 @@ class AddressElementViewModelTest {
         val vmToBeReturned = mock<AddressElementViewModel>()
 
         val injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*, *>) {
+            override fun inject(injectable: Injectable<*>) {
                 val factory = injectable as AddressElementViewModel.Factory
                 factory.viewModel = vmToBeReturned
             }

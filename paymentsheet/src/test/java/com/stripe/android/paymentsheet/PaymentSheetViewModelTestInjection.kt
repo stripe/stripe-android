@@ -145,7 +145,7 @@ internal open class PaymentSheetViewModelTestInjection {
         )
     ) {
         injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*, *>) {
+            override fun inject(injectable: Injectable<*>) {
                 (injectable as? PaymentSheetViewModel.Factory)?.let {
                     val mockBuilder = mock<PaymentSheetViewModelSubcomponent.Builder>()
                     val mockSubcomponent = mock<PaymentSheetViewModelSubcomponent>()

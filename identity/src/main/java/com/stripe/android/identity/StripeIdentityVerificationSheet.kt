@@ -71,7 +71,7 @@ internal class StripeIdentityVerificationSheet internal constructor(
         )
     }
 
-    override fun inject(injectable: Injectable<*, *>) {
+    override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is IdentityActivity -> {
                 identityVerificationSheetComponent.inject(injectable)

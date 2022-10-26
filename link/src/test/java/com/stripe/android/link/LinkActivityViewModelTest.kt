@@ -100,7 +100,7 @@ class LinkActivityViewModelTest {
         val vmToBeReturned = mock<LinkActivityViewModel>()
 
         val injector = object : NonFallbackInjector {
-            override fun inject(injectable: Injectable<*, *>) {
+            override fun inject(injectable: Injectable<*>) {
                 val factory = injectable as LinkActivityViewModel.Factory
                 factory.viewModel = vmToBeReturned
             }

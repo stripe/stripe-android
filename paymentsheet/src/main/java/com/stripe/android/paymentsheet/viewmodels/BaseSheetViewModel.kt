@@ -22,6 +22,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.verification.LinkVerificationCallback
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
@@ -29,6 +30,8 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
+import com.stripe.android.paymentsheet.PaymentOptionsState
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -40,6 +43,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
@@ -47,9 +51,13 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
@@ -235,6 +243,25 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         get() = savedStateHandle.get<String>(LPM_SERVER_SPEC_STRING)
         set(value) = savedStateHandle.set(LPM_SERVER_SPEC_STRING, value)
 
+    private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
+        PaymentOptionsStateMapper(
+            paymentMethods = paymentMethods,
+            initialSelection = savedSelection,
+            currentSelection = selection,
+            isGooglePayReady = isGooglePayReady,
+            isLinkEnabled = isLinkEnabled,
+            isNotPaymentFlow = this is PaymentOptionsViewModel,
+        )
+    }
+
+    val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()
+        .asFlow()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = PaymentOptionsState(),
+        )
+
     init {
         if (_savedSelection.value == null) {
             viewModelScope.launch {
@@ -267,6 +294,15 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     _isResourceRepositoryReady.postValue(true)
                 }
             }
+        }
+
+        viewModelScope.launch {
+            // If the currently selected payment option has been removed, we set it to the one
+            // determined in the payment options state.
+            paymentOptionsState
+                .mapNotNull { it.selectedItem?.toPaymentSelection() }
+                .filter { it != selection.value }
+                .collect { updateSelection(it) }
         }
     }
 
@@ -315,7 +351,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    open fun transitionTo(target: TransitionTargetType) {
+    fun transitionTo(target: TransitionTargetType) {
         _transition.postValue(Event(target))
     }
 
@@ -411,38 +447,38 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         _contentVisible.value = visible
     }
 
-    fun removePaymentMethod(paymentMethod: PaymentMethod) = runBlocking {
-        launch {
-            paymentMethod.id?.let { paymentMethodId ->
-                if (
-                    (selection.value as? PaymentSelection.Saved)
-                        ?.paymentMethod?.id == paymentMethodId
-                ) {
-                    _selection.value = null
-                }
+    fun removePaymentMethod(paymentMethod: PaymentMethod) {
+        val paymentMethodId = paymentMethod.id ?: return
 
-                savedStateHandle[SAVE_PAYMENT_METHODS] = _paymentMethods.value?.filter {
-                    it.id != paymentMethodId
-                }
+        viewModelScope.launch {
+            val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
+            val didRemoveSelectedItem = currentSelection == paymentMethodId
 
-                customerConfig?.let {
-                    customerRepository.detachPaymentMethod(
-                        it,
-                        paymentMethodId
+            if (didRemoveSelectedItem) {
+                // Remove the current selection. The new selection will be set when we're computing
+                // the next PaymentOptionsState.
+                _selection.value = null
+            }
+
+            savedStateHandle[SAVE_PAYMENT_METHODS] = _paymentMethods.value?.filter {
+                it.id != paymentMethodId
+            }
+
+            customerConfig?.let {
+                customerRepository.detachPaymentMethod(
+                    it,
+                    paymentMethodId
+                )
+            }
+
+            val hasNoBankAccounts = paymentMethods.value.orEmpty().all { it.type != USBankAccount }
+            if (hasNoBankAccounts) {
+                updatePrimaryButtonUIState(
+                    primaryButtonUIState.value?.copy(
+                        visible = false
                     )
-                }
-
-                if (_paymentMethods.value?.all {
-                    it.type != PaymentMethod.Type.USBankAccount
-                } == true
-                ) {
-                    updatePrimaryButtonUIState(
-                        primaryButtonUIState.value?.copy(
-                            visible = false
-                        )
-                    )
-                    updateBelowButtonText(null)
-                }
+                )
+                updateBelowButtonText(null)
             }
         }
     }

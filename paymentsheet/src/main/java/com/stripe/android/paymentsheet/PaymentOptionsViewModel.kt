@@ -14,6 +14,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
@@ -310,7 +311,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         owner: SavedStateRegistryOwner,
         defaultArgs: Bundle? = null
     ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
-        Injectable<Factory.FallbackInitializeParam, NonFallbackInjector> {
+        Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application,
             val productUsage: Set<String>
@@ -340,11 +341,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 .savedStateHandle(savedStateHandle)
                 .build()
             val viewModel = subcomponent.viewModel
-            viewModel.injector = injector
+            viewModel.injector = requireNotNull(injector as NonFallbackInjector)
             return viewModel as T
         }
 
-        override fun fallbackInitialize(arg: FallbackInitializeParam): NonFallbackInjector {
+        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector {
             val component = DaggerPaymentOptionsViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .productUsage(arg.productUsage)

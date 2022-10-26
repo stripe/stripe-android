@@ -9,16 +9,16 @@ import androidx.annotation.RestrictTo
  *
  * @param <FallbackInitializeParam> Class that holds the parameters required to recreate the Dagger
  * dependency graph during fallback.
- * @param <InjectorType> Injector class created during fallback, and used to inject into other
- * classes. [Unit] if the injector created during fallback does not inject into other classes.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface Injectable<FallbackInitializeParam, InjectorType> {
+interface Injectable<FallbackInitializeParam> {
     /**
      * Fallback initialization logic for the dependencies when [Injector] is not available. This
      * could happen when the app process is killed and static [Injector]s are cleared up.
-     *
      * An [Injectable] should check when this happens and calls this function manually.
+     *
+     * @return The [Injector] created during fallback. It must be non-null when the [Injectable]
+     * is responsible for injecting into other classes.
      */
-    fun fallbackInitialize(arg: FallbackInitializeParam): InjectorType
+    fun fallbackInitialize(arg: FallbackInitializeParam): Injector?
 }

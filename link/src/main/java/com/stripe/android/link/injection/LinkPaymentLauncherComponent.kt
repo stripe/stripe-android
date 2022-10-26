@@ -47,7 +47,7 @@ internal abstract class LinkPaymentLauncherComponent {
     abstract fun inject(factory: InlineSignupViewModel.Factory)
 
     val injector: NonFallbackInjector = object : NonFallbackInjector {
-        override fun inject(injectable: Injectable<*, *>) {
+        override fun inject(injectable: Injectable<*>) {
             when (injectable) {
                 is VerificationViewModel.Factory ->
                     this@LinkPaymentLauncherComponent.inject(injectable)
