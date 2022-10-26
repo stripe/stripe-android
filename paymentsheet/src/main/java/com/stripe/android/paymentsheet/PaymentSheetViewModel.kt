@@ -49,7 +49,6 @@ import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShip
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent

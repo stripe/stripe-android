@@ -25,7 +25,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -187,7 +186,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                         savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
                     }
                     AccountStatus.SignedOut,
-                    AccountStatus.Error -> {}
+                    AccountStatus.Error -> {
+                    }
                 }
                 activeLinkSession.value = accountStatus == AccountStatus.Verified
                 _isLinkEnabled.value = accountStatus != AccountStatus.Error

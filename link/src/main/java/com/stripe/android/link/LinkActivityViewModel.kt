@@ -13,11 +13,6 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.ConfirmationManager
 import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
 import com.stripe.android.link.model.Navigator
-import com.stripe.android.link.ui.cardedit.CardEditViewModel
-import com.stripe.android.link.ui.paymentmethod.PaymentMethodViewModel
-import com.stripe.android.link.ui.signup.SignUpViewModel
-import com.stripe.android.link.ui.verification.VerificationViewModel
-import com.stripe.android.link.ui.wallet.WalletViewModel
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import javax.inject.Inject
