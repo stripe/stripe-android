@@ -54,6 +54,7 @@ internal fun SuccessScreen() {
             onDoneClick = viewModel::onDoneClick,
             onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
             onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
+            onDisconnectLinkClick = viewModel::onDisconnectLinkClick,
             showLinkAnotherAccount = payload.showLinkAnotherAccount
         ) { parentViewModel.onCloseWithConfirmationClick(NextPane.SUCCESS) }
     }
@@ -72,6 +73,7 @@ private fun SuccessContent(
     onLinkAnotherAccountClick: () -> Unit,
     showLinkAnotherAccount: Boolean,
     onLearnMoreAboutDataAccessClick: () -> Unit,
+    onDisconnectLinkClick: () -> Unit,
     onCloseClick: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
@@ -125,7 +127,10 @@ private fun SuccessContent(
             Spacer(modifier = Modifier.size(12.dp))
             AnnotatedText(
                 text = TextResource.StringId(R.string.success_pane_disconnect),
-                onClickableTextClick = { uriHandler.openUri(disconnectUrl) },
+                onClickableTextClick = {
+                    onDisconnectLinkClick()
+                    uriHandler.openUri(disconnectUrl)
+                },
                 defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
                     color = FinancialConnectionsTheme.colors.textSecondary
                 ),
@@ -239,6 +244,7 @@ internal fun SuccessScreenPreview() {
             onDoneClick = {},
             onLinkAnotherAccountClick = {},
             onLearnMoreAboutDataAccessClick = {},
+            onDisconnectLinkClick = {},
             showLinkAnotherAccount = true,
         ) {}
     }

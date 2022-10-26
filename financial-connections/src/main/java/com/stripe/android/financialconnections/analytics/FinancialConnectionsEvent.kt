@@ -70,6 +70,15 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
+    class ClickDisconnectLink(
+        pane: NextPane
+    ) : FinancialConnectionsEvent(
+        name = "click.disconnect_link",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
     class Click(
         eventName: String,
         pane: NextPane
