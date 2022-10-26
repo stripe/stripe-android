@@ -49,7 +49,6 @@ import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShip
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
@@ -716,16 +715,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 .injectorKey(DUMMY_INJECTOR_KEY)
                 .build()
             component.inject(this)
-            return object : NonFallbackInjector {
-                override fun inject(injectable: Injectable<*, *>) {
-                    when (injectable) {
-                        is FormViewModel.Factory -> component.inject(injectable)
-                        else -> {
-                            throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-                        }
-                    }
-                }
-            }
+            return component
         }
     }
 

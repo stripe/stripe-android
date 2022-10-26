@@ -25,7 +25,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -351,16 +350,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 .productUsage(arg.productUsage)
                 .build()
             component.inject(this)
-            return object : NonFallbackInjector {
-                override fun inject(injectable: Injectable<*, *>) {
-                    when (injectable) {
-                        is FormViewModel.Factory -> component.inject(injectable)
-                        else -> {
-                            throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
-                        }
-                    }
-                }
-            }
+            return component
         }
     }
 
