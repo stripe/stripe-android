@@ -87,7 +87,7 @@ internal class InstitutionPickerViewModelTest {
     }
 
     @Test
-    fun `onQueryChanged - institutions are searched`() = runTest {
+    fun `onQueryChanged - institutions are searched and event sent`() = runTest {
         val query = "query"
         val searchResults = InstitutionResponse(
             listOf(
@@ -125,6 +125,13 @@ internal class InstitutionPickerViewModelTest {
         withState(viewModel) { state ->
             assertEquals(state.payload()!!.featuredInstitutions, featuredResults.data)
             assertEquals(state.searchInstitutions()!!.data, searchResults.data)
+            eventTracker.assertContainsEvent(
+                expectedEventName = "linked_accounts.search.succeeded",
+                expectedParams = mapOf(
+                    "pane" to "institution_picker",
+                    "query" to query
+                )
+            )
         }
     }
 
