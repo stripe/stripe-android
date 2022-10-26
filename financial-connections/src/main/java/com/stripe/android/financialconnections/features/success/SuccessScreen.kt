@@ -53,6 +53,7 @@ internal fun SuccessScreen() {
             loading = state.value.completeSession is Loading,
             onDoneClick = viewModel::onDoneClick,
             onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
+            onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
             showLinkAnotherAccount = payload.showLinkAnotherAccount
         ) { parentViewModel.onCloseWithConfirmationClick(NextPane.SUCCESS) }
     }
@@ -70,6 +71,7 @@ private fun SuccessContent(
     onDoneClick: () -> Unit,
     onLinkAnotherAccountClick: () -> Unit,
     showLinkAnotherAccount: Boolean,
+    onLearnMoreAboutDataAccessClick: () -> Unit,
     onCloseClick: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
@@ -117,6 +119,7 @@ private fun SuccessContent(
                     model = accessibleDataModel,
                     accounts = accounts,
                     institution = institution,
+                    onLearnMoreClick = { onLearnMoreAboutDataAccessClick() }
                 )
             }
             Spacer(modifier = Modifier.size(12.dp))
@@ -235,6 +238,7 @@ internal fun SuccessScreenPreview() {
             loading = false,
             onDoneClick = {},
             onLinkAnotherAccountClick = {},
+            onLearnMoreAboutDataAccessClick = {},
             showLinkAnotherAccount = true,
         ) {}
     }

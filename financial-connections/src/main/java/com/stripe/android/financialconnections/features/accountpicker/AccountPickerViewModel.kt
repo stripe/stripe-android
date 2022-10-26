@@ -10,6 +10,7 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLinkAccounts
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
@@ -250,6 +251,14 @@ internal class AccountPickerViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun onLearnMoreAboutDataAccessClick() {
+        viewModelScope.launch {
+            eventTracker.track(
+                FinancialConnectionsEvent.ClickLearnMoreDataAccess(NextPane.ACCOUNT_PICKER)
+            )
         }
     }
 

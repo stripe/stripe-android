@@ -9,6 +9,7 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickDone
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLinkAnotherAccount
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
@@ -106,6 +107,12 @@ internal class SuccessViewModel @Inject constructor(
             eventTracker.track(ClickLinkAnotherAccount(NextPane.SUCCESS))
         }
         navigationManager.navigate(NavigationDirections.reset)
+    }
+
+    fun onLearnMoreAboutDataAccessClick() {
+        viewModelScope.launch {
+            eventTracker.track(ClickLearnMoreDataAccess(NextPane.SUCCESS))
+        }
     }
 
     companion object : MavericksViewModelFactory<SuccessViewModel, SuccessState> {

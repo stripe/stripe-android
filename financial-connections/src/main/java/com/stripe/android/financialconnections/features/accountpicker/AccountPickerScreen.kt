@@ -91,6 +91,7 @@ internal fun AccountPickerScreen() {
         onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(NextPane.ACCOUNT_PICKER) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
+        onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick
     )
 }
 
@@ -104,6 +105,7 @@ private fun AccountPickerContent(
     onEnterDetailsManually: () -> Unit,
     onLoadAccountsAgain: () -> Unit,
     onCloseClick: () -> Unit,
+    onLearnMoreAboutDataAccessClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
@@ -132,6 +134,7 @@ private fun AccountPickerContent(
                     selectionMode = payload().selectionMode,
                     accessibleDataCalloutModel = payload().accessibleData,
                     onSelectAllAccountsClicked = onSelectAllAccountsClicked,
+                    onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick
                 )
             }
 
@@ -180,6 +183,7 @@ private fun AccountPickerLoaded(
     onAccountClicked: (PartnerAccount) -> Unit,
     onSelectAllAccountsClicked: () -> Unit,
     onSubmit: () -> Unit,
+    onLearnMoreAboutDataAccessClick: () -> Unit,
     subtitle: TextResource?
 ) {
     Column(
@@ -229,7 +233,7 @@ private fun AccountPickerLoaded(
             }
             Spacer(modifier = Modifier.weight(1f))
         }
-        accessibleDataCalloutModel?.let { AccessibleDataCallout(it) }
+        accessibleDataCalloutModel?.let { AccessibleDataCallout(it, onLearnMoreAboutDataAccessClick) }
         Spacer(modifier = Modifier.size(12.dp))
         FinancialConnectionsButton(
             enabled = submitEnabled,
@@ -544,7 +548,8 @@ internal fun AccountPickerPreviewMultiSelect() {
             onSelectAnotherBank = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseClick = {}
+            onCloseClick = {},
+            onLearnMoreAboutDataAccessClick = {}
         ) {}
     }
 }
@@ -565,7 +570,8 @@ internal fun AccountPickerPreviewSingleSelect() {
             onSelectAnotherBank = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseClick = {}
+            onCloseClick = {},
+            onLearnMoreAboutDataAccessClick = {}
         ) {}
     }
 }
@@ -586,7 +592,8 @@ internal fun AccountPickerPreviewDropdown() {
             onSelectAnotherBank = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseClick = {}
+            onCloseClick = {},
+            onLearnMoreAboutDataAccessClick = {}
         ) {}
     }
 }

@@ -61,6 +61,15 @@ internal sealed class FinancialConnectionsEvent(
             .filterNotNullValues()
     )
 
+    class ClickLearnMoreDataAccess(
+        pane: NextPane
+    ) : FinancialConnectionsEvent(
+        name = "click.data_access.learn_more",
+        mapOf(
+            "pane" to pane.value,
+        ).filterNotNullValues()
+    )
+
     class Click(
         eventName: String,
         pane: NextPane
@@ -71,7 +80,10 @@ internal sealed class FinancialConnectionsEvent(
         ).filterNotNullValues()
     )
 
-    class InstitutionSelected(pane: NextPane, fromFeatured: Boolean) : FinancialConnectionsEvent(
+    class InstitutionSelected(
+        pane: NextPane,
+        fromFeatured: Boolean
+    ) : FinancialConnectionsEvent(
         name = if (fromFeatured) "search.featured_institution_selected" else "search.search_result_selected",
         mapOf(
             "pane" to pane.value,
