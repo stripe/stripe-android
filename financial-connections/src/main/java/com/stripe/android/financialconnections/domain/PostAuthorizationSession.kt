@@ -2,8 +2,8 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.exception.InstitutionPlannedException
-import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
+import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
+import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
@@ -48,12 +48,12 @@ internal class PostAuthorizationSession @Inject constructor(
         val availableAt: String? = it.extraFields?.get("expected_to_be_available_at")
         when (institutionUnavailable) {
             "true" -> when {
-                availableAt.isNullOrEmpty() -> InstitutionUnplannedException(
+                availableAt.isNullOrEmpty() -> InstitutionUnplannedDowntimeError(
                     institution = institution,
                     allowManualEntry = allowManualEntry,
                     stripeException = this
                 )
-                else -> InstitutionPlannedException(
+                else -> InstitutionPlannedDowntimeError(
                     institution = institution,
                     allowManualEntry = allowManualEntry,
                     isToday = true,

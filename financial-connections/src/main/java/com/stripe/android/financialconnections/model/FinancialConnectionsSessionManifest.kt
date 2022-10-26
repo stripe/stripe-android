@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 /**
  *

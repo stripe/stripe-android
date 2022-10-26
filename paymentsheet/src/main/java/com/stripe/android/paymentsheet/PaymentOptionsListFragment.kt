@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
-import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
     canClickSelectedItem = true
@@ -49,14 +48,8 @@ internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
         )
     }
 
-    override fun onPaymentOptionSelected(
-        paymentSelection: PaymentSelection,
-        isClick: Boolean
-    ) {
-        super.onPaymentOptionSelected(paymentSelection, isClick)
-        if (isClick) {
-            // this is a click-triggered selection
-            sheetViewModel.onUserSelection()
-        }
+    override fun onPaymentOptionsItemSelected(item: PaymentOptionsItem) {
+        super.onPaymentOptionsItemSelected(item)
+        sheetViewModel.onUserSelection()
     }
 }

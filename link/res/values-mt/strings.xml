@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[Meta tingħaqad ma\' Link tkun qed taqbel mat-<terms>Termini</terms> u l-<privacy>Politika tal-Privatezza</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">Ibdel l-indirizz tal-email</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">Il-kodiċi ntbagħat</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">Daħħal il-kodiċi ta\' verifika tiegħek</string>
   <!-- Two factor authentication screen heading -->

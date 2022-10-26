@@ -16,12 +16,13 @@ import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
@@ -48,6 +49,7 @@ import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShip
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
+import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
@@ -66,6 +68,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.ui.core.injection.NonFallbackInjector
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -686,6 +689,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         lateinit var subComponentBuilderProvider:
             Provider<PaymentSheetViewModelSubcomponent.Builder>
 
+        private lateinit var injector: NonFallbackInjector
+
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(
             key: String,
@@ -693,21 +698,53 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             savedStateHandle: SavedStateHandle
         ): T {
             val args = starterArgsSupplier()
+            val logger = Logger.getInstance(BuildConfig.DEBUG)
 
-            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
+            WeakMapInjectorRegistry.retrieve(args.injectorKey)?.let {
+                it as? NonFallbackInjector
+            }?.let {
+                logger.info(
+                    "Injector available, " +
+                        "injecting dependencies into ${this::class.java.canonicalName}"
+                )
+                injector = it
+                it.inject(this)
+            } ?: run {
+                logger.info(
+                    "Injector unavailable, " +
+                        "initializing dependencies of ${this::class.java.canonicalName}"
+                )
+                fallbackInitialize(FallbackInitializeParam(applicationSupplier()))
+            }
 
-            return subComponentBuilderProvider.get()
+            val subcomponent = subComponentBuilderProvider.get()
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
                 .savedStateHandle(savedStateHandle)
-                .build().viewModel as T
+                .build()
+            val viewModel = subcomponent.viewModel
+            viewModel.injector = injector
+            return viewModel as T
         }
 
         override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            DaggerPaymentSheetLauncherComponent
+            val component = DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(arg.application)
                 .injectorKey(DUMMY_INJECTOR_KEY)
-                .build().inject(this)
+                .build()
+
+            injector = object : NonFallbackInjector {
+                override fun inject(injectable: Injectable<*>) {
+                    when (injectable) {
+                        is FormViewModel.Factory -> component.inject(injectable)
+                        else -> {
+                            throw IllegalArgumentException("invalid Injectable $injectable requested in $this")
+                        }
+                    }
+                }
+            }
+
+            component.inject(this)
         }
     }
 

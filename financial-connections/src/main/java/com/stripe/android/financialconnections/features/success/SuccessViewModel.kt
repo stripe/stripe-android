@@ -7,6 +7,13 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickDisconnectLink
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickDone
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLearnMoreDataAccess
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickLinkAnotherAccount
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -17,10 +24,12 @@ import com.stripe.android.financialconnections.features.consent.FinancialConnect
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Suppress("LongParameterList")
@@ -28,14 +37,16 @@ internal class SuccessViewModel @Inject constructor(
     initialState: SuccessState,
     getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
     getManifest: GetManifest,
-    val logger: Logger,
-    val navigationManager: NavigationManager,
-    val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
-    val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val logger: Logger,
+    private val navigationManager: NavigationManager,
+    private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
+    private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
 ) : MavericksViewModel<SuccessState>(initialState) {
 
     init {
         logErrors()
+
         suspend {
             val manifest = getManifest()
             SuccessState.Payload(
@@ -54,15 +65,33 @@ internal class SuccessViewModel @Inject constructor(
     }
 
     private fun logErrors() {
-        onAsync(SuccessState::payload, onFail = {
-            logger.error("Error retrieving payload", it)
-        })
-        onAsync(SuccessState::completeSession, onFail = {
-            logger.error("Error completing session", it)
-        })
+        onAsync(
+            SuccessState::payload,
+            onFail = { logger.error("Error retrieving payload", it) },
+            onSuccess = { eventTracker.track(PaneLoaded(NextPane.SUCCESS)) }
+        )
+        onAsync(SuccessState::completeSession, onSuccess = {
+            eventTracker.track(
+                Complete(
+                    connectedAccounts = it.accounts.data.count(),
+                    exception = null
+                )
+            )
+        }, onFail = {
+                eventTracker.track(
+                    Complete(
+                        connectedAccounts = null,
+                        exception = it
+                    )
+                )
+                logger.error("Error completing session", it)
+            })
     }
 
     fun onDoneClick() {
+        viewModelScope.launch {
+            eventTracker.track(ClickDone(NextPane.SUCCESS))
+        }
         suspend {
             completeFinancialConnectionsSession().also {
                 val result = Completed(
@@ -75,7 +104,22 @@ internal class SuccessViewModel @Inject constructor(
     }
 
     fun onLinkAnotherAccountClick() {
+        viewModelScope.launch {
+            eventTracker.track(ClickLinkAnotherAccount(NextPane.SUCCESS))
+        }
         navigationManager.navigate(NavigationDirections.reset)
+    }
+
+    fun onLearnMoreAboutDataAccessClick() {
+        viewModelScope.launch {
+            eventTracker.track(ClickLearnMoreDataAccess(NextPane.SUCCESS))
+        }
+    }
+
+    fun onDisconnectLinkClick() {
+        viewModelScope.launch {
+            eventTracker.track(ClickDisconnectLink(NextPane.SUCCESS))
+        }
     }
 
     companion object : MavericksViewModelFactory<SuccessViewModel, SuccessState> {

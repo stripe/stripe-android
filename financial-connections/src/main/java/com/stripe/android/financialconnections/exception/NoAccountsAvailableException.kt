@@ -8,10 +8,7 @@ internal class NoAccountsAvailableException(
     val canRetry: Boolean,
     val institution: FinancialConnectionsInstitution,
     stripeException: StripeException
-) : StripeException(
-    stripeException.stripeError,
-    stripeException.requestId,
-    stripeException.statusCode,
-    stripeException.cause,
-    stripeException.message
+) : FinancialConnectionsError(
+    name = "NoAccountsAvailableException",
+    stripeException = stripeException
 )

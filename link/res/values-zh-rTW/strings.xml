@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[加入 Link 即表示您同意<terms>條款</terms>和<privacy>隱私政策</privacy>。]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">更改電郵地址</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">驗證碼已發送</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">輸入您的驗證碼</string>
   <!-- Two factor authentication screen heading -->

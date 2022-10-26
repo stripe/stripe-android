@@ -15,6 +15,11 @@ import com.airbnb.mvrx.ViewModelContext
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarBack
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarClose
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
@@ -31,7 +36,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
-import com.stripe.android.financialconnections.utils.UriComparator
+import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -44,8 +49,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     val activityRetainedComponent: FinancialConnectionsSheetNativeComponent,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
-    private val uriComparator: UriComparator,
+    private val uriUtils: UriUtils,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
@@ -86,7 +92,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     copy(webAuthFlow = Fail(WebAuthFlowFailedException(url = null)))
                 }
 
-                uriComparator.compareSchemeAuthorityAndPath(receivedUrl, SUCCESS_URL) -> setState {
+                uriUtils.compareSchemeAuthorityAndPath(receivedUrl, SUCCESS_URL) -> setState {
                     copy(webAuthFlow = Success(receivedUrl))
                 }
 
@@ -125,9 +131,26 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    fun onCloseWithConfirmationClick() = setState { copy(showCloseDialog = true) }
+    fun onCloseWithConfirmationClick(pane: NextPane) {
+        viewModelScope.launch {
+            eventTracker.track(ClickNavBarClose(pane))
+            setState { copy(showCloseDialog = true) }
+        }
+    }
 
-    fun onCloseNoConfirmationClick() = closeAuthFlow(closeAuthFlowError = null)
+    fun onBackClick(pane: NextPane) {
+        viewModelScope.launch {
+//            eventTracker.track(PaneExit(pane, ))
+            eventTracker.track(ClickNavBarBack(pane))
+        }
+    }
+
+    fun onCloseNoConfirmationClick(pane: NextPane) {
+        viewModelScope.launch {
+            eventTracker.track(ClickNavBarClose(pane))
+        }
+        closeAuthFlow(closeAuthFlowError = null)
+    }
 
     fun onCloseFromErrorClick(error: Throwable) = closeAuthFlow(closeAuthFlowError = error)
 
@@ -139,7 +162,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      * [NavHost] handles back presses except for when backstack is empty, where it delegates
      * to the container activity. [onBackPressed] will be triggered on these empty backstack cases.
      */
-    fun onBackPressed() = closeAuthFlow(closeAuthFlowError = null)
+    fun onBackPressed() {
+        closeAuthFlow(closeAuthFlowError = null)
+    }
 
     /**
      * There's at least three types of close cases:
@@ -155,6 +180,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             kotlin
                 .runCatching { completeFinancialConnectionsSession() }
                 .onSuccess { session ->
+                    eventTracker.track(
+                        Complete(
+                            exception = null,
+                            connectedAccounts = session.accounts.data.count()
+                        )
+                    )
                     when {
                         session.accounts.data.isNotEmpty() ||
                             session.paymentAccount != null ||
@@ -169,6 +200,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         closeAuthFlowError != null -> setState {
                             copy(viewEffect = Finish(Failed(closeAuthFlowError)))
                         }
+
                         else -> setState {
                             copy(viewEffect = Finish(Canceled))
                         }
@@ -176,6 +208,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 }
                 .onFailure { completeSessionError ->
                     logger.error("Error completing session before closing", completeSessionError)
+                    eventTracker.track(
+                        Complete(
+                            exception = completeSessionError,
+                            connectedAccounts = null
+                        )
+                    )
                     setState {
                         copy(
                             viewEffect = Finish(
@@ -184,6 +222,14 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+    }
+
+    fun onPaneLaunched(pane: NextPane) {
+        viewModelScope.launch {
+            eventTracker.track(
+                FinancialConnectionsEvent.PaneLaunched(pane)
+            )
         }
     }
 

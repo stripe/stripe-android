@@ -6,6 +6,11 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Click
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ConsentAgree
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GoNext
@@ -13,9 +18,12 @@ import com.stripe.android.financialconnections.features.MarkdownParser
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.UriUtils
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class ConsentViewModel @Inject constructor(
@@ -24,6 +32,8 @@ internal class ConsentViewModel @Inject constructor(
     private val goNext: GoNext,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val uriUtils: UriUtils,
     private val logger: Logger
 ) : MavericksViewModel<ConsentState>(initialState) {
 
@@ -36,16 +46,20 @@ internal class ConsentViewModel @Inject constructor(
     }
 
     private fun logErrors() {
-        onAsync(ConsentState::consent, onFail = {
-            logger.error("Error retrieving consent content", it)
-        })
+        onAsync(
+            ConsentState::consent,
+            onSuccess = { eventTracker.track(FinancialConnectionsEvent.PaneLoaded(NextPane.CONSENT)) },
+            onFail = { logger.error("Error retrieving consent content", it) }
+        )
         onAsync(ConsentState::acceptConsent, onFail = {
+            eventTracker.track(Error(it))
             logger.error("Error accepting consent", it)
         })
     }
 
     fun onContinueClick() {
         suspend {
+            eventTracker.track(ConsentAgree)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
             goNext(updatedManifest.nextPane)
             Unit
@@ -53,20 +67,28 @@ internal class ConsentViewModel @Inject constructor(
     }
 
     fun onClickableTextClick(tag: String) {
+        val logClick: (String) -> Unit = {
+            viewModelScope.launch {
+                eventTracker.track(Click(it, pane = NextPane.CONSENT))
+            }
+        }
         if (URLUtil.isNetworkUrl(tag)) {
             kotlin.runCatching {
                 Uri.parse(tag)
                     .getQueryParameter("eventName")
-                    // TODO@carlosmuvi send event tracker!
-                    ?.let { logger.debug("EVENT: $it") }
+                    ?.let { logClick(it) }
                 setState { copy(viewEffect = OpenUrl(tag)) }
             }
         } else when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
-            ConsentClickableText.DATA ->
+            ConsentClickableText.DATA -> {
+                logClick("click.data_requested")
                 setState { copy(viewEffect = ViewEffect.OpenBottomSheet) }
+            }
 
-            ConsentClickableText.MANUAL_ENTRY ->
+            ConsentClickableText.MANUAL_ENTRY -> {
+                logClick("click.manual_entry")
                 navigationManager.navigate(NavigationDirections.manualEntry)
+            }
 
             null -> logger.error("Unrecognized clickable text: $tag")
         }

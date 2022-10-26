@@ -39,11 +39,11 @@ internal fun NextPane.toNavigationCommand(
     NextPane.MANUAL_ENTRY -> NavigationDirections.manualEntry
     NextPane.MANUAL_ENTRY_SUCCESS -> NavigationDirections.ManualEntrySuccess(args)
     NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT -> NavigationDirections.attachLinkedPaymentAccount
+    NextPane.RESET -> NavigationDirections.reset
     NextPane.NETWORKING_LINK_SIGNUP_PANE -> {
         logger.error("Link not supported on native flows yet. Navigating to Success.")
         NavigationDirections.success
     }
-    NextPane.RESET -> NavigationDirections.reset
     NextPane.AUTH_OPTIONS,
     NextPane.LINK_CONSENT,
     NextPane.LINK_LOGIN,

@@ -47,6 +47,7 @@ import com.stripe.android.financialconnections.features.common.InstitutionPlaceh
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
@@ -95,8 +96,7 @@ internal fun ConsentScreen() {
         onContinueClick = viewModel::onContinueClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-        onCloseClick = parentViewModel::onCloseNoConfirmationClick
-    )
+    ) { parentViewModel.onCloseNoConfirmationClick(NextPane.CONSENT) }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -164,7 +164,11 @@ private fun ConsentMainContent(
         consent.body.bullets.map { it.icon to TextResource.Text(fromHtml(it.content)) }
     }
     FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                onCloseClick = onCloseClick
+            )
+        }
     ) {
         Column(
             Modifier.fillMaxSize()
@@ -474,8 +478,7 @@ internal fun ContentPreview(
             onContinueClick = {},
             onClickableTextClick = {},
             onConfirmModalClick = {},
-            onCloseClick = {}
-        )
+        ) {}
     }
 }
 
@@ -512,7 +515,6 @@ internal fun ContentManualEntryPlusMicrodeposits(
             onContinueClick = {},
             onClickableTextClick = {},
             onConfirmModalClick = {},
-            onCloseClick = {}
-        )
+        ) {}
     }
 }

@@ -49,8 +49,8 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
-import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.PartnerAccountUI
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
@@ -61,6 +61,7 @@ import com.stripe.android.financialconnections.features.common.NoAccountsAvailab
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.LocalImageLoader
@@ -84,12 +85,13 @@ internal fun AccountPickerScreen() {
         state = state.value,
         onAccountClicked = viewModel::onAccountClicked,
         onSubmit = viewModel::onSubmit,
+        onSelectAllAccountsClicked = viewModel::onSelectAllAccountsClicked,
         onSelectAnotherBank = viewModel::selectAnotherBank,
-        onCloseClick = parentViewModel::onCloseWithConfirmationClick,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
-        onSelectAllAccountsClicked = viewModel::onSelectAllAccountsClicked,
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(NextPane.ACCOUNT_PICKER) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
+        onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick
     )
 }
 
@@ -103,13 +105,14 @@ private fun AccountPickerContent(
     onEnterDetailsManually: () -> Unit,
     onLoadAccountsAgain: () -> Unit,
     onCloseClick: () -> Unit,
+    onLearnMoreAboutDataAccessClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
-                showBack = false
+                showBack = false,
+                onCloseClick = onCloseClick
             )
         }
     ) {
@@ -123,19 +126,20 @@ private fun AccountPickerContent(
                     submitEnabled = state.submitEnabled,
                     submitLoading = state.submitLoading,
                     accounts = payload().accounts,
-                    allAccountsSelected = payload().allAccountsSelected,
+                    allAccountsSelected = state.allAccountsSelected,
                     subtitle = payload().subtitle,
-                    selectedIds = payload().selectedIds,
+                    selectedIds = state.selectedIds,
                     onAccountClicked = onAccountClicked,
                     onSubmit = onSubmit,
                     selectionMode = payload().selectionMode,
                     accessibleDataCalloutModel = payload().accessibleData,
                     onSelectAllAccountsClicked = onSelectAllAccountsClicked,
+                    onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick
                 )
             }
 
             is Fail -> when (val error = payload.error) {
-                is NoSupportedPaymentMethodTypeAccountsException ->
+                is AccountNoneEligibleForPaymentMethodError ->
                     NoSupportedPaymentMethodTypeAccountsErrorContent(
                         exception = error,
                         onSelectAnotherBank = onSelectAnotherBank,
@@ -179,6 +183,7 @@ private fun AccountPickerLoaded(
     onAccountClicked: (PartnerAccount) -> Unit,
     onSelectAllAccountsClicked: () -> Unit,
     onSubmit: () -> Unit,
+    onLearnMoreAboutDataAccessClick: () -> Unit,
     subtitle: TextResource?
 ) {
     Column(
@@ -228,7 +233,7 @@ private fun AccountPickerLoaded(
             }
             Spacer(modifier = Modifier.weight(1f))
         }
-        accessibleDataCalloutModel?.let { AccessibleDataCallout(it) }
+        accessibleDataCalloutModel?.let { AccessibleDataCallout(it, onLearnMoreAboutDataAccessClick) }
         Spacer(modifier = Modifier.size(12.dp))
         FinancialConnectionsButton(
             enabled = submitEnabled,
@@ -539,13 +544,13 @@ internal fun AccountPickerPreviewMultiSelect() {
             AccountPickerStates.multiSelect(),
             onAccountClicked = {},
             onSubmit = {},
+            onSelectAllAccountsClicked = {},
             onSelectAnotherBank = {},
-            onCloseClick = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseFromErrorClick = {},
-            onSelectAllAccountsClicked = {}
-        )
+            onCloseClick = {},
+            onLearnMoreAboutDataAccessClick = {}
+        ) {}
     }
 }
 
@@ -561,13 +566,13 @@ internal fun AccountPickerPreviewSingleSelect() {
             AccountPickerStates.singleSelect(),
             onAccountClicked = {},
             onSubmit = {},
+            onSelectAllAccountsClicked = {},
             onSelectAnotherBank = {},
-            onCloseClick = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseFromErrorClick = {},
-            onSelectAllAccountsClicked = {}
-        )
+            onCloseClick = {},
+            onLearnMoreAboutDataAccessClick = {}
+        ) {}
     }
 }
 
@@ -583,12 +588,12 @@ internal fun AccountPickerPreviewDropdown() {
             AccountPickerStates.dropdown(),
             onAccountClicked = {},
             onSubmit = {},
+            onSelectAllAccountsClicked = {},
             onSelectAnotherBank = {},
-            onCloseClick = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseFromErrorClick = {},
-            onSelectAllAccountsClicked = {}
-        )
+            onCloseClick = {},
+            onLearnMoreAboutDataAccessClick = {}
+        ) {}
     }
 }

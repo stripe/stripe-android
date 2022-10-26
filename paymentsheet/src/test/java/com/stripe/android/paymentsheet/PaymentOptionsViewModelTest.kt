@@ -33,7 +33,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
@@ -232,7 +231,6 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    @Ignore("Disabled until Link is enabled")
     fun `setupLink() selects Link when account status is Verified`() = runTest {
         whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
         val viewModel = createViewModel()
@@ -245,7 +243,6 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    @Ignore("Disabled until Link is enabled")
     fun `setupLink() selects Link when account status is VerificationStarted`() = runTest {
         whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.VerificationStarted))
         val viewModel = createViewModel()
@@ -258,7 +255,6 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    @Ignore("Disabled until Link is enabled")
     fun `setupLink() selects Link when account status is NeedsVerification`() = runTest {
         whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.NeedsVerification))
         val viewModel = createViewModel()
@@ -271,7 +267,6 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    @Ignore("Disabled until Link is enabled")
     fun `setupLink() enables Link when account status is SignedOut`() = runTest {
         whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
         val viewModel = createViewModel()

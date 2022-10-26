@@ -29,8 +29,8 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.exception.InstitutionPlannedException
-import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
+import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
+import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
 import com.stripe.android.financialconnections.features.common.InstitutionPlannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.InstitutionUnknownErrorContent
@@ -40,6 +40,7 @@ import com.stripe.android.financialconnections.features.common.PartnerCallout
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.LocalImageLoader
@@ -71,8 +72,8 @@ internal fun PartnerAuthScreen() {
         state = state.value,
         onContinueClick = viewModel::onLaunchAuthClick,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
-        onCloseClick = parentViewModel::onCloseNoConfirmationClick,
         onEnterDetailsManually = viewModel::onEnterDetailsManuallyClick,
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.PARTNER_AUTH) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
@@ -89,8 +90,8 @@ private fun PartnerAuthScreenContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
-                showBack = state.canNavigateBack
+                showBack = state.canNavigateBack,
+                onCloseClick = onCloseClick
             )
         }
     ) {
@@ -125,13 +126,13 @@ fun ErrorContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     when (error) {
-        is InstitutionPlannedException -> InstitutionPlannedDowntimeErrorContent(
+        is InstitutionPlannedDowntimeError -> InstitutionPlannedDowntimeErrorContent(
             exception = error,
             onSelectAnotherBank = onSelectAnotherBank,
             onEnterDetailsManually = onEnterDetailsManually
         )
 
-        is InstitutionUnplannedException -> InstitutionUnplannedDowntimeErrorContent(
+        is InstitutionUnplannedDowntimeError -> InstitutionUnplannedDowntimeErrorContent(
             exception = error,
             onSelectAnotherBank = onSelectAnotherBank,
             onEnterDetailsManually = onEnterDetailsManually
@@ -264,9 +265,8 @@ internal fun PrepaneContentPreview() {
             ),
             onContinueClick = {},
             onSelectAnotherBank = {},
-            onCloseClick = {},
             onEnterDetailsManually = {},
-            onCloseFromErrorClick = {}
-        )
+            onCloseClick = {}
+        ) {}
     }
 }
