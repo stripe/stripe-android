@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.consent
 
-import android.net.Uri
 import android.webkit.URLUtil
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
@@ -73,12 +72,8 @@ internal class ConsentViewModel @Inject constructor(
             }
         }
         if (URLUtil.isNetworkUrl(tag)) {
-            kotlin.runCatching {
-                Uri.parse(tag)
-                    .getQueryParameter("eventName")
-                    ?.let { logClick(it) }
-                setState { copy(viewEffect = OpenUrl(tag)) }
-            }
+            uriUtils.getQueryParameter(tag, "eventName")?.let { logClick(it) }
+            setState { copy(viewEffect = OpenUrl(tag)) }
         } else when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
             ConsentClickableText.DATA -> {
                 logClick("click.data_requested")
