@@ -65,27 +65,30 @@ internal class ConsentViewModel @Inject constructor(
         }.execute { copy(acceptConsent = it) }
     }
 
-    fun onClickableTextClick(tag: String) {
-        val logClick: (String) -> Unit = {
-            viewModelScope.launch {
-                eventTracker.track(Click(it, pane = NextPane.CONSENT))
+    fun onClickableTextClick(uri: String) {
+        // if clicked uri contains an eventName query param, track click event.
+        viewModelScope.launch {
+            uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
+                eventTracker.track(Click(eventName, pane = NextPane.CONSENT))
             }
         }
-        if (URLUtil.isNetworkUrl(tag)) {
-            uriUtils.getQueryParameter(tag, "eventName")?.let { logClick(it) }
-            setState { copy(viewEffect = OpenUrl(tag)) }
-        } else when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
-            ConsentClickableText.DATA -> {
-                logClick("click.data_requested")
-                setState { copy(viewEffect = ViewEffect.OpenBottomSheet) }
-            }
 
-            ConsentClickableText.MANUAL_ENTRY -> {
-                logClick("click.manual_entry")
-                navigationManager.navigate(NavigationDirections.manualEntry)
-            }
+        if (URLUtil.isNetworkUrl(uri)) {
+            setState { copy(viewEffect = OpenUrl(uri)) }
+        } else {
+            val managedUri = ConsentClickableText.values()
+                .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
+            when (managedUri) {
+                ConsentClickableText.DATA -> {
+                    setState { copy(viewEffect = ViewEffect.OpenBottomSheet) }
+                }
 
-            null -> logger.error("Unrecognized clickable text: $tag")
+                ConsentClickableText.MANUAL_ENTRY -> {
+                    navigationManager.navigate(NavigationDirections.manualEntry)
+                }
+
+                null -> logger.error("Unrecognized clickable text: $uri")
+            }
         }
     }
 
