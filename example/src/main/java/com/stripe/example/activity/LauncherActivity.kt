@@ -164,7 +164,11 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.manual_us_bank_account_example),
                 ManualUSBankAccountPaymentMethodActivity::class.java
-            )
+            ),
+            Item(
+                "Shipping info widget",
+                ShippingInfoWidgetActivity::class.java
+            ),
         )
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ExamplesViewHolder {

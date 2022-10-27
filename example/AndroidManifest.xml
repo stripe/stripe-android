@@ -36,11 +36,6 @@
         <activity
             android:name=".activity.LauncherActivity"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <activity android:name=".activity.CreateCardTokenActivity" />
@@ -70,12 +65,21 @@
         <activity android:name=".activity.SimpleConfirmationActivity" />
         <activity android:name=".activity.ConnectExampleActivity" />
         <activity android:name=".activity.ComposeExampleActivity" />
-        <activity android:name=".activity.KlarnaPaymentActivity"/>
-        <activity android:name=".activity.AffirmPaymentActivity"/>
-        <activity android:name=".activity.AlipayPaymentNativeActivity"/>
-        <activity android:name=".activity.AlipayPaymentWebActivity"/>
-        <activity android:name=".activity.ConnectUSBankAccountActivity"/>
-        <activity android:name=".activity.ManualUSBankAccountPaymentMethodActivity"/>
+        <activity android:name=".activity.KlarnaPaymentActivity" />
+        <activity android:name=".activity.AffirmPaymentActivity" />
+        <activity android:name=".activity.AlipayPaymentNativeActivity" />
+        <activity android:name=".activity.AlipayPaymentWebActivity" />
+        <activity android:name=".activity.ConnectUSBankAccountActivity" />
+        <activity android:name=".activity.ManualUSBankAccountPaymentMethodActivity" />
+        <activity
+            android:name=".activity.ShippingInfoWidgetActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
