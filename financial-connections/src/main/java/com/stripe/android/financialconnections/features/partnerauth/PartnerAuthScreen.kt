@@ -89,7 +89,6 @@ private fun ObserveViewEffect(
                 activityViewModel.openPartnerAuthFlowInBrowser(viewEffect.url)
                 viewModel.onViewEffectLaunched()
             }
-
         }
     }
 }

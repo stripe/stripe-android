@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.repository
 
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
@@ -20,7 +19,6 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.willSuspendableAnswer
 
@@ -34,9 +32,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
 
-    private fun buildRepository(
-        initialManifest: FinancialConnectionsSessionManifest? = null
-    ) = FinancialConnectionsManifestRepository(
+    private fun buildRepository() = FinancialConnectionsManifestRepository(
         requestExecutor = mockRequestExecutor,
         configuration = configuration,
         apiRequestFactory = apiRequestFactory,
@@ -58,18 +54,6 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             )
 
             verify(mockRequestExecutor, times(1)).execute(any(), any<KSerializer<*>>())
-        }
-
-    @Test
-    fun `getOrFetchManifest - when initial manifest passed in constructor, returns it and no network interaction`() =
-        runTest {
-            val initialManifest = sessionManifest()
-            val repository = buildRepository(initialManifest = initialManifest)
-
-            val returnedManifest = repository.getOrFetchManifest()
-
-            assertThat(returnedManifest).isEqualTo(initialManifest)
-            verifyNoInteractions(mockRequestExecutor)
         }
 
     /**

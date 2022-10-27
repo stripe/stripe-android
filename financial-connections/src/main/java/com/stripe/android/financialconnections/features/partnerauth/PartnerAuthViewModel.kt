@@ -240,5 +240,4 @@ internal data class PartnerAuthState(
     sealed interface PartnerAuthViewEffect {
         data class OpenPartnerAuth(val url: String) : PartnerAuthViewEffect
     }
-
 }
