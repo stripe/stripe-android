@@ -23,18 +23,11 @@ appId: com.stripe.android.financialconnections.example
 - assertVisible: "Select another bank"
 - takeScreenshot: TestOAuth_ErrorDownBankUnscheduled
 - tapOn: "Select another bank"
-# ERRORS
+# OAUTH - SELECT ALL ACCOUNTS
 - tapOn: "Test OAuth Institution"
 - assertVisible: "Continue"
 - takeScreenshot: TestOAuth_Prepane
 - tapOn: "Continue"
-- assertVisible:
-    text: "Establishing connection"
-    optional: true
-- takeScreenshot: TestOAuth_Loading_PartnerAuth
-- assertVisible:
-    text: "Retrieving accounts"
-    optional: true
 - takeScreenshot: TestOAuth_Loading_Accounts
 - assertVisible: "Select all accounts"
 - takeScreenshot: TestOAuth_AccountPicker
@@ -45,17 +38,13 @@ appId: com.stripe.android.financialconnections.example
     text: ".*Select account.*"
     index: 1
 - assertVisible: "Done"
+# START LINK MORE ACCOUNTS FLOW
 - assertVisible: "Link another account"
 - takeScreenshot: TestOAuth_Success
 - tapOn: "Link another account"
+# LEGACY - SELECT ALL ACCOUNTS
 - assertVisible: "Test Institution"
 - tapOn: "Test Institution"
-- assertVisible:
-    text: "Establishing connection"
-    optional: true
-- assertVisible:
-    text: "Retrieving accounts"
-    optional: true
 - assertVisible: "Select all accounts"
 - takeScreenshot: TestLegacy_AccountPicker
 - tapOn: "Select all accounts" # select all accounts
@@ -66,3 +55,5 @@ appId: com.stripe.android.financialconnections.example
     index: 1
 - assertVisible: "Done"
 - assertVisible: "Link another account"
+- tapOn: "Done"
+- assertVisible: ".*StripeBank - Success.*"

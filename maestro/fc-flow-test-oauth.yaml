@@ -23,7 +23,7 @@ appId: com.stripe.android.financialconnections.example
 - assertVisible: "Select another bank"
 - takeScreenshot: TestOAuth_ErrorDownBankUnscheduled
 - tapOn: "Select another bank"
-# ERRORS
+# OAUTH - SELECT ALL ACCOUNTS
 - tapOn: "Test OAuth Institution"
 - assertVisible: "Continue"
 - takeScreenshot: TestOAuth_Prepane
@@ -44,3 +44,4 @@ appId: com.stripe.android.financialconnections.example
 - assertVisible: "Link another account"
 - takeScreenshot: TestOAuth_Success
 - tapOn: "Done"
+- assertVisible: ".*StripeBank - Success.*"
