@@ -28,17 +28,7 @@
                 <data
                     android:host="auth-redirect"
                     android:scheme="stripe"
-                    android:path="/${applicationId}/cancel" />
-
-                <data
-                    android:host="auth-redirect"
-                    android:scheme="stripe"
-                    android:path="/${applicationId}/success" />
-
-                <data
-                    android:host="auth-redirect"
-                    android:scheme="stripe"
-                    android:path="/${applicationId}/fail" />
+                    android:pathPrefix="/${applicationId}" />
             </intent-filter>
         </activity>
         <activity

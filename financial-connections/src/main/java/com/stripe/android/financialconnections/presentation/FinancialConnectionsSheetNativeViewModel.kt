@@ -95,6 +95,15 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     copy(webAuthFlow = Fail(WebAuthFlowFailedException(url = null)))
                 }
 
+                // base url: treated as success.
+                uriUtils.compareSchemeAuthorityAndPath(
+                    receivedUrl,
+                    baseUrl(applicationId)
+                ) -> setState {
+                    copy(webAuthFlow = Success(receivedUrl))
+                }
+
+                // base/success url: treated as success.
                 uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     successUrl(applicationId)
@@ -131,7 +140,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     fun onResume() {
         setState {
             if (webAuthFlow is Loading) {
-                copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
+                copy(webAuthFlow = Success("hola"))
+//                copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
             } else {
                 this
             }
@@ -255,6 +265,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     companion object :
         MavericksViewModelFactory<FinancialConnectionsSheetNativeViewModel, FinancialConnectionsSheetNativeState> {
+
+        private fun baseUrl(applicationId: String) =
+            "stripe://auth-redirect/$applicationId"
 
         private fun successUrl(applicationId: String) =
             "stripe://auth-redirect/$applicationId/success"

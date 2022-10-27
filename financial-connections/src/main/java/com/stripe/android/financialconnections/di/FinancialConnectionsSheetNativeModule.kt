@@ -94,8 +94,7 @@ internal class FinancialConnectionsSheetNativeModule {
         configuration = configuration,
         apiRequestFactory = apiRequestFactory,
         apiOptions = apiOptions,
-        logger = logger,
-        initialManifest = initialManifest
+        logger = logger
     )
 
     @Singleton

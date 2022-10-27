@@ -37,12 +37,11 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
     private fun buildRepository(
         initialManifest: FinancialConnectionsSessionManifest? = null
     ) = FinancialConnectionsManifestRepository(
-        apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
         requestExecutor = mockRequestExecutor,
-        apiRequestFactory = apiRequestFactory,
         configuration = configuration,
-        logger = Logger.noop(),
-        initialManifest = initialManifest
+        apiRequestFactory = apiRequestFactory,
+        apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+        logger = Logger.noop()
     )
 
     @Test
