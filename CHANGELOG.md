@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+* [FIXED][5749](https://github.com/stripe/stripe-android/pull/5749) Prevent multiple invocations to `/verify_frames`
+
 ## 20.15.2 - 2022-10-25
 
 This release fixes a few bugs in `PaymentSession`, `PaymentSheet` and `CardScan`.
@@ -41,7 +43,7 @@ This release adds Link as a payment method to the SDK and fixes a minor issue wi
 
 ### CardScan
 
-* [CHANGED][5679](https://github.com/stripe/stripe-android/pull/5679) Fix oversized verification_frames payloads leading to failed scans.
+* [FIXED][5679](https://github.com/stripe/stripe-android/pull/5679) Fix oversized verification_frames payloads leading to failed scans.
 
 ## 20.14.1 - 2022-10-03
 
