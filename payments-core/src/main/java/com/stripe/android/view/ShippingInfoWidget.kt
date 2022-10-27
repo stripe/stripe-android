@@ -8,7 +8,9 @@ import android.text.InputFilter.AllCaps
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.core.content.withStyledAttributes
 import com.stripe.android.R
 import com.stripe.android.core.model.Country
 import com.stripe.android.core.model.CountryUtils
@@ -19,6 +21,8 @@ import java.util.Locale
 
 /**
  * A widget used to collect address data from a user.
+ *
+ * If used with MaterialComponents, be sure to provide `countryTextInputStyle` in the XML.
  */
 class ShippingInfoWidget @JvmOverloads constructor(
     context: Context,
@@ -56,7 +60,29 @@ class ShippingInfoWidget @JvmOverloads constructor(
             countryAutoCompleteTextView.selectedCountry?.let(::updateConfigForCountry)
         }
 
-    private val countryAutoCompleteTextView = viewBinding.countryAutocompleteAaw
+    private val countryAutoCompleteTextView: CountryTextInputLayout by lazy {
+        var styleAttr = 0
+
+        context.withStyledAttributes(
+            attrs,
+            intArrayOf(R.styleable.ShippingInfoWidget_countryTextInputExposedDropdownMenuStyle)
+        ) {
+            styleAttr = getResourceId(
+                R.styleable.ShippingInfoWidget_countryTextInputExposedDropdownMenuStyle,
+                R.attr.textInputFilledExposedDropdownMenuStyle
+            )
+        }
+
+        CountryTextInputLayout(
+            context,
+            null,
+            styleAttr,
+        ).apply {
+            hint = resources.getString(R.string.address_label_country)
+        }
+    }
+
+    private val countryAutoCompleteContainer = viewBinding.countryAutocompleteContainer
     private val addressLine1TextInputLayout = viewBinding.tlAddressLine1Aaw
     private val addressLine2TextInputLayout = viewBinding.tlAddressLine2Aaw
     private val cityTextInputLayout = viewBinding.tlCityAaw
@@ -221,6 +247,14 @@ class ShippingInfoWidget @JvmOverloads constructor(
     }
 
     private fun initView() {
+        countryAutoCompleteContainer.addView(
+            countryAutoCompleteTextView,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+            )
+        )
+
         countryAutoCompleteTextView.countryChangeCallback = ::updateConfigForCountry
 
         phoneNumberEditText.addTextChangedListener(PhoneNumberFormattingTextWatcher())

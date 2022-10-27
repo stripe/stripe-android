@@ -3,7 +3,6 @@ package com.stripe.android.view
 import android.content.Context
 import android.os.Parcelable
 import android.util.AttributeSet
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View.OnFocusChangeListener
 import android.widget.AdapterView
@@ -39,7 +38,7 @@ import kotlin.properties.Delegates
 class CountryTextInputLayout @JvmOverloads internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = context.determineExposedDropdownMenuStyle(),
+    defStyleAttr: Int = com.google.android.material.R.attr.textInputStyle
 ) : TextInputLayout(context, attrs, defStyleAttr) {
 
     @StyleRes
@@ -295,32 +294,4 @@ class CountryTextInputLayout @JvmOverloads internal constructor(
         val countryCode: CountryCode,
         val superState: Parcelable?
     ) : Parcelable
-}
-
-/**
- * Determines the correct text input style to use for [CountryTextInputLayout].
- *
- * A [TextInputLayout] with an [AutoCompleteTextView] requires the use of an exposed dropdown menu
- * style. Otherwise, it won't render correctly when using a MaterialComponents theme.
- *
- * Unfortunately, there's no single theme attribute for this, which requires us to manually select
- * the correct attribute based on the current [R.attr.textInputStyle].
- */
-private fun Context.determineExposedDropdownMenuStyle(): Int {
-    val typedValue = TypedValue()
-    theme.resolveAttribute(R.attr.textInputStyle, typedValue, true)
-
-    return when (val textInputStyle = typedValue.data) {
-        R.style.Widget_MaterialComponents_TextInputLayout_FilledBox,
-        R.style.Widget_MaterialComponents_TextInputLayout_FilledBox_Dense -> {
-            R.attr.textInputFilledExposedDropdownMenuStyle
-        }
-        R.style.Widget_MaterialComponents_TextInputLayout_OutlinedBox,
-        R.style.Widget_MaterialComponents_TextInputLayout_OutlinedBox_Dense -> {
-            R.attr.textInputOutlinedExposedDropdownMenuStyle
-        }
-        else -> {
-            textInputStyle
-        }
-    }
 }

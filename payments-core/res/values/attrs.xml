@@ -22,6 +22,10 @@
         <attr name="countryItemLayout" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="ShippingInfoWidget">
+        <attr name="countryTextInputExposedDropdownMenuStyle" format="reference" />
+    </declare-styleable>
+
     <declare-styleable name="StripeCardFormView">
         <attr name="cardFormStyle" format="enum">
             <enum name="standard" value="0" />

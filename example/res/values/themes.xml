@@ -7,7 +7,13 @@
         <item name="colorControlActivated">@color/accent</item>
         <item name="titleTextColor">@color/title</item>
         <item name="android:textColorPrimary">@color/textPrimary</item>
+        <item name="textInputStyle">@style/MyTextInputStyle</item>
+        <item name="textInputFilledExposedDropdownMenuStyle">@style/MyDropdownTextInputStyle</item>
     </style>
+
+    <style name="MyTextInputStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox" />
+
+    <style name="MyDropdownTextInputStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu" />
 
     <style name="StripeDefaultTheme" parent="StripeBaseTheme">
         <!-- Applied to toolbar background -->
