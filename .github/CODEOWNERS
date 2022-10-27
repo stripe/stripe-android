@@ -23,5 +23,3 @@
 
 # shared modules
 /camera-core/ @ccen-stripe @awush-stripe
-/payments-core/ @brnunes-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
-/payments-ui-core/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
