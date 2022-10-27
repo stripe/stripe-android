@@ -20,9 +20,11 @@ import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.PartnerAuthViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -43,21 +45,25 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val logger: Logger,
     initialState: PartnerAuthState
 ) : MavericksViewModel<PartnerAuthState>(initialState) {
-
     init {
         logErrors()
-        launchAuthIfSkipPrepane()
         suspend {
-            val manifest = getManifest()
-            val authSession = createAuthorizationSession(
-                institution = requireNotNull(manifest.activeInstitution),
-                allowManualEntry = manifest.allowManualEntry
-            )
+            /**
+             * if viewModel dies while WebAuth happens, avoid creating a new auth session.
+             * [FinancialConnectionsSessionManifest] gets re-fetched, and the existing
+             * [FinancialConnectionsSessionManifest.activeAuthSession] will be used instead.
+             */
+            val manifest: FinancialConnectionsSessionManifest = getManifest()
+            val authSession = manifest.activeAuthSession
+                ?: createAuthorizationSession(
+                    institution = requireNotNull(manifest.activeInstitution),
+                    allowManualEntry = manifest.allowManualEntry
+                ).also { launchAuthIfSkipPrepane() }
             Payload(
                 flow = authSession.flow,
                 showPrepane = authSession.isOAuth,
                 showPartnerDisclosure = authSession.showPartnerDisclosure ?: false,
-                institution = manifest.activeInstitution
+                institution = requireNotNull(manifest.activeInstitution)
             )
         }.execute {
             copy(payload = it)
@@ -85,7 +91,9 @@ internal class PartnerAuthViewModel @Inject constructor(
     fun onLaunchAuthClick() {
         viewModelScope.launch {
             kotlin.runCatching { requireNotNull(getManifest().activeAuthSession) }
-                .onSuccess { setState { copy(url = it.url) } }
+                .onSuccess {
+                    it.url?.let { setState { copy(viewEffect = OpenPartnerAuth(it)) } }
+                }
                 .onFailure {
                     eventTracker.track(FinancialConnectionsEvent.Error(it))
                     logger.error("failed retrieving active session from cache", it)
@@ -186,6 +194,12 @@ internal class PartnerAuthViewModel @Inject constructor(
         navigationManager.navigate(NavigationDirections.manualEntry)
     }
 
+    fun onViewEffectLaunched() {
+        setState {
+            copy(viewEffect = null)
+        }
+    }
+
     companion object : MavericksViewModelFactory<PartnerAuthViewModel, PartnerAuthState> {
 
         override fun create(
@@ -205,7 +219,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 
 internal data class PartnerAuthState(
     val payload: Async<Payload> = Uninitialized,
-    val url: String? = null,
+    val viewEffect: PartnerAuthViewEffect? = null,
     val authenticationStatus: Async<String> = Uninitialized
 ) : MavericksState {
     data class Payload(
@@ -222,4 +236,9 @@ internal data class PartnerAuthState(
                 authenticationStatus !is Success &&
                 // Failures posting institution -> don't allow back navigation
                 payload !is Fail
+
+    sealed interface PartnerAuthViewEffect {
+        data class OpenPartnerAuth(val url: String) : PartnerAuthViewEffect
+    }
+
 }

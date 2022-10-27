@@ -91,7 +91,7 @@ class StripeImageLoader(
         diskCache?.put(url, bitmap)
         memoryCache?.put(url, bitmap)
         bitmap
-    }.onFailure { logger.error("$TAG: Could not load image from network", it) }
+    }.onFailure { logger.warning("$TAG: Could not load image from network") }
 
     /**
      * Runs the specified [action] within a locked mutex keyed by the passed url.

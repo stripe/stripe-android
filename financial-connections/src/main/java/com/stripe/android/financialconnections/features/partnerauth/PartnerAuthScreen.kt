@@ -38,6 +38,7 @@ import com.stripe.android.financialconnections.features.common.InstitutionUnplan
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PartnerCallout
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.PartnerAuthViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
@@ -61,10 +62,7 @@ internal fun PartnerAuthScreen() {
     val viewModel: PartnerAuthViewModel = mavericksViewModel()
     val state: State<PartnerAuthState> = viewModel.collectAsState()
 
-    LaunchedEffect(state.value.url) {
-        val url = state.value.url
-        if (url != null) activityViewModel.openPartnerAuthFlowInBrowser(url)
-    }
+    ObserveViewEffect(state, activityViewModel, viewModel)
     LaunchedEffect(webAuthFlow.value) {
         viewModel.onWebAuthFlowFinished(webAuthFlow.value)
     }
@@ -76,6 +74,24 @@ internal fun PartnerAuthScreen() {
         onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.PARTNER_AUTH) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
+}
+
+@Composable
+private fun ObserveViewEffect(
+    state: State<PartnerAuthState>,
+    activityViewModel: FinancialConnectionsSheetNativeViewModel,
+    viewModel: PartnerAuthViewModel
+) {
+    LaunchedEffect(state.value.viewEffect) {
+        when (val viewEffect = state.value.viewEffect) {
+            null -> Unit
+            is OpenPartnerAuth -> {
+                activityViewModel.openPartnerAuthFlowInBrowser(viewEffect.url)
+                viewModel.onViewEffectLaunched()
+            }
+
+        }
+    }
 }
 
 @Composable
@@ -261,7 +277,7 @@ internal fun PrepaneContentPreview() {
                     )
                 ),
                 authenticationStatus = Uninitialized,
-                url = null
+                viewEffect = null
             ),
             onContinueClick = {},
             onSelectAnotherBank = {},

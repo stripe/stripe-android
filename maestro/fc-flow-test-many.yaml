@@ -1,0 +1,68 @@
+appId: com.stripe.android.financialconnections.example
+---
+- launchApp
+# Android specific: Navigate to example (1)
+- tapOn: "Collect account for data"
+
+# Android specific: Navigate to example (2)
+- takeScreenshot: TestOAuth_ExampleAppLauncher
+- tapOn: "CONNECT AN ACCOUNT"
+
+# Common: web AuthFlow - connect OAuth institution
+- assertVisible: "Agree"
+- takeScreenshot: TestOAuth_Consent
+- tapOn: "Agree"
+- assertVisible: "Test OAuth Institution"
+- takeScreenshot: TestOAuth_BankPicker
+# ERRORS
+- tapOn: ".*unknown error.*"
+- assertVisible: "Something went wrong"
+- takeScreenshot: TestOAuth_ErrorDownBankUnknown
+- back
+- tapOn: ".*unscheduled.*"
+- assertVisible: "Select another bank"
+- takeScreenshot: TestOAuth_ErrorDownBankUnscheduled
+- tapOn: "Select another bank"
+# ERRORS
+- tapOn: "Test OAuth Institution"
+- assertVisible: "Continue"
+- takeScreenshot: TestOAuth_Prepane
+- tapOn: "Continue"
+- assertVisible:
+    text: "Establishing connection"
+    optional: true
+- takeScreenshot: TestOAuth_Loading_PartnerAuth
+- assertVisible:
+    text: "Retrieving accounts"
+    optional: true
+- takeScreenshot: TestOAuth_Loading_Accounts
+- assertVisible: "Select all accounts"
+- takeScreenshot: TestOAuth_AccountPicker
+- tapOn: "Select all accounts" # select all accounts
+- takeScreenshot: TestOAuth_AccountPicker_AllAccounts
+- scroll
+- tapOn:
+    text: ".*Select account.*"
+    index: 1
+- assertVisible: "Done"
+- assertVisible: "Link another account"
+- takeScreenshot: TestOAuth_Success
+- tapOn: "Link another account"
+- assertVisible: "Test Institution"
+- tapOn: "Test Institution"
+- assertVisible:
+    text: "Establishing connection"
+    optional: true
+- assertVisible:
+    text: "Retrieving accounts"
+    optional: true
+- assertVisible: "Select all accounts"
+- takeScreenshot: TestLegacy_AccountPicker
+- tapOn: "Select all accounts" # select all accounts
+- takeScreenshot: TestLegacy_AccountPicker_AllAccounts
+- scroll
+- tapOn:
+    text: ".*Select account.*"
+    index: 1
+- assertVisible: "Done"
+- assertVisible: "Link another account"
