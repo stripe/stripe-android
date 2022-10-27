@@ -98,7 +98,7 @@ internal class FormViewModelTest {
                 )
             )
         )
-        formViewModel.setShowCheckbox(true)
+        formViewModel.setCheckboxVisible(true)
 
         // Set all the card fields, billing is set in the args
         val emailController =
@@ -142,7 +142,7 @@ internal class FormViewModelTest {
                 )
             )
         )
-        formViewModel.setShowCheckbox(true)
+        formViewModel.setCheckboxVisible(true)
 
         val values = mutableListOf<Set<IdentifierSpec>>()
         formViewModel.hiddenIdentifiers.asLiveData()
@@ -151,7 +151,7 @@ internal class FormViewModelTest {
             }
         assertThat(values[0]).isEmpty()
 
-        formViewModel.setShowCheckbox(false)
+        formViewModel.setCheckboxVisible(false)
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 

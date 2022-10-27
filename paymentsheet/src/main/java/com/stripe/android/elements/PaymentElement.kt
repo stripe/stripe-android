@@ -20,7 +20,7 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.FlowPreview
 
-val PaymentElementHorizontalPadding = 20.dp
+internal val PaymentElementHorizontalPadding = 20.dp
 
 @Composable
 internal fun PaymentElement(

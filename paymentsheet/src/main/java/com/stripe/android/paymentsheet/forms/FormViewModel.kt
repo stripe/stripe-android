@@ -62,7 +62,7 @@ internal class FormViewModel @Inject internal constructor(
         }
     }
 
-    private val showCheckboxFlow = MutableStateFlow(false)
+    private val checkboxVisibleFlow = MutableStateFlow(false)
 
     val elementsFlow = flowOf(
         TransformSpecToElements(
@@ -109,7 +109,7 @@ internal class FormViewModel @Inject internal constructor(
     }
 
     internal val hiddenIdentifiers = combine(
-        showCheckboxFlow,
+        checkboxVisibleFlow,
         cardBillingElement.map {
             it?.hiddenIdentifiers ?: flowOf(emptySet())
         }.flattenConcat(),
@@ -143,7 +143,7 @@ internal class FormViewModel @Inject internal constructor(
     private val userRequestedReuse =
         combine(
             elementsFlow.filterNotNull(),
-            showCheckboxFlow
+            checkboxVisibleFlow
         ) { elementsList, showCheckbox ->
             combine(
                 elementsList.map { it.getFormFieldValueFlow() },
@@ -197,7 +197,7 @@ internal class FormViewModel @Inject internal constructor(
         }
     }
 
-    fun setShowCheckbox(showCheckbox: Boolean) {
-        showCheckboxFlow.value = showCheckbox
+    fun setCheckboxVisible(visible: Boolean) {
+        checkboxVisibleFlow.value = visible
     }
 }

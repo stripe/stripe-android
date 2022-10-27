@@ -31,7 +31,7 @@ internal fun PaymentMethodForm(
         )
     )
 
-    formViewModel.setShowCheckbox(showCheckbox)
+    formViewModel.setCheckboxVisible(showCheckbox)
 
     val formValues by formViewModel.completeFormValues.collectAsState(null)
 
