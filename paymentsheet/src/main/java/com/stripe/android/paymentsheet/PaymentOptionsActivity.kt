@@ -176,7 +176,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewBinding.continueButton.lockVisible = false
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
-        val customLabel = starterArgs?.config?.customPrimaryButtonLabel
+        val customLabel = starterArgs?.config?.primaryButtonLabel
         val label = customLabel ?: getString(R.string.stripe_continue_button_label)
 
         viewBinding.continueButton.setLabel(label)

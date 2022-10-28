@@ -263,10 +263,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override fun resetPrimaryButtonState() {
         viewBinding.buyButton.updateState(PrimaryButton.State.Ready)
 
-        val customLabel = starterArgs?.config?.customPrimaryButtonLabel
+        val customLabel = starterArgs?.config?.primaryButtonLabel
 
         val label = if (customLabel != null) {
-            starterArgs?.config?.customPrimaryButtonLabel
+            starterArgs?.config?.primaryButtonLabel
         } else if (viewModel.isProcessingPaymentIntent) {
             viewModel.amount.value?.buildPayButtonLabel(resources)
         } else {

@@ -425,7 +425,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             defaultBillingDetails = defaultBilling,
             allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked,
             appearance = appearance,
-            customPrimaryButtonLabel = customPrimaryButtonLabel,
+            primaryButtonLabel = customPrimaryButtonLabel,
         )
     }
 
