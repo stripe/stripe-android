@@ -56,7 +56,7 @@ internal fun PaymentOptions(
                 val canClickSelectedItem = sheetViewModel is PaymentOptionsViewModel
                 val isAllowed = canClickSelectedItem || item != state.selectedItem
 
-                if (isAllowed) {
+                if (isAllowed && !isEditing) {
                     val paymentSelection = item.toPaymentSelection()
                     sheetViewModel.updateSelection(paymentSelection)
                     (sheetViewModel as? PaymentOptionsViewModel)?.onUserSelection()
@@ -98,12 +98,18 @@ internal fun PaymentOptions(
             userScrollEnabled = isEnabled,
         ) {
             items(state.items) { item ->
-                val isSelected = item == state.selectedItem
+                val isSelected = !isEditing && item == state.selectedItem
+                val isOptionEnabled = if (item is PaymentOptionsItem.SavedPaymentMethod) {
+                    isEnabled
+                } else {
+                    isEnabled && !isEditing
+                }
+
                 PaymentOptionCard(
                     item = item,
                     width = itemWidth,
                     isSelected = isSelected,
-                    isEnabled = isEnabled,
+                    isEnabled = isOptionEnabled,
                     isEditing = isEditing,
                     paymentMethodNameProvider = paymentMethodNameProvider,
                     onAddCard = onAddCard,
