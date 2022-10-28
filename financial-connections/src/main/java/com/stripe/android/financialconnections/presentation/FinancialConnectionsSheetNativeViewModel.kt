@@ -140,7 +140,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     fun onBackClick(pane: NextPane) {
         viewModelScope.launch {
-//            eventTracker.track(PaneExit(pane, ))
             eventTracker.track(ClickNavBarBack(pane))
         }
     }

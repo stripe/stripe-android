@@ -51,7 +51,7 @@ internal class ConsentViewModel @Inject constructor(
             onFail = { logger.error("Error retrieving consent content", it) }
         )
         onAsync(ConsentState::acceptConsent, onFail = {
-            eventTracker.track(Error(it))
+            eventTracker.track(Error(NextPane.CONSENT, it))
             logger.error("Error accepting consent", it)
         })
     }

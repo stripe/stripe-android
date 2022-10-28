@@ -66,12 +66,14 @@ internal class AccountPickerViewModel @Inject constructor(
                     canRetry = state.canRetry
                 )
             }
-            eventTracker.track(
-                PollAccountsSucceeded(
-                    authSessionId = activeAuthSession.id,
-                    duration = millis
+            if (partnerAccountList.data.isNotEmpty()) {
+                eventTracker.track(
+                    PollAccountsSucceeded(
+                        authSessionId = activeAuthSession.id,
+                        duration = millis
+                    )
                 )
-            )
+            }
             val accounts = partnerAccountList.data.map { account ->
                 AccountPickerState.PartnerAccountUI(
                     account = account,
@@ -133,14 +135,14 @@ internal class AccountPickerViewModel @Inject constructor(
         onAsync(
             AccountPickerState::payload,
             onFail = {
-                eventTracker.track(Error(it))
+                eventTracker.track(Error(NextPane.ACCOUNT_PICKER, it))
                 logger.error("Error retrieving accounts", it)
             },
         )
         onAsync(
             AccountPickerState::selectAccounts,
             onFail = {
-                eventTracker.track(Error(it))
+                eventTracker.track(Error(NextPane.ACCOUNT_PICKER, it))
                 logger.error("Error selecting accounts", it)
             }
         )

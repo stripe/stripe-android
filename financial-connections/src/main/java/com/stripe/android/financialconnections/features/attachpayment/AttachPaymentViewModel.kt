@@ -70,14 +70,16 @@ internal class AttachPaymentViewModel @Inject constructor(
             AttachPaymentState::payload,
             onFail = {
                 logger.error("Error retrieving accounts to attach payment", it)
-                eventTracker.track(Error(it))
+                eventTracker.track(Error(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT, it))
             },
-            onSuccess = { eventTracker.track(PaneLoaded(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT)) }
+            onSuccess = {
+                eventTracker.track(PaneLoaded(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT))
+            }
         )
         onAsync(
             AttachPaymentState::linkPaymentAccount,
             onFail = {
-                eventTracker.track(Error(it))
+                eventTracker.track(Error(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT, it))
                 logger.error("Error Attaching payment account", it)
             }
         )

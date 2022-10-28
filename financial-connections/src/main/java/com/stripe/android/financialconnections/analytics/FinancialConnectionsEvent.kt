@@ -56,7 +56,10 @@ internal sealed class FinancialConnectionsEvent(
         connectedAccounts: Int?
     ) : FinancialConnectionsEvent(
         name = "complete",
-        mapOf("num_linked_accounts" to connectedAccounts?.toString())
+        mapOf(
+            "num_linked_accounts" to connectedAccounts?.toString(),
+            "type" to if (exception == null) "object" else "error"
+        )
             .plus(exception?.toEventParams() ?: emptyMap())
             .filterNotNullValues()
     )
@@ -91,11 +94,13 @@ internal sealed class FinancialConnectionsEvent(
 
     class InstitutionSelected(
         pane: NextPane,
-        fromFeatured: Boolean
+        fromFeatured: Boolean,
+        institutionId: String
     ) : FinancialConnectionsEvent(
         name = if (fromFeatured) "search.featured_institution_selected" else "search.search_result_selected",
         mapOf(
             "pane" to pane.value,
+            "institution_id" to institutionId
         ).filterNotNullValues()
     )
 
@@ -164,10 +169,15 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class Error(
+        pane: NextPane,
         exception: Throwable
     ) : FinancialConnectionsEvent(
         name = if (exception is FinancialConnectionsError) "error.expected" else "error.unexpected",
-        params = exception.toEventParams().filterNotNullValues()
+        params = (
+            mapOf("pane" to pane.value)
+                .plus(exception.toEventParams())
+                .filterNotNullValues()
+            )
     )
 
     object ConsentAgree : FinancialConnectionsEvent(

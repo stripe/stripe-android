@@ -74,14 +74,14 @@ internal class InstitutionPickerViewModel @Inject constructor(
             onSuccess = { eventTracker.track(PaneLoaded(NextPane.INSTITUTION_PICKER)) },
             onFail = {
                 logger.error("Error fetching initial payload", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(it))
+                eventTracker.track(FinancialConnectionsEvent.Error(NextPane.INSTITUTION_PICKER, it))
             }
         )
         onAsync(
             InstitutionPickerState::searchInstitutions,
             onFail = {
                 logger.error("Error searching institutions", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(it))
+                eventTracker.track(FinancialConnectionsEvent.Error(NextPane.INSTITUTION_PICKER, it))
             }
         )
     }
@@ -96,7 +96,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                     query = query
                 )
             }
-            eventTracker.track(
+            if (query.isNotEmpty()) eventTracker.track(
                 SearchSucceeded(
                     pane = NextPane.INSTITUTION_PICKER,
                     query = query,
@@ -124,7 +124,13 @@ internal class InstitutionPickerViewModel @Inject constructor(
     fun onInstitutionSelected(institution: FinancialConnectionsInstitution, fromFeatured: Boolean) {
         clearSearch()
         suspend {
-            eventTracker.track(InstitutionSelected(NextPane.INSTITUTION_PICKER, fromFeatured))
+            eventTracker.track(
+                InstitutionSelected(
+                    pane = NextPane.INSTITUTION_PICKER,
+                    fromFeatured = fromFeatured,
+                    institutionId = institution.id
+                )
+            )
             // updates local manifest with active institution
             updateLocalManifest { it.copy(activeInstitution = institution) }
             // navigate to next step
