@@ -92,7 +92,6 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.utils.StripeUrlUtils
 import kotlinx.coroutines.Dispatchers
 import org.json.JSONException
-import org.json.JSONObject
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.security.Security
@@ -1112,7 +1111,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun retrieveObject(
         url: String,
         requestOptions: ApiRequest.Options
-    ): JSONObject {
+    ): StripeResponse<String> {
         if (!StripeUrlUtils.isStripeUrl(url)) {
             throw IllegalArgumentException("Unrecognized domain: $url")
         }
@@ -1125,7 +1124,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             fireAnalyticsRequest(PaymentAnalyticsEvent.StripeUrlRetrieve)
         }
 
-        return response.responseJson()
+        return response
     }
 
     /**
@@ -1551,7 +1550,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         paymentIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
     ): PaymentIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
@@ -1560,9 +1560,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     financialConnectionsSessionId
                 ),
                 requestOptions,
-                mapOf(
-                    "client_secret" to clientSecret
-                )
+                mapOf("client_secret" to clientSecret)
+                    .plus(createExpandParam(expandFields))
             ),
             PaymentIntentJsonParser()
         ) {
@@ -1577,7 +1576,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         setupIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>
     ): SetupIntent? {
         return fetchStripeModel(
             apiRequestFactory.createPost(
@@ -1586,9 +1586,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     financialConnectionsSessionId
                 ),
                 requestOptions,
-                mapOf(
-                    "client_secret" to clientSecret
-                )
+                mapOf("client_secret" to clientSecret)
+                    .plus(createExpandParam(expandFields))
             ),
             SetupIntentJsonParser()
         ) {

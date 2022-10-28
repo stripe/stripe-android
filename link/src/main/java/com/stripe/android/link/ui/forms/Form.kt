@@ -22,23 +22,24 @@ internal fun Form(
     enabledFlow: Flow<Boolean>
 ) {
     FormUI(
-        formController.hiddenIdentifiers,
-        enabledFlow,
-        formController.elements,
-        formController.lastTextFieldIdentifier
-    ) {
-        Row(
-            modifier = Modifier
-                .height(100.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(24.dp),
-                color = MaterialTheme.linkColors.buttonLabel,
-                strokeWidth = 2.dp
-            )
+        hiddenIdentifiersFlow = formController.hiddenIdentifiers,
+        enabledFlow = enabledFlow,
+        elementsFlow = formController.elements,
+        lastTextFieldIdentifierFlow = formController.lastTextFieldIdentifier,
+        loadingComposable = {
+            Row(
+                modifier = Modifier
+                    .height(100.dp)
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.linkColors.buttonLabel,
+                    strokeWidth = 2.dp
+                )
+            }
         }
-    }
+    )
 }

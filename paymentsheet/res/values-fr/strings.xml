@@ -12,8 +12,6 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Ajouter</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Ajoutez vos informations de paiement</string>
-  <!-- Text for back button -->
-  <string name="stripe_paymentsheet_back">Retour</string>
   <string name="stripe_paymentsheet_close">Fermer</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe va effectuer un versement de 0,01 $ sur votre compte sous 1 ou 2 jours ouvrables. Vous recevrez ensuite un e-mail contenant des instructions pour finaliser le paiement en faveur de %s.</string>
@@ -23,6 +21,8 @@
   <string name="stripe_paymentsheet_or_pay_with_card">Ou payez par carte bancaire</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Payer</string>
+  <!-- Title shown above a section containing various payment options -->
+  <string name="stripe_paymentsheet_pay_using">Payer avec</string>
   <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
   <string name="stripe_paymentsheet_primary_button_processing">Traitement en cours...</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->

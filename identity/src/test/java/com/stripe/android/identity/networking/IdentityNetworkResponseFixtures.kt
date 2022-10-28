@@ -29,7 +29,8 @@ internal val VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         "decline_button_text": "No, don't verify",
         "privacy_policy": "Data will be stored and may be used according to the \u003Ca href='https://stripe.com/privacy'\u003EStripe Privacy Policy\u003C/a\u003E and mlgb.band Privacy Policy.",
         "time_estimate": "Takes about 1–2 minutes.",
-        "title": "mlgb.band uses Stripe to verify your identity"
+        "title": "mlgb.band uses Stripe to verify your identity",
+        "scroll_to_continue_button_text": "Scroll to consent"
       },
       "document_capture": {
         "autocapture_timeout": 8000,
@@ -89,7 +90,8 @@ internal val VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         "decline_button_text": "No, don't verify",
         "privacy_policy": "Data will be stored and may be used according to the \u003Ca href='https://stripe.com/privacy'\u003EStripe Privacy Policy\u003C/a\u003E and mlgb.band Privacy Policy.",
         "time_estimate": "Takes about 1–2 minutes.",
-        "title": "mlgb.band uses Stripe to verify your identity"
+        "title": "mlgb.band uses Stripe to verify your identity",
+        "scroll_to_continue_button_text": "Scroll to consent"
       },
       "document_capture": {
         "autocapture_timeout": 8000,

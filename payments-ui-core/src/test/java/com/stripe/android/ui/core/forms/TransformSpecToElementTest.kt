@@ -28,6 +28,8 @@ import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.TranslationId
+import com.stripe.android.ui.core.elements.UpiElement
+import com.stripe.android.ui.core.elements.UpiSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import kotlinx.coroutines.flow.first
@@ -218,6 +220,17 @@ internal class TransformSpecToElementTest {
         )
 
         assertThat(formElement).containsExactly(EmptyFormElement())
+    }
+
+    @Test
+    fun `UPI spec is transformed into UPI element wrapped in section`() {
+        val upiSpec = UpiSpec()
+        val formElement = transformSpecToElements.transform(listOf(upiSpec))
+
+        val sectionElement = formElement.first() as SectionElement
+        val upiElement = sectionElement.fields.first() as UpiElement
+
+        assertThat(sectionElement.fields).containsExactly(upiElement)
     }
 
     companion object {

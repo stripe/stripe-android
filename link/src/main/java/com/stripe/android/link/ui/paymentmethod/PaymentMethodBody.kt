@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui.paymentmethod
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -36,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForLinkContract
@@ -52,7 +54,6 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.ui.forms.Form
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 @Preview
 @Composable
@@ -197,9 +198,9 @@ internal fun PaymentMethodBody(
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
-        errorMessage?.let {
+        AnimatedVisibility(visible = errorMessage != null) {
             ErrorText(
-                text = it.getMessage(LocalContext.current.resources),
+                text = errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
                 modifier = Modifier.fillMaxWidth()
             )
         }

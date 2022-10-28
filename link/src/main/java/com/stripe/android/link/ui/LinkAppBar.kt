@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.R
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.theme.AppBarHeight
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
@@ -114,7 +115,7 @@ internal fun LinkAppBar(
         ) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
-                contentDescription = stringResource(R.string.menu),
+                contentDescription = stringResource(R.string.show_menu),
                 tint = MaterialTheme.linkColors.closeButton
             )
         }
@@ -131,7 +132,8 @@ private fun LinkAppBarPreview() {
                     navigationIcon = R.drawable.ic_link_close,
                     showHeader = true,
                     showOverflowMenu = true,
-                    email = "email@example.com"
+                    email = "email@example.com",
+                    accountStatus = AccountStatus.Verified
                 ),
                 onBackPressed = {},
                 onLogout = {},
@@ -151,7 +153,8 @@ private fun LinkAppBar_NoEmail() {
                     navigationIcon = R.drawable.ic_link_close,
                     showHeader = true,
                     showOverflowMenu = true,
-                    email = null
+                    email = null,
+                    accountStatus = AccountStatus.SignedOut
                 ),
                 onBackPressed = {},
                 onLogout = {},
@@ -171,7 +174,8 @@ private fun LinkAppBar_ChildScreen() {
                     navigationIcon = R.drawable.ic_link_back,
                     showHeader = false,
                     showOverflowMenu = false,
-                    email = "email@example.com"
+                    email = "email@example.com",
+                    accountStatus = AccountStatus.Verified
                 ),
                 onBackPressed = {},
                 onLogout = {},
@@ -191,7 +195,8 @@ private fun LinkAppBar_ChildScreen_NoEmail() {
                     navigationIcon = R.drawable.ic_link_back,
                     showHeader = false,
                     showOverflowMenu = false,
-                    email = null
+                    email = null,
+                    accountStatus = AccountStatus.SignedOut
                 ),
                 onBackPressed = {},
                 onLogout = {},

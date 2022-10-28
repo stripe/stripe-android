@@ -1,10 +1,10 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -39,6 +42,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.R
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -60,37 +64,47 @@ import com.stripe.android.model.CvcCheck
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.ui.core.elements.DateConfig
-import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.RowController
+import com.stripe.android.ui.core.elements.RowElement
 import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionElementUI
+import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
-import com.stripe.android.ui.core.injection.NonFallbackInjector
+import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.flow.flowOf
+import java.util.UUID
 
 @Preview
 @Composable
 private fun WalletBodyPreview() {
     val paymentDetailsList = listOf(
         ConsumerPaymentDetails.Card(
-            "id1",
-            true,
-            2030,
-            12,
-            CardBrand.Visa,
-            "4242",
-            CvcCheck.Fail
+            id = "id1",
+            isDefault = false,
+            expiryYear = 2030,
+            expiryMonth = 12,
+            brand = CardBrand.Visa,
+            last4 = "4242",
+            cvcCheck = CvcCheck.Fail
         ),
         ConsumerPaymentDetails.Card(
-            "id2",
-            false,
-            2022,
-            1,
-            CardBrand.MasterCard,
-            "4444",
-            CvcCheck.Pass
+            id = "id2",
+            isDefault = false,
+            expiryYear = 2022,
+            expiryMonth = 1,
+            brand = CardBrand.MasterCard,
+            last4 = "4444",
+            cvcCheck = CvcCheck.Pass
+        ),
+        ConsumerPaymentDetails.BankAccount(
+            id = "id2",
+            isDefault = true,
+            bankIconCode = "icon",
+            bankName = "Stripe Bank With Long Name",
+            last4 = "6789"
         )
     )
 
@@ -100,7 +114,7 @@ private fun WalletBodyPreview() {
                 uiState = WalletUiState(
                     paymentDetailsList = paymentDetailsList,
                     supportedTypes = SupportedPaymentMethod.allTypes,
-                    selectedItem = paymentDetailsList.first(),
+                    selectedItem = paymentDetailsList[2],
                     isExpanded = true,
                     errorMessage = ErrorMessage.Raw("Something went wrong")
                 ),
@@ -111,6 +125,7 @@ private fun WalletBodyPreview() {
                 onItemSelected = {},
                 onAddNewPaymentMethodClick = {},
                 onEditPaymentMethod = {},
+                onSetDefault = {},
                 onDeletePaymentMethod = {},
                 onPrimaryButtonClick = {},
                 onPayAnotherWayClick = {},
@@ -135,6 +150,21 @@ internal fun WalletBody(
 
     val uiState by viewModel.uiState.collectAsState()
 
+    uiState.alertMessage?.let { alertMessage ->
+        AlertDialog(
+            text = { Text(alertMessage.getMessage(LocalContext.current.resources)) },
+            onDismissRequest = viewModel::onAlertDismissed,
+            confirmButton = {
+                TextButton(onClick = viewModel::onAlertDismissed) {
+                    Text(
+                        text = stringResource(android.R.string.ok),
+                        color = MaterialTheme.linkColors.actionLabel
+                    )
+                }
+            }
+        )
+    }
+
     if (uiState.paymentDetailsList.isEmpty()) {
         Box(
             modifier = Modifier
@@ -157,6 +187,7 @@ internal fun WalletBody(
             onItemSelected = viewModel::onItemSelected,
             onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
             onEditPaymentMethod = viewModel::editPaymentMethod,
+            onSetDefault = viewModel::setDefault,
             onDeletePaymentMethod = viewModel::deletePaymentMethod,
             onPrimaryButtonClick = viewModel::onConfirmPayment,
             onPayAnotherWayClick = viewModel::payAnotherWay,
@@ -175,6 +206,7 @@ internal fun WalletBody(
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onAddNewPaymentMethodClick: () -> Unit,
     onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onSetDefault: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClick: () -> Unit,
@@ -204,6 +236,14 @@ internal fun WalletBody(
         }
     }
 
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(uiState.isProcessing) {
+        if (uiState.isProcessing) {
+            focusManager.clearFocus()
+        }
+    }
+
     ScrollableTopLevelColumn {
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -222,6 +262,10 @@ internal fun WalletBody(
                                 onEditClick = {
                                     showBottomSheetContent(null)
                                     onEditPaymentMethod(it)
+                                },
+                                onSetDefaultClick = {
+                                    showBottomSheetContent(null)
+                                    onSetDefault(it)
                                 },
                                 onRemoveClick = {
                                     showBottomSheetContent(null)
@@ -251,7 +295,7 @@ internal fun WalletBody(
 
         if (uiState.selectedItem is ConsumerPaymentDetails.BankAccount) {
             Html(
-                html = stringResource(R.string.wallet_bank_account_terms),
+                html = stringResource(R.string.wallet_bank_account_terms).replaceHyperlinks(),
                 imageGetter = emptyMap(),
                 color = MaterialTheme.colors.onSecondary,
                 style = MaterialTheme.typography.caption,
@@ -264,9 +308,9 @@ internal fun WalletBody(
             )
         }
 
-        uiState.errorMessage?.let {
+        AnimatedVisibility(visible = uiState.errorMessage != null) {
             ErrorText(
-                text = it.getMessage(LocalContext.current.resources),
+                text = uiState.errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp)
@@ -308,10 +352,25 @@ internal fun CardDetailsRecollectionForm(
     isCardExpired: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val cvcElement = remember(cvcController) {
-        CvcElement(
-            _identifier = IdentifierSpec.CardCvc,
-            controller = cvcController
+    val rowElement = remember(expiryDateController, cvcController) {
+        val rowFields: List<SectionSingleFieldElement> = buildList {
+            if (isCardExpired) {
+                this += SimpleTextElement(
+                    identifier = IdentifierSpec.Generic("date"),
+                    controller = expiryDateController
+                )
+            }
+
+            this += CvcElement(
+                _identifier = IdentifierSpec.CardCvc,
+                controller = cvcController
+            )
+        }
+
+        RowElement(
+            _identifier = IdentifierSpec.Generic("row_" + UUID.randomUUID().leastSignificantBits),
+            fields = rowFields,
+            controller = RowController(rowFields)
         )
     }
 
@@ -330,34 +389,12 @@ internal fun CardDetailsRecollectionForm(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                if (isCardExpired) {
-                    val expiryDateElement = remember(expiryDateController) {
-                        SimpleTextElement(
-                            identifier = IdentifierSpec.Generic("date"),
-                            controller = expiryDateController
-                        )
-                    }
-
-                    Box(modifier = Modifier.weight(0.5f)) {
-                        SectionElementUI(
-                            enabled = true,
-                            element = SectionElement.wrap(expiryDateElement),
-                            hiddenIdentifiers = emptyList(),
-                            lastTextFieldIdentifier = cvcElement.identifier
-                        )
-                    }
-                }
-
-                Box(modifier = Modifier.weight(0.5f)) {
-                    SectionElementUI(
-                        enabled = true,
-                        element = SectionElement.wrap(cvcElement),
-                        hiddenIdentifiers = emptyList(),
-                        lastTextFieldIdentifier = cvcElement.identifier
-                    )
-                }
-            }
+            SectionElementUI(
+                enabled = true,
+                element = SectionElement.wrap(rowElement),
+                hiddenIdentifiers = emptySet(),
+                lastTextFieldIdentifier = rowElement.fields.last().identifier
+            )
         }
     }
 }
@@ -397,7 +434,6 @@ internal fun CollapsedPaymentDetails(
             color = MaterialTheme.linkColors.disabledText
         )
         PaymentDetails(paymentDetails = selectedPaymentMethod, enabled = true)
-        Spacer(modifier = Modifier.weight(1f))
         Icon(
             painter = painterResource(id = R.drawable.ic_link_chevron),
             contentDescription = stringResource(id = R.string.wallet_expand_accessibility),
@@ -470,6 +506,7 @@ private fun ExpandedPaymentDetails(
                 enabled = isEnabled,
                 isSupported = uiState.supportedTypes.contains(item.type),
                 isSelected = uiState.selectedItem?.id == item.id,
+                isUpdating = uiState.paymentMethodIdBeingUpdated == item.id,
                 onClick = {
                     onItemSelected(item)
                 },
@@ -501,3 +538,8 @@ private fun ExpandedPaymentDetails(
         }
     }
 }
+
+private fun String.replaceHyperlinks() = this.replace(
+    "<terms>",
+    "<a href=\"https://stripe.com/legal/ach-payments/authorization\">"
+).replace("</terms>", "</a>")

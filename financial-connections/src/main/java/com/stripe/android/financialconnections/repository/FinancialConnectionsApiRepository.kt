@@ -41,10 +41,12 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
         encodeDefaults = true
     }
 
-    private val options = ApiRequest.Options(
-        apiKey = publishableKey,
-        stripeAccount = stripeAccountId
-    )
+    private val options by lazy {
+        ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId
+        )
+    }
 
     override suspend fun getFinancialConnectionsAccounts(
         getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams

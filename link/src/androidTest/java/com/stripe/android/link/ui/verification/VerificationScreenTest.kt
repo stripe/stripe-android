@@ -5,6 +5,8 @@ import android.view.KeyEvent.KEYCODE_DEL
 import androidx.activity.ComponentActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.test.assertIsFocused
@@ -165,12 +167,6 @@ internal class VerificationScreenTest {
     }
 
     @Test
-    fun focus_on_first_otp_field_at_start() {
-        setContent()
-        onOtpField(0).assertIsFocused()
-    }
-
-    @Test
     fun when_error_message_is_not_null_then_it_is_visible() {
         val errorMessage = "Error message"
         setContent(errorMessage = ErrorMessage.Raw(errorMessage))
@@ -197,6 +193,7 @@ internal class VerificationScreenTest {
                 otpElement = otpElement,
                 isProcessing = isProcessing,
                 errorMessage = errorMessage,
+                focusRequester = remember { FocusRequester() },
                 onBack = onBack,
                 onChangeEmailClick = onChangeEmailClick,
                 onResendCodeClick = onResendCodeClick

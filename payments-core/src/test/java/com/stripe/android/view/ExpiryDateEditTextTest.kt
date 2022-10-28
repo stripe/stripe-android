@@ -85,14 +85,14 @@ class ExpiryDateEditTextTest {
     }
 
     @Test
-    fun afterInputThreeDigits_whenDeletingOne_textDoesContainSlash() {
+    fun afterInputThreeDigits_whenDeletingOne_textDoesNotContainSlash() {
         expiryDateEditText.append("1")
         expiryDateEditText.append("2")
         expiryDateEditText.append("3")
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
         assertThat(expiryDateEditText.text.toString())
-            .isEqualTo("12/")
+            .isEqualTo("12")
     }
 
     @Test
@@ -213,14 +213,14 @@ class ExpiryDateEditTextTest {
     }
 
     @Test
-    fun delete_whenAcrossSeparator_deletesSeparator() {
+    fun delete_whenAcrossSeparator_deletesSeparatorAndLastCharacterBeforeSeparator() {
         expiryDateEditText.append("12")
         assertThat(expiryDateEditText.text.toString())
             .isEqualTo("12/")
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
         assertThat(expiryDateEditText.text.toString())
-            .isEqualTo("12")
+            .isEqualTo("1")
     }
 
     @Test
@@ -376,15 +376,7 @@ class ExpiryDateEditTextTest {
 
         ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
         assertThat(expiryDateEditText.fieldText)
-            .isEqualTo("12 / ")
-
-        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
-        assertThat(expiryDateEditText.fieldText)
-            .isEqualTo("12 /")
-
-        ViewTestUtils.sendDeleteKeyEvent(expiryDateEditText)
-        assertThat(expiryDateEditText.fieldText)
-            .isEqualTo("12 ")
+            .isEqualTo("12")
     }
 
     @Test

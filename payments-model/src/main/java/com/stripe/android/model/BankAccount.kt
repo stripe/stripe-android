@@ -45,7 +45,9 @@ constructor(
      *
      * [country](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-country)
      */
-    @param:Size(2) @field:Size(2) @get:Size(2)
+    @param:Size(2)
+    @field:Size(2)
+    @get:Size(2)
     val countryCode: String? = null,
 
     /**
@@ -53,7 +55,9 @@ constructor(
      *
      * [currency](https://stripe.com/docs/api/customer_bank_accounts/object#customer_bank_account_object-currency)
      */
-    @param:Size(3) @field:Size(3) @get:Size(3)
+    @param:Size(3)
+    @field:Size(3)
+    @get:Size(3)
     val currency: String? = null,
 
     /**

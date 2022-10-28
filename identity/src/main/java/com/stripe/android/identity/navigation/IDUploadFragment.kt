@@ -2,6 +2,7 @@ package com.stripe.android.identity.navigation
 
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.IdentityIO
 
@@ -22,4 +23,5 @@ internal class IDUploadFragment(
     override var backScanType: IdentityScanState.ScanType? = IdentityScanState.ScanType.ID_BACK
     override val fragmentId = R.id.IDUploadFragment
     override val presentedId = "ID_UPLOAD_PRESENTED"
+    override val collectedDataParamType = CollectedDataParam.Type.IDCARD
 }

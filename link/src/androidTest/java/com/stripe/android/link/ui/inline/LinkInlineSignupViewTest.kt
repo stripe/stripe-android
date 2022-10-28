@@ -100,6 +100,22 @@ internal class LinkInlineSignupViewTest {
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
 
+    @Test
+    fun when_expanded_inline_logo_visible() {
+        setContent(
+            expanded = true
+        )
+        onInlineLinkLogo().assertExists()
+    }
+
+    @Test
+    fun when_not_expanded_inline_logo_not_visible() {
+        setContent(
+            expanded = false
+        )
+        onInlineLinkLogo().assertDoesNotExist()
+    }
+
     private fun setContent(
         merchantName: String = "Example, Inc.",
         emailElement: SimpleTextFieldController =
@@ -112,8 +128,7 @@ internal class LinkInlineSignupViewTest {
         expanded: Boolean = true,
         requiresNameCollection: Boolean = false,
         errorMessage: ErrorMessage? = null,
-        toggleExpanded: () -> Unit = {},
-        onUserInteracted: () -> Unit = {}
+        toggleExpanded: () -> Unit = {}
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             LinkInlineSignup(
@@ -126,8 +141,7 @@ internal class LinkInlineSignupViewTest {
                 expanded,
                 requiresNameCollection,
                 errorMessage,
-                toggleExpanded,
-                onUserInteracted
+                toggleExpanded
             )
         }
     }
@@ -137,4 +151,5 @@ internal class LinkInlineSignupViewTest {
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
     private fun onNameField() = composeTestRule.onNodeWithText("Full name")
     private fun onSaveMyInfo() = composeTestRule.onNodeWithText("Save my info", substring = true)
+    private fun onInlineLinkLogo() = composeTestRule.onNodeWithTag("LinkLogoIcon", useUnmergedTree = true)
 }

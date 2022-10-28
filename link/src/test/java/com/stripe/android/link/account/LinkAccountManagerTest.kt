@@ -3,6 +3,7 @@ package com.stripe.android.link.account
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.repositories.LinkRepository
@@ -57,6 +58,15 @@ class LinkAccountManagerTest {
     }
 
     @Test
+    fun `When cookie exists and network call fails then account status is Error`() = runSuspendTest {
+        whenever(cookieStore.getAuthSessionCookie()).thenReturn("cookie")
+        whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
+            .thenReturn(Result.failure(Exception()))
+
+        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Error)
+    }
+
+    @Test
     fun `When new user email exists then it is used at start`() = runSuspendTest {
         val email = "email"
         whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
@@ -65,6 +75,17 @@ class LinkAccountManagerTest {
         assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Verified)
 
         verify(linkRepository).lookupConsumer(eq(email), isNull())
+    }
+
+    @Test
+    fun `When new user email exists and network call fails then account status is Error`() = runSuspendTest {
+        val email = "email"
+        whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
+        whenever(cookieStore.getNewUserEmail()).thenReturn(email)
+        whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
+            .thenReturn(Result.failure(Exception()))
+
+        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Error)
     }
 
     @Test
@@ -84,6 +105,15 @@ class LinkAccountManagerTest {
         assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.SignedOut)
 
         verifyNoInteractions(linkRepository)
+    }
+
+    @Test
+    fun `When customerEmail is set and network call fails then account status is Error`() = runSuspendTest {
+        whenever(cookieStore.getAuthSessionCookie()).thenReturn(null)
+        whenever(linkRepository.lookupConsumer(anyOrNull(), anyOrNull()))
+            .thenReturn(Result.failure(Exception()))
+
+        assertThat(accountManager(EMAIL).accountStatus.first()).isEqualTo(AccountStatus.Error)
     }
 
     @Test
@@ -693,8 +723,15 @@ class LinkAccountManagerTest {
         customerEmail: String? = null,
         stripeIntent: StripeIntent = mock()
     ) = LinkAccountManager(
-        customerEmail,
-        stripeIntent,
+        config = LinkPaymentLauncher.Configuration(
+            stripeIntent = stripeIntent,
+            customerEmail = customerEmail,
+            customerName = null,
+            customerPhone = null,
+            customerBillingCountryCode = null,
+            merchantName = "Merchant",
+            shippingValues = null,
+        ),
         linkRepository,
         cookieStore,
         linkEventsReporter

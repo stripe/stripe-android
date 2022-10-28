@@ -13,9 +13,12 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -26,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PaymentsThemeForLink
@@ -42,7 +46,6 @@ import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.elements.TextFieldSection
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 
 @Preview
 @Composable
@@ -67,13 +70,9 @@ private fun SignUpBodyPreview() {
 @Composable
 internal fun SignUpBody(
     injector: NonFallbackInjector,
-    email: String?
 ) {
     val signUpViewModel: SignUpViewModel = viewModel(
-        factory = SignUpViewModel.Factory(
-            injector,
-            email
-        )
+        factory = SignUpViewModel.Factory(injector)
     )
 
     val signUpState by signUpViewModel.signUpState.collectAsState()
@@ -138,7 +137,7 @@ internal fun SignUpBody(
                 errorMessage != null
         ) {
             ErrorText(
-                text = errorMessage!!.getMessage(LocalContext.current.resources),
+                text = errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -173,7 +172,7 @@ internal fun SignUpBody(
                 }
                 AnimatedVisibility(visible = errorMessage != null) {
                     ErrorText(
-                        text = errorMessage!!.getMessage(LocalContext.current.resources),
+                        text = errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -198,7 +197,8 @@ internal fun SignUpBody(
 internal fun EmailCollectionSection(
     enabled: Boolean,
     emailController: TextFieldController,
-    signUpState: SignUpState
+    signUpState: SignUpState,
+    focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
     Box(
         modifier = Modifier
@@ -213,7 +213,9 @@ internal fun EmailCollectionSection(
             } else {
                 ImeAction.Done
             },
-            enabled = enabled && signUpState != SignUpState.VerifyingEmail
+            enabled = enabled && signUpState != SignUpState.VerifyingEmail,
+            modifier = Modifier
+                .focusRequester(focusRequester)
         )
         if (signUpState == SignUpState.VerifyingEmail) {
             CircularProgressIndicator(

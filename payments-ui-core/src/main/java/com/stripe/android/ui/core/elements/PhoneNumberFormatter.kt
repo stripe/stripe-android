@@ -99,16 +99,20 @@ internal sealed class PhoneNumberFormatter {
                         }
 
                         override fun transformedToOriginal(offset: Int): Int {
-                            return if (offset == 0) 0 else metadata.pattern.let {
-                                // count the number of characters added as the number of non '#' characters
-                                var added = it.substring(0, min(offset, it.length))
-                                    .filter { it != '#' }.length
+                            return if (offset == 0) {
+                                0
+                            } else {
+                                metadata.pattern.let {
+                                    // count the number of characters added as the number of non '#' characters
+                                    var added = it.substring(0, min(offset, it.length))
+                                        .filter { it != '#' }.length
 
-                                // if bigger than the pattern, one space is added after the pattern
-                                if (offset > it.length) {
-                                    added++
+                                    // if bigger than the pattern, one space is added after the pattern
+                                    if (offset > it.length) {
+                                        added++
+                                    }
+                                    offset - added
                                 }
-                                offset - added
                             }
                         }
                     }
@@ -183,7 +187,9 @@ internal sealed class PhoneNumberFormatter {
     )
 
     companion object {
-        const val E164_MAX_DIGITS = 15
+        private const val E164_MAX_DIGITS = 15
+        private const val COUNTRY_PREFIX_MAX_LENGTH = 5
+
         val VALID_INPUT_RANGE = ('0'..'9')
 
         fun forCountry(countryCode: String) =
@@ -191,7 +197,28 @@ internal sealed class PhoneNumberFormatter {
                 WithRegion(it)
             } ?: UnknownRegion(countryCode)
 
-        fun findBestCountryForPrefix(prefix: String, userLocales: LocaleListCompat) =
+        fun forPrefix(phoneNumber: String): PhoneNumberFormatter? {
+            var charIndex = 1
+
+            // Find the regions that match the phone number prefix, then pick the top match from the
+            // device's locales
+            while (charIndex < phoneNumber.lastIndex && charIndex < COUNTRY_PREFIX_MAX_LENGTH - 1) {
+                charIndex++
+
+                val country = findBestCountryForPrefix(
+                    prefix = phoneNumber.substring(0, charIndex),
+                    userLocales = LocaleListCompat.getAdjustedDefault(),
+                )
+
+                if (country != null) {
+                    return forCountry(country)
+                }
+            }
+
+            return null
+        }
+
+        private fun findBestCountryForPrefix(prefix: String, userLocales: LocaleListCompat) =
             countryCodesForPrefix(prefix).takeIf { it.isNotEmpty() }?.let {
                 for (i in 0 until userLocales.size()) {
                     val locale = userLocales.get(i)!!

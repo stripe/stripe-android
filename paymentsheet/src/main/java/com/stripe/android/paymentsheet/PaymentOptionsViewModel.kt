@@ -14,11 +14,13 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
-import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -35,6 +37,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -54,7 +57,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     lpmResourceRepository: ResourceRepository<LpmRepository>,
     addressResourceRepository: ResourceRepository<AddressRepository>,
     savedStateHandle: SavedStateHandle,
-    linkPaymentLauncherFactory: LinkPaymentLauncherFactory
+    linkLauncher: LinkPaymentLauncher
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -67,7 +70,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     lpmResourceRepository = lpmResourceRepository,
     addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
-    linkPaymentLauncherFactory = linkPaymentLauncherFactory
+    linkLauncher = linkLauncher
 ) {
     @VisibleForTesting
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
@@ -80,6 +83,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
     override var newPaymentSelection = args.newLpm
+
+    override var linkInlineSelection =
+        MutableLiveData<PaymentSelection.New.LinkInline?>(args.newLpm as? PaymentSelection.New.LinkInline)
 
     // This is used in the case where the last card was new and not saved. In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
@@ -169,7 +175,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
             stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
         ) {
             viewModelScope.launch {
-                val accountStatus = linkLauncher.setup(stripeIntent, this)
+                val configuration = createLinkConfiguration(stripeIntent).also {
+                    _linkConfiguration.value = it
+                }
+                val accountStatus = linkLauncher.getAccountStatusFlow(configuration).first()
                 when (accountStatus) {
                     AccountStatus.Verified,
                     AccountStatus.VerificationStarted,
@@ -177,10 +186,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
                         // If account exists, select link by default
                         savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
                     }
-                    AccountStatus.SignedOut -> {}
+                    AccountStatus.SignedOut,
+                    AccountStatus.Error -> {
+                    }
                 }
                 activeLinkSession.value = accountStatus == AccountStatus.Verified
-                _isLinkEnabled.value = true
+                _isLinkEnabled.value = accountStatus != AccountStatus.Error
             }
         } else {
             _isLinkEnabled.value = false
@@ -309,13 +320,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val productUsage: Set<String>
         )
 
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            DaggerPaymentOptionsViewModelFactoryComponent.builder()
-                .context(arg.application)
-                .productUsage(arg.productUsage)
-                .build().inject(this)
-        }
-
         @Inject
         lateinit var subComponentBuilderProvider:
             Provider<PaymentOptionsViewModelSubcomponent.Builder>
@@ -328,15 +332,29 @@ internal class PaymentOptionsViewModel @Inject constructor(
         ): T {
             val application = applicationSupplier()
             val starterArgs = starterArgsSupplier()
-            injectWithFallback(
-                starterArgsSupplier().injectorKey,
+
+            val injector = injectWithFallback(
+                starterArgs.injectorKey,
                 FallbackInitializeParam(application, starterArgs.productUsage)
             )
-            return subComponentBuilderProvider.get()
+
+            val subcomponent = subComponentBuilderProvider.get()
                 .application(application)
                 .args(starterArgs)
                 .savedStateHandle(savedStateHandle)
-                .build().viewModel as T
+                .build()
+            val viewModel = subcomponent.viewModel
+            viewModel.injector = requireNotNull(injector as NonFallbackInjector)
+            return viewModel as T
+        }
+
+        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector {
+            val component = DaggerPaymentOptionsViewModelFactoryComponent.builder()
+                .context(arg.application)
+                .productUsage(arg.productUsage)
+                .build()
+            component.inject(this)
+            return component
         }
     }
 

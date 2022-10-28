@@ -1,5 +1,6 @@
 package com.stripe.android.test.core
 
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 
@@ -9,7 +10,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPayment
 data class TestParameters(
     val paymentMethod: SupportedPaymentMethod,
     val customer: Customer,
-    val linkState: LinkState,
+    val linkState: LinkState = LinkState.Off,
     val googlePayState: GooglePayState,
     val currency: Currency,
     val intentType: IntentType,
@@ -25,7 +26,8 @@ data class TestParameters(
     val forceDarkMode: Boolean? = null,
     val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
     val snapshotReturningCustomer: Boolean = false,
-    val merchantCountryCode: String
+    val merchantCountryCode: String,
+    val supportedPaymentMethods: List<PaymentMethodCode> = listOf()
 )
 
 /**
@@ -100,7 +102,8 @@ enum class Currency {
     USD,
     EUR,
     AUD,
-    GBP
+    GBP,
+    INR,
 }
 
 /**

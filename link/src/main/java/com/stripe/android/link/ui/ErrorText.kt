@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.linkColors
+import com.stripe.android.ui.core.elements.HyperlinkedText
 
 internal sealed class ErrorTextStyle {
     abstract val shape: Shape
@@ -84,11 +84,11 @@ internal fun ErrorText(
             modifier = style.iconModifier,
             tint = MaterialTheme.linkColors.errorText
         )
-        Text(
+        HyperlinkedText(
             text = text,
             modifier = style.textModifier,
-            style = style.textStyle,
-            color = MaterialTheme.linkColors.errorText
+            color = MaterialTheme.linkColors.errorText,
+            style = style.textStyle
         )
     }
 }

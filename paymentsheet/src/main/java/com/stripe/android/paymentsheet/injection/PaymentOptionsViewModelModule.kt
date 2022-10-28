@@ -15,7 +15,10 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module(
-    subcomponents = [PaymentOptionsViewModelSubcomponent::class]
+    subcomponents = [
+        PaymentOptionsViewModelSubcomponent::class,
+        FormViewModelSubcomponent::class
+    ]
 )
 internal class PaymentOptionsViewModelModule {
 
@@ -29,13 +32,11 @@ internal class PaymentOptionsViewModelModule {
         appContext: Context,
         @IOContext workContext: CoroutineContext
     ): (PaymentSheet.CustomerConfiguration?) -> PrefsRepository = { customerConfig ->
-        customerConfig?.let {
-            DefaultPrefsRepository(
-                appContext,
-                it.id,
-                workContext
-            )
-        } ?: PrefsRepository.Noop()
+        DefaultPrefsRepository(
+            appContext,
+            customerConfig?.id,
+            workContext
+        )
     }
 
     /**

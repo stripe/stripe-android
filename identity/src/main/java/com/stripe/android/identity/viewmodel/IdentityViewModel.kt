@@ -31,11 +31,11 @@ import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
-import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SelfieUploadState
+import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.ClearDataParam
@@ -73,15 +73,29 @@ internal class IdentityViewModel constructor(
 ) : ViewModel() {
 
     /**
-     * StateFlow to track the upload status of high/low resolution image of front and back for documents.
+     * StateFlow to track the upload status of high/low resolution image for front of document.
      */
-    private val _documentUploadedState =
+    private val _documentFrontUploadedState =
         MutableStateFlow(
-            savedStateHandle.get<DocumentUploadState>(DOCUMENT_UPLOAD_STATE) ?: run {
-                DocumentUploadState()
+            savedStateHandle.get<SingleSideDocumentUploadState>(DOCUMENT_FRONT_UPLOAD_STATE)
+                ?: run {
+                    SingleSideDocumentUploadState()
+                }
+        )
+    val documentFrontUploadedState: StateFlow<SingleSideDocumentUploadState> =
+        _documentFrontUploadedState
+
+    /**
+     * StateFlow to track the upload status of high/low resolution image for back of document.
+     */
+    private val _documentBackUploadedState =
+        MutableStateFlow(
+            savedStateHandle.get<SingleSideDocumentUploadState>(DOCUMENT_BACK_UPLOAD_STATE) ?: run {
+                SingleSideDocumentUploadState()
             }
         )
-    val documentUploadState: StateFlow<DocumentUploadState> = _documentUploadedState
+    val documentBackUploadedState: StateFlow<SingleSideDocumentUploadState> =
+        _documentBackUploadedState
 
     /**
      * StateFlow to track the upload status of high/low resolution images of selfies.
@@ -200,7 +214,8 @@ internal class IdentityViewModel constructor(
      * Reset document uploaded state to loading state.
      */
     internal fun resetDocumentUploadedState() {
-        _documentUploadedState.updateStateAndSave { DocumentUploadState() }
+        _documentFrontUploadedState.updateStateAndSave { SingleSideDocumentUploadState() }
+        _documentBackUploadedState.updateStateAndSave { SingleSideDocumentUploadState() }
     }
 
     /**
@@ -440,26 +455,47 @@ internal class IdentityViewModel constructor(
                             )
                         }
                     }
-                    _documentUploadedState.updateStateAndSave { currentState ->
-                        currentState.update(
-                            isHighRes = isHighRes,
-                            isFront = isFront,
-                            newResult = UploadedResult(
-                                fileTimePair.first,
-                                scores,
-                                uploadMethod
+                    if (isFront) {
+                        _documentFrontUploadedState.updateStateAndSave { currentState ->
+                            currentState.update(
+                                isHighRes = isHighRes,
+                                newResult = UploadedResult(
+                                    fileTimePair.first,
+                                    scores,
+                                    uploadMethod
+                                )
                             )
-                        )
+                        }
+                    } else {
+                        _documentBackUploadedState.updateStateAndSave { currentState ->
+                            currentState.update(
+                                isHighRes = isHighRes,
+                                newResult = UploadedResult(
+                                    fileTimePair.first,
+                                    scores,
+                                    uploadMethod
+                                )
+                            )
+                        }
                     }
                 },
                 onFailure = {
-                    _documentUploadedState.updateStateAndSave { currentState ->
-                        currentState.updateError(
-                            isHighRes = isHighRes,
-                            isFront = isFront,
-                            message = "Failed to upload file : ${imageFile.name}",
-                            throwable = it
-                        )
+                    if (isFront) {
+                        _documentFrontUploadedState.updateStateAndSave { currentState ->
+                            currentState.updateError(
+                                isHighRes = isHighRes,
+                                message = "Failed to upload file : ${imageFile.name}",
+                                throwable = it
+                            )
+                        }
+                    } else {
+                        _documentBackUploadedState.updateStateAndSave { currentState ->
+                            currentState.updateError(
+                                isHighRes = isHighRes,
+                                message = "Failed to upload file : ${imageFile.name}",
+                                throwable = it
+                            )
+                        }
                     }
                 }
             )
@@ -751,9 +787,10 @@ internal class IdentityViewModel constructor(
         this.update(function)
         savedStateHandle.set(
             when (this) {
-                _documentUploadedState -> DOCUMENT_UPLOAD_STATE
                 _selfieUploadedState -> SELFIE_UPLOAD_STATE
                 _analyticsState -> ANALYTICS_STATE
+                _documentFrontUploadedState -> DOCUMENT_FRONT_UPLOAD_STATE
+                _documentBackUploadedState -> DOCUMENT_BACK_UPLOAD_STATE
                 else -> {
                     throw IllegalStateException("Unexpected state flow: $this")
                 }
@@ -796,7 +833,8 @@ internal class IdentityViewModel constructor(
         const val FRONT = "front"
         const val BACK = "back"
         const val BYTES_IN_KB = 1024
-        private const val DOCUMENT_UPLOAD_STATE = "document_upload_state"
+        private const val DOCUMENT_FRONT_UPLOAD_STATE = "document_front_upload_state"
+        private const val DOCUMENT_BACK_UPLOAD_STATE = "document_back_upload_state"
         private const val SELFIE_UPLOAD_STATE = "selfie_upload_state"
         private const val ANALYTICS_STATE = "analytics_upload_state"
     }

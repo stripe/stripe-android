@@ -4,6 +4,7 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails.BankAccount
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.forms.FormFieldEntry
@@ -17,7 +18,9 @@ internal data class WalletUiState(
     val hasCompleted: Boolean = false,
     val errorMessage: ErrorMessage? = null,
     val expiryDateInput: FormFieldEntry = FormFieldEntry(value = null),
-    val cvcInput: FormFieldEntry = FormFieldEntry(value = null)
+    val cvcInput: FormFieldEntry = FormFieldEntry(value = null),
+    val alertMessage: ErrorMessage? = null,
+    val paymentMethodIdBeingUpdated: String? = null
 ) {
 
     val selectedCard: Card?
@@ -61,8 +64,31 @@ internal data class WalletUiState(
         return copy(
             paymentDetailsList = response.paymentDetails,
             selectedItem = selectedItem,
-            isExpanded = !isSelectedItemValid,
+            isExpanded = if (isSelectedItemValid) isExpanded else true,
             isProcessing = false
+        )
+    }
+
+    fun updateWithSetDefaultResult(
+        updatedPaymentMethod: ConsumerPaymentDetails.PaymentDetails
+    ): WalletUiState {
+        val paymentMethods = paymentDetailsList.map { paymentMethod ->
+            if (paymentMethod.id == updatedPaymentMethod.id) {
+                updatedPaymentMethod
+            } else {
+                when (paymentMethod) {
+                    is BankAccount -> paymentMethod.copy(isDefault = false)
+                    is Card -> paymentMethod.copy(isDefault = false)
+                }
+            }
+        }
+
+        val selectedItem = paymentMethods.firstOrNull { it.id == selectedItem?.id }
+
+        return copy(
+            paymentDetailsList = paymentMethods,
+            selectedItem = selectedItem,
+            paymentMethodIdBeingUpdated = null
         )
     }
 

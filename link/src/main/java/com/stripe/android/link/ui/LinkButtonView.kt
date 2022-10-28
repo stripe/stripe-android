@@ -37,11 +37,11 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkShapes
 
 private val LinkButtonVerticalPadding = 6.dp
 private val LinkButtonHorizontalPadding = 10.dp
 private val LinkButtonShape = RoundedCornerShape(22.dp)
+private val LinkButtonEmailShape = RoundedCornerShape(16.dp) // Button corner radius - padding
 
 @Preview
 @Composable
@@ -57,15 +57,19 @@ private fun LinkButton() {
 private fun LinkButton(
     linkPaymentLauncher: LinkPaymentLauncher,
     enabled: Boolean,
-    onClick: () -> Unit
+    onClick: (LinkPaymentLauncher.Configuration) -> Unit
 ) {
-    val account = linkPaymentLauncher.linkAccountManager.linkAccount.collectAsState()
+    linkPaymentLauncher.component?.let { component ->
+        val account = component.linkAccountManager.linkAccount.collectAsState()
 
-    LinkButton(
-        enabled = enabled,
-        email = account.value?.email,
-        onClick = onClick
-    )
+        LinkButton(
+            enabled = enabled,
+            email = account.value?.email,
+            onClick = {
+                onClick(component.configuration)
+            }
+        )
+    }
 }
 
 @Composable
@@ -113,7 +117,7 @@ private fun LinkButton(
                         modifier = Modifier
                             .background(
                                 color = Color.Black.copy(alpha = 0.05f),
-                                shape = MaterialTheme.linkShapes.extraSmall
+                                shape = LinkButtonEmailShape
                             )
                     ) {
                         Text(
@@ -148,7 +152,7 @@ class LinkButtonView @JvmOverloads constructor(
         private set
 
     var linkPaymentLauncher: LinkPaymentLauncher? = null
-    var onClick by mutableStateOf({})
+    var onClick by mutableStateOf<(LinkPaymentLauncher.Configuration) -> Unit>({})
     private var isEnabledState by mutableStateOf(isEnabled)
 
     override fun setEnabled(enabled: Boolean) {

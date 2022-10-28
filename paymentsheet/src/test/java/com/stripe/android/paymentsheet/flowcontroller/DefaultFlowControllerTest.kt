@@ -19,12 +19,6 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.injection.CUSTOMER_EMAIL
-import com.stripe.android.link.injection.CUSTOMER_NAME
-import com.stripe.android.link.injection.CUSTOMER_PHONE
-import com.stripe.android.link.injection.LinkPaymentLauncherFactory
-import com.stripe.android.link.injection.MERCHANT_NAME
-import com.stripe.android.link.injection.SHIPPING_VALUES
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -56,14 +50,13 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.view.ActivityScenarioFactory
-import dagger.assisted.Assisted
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -74,6 +67,7 @@ import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
@@ -94,7 +88,9 @@ internal class DefaultFlowControllerTest {
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
 
     private val paymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
-    private val paymentLauncher = mock<StripePaymentLauncher>()
+    private val paymentLauncher = mock<StripePaymentLauncher> {
+        on { authenticatorRegistry } doReturn mock()
+    }
     private val eventReporter = mock<EventReporter>()
 
     private val paymentOptionActivityLauncher =
@@ -646,6 +642,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with link payment method should launch LinkPaymentLauncher`() = runTest {
+        whenever(linkPaymentLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
         val flowController = createFlowController(
             savedSelection = SavedSelection.Link,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -660,12 +657,12 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), eq(null))
+        verify(linkPaymentLauncher).present(any(), any(), eq(null))
     }
 
     @Test
     fun `confirmPaymentSelection() with LinkInline and user signed in should launch LinkPaymentLauncher`() = runTest {
-        whenever(linkPaymentLauncher.setup(any(), any())).thenReturn(AccountStatus.Verified)
+        whenever(linkPaymentLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
 
         val flowController = createFlowController(
             savedSelection = SavedSelection.Link,
@@ -693,12 +690,12 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), eq(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
+        verify(linkPaymentLauncher).present(any(), any(), eq(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
     }
 
     @Test
     fun `confirmPaymentSelection() with LinkInline and user not signed in should confirm with PaymentLauncher`() = runTest {
-        whenever(linkPaymentLauncher.setup(any(), any())).thenReturn(AccountStatus.SignedOut)
+        whenever(linkPaymentLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
 
         val flowController = createFlowController(
             savedSelection = SavedSelection.Link,
@@ -731,7 +728,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with Link and shipping should have shipping details in confirm params`() = runTest {
-        whenever(linkPaymentLauncher.setup(any(), any())).thenReturn(AccountStatus.SignedOut)
+        whenever(linkPaymentLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
 
         val flowController = createFlowController(
             savedSelection = SavedSelection.Link,
@@ -777,7 +774,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `confirmPaymentSelection() with Link and no shipping should not have shipping details in confirm params`() = runTest {
-        whenever(linkPaymentLauncher.setup(any(), any())).thenReturn(AccountStatus.SignedOut)
+        whenever(linkPaymentLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
 
         val flowController = createFlowController(
             savedSelection = SavedSelection.Link,
@@ -996,6 +993,7 @@ internal class DefaultFlowControllerTest {
         activityResultCaller,
         INJECTOR_KEY,
         flowControllerInitializer,
+        mock(),
         eventReporter,
         viewModel,
         paymentLauncherAssistedFactory,
@@ -1006,7 +1004,7 @@ internal class DefaultFlowControllerTest {
         ENABLE_LOGGING,
         PRODUCT_USAGE,
         createGooglePayPaymentMethodLauncherFactory(),
-        createLinkPaymentLauncherFactory()
+        linkPaymentLauncher
     )
 
     private fun createGooglePayPaymentMethodLauncherFactory() =
@@ -1019,19 +1017,6 @@ internal class DefaultFlowControllerTest {
                 skipReadyCheck: Boolean
             ): GooglePayPaymentMethodLauncher {
                 return googlePayPaymentMethodLauncher
-            }
-        }
-
-    private fun createLinkPaymentLauncherFactory() =
-        object : LinkPaymentLauncherFactory {
-            override fun create(
-                @Assisted(MERCHANT_NAME) merchantName: String,
-                @Assisted(CUSTOMER_EMAIL) customerEmail: String?,
-                @Assisted(CUSTOMER_PHONE) customerPhone: String?,
-                @Assisted(CUSTOMER_NAME) customerName: String?,
-                @Assisted(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?
-            ): LinkPaymentLauncher {
-                return linkPaymentLauncher
             }
         }
 

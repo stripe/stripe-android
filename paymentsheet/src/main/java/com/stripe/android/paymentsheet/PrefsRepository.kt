@@ -10,13 +10,4 @@ internal interface PrefsRepository {
     ): SavedSelection
 
     fun savePaymentSelection(paymentSelection: PaymentSelection?)
-
-    class Noop : PrefsRepository {
-        override suspend fun getSavedSelection(
-            isGooglePayAvailable: Boolean,
-            isLinkAvailable: Boolean
-        ) = SavedSelection.None
-
-        override fun savePaymentSelection(paymentSelection: PaymentSelection?) {}
-    }
 }

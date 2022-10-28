@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.NonFallbackInjectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -14,19 +16,27 @@ import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.ui.core.elements.OTPSpec
-import com.stripe.android.ui.core.injection.NonFallbackInjectable
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+internal data class VerificationViewState(
+    val isProcessing: Boolean = false,
+    val requestFocus: Boolean = true,
+    val errorMessage: ErrorMessage? = null,
+    val isSendingNewCode: Boolean = false,
+    val didSendNewCode: Boolean = false,
+)
 
 /**
  * ViewModel that handles user verification confirmation logic.
  */
+@Suppress("TooManyFunctions")
 internal class VerificationViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
@@ -35,11 +45,8 @@ internal class VerificationViewModel @Inject constructor(
 ) : ViewModel() {
     lateinit var linkAccount: LinkAccount
 
-    private val _isProcessing = MutableStateFlow(false)
-    val isProcessing: StateFlow<Boolean> = _isProcessing
-
-    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
-    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
+    private val _viewState = MutableStateFlow(VerificationViewState())
+    val viewState: StateFlow<VerificationViewState> = _viewState
 
     /**
      * Callback when user has successfully verified their account. If not overridden, defaults to
@@ -75,34 +82,61 @@ internal class VerificationViewModel @Inject constructor(
     }
 
     fun onVerificationCodeEntered(code: String) {
-        _isProcessing.value = true
-        clearError()
+        updateViewState {
+            it.copy(
+                isProcessing = true,
+                errorMessage = null,
+            )
+        }
 
         viewModelScope.launch {
             linkAccountManager.confirmVerification(code).fold(
                 onSuccess = {
-                    _isProcessing.value = false
+                    updateViewState {
+                        it.copy(isProcessing = false)
+                    }
+
                     linkEventsReporter.on2FAComplete()
                     onVerificationCompleted()
                 },
                 onFailure = {
-                    onError(it)
                     linkEventsReporter.on2FAFailure()
+                    for (i in 0 until otpElement.controller.otpLength) {
+                        otpElement.controller.onValueChanged(i, "")
+                    }
+                    onError(it)
                 }
             )
         }
     }
 
     fun startVerification() {
-        clearError()
+        updateViewState {
+            it.copy(errorMessage = null)
+        }
 
         viewModelScope.launch {
-            linkAccountManager.startVerification().fold(
-                onSuccess = {
-                    logger.info("Verification code sent")
-                },
-                onFailure = ::onError
-            )
+            val result = linkAccountManager.startVerification()
+            val error = result.exceptionOrNull()
+
+            updateViewState {
+                it.copy(
+                    isSendingNewCode = false,
+                    didSendNewCode = error == null,
+                    errorMessage = error?.getErrorMessage(),
+                )
+            }
+        }
+    }
+
+    fun resendCode() {
+        updateViewState { it.copy(isSendingNewCode = true) }
+        startVerification()
+    }
+
+    fun didShowCodeSentNotification() {
+        updateViewState {
+            it.copy(didSendNewCode = false)
         }
     }
 
@@ -115,18 +149,35 @@ internal class VerificationViewModel @Inject constructor(
 
     fun onChangeEmailClicked() {
         clearError()
-        navigator.navigateTo(LinkScreen.SignUp(), clearBackStack = true)
+        navigator.navigateTo(LinkScreen.SignUp, clearBackStack = true)
         linkAccountManager.logout()
     }
 
-    private fun clearError() {
-        _errorMessage.value = null
+    fun onFocusRequested() {
+        updateViewState {
+            it.copy(requestFocus = false)
+        }
     }
 
-    private fun onError(error: Throwable) = error.getErrorMessage().let {
+    private fun clearError() {
+        updateViewState {
+            it.copy(errorMessage = null)
+        }
+    }
+
+    private fun onError(error: Throwable) = error.getErrorMessage().let { message ->
         logger.error("Error: ", error)
-        _isProcessing.value = false
-        _errorMessage.value = it
+
+        updateViewState {
+            it.copy(
+                isProcessing = false,
+                errorMessage = message,
+            )
+        }
+    }
+
+    private fun updateViewState(block: (VerificationViewState) -> VerificationViewState) {
+        _viewState.update(block)
     }
 
     internal class Factory(

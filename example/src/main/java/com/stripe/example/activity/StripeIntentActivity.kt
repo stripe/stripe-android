@@ -127,7 +127,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleCreatePaymentIntentResponse(
+    open fun handleCreatePaymentIntentResponse(
         responseData: JSONObject,
         params: PaymentMethodCreateParams?,
         shippingDetails: ConfirmPaymentIntentParams.Shipping?,

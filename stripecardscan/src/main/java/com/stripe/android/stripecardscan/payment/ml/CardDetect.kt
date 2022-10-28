@@ -70,7 +70,7 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
         enum class Side {
             NO_CARD,
             NO_PAN,
-            PAN,
+            PAN
         }
     }
 

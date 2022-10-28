@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.animation.LayoutTransition
 import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.graphics.Insets
@@ -34,15 +35,16 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.getBackgroundColor
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.text.Html
 import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
@@ -56,6 +58,14 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     protected val bottomSheetController: BottomSheetController by lazy {
         BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
     }
+
+    /**
+     * This variable is a temporary way of passing parameters to [USBankAccountFormFragment] from
+     * [BaseAddPaymentMethodFragment], while the former is not fully refactored to Compose.
+     * These arguments can't be passed through the Fragment's arguments because the Fragment is
+     * added with an [AndroidViewBinding] from Compose, which doesn't allow that.
+     */
+    var formArgs: FormFragmentArguments? = null
 
     abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup
@@ -97,6 +107,9 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 0f
             }
         }
+
+        bottomSheet.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
+        fragmentContainerParent.layoutTransition.enableTransitionType(LayoutTransition.CHANGING)
 
         bottomSheetController.setup()
 
@@ -301,7 +314,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         } else {
             ToolbarResources(
                 R.drawable.stripe_paymentsheet_toolbar_back,
-                R.string.stripe_paymentsheet_back
+                R.string.back
             )
         }
 

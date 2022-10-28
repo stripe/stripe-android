@@ -4,54 +4,51 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.injection.NonFallbackInjectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.injection.CUSTOMER_EMAIL
-import com.stripe.android.link.injection.CUSTOMER_NAME
-import com.stripe.android.link.injection.CUSTOMER_PHONE
-import com.stripe.android.link.injection.LINK_INTENT
-import com.stripe.android.link.injection.MERCHANT_NAME
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.injection.NonFallbackInjectable
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 
 internal class InlineSignupViewModel @Inject constructor(
-    @Named(LINK_INTENT) val stripeIntent: StripeIntent,
-    @Named(MERCHANT_NAME) val merchantName: String,
-    @Named(CUSTOMER_EMAIL) customerEmail: String?,
-    @Named(CUSTOMER_PHONE) customerPhone: String?,
-    @Named(CUSTOMER_NAME) customerName: String?,
+    private val config: LinkPaymentLauncher.Configuration,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger
 ) : ViewModel() {
-    private val prefilledEmail =
-        if (linkAccountManager.hasUserLoggedOut(customerEmail)) null else customerEmail
-    private val prefilledPhone =
-        customerPhone?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) } ?: ""
-    private val prefilledName =
-        customerName?.takeUnless { linkAccountManager.hasUserLoggedOut(customerEmail) }
+
+    private val isLoggedOut = linkAccountManager.hasUserLoggedOut(config.customerEmail)
+
+    private val prefilledEmail = config.customerEmail.takeUnless { isLoggedOut }
+    private val prefilledPhone = config.customerPhone?.takeUnless { isLoggedOut }.orEmpty()
+    private val prefilledName = config.customerName?.takeUnless { isLoggedOut }
 
     val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
-    val phoneController = PhoneNumberController.createPhoneNumberController(prefilledPhone)
+
+    val phoneController = PhoneNumberController.createPhoneNumberController(
+        initialValue = prefilledPhone,
+        initiallySelectedCountryCode = config.customerBillingCountryCode,
+    )
+
     val nameController = SimpleTextFieldController.createNameSectionController(prefilledName)
 
     /**
@@ -75,41 +72,51 @@ internal class InlineSignupViewModel @Inject constructor(
         nameController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
             .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
-    private val _signUpStatus = MutableStateFlow(SignUpState.InputtingEmail)
-    val signUpState: StateFlow<SignUpState> = _signUpStatus
-
-    val isExpanded = MutableStateFlow(false)
+    private val _viewState =
+        MutableStateFlow(
+            InlineSignupViewState(
+                userInput = null,
+                merchantName = config.merchantName,
+                isExpanded = false,
+                apiFailed = false,
+                signUpState = SignUpState.InputtingEmail
+            )
+        )
+    val viewState: StateFlow<InlineSignupViewState> = _viewState
 
     private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
+    val accountEmail = linkAccountManager.linkAccount.map { it?.email }
+
     val requiresNameCollection: Boolean
         get() {
-            val countryCode = when (stripeIntent) {
+            val countryCode = when (val stripeIntent = config.stripeIntent) {
                 is PaymentIntent -> stripeIntent.countryCode
                 is SetupIntent -> stripeIntent.countryCode
             }
             return countryCode != CountryCode.US.value
         }
 
-    /**
-     * The collected input from the user, always valid unless null.
-     * When not null, enough information has been collected to proceed with the payment flow.
-     * This means that the user has entered an email that already has a link account and just
-     * needs verification, or entered a new email and phone number.
-     */
-    val userInput = MutableStateFlow<UserInput?>(null)
     private var hasExpanded = false
 
     private var debouncer = SignUpViewModel.Debouncer(prefilledEmail)
 
     fun toggleExpanded() {
-        isExpanded.value = !isExpanded.value
+        _viewState.update { oldState ->
+            oldState.copy(isExpanded = !oldState.isExpanded)
+        }
         // First time user checks the box, start listening to inputs
-        if (isExpanded.value && !hasExpanded) {
+        if (_viewState.value.isExpanded && !hasExpanded) {
             hasExpanded = true
             watchUserInput()
             linkEventsReporter.onInlineSignupCheckboxChecked()
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            linkAccountManager.logout()
         }
     }
 
@@ -117,15 +124,20 @@ internal class InlineSignupViewModel @Inject constructor(
         debouncer.startWatching(
             coroutineScope = viewModelScope,
             emailFlow = consumerEmail,
-            onStateChanged = {
+            onStateChanged = { signUpState ->
                 clearError()
-                _signUpStatus.value = it
-                if (it == SignUpState.InputtingEmail || it == SignUpState.VerifyingEmail) {
-                    userInput.value = null
-                } else if (it == SignUpState.InputtingPhoneOrName) {
-                    userInput.value = mapToUserInput(
-                        phoneNumber = consumerPhoneNumber.value,
-                        name = consumerName.value
+                _viewState.update { oldState ->
+                    oldState.copy(
+                        signUpState = signUpState,
+                        userInput = when (signUpState) {
+                            SignUpState.InputtingEmail, SignUpState.VerifyingEmail -> null
+                            SignUpState.InputtingPhoneOrName ->
+                                mapToUserInput(
+                                    email = consumerEmail.value,
+                                    phoneNumber = consumerPhoneNumber.value,
+                                    name = consumerName.value
+                                )
+                        }
                     )
                 }
             },
@@ -138,22 +150,24 @@ internal class InlineSignupViewModel @Inject constructor(
 
         viewModelScope.launch {
             combine(
+                consumerEmail,
                 consumerPhoneNumber,
                 consumerName,
                 this@InlineSignupViewModel::mapToUserInput
             ).collect {
-                userInput.value = it
+                _viewState.update { oldState ->
+                    oldState.copy(userInput = it)
+                }
             }
         }
     }
 
     private fun mapToUserInput(
+        email: String?,
         phoneNumber: String?,
         name: String?
     ): UserInput? {
-        return if (phoneNumber != null) {
-            // Email must be valid otherwise phone number and name collection UI would not be visible
-            val email = requireNotNull(consumerEmail.value)
+        return if (email != null && phoneNumber != null) {
             val isNameValid = !requiresNameCollection || !name.isNullOrBlank()
 
             val phone = phoneController.getE164PhoneNumber(phoneNumber)
@@ -167,20 +181,39 @@ internal class InlineSignupViewModel @Inject constructor(
 
     private suspend fun lookupConsumerEmail(email: String) {
         clearError()
+        linkAccountManager.logout()
         linkAccountManager.lookupConsumer(email, startSession = false).fold(
             onSuccess = {
                 if (it != null) {
-                    userInput.value = UserInput.SignIn(email)
-                    _signUpStatus.value = SignUpState.InputtingEmail
+                    _viewState.update { oldState ->
+                        oldState.copy(
+                            userInput = UserInput.SignIn(email),
+                            signUpState = SignUpState.InputtingEmail,
+                            apiFailed = false
+                        )
+                    }
                 } else {
-                    userInput.value = null
-                    _signUpStatus.value = SignUpState.InputtingPhoneOrName
+                    _viewState.update { oldState ->
+                        oldState.copy(
+                            userInput = null,
+                            signUpState = SignUpState.InputtingPhoneOrName,
+                            apiFailed = false
+                        )
+                    }
                     linkEventsReporter.onSignupStarted(true)
                 }
             },
             onFailure = {
-                _signUpStatus.value = SignUpState.InputtingEmail
-                onError(it)
+                _viewState.update { oldState ->
+                    oldState.copy(
+                        userInput = null,
+                        signUpState = SignUpState.InputtingEmail,
+                        apiFailed = it is APIConnectionException
+                    )
+                }
+                if (!(it is APIConnectionException)) {
+                    onError(it)
+                }
             }
         )
     }

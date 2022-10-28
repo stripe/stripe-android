@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.NonFallbackInjectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.SignedInViewModelSubcomponent
@@ -22,8 +24,6 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.ui.core.forms.LinkCardForm
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
-import com.stripe.android.ui.core.injection.NonFallbackInjectable
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -107,10 +107,10 @@ internal class CardEditViewModel @Inject constructor(
             )
 
         viewModelScope.launch {
-            val updateParams = ConsumerPaymentDetailsUpdateParams.Card(
-                paymentDetails.id,
-                setAsDefault.value.takeUnless { isDefault || it == isDefault },
-                paymentMethodCreateParams
+            val updateParams = ConsumerPaymentDetailsUpdateParams(
+                id = paymentDetails.id,
+                isDefault = setAsDefault.value.takeUnless { isDefault || it == isDefault },
+                cardPaymentMethodCreateParams = paymentMethodCreateParams
             )
 
             linkAccountManager.updatePaymentDetails(updateParams).fold(
@@ -143,6 +143,12 @@ internal class CardEditViewModel @Inject constructor(
         IdentifierSpec.CardBrand to brand.code,
         IdentifierSpec.CardExpMonth to expiryMonth.toString().padStart(length = 2, padChar = '0'),
         IdentifierSpec.CardExpYear to expiryYear.toString()
+    ).plus(
+        billingAddress?.countryCode?.value?.let {
+            mapOf(IdentifierSpec.Country to it)
+        } ?: emptyMap()
+    ).plus(
+        billingAddress?.postalCode?.let { mapOf(IdentifierSpec.PostalCode to it) } ?: emptyMap()
     )
 
     internal class Factory(

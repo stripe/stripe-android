@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
-import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
     canClickSelectedItem = true
@@ -31,6 +30,13 @@ internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
         sheetViewModel.resolveTransitionTarget(config)
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        sheetViewModel.headerText.value =
+            getString(R.string.stripe_paymentsheet_select_payment_method)
+    }
+
     override fun transitionToAddPaymentMethod() {
         /**
          * Only the [PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull] will add
@@ -42,14 +48,8 @@ internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
         )
     }
 
-    override fun onPaymentOptionSelected(
-        paymentSelection: PaymentSelection,
-        isClick: Boolean
-    ) {
-        super.onPaymentOptionSelected(paymentSelection, isClick)
-        if (isClick) {
-            // this is a click-triggered selection
-            sheetViewModel.onUserSelection()
-        }
+    override fun onPaymentOptionsItemSelected(item: PaymentOptionsItem) {
+        super.onPaymentOptionsItemSelected(item)
+        sheetViewModel.onUserSelection()
     }
 }
