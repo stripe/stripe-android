@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.VisibleForTesting
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +22,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -61,13 +63,15 @@ internal fun PaymentOptionUI(
     onRemoveAccessibilityDescription: String = "",
     onItemSelectedListener: (() -> Unit)
 ) {
+    val alpha by animateFloatAsState(targetValue = if (isEnabled) 1f else 0.6f)
+
     // An attempt was made to not use constraint layout here but it was unsuccessful in
     // precisely positioning the check and delete icons to match the mocks.
     ConstraintLayout(
         modifier = Modifier
             .padding(top = 12.dp)
             .width(viewWidth)
-            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+            .alpha(alpha)
     ) {
         val (checkIcon, deleteIcon, label, card) = createRefs()
         SectionCard(
