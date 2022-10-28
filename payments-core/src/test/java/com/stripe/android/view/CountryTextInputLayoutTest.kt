@@ -2,6 +2,8 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.widget.AutoCompleteTextView
+import android.widget.FrameLayout
+import androidx.core.view.children
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
@@ -61,8 +63,7 @@ class CountryTextInputLayoutTest {
             )
         ).use { activityScenario ->
             activityScenario.onActivity {
-                countryTextInputLayout = it
-                    .findViewById(R.id.country_autocomplete_aaw)
+                countryTextInputLayout = it.findCountryTextInputLayout()
                 autoCompleteTextView = countryTextInputLayout.countryAutocomplete
             }
         }
@@ -177,4 +178,9 @@ class CountryTextInputLayoutTest {
     fun teardown() {
         Locale.setDefault(Locale.US)
     }
+}
+
+private fun PaymentFlowActivity.findCountryTextInputLayout(): CountryTextInputLayout {
+    val countryTextContainer = findViewById<FrameLayout>(R.id.country_autocomplete_container)
+    return countryTextContainer.children.first() as CountryTextInputLayout
 }

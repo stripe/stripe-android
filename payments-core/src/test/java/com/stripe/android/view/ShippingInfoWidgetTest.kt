@@ -2,6 +2,8 @@ package com.stripe.android.view
 
 import android.content.Context
 import android.view.View
+import android.widget.FrameLayout
+import androidx.core.view.children
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.google.common.truth.Truth.assertThat
@@ -83,8 +85,7 @@ class ShippingInfoWidgetTest {
                 postalEditText = shippingInfoWidget.findViewById(R.id.et_postal_code_aaw)
                 stateEditText = shippingInfoWidget.findViewById(R.id.et_state_aaw)
                 phoneEditText = shippingInfoWidget.findViewById(R.id.et_phone_number_aaw)
-                countryTextInputLayout =
-                    shippingInfoWidget.findViewById(R.id.country_autocomplete_aaw)
+                countryTextInputLayout = shippingInfoWidget.findCountryTextInputLayout()
             }
         }
     }
@@ -390,4 +391,9 @@ class ShippingInfoWidgetTest {
             "416-759-0260"
         )
     }
+}
+
+private fun ShippingInfoWidget.findCountryTextInputLayout(): CountryTextInputLayout {
+    val countryTextContainer = findViewById<FrameLayout>(R.id.country_autocomplete_container)
+    return countryTextContainer.children.first() as CountryTextInputLayout
 }
