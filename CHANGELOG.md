@@ -2,6 +2,12 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+### PaymentSheet
+
+* [ADDED][5729](https://github.com/stripe/stripe-android/pull/5729) Added support for a custom primary button label via `PaymentSheet.Configuration.primaryButtonLabel`.
+
+### CardScan
+
 * [FIXED][5749](https://github.com/stripe/stripe-android/pull/5749) Prevent multiple invocations to `/verify_frames`
 
 ## 20.15.2 - 2022-10-25
