@@ -4,9 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.activityViewModels
 
-internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
-    canClickSelectedItem = true
-) {
+internal class PaymentOptionsListFragment : BasePaymentMethodsListFragment() {
     private val activityViewModel by activityViewModels<PaymentOptionsViewModel> {
         PaymentOptionsViewModel.Factory {
             requireNotNull(

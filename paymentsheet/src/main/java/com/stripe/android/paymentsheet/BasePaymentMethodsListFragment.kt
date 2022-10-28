@@ -8,31 +8,25 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.isSystemDarkTheme
+import kotlinx.coroutines.launch
 
-internal abstract class BasePaymentMethodsListFragment(
-    private val canClickSelectedItem: Boolean
-) : Fragment() {
+internal abstract class BasePaymentMethodsListFragment : Fragment() {
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
     protected lateinit var config: FragmentConfig
@@ -81,6 +75,21 @@ internal abstract class BasePaymentMethodsListFragment(
             linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
             activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
         )
+
+        sheetViewModel.paymentMethods.observe(this) { paymentMethods ->
+            editMenuItem?.isVisible = paymentMethods.isNotEmpty()
+            if (!isVisible) {
+                sheetViewModel.setEditing(false)
+            }
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                sheetViewModel.isEditing.collect { isEditing ->
+                    setEditMenuItemText(isEditing)
+                }
+            }
+        }
     }
 
     override fun onCreateView(
@@ -91,11 +100,8 @@ internal abstract class BasePaymentMethodsListFragment(
         val view = ComposeView(requireContext())
 
         view.setContent {
-            PaymentOptionsScreen(
+            PaymentOptions(
                 sheetViewModel = sheetViewModel,
-                canClickSelectedItem = canClickSelectedItem,
-                toggleEditMenuItem = this::toggleEditMenuItem,
-                setEditMenuItemText = this::setEditMenuItemText,
                 transitionToAddPaymentMethod = this::transitionToAddPaymentMethod,
                 modifier = Modifier
                     .padding(
@@ -110,13 +116,6 @@ internal abstract class BasePaymentMethodsListFragment(
         }
 
         return view
-    }
-
-    private fun toggleEditMenuItem(isVisible: Boolean) {
-        editMenuItem?.isVisible = isVisible
-        if (!isVisible) {
-            sheetViewModel.setEditing(false)
-        }
     }
 
     private fun setEditMenuItemText(isEditing: Boolean) {
@@ -138,61 +137,4 @@ internal abstract class BasePaymentMethodsListFragment(
     }
 
     abstract fun transitionToAddPaymentMethod()
-}
-
-@Composable
-private fun PaymentOptionsScreen(
-    sheetViewModel: BaseSheetViewModel<*>,
-    canClickSelectedItem: Boolean,
-    toggleEditMenuItem: (Boolean) -> Unit,
-    setEditMenuItemText: (Boolean) -> Unit,
-    transitionToAddPaymentMethod: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val context = LocalContext.current
-
-    val state by sheetViewModel.paymentOptionsState.collectAsState()
-    val isProcessing by sheetViewModel.processing.observeAsState(initial = false)
-
-    val savedPaymentMethods by sheetViewModel.paymentMethods.observeAsState(initial = emptyList())
-    val isEditing by sheetViewModel.isEditing.collectAsState()
-
-    LaunchedEffect(savedPaymentMethods) {
-        val setVisible = savedPaymentMethods.isNotEmpty()
-        toggleEditMenuItem(setVisible)
-    }
-
-    LaunchedEffect(isEditing) {
-        setEditMenuItemText(isEditing)
-    }
-
-    val lpmRepository = remember(sheetViewModel) {
-        sheetViewModel.lpmResourceRepository.getRepository()
-    }
-
-    PaymentsTheme {
-        PaymentOptions(
-            state = state,
-            isEnabled = !isProcessing,
-            isEditing = isEditing,
-            paymentMethodNameProvider = { code ->
-                lpmRepository.fromCode(code)?.let {
-                    context.getString(it.displayNameResource)
-                }
-            },
-            onAddCard = transitionToAddPaymentMethod,
-            onRemove = { item ->
-                sheetViewModel.removePaymentMethod(item.paymentMethod)
-            },
-            onItemSelected = { item ->
-                val isAllowed = canClickSelectedItem || item != state.selectedItem
-                if (isAllowed) {
-                    val paymentSelection = item.toPaymentSelection()
-                    sheetViewModel.updateSelection(paymentSelection)
-                    (sheetViewModel as? PaymentOptionsViewModel)?.onUserSelection()
-                }
-            },
-            modifier = modifier,
-        )
-    }
 }

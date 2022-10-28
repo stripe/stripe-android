@@ -6,6 +6,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -14,8 +17,55 @@ import androidx.compose.ui.unit.Dp
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getLabelIcon
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.ui.core.shouldUseDarkDynamicColor
+
+@Composable
+internal fun PaymentOptions(
+    sheetViewModel: BaseSheetViewModel<*>,
+    transitionToAddPaymentMethod: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+
+    val state by sheetViewModel.paymentOptionsState.collectAsState()
+    val isProcessing by sheetViewModel.processing.observeAsState(initial = false)
+    val isEditing by sheetViewModel.isEditing.collectAsState()
+
+    val lpmRepository = remember(sheetViewModel) {
+        sheetViewModel.lpmResourceRepository.getRepository()
+    }
+
+    PaymentsTheme {
+        PaymentOptions(
+            state = state,
+            isEnabled = !isProcessing,
+            isEditing = isEditing,
+            paymentMethodNameProvider = { code ->
+                lpmRepository.fromCode(code)?.let {
+                    context.getString(it.displayNameResource)
+                }
+            },
+            onAddCard = transitionToAddPaymentMethod,
+            onRemove = { item ->
+                sheetViewModel.removePaymentMethod(item.paymentMethod)
+            },
+            onItemSelected = { item ->
+                val canClickSelectedItem = sheetViewModel is PaymentOptionsViewModel
+                val isAllowed = canClickSelectedItem || item != state.selectedItem
+
+                if (isAllowed) {
+                    val paymentSelection = item.toPaymentSelection()
+                    sheetViewModel.updateSelection(paymentSelection)
+                    (sheetViewModel as? PaymentOptionsViewModel)?.onUserSelection()
+                }
+            },
+            modifier = modifier,
+        )
+    }
+}
 
 @Composable
 internal fun PaymentOptions(
