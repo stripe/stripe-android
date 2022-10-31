@@ -61,7 +61,7 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
             "key" to configuration.publishableKey,
             "stripe_account" to configuration.stripeAccountId,
             "logger_id" to loggerId,
-            "navigator_language" to locale.language,
+            "navigator_language" to locale.toLanguageTag(),
             "is_webview" to false.toString(),
             "livemode" to manifest.livemode.toString(),
             "product" to manifest.product.value,
