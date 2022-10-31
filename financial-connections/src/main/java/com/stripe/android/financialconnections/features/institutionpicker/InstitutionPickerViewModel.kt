@@ -87,7 +87,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     fun onQueryChanged(query: String) {
-        setState { copy(query = query) }
         searchJob += suspend {
             delay(SEARCH_DEBOUNCE_MS)
             val (result, millis) = measureTimeMillis {
@@ -145,7 +144,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private fun clearSearch() {
         setState {
             copy(
-                query = "",
                 searchInstitutions = Success(InstitutionResponse(emptyList())),
                 searchMode = false
             )
@@ -182,7 +180,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
 }
 
 internal data class InstitutionPickerState(
-    val query: String = "",
     val searchMode: Boolean = false,
     val allowManualEntry: Boolean = false,
     val payload: Async<Payload> = Uninitialized,

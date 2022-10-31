@@ -24,7 +24,6 @@ internal class InstitutionPickerStates :
             payload = Success(payload()),
             searchInstitutions = Loading(),
             searchMode = true,
-            query = "query"
         )
 
         // Search mode: with results
@@ -32,7 +31,6 @@ internal class InstitutionPickerStates :
             payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
             searchMode = true,
-            query = "query"
         )
 
         // Search mode: No results
@@ -40,7 +38,6 @@ internal class InstitutionPickerStates :
             payload = Success(payload()),
             searchInstitutions = Success(InstitutionResponse(emptyList())),
             searchMode = false,
-            query = "query"
         )
 
         // Search mode: No results
@@ -48,7 +45,6 @@ internal class InstitutionPickerStates :
             payload = Success(payload()),
             searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
             searchMode = false,
-            query = "query"
         )
 
         // Search mode: no query
@@ -56,7 +52,6 @@ internal class InstitutionPickerStates :
             payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
             searchMode = true,
-            query = ""
         )
 
         // No search mode
@@ -64,7 +59,6 @@ internal class InstitutionPickerStates :
             payload = Success(payload()),
             searchInstitutions = Success(institutionResponse()),
             searchMode = false,
-            query = ""
         )
 
         private fun payload() = InstitutionPickerState.Payload(
