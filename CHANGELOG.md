@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+
+## 20.15.3 - 2022-10-31
+
 ### PaymentSheet
 
 * [ADDED][5729](https://github.com/stripe/stripe-android/pull/5729) Added support for a custom primary button label via `PaymentSheet.Configuration.primaryButtonLabel`.
