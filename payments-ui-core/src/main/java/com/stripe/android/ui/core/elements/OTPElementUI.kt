@@ -20,13 +20,11 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
@@ -38,7 +36,6 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextRange
@@ -49,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.getBorderStrokeWidth
 import com.stripe.android.ui.core.paymentsColors
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun OTPElementUI(
@@ -59,11 +56,10 @@ fun OTPElementUI(
     colors: OTPElementColors = OTPElementColors(
         selectedBorder = MaterialTheme.colors.primary,
         placeholder = MaterialTheme.paymentsColors.placeholderText
-    )
+    ),
+    focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
     val focusManager = LocalFocusManager.current
-    val focusRequester = remember { FocusRequester() }
-    val keyboardController = LocalSoftwareKeyboardController.current
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -93,7 +89,6 @@ fun OTPElementUI(
                 )
             ) {
                 val value by element.controller.fieldValues[index].collectAsState("")
-
                 var textFieldModifier = Modifier
                     .height(56.dp)
                     .onFocusChanged { focusState ->
@@ -185,21 +180,12 @@ fun OTPElementUI(
                                 placeholderColor = colors.placeholder,
                                 disabledPlaceholderColor = colors.placeholder
                             ),
-                            contentPadding = PaddingValues(
-                                TextFieldPadding,
-                                TextFieldPadding,
-                                TextFieldPadding,
-                                TextFieldPadding
-                            )
+                            // TextField has a default padding, here we are specifying 0.dp padding
+                            contentPadding = PaddingValues()
                         )
                     }
                 )
             }
-        }
-
-        LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
-            keyboardController?.show()
         }
     }
 }
@@ -209,5 +195,3 @@ data class OTPElementColors(
     val selectedBorder: Color,
     val placeholder: Color
 )
-
-private val TextFieldPadding = 12.dp

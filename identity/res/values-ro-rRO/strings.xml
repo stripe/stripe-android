@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Instructional text during selfie is being captured -->
-  <string name="capturing">Se captează…</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">Setările aplicației</string>
   <!-- Description of back of driver's license image -->
@@ -15,6 +13,8 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="camera_permission">Permisiune cameră</string>
   <string name="camera_permission_rationale">Această aplicație utilizează camera pentru a vă scana documentele de identificare și face fotografii pentru a vă verifica identitatea.</string>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Se captează…</string>
   <!-- Description of the check mark, used for A11Y -->
   <string name="check_mark">Bifă care indică faptul că documentele au fost captate cu succes</string>
   <!-- Text for choosing a photo from gallery -->

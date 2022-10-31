@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Application
+import android.os.Handler
+import android.os.Looper
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -22,7 +24,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -37,17 +39,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.darken
 import com.stripe.android.ui.core.elements.TextFieldSection
-import com.stripe.android.ui.core.elements.annotatedStringResource
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.text.annotatedStringResource
 
 @VisibleForTesting
-const val TEST_TAG_ATTRIBUTION_DRAWABLE = "AutocompleteAttributionDrawable"
+internal const val TEST_TAG_ATTRIBUTION_DRAWABLE = "AutocompleteAttributionDrawable"
 
 @Composable
 internal fun AutocompleteScreen(
@@ -77,6 +79,14 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
     val attributionDrawable =
         PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme())
     val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        val handler = Handler(Looper.getMainLooper())
+        handler.post {
+            focusRequester.requestFocus()
+        }
+    }
+
     Scaffold(
         bottomBar = {
             val background = if (isSystemInDarkTheme()) {
@@ -100,7 +110,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
             }
         }
     ) { paddingValues ->
-        Column(
+        ScrollableColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight()
@@ -127,9 +137,6 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                             .fillMaxWidth()
                             .focusRequester(focusRequester)
                     )
-                    SideEffect {
-                        focusRequester.requestFocus()
-                    }
                 }
                 if (loading) {
                     Row(
@@ -145,9 +152,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                             Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
+                                modifier = Modifier.fillMaxWidth()
                             ) {
                                 it.forEach { prediction ->
                                     val primaryText = prediction.primaryText
@@ -158,6 +163,10 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                                             .clickable {
                                                 viewModel.selectPrediction(prediction)
                                             }
+                                            .padding(
+                                                vertical = 8.dp,
+                                                horizontal = 16.dp
+                                            )
                                     ) {
                                         val regex = query.value
                                             .replace(" ", "|")
@@ -182,7 +191,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                                         )
                                     }
                                     Divider(
-                                        modifier = Modifier.padding(vertical = 8.dp)
+                                        modifier = Modifier.padding(horizontal = 16.dp)
                                     )
                                 }
                             }
@@ -208,8 +217,10 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                                 ),
                                 contentDescription = null,
                                 modifier = Modifier
-                                    .padding(top = 8.dp)
-                                    .padding(horizontal = 16.dp)
+                                    .padding(
+                                        vertical = 16.dp,
+                                        horizontal = 16.dp
+                                    )
                                     .testTag(TEST_TAG_ATTRIBUTION_DRAWABLE)
                             )
                         }

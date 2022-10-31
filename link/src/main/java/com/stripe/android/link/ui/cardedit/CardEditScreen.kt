@@ -1,16 +1,13 @@
 package com.stripe.android.link.ui.cardedit
 
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -26,11 +23,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.R
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PaymentsThemeForLink
-import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
@@ -38,7 +35,10 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.ui.forms.Form
-import com.stripe.android.ui.core.injection.NonFallbackInjector
+import com.stripe.android.link.ui.wallet.PaymentDetailsResult
+import com.stripe.android.ui.core.elements.CheckboxElementUI
+
+internal const val DEFAULT_PAYMENT_METHOD_CHECKBOX_TAG = "DEFAULT_PAYMENT_METHOD_CHECKBOX"
 
 @Preview
 @Composable
@@ -100,7 +100,9 @@ internal fun CardEditBody(
                         viewModel.updateCard(it)
                     }
                 },
-                onCancelClick = viewModel::dismiss
+                onCancelClick = {
+                    viewModel.dismiss(PaymentDetailsResult.Cancelled, userInitiated = true)
+                }
             ) {
                 Form(
                     it,
@@ -134,43 +136,22 @@ internal fun CardEditBody(
         )
         PaymentsThemeForLink {
             formContent()
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        if (isDefault) {
-            Text(
-                text = stringResource(R.string.pm_your_default),
-                modifier = Modifier.padding(vertical = 16.dp),
-                style = MaterialTheme.typography.h6,
-                color = MaterialTheme.linkColors.disabledText
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            DefaultPaymentMethodCheckbox(
+                setAsDefaultChecked = setAsDefaultChecked,
+                isDefault = isDefault,
+                isProcessing = isProcessing,
+                onSetAsDefaultClick = onSetAsDefaultClick,
             )
-        } else {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-                    .clickable {
-                        onSetAsDefaultClick(!setAsDefaultChecked)
-                    }
-            ) {
-                Checkbox(
-                    checked = setAsDefaultChecked,
-                    onCheckedChange = null, // needs to be null for accessibility on row click to work
-                    modifier = Modifier.padding(end = 8.dp),
-                    enabled = !isProcessing,
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colors.primary,
-                        uncheckedColor = MaterialTheme.linkColors.disabledText
-                    )
-                )
-                Text(
-                    text = stringResource(R.string.pm_set_as_default),
-                    style = MaterialTheme.typography.h6,
-                    color = MaterialTheme.colors.onPrimary
-                )
-            }
         }
-        errorMessage?.let {
-            ErrorText(text = it.getMessage(LocalContext.current.resources))
+
+        AnimatedVisibility(visible = errorMessage != null) {
+            ErrorText(
+                text = errorMessage?.getMessage(LocalContext.current.resources).orEmpty(),
+                modifier = Modifier.fillMaxWidth()
+            )
         }
         PrimaryButton(
             label = stringResource(R.string.wallet_update_card),
@@ -187,4 +168,25 @@ internal fun CardEditBody(
             onClick = onCancelClick
         )
     }
+}
+
+@Composable
+private fun DefaultPaymentMethodCheckbox(
+    setAsDefaultChecked: Boolean,
+    isDefault: Boolean,
+    isProcessing: Boolean,
+    onSetAsDefaultClick: (Boolean) -> Unit,
+) {
+    val isChecked = isDefault || setAsDefaultChecked
+    val canCheck = !isDefault && !isProcessing
+
+    CheckboxElementUI(
+        automationTestTag = DEFAULT_PAYMENT_METHOD_CHECKBOX_TAG,
+        isChecked = isChecked,
+        label = stringResource(R.string.pm_set_as_default),
+        isEnabled = canCheck,
+        onValueChange = {
+            onSetAsDefaultClick(!setAsDefaultChecked)
+        }
+    )
 }

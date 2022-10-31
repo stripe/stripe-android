@@ -177,7 +177,7 @@ open class ExpiryDateEditText @JvmOverloads constructor(
                 }
 
                 override fun afterTextChanged(s: Editable?) {
-                    if (!isLastKeyDelete && formattedDate != null) {
+                    if (formattedDate != null) {
                         setTextSilent(formattedDate)
                         newCursorPosition?.let {
                             setSelection(it.coerceIn(0, fieldText.length))

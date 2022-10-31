@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
@@ -32,19 +34,34 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
             viewModel.inProgress.postValue(false)
             when (result) {
                 is CollectBankAccountResult.Completed -> {
-                    viewModel.status
-                        .postValue(
-                            "Attached bank account to paymentIntent." +
-                                " secret: ${result.response.intent.clientSecret}. Attempting to " +
-                                "confirm payment intent. You should have webhooks setup to check" +
-                                " the final state of this payment intent."
+                    if (result.response.intent is PaymentIntent) {
+                        viewModel.status
+                            .postValue(
+                                "Attached bank account to paymentIntent." +
+                                    " secret: ${result.response.intent.clientSecret}. Attempting " +
+                                    "to confirm payment intent. You should have webhooks setup" +
+                                    "to check the final state of this payment intent."
+                            )
+                        confirmPaymentIntent(
+                            ConfirmPaymentIntentParams.create(
+                                clientSecret = requireNotNull(result.response.intent.clientSecret),
+                                paymentMethodType = PaymentMethod.Type.USBankAccount
+                            )
                         )
-                    confirmPaymentIntent(
-                        ConfirmPaymentIntentParams.create(
-                            clientSecret = requireNotNull(result.response.intent.clientSecret),
-                            paymentMethodType = PaymentMethod.Type.USBankAccount
+                    } else {
+                        viewModel.status
+                            .postValue(
+                                "Attached bank account to setupIntent." +
+                                    " secret: ${result.response.intent.clientSecret}. Attempting " +
+                                    "to confirm setup intent."
+                            )
+                        confirmSetupIntent(
+                            ConfirmSetupIntentParams.create(
+                                clientSecret = requireNotNull(result.response.intent.clientSecret),
+                                paymentMethodType = PaymentMethod.Type.USBankAccount
+                            )
                         )
-                    )
+                    }
                 }
                 is CollectBankAccountResult.Cancelled ->
                     viewModel.status.postValue(
@@ -59,6 +76,8 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
 
         viewBinding.confirmWithPaymentButton.text =
             getString(R.string.confirm_with_us_bank_account)
+        viewBinding.setupButton.text =
+            getString(R.string.setup_us_bank_account)
         viewBinding.paymentExampleIntro.text =
             getString(R.string.confirm_with_us_bank_account_intro)
 
@@ -74,6 +93,26 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
                     viewModel.status
                         .postValue("Collecting bank account information for payment")
                     launcher.presentWithPaymentIntent(
+                        publishableKey = settings.publishableKey,
+                        stripeAccountId = settings.stripeAccountId,
+                        clientSecret = it.getString("secret"),
+                        configuration = CollectBankAccountConfiguration.USBankAccount(
+                            name = viewBinding.name.text?.toString() ?: "",
+                            email = viewBinding.email.text?.toString()
+                        )
+                    )
+                }
+            }
+        }
+
+        viewBinding.setupButton.setOnClickListener {
+            viewModel.createSetupIntent(
+                "us"
+            ).observe(this) { result ->
+                result.onSuccess {
+                    viewModel.status
+                        .postValue("Collecting bank account information for setup")
+                    launcher.presentWithSetupIntent(
                         publishableKey = settings.publishableKey,
                         clientSecret = it.getString("secret"),
                         configuration = CollectBankAccountConfiguration.USBankAccount(

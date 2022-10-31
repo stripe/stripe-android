@@ -82,6 +82,12 @@ data class PaymentIntent internal constructor(
     val confirmationMethod: ConfirmationMethod = ConfirmationMethod.Automatic,
 
     /**
+     * Country code of the user.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val countryCode: String?,
+
+    /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
      */
     override val created: Long,
@@ -137,6 +143,11 @@ data class PaymentIntent internal constructor(
      */
     override val unactivatedPaymentMethods: List<String>,
 
+    /**
+     * Payment types that are accepted when paying with Link.
+     */
+    override val linkFundingSources: List<String> = emptyList(),
+
     override val nextActionData: StripeIntent.NextActionData? = null,
 
     private val paymentMethodOptionsJsonString: String? = null
@@ -149,12 +160,27 @@ data class PaymentIntent internal constructor(
 
     override val nextActionType: StripeIntent.NextActionType?
         get() = when (nextActionData) {
-            is StripeIntent.NextActionData.SdkData -> StripeIntent.NextActionType.UseStripeSdk
-            is StripeIntent.NextActionData.RedirectToUrl -> StripeIntent.NextActionType.RedirectToUrl
-            is StripeIntent.NextActionData.DisplayOxxoDetails -> StripeIntent.NextActionType.DisplayOxxoDetails
-            is StripeIntent.NextActionData.VerifyWithMicrodeposits ->
+            is StripeIntent.NextActionData.SdkData -> {
+                StripeIntent.NextActionType.UseStripeSdk
+            }
+            is StripeIntent.NextActionData.RedirectToUrl -> {
+                StripeIntent.NextActionType.RedirectToUrl
+            }
+            is StripeIntent.NextActionData.DisplayOxxoDetails -> {
+                StripeIntent.NextActionType.DisplayOxxoDetails
+            }
+            is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
-            else -> null
+            }
+            is StripeIntent.NextActionData.UpiAwaitNotification -> {
+                StripeIntent.NextActionType.UpiAwaitNotification
+            }
+            is StripeIntent.NextActionData.AlipayRedirect,
+            is StripeIntent.NextActionData.BlikAuthorize,
+            is StripeIntent.NextActionData.WeChatPayRedirect,
+            null -> {
+                null
+            }
         }
 
     override val isConfirmed: Boolean

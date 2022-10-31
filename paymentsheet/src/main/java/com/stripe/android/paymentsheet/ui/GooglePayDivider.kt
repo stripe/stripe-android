@@ -26,7 +26,7 @@ internal fun GooglePayDividerUi(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp)
+            .padding(top = 18.dp)
     ) {
         GooglePayDividerLine()
         Text(

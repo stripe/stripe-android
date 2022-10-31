@@ -16,6 +16,7 @@ private val ActionGreen = Color(0xFF05A87F)
 private val ButtonLabel = Color(0xFF1D3944)
 private val ErrorText = Color(0xFFFF2F4C)
 private val ErrorBackground = Color(0x2EFE87A1)
+private val InlineLink = Color(0x33787880)
 
 private val LightComponentBackground = Color.White
 private val LightComponentBorder = Color(0xFFE0E6EB)
@@ -63,6 +64,7 @@ internal data class LinkColors(
     val sheetScrim: Color,
     val progressIndicator: Color,
     val otpElementColors: OTPElementColors,
+    val inlineLinkLogo: Color,
     val materialColors: Colors
 )
 
@@ -78,7 +80,9 @@ internal fun PaymentsThemeForLink(
                 primary = ActionGreen
             )
         ),
-        shapes = PaymentsThemeDefaults.shapes,
+        shapes = PaymentsThemeDefaults.shapes.copy(
+            cornerRadius = 9f
+        ),
         typography = PaymentsThemeDefaults.typography
     ) {
         content()
@@ -109,6 +113,7 @@ internal object LinkThemeConfig {
             selectedBorder = LinkTeal,
             placeholder = LightOtpPlaceholder
         ),
+        inlineLinkLogo = InlineLink,
         materialColors = lightColors(
             primary = LinkTeal,
             secondary = LightFill,
@@ -138,6 +143,7 @@ internal object LinkThemeConfig {
             selectedBorder = LinkTeal,
             placeholder = DarkOtpPlaceholder
         ),
+        inlineLinkLogo = InlineLink,
         materialColors = darkColors(
             primary = LinkTeal,
             secondary = DarkFill,

@@ -48,6 +48,14 @@ constructor(
     @JvmField val liveMode: Boolean,
 
     /**
+     * The code of the PaymentMethod. This is useful when the PaymentMethodType is not
+     * hard coded in the SDK.
+     *
+     * [livemode](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)
+     */
+    @JvmField internal val code: PaymentMethodCode?,
+
+    /**
      * The type of the PaymentMethod. An additional hash is included on the PaymentMethod with a
      * name matching this value. It contains additional information specific to the
      * PaymentMethod type.
@@ -358,6 +366,7 @@ constructor(
         private var created: Long? = null
         private var liveMode: Boolean = false
         private var type: Type? = null
+        private var code: PaymentMethodCode? = null
         private var billingDetails: BillingDetails? = null
         private var metadata: Map<String, String>? = null
         private var customerId: String? = null
@@ -445,12 +454,17 @@ constructor(
             this.upi = upi
         }
 
+        fun setCode(code: String?): Builder = apply {
+            this.code = code
+        }
+
         override fun build(): PaymentMethod {
             return PaymentMethod(
                 id = id,
                 created = created,
                 liveMode = liveMode,
                 type = type,
+                code = code,
                 billingDetails = billingDetails,
                 customerId = customerId,
                 card = card,
@@ -663,7 +677,7 @@ constructor(
         @JvmField val wallet: Wallet? = null,
 
         @JvmField
-        internal val networks: Networks? = null
+        val networks: Networks? = null
     ) : TypeData() {
         override val type: Type get() = Type.Card
 

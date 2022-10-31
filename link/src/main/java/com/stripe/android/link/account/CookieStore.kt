@@ -1,5 +1,7 @@
 package com.stripe.android.link.account
 
+import android.content.Context
+import androidx.annotation.RestrictTo
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -8,9 +10,20 @@ import javax.inject.Singleton
  * Persistent cookies storage.
  */
 @Singleton
-internal class CookieStore @Inject constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CookieStore @Inject internal constructor(
     private val store: EncryptedStore
 ) {
+
+    constructor(context: Context) : this(EncryptedStore(context))
+
+    /**
+     * Clear all local data.
+     */
+    fun clear() {
+        allCookies.forEach { store.delete(it) }
+    }
+
     /**
      * Update authentication session cookie according to the following rules:
      *
@@ -24,7 +37,7 @@ internal class CookieStore @Inject constructor(
      * |  Any other value            | Store   |
      * +-----------------------------+---------+
      */
-    fun updateAuthSessionCookie(cookie: String?) = cookie?.let {
+    internal fun updateAuthSessionCookie(cookie: String?) = cookie?.let {
         if (it.isEmpty()) {
             store.delete(AUTH_SESSION_COOKIE)
         } else {
@@ -35,44 +48,51 @@ internal class CookieStore @Inject constructor(
     /**
      * Retrieve and return the current authentication session cookie.
      */
-    fun getAuthSessionCookie() = store.read(AUTH_SESSION_COOKIE)
+    internal fun getAuthSessionCookie() = store.read(AUTH_SESSION_COOKIE)
 
     /**
      * Delete the current authentication session cookie and store the hash of the email so that the
      * user won't be automatically redirected to the verification screen next time.
      */
-    fun logout(email: String) {
+    internal fun logout(email: String) {
         storeLoggedOutEmail(email)
         store.delete(AUTH_SESSION_COOKIE)
+        store.delete(SIGNED_UP_EMAIL)
     }
 
     /**
      * Check whether this is the most recently logged out email.
      */
-    fun isEmailLoggedOut(email: String) =
+    internal fun isEmailLoggedOut(email: String) =
         store.read(LOGGED_OUT_EMAIL_HASH) == email.sha256()
 
-    fun storeLoggedOutEmail(email: String) =
+    internal fun storeLoggedOutEmail(email: String) =
         store.write(LOGGED_OUT_EMAIL_HASH, email.sha256())
 
     /**
      * Store the email that has recently signed up on this device so that the user is remembered.
      */
-    fun storeNewUserEmail(email: String) =
+    internal fun storeNewUserEmail(email: String) =
         store.write(SIGNED_UP_EMAIL, email)
 
     /**
      * Retrieve the email that has recently signed up on this device.
      */
-    fun getNewUserEmail() =
+    internal fun getNewUserEmail() =
         store.read(SIGNED_UP_EMAIL).also {
             store.delete(SIGNED_UP_EMAIL)
         }
 
-    companion object {
+    internal companion object {
         const val AUTH_SESSION_COOKIE = "auth_session_cookie"
         const val LOGGED_OUT_EMAIL_HASH = "logged_out_email_hash"
         const val SIGNED_UP_EMAIL = "signed_up_email"
+
+        val allCookies = arrayOf(
+            AUTH_SESSION_COOKIE,
+            LOGGED_OUT_EMAIL_HASH,
+            SIGNED_UP_EMAIL
+        )
     }
 
     private fun String.sha256(): String =

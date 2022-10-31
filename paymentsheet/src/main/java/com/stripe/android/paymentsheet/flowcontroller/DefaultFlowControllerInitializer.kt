@@ -4,7 +4,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
-import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.injection.LINK_ENABLED
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -18,10 +18,12 @@ import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.repositories.initializeRepositoryAndGetStripeIntent
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -34,10 +36,11 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
-    private val resourceRepository: ResourceRepository,
+    private val lpmResourceRepository: ResourceRepository<LpmRepository>,
     private val logger: Logger,
     val eventReporter: EventReporter,
-    @IOContext private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext,
+    @Named(LINK_ENABLED) private val isLinkEnabled: Boolean
 ) : FlowControllerInitializer {
 
     override suspend fun init(
@@ -49,24 +52,16 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val isLinkReady = LinkPaymentLauncher.LINK_ENABLED &&
+                val isLinkReady = isLinkEnabled &&
                     stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
 
-                paymentSheetConfiguration?.customer?.let { customerConfig ->
-                    createWithCustomer(
-                        clientSecret,
-                        stripeIntent,
-                        customerConfig,
-                        paymentSheetConfiguration,
-                        isGooglePayReady,
-                        isLinkReady
-                    )
-                } ?: createWithoutCustomer(
-                    clientSecret,
-                    stripeIntent,
-                    paymentSheetConfiguration,
-                    isGooglePayReady,
-                    isLinkReady
+                create(
+                    clientSecret = clientSecret,
+                    stripeIntent = stripeIntent,
+                    customerConfig = paymentSheetConfiguration?.customer,
+                    config = paymentSheetConfiguration,
+                    isGooglePayReady = isGooglePayReady,
+                    isLinkReady = isLinkReady
                 )
             },
             onFailure = {
@@ -91,20 +86,54 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
         }?.isReady()?.first() ?: false
     }
 
-    private suspend fun createWithCustomer(
+    private suspend fun create(
         clientSecret: ClientSecret,
         stripeIntent: StripeIntent,
-        customerConfig: PaymentSheet.CustomerConfiguration,
+        customerConfig: PaymentSheet.CustomerConfiguration?,
         config: PaymentSheet.Configuration?,
         isGooglePayReady: Boolean,
         isLinkReady: Boolean
     ): FlowControllerInitializer.InitResult {
         val prefsRepository = prefsRepositoryFactory(customerConfig)
 
+        val paymentMethods = if (customerConfig != null) {
+            retrieveCustomerPaymentMethods(
+                stripeIntent,
+                config,
+                customerConfig
+            )
+        } else {
+            emptyList()
+        }
+
+        val savedSelection = retrieveSavedPaymentSelection(
+            prefsRepository,
+            isGooglePayReady,
+            isLinkReady,
+            paymentMethods
+        )
+
+        return FlowControllerInitializer.InitResult.Success(
+            InitData(
+                config = config,
+                clientSecret = clientSecret,
+                stripeIntent = stripeIntent,
+                paymentMethods = paymentMethods,
+                savedSelection = savedSelection,
+                isGooglePayReady = isGooglePayReady
+            )
+        )
+    }
+
+    private suspend fun retrieveCustomerPaymentMethods(
+        stripeIntent: StripeIntent,
+        config: PaymentSheet.Configuration?,
+        customerConfig: PaymentSheet.CustomerConfiguration
+    ): List<PaymentMethod> {
         val paymentMethodTypes = getSupportedSavedCustomerPMs(
             stripeIntent,
             config,
-            resourceRepository.getLpmRepository()
+            lpmResourceRepository.getRepository()
         ).mapNotNull {
             // The SDK is only able to parse customer LPMs
             // that are hard coded in the SDK.
@@ -116,74 +145,43 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             paymentMethodTypes
         ).filter { paymentMethod ->
             paymentMethod.hasExpectedDetails()
-        }.let { paymentMethods ->
-            setLastSavedPaymentMethod(
-                prefsRepository,
-                isGooglePayReady,
-                isLinkReady,
-                paymentMethods
-            )
-
-            FlowControllerInitializer.InitResult.Success(
-                InitData(
-                    config = config,
-                    clientSecret = clientSecret,
-                    stripeIntent = stripeIntent,
-                    paymentMethods = paymentMethods,
-                    savedSelection = prefsRepository.getSavedSelection(
-                        isGooglePayReady,
-                        isLinkReady
-                    ),
-                    isGooglePayReady = isGooglePayReady
-                )
-            )
         }
     }
 
-    private fun createWithoutCustomer(
-        clientSecret: ClientSecret,
-        stripeIntent: StripeIntent,
-        config: PaymentSheet.Configuration?,
-        isGooglePayReady: Boolean,
-        isLinkReady: Boolean
-    ): FlowControllerInitializer.InitResult {
-        val savedSelection = if (isLinkReady) {
-            SavedSelection.Link
-        } else if (isGooglePayReady) {
-            SavedSelection.GooglePay
-        } else {
-            SavedSelection.None
-        }
-
-        return FlowControllerInitializer.InitResult.Success(
-            InitData(
-                config = config,
-                clientSecret = clientSecret,
-                stripeIntent = stripeIntent,
-                paymentMethods = emptyList(),
-                savedSelection = savedSelection,
-                isGooglePayReady = isGooglePayReady
-            )
-        )
-    }
-
-    private suspend fun setLastSavedPaymentMethod(
+    private suspend fun retrieveSavedPaymentSelection(
         prefsRepository: PrefsRepository,
         isGooglePayReady: Boolean,
         isLinkReady: Boolean,
         paymentMethods: List<PaymentMethod>
-    ) {
-        if (
-            prefsRepository.getSavedSelection(isGooglePayReady, isLinkReady) == SavedSelection.None
-        ) {
-            when {
-                paymentMethods.isNotEmpty() -> PaymentSelection.Saved(paymentMethods.first())
-                isLinkReady -> PaymentSelection.Link
-                isGooglePayReady -> PaymentSelection.GooglePay
-                else -> null
-            }?.let {
-                prefsRepository.savePaymentSelection(it)
-            }
+    ): SavedSelection {
+        val savedSelection = prefsRepository.getSavedSelection(isGooglePayReady, isLinkReady)
+        if (savedSelection != SavedSelection.None) {
+            return savedSelection
+        }
+
+        // No saved selection has been set yet, so we'll initialize it with a default
+        // value based on which payment methods are available.
+        val paymentSelection = determineDefaultPaymentSelection(
+            isGooglePayReady,
+            isLinkReady,
+            paymentMethods
+        )
+
+        prefsRepository.savePaymentSelection(paymentSelection)
+
+        return prefsRepository.getSavedSelection(isGooglePayReady, isLinkReady)
+    }
+
+    private fun determineDefaultPaymentSelection(
+        isGooglePayReady: Boolean,
+        isLinkReady: Boolean,
+        paymentMethods: List<PaymentMethod>
+    ): PaymentSelection? {
+        return when {
+            paymentMethods.isNotEmpty() -> PaymentSelection.Saved(paymentMethods.first())
+            isLinkReady -> PaymentSelection.Link
+            isGooglePayReady -> PaymentSelection.GooglePay
+            else -> null
         }
     }
 
@@ -191,7 +189,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
         clientSecret: ClientSecret
     ) = stripeIntentValidator.requireValid(
         initializeRepositoryAndGetStripeIntent(
-            resourceRepository,
+            lpmResourceRepository,
             stripeIntentRepository,
             clientSecret,
             eventReporter

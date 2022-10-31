@@ -26,6 +26,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     }
 
     private lateinit var paymentLauncher: PaymentLauncher
+    private var isPaymentIntent: Boolean = true
 
     private val keyboardController: KeyboardController by lazy {
         KeyboardController(this)
@@ -126,7 +127,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleCreatePaymentIntentResponse(
+    open fun handleCreatePaymentIntentResponse(
         responseData: JSONObject,
         params: PaymentMethodCreateParams?,
         shippingDetails: ConfirmPaymentIntentParams.Shipping?,
@@ -162,6 +163,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     }
 
     protected fun confirmPaymentIntent(params: ConfirmPaymentIntentParams) {
+        isPaymentIntent = true
         paymentLauncher.confirm(params)
     }
 
@@ -189,25 +191,27 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         )
     }
 
-    private fun confirmSetupIntent(
-        params: ConfirmSetupIntentParams
-    ) {
+    protected fun confirmSetupIntent(params: ConfirmSetupIntentParams) {
+        isPaymentIntent = false
         paymentLauncher.confirm(params)
     }
 
     protected open fun onConfirmSuccess() {
-        viewModel.status.value += "\n\nPaymentIntent confirmation succeeded\n\n"
+        viewModel.status.value +=
+            "\n\n${if (isPaymentIntent)"Payment" else "Setup"}Intent confirmation succeeded\n\n"
         viewModel.inProgress.value = false
     }
 
     protected open fun onConfirmCanceled() {
-        viewModel.status.value += "\n\nPaymentIntent confirmation cancelled\n\n"
+        viewModel.status.value +=
+            "\n\n${if (isPaymentIntent)"Payment" else "Setup"}Intent confirmation canceled\n\n"
         viewModel.inProgress.value = false
     }
 
     protected open fun onConfirmError(failedResult: PaymentResult.Failed) {
-        viewModel.status.value += "\n\nPaymentIntent confirmation failed with throwable " +
-            "${failedResult.throwable} \n\n"
+        viewModel.status.value +=
+            "\n\n${if (isPaymentIntent)"Payment" else "Setup"}Intent confirmation failed with " +
+            "throwable ${failedResult.throwable} \n\n"
         viewModel.inProgress.value = false
     }
 }

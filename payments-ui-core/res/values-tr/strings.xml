@@ -40,6 +40,8 @@
   <string name="address_label_village_township">Köy veya İlçe</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[<img/> ile <installment_price/> tutarında faizsiz <num_installments/> taksitle ödeyin]]></string>
+  <!-- Text for back button -->
+  <string name="back">Geri</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Fatura adresi</string>
   <!-- Used when a required field is blank and submit is clicked. -->
@@ -64,6 +66,8 @@
   <string name="iban_invalid_start">IBAN numaranız iki harfli bir ülke koduyla başlamalıdır.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL Bank</string>
+  <!-- Error description for incomplete phone number -->
+  <string name="incomplete_phone_number">Eksik telefon numarası</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Şimdi satın alın veya daha sonra Klarna ile ödeyin.</string>
   <!-- Klarna pay later copy -->
@@ -80,6 +84,8 @@
   <string name="stripe_continue_button_label">Devam et</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">%s öde</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">Banka</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Kart bilgileri</string>
   <!-- Payment Method type brand name. -->

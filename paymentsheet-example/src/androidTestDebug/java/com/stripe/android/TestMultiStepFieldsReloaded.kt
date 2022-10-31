@@ -13,9 +13,11 @@ import com.stripe.android.test.core.Billing
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
+import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
@@ -41,19 +43,23 @@ class TestMultiStepFieldsReloaded {
     @get:Rule
     val testWatcher = TestWatcher()
 
+    @get:Rule
+    val disableAnimations = DisableAnimationsRule()
+
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
 
     private val newUser = TestParameters(
         paymentMethod = lpmRepository.fromCode("bancontact")!!,
         Customer.New,
+        LinkState.Off,
         GooglePayState.Off,
         Currency.EUR,
         IntentType.Pay,
         Billing.Off,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
-        automatic = Automatic.On,
+        automatic = Automatic.Off,
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = null,
@@ -168,6 +174,7 @@ class TestMultiStepFieldsReloaded {
                 paymentMethod = lpmRepository.fromCode("affirm")!!,
                 merchantCountryCode = "US",
                 currency = Currency.USD,
+                shipping = Shipping.On
             )
         )
     }
@@ -211,7 +218,7 @@ class TestMultiStepFieldsReloaded {
                 InstrumentationRegistry.getInstrumentation().targetContext.resources
             )
         ).apply {
-            forceUpdate(LpmRepository.exposedPaymentMethods, null)
+            forceUpdate(this.supportedPaymentMethods, null)
         }
     }
 }

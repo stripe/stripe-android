@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -29,6 +30,7 @@ import com.stripe.android.test.core.DelayedPMs
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
@@ -43,6 +45,7 @@ class Selectors(
     val composeTestRule: ComposeTestRule,
     testParameters: TestParameters
 ) {
+    val reset = EspressoIdButton(R.id.reset_button)
     val testMode = EspressoIdButton(R.id.testmode)
     val continueButton = EspressoIdButton(R.id.continue_button)
     val complete = EspressoLabelIdButton(R.string.checkout_complete)
@@ -56,6 +59,12 @@ class Selectors(
         Customer.New -> EspressoLabelIdButton(R.string.customer_new)
         Customer.Returning -> EspressoLabelIdButton(R.string.customer_returning)
     }
+
+    val linkState = when (testParameters.linkState) {
+        LinkState.Off -> EspressoIdButton(R.id.link_off_button)
+        LinkState.On -> EspressoIdButton(R.id.link_on_button)
+    }
+
     val googlePayState = when (testParameters.googlePayState) {
         GooglePayState.Off -> EspressoIdButton(R.id.google_pay_off_button)
         GooglePayState.On -> EspressoIdButton(R.id.google_pay_on_button)
@@ -99,6 +108,8 @@ class Selectors(
     val buyButton = BuyButton(device)
 
     val editButton = EditButton(device)
+
+    val addPaymentMethodButton = AddPaymentMethodButton(device)
 
     val selectBrowserPrompt = UiAutomatorText("Verify your payment", device = device)
 
@@ -236,6 +247,13 @@ class Selectors(
     fun getState() = composeTestRule.onNodeWithText(
         getResourceString(R.string.address_label_state)
     )
+
+    fun selectState(value: String) {
+        composeTestRule.onNodeWithText(getResourceString(R.string.address_label_state))
+            .performClick()
+        composeTestRule.onNodeWithText(value)
+            .performClick()
+    }
 
     fun getZip() = composeTestRule.onNodeWithText(
         getResourceString(R.string.address_label_zip_code)

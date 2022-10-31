@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import kotlinx.coroutines.Dispatchers
@@ -40,14 +41,15 @@ class InputAddressViewModelTest {
             whenever(viewModelScope(anyOrNull())).thenReturn(this)
             whenever(merchantName(anyOrNull())).thenReturn(this)
             whenever(stripeIntent(anyOrNull())).thenReturn(this)
+            whenever(shippingValues(anyOrNull())).thenReturn(this)
             whenever(build()).thenReturn(formControllerSubcomponent)
         }
     }
     private val eventReporter = mock<AddressLauncherEventReporter>()
 
-    private fun createViewModel(defaultAddress: AddressDetails? = null): InputAddressViewModel {
-        defaultAddress?.let {
-            whenever(config.defaultValues).thenReturn(defaultAddress)
+    private fun createViewModel(address: AddressDetails? = null): InputAddressViewModel {
+        address?.let {
+            whenever(config.address).thenReturn(address)
         }
         whenever(args.config).thenReturn(config)
         return InputAddressViewModel(
@@ -79,7 +81,7 @@ class InputAddressViewModelTest {
 
     @Test
     fun `autocomplete address passed is collected to start`() = runTest(UnconfinedTestDispatcher()) {
-        val expectedAddress = AddressDetails(name = "skyler", company = "stripe")
+        val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
         val flow = MutableStateFlow<AddressDetails?>(expectedAddress)
         whenever(navigator.getResultFlow<AddressDetails?>(any())).thenReturn(flow)
 
@@ -89,7 +91,7 @@ class InputAddressViewModelTest {
 
     @Test
     fun `default address from merchant is parsed`() = runTest(UnconfinedTestDispatcher()) {
-        val expectedAddress = AddressDetails(name = "skyler", company = "stripe")
+        val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
 
         val viewModel = createViewModel(expectedAddress)
         assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
@@ -99,16 +101,20 @@ class InputAddressViewModelTest {
     fun `viewModel emits onComplete event`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel(
             AddressDetails(
-                line1 = "99 Broadway St",
-                city = "Seattle",
-                country = "US"
+                address = PaymentSheet.Address(
+                    line1 = "99 Broadway St",
+                    city = "Seattle",
+                    country = "US"
+                )
             )
         )
         viewModel.dismissWithAddress(
             AddressDetails(
-                line1 = "99 Broadway St",
-                city = "Seattle",
-                country = "US"
+                address = PaymentSheet.Address(
+                    line1 = "99 Broadway St",
+                    city = "Seattle",
+                    country = "US"
+                )
             )
         )
         verify(eventReporter).onCompleted(
@@ -116,5 +122,47 @@ class InputAddressViewModelTest {
             autocompleteResultSelected = eq(true),
             editDistance = eq(0)
         )
+    }
+
+    @Test
+    fun `default checkbox should emit true to start if passed by merchant`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            AddressDetails(
+                isCheckboxSelected = true
+            )
+        )
+        assertThat(viewModel.checkboxChecked.value).isTrue()
+    }
+
+    @Test
+    fun `default checkbox should emit false to start if passed by merchant`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            AddressDetails(
+                isCheckboxSelected = false
+            )
+        )
+        assertThat(viewModel.checkboxChecked.value).isFalse()
+    }
+
+    @Test
+    fun `default checkbox should emit false to start by default`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+        assertThat(viewModel.checkboxChecked.value).isFalse()
+    }
+
+    @Test
+    fun `clicking the checkbox should change the internal state`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel()
+
+        assertThat(viewModel.checkboxChecked.value).isFalse()
+
+        viewModel.clickCheckbox(true)
+        assertThat(viewModel.checkboxChecked.value).isTrue()
+
+        viewModel.clickCheckbox(false)
+        assertThat(viewModel.checkboxChecked.value).isFalse()
+
+        viewModel.clickCheckbox(true)
+        assertThat(viewModel.checkboxChecked.value).isTrue()
     }
 }

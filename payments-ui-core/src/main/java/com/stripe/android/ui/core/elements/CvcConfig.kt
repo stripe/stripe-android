@@ -1,12 +1,14 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
 
-internal class CvcConfig : CardDetailsTextFieldConfig {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CvcConfig : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "cvc"
     override val label: Int = R.string.cvc_number_hint

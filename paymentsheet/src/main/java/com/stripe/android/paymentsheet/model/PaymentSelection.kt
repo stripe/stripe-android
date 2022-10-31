@@ -8,7 +8,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.ui.getCardBrandIcon
+import com.stripe.android.paymentsheet.R
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -25,7 +25,8 @@ sealed class PaymentSelection : Parcelable {
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Saved(
-        val paymentMethod: PaymentMethod
+        val paymentMethod: PaymentMethod,
+        internal val isGooglePay: Boolean = false
     ) : PaymentSelection()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -70,7 +71,7 @@ sealed class PaymentSelection : Parcelable {
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class LinkInline(val linkPaymentDetails: LinkPaymentDetails) : New() {
+        data class LinkInline(val linkPaymentDetails: LinkPaymentDetails.New) : New() {
             @IgnoredOnParcel
             override val customerRequestedSave = CustomerRequestedSave.NoRequest
 
@@ -82,13 +83,14 @@ sealed class PaymentSelection : Parcelable {
 
             @IgnoredOnParcel
             @DrawableRes
-            val iconResource = when (paymentDetails) {
-                is ConsumerPaymentDetails.Card -> paymentDetails.brand.getCardBrandIcon()
-            }
+            val iconResource = R.drawable.stripe_ic_paymentsheet_link
 
             @IgnoredOnParcel
             val label = when (paymentDetails) {
-                is ConsumerPaymentDetails.Card -> paymentDetails.last4
+                is ConsumerPaymentDetails.Card ->
+                    "····${paymentDetails.last4}"
+                is ConsumerPaymentDetails.BankAccount ->
+                    "····${paymentDetails.last4}"
             }
         }
 

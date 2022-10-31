@@ -42,7 +42,7 @@ class Settings(context: Context) {
          *
          * Set to the base URL of your test backend. If you are using
          * [example-mobile-backend](https://github.com/stripe/example-mobile-backend),
-         * the URL will be something like `https://hidden-beach-12345.herokuapp.com/`.
+         * the URL will be something like `https://stripe-example-mobile-backend.glitch.me/`.
          */
         private const val BASE_URL = "put your base url here"
 

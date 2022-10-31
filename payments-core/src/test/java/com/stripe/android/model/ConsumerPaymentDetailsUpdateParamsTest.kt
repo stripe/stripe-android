@@ -32,7 +32,7 @@ class ConsumerPaymentDetailsUpdateParamsTest {
         )
 
         Truth.assertThat(
-            ConsumerPaymentDetailsUpdateParams.Card(
+            ConsumerPaymentDetailsUpdateParams(
                 id = id,
                 cardPaymentMethodCreateParams = paymentMethodCreateParams
             ).toParamMap()
@@ -53,7 +53,7 @@ class ConsumerPaymentDetailsUpdateParamsTest {
         val id = "payment_details_id"
 
         Truth.assertThat(
-            ConsumerPaymentDetailsUpdateParams.Card(
+            ConsumerPaymentDetailsUpdateParams(
                 id = id,
                 isDefault = true
             ).toParamMap()
@@ -91,7 +91,7 @@ class ConsumerPaymentDetailsUpdateParamsTest {
         )
 
         Truth.assertThat(
-            ConsumerPaymentDetailsUpdateParams.Card(
+            ConsumerPaymentDetailsUpdateParams(
                 id = id,
                 cardPaymentMethodCreateParams = paymentMethodCreateParams,
                 isDefault = false

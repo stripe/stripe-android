@@ -40,6 +40,8 @@
   <string name="address_label_village_township">Falu vagy község</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Fizetés <num_installments/>, egyenként <installment_price/> összegű kamatmentes részletben <img/> használatával]]></string>
+  <!-- Text for back button -->
+  <string name="back">Vissza</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Számlázási cím</string>
   <!-- Used when a required field is blank and submit is clicked. -->
@@ -64,6 +66,8 @@
   <string name="iban_invalid_start">Az IBAN-számának egy kétbetűs országkóddal kell kezdődnie.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL bank</string>
+  <!-- Error description for incomplete phone number -->
+  <string name="incomplete_phone_number">Hiányos telefonszám</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Megvásárlás most, vagy fizetés később Klarnával.</string>
   <!-- Klarna pay later copy -->
@@ -80,6 +84,8 @@
   <string name="stripe_continue_button_label">Folytatás</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">%s kifizetése</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">Bank</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Kártyaadatok</string>
   <!-- Payment Method type brand name. -->

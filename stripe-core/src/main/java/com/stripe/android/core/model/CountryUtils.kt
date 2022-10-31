@@ -7,7 +7,7 @@ import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet -- this still auto-completes
 object CountryUtils {
-    internal val CARD_POSTAL_CODE_COUNTRIES = setOf(
+    private val CARD_POSTAL_CODE_COUNTRIES = setOf(
         "US",
         "GB",
         "CA"
@@ -29,40 +29,22 @@ object CountryUtils {
     @JvmSynthetic
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun getCountryCodeByName(countryName: String, currentLocale: Locale): CountryCode? {
-        return localizedCountries(currentLocale).firstOrNull { it.name == countryName }?.code
+        return getSortedLocalizedCountries(currentLocale).firstOrNull { it.name == countryName }?.code
     }
 
     @JvmSynthetic
     fun getCountryByCode(countryCode: CountryCode?, currentLocale: Locale): Country? {
-        return localizedCountries(currentLocale).firstOrNull {
+        return getSortedLocalizedCountries(currentLocale).firstOrNull {
             it.code == countryCode
         }
     }
 
-    private var cachedCountriesLocale: Locale? = null
-    private var cachedOrderedLocalizedCountries: List<Country> = emptyList()
-    private fun getSortedLocalizedCountries(currentLocale: Locale): List<Country> {
-        return if (currentLocale == cachedCountriesLocale) {
-            cachedOrderedLocalizedCountries
-        } else {
-            cachedCountriesLocale = currentLocale
-            cachedOrderedLocalizedCountries = localizedCountries(currentLocale)
-                .sortedBy { formatNameForSorting(it.name) }
-                .filterNot { it.code == currentLocale.getCountryCode() }
-
-            cachedOrderedLocalizedCountries
-        }
-    }
-
+    /**
+     * Show user's current locale first, followed by countries alphabetized by display name
+     */
     @JvmSynthetic
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun getOrderedCountries(currentLocale: Locale): List<Country> {
-        // Show user's current locale first, followed by countries alphabetized by display name
-        return listOfNotNull(getCountryByCode(currentLocale.getCountryCode(), currentLocale))
-            .plus(
-                getSortedLocalizedCountries(currentLocale)
-            )
-    }
+    fun getOrderedCountries(currentLocale: Locale) = getSortedLocalizedCountries(currentLocale)
 
     @VisibleForTesting
     internal fun formatNameForSorting(name: String): String {
@@ -88,5 +70,33 @@ object CountryUtils {
     @JvmSynthetic
     fun doesCountryUsePostalCode(countryCode: CountryCode): Boolean {
         return CARD_POSTAL_CODE_COUNTRIES.contains(countryCode.value)
+    }
+
+    private var cachedCountriesLocale: Locale? = null
+    private var cachedOrderedLocalizedCountries: List<Country> = emptyList()
+
+    /**
+     * Load, sort and cache the list of localized countries, putting the current locale's country
+     * at the top of the list.
+     */
+    private fun getSortedLocalizedCountries(currentLocale: Locale): List<Country> {
+        return if (currentLocale == cachedCountriesLocale) {
+            cachedOrderedLocalizedCountries
+        } else {
+            cachedCountriesLocale = currentLocale
+
+            val localizedCountries = localizedCountries(currentLocale)
+            cachedOrderedLocalizedCountries = listOfNotNull(
+                localizedCountries.firstOrNull {
+                    it.code == currentLocale.getCountryCode()
+                }
+            ).plus(
+                localizedCountries
+                    .filterNot { it.code == currentLocale.getCountryCode() }
+                    .sortedBy { formatNameForSorting(it.name) }
+            )
+
+            cachedOrderedLocalizedCountries
+        }
     }
 }

@@ -4,14 +4,15 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.FakeCustomerRepository
 import com.stripe.android.paymentsheet.FakePrefsRepository
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -20,7 +21,8 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
+import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -47,8 +49,7 @@ internal class DefaultFlowControllerInitializerTest {
     private val stripeIntentRepository =
         StripeIntentRepository.Static(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
     private val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
-    private val resourceRepository = StaticResourceRepository(
-        mock(),
+    private val lpmResourceRepository = StaticLpmResourceRepository(
         LpmRepository(
             LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)
         ).apply {
@@ -395,8 +396,61 @@ internal class DefaultFlowControllerInitializerTest {
                 .isInstanceOf(FlowControllerInitializer.InitResult::class.java)
         }
 
+    @Test
+    fun `Defaults to Google Play for guests if Link is not enabled`() = runTest {
+        val result = createInitializer(
+            stripeIntentRepo = StripeIntentRepository.Static(
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+            )
+        ).init(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+            paymentSheetConfiguration = mockConfiguration()
+        ) as FlowControllerInitializer.InitResult.Success
+
+        assertThat(result.initData.savedSelection).isEqualTo(SavedSelection.GooglePay)
+    }
+
+    @Test
+    fun `Defaults to Link for guests if available`() = runTest {
+        val result = createInitializer(
+            stripeIntentRepo = StripeIntentRepository.Static(
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+            ),
+            isLinkEnabled = true
+        ).init(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+            // The mock configuration is necessary to enable Google Pay. We want to do that,
+            // so that we can check that Link is preferred.
+            paymentSheetConfiguration = mockConfiguration()
+        ) as FlowControllerInitializer.InitResult.Success
+
+        assertThat(result.initData.savedSelection).isEqualTo(SavedSelection.Link)
+    }
+
+    @Test
+    fun `Defaults to first existing payment method for known customer`() = runTest {
+        val result = createInitializer(
+            stripeIntentRepo = StripeIntentRepository.Static(
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+            ),
+            customerRepo = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS)
+        ).init(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+            paymentSheetConfiguration = mockConfiguration(
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "some_id",
+                    ephemeralKeySecret = "some_key"
+                )
+            )
+        ) as FlowControllerInitializer.InitResult.Success
+
+        val expectedPaymentMethodId = requireNotNull(PAYMENT_METHODS.first().id)
+        assertThat(result.initData.savedSelection).isEqualTo(SavedSelection.PaymentMethod(id = expectedPaymentMethodId))
+    }
+
     private fun createInitializer(
         isGooglePayReady: Boolean = true,
+        isLinkEnabled: Boolean = false,
         stripeIntentRepo: StripeIntentRepository = stripeIntentRepository,
         customerRepo: CustomerRepository = customerRepository
     ): FlowControllerInitializer {
@@ -406,10 +460,25 @@ internal class DefaultFlowControllerInitializerTest {
             stripeIntentRepo,
             StripeIntentValidator(),
             customerRepo,
-            resourceRepository,
+            lpmResourceRepository,
             Logger.noop(),
             eventReporter,
-            testDispatcher
+            testDispatcher,
+            isLinkEnabled
+        )
+    }
+
+    private fun mockConfiguration(
+        customer: PaymentSheet.CustomerConfiguration? = null,
+        isGooglePayEnabled: Boolean = true
+    ): PaymentSheet.Configuration {
+        return PaymentSheet.Configuration(
+            merchantDisplayName = "Merchant",
+            customer = customer,
+            googlePay = PaymentSheet.GooglePayConfiguration(
+                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                countryCode = CountryCode.US.value
+            ).takeIf { isGooglePayEnabled }
         )
     }
 

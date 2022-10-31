@@ -7,6 +7,7 @@ import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.PermissionException
 import com.stripe.android.core.exception.RateLimitException
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
@@ -27,6 +28,7 @@ import javax.inject.Named
 
 internal class FinancialConnectionsApiRepository @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKey: String,
+    @Named(STRIPE_ACCOUNT_ID) stripeAccountId: String?,
     private val stripeNetworkClient: StripeNetworkClient,
     private val apiRequestFactory: ApiRequest.Factory
 ) : FinancialConnectionsRepository {
@@ -39,9 +41,12 @@ internal class FinancialConnectionsApiRepository @Inject constructor(
         encodeDefaults = true
     }
 
-    private val options = ApiRequest.Options(
-        apiKey = publishableKey
-    )
+    private val options by lazy {
+        ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId
+        )
+    }
 
     override suspend fun getFinancialConnectionsAccounts(
         getFinancialConnectionsAcccountsParams: GetFinancialConnectionsAcccountsParams

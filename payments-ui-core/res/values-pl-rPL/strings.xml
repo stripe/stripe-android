@@ -40,6 +40,8 @@
   <string name="address_label_village_township">Wieś lub miasto</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Zapłacić w <num_installments/> nieoprocentowanych ratach <installment_price/> z <img/>]]></string>
+  <!-- Text for back button -->
+  <string name="back">Wstecz</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Adres rozliczeniowy</string>
   <!-- Used when a required field is blank and submit is clicked. -->
@@ -64,6 +66,8 @@
   <string name="iban_invalid_start">IBAN powinien się zaczynać od dwuliterowego kodu kraju.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL Bank</string>
+  <!-- Error description for incomplete phone number -->
+  <string name="incomplete_phone_number">Niekompletny numer telefonu</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Kup teraz lub zapłać za pomocą Klarna później.</string>
   <!-- Klarna pay later copy -->
@@ -80,6 +84,8 @@
   <string name="stripe_continue_button_label">Kontynuuj</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">Zapłać %s</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">Bank</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">Dane karty</string>
   <!-- Payment Method type brand name. -->

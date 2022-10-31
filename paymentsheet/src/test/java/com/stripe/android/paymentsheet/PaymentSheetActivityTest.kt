@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.animation.LayoutTransition
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -13,9 +14,14 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.NonFallbackInjector
+import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -24,23 +30,36 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
+import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
+import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
+import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.getOrAwaitValue
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -50,6 +69,8 @@ import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -57,13 +78,18 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 @ExperimentalCoroutinesApi
+@FlowPreview
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSheetActivityTest {
     @get:Rule
@@ -71,14 +97,28 @@ internal class PaymentSheetActivityTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
+    private lateinit var injector: NonFallbackInjector
 
     private val eventReporter = mock<EventReporter>()
     private val googlePayPaymentMethodLauncherFactory =
         createGooglePayPaymentMethodLauncherFactory()
-    private val stripePaymentLauncherAssistedFactory =
-        mock<StripePaymentLauncherAssistedFactory>()
 
-    private val viewModel = createViewModel()
+    private val paymentLauncherFactory = PaymentLauncherFactory(
+        context = context,
+        hostActivityLauncher = mock(),
+    )
+
+    private val paymentLauncher: StripePaymentLauncher by lazy {
+        paymentLauncherFactory.create(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        ) as StripePaymentLauncher
+    }
+
+    private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory> {
+        on { create(any(), any(), any()) } doReturn paymentLauncher
+    }
+
+    private lateinit var viewModel: PaymentSheetViewModel
 
     private val contract = PaymentSheetContract()
 
@@ -100,6 +140,7 @@ internal class PaymentSheetActivityTest {
 
     @BeforeTest
     fun before() {
+        viewModel = createViewModel()
         PaymentConfiguration.init(
             context,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
@@ -108,6 +149,7 @@ internal class PaymentSheetActivityTest {
 
     @AfterTest
     fun cleanup() {
+        WeakMapInjectorRegistry.clear()
         Dispatchers.resetMain()
     }
 
@@ -158,16 +200,10 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `updates buy button state on add payment`() {
-        val scenario = activityScenario()
+        val viewModel = createViewModel(paymentMethods = emptyList())
+        val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
-            // Based on previously run tests the viewModel might have a different selection state saved
-            viewModel.updateSelection(null)
-
-            viewModel.transitionTo(
-                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                    FragmentConfigFixtures.DEFAULT
-                )
-            )
+            // wait for bottom sheet to animate in
             idleLooper()
 
             // Initially empty card
@@ -305,7 +341,7 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             assertThat(activity.toolbar.navigationContentDescription)
-                .isEqualTo(context.getString(R.string.stripe_paymentsheet_back))
+                .isEqualTo(context.getString(R.string.back))
 
             activity.onBackPressed()
             idleLooper()
@@ -366,9 +402,8 @@ internal class PaymentSheetActivityTest {
 
             val googlePayButton =
                 StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
-            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
             assertThat(googlePayButton.primaryButton.isVisible).isTrue()
-            assertThat(googlePayIconComponent.isVisible).isFalse()
+            assertThat(googlePayButton.googlePayButtonContent.isVisible).isFalse()
             assertThat(googlePayButton.primaryButton.externalLabel)
                 .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
         }
@@ -394,9 +429,8 @@ internal class PaymentSheetActivityTest {
 
             val googlePayButton =
                 StripeGooglePayButtonBinding.bind(activity.viewBinding.googlePayButton)
-            val googlePayIconComponent = googlePayButton.googlePayButtonIcon
             assertThat(googlePayButton.primaryButton.isVisible).isTrue()
-            assertThat(googlePayIconComponent.isVisible).isFalse()
+            assertThat(googlePayButton.googlePayButtonContent.isVisible).isFalse()
             assertThat(finishProcessingCalled).isTrue()
         }
     }
@@ -965,6 +999,28 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `verify animation is enabled for layout transition changes`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            assertThat(
+                activity.viewBinding.bottomSheet.layoutTransition.isTransitionTypeEnabled(
+                    LayoutTransition.CHANGING
+                )
+            ).isTrue()
+
+            assertThat(
+                activity.viewBinding.fragmentContainerParent.layoutTransition
+                    .isTransitionTypeEnabled(
+                        LayoutTransition.CHANGING
+                    )
+            ).isTrue()
+        }
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
@@ -983,8 +1039,14 @@ internal class PaymentSheetActivityTest {
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = mock<LpmRepository>()
-        whenever(lpmRepository.fromCode("card")).thenReturn(LpmRepository.HardcodedCard)
+        whenever(lpmRepository.fromCode(any())).thenReturn(LpmRepository.HardcodedCard)
         whenever(lpmRepository.serverSpecLoadingState).thenReturn(LpmRepository.ServerSpecState.Uninitialized)
+
+        val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
+            onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
+        }
+
+        registerFormViewModelInjector()
 
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
@@ -995,15 +1057,18 @@ internal class PaymentSheetActivityTest {
             StripeIntentValidator(),
             FakeCustomerRepository(paymentMethods),
             FakePrefsRepository(),
-            StaticResourceRepository(mock(), lpmRepository),
+            StaticLpmResourceRepository(lpmRepository),
+            mock(),
             stripePaymentLauncherAssistedFactory,
             googlePayPaymentMethodLauncherFactory,
             Logger.noop(),
             testDispatcher,
             DUMMY_INJECTOR_KEY,
             savedStateHandle = SavedStateHandle(),
-            mock()
-        )
+            linkLauncher = linkPaymentLauncher
+        ).also {
+            it.injector = injector
+        }
     }
 
     private fun createGooglePayPaymentMethodLauncherFactory() =
@@ -1020,6 +1085,57 @@ internal class PaymentSheetActivityTest {
                 return googlePayPaymentMethodLauncher
             }
         }
+
+    fun registerFormViewModelInjector() {
+        val lpmRepository = mock<LpmRepository>().apply {
+            whenever(fromCode(any())).thenReturn(
+                LpmRepository.SupportedPaymentMethod(
+                    PaymentMethod.Type.Card.code,
+                    false,
+                    com.stripe.android.ui.core.R.string.stripe_paymentsheet_payment_method_card,
+                    com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
+                    true,
+                    PaymentMethodRequirements(emptySet(), emptySet(), true),
+                    LayoutSpec.create(
+                        EmailSpec(),
+                        SaveForFutureUseSpec()
+                    )
+                )
+            )
+        }
+
+        val formViewModel = FormViewModel(
+            context = context,
+            formFragmentArguments = FormFragmentArguments(
+                PaymentMethod.Type.Card.code,
+                showCheckbox = true,
+                showCheckboxControlledFields = true,
+                merchantName = "Merchant, Inc.",
+                amount = Amount(50, "USD"),
+                initialPaymentMethodCreateParams = null
+            ),
+            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
+            addressResourceRepository = StaticAddressResourceRepository(AddressRepository(context.resources)),
+            showCheckboxFlow = mock()
+        )
+
+        val mockFormBuilder = mock<FormViewModelSubcomponent.Builder>()
+        val mockFormSubcomponent = mock<FormViewModelSubcomponent>()
+        val mockFormSubComponentBuilderProvider =
+            mock<Provider<FormViewModelSubcomponent.Builder>>()
+        whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
+        whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormBuilder.showCheckboxFlow(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
+        whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
+
+        injector = object : NonFallbackInjector {
+            override fun inject(injectable: Injectable<*>) {
+                (injectable as FormViewModel.Factory).subComponentBuilderProvider =
+                    mockFormSubComponentBuilderProvider
+            }
+        }
+    }
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD

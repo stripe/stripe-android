@@ -20,7 +20,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -28,21 +30,26 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
-import com.stripe.android.link.injection.LinkPaymentLauncherFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
+import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
@@ -57,32 +64,19 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.repositories.initializeRepositoryAndGetStripeIntent
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
-
-/**
- * This is used by both the [PaymentSheetActivity] and the [PaymentSheetAddPaymentMethodFragment]
- * classes to convert a [PaymentSheetViewState] to a [PrimaryButton.State]
- */
-internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
-    return when (this) {
-        is PaymentSheetViewState.Reset ->
-            PrimaryButton.State.Ready
-        is PaymentSheetViewState.StartProcessing ->
-            PrimaryButton.State.StartProcessing
-        is PaymentSheetViewState.FinishProcessing ->
-            PrimaryButton.State.FinishProcessing(this.onComplete)
-    }
-}
 
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
@@ -95,14 +89,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val stripeIntentValidator: StripeIntentValidator,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
-    resourceRepository: ResourceRepository,
+    lpmResourceRepository: ResourceRepository<LpmRepository>,
+    addressResourceRepository: ResourceRepository<AddressRepository>,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     logger: Logger,
     @IOContext workContext: CoroutineContext,
     @InjectorKey injectorKey: String,
     savedStateHandle: SavedStateHandle,
-    linkPaymentLauncherFactory: LinkPaymentLauncherFactory
+    linkLauncher: LinkPaymentLauncher
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
     config = args.config,
@@ -112,12 +107,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     workContext = workContext,
     logger = logger,
     injectorKey = injectorKey,
-    resourceRepository = resourceRepository,
+    lpmResourceRepository = lpmResourceRepository,
+    addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
-    linkPaymentLauncherFactory = linkPaymentLauncherFactory
+    linkLauncher = linkLauncher
 ) {
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
-        args.clientSecret
+        args.clientSecret,
+        args.config?.shippingDetails?.toConfirmPaymentIntentShipping()
     )
 
     @VisibleForTesting
@@ -160,6 +157,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         ActivityResultLauncher<LinkActivityContract.Args>? = null
 
     @VisibleForTesting
+    internal var launchedLinkDirectly: Boolean = false
+
+    @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
         args.googlePayConfig?.let { config ->
             if (config.currencyCode == null && !isProcessingPaymentIntent) {
@@ -198,7 +198,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    internal var paymentLauncher: PaymentLauncher? = null
+    private var paymentLauncher: StripePaymentLauncher? = null
 
     init {
         eventReporter.onInit(config)
@@ -235,14 +235,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             CoroutineScope(workContext).launch {
                 runCatching {
                     val intent = initializeRepositoryAndGetStripeIntent(
-                        resourceRepository,
+                        lpmResourceRepository,
                         stripeIntentRepository,
                         args.clientSecret,
                         eventReporter
                     )
 
                     lpmServerSpec =
-                        resourceRepository.getLpmRepository().serverSpecLoadingState.serverLpmSpecs
+                        lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
 
                     // The lpm server specs need to be saved so that upon the
                     // activity being killed the state can be restored.
@@ -294,7 +294,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     getSupportedSavedCustomerPMs(
                         stripeIntent,
                         config,
-                        resourceRepository.getLpmRepository()
+                        lpmResourceRepository.getRepository()
                     ).mapNotNull {
                         // The SDK is only able to parse customer LPMs
                         // that are hard coded in the SDK.
@@ -413,7 +413,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 PaymentLauncherContract(),
                 ::onPaymentResult
             )
-        )
+        ).also {
+            it.registerPollingAuthenticator()
+        }
     }
 
     /**
@@ -421,6 +423,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * Must be called from the Activity's `onDestroy`.
      */
     fun unregisterFromActivity() {
+        paymentLauncher?.unregisterPollingAuthenticator()
         linkActivityResultLauncher = null
         paymentLauncher = null
     }
@@ -441,11 +444,17 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun setupLink(stripeIntent: StripeIntent) {
         if (LINK_ENABLED &&
-            stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
+            stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code) &&
+            stripeIntent.linkFundingSources.intersect(LinkPaymentLauncher.supportedFundingSources)
+                .isNotEmpty()
         ) {
             viewModelScope.launch {
-                when (linkLauncher.setup(stripeIntent, this)) {
-                    AccountStatus.Verified -> launchLink()
+                val linkConfig = createLinkConfiguration(stripeIntent).also {
+                    _linkConfiguration.value = it
+                }
+                val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
+                when (accountStatus) {
+                    AccountStatus.Verified -> launchLink(linkConfig, launchedDirectly = true)
                     AccountStatus.VerificationStarted,
                     AccountStatus.NeedsVerification -> {
                         linkVerificationCallback = { success ->
@@ -453,24 +462,50 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             _showLinkVerificationDialog.value = false
 
                             if (success) {
-                                launchLink()
+                                launchLink(linkConfig, launchedDirectly = true)
                             }
                         }
                         _showLinkVerificationDialog.value = true
                     }
-                    AccountStatus.SignedOut -> {}
+                    AccountStatus.SignedOut,
+                    AccountStatus.Error -> {
+                    }
                 }
-                _isLinkEnabled.value = true
+                activeLinkSession.value = accountStatus == AccountStatus.Verified
+                _isLinkEnabled.value = accountStatus != AccountStatus.Error
             }
         } else {
             _isLinkEnabled.value = false
         }
     }
 
-    fun launchLink() {
+    override fun completeLinkInlinePayment(
+        configuration: LinkPaymentLauncher.Configuration,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        isReturningUser: Boolean
+    ) {
+        if (isReturningUser) {
+            launchLink(configuration, launchedDirectly = false, paymentMethodCreateParams)
+        } else {
+            super.completeLinkInlinePayment(
+                configuration,
+                paymentMethodCreateParams,
+                isReturningUser
+            )
+        }
+    }
+
+    fun launchLink(
+        configuration: LinkPaymentLauncher.Configuration,
+        launchedDirectly: Boolean,
+        paymentMethodCreateParams: PaymentMethodCreateParams? = null
+    ) {
+        launchedLinkDirectly = launchedDirectly
         linkActivityResultLauncher?.let { activityResultLauncher ->
             linkLauncher.present(
-                activityResultLauncher
+                configuration,
+                activityResultLauncher,
+                paymentMethodCreateParams
             )
             onLinkLaunched()
         }
@@ -489,18 +524,25 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * Method called with the result of launching the Link UI to collect a payment.
      */
     private fun onLinkActivityResult(result: LinkActivityResult) {
-        val paymentResult = result.convertToPaymentResult()
-        if (paymentResult is PaymentResult.Completed) {
-            // If payment was completed, don't show the Payment Sheet.
+        val completePaymentFlow = result is LinkActivityResult.Completed
+        val cancelPaymentFlow = launchedLinkDirectly &&
+            result is LinkActivityResult.Canceled && result.reason == Reason.BackPressed
+
+        if (completePaymentFlow) {
+            // If payment was completed inside the Link UI, dismiss immediately.
+            eventReporter.onPaymentSuccess(PaymentSelection.Link)
             prefsRepository.savePaymentSelection(PaymentSelection.Link)
             _paymentSheetResult.value = PaymentSheetResult.Completed
+        } else if (cancelPaymentFlow) {
+            // We launched the user straight into Link, but they decided to exit out of it.
+            _paymentSheetResult.value = PaymentSheetResult.Canceled
         } else {
             setContentVisible(true)
-            onPaymentResult(paymentResult)
+            onPaymentResult(result.convertToPaymentResult())
         }
     }
 
-    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails?) {
+    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?) {
         linkPaymentDetails?.let {
             // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
             updateSelection(PaymentSelection.New.LinkInline(it))
@@ -532,13 +574,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
                 // SavedSelection needs to happen after new cards have been saved.
                 when (selection.value) {
+                    is PaymentSelection.New.LinkInline -> PaymentSelection.Link
                     is PaymentSelection.New -> stripeIntent.paymentMethod?.let {
                         PaymentSelection.Saved(it)
                     }
-                    PaymentSelection.GooglePay -> selection.value
-                    PaymentSelection.Link -> selection.value
-                    is PaymentSelection.Saved -> selection.value
-                    null -> null
+                    else -> selection.value
                 }?.let {
                     prefsRepository.savePaymentSelection(it)
                 }
@@ -548,7 +588,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }
             }
             else -> {
-                eventReporter.onPaymentFailure(selection.value)
+                if (paymentResult is PaymentResult.Failed) {
+                    eventReporter.onPaymentFailure(selection.value)
+                }
 
                 runCatching {
                     stripeIntentValidator.requireValid(stripeIntent)
@@ -655,20 +697,26 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         ): T {
             val args = starterArgsSupplier()
 
-            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
+            val injector =
+                injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
 
-            return subComponentBuilderProvider.get()
+            val subcomponent = subComponentBuilderProvider.get()
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
                 .savedStateHandle(savedStateHandle)
-                .build().viewModel as T
+                .build()
+            val viewModel = subcomponent.viewModel
+            viewModel.injector = requireNotNull(injector as NonFallbackInjector)
+            return viewModel as T
         }
 
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            DaggerPaymentSheetLauncherComponent
+        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector {
+            val component = DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(arg.application)
                 .injectorKey(DUMMY_INJECTOR_KEY)
-                .build().inject(this)
+                .build()
+            component.inject(this)
+            return component
         }
     }
 

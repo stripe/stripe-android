@@ -144,7 +144,8 @@ class PaymentSheetPlaygroundViewModel(
         linkEnabled: Boolean,
         setShippingAddress: Boolean,
         setAutomaticPaymentMethod: Boolean,
-        backendUrl: String
+        backendUrl: String,
+        supportedPaymentMethods: List<String>?
     ) {
         customerConfig.value = null
         clientSecret.value = null
@@ -158,7 +159,8 @@ class PaymentSheetPlaygroundViewModel(
             set_shipping_address = setShippingAddress,
             automatic_payment_methods = setAutomaticPaymentMethod,
             use_link = linkEnabled,
-            merchant_country_code = merchantCountry.value
+            merchant_country_code = merchantCountry.value,
+            supported_payment_methods = supportedPaymentMethods
         )
 
         Fuel.post(backendUrl + "checkout")

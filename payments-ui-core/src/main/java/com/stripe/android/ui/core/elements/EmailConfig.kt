@@ -28,7 +28,7 @@ class EmailConfig : TextFieldConfig {
      * This will allow all characters, but will show as invalid if it doesn't match
      * the regular expression.
      */
-    override fun filter(userTyped: String) = userTyped
+    override fun filter(userTyped: String) = userTyped.filterNot { it == ' ' }
 
     override fun convertToRaw(displayName: String) = displayName
 
@@ -38,7 +38,8 @@ class EmailConfig : TextFieldConfig {
         return when {
             input.isEmpty() -> Error.Blank
             PATTERN.matcher(input).matches() -> Valid.Limitless
-            containsNameAndDomain(input) -> Error.Invalid(R.string.email_is_invalid)
+            containsNameAndDomain(input) || cannotBecomeValid(input) ->
+                Error.Invalid(R.string.email_is_invalid)
             else -> Error.Incomplete(R.string.email_is_invalid)
         }
     }
@@ -46,6 +47,8 @@ class EmailConfig : TextFieldConfig {
     private fun containsNameAndDomain(str: String) = str.contains("@") && str.matches(
         Regex(".*@.*\\..+")
     )
+
+    private fun cannotBecomeValid(str: String) = str.count { it == '@' } > 1
 
     companion object {
         // This is copied from Patterns.EMAIL_ADDRESS because it is not defined for unit tests

@@ -2,7 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
+import com.stripe.android.ui.core.address.AddressRepository
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -68,25 +68,47 @@ data class AddressSpec(
 ) : FormItemSpec() {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
-        addressRepository: AddressFieldElementRepository
-    ) = createSectionElement(
-        if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
-            CountryElement(
-                IdentifierSpec.Generic("billing_details[address][country]"),
-                DropdownFieldController(
-                    CountryConfig(this.allowedCountryCodes),
-                    initialValue = initialValues[this.apiPath]
-                )
+        addressRepository: AddressRepository,
+        shippingValues: Map<IdentifierSpec, String?>?
+    ): SectionElement {
+        val label = if (showLabel) R.string.billing_details else null
+        return if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
+            createSectionElement(
+                sectionFieldElement = CountryElement(
+                    identifier = IdentifierSpec.Generic("billing_details[address][country]"),
+                    controller = DropdownFieldController(
+                        CountryConfig(this.allowedCountryCodes),
+                        initialValue = initialValues[this.apiPath]
+                    )
+                ),
+                label = label
             )
         } else {
-            AddressElement(
-                apiPath,
-                addressRepository,
-                initialValues,
+            val sameAsShippingElement =
+                shippingValues?.get(IdentifierSpec.SameAsShipping)
+                    ?.toBooleanStrictOrNull()
+                    ?.let {
+                        SameAsShippingElement(
+                            identifier = IdentifierSpec.SameAsShipping,
+                            controller = SameAsShippingController(it)
+                        )
+                    }
+            val addressElement = AddressElement(
+                _identifier = apiPath,
+                addressRepository = addressRepository,
+                rawValuesMap = initialValues,
                 countryCodes = allowedCountryCodes,
-                addressType = type
+                addressType = type,
+                sameAsShippingElement = sameAsShippingElement,
+                shippingValuesMap = shippingValues
             )
-        },
-        label = if (showLabel) R.string.billing_details else null
-    )
+            createSectionElement(
+                sectionFieldElements = listOfNotNull(
+                    addressElement,
+                    sameAsShippingElement
+                ),
+                label = label
+            )
+        }
+    }
 }

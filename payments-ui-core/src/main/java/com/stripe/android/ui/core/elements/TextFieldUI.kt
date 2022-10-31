@@ -17,6 +17,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,10 +55,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun TextFieldSection(
     textFieldController: TextFieldController,
-    modifier: Modifier = Modifier,
-    @StringRes sectionTitle: Int? = null,
     imeAction: ImeAction,
     enabled: Boolean,
+    modifier: Modifier = Modifier,
+    @StringRes sectionTitle: Int? = null,
     onTextStateChanged: (TextFieldState?) -> Unit = {}
 ) {
     val error by textFieldController.error.collectAsState(null)
@@ -114,29 +115,25 @@ fun TextField(
         TextFieldStateConstants.Error.Blank
     )
     val label by textFieldController.label.collectAsState(null)
-    var processedIsFull by rememberSaveable { mutableStateOf(false) }
 
-    /**
-     * This is setup so that when a field is full it still allows more characters
-     * to be entered, it just triggers next focus when the event happens.
-     */
-    @Suppress("UNUSED_VALUE")
-    processedIsFull = if (fieldState == TextFieldStateConstants.Valid.Full) {
-        if (!processedIsFull) {
+    LaunchedEffect(fieldState) {
+        // When field is in focus and full, move to next field so the user can keep typing
+        if (fieldState == TextFieldStateConstants.Valid.Full && hasFocus) {
             focusManager.moveFocus(nextFocusDirection)
         }
-        true
-    } else {
-        false
     }
 
     TextField(
         value = value,
-        onValueChange = {
-            val newTextState = textFieldController.onValueChange(it)
+        onValueChange = { newValue ->
+            val acceptInput = fieldState.canAcceptInput(value, newValue)
 
-            if (newTextState != null) {
-                onTextStateChanged(newTextState)
+            if (acceptInput) {
+                val newTextState = textFieldController.onValueChange(newValue)
+
+                if (newTextState != null) {
+                    onTextStateChanged(newTextState)
+                }
             }
         },
         modifier = modifier

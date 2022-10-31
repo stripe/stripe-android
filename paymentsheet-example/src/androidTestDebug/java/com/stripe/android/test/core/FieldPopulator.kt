@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsToggleable
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
@@ -87,7 +88,7 @@ class FieldPopulator(
         val line1: String = "123 Main Street",
         val city: String = "San Francisco",
         val zip: String = "12345",
-        val state: String = "CA",
+        val state: String = "California",
         val cardNumber: String = "4242424242424242",
         val cardExpiration: String = "1230",
         val cardCvc: String = "321",
@@ -134,7 +135,7 @@ class FieldPopulator(
                         selectors.getZip()
                             .assertContentDescriptionEquals(values.zip)
                         selectors.getState()
-                            .assertContentDescriptionEquals(values.state)
+                            .assertTextContains(values.state)
                     }
                 }
                 is CountrySpec -> {}
@@ -153,6 +154,7 @@ class FieldPopulator(
                             .assertContentDescriptionEquals(values.zip)
                     }
                 }
+                else -> {}
             }
         }
     }
@@ -217,14 +219,15 @@ class FieldPopulator(
                         selectors.getZip()
                             .performTextInput(values.zip)
                         selectors.getState().apply {
-                            performTextInput(values.state)
-
+                            performClick()
                         }
+                        selectors.selectState(values.state)
                     }
                 }
                 is CountrySpec -> {}
                 is SimpleTextSpec -> {}
                 is DropdownSpec -> {}
+                else -> {}
             }
         }
     }

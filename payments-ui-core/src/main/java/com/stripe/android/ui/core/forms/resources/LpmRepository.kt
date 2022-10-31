@@ -6,6 +6,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
@@ -25,6 +26,8 @@ import com.stripe.android.paymentsheet.forms.PaypalRequirement
 import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
+import com.stripe.android.paymentsheet.forms.UpiRequirement
+import com.stripe.android.ui.core.BuildConfig
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
@@ -34,6 +37,7 @@ import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.ui.core.elements.transform
 import java.io.InputStream
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -49,21 +53,41 @@ import java.util.concurrent.TimeUnit
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LpmRepository constructor(
-    private val arguments: LpmRepositoryArguments
+    private val arguments: LpmRepositoryArguments,
+    private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance,
+    private val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
 ) {
+
     private val lpmSerializer = LpmSerializer()
     private val serverInitializedLatch = CountDownLatch(1)
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
 
-    private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
-
-    fun values() = codeToSupportedPaymentMethod.values
-
-    fun fromCode(code: String?) = code?.let { paymentMethodCode ->
-        codeToSupportedPaymentMethod[paymentMethodCode]
+    val supportedPaymentMethods: List<String> by lazy {
+        listOfNotNull(
+            PaymentMethod.Type.Card.code,
+            PaymentMethod.Type.Bancontact.code,
+            PaymentMethod.Type.Sofort.code,
+            PaymentMethod.Type.Ideal.code,
+            PaymentMethod.Type.SepaDebit.code,
+            PaymentMethod.Type.Eps.code,
+            PaymentMethod.Type.Giropay.code,
+            PaymentMethod.Type.P24.code,
+            PaymentMethod.Type.Klarna.code,
+            PaymentMethod.Type.PayPal.code,
+            PaymentMethod.Type.AfterpayClearpay.code,
+            PaymentMethod.Type.USBankAccount.code,
+            PaymentMethod.Type.Affirm.code,
+            PaymentMethod.Type.AuBecsDebit.code,
+            // TODO: Unconditionally enable this when we release UPI
+            PaymentMethod.Type.Upi.code.takeIf { arguments.isUpiEnabled }
+        )
     }
 
     fun isLoaded() = serverInitializedLatch.count <= 0L
+
+    fun fromCode(code: PaymentMethodCode?) = lpmInitialFormData.fromCode(code)
+
+    fun values() = lpmInitialFormData.values()
 
     fun waitUntilLoaded() {
         serverInitializedLatch.await(20, TimeUnit.SECONDS)
@@ -103,10 +127,10 @@ class LpmRepository constructor(
         serverLpmSpecs: String?,
         force: Boolean = false
     ) {
-        // If the expectedLpms is different form last time, we still need to reload.
-        var lpmsNotParsedFromServerSpec = expectedLpms
-            .filter { !codeToSupportedPaymentMethod.containsKey(it) }
-        if (!isLoaded() || force || lpmsNotParsedFromServerSpec.isNotEmpty()) {
+        val newSpecsToLoad =
+            expectedLpms.firstOrNull { !lpmInitialFormData.containsKey(it) } != null
+
+        if (!isLoaded() || force || newSpecsToLoad) {
             serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
             if (!serverLpmSpecs.isNullOrEmpty()) {
                 serverSpecLoadingState = ServerSpecState.ServerNotParsed(serverLpmSpecs)
@@ -119,19 +143,28 @@ class LpmRepository constructor(
 
             // If the server does not return specs, or they are not parsed successfully
             // we will use the LPM on disk if found
-            lpmsNotParsedFromServerSpec = expectedLpms
-                .filter { !codeToSupportedPaymentMethod.containsKey(it) }
+            val lpmsNotParsedFromServerSpec = expectedLpms
+                .filter { !lpmInitialFormData.containsKey(it) }
+                .filter { supportsPaymentMethod(it) }
+
             if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
                 val mapFromDisk: Map<String, SharedDataSpec>? =
                     readFromDisk()
                         ?.associateBy { it.type }
                         ?.filterKeys { expectedLpms.contains(it) }
-                codeToSupportedPaymentMethod.putAll(
+                lpmInitialFormData.putAll(
                     lpmsNotParsedFromServerSpec
                         .mapNotNull { mapFromDisk?.get(it) }
                         .mapNotNull { convertToSupportedPaymentMethod(it) }
                         .associateBy { it.code }
                 )
+                mapFromDisk
+                    ?.mapValues { it.value.nextActionSpec.transform() }
+                    ?.let {
+                        lpmPostConfirmData.update(
+                            it
+                        )
+                    }
             }
 
             serverInitializedLatch.countDown()
@@ -147,20 +180,35 @@ class LpmRepository constructor(
         parseLpms(arguments.resources?.assets?.open("lpms.json"))
 
     private fun update(lpms: List<SharedDataSpec>?) {
+        val parsedSharedData = lpms
+            ?.filter { supportsPaymentMethod(it.type) }
+            ?.filterNot {
+                !arguments.isFinancialConnectionsAvailable() &&
+                    it.type == PaymentMethod.Type.USBankAccount.code
+            }
+
         // By mapNotNull we will not accept any LPMs that are not known by the platform.
-        val parsedSupportedPaymentMethod = lpms
-            ?.filter { exposedPaymentMethods.contains(it.type) }
+        parsedSharedData
             ?.mapNotNull { convertToSupportedPaymentMethod(it) }
             ?.toMutableList()
+            ?.let {
+                lpmInitialFormData.putAll(
+                    it.associateBy { it.code }
+                )
+            }
 
-        parsedSupportedPaymentMethod?.removeAll {
-            !arguments.isFinancialConnectionsAvailable() &&
-                it.code == PaymentMethod.Type.USBankAccount.code
-        }
+        // Here nextActionSpec if null will convert to an explicit internal next action and status.
+        parsedSharedData
+            ?.associate { it.type to it.nextActionSpec.transform() }
+            ?.let {
+                lpmPostConfirmData.update(
+                    it
+                )
+            }
+    }
 
-        codeToSupportedPaymentMethod.putAll(
-            parsedSupportedPaymentMethod?.associateBy { it.code } ?: emptyMap()
-        )
+    private fun supportsPaymentMethod(paymentMethodCode: String): Boolean {
+        return supportedPaymentMethods.contains(paymentMethodCode)
     }
 
     private fun parseLpms(inputStream: InputStream?) =
@@ -307,6 +355,15 @@ class LpmRepository constructor(
                 USBankAccountRequirement,
                 LayoutSpec(sharedDataSpec.fields)
             )
+            PaymentMethod.Type.Upi.code -> SupportedPaymentMethod(
+                code = "upi",
+                requiresMandate = false,
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_upi,
+                iconResource = R.drawable.stripe_ic_paymentsheet_pm_upi,
+                tintIconOnSelection = false,
+                requirement = UpiRequirement,
+                formSpec = LayoutSpec(sharedDataSpec.fields)
+            )
             else -> null
         }
 
@@ -359,6 +416,28 @@ class LpmRepository constructor(
         fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    class LpmInitialFormData {
+
+        private var codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
+
+        fun values() = codeToSupportedPaymentMethod.values
+
+        fun fromCode(code: String?) = code?.let { paymentMethodCode ->
+            codeToSupportedPaymentMethod[paymentMethodCode]
+        }
+
+        fun containsKey(it: String) = codeToSupportedPaymentMethod.containsKey(it)
+
+        fun putAll(map: Map<PaymentMethodCode, SupportedPaymentMethod>) {
+            codeToSupportedPaymentMethod.putAll(map)
+        }
+
+        internal companion object {
+            val Instance = LpmInitialFormData()
+        }
+    }
+
     companion object {
         @Volatile
         private var INSTANCE: LpmRepository? = null
@@ -377,28 +456,6 @@ class LpmRepository constructor(
             CardRequirement,
             LayoutSpec(listOf(CardDetailsSectionSpec(), CardBillingSpec(), SaveForFutureUseSpec()))
         )
-
-        /**
-         * This is a list of the payment methods that we are allowing in the release
-         */
-        val exposedPaymentMethods by lazy {
-            listOf(
-                PaymentMethod.Type.Card.code,
-                PaymentMethod.Type.Bancontact.code,
-                PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Ideal.code,
-                PaymentMethod.Type.SepaDebit.code,
-                PaymentMethod.Type.Eps.code,
-                PaymentMethod.Type.Giropay.code,
-                PaymentMethod.Type.P24.code,
-                PaymentMethod.Type.Klarna.code,
-                PaymentMethod.Type.PayPal.code,
-                PaymentMethod.Type.AfterpayClearpay.code,
-                PaymentMethod.Type.USBankAccount.code,
-                PaymentMethod.Type.Affirm.code,
-                PaymentMethod.Type.AuBecsDebit.code
-            )
-        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -413,6 +470,8 @@ class LpmRepository constructor(
     data class LpmRepositoryArguments(
         val resources: Resources?,
         val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
-            DefaultIsFinancialConnectionsAvailable()
+            DefaultIsFinancialConnectionsAvailable(),
+        // TODO Remove this when releasing UPI
+        val isUpiEnabled: Boolean = BuildConfig.DEBUG
     )
 }

@@ -9,7 +9,7 @@ import kotlin.coroutines.CoroutineContext
 
 internal class DefaultPrefsRepository(
     private val context: Context,
-    private val customerId: String,
+    private val customerId: String?,
     private val workContext: CoroutineContext
 ) : PrefsRepository {
     private val prefs: SharedPreferences by lazy {
@@ -51,7 +51,7 @@ internal class DefaultPrefsRepository(
     }
 
     private fun getKey(): String {
-        return "customer[$customerId]"
+        return customerId?.let { "customer[$it]" } ?: "guest"
     }
 
     private companion object {

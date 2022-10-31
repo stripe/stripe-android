@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="LinkBaseTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="LinkBaseTheme" parent="@android:style/Theme.Translucent">
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@color/link_window_background</item>

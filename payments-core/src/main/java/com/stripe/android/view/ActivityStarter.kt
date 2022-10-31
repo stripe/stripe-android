@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
  * See [PaymentMethodsActivityStarter], [AddPaymentMethodActivityStarter],
  * [PaymentFlowActivityStarter].
  */
+@Suppress("UnnecessaryAbstractClass")
 abstract class ActivityStarter<TargetActivityType : Activity, ArgsType : ActivityStarter.Args> internal constructor(
     private val activity: Activity,
     private val fragment: Fragment? = null,

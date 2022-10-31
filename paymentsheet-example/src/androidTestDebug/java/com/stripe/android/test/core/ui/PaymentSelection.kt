@@ -1,6 +1,7 @@
 package com.stripe.android.test.core.ui
 
 import androidx.annotation.StringRes
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasText
@@ -16,11 +17,18 @@ class PaymentSelection(val composeTestRule: ComposeTestRule, @StringRes val labe
     fun click() {
         val resource = InstrumentationRegistry.getInstrumentation().targetContext.resources
 
-        composeTestRule.waitUntil(5000) {
-            composeTestRule
-                .onAllNodesWithTag(TEST_TAG_LIST)
-                .fetchSemanticsNodes().size == 1
+        try {
+            // If we don't find the node, it means that there's only one payment method available
+            // and we don't show the payment method carousel as a result.
+            composeTestRule.waitUntil(5000) {
+                composeTestRule
+                    .onAllNodesWithTag(TEST_TAG_LIST)
+                    .fetchSemanticsNodes().size == 1
+            }
+        } catch (_: ComposeTimeoutException) {
+            return
         }
+
         composeTestRule.onNodeWithTag(TEST_TAG_LIST, true)
             .performScrollToNode(hasText(resource.getString(label)))
         composeTestRule.waitForIdle()

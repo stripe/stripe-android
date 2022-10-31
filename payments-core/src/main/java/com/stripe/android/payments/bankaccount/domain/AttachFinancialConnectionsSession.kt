@@ -19,13 +19,18 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
     suspend fun forPaymentIntent(
         publishableKey: String,
         linkedAccountSessionId: String,
-        clientSecret: String
+        clientSecret: String,
+        stripeAccountId: String?
     ): Result<PaymentIntent> = kotlin.runCatching {
         stripeRepository.attachFinancialConnectionsSessionToPaymentIntent(
             financialConnectionsSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,
             paymentIntentId = PaymentIntent.ClientSecret(clientSecret).paymentIntentId,
-            requestOptions = ApiRequest.Options(publishableKey)
+            requestOptions = ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            ),
+            expandFields = EXPAND_PAYMENT_METHOD
         )
     }.mapCatching { it ?: throw InternalError("Error attaching session to PaymentIntent") }
 
@@ -38,13 +43,22 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
     suspend fun forSetupIntent(
         publishableKey: String,
         linkedAccountSessionId: String,
-        clientSecret: String
+        clientSecret: String,
+        stripeAccountId: String?
     ): Result<SetupIntent> = kotlin.runCatching {
         stripeRepository.attachFinancialConnectionsSessionToSetupIntent(
             financialConnectionsSessionId = linkedAccountSessionId,
             clientSecret = clientSecret,
             setupIntentId = SetupIntent.ClientSecret(clientSecret).setupIntentId,
-            requestOptions = ApiRequest.Options(publishableKey)
+            requestOptions = ApiRequest.Options(
+                apiKey = publishableKey,
+                stripeAccount = stripeAccountId
+            ),
+            expandFields = EXPAND_PAYMENT_METHOD
         )
     }.mapCatching { it ?: throw InternalError("Error attaching session to SetupIntent") }
+
+    private companion object {
+        private val EXPAND_PAYMENT_METHOD = listOf("payment_method")
+    }
 }

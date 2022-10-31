@@ -132,7 +132,7 @@ object ConsumerFixtures {
     )
     val CONSUMER_LOGGED_OUT = ConsumerSessionJsonParser().parse(CONSUMER_LOGGED_OUT_JSON)
 
-    val CONSUMER_SINGLE_PAYMENT_DETAILS_JSON = JSONObject(
+    val CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON = JSONObject(
         """
             {
               "redacted_payment_details": {
@@ -167,8 +167,42 @@ object ConsumerFixtures {
             }
         """.trimIndent()
     )
-    val CONSUMER_SINGLE_PAYMENT_DETAILS =
-        ConsumerPaymentDetailsJsonParser().parse(CONSUMER_SINGLE_PAYMENT_DETAILS_JSON)
+    val CONSUMER_SINGLE_CARD_PAYMENT_DETAILS =
+        ConsumerPaymentDetailsJsonParser().parse(CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON)
+
+    val CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_JSON = JSONObject(
+        """
+            {
+              "redacted_payment_details": [
+                {
+                  "id": "wAAACGA",
+                  "bank_account_details": {
+                    "bank_icon_code": null,
+                    "bank_name": "STRIPE TEST BANK",
+                    "last4": "6789"
+                  },
+                  "billing_address": {
+                    "administrative_area": null,
+                    "country_code": null,
+                    "dependent_locality": null,
+                    "line_1": null,
+                    "line_2": null,
+                    "locality": null,
+                    "name": null,
+                    "postal_code": null,
+                    "sorting_code": null
+                  },
+                  "billing_email_address": "",
+                  "card_details": null,
+                  "is_default": true,
+                  "type": "BANK_ACCOUNT"
+                }
+              ]
+            }
+        """.trimIndent()
+    )
+    val CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS =
+        ConsumerPaymentDetailsJsonParser().parse(CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_JSON)
 
     val CONSUMER_PAYMENT_DETAILS_JSON = JSONObject(
         """
@@ -223,7 +257,7 @@ object ConsumerFixtures {
                     "checks": {
                       "address_line1_check": "STATE_INVALID",
                       "address_postal_code_check": "PASS",
-                      "cvc_check": "PASS"
+                      "cvc_check": "FAIL"
                     },
                     "exp_month": 4,
                     "exp_year": 2024,
@@ -231,6 +265,29 @@ object ConsumerFixtures {
                   },
                   "is_default": false,
                   "type": "CARD"
+                },
+                {
+                  "id": "wAAACGA",
+                  "bank_account_details": {
+                    "bank_icon_code": null,
+                    "bank_name": "STRIPE TEST BANK",
+                    "last4": "6789"
+                  },
+                  "billing_address": {
+                    "administrative_area": null,
+                    "country_code": null,
+                    "dependent_locality": null,
+                    "line_1": null,
+                    "line_2": null,
+                    "locality": null,
+                    "name": null,
+                    "postal_code": null,
+                    "sorting_code": null
+                  },
+                  "billing_email_address": "",
+                  "card_details": null,
+                  "is_default": false,
+                  "type": "BANK_ACCOUNT"
                 }
               ]
             }

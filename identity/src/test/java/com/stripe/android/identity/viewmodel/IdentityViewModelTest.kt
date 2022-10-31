@@ -16,10 +16,10 @@ import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
-import com.stripe.android.identity.networking.DocumentUploadState
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -120,7 +120,8 @@ internal class IdentityViewModelTest {
     @Test
     fun `resetDocumentUploadedState does reset _documentUploadedState`() {
         viewModel.resetDocumentUploadedState()
-        assertThat(viewModel.documentUploadState.value).isEqualTo(DocumentUploadState())
+        assertThat(viewModel.documentFrontUploadedState.value).isEqualTo(SingleSideDocumentUploadState())
+        assertThat(viewModel.documentBackUploadedState.value).isEqualTo(SingleSideDocumentUploadState())
     }
 
     @Test
@@ -327,9 +328,9 @@ internal class IdentityViewModelTest {
         )
 
         if (isFront) {
-            viewModel.documentUploadState.value.frontHighResResult
+            viewModel.documentFrontUploadedState.value.highResResult
         } else {
-            viewModel.documentUploadState.value.backHighResResult
+            viewModel.documentBackUploadedState.value.highResResult
         }.let { uploadedResult ->
             assertThat(uploadedResult).isEqualTo(
                 Resource.success(
@@ -377,9 +378,9 @@ internal class IdentityViewModelTest {
             eq(HIGH_RES_COMPRESSION_QUALITY)
         )
         if (isFront) {
-            viewModel.documentUploadState.value.frontHighResResult
+            viewModel.documentFrontUploadedState.value.highResResult
         } else {
-            viewModel.documentUploadState.value.backHighResResult
+            viewModel.documentBackUploadedState.value.highResResult
         }.let { result ->
             assertThat(result).isEqualTo(
                 Resource.success(
@@ -408,9 +409,9 @@ internal class IdentityViewModelTest {
         )
 
         if (isFront) {
-            viewModel.documentUploadState.value.frontLowResResult
+            viewModel.documentFrontUploadedState.value.lowResResult
         } else {
-            viewModel.documentUploadState.value.backLowResResult
+            viewModel.documentBackUploadedState.value.lowResResult
         }.let { result ->
             assertThat(result).isEqualTo(
                 Resource.success(
@@ -512,9 +513,9 @@ internal class IdentityViewModelTest {
         )
 
         if (isFront) {
-            viewModel.documentUploadState.value.frontHighResResult
+            viewModel.documentFrontUploadedState.value.highResResult
         } else {
-            viewModel.documentUploadState.value.backHighResResult
+            viewModel.documentBackUploadedState.value.highResResult
         }.let { uploadedResult ->
             assertThat(uploadedResult).isEqualTo(
                 Resource.error<UploadedResult>(

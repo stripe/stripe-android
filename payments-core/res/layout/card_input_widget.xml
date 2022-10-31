@@ -9,7 +9,8 @@
         android:layout_height="@dimen/card_brand_view_height"
         android:layout_marginTop="@dimen/stripe_card_icon_padding"
         android:layout_marginBottom="@dimen/stripe_card_icon_padding"
-        android:layout_marginEnd="@dimen/stripe_card_icon_padding" />
+        android:layout_marginEnd="@dimen/stripe_card_icon_padding"
+        android:layout_gravity="center_vertical" />
 
     <FrameLayout
         android:id="@+id/container"

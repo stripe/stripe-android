@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-  <!-- Instructional text during selfie is being captured -->
-  <string name="capturing">Pildistamine …</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="app_settings">Rakenduse sätted</string>
   <!-- Description of back of driver's license image -->
@@ -15,6 +13,8 @@
   <!-- Title displayed when requesting camera permissions -->
   <string name="camera_permission">Kaamera luba</string>
   <string name="camera_permission_rationale">See rakendus kasutab teie isikut tõendavate dokumentide skannimiseks kaamerat ja pildistab teie isiku kinnitamiseks.</string>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="capturing">Pildistamine …</string>
   <!-- Description of the check mark, used for A11Y -->
   <string name="check_mark">Dokumendi edukat jäädvustamist tähistav märge</string>
   <!-- Text for choosing a photo from gallery -->

@@ -1,21 +1,19 @@
 package com.stripe.android.ui.core.forms.resources
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.address.AddressFieldElementRepository
 
 /**
- * Interface that provides all resources needed by the forms.
+ * Interface that provides resources needed by the forms.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface ResourceRepository {
+interface ResourceRepository<T> {
     /**
-     * Suspend function that will wait for all resources to be loaded.
+     * Suspend function that will wait for resource to be loaded.
      * Must be called before trying to get any of the repositories.
      */
     suspend fun waitUntilLoaded()
 
     fun isLoaded(): Boolean
 
-    fun getLpmRepository(): LpmRepository
-    fun getAddressRepository(): AddressFieldElementRepository
+    fun getRepository(): T
 }

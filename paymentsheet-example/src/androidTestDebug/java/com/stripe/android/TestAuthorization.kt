@@ -11,9 +11,11 @@ import com.stripe.android.test.core.Browser
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
+import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
@@ -38,6 +40,9 @@ class TestAuthorization {
     @get:Rule
     val testWatcher = TestWatcher()
 
+    @get:Rule
+    val disableAnimations = DisableAnimationsRule()
+
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
     private val screenshotProcessor = MyScreenCaptureProcessor()
@@ -56,13 +61,14 @@ class TestAuthorization {
     private val bancontactNewUser = TestParameters(
         lpmRepository.fromCode("bancontact")!!,
         Customer.New,
+        LinkState.Off,
         GooglePayState.On,
         Currency.EUR,
         IntentType.Pay,
         Billing.On,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
-        automatic = Automatic.On,
+        automatic = Automatic.Off,
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = Browser.Chrome,
@@ -104,7 +110,7 @@ class TestAuthorization {
                 InstrumentationRegistry.getInstrumentation().targetContext.resources
             )
         ).apply {
-            forceUpdate(LpmRepository.exposedPaymentMethods, null)
+            forceUpdate(this.supportedPaymentMethods, null)
         }
     }
 }

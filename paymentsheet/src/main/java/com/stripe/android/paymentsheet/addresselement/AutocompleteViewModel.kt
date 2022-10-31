@@ -6,9 +6,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.injection.NonFallbackInjectable
+import com.stripe.android.core.injection.NonFallbackInjector
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.ui.core.injection.NonFallbackInjectable
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.ui.core.elements.SimpleTextFieldConfig
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
@@ -16,7 +18,6 @@ import com.stripe.android.ui.core.elements.TextFieldIcon
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -121,12 +122,14 @@ internal class AutocompleteViewModel @Inject constructor(
                     val address = it.place.transformGoogleToStripeAddress(getApplication())
                     addressResult.value = Result.success(
                         AddressDetails(
-                            city = address.city,
-                            country = address.country,
-                            line1 = address.line1,
-                            line2 = address.line2,
-                            postalCode = address.postalCode,
-                            state = address.state
+                            address = PaymentSheet.Address(
+                                city = address.city,
+                                country = address.country,
+                                line1 = address.line1,
+                                line2 = address.line2,
+                                postalCode = address.postalCode,
+                                state = address.state
+                            )
                         )
                     )
                     setResultAndGoBack()
@@ -143,7 +146,9 @@ internal class AutocompleteViewModel @Inject constructor(
     fun onBackPressed() {
         val result = if (queryFlow.value.isNotBlank()) {
             AddressDetails(
-                line1 = queryFlow.value
+                address = PaymentSheet.Address(
+                    line1 = queryFlow.value
+                )
             )
         } else {
             null
@@ -154,7 +159,9 @@ internal class AutocompleteViewModel @Inject constructor(
     fun onEnterAddressManually() {
         setResultAndGoBack(
             AddressDetails(
-                line1 = queryFlow.value
+                address = PaymentSheet.Address(
+                    line1 = queryFlow.value
+                )
             )
         )
     }
@@ -176,8 +183,9 @@ internal class AutocompleteViewModel @Inject constructor(
         navigator.onBack()
     }
 
-    private fun clearQuery() {
+    fun clearQuery() {
         textFieldController.onRawValueChange("")
+        _predictions.value = null
     }
 
     internal class Debouncer {

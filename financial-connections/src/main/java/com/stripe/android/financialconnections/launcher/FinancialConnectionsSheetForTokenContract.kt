@@ -38,7 +38,7 @@ internal class FinancialConnectionsSheetForTokenContract :
                 error
             )
             is FinancialConnectionsSheetActivityResult.Completed -> FinancialConnectionsSheetForTokenResult.Completed(
-                financialConnectionsSession = financialConnectionsSession,
+                financialConnectionsSession = requireNotNull(financialConnectionsSession),
                 token = requireNotNull(token)
             )
         }

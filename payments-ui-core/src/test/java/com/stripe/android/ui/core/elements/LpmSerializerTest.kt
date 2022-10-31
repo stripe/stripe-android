@@ -14,7 +14,7 @@ class LpmSerializerTest {
 
     /**
      * Sofort is a little unique as it has a specific list of valid
-     * countries, and the api path must be sofort[country]
+     * countries, and the api path must be sofort\[country\]
      */
     @Test
     fun `Verify sofort country spec parsed correctly`() {
@@ -33,13 +33,24 @@ class LpmSerializerTest {
 
         assertThat(countrySpec.apiPath.v1).isEqualTo("sofort[country]")
         assertThat(countrySpec.allowedCountryCodes).isEqualTo(
-            setOf(
-                "AT",
-                "BE",
-                "DE",
-                "ES",
-                "IT",
-                "NL"
+            setOf("AT", "BE", "DE", "ES", "IT", "NL")
+        )
+
+        val nextAction = result.first { it.type == "sofort" }.nextActionSpec
+        assertThat(nextAction?.confirmResponseStatusSpecs).isEqualTo(
+            ConfirmStatusSpecAssociation(
+                requiresAction = ConfirmResponseStatusSpecs.RedirectNextActionSpec(
+                    urlPath = "next_action[redirect_to_url][url]",
+                    returnUrlPath = "next_action[redirect_to_url][return_url]"
+                )
+            )
+        )
+
+        assertThat(nextAction?.postConfirmHandlingPiStatusSpecs).isEqualTo(
+            PostConfirmStatusSpecAssociation(
+                requiresAction = PostConfirmHandlingPiStatusSpecs.CanceledSpec,
+                processing = PostConfirmHandlingPiStatusSpecs.FinishedSpec,
+                succeeded = PostConfirmHandlingPiStatusSpecs.FinishedSpec
             )
         )
     }
@@ -248,6 +259,9 @@ class LpmSerializerTest {
             """.trimIndent()
 
             val result = lpmSerializer.deserialize(serializedString)
+            result.onFailure {
+                println(it.message)
+            }
             assertThat(result.isSuccess).isTrue()
             result.onSuccess { sharedDataSpec ->
                 val fieldItemSpec = sharedDataSpec.fields[0]
@@ -378,6 +392,20 @@ class LpmSerializerTest {
     }
 
     companion object {
+
+        val FormUiSpecJsonString = """
+            "type": "new_lpm",
+            "async": true,
+            "fields": [
+              {
+                "type": "billing_address",
+                "allowed_country_codes": [
+                  "AT", "BE"
+                ]
+              }
+            ]
+        """.trimIndent()
+
         val JSON_ALL_FIELDS = """
                 [
                   {
@@ -485,5 +513,55 @@ class LpmSerializerTest {
                   }
                ]
         """.trimIndent()
+    }
+
+    @Test
+    fun `Verify serialize redirect url next action and success-finished pi status`() {
+        val serializedString = """
+              {
+                $FormUiSpecJsonString,
+                "next_action_spec": {
+                    "confirm_response_status_specs": {
+                        "requires_action": {
+                            "type": "redirect_to_url",
+                            "url_path": "next_action[redirect_to_url][url]",
+                            "return_url_path": "next_action[redirect_to_url][return_url]"
+                        }
+                    },
+                    "post_confirm_handling_pi_status_specs": {
+                        "succeeded": {
+                            "type": "finished"
+                        },
+                        "requires_action": {
+                            "type": "canceled"
+                        }
+                    }
+                }
+              }
+        """.trimIndent()
+
+        val result = lpmSerializer.deserialize(serializedString)
+        result.onFailure {
+            println(it.message)
+        }
+        assertThat(result.isSuccess).isTrue()
+        result.onSuccess {
+            assertThat(it.nextActionSpec?.confirmResponseStatusSpecs).isEqualTo(
+                ConfirmStatusSpecAssociation(
+                    requiresAction =
+                    ConfirmResponseStatusSpecs.RedirectNextActionSpec(
+                        urlPath = "next_action[redirect_to_url][url]",
+                        returnUrlPath = "next_action[redirect_to_url][return_url]"
+                    )
+                )
+            )
+
+            assertThat(it.nextActionSpec?.postConfirmHandlingPiStatusSpecs).isEqualTo(
+                PostConfirmStatusSpecAssociation(
+                    succeeded = PostConfirmHandlingPiStatusSpecs.FinishedSpec,
+                    requiresAction = PostConfirmHandlingPiStatusSpecs.CanceledSpec
+                )
+            )
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.model.CardBrand
@@ -10,10 +11,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
-internal class CvcController constructor(
-    private val cvcTextFieldConfig: CvcConfig,
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CvcController constructor(
+    private val cvcTextFieldConfig: CvcConfig = CvcConfig(),
     cardBrandFlow: Flow<CardBrand>,
-    initialValue: String?,
+    initialValue: String? = null,
     override val showOptionalLabel: Boolean = false
 ) : TextFieldController, SectionFieldErrorController {
     override val capitalization: KeyboardCapitalization = cvcTextFieldConfig.capitalization

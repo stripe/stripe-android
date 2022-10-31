@@ -40,6 +40,8 @@
   <string name="address_label_village_township">หมู่บ้านหรือเขตการปกครองท้องถิ่น</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[ผ่อนชำระ <num_installments/> งวดแบบปลอดดอกเบี้ย งวดละ <installment_price/> ด้วย <img/>]]></string>
+  <!-- Text for back button -->
+  <string name="back">ย้อนกลับ</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">ที่อยู่ในการเรียกเก็บเงิน</string>
   <!-- Used when a required field is blank and submit is clicked. -->
@@ -64,6 +66,8 @@
   <string name="iban_invalid_start">IBAN ควรเริ่มต้นด้วยรหัสประเทศ 2 ตัวอักษร</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">ธนาคารที่รองรับ iDEAL</string>
+  <!-- Error description for incomplete phone number -->
+  <string name="incomplete_phone_number">หมายเลขโทรศัพท์ไม่ครบถ้วน</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">ซื้อตอนนี้หรือจ่ายทีหลังด้วย Klarna</string>
   <!-- Klarna pay later copy -->
@@ -80,6 +84,8 @@
   <string name="stripe_continue_button_label">ดำเนินการต่อ</string>
   <!-- Label of a button that initiates payment when tapped -->
   <string name="stripe_pay_button_amount">ชำระ %s</string>
+  <!-- Title for a bank account payment method -->
+  <string name="stripe_payment_method_bank">ธนาคาร</string>
   <!-- Card details entry form header title -->
   <string name="stripe_paymentsheet_add_payment_method_card_information">ข้อมูลบัตร</string>
   <!-- Payment Method type brand name. -->

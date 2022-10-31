@@ -12,6 +12,7 @@ import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -323,7 +324,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
      * Fallback call to initialize dependencies when injection is not available, this might happen
      * when app process is killed by system and [WeakMapInjectorRegistry] is cleared.
      */
-    override fun fallbackInitialize(arg: FallbackInitializeParam) {
+    override fun fallbackInitialize(arg: FallbackInitializeParam): Injector? {
         DaggerStripe3ds2TransactionViewModelFactoryComponent.builder()
             .context(arg.application)
             .enableLogging(arg.enableLogging)
@@ -332,6 +333,7 @@ internal class Stripe3ds2TransactionViewModelFactory(
             .isInstantApp(InstantApps.isInstantApp(arg.application))
             .build()
             .inject(this)
+        return null
     }
 
     @Suppress("UNCHECKED_CAST")

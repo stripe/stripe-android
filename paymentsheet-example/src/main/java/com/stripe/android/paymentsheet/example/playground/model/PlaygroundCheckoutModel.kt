@@ -60,7 +60,8 @@ data class CheckoutRequest(
     val set_shipping_address: Boolean,
     val automatic_payment_methods: Boolean,
     val use_link: Boolean,
-    val merchant_country_code: String
+    val merchant_country_code: String,
+    val supported_payment_methods: List<String>?
 )
 
 @Serializable

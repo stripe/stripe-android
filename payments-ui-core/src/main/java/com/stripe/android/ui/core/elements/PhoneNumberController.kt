@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.core.os.LocaleListCompat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
@@ -26,6 +25,8 @@ class PhoneNumberController internal constructor(
      */
     override val fieldValue: Flow<String> = _fieldValue
 
+    private val _hasFocus = MutableStateFlow(false)
+
     private val countryConfig = CountryConfig(
         overrideCountryCodes,
         tinyMode = true,
@@ -49,21 +50,39 @@ class PhoneNumberController internal constructor(
         )
     )
 
+    private val phoneNumberMinimumLength = countryDropdownController.selectedIndex.map {
+        PhoneNumberFormatter.lengthForCountry(
+            countryConfig.countries[it].code.value
+        )
+    }
+
     /**
      * Flow of the phone number in the E.164 format.
      */
     override val rawFieldValue = combine(fieldValue, phoneNumberFormatter) { value, formatter ->
         formatter.toE164Format(value)
     }
-    override val isComplete = fieldValue.map { it.isNotBlank() || showOptionalLabel }
+    override val isComplete = combine(fieldValue, phoneNumberMinimumLength) { value, minLength ->
+        value.length >= (minLength ?: 0) || showOptionalLabel
+    }
     override val formFieldValue = fieldValue.combine(isComplete) { fieldValue, isComplete ->
         FormFieldEntry(fieldValue, isComplete)
     }
 
-    override val error: Flow<FieldError?> = flowOf(null)
+    override val error: Flow<FieldError?> = combine(
+        fieldValue,
+        isComplete,
+        _hasFocus
+    ) { value, complete, hasFocus ->
+        if (value.isNotBlank() && !complete && !hasFocus) {
+            FieldError(R.string.incomplete_phone_number)
+        } else {
+            null
+        }
+    }
 
     internal val placeholder = phoneNumberFormatter.map { it.placeholder }
-    internal val prefix = phoneNumberFormatter.map { it.prefix }
+
     internal val visualTransformation = phoneNumberFormatter.map { it.visualTransformation }
 
     fun getCountryCode() = phoneNumberFormatter.value.countryCode
@@ -86,6 +105,10 @@ class PhoneNumberController internal constructor(
         onValueChange(rawValue)
     }
 
+    fun onFocusChange(newHasFocus: Boolean) {
+        _hasFocus.value = newHasFocus
+    }
+
     companion object {
         /**
          * Instantiate a [PhoneNumberController] with the given initial values.
@@ -96,37 +119,31 @@ class PhoneNumberController internal constructor(
             initialValue: String = "",
             initiallySelectedCountryCode: String? = null
         ): PhoneNumberController {
-            // Find the regions that match the phone number prefix, then pick the top match from the
-            // device's locales
-            if (initiallySelectedCountryCode == null && initialValue.startsWith("+")) {
-                var charIndex = 1
-                while (charIndex < initialValue.length - 1 && charIndex < 4) {
-                    charIndex++
-                    PhoneNumberFormatter.findBestCountryForPrefix(
-                        initialValue.substring(0, charIndex),
-                        LocaleListCompat.getAdjustedDefault()
-                    )?.let {
-                        return PhoneNumberController(
-                            initialPhoneNumber = initialValue.substring(charIndex),
-                            initiallySelectedCountryCode = it
-                        )
-                    }
-                }
+            val hasCountryPrefix = initialValue.startsWith("+")
+
+            val formatter = if (initiallySelectedCountryCode == null && hasCountryPrefix) {
+                PhoneNumberFormatter.forPrefix(initialValue)
+            } else if (initiallySelectedCountryCode != null) {
+                PhoneNumberFormatter.forCountry(initiallySelectedCountryCode)
+            } else {
+                null
             }
 
-            // Clean up if initial country is set and country prefix is in initial phone number
-            if (initiallySelectedCountryCode != null && initialValue.startsWith("+")) {
-                val prefix = PhoneNumberFormatter.forCountry(initiallySelectedCountryCode).prefix
-                return PhoneNumberController(
-                    initialPhoneNumber = initialValue.removePrefix(prefix),
+            return if (formatter != null) {
+                val prefix = formatter.prefix
+                val localNumber = initialValue.removePrefix(prefix)
+                // Converting to E164 to get rid of any weird formatting, e.g. leading spaces.
+                val e164Number = formatter.toE164Format(localNumber)
+                PhoneNumberController(
+                    initialPhoneNumber = e164Number.removePrefix(prefix),
+                    initiallySelectedCountryCode = formatter.countryCode,
+                )
+            } else {
+                PhoneNumberController(
+                    initialPhoneNumber = initialValue,
                     initiallySelectedCountryCode = initiallySelectedCountryCode
                 )
             }
-
-            return PhoneNumberController(
-                initialPhoneNumber = initialValue,
-                initiallySelectedCountryCode = initiallySelectedCountryCode
-            )
         }
     }
 }

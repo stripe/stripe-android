@@ -16,6 +16,7 @@ import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailConfig
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
+import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.NameConfig
@@ -27,8 +28,10 @@ import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.TranslationId
+import com.stripe.android.ui.core.elements.UpiElement
+import com.stripe.android.ui.core.elements.UpiSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -55,15 +58,15 @@ internal class TransformSpecToElementTest {
     fun beforeTest() {
         transformSpecToElements =
             TransformSpecToElements(
-                resourceRepository = StaticResourceRepository(
-                    mock(),
+                addressResourceRepository = StaticAddressResourceRepository(
                     mock()
                 ),
                 initialValues = mapOf(),
                 amount = null,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
-                context
+                context = context,
+                shippingValues = null
             )
     }
 
@@ -147,7 +150,7 @@ internal class TransformSpecToElementTest {
             as SimpleTextElement
 
         // Verify the correct config is setup for the controller
-        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_name)
+        assertThat(nameElement.controller.label.first()).isEqualTo(R.string.address_label_full_name)
         assertThat(nameElement.identifier.v1).isEqualTo("simple")
         assertThat(nameElement.controller.showOptionalLabel).isTrue()
     }
@@ -187,16 +190,16 @@ internal class TransformSpecToElementTest {
     fun `Setting card number to view only returns the correct elements`() {
         transformSpecToElements =
             TransformSpecToElements(
-                resourceRepository = StaticResourceRepository(
-                    mock(),
+                addressResourceRepository = StaticAddressResourceRepository(
                     mock()
                 ),
                 initialValues = mapOf(),
                 amount = null,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
-                context,
-                viewOnlyFields = setOf(IdentifierSpec.CardNumber)
+                context = context,
+                viewOnlyFields = setOf(IdentifierSpec.CardNumber),
+                shippingValues = null
             )
 
         val formElements = transformSpecToElements.transform(
@@ -208,6 +211,26 @@ internal class TransformSpecToElementTest {
 
         assertThat(cardNumberElement.controller)
             .isInstanceOf(CardNumberViewOnlyController::class.java)
+    }
+
+    @Test
+    fun `Empty spec is transformed to single EmptyFormElement`() {
+        val formElement = transformSpecToElements.transform(
+            emptyList()
+        )
+
+        assertThat(formElement).containsExactly(EmptyFormElement())
+    }
+
+    @Test
+    fun `UPI spec is transformed into UPI element wrapped in section`() {
+        val upiSpec = UpiSpec()
+        val formElement = transformSpecToElements.transform(listOf(upiSpec))
+
+        val sectionElement = formElement.first() as SectionElement
+        val upiElement = sectionElement.fields.first() as UpiElement
+
+        assertThat(sectionElement.fields).containsExactly(upiElement)
     }
 
     companion object {

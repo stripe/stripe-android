@@ -43,7 +43,16 @@ class CookieStoreTest {
     }
 
     @Test
-    fun `logout stores hashed email and clears cookie`() {
+    fun `clear deletes all data`() {
+        createCookieStore().clear()
+
+        CookieStore.allCookies.forEach {
+            verify(store).delete(it)
+        }
+    }
+
+    @Test
+    fun `logout stores hashed email and clears cookie and signed up email`() {
         val cookieStore = createCookieStore()
         val email = "test@stripe.com"
         cookieStore.logout(email)
@@ -53,6 +62,7 @@ class CookieStoreTest {
             eq("49644df5404ea8ee8f0ec46cdb1dd7756c5661d6387fd1705a072f2fbf020f48")
         )
         verify(store).delete(eq(AUTH_SESSION_COOKIE))
+        verify(store).delete(eq(SIGNED_UP_EMAIL))
     }
 
     @Test

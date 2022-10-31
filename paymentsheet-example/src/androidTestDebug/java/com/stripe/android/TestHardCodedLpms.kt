@@ -12,9 +12,11 @@ import com.stripe.android.test.core.Billing
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
+import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
@@ -39,6 +41,9 @@ class TestHardCodedLpms {
     @get:Rule
     val testWatcher = TestWatcher()
 
+    @get:Rule
+    val disableAnimations = DisableAnimationsRule()
+
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
 
@@ -52,7 +57,7 @@ class TestHardCodedLpms {
                 InstrumentationRegistry.getInstrumentation().targetContext.resources
             )
         ).apply {
-            forceUpdate(LpmRepository.exposedPaymentMethods, null)
+            forceUpdate(this.supportedPaymentMethods, null)
         }
     }
 
@@ -65,13 +70,14 @@ class TestHardCodedLpms {
     private val newUser = TestParameters(
         lpmRepository.fromCode("bancontact")!!,
         Customer.New,
+        LinkState.Off,
         GooglePayState.On,
         Currency.EUR,
         IntentType.Pay,
         Billing.On,
         shipping = Shipping.Off,
         delayed = DelayedPMs.Off,
-        automatic = Automatic.On,
+        automatic = Automatic.Off,
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = null,
@@ -240,6 +246,26 @@ class TestHardCodedLpms {
                 merchantCountryCode = "GB",
                 automatic = Automatic.Off
             )
+        )
+    }
+
+    @Test
+    fun testUpi() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = newUser.copy(
+                paymentMethod = lpmRepository.fromCode("upi")!!,
+                currency = Currency.INR,
+                merchantCountryCode = "IN",
+                automatic = Automatic.Off,
+                authorizationAction = null,
+            ),
+            populateCustomLpmFields = {
+                composeTestRule.onNodeWithText("UPI ID").apply {
+                    performTextInput(
+                        "payment.success@stripeupi"
+                    )
+                }
+            }
         )
     }
 }

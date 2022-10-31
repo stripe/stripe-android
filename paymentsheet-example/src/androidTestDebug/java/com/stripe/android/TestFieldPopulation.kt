@@ -2,18 +2,24 @@ package com.stripe.android
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
+import com.stripe.android.test.core.Browser
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
+import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
+import com.stripe.android.test.core.LinkState
 import com.stripe.android.test.core.MyScreenCaptureProcessor
 import com.stripe.android.test.core.PlaygroundTestDriver
 import com.stripe.android.test.core.Shipping
@@ -39,6 +45,9 @@ class TestFieldPopulation {
     @get:Rule
     val testWatcher = TestWatcher()
 
+    @get:Rule
+    val disableAnimations = DisableAnimationsRule()
+
     private lateinit var device: UiDevice
     private lateinit var testDriver: PlaygroundTestDriver
     private val screenshotProcessor = MyScreenCaptureProcessor()
@@ -56,6 +65,7 @@ class TestFieldPopulation {
     private val sepaDebit = TestParameters(
         paymentMethod = lpmRepository.fromCode("sepa_debit")!!,
         customer = Customer.New,
+        linkState = LinkState.Off,
         googlePayState = GooglePayState.On,
         currency = Currency.EUR,
         intentType = IntentType.Pay,
@@ -73,6 +83,7 @@ class TestFieldPopulation {
     private val card = TestParameters(
         paymentMethod = LpmRepository.HardcodedCard,
         customer = Customer.New,
+        linkState = LinkState.Off,
         googlePayState = GooglePayState.On,
         currency = Currency.EUR,
         merchantCountryCode = "GB",
@@ -85,6 +96,28 @@ class TestFieldPopulation {
         saveForFutureUseCheckboxVisible = true,
         useBrowser = null,
         authorizationAction = null
+    )
+
+    private val bancontact = TestParameters(
+        lpmRepository.fromCode("bancontact")!!,
+        Customer.New,
+        LinkState.Off,
+        GooglePayState.Off,
+        Currency.EUR,
+        IntentType.Pay,
+        Billing.Off,
+        shipping = Shipping.Off,
+        delayed = DelayedPMs.Off,
+        automatic = Automatic.Off,
+        saveCheckboxValue = false,
+        saveForFutureUseCheckboxVisible = false,
+        useBrowser = Browser.Chrome,
+        authorizationAction = AuthorizeAction.Authorize,
+        merchantCountryCode = "GB",
+        supportedPaymentMethods = listOf(
+            PaymentMethod.Type.Card.code,
+            PaymentMethod.Type.Bancontact.code,
+        ),
     )
 
     @Ignore("Testing of dropdowns is not yet supported")
@@ -137,13 +170,25 @@ class TestFieldPopulation {
         }
     }
 
+    @Test
+    fun testSinglePaymentMethodWithoutGooglePayAndKeyboardInput() {
+        testDriver.confirmNewOrGuestComplete(bancontact) {
+            composeTestRule.waitForIdle()
+            val node = composeTestRule.onNodeWithText("Full name")
+            node.performClick()
+            composeTestRule.waitForIdle()
+            node.performTextInput("Jenny Rosen")
+            composeTestRule.waitForIdle()
+        }
+    }
+
     companion object {
         private val lpmRepository = LpmRepository(
             LpmRepository.LpmRepositoryArguments(
                 InstrumentationRegistry.getInstrumentation().targetContext.resources
             )
         ).apply {
-            forceUpdate(LpmRepository.exposedPaymentMethods, null)
+            forceUpdate(this.supportedPaymentMethods, null)
         }
     }
 }

@@ -49,6 +49,7 @@ dependencies {
     testImplementation "com.google.truth:truth:$truthVersion"
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
+    testImplementation "androidx.lifecycle:lifecycle-runtime-testing:$androidxLifecycleVersion"
     testImplementation testLibs.turbine
 
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
@@ -83,8 +84,6 @@ android {
             }
         }
     }
-    productFlavors {
-    }
 
     buildFeatures {
         compose = true
@@ -92,7 +91,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion "$androidxComposeVersion"
+        kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
     }
 }
 

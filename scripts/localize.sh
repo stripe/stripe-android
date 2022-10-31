@@ -95,3 +95,4 @@ do
     ls -1 android/$MODULE/ | paste -sd "," - | sed 's/[,]*values[-]*//g'
 done
 
+rm -rf android/*

@@ -1,6 +1,7 @@
 # Shared variables used in our localization scripts
 
 MODULES=(
+  "link"
   "paymentsheet"
   "payments-core"
   "payments-ui-core"

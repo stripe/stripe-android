@@ -31,6 +31,7 @@ internal class SignUpScreenTest {
         onEmailField().assertIsEnabled()
         onProgressIndicator().assertDoesNotExist()
         onPhoneField().assertDoesNotExist()
+        onNameField().assertDoesNotExist()
         onSignUpButton().assertDoesNotExist()
     }
 
@@ -42,18 +43,37 @@ internal class SignUpScreenTest {
         onEmailField().assertIsNotEnabled()
         onProgressIndicator().assertExists()
         onPhoneField().assertDoesNotExist()
+        onNameField().assertDoesNotExist()
         onSignUpButton().assertDoesNotExist()
     }
 
     @Test
-    fun status_inputting_phone_shows_all_fields() {
-        setContent(SignUpState.InputtingPhone)
+    fun status_inputting_phone_shows_all_fields_if_name_required() {
+        setContent(
+            signUpState = SignUpState.InputtingPhoneOrName,
+            requiresNameCollection = true
+        )
 
         onEmailField().assertExists()
         onEmailField().assertIsEnabled()
         onProgressIndicator().assertDoesNotExist()
         onPhoneField().assertExists()
         onPhoneField().assertIsEnabled()
+        onNameField().assertExists()
+        onNameField().assertIsEnabled()
+        onSignUpButton().assertExists()
+    }
+
+    @Test
+    fun status_inputting_phone_shows_only_phone_field_if_name_not_required() {
+        setContent(SignUpState.InputtingPhoneOrName)
+
+        onEmailField().assertExists()
+        onEmailField().assertIsEnabled()
+        onProgressIndicator().assertDoesNotExist()
+        onPhoneField().assertExists()
+        onPhoneField().assertIsEnabled()
+        onNameField().assertDoesNotExist()
         onSignUpButton().assertExists()
     }
 
@@ -66,7 +86,7 @@ internal class SignUpScreenTest {
 
     @Test
     fun signup_button_is_disabled_when_not_ready_to_sign_up() {
-        setContent(SignUpState.InputtingPhone, isReadyToSignUp = false)
+        setContent(SignUpState.InputtingPhoneOrName, isReadyToSignUp = false)
 
         onSignUpButton().assertExists()
         onSignUpButton().assertIsNotEnabled()
@@ -74,41 +94,52 @@ internal class SignUpScreenTest {
 
     @Test
     fun signup_button_is_enabled_when_ready_to_sign_up() {
-        setContent(SignUpState.InputtingPhone, isReadyToSignUp = true)
+        setContent(SignUpState.InputtingPhoneOrName, isReadyToSignUp = true)
 
         onSignUpButton().assertExists()
         onSignUpButton().assertIsEnabled()
     }
 
     @Test
-    fun when_error_message_is_not_null_then_it_is_visible() {
+    fun when_error_message_not_null_in_state_InputtingPhoneOrName_then_it_is_visible() {
         val errorMessage = "Error message"
-        setContent(SignUpState.InputtingPhone, errorMessage = ErrorMessage.Raw(errorMessage))
+        setContent(SignUpState.InputtingPhoneOrName, errorMessage = ErrorMessage.Raw(errorMessage))
+        composeTestRule.onNodeWithText(errorMessage).assertExists()
+    }
+
+    @Test
+    fun when_error_message_not_null_in_state_InputtingEmail_then_it_is_visible() {
+        val errorMessage = "Error message"
+        setContent(SignUpState.InputtingEmail, errorMessage = ErrorMessage.Raw(errorMessage))
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
 
     private fun setContent(
         signUpState: SignUpState,
         isReadyToSignUp: Boolean = true,
+        requiresNameCollection: Boolean = false,
         errorMessage: ErrorMessage? = null
-    ) =
-        composeTestRule.setContent {
-            DefaultLinkTheme {
-                SignUpBody(
-                    merchantName = "Example, Inc.",
-                    emailController = SimpleTextFieldController
-                        .createEmailSectionController(""),
-                    phoneNumberController = PhoneNumberController.createPhoneNumberController(),
-                    signUpState = signUpState,
-                    isReadyToSignUp = isReadyToSignUp,
-                    errorMessage = errorMessage,
-                    onSignUpClick = {}
-                )
-            }
+    ) = composeTestRule.setContent {
+        DefaultLinkTheme {
+            SignUpBody(
+                merchantName = "Example, Inc.",
+                emailController = SimpleTextFieldController
+                    .createEmailSectionController(""),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController(),
+                nameController = SimpleTextFieldController
+                    .createNameSectionController(null),
+                signUpState = signUpState,
+                isReadyToSignUp = isReadyToSignUp,
+                requiresNameCollection = requiresNameCollection,
+                errorMessage = errorMessage,
+                onSignUpClick = {}
+            )
         }
+    }
 
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(progressIndicatorTestTag)
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
+    private fun onNameField() = composeTestRule.onNodeWithText("Full name")
     private fun onSignUpButton() = composeTestRule.onNodeWithText("Join Link")
 }

@@ -13,6 +13,9 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -29,6 +32,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -44,10 +48,12 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.StaticResourceRepository
+import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
+import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -84,20 +90,22 @@ internal class PaymentSheetViewModelTest {
     private val eventReporter = mock<EventReporter>()
     private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val application = ApplicationProvider.getApplicationContext<Application>()
-    private val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(application.resources)).apply {
-        this.forceUpdate(
-            listOf(
-                PaymentMethod.Type.Card.code,
-                PaymentMethod.Type.USBankAccount.code,
-                PaymentMethod.Type.Ideal.code,
-                PaymentMethod.Type.SepaDebit.code,
-                PaymentMethod.Type.Sofort.code
-            ),
-            null
-        )
-    }
+    private val lpmRepository =
+        LpmRepository(LpmRepository.LpmRepositoryArguments(application.resources)).apply {
+            this.forceUpdate(
+                listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.USBankAccount.code,
+                    PaymentMethod.Type.Ideal.code,
+                    PaymentMethod.Type.SepaDebit.code,
+                    PaymentMethod.Type.Sofort.code
+                ),
+                null
+            )
+        }
     private val prefsRepository = FakePrefsRepository()
-    private val resourceRepository = StaticResourceRepository(mock(), lpmRepository)
+    private val lpmResourceRepository = StaticLpmResourceRepository(lpmRepository)
+    private val linkLauncher = mock<LinkPaymentLauncher>()
 
     private val primaryButtonUIState = PrimaryButton.UIState(
         label = "Test",
@@ -365,6 +373,113 @@ internal class PaymentSheetViewModelTest {
                     )
                 )
             )
+    }
+
+    @Test
+    fun `checkout() with shipping should confirm new payment methods`() = runTest {
+        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
+
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                    shippingDetails = AddressDetails(
+                        address = PaymentSheet.Address(
+                            country = "US"
+                        ),
+                        name = "Test Name"
+                    )
+                )
+            )
+        )
+
+        viewModel.startConfirm.observeForever {
+            confirmParams.add(it)
+        }
+
+        val paymentSelection = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+        )
+        viewModel.updateSelection(paymentSelection)
+        viewModel.checkout(CheckoutIdentifier.None)
+
+        assertThat(confirmParams).hasSize(1)
+        assertThat(confirmParams[0].peekContent())
+            .isEqualTo(
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    CLIENT_SECRET,
+                    paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                    ),
+                    shipping = ConfirmPaymentIntentParams.Shipping(
+                        address = Address(
+                            country = "US"
+                        ),
+                        name = "Test Name"
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun `setupLink() launches Link when account status is Verified`() = runTest {
+        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
+        val viewModel = createViewModel()
+
+        viewModel.setupLink(PAYMENT_INTENT)
+
+        assertThat(viewModel.showLinkVerificationDialog.value).isFalse()
+        assertThat(viewModel.activeLinkSession.value).isTrue()
+        assertThat(viewModel.isLinkEnabled.value).isTrue()
+        assertThat(viewModel.launchedLinkDirectly).isTrue()
+    }
+
+    @Test
+    fun `setupLink() starts verification when account status is NeedsVerification`() = runTest {
+        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.NeedsVerification))
+        val viewModel = createViewModel()
+
+        viewModel.setupLink(PAYMENT_INTENT)
+
+        assertThat(viewModel.showLinkVerificationDialog.value).isTrue()
+        assertThat(viewModel.activeLinkSession.value).isFalse()
+        assertThat(viewModel.isLinkEnabled.value).isTrue()
+    }
+
+    @Test
+    fun `setupLink() starts verification when account status is VerificationStarted`() = runTest {
+        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.VerificationStarted))
+        val viewModel = createViewModel()
+
+        viewModel.setupLink(PAYMENT_INTENT)
+
+        assertThat(viewModel.showLinkVerificationDialog.value).isTrue()
+        assertThat(viewModel.activeLinkSession.value).isFalse()
+        assertThat(viewModel.isLinkEnabled.value).isTrue()
+    }
+
+    @Test
+    fun `setupLink() enables Link when account status is SignedOut`() = runTest {
+        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
+        val viewModel = createViewModel()
+
+        viewModel.setupLink(PAYMENT_INTENT)
+
+        assertThat(viewModel.activeLinkSession.value).isFalse()
+        assertThat(viewModel.isLinkEnabled.value).isTrue()
+    }
+
+    @Test
+    fun `setupLink() disables Link when account status is Error`() = runTest {
+        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Error))
+        val viewModel = createViewModel()
+
+        viewModel.setupLink(PAYMENT_INTENT)
+
+        assertThat(viewModel.activeLinkSession.value).isFalse()
+        assertThat(viewModel.isLinkEnabled.value).isFalse()
     }
 
     @Test
@@ -820,6 +935,7 @@ internal class PaymentSheetViewModelTest {
     fun `fragmentConfig when all data is ready should emit value`() {
         viewModel.maybeFetchStripeIntent()
         viewModel._isGooglePayReady.value = true
+        viewModel._isLinkEnabled.value = true
 
         val configs = mutableListOf<FragmentConfig>()
         viewModel.fragmentConfigEvent.observeForever { event ->
@@ -1019,14 +1135,15 @@ internal class PaymentSheetViewModelTest {
             StripeIntentValidator(),
             customerRepository,
             prefsRepository,
-            resourceRepository,
+            lpmResourceRepository,
+            mock(),
             mock(),
             mock(),
             Logger.noop(),
             testDispatcher,
             DUMMY_INJECTOR_KEY,
             savedStateHandle = SavedStateHandle(),
-            mock()
+            linkLauncher
         )
     }
 

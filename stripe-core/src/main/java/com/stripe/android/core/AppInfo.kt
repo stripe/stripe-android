@@ -30,15 +30,15 @@ data class AppInfo internal constructor(
     }
 
     internal fun createClientHeaders(): Map<String, Map<String, String?>> {
-        val appInfo = mapOf(
-            "name" to name,
-            "version" to version,
-            "url" to url,
-            "partner_id" to partnerId
-        )
-
-        return mapOf("application" to appInfo)
+        return mapOf("application" to toParamMap())
     }
+
+    internal fun toParamMap() = mapOf(
+        "name" to name,
+        "version" to version,
+        "url" to url,
+        "partner_id" to partnerId
+    )
 
     companion object {
         @JvmStatic

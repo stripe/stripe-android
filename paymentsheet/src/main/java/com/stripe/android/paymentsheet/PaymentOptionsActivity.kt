@@ -21,10 +21,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
-import com.stripe.android.paymentsheet.ui.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.utils.AnimationConstants
+import java.security.InvalidParameterException
 
 /**
  * An `Activity` for selecting a payment option.
@@ -70,13 +71,20 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
         val starterArgs = this.starterArgs
         if (starterArgs == null) {
             finish()
             return
         }
+        try {
+            starterArgs.config?.validate()
+            starterArgs.config?.appearance?.parseAppearance()
+        } catch (e: InvalidParameterException) {
+            finish()
+            return
+        }
+
+        super.onCreate(savedInstanceState)
 
         starterArgs.statusBarColor?.let {
             window.statusBarColor = it

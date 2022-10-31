@@ -13,77 +13,70 @@ internal enum class ImageFormat(val string: String) {
     companion object {
         fun fromValue(value: CardImageVerificationDetailsFormat): ImageFormat =
             when (value) {
-                CardImageVerificationDetailsFormat.HEIC -> ImageFormat.HEIC
-                CardImageVerificationDetailsFormat.JPEG -> ImageFormat.JPEG
-                CardImageVerificationDetailsFormat.WEBP -> ImageFormat.WEBP
+                CardImageVerificationDetailsFormat.HEIC -> HEIC
+                CardImageVerificationDetailsFormat.JPEG -> JPEG
+                CardImageVerificationDetailsFormat.WEBP -> WEBP
             }
     }
 }
 
+internal data class OptionalImageSettings(
+    val compressionRatio: Double?,
+    val imageSize: Size?,
+    val imageCount: Int?
+) {
+    constructor(settings: CardImageVerificationDetailsImageSettings?) : this(
+        compressionRatio = settings?.compressionRatio,
+        imageSize = settings?.imageSize?.takeIf { it.size > 1 }?.let {
+            Size(it.first().toInt(), it.last().toInt())
+        },
+        imageCount = settings?.imageCount
+    )
+}
+
 internal data class ImageSettings(
-    var compressionRatio: Double? = null,
-    var imageSize: Size? = null
+    val compressionRatio: Double,
+    val imageSize: Size,
+    val imageCount: Int
 ) {
     companion object {
         // These default values are what Android was using before the addition of a server config.
-        val DEFAULT = ImageSettings(0.92, Size(1080, 1920))
-    }
-
-    constructor(settings: CardImageVerificationDetailsImageSettings?) : this() {
-        settings?.let {
-            compressionRatio = it.compressionRatio ?: compressionRatio
-
-            it.imageSize?.takeIf { it.size > 1 }?.let {
-                var pendingSize = imageSize ?: ImageSettings.DEFAULT.imageSize!!
-                val width = it.first().toInt() ?: pendingSize.width
-                val height = it.last().toInt() ?: pendingSize.height
-                imageSize = Size(width, height)
-            }
-        }
+        val DEFAULT = ImageSettings(0.92, Size(1080, 1920), 3)
     }
 }
 
 internal data class AcceptedImageConfigs(
-    private var defaultSettings: ImageSettings? = ImageSettings.DEFAULT,
-    private var formatSettings: HashMap<ImageFormat, ImageSettings?>? = null,
-    var preferredFormats: Array<ImageFormat>? = Array<ImageFormat>(1) { ImageFormat.JPEG }
+    private val defaultSettings: OptionalImageSettings?,
+    private val formatSettings: Map<ImageFormat, OptionalImageSettings?>? = null,
+    val preferredFormats: List<ImageFormat>? = listOf(ImageFormat.JPEG)
 ) {
-    constructor(configs: CardImageVerificationDetailsAcceptedImageConfigs?) : this() {
-        configs?.let {
-            it.formatSettings?.takeIf { it.size > 0 }.also { formatSettings = HashMap() }?.forEach {
-                val value = ImageSettings(it.value)
-                val key = ImageFormat.fromValue(it.key)
-                formatSettings?.put(key, value)
-            }
-
-            val mappedFormats = it.preferredFormats?.map { ImageFormat.fromValue(it) }
-                ?.filter { isformatSupport(it) }
-                ?.takeIf { it.count() > 0 }
-                ?.let { preferredFormats = it.toTypedArray() }
-
-            it.defaultSettings?.let { defaultSettings = ImageSettings(it) }
-        }
+    companion object {
+        internal fun isFormatSupported(format: ImageFormat) =
+            format == ImageFormat.JPEG || format == ImageFormat.WEBP
     }
 
-    internal fun isformatSupport(format: ImageFormat) =
-        format == ImageFormat.JPEG || format == ImageFormat.WEBP
-
-    fun imageSettings(format: ImageFormat): Pair<Double, Size> {
-        // Default to client default settings
-        var result = ImageSettings.DEFAULT
-
-        // Override with server default settings
-        defaultSettings?.let {
-            result.compressionRatio = it.compressionRatio ?: result.compressionRatio
-            result.imageSize = it.imageSize ?: result.imageSize
+    constructor(configs: CardImageVerificationDetailsAcceptedImageConfigs? = null) : this(
+        defaultSettings = configs?.defaultSettings?.let { OptionalImageSettings(it) },
+        formatSettings = configs?.formatSettings?.takeIf { it.isNotEmpty() }?.map { entry ->
+            ImageFormat.fromValue(entry.key) to OptionalImageSettings(entry.value)
         }
+            ?.toMap(),
+        preferredFormats = configs?.preferredFormats?.map { ImageFormat.fromValue(it) }
+            ?.filter { isFormatSupported(it) }
+            ?.takeIf { it.isNotEmpty() }
+    )
 
-        // Take format specific settings
-        formatSettings?.get(format)?.let {
-            result.compressionRatio = it.compressionRatio ?: result.compressionRatio
-            result.imageSize = it.imageSize ?: result.imageSize
-        }
+    fun getImageSettings(format: ImageFormat): ImageSettings = ImageSettings(
+        compressionRatio = formatSettings?.get(format)?.compressionRatio
+            ?: defaultSettings?.compressionRatio ?: ImageSettings.DEFAULT.compressionRatio,
+        imageSize = formatSettings?.get(format)?.imageSize ?: defaultSettings?.imageSize
+            ?: ImageSettings.DEFAULT.imageSize,
+        imageCount = formatSettings?.get(format)?.imageCount ?: defaultSettings?.imageCount
+            ?: ImageSettings.DEFAULT.imageCount
+    )
 
-        return Pair(result.compressionRatio!!, result.imageSize!!)
+    fun getImageSettings(): Pair<ImageFormat, ImageSettings> {
+        val format = preferredFormats?.first() ?: ImageFormat.JPEG
+        return format to getImageSettings(format)
     }
 }

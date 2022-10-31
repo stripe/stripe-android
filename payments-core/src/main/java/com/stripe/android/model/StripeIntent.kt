@@ -64,6 +64,11 @@ sealed interface StripeIntent : StripeModel {
      */
     val unactivatedPaymentMethods: List<String>
 
+    /**
+     * Payment types that are accepted when paying with Link.
+     */
+    val linkFundingSources: List<String>
+
     fun requiresAction(): Boolean
 
     fun requiresConfirmation(): Boolean
@@ -78,7 +83,8 @@ sealed interface StripeIntent : StripeModel {
         AlipayRedirect("alipay_handle_redirect"),
         BlikAuthorize("blik_authorize"),
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
-        VerifyWithMicrodeposits("verify_with_microdeposits");
+        VerifyWithMicrodeposits("verify_with_microdeposits"),
+        UpiAwaitNotification("upi_await_notification");
 
         override fun toString(): String {
             return code
@@ -256,8 +262,9 @@ sealed interface StripeIntent : StripeModel {
         @Parcelize
         object BlikAuthorize : NextActionData() {
             override fun hashCode(): Int {
-                return 0
+                return this::class.java.hashCode()
             }
+
             override fun equals(other: Any?): Boolean {
                 return this === other
             }
@@ -273,5 +280,16 @@ sealed interface StripeIntent : StripeModel {
             val hostedVerificationUrl: String,
             val microdepositType: MicrodepositType
         ) : NextActionData()
+
+        @Parcelize
+        object UpiAwaitNotification : NextActionData() {
+            override fun hashCode(): Int {
+                return this::class.java.hashCode()
+            }
+
+            override fun equals(other: Any?): Boolean {
+                return this === other
+            }
+        }
     }
 }

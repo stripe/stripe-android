@@ -21,13 +21,15 @@ import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBindi
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBack
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.LoadingButton
 import com.stripe.android.identity.utils.fragmentIdToScreenName
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
+import com.stripe.android.identity.utils.navigateToSelfieOrSubmit
+import com.stripe.android.identity.utils.postVerificationPageData
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.CameraViewModel
-import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -65,7 +67,7 @@ internal abstract class IdentityDocumentScanFragment(
         checkMarkView = binding.checkMarkView
         continueButton = binding.kontinue
         continueButton.setText(getString(R.string.kontinue))
-        continueButton.isEnabled = false
+        continueButton.toggleToDisabled()
         return binding.root
     }
 
@@ -96,7 +98,7 @@ internal abstract class IdentityDocumentScanFragment(
         cameraView.viewFinderBackgroundView.visibility = View.VISIBLE
         cameraView.viewFinderWindowView.visibility = View.VISIBLE
         cameraView.viewFinderBorderView.visibility = View.VISIBLE
-        continueButton.isEnabled = false
+        continueButton.toggleToDisabled()
         checkMarkView.visibility = View.GONE
         cameraView.viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
     }
@@ -148,85 +150,129 @@ internal abstract class IdentityDocumentScanFragment(
     )
 
     /**
-     * Collect the [IdentityViewModel.documentUploadState] and update UI accordingly.
+     * Check the upload status of the front of the document, post it with VerificationPageData.
      *
-     * Try to [postVerificationPageDataAndMaybeSubmit] when all images are uploaded and navigates
-     * to error when error occurs.
+     * If document is [CollectedDataParam.Type.PASSPORT], navigate to selfie or submit.
+     * Otherwise document is ID or Driver license, check the post result to determine if we should
+     * collect back of the document.
      */
-    protected fun collectUploadedStateAndUploadForBothSides(type: CollectedDataParam.Type) =
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                identityViewModel.documentUploadState.collectLatest {
-                    when {
-                        it.hasError() -> {
-                            Log.e(TAG, "Fail to upload files: ${it.getError()}")
-                            navigateToDefaultErrorFragment(it.getError())
-                        }
-                        it.isAnyLoading() -> {
-                            continueButton.toggleToLoading()
-                        }
-                        it.isBothUploaded() -> {
-                            identityViewModel.observeForVerificationPage(
-                                viewLifecycleOwner,
-                                onSuccess = { verificationPage ->
-                                    lifecycleScope.launch {
-                                        runCatching {
-                                            if (verificationPage.requireSelfie()) {
-                                                postVerificationPageDataAndMaybeSubmit(
-                                                    identityViewModel = identityViewModel,
-                                                    collectedDataParam =
-                                                    CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                                                        type = type,
-                                                        frontHighResResult = requireNotNull(it.frontHighResResult.data),
-                                                        frontLowResResult = requireNotNull(it.frontLowResResult.data),
-                                                        backHighResResult = requireNotNull(it.backHighResResult.data),
-                                                        backLowResResult = requireNotNull(it.backLowResResult.data)
-                                                    ),
-                                                    clearDataParam = ClearDataParam.UPLOAD_TO_SELFIE,
-                                                    fromFragment = fragmentId
-                                                ) {
-                                                    findNavController().navigate(R.id.action_global_selfieFragment)
-                                                }
+    protected fun collectFrontUploadStateAndPost(
+        type: CollectedDataParam.Type,
+        scanBackBlock: (() -> Unit)? = null
+    ) = lifecycleScope.launch {
+        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            continueButton.toggleToLoading()
+            identityViewModel.documentFrontUploadedState.collectLatest {
+                if (it.hasError()) {
+                    navigateToDefaultErrorFragment(it.getError())
+                } else if (it.isUploaded()) {
+                    identityViewModel.observeForVerificationPage(
+                        viewLifecycleOwner,
+                        onSuccess = { verificationPage ->
+                            lifecycleScope.launch {
+                                runCatching {
+                                    postVerificationPageData(
+                                        identityViewModel = identityViewModel,
+                                        collectedDataParam =
+                                        CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
+                                            type = type,
+                                            frontHighResResult = requireNotNull(it.highResResult.data),
+                                            frontLowResResult = requireNotNull(it.lowResResult.data)
+                                        ),
+                                        clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_FRONT_SELFIE else ClearDataParam.UPLOAD_FRONT,
+                                        fromFragment = fragmentId
+                                    ) { verificationPageDataWithNoError ->
+                                        if (type == CollectedDataParam.Type.PASSPORT) {
+                                            navigateToSelfieOrSubmit(
+                                                verificationPage,
+                                                identityViewModel,
+                                                fragmentId
+                                            )
+                                        } else {
+                                            if (verificationPageDataWithNoError.isMissingBack()) {
+                                                scanBackBlock?.invoke()
                                             } else {
-                                                postVerificationPageDataAndMaybeSubmit(
-                                                    identityViewModel = identityViewModel,
-                                                    collectedDataParam =
-                                                    CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                                                        type = type,
-                                                        frontHighResResult = requireNotNull(it.frontHighResResult.data),
-                                                        frontLowResResult = requireNotNull(it.frontLowResResult.data),
-                                                        backHighResResult = requireNotNull(it.backHighResResult.data),
-                                                        backLowResResult = requireNotNull(it.backLowResResult.data)
-                                                    ),
-                                                    clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                                                    fromFragment = fragmentId
+                                                navigateToSelfieOrSubmit(
+                                                    verificationPage,
+                                                    identityViewModel,
+                                                    fragmentId
                                                 )
                                             }
-                                        }.onFailure { throwable ->
-                                            Log.e(
-                                                TAG,
-                                                "fail to submit uploaded files: $throwable"
-                                            )
-                                            navigateToDefaultErrorFragment(throwable)
                                         }
                                     }
-                                },
-                                onFailure = { throwable ->
-                                    Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
+                                }.onFailure { throwable ->
+                                    Log.e(
+                                        TAG,
+                                        "fail to submit uploaded files: $throwable"
+                                    )
                                     navigateToDefaultErrorFragment(throwable)
                                 }
-                            )
-                        }
-                        else -> {
-                            "observeAndUploadForBothSides reaches unexpected upload state: $it".let { msg ->
-                                Log.e(TAG, msg)
-                                navigateToDefaultErrorFragment(msg)
                             }
+                        },
+                        onFailure = { throwable ->
+                            Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
+                            navigateToDefaultErrorFragment(throwable)
                         }
-                    }
+                    )
                 }
             }
         }
+    }
+
+    /**
+     * Check the upload status of the back of ID, post it with VerificationPageData.
+     *
+     * After post, submit VerificationPageData if no selfie is required, otherwise navigate to selfie.
+     */
+    protected fun collectBackUploadStateAndPost(
+        type: CollectedDataParam.Type
+    ) = lifecycleScope.launch {
+        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            continueButton.toggleToLoading()
+            identityViewModel.documentBackUploadedState.collectLatest {
+                if (it.hasError()) {
+                    navigateToDefaultErrorFragment(it.getError())
+                } else if (it.isUploaded()) {
+                    identityViewModel.observeForVerificationPage(
+                        viewLifecycleOwner,
+                        onSuccess = { verificationPage ->
+                            lifecycleScope.launch {
+                                runCatching {
+                                    postVerificationPageDataAndMaybeSubmit(
+                                        identityViewModel = identityViewModel,
+                                        collectedDataParam =
+                                        CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
+                                            type = type,
+                                            backHighResResult = requireNotNull(it.highResResult.data),
+                                            backLowResResult = requireNotNull(it.lowResResult.data)
+                                        ),
+                                        clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_TO_SELFIE else ClearDataParam.UPLOAD_TO_CONFIRM,
+                                        fromFragment = fragmentId,
+                                        notSubmitBlock =
+                                        if (verificationPage.requireSelfie()) {
+                                            ({ findNavController().navigate(R.id.action_global_selfieFragment) })
+                                        } else {
+                                            null
+                                        }
+                                    )
+                                }.onFailure { throwable ->
+                                    Log.e(
+                                        TAG,
+                                        "fail to submit uploaded files: $throwable"
+                                    )
+                                    navigateToDefaultErrorFragment(throwable)
+                                }
+                            }
+                        },
+                        onFailure = { throwable ->
+                            Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
+                            navigateToDefaultErrorFragment(throwable)
+                        }
+                    )
+                }
+            }
+        }
+    }
 
     internal companion object {
         const val ARG_SHOULD_START_FROM_BACK = "startFromBack"

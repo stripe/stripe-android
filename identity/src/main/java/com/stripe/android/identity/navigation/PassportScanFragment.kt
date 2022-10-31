@@ -1,23 +1,11 @@
 package com.stripe.android.identity.navigation
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
-import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
-import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 
 /**
  * Fragment to scan passport.
@@ -39,85 +27,9 @@ internal class PassportScanFragment(
         messageView.text = requireContext().getText(R.string.position_passport)
         continueButton.setOnClickListener {
             continueButton.toggleToLoading()
-            collectUploadedStateAndUploadForFrontSide()
+            collectFrontUploadStateAndPost(CollectedDataParam.Type.PASSPORT)
         }
     }
-
-    /**
-     * Collect the [IdentityViewModel.documentUploadState] and upload when frontHighRes and frontLowRes
-     * are uploaded.
-     *
-     * Try to [postVerificationPageDataAndMaybeSubmit] when success and navigates to error when fails.
-     */
-    private fun collectUploadedStateAndUploadForFrontSide() =
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                identityViewModel.documentUploadState.collectLatest {
-                    when {
-                        it.hasError() -> {
-                            navigateToDefaultErrorFragment(it.getError())
-                        }
-                        it.isFrontLoading() -> {
-                            continueButton.toggleToLoading()
-                        }
-                        it.isFrontUploaded() -> {
-                            identityViewModel.observeForVerificationPage(
-                                viewLifecycleOwner,
-                                onSuccess = { verificationPage ->
-                                    lifecycleScope.launch {
-                                        runCatching {
-                                            if (verificationPage.requireSelfie()) {
-                                                postVerificationPageDataAndMaybeSubmit(
-                                                    identityViewModel = identityViewModel,
-                                                    collectedDataParam =
-                                                    CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                                                        type = CollectedDataParam.Type.PASSPORT,
-                                                        frontHighResResult = requireNotNull(it.frontHighResResult.data),
-                                                        frontLowResResult = requireNotNull(it.frontLowResResult.data)
-                                                    ),
-                                                    clearDataParam = ClearDataParam.UPLOAD_TO_SELFIE,
-                                                    fromFragment = R.id.passportScanFragment
-                                                ) {
-                                                    findNavController().navigate(R.id.action_global_selfieFragment)
-                                                }
-                                            } else {
-                                                postVerificationPageDataAndMaybeSubmit(
-                                                    identityViewModel = identityViewModel,
-                                                    collectedDataParam =
-                                                    CollectedDataParam.createFromUploadedResultsForAutoCapture(
-                                                        type = CollectedDataParam.Type.PASSPORT,
-                                                        frontHighResResult = requireNotNull(it.frontHighResResult.data),
-                                                        frontLowResResult = requireNotNull(it.frontLowResResult.data)
-                                                    ),
-                                                    clearDataParam = ClearDataParam.UPLOAD_TO_CONFIRM,
-                                                    fromFragment = R.id.passportScanFragment
-                                                )
-                                            }
-                                        }.onFailure { throwable ->
-                                            Log.e(
-                                                TAG,
-                                                "fail to submit uploaded files: $throwable"
-                                            )
-                                            navigateToDefaultErrorFragment(throwable)
-                                        }
-                                    }
-                                },
-                                onFailure = { throwable ->
-                                    Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
-                                    navigateToDefaultErrorFragment(throwable)
-                                }
-                            )
-                        }
-                        else -> {
-                            "observeAndUploadForFrontSide reaches unexpected upload state: $it".let { msg ->
-                                Log.d(TAG, msg)
-                                navigateToDefaultErrorFragment(msg)
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
     override fun onCameraReady() {
         startScanning(IdentityScanState.ScanType.PASSPORT)
