@@ -32,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -399,6 +400,7 @@ private fun ConsentBottomSheetBullet(
             .offset(y = 2.dp)
         StripeImage(
             url = iconUrl,
+            colorFilter = ColorFilter.tint(colors.iconSuccess),
             errorContent = { InstitutionPlaceholder(modifier) },
             imageLoader = LocalImageLoader.current,
             contentDescription = null,
@@ -438,6 +440,7 @@ private fun ConsentBullet(
             .offset(y = 2.dp)
         StripeImage(
             url = iconUrl,
+            colorFilter = ColorFilter.tint(colors.textSecondary),
             imageLoader = LocalImageLoader.current,
             contentDescription = null,
             errorContent = { InstitutionPlaceholder(modifier) },
