@@ -26,8 +26,6 @@ import java.io.OutputStream
  * @param cacheFolder name of the folder that will store the images of this cache.
  *        It will create a cache if none exists there.
  * @param maxSizeBytes the maximum number of bytes this cache should use to store
- * @param compressFormat the format to be used when compressing to store the image in cache.
- * @param mCompressQuality the compress quality to be used when compressing to store the image in cache.
  * @throws IOException if reading or writing the cache directory fails
  **/
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -35,8 +33,6 @@ class ImageLruDiskCache(
     context: Context,
     cacheFolder: String,
     maxSizeBytes: Long = 10L * 1024 * 1024, // 10MB
-    private val compressFormat: CompressFormat = CompressFormat.JPEG,
-    private val mCompressQuality: Int = 70,
 ) {
     private lateinit var diskLruCache: DiskLruCache
 
@@ -62,7 +58,14 @@ class ImageLruDiskCache(
             try {
                 editor = diskLruCache.edit(hashedKey)
                 if (editor == null) return
-                if (writeBitmapToFile(data, editor)) {
+                val (compressFormat, quality) = getBitmapConfigFromUrl(key)
+                if (writeBitmapToFile(
+                        bitmap = data,
+                        editor = editor,
+                        compressFormat = compressFormat,
+                        compressQuality = quality
+                    )
+                ) {
                     diskLruCache.flush()
                     editor.commit()
                     debug("image put on disk cache $hashedKey")
@@ -74,6 +77,15 @@ class ImageLruDiskCache(
                 Log.e(TAG, "ERROR on: image put on disk cache $hashedKey")
                 kotlin.runCatching { editor?.abort() }
             }
+        }
+    }
+
+    private fun getBitmapConfigFromUrl(url: String): Pair<CompressFormat, Int> {
+        return when {
+            url.endsWith("png") -> CompressFormat.PNG to 100
+            url.endsWith("jpg") -> CompressFormat.JPEG to 80
+            url.endsWith("webp") -> CompressFormat.WEBP to 80
+            else -> CompressFormat.JPEG to 80
         }
     }
 
@@ -141,11 +153,16 @@ class ImageLruDiskCache(
     private fun String.toKey(): String = hashCode().toString()
 
     @Throws(IOException::class, FileNotFoundException::class)
-    private fun writeBitmapToFile(bitmap: Bitmap, editor: DiskLruCache.Editor): Boolean {
+    private fun writeBitmapToFile(
+        bitmap: Bitmap,
+        editor: DiskLruCache.Editor,
+        compressFormat: CompressFormat,
+        compressQuality: Int
+    ): Boolean {
         var out: OutputStream? = null
         return try {
             out = BufferedOutputStream(editor.newOutputStream(0), IO_BUFFER_SIZE)
-            bitmap.compress(compressFormat, mCompressQuality, out)
+            bitmap.compress(compressFormat, compressQuality, out)
         } finally {
             out?.close()
         }
