@@ -191,7 +191,7 @@ private fun ConsentMainContent(
                 )
                 Spacer(modifier = Modifier.size(24.dp))
                 bullets.forEach { (iconUrl, text) ->
-                    ConsentBullet(iconUrl, text) { onClickableTextClick(it) }
+                    ConsentBullet(iconUrl.default, text) { onClickableTextClick(it) }
                     Spacer(modifier = Modifier.size(16.dp))
                 }
 
@@ -330,7 +330,7 @@ private fun ConsentPermissionsBottomSheetContent(
             bullets.forEach { (iconUrl, title, description) ->
                 Spacer(modifier = Modifier.size(24.dp))
                 ConsentBottomSheetBullet(
-                    iconUrl = iconUrl,
+                    iconUrl = iconUrl.default,
                     title = title,
                     description = description
                 )

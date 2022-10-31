@@ -7,6 +7,7 @@ import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.ConsentPaneBody
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.DataAccessNoticeBody
+import com.stripe.android.financialconnections.model.Image
 
 internal class ConsentStates : PreviewParameterProvider<ConsentState> {
     override val values = sequenceOf(
@@ -29,17 +30,17 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
             body = ConsentPaneBody(
                 bullets = listOf(
                     Bullet(
-                        icon = "https://www.cdn.stripe.com/12321312321.png",
+                        icon = Image("https://www.cdn.stripe.com/12321312321.png"),
                         content = "Stripe will allow Goldilocks to access only the data requested",
                         title = "Stripe will allow Goldilocks to access only the data requested"
                     ),
                     Bullet(
-                        icon = "https://www.cdn.stripe.com/12321312321.png",
+                        icon = Image("https://www.cdn.stripe.com/12321312321.png"),
                         content = "Stripe will allow Goldilocks to access only the data requested",
                         title = "Stripe will allow Goldilocks to access only the data requested"
                     ),
                     Bullet(
-                        icon = "https://www.cdn.stripe.com/12321312321.png",
+                        icon = Image("https://www.cdn.stripe.com/12321312321.png"),
                         content = "Stripe will allow Goldilocks to access only the data requested",
                         title = "Stripe will allow Goldilocks to access only the data requested"
                     ),
@@ -54,12 +55,12 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
                 body = DataAccessNoticeBody(
                     bullets = listOf(
                         Bullet(
-                            icon = "https://www.cdn.stripe.com/12321312321.png",
+                            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
                             title = "Account details",
                             content = "Account number, routing number, account type, account nickname."
                         ),
                         Bullet(
-                            icon = "https://www.cdn.stripe.com/12321312321.png",
+                            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
                             title = "Account details",
                             content = "Account number, routing number, account type, account nickname."
                         ),
