@@ -54,11 +54,10 @@ internal class PartnerAuthViewModel @Inject constructor(
              * [FinancialConnectionsSessionManifest.activeAuthSession] will be used instead.
              */
             val manifest: FinancialConnectionsSessionManifest = getManifest()
-            val authSession = manifest.activeAuthSession
-                ?: createAuthorizationSession(
-                    institution = requireNotNull(manifest.activeInstitution),
-                    allowManualEntry = manifest.allowManualEntry
-                ).also { launchAuthIfSkipPrepane() }
+            val authSession = createAuthorizationSession(
+                institution = requireNotNull(manifest.activeInstitution),
+                allowManualEntry = manifest.allowManualEntry
+            ).also { launchAuthIfSkipPrepane() }
             Payload(
                 flow = authSession.flow,
                 showPrepane = authSession.isOAuth,
@@ -177,7 +176,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 logger.debug("OAuth results received! completing session")
                 val updatedSession = completeAuthorizationSession(
                     authorizationSessionId = authSession.id,
-                    publicToken = oAuthResults.memberGuid
+                    publicToken = oAuthResults.publicToken
                 )
                 logger.debug("Session authorized!")
                 goNext(updatedSession.nextPane)

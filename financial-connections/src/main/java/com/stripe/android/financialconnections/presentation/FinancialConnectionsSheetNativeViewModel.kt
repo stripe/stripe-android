@@ -89,44 +89,31 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      */
     fun handleOnNewIntent(intent: Intent?) {
         viewModelScope.launch {
-            val receivedUrl: String? = intent?.data?.toString()
+            val receivedUrl: String = intent?.data?.toString() ?: ""
             when {
-                receivedUrl == null -> setState {
-                    copy(webAuthFlow = Fail(WebAuthFlowFailedException(url = null)))
-                }
-
-                // base url: treated as success.
                 uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     baseUrl(applicationId)
-                ) -> setState {
-                    copy(webAuthFlow = Success(receivedUrl))
-                }
+                ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_CODE)) {
+                    SUCCESS -> setState {
+                        copy(webAuthFlow = Success(receivedUrl))
+                    }
 
-                // base/success url: treated as success.
-                uriUtils.compareSchemeAuthorityAndPath(
-                    receivedUrl,
-                    successUrl(applicationId)
-                ) -> setState {
-                    copy(webAuthFlow = Success(receivedUrl))
-                }
+                    CANCEL -> setState {
+                        copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
+                    }
 
-                uriUtils.compareSchemeAuthorityAndPath(
-                    receivedUrl,
-                    cancelUrl(applicationId)
-                ) -> setState {
-                    copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
-                }
+                    FAIL -> setState {
+                        copy(webAuthFlow = Fail(WebAuthFlowFailedException(receivedUrl)))
+                    }
 
-                uriUtils.compareSchemeAuthorityAndPath(
-                    receivedUrl,
-                    failUrl(applicationId)
-                ) -> setState {
-                    copy(webAuthFlow = Fail(WebAuthFlowFailedException(receivedUrl)))
+                    else -> setState {
+                        copy(webAuthFlow = Fail(WebAuthFlowFailedException(receivedUrl)))
+                    }
                 }
 
                 else -> setState {
-                    copy(webAuthFlow = Fail(WebAuthFlowFailedException(receivedUrl)))
+                    copy(webAuthFlow = Fail(WebAuthFlowFailedException(url = null)))
                 }
             }
         }
@@ -140,8 +127,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     fun onResume() {
         setState {
             if (webAuthFlow is Loading) {
-                copy(webAuthFlow = Success("hola"))
-//                copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
+                copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
             } else {
                 this
             }
@@ -269,14 +255,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         private fun baseUrl(applicationId: String) =
             "stripe://auth-redirect/$applicationId"
 
-        private fun successUrl(applicationId: String) =
-            "stripe://auth-redirect/$applicationId/success"
 
-        private fun cancelUrl(applicationId: String) =
-            "stripe://auth-redirect/$applicationId/cancel"
-
-        private fun failUrl(applicationId: String) =
-            "stripe://auth-redirect/$applicationId/fail"
+        private const val PARAM_CODE = "code"
+        private const val SUCCESS = "success"
+        private const val CANCEL = "cancel"
+        private const val FAIL = "fail"
 
         override fun create(
             viewModelContext: ViewModelContext,
