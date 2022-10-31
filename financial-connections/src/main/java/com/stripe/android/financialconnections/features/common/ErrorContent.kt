@@ -32,11 +32,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
-import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -173,7 +173,7 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
 
 @Composable
 internal fun NoAccountsAvailableErrorContent(
-    exception: NoAccountsAvailableException,
+    exception: AccountLoadError,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onTryAgain: () -> Unit
@@ -398,7 +398,7 @@ internal fun NoAccountsAvailableErrorContentPreview() {
             topBar = { FinancialConnectionsTopAppBar { } }
         ) {
             NoAccountsAvailableErrorContent(
-                exception = NoAccountsAvailableException(
+                exception = AccountLoadError(
                     institution = FinancialConnectionsInstitution(
                         id = "3",
                         name = "RandomInstitution",

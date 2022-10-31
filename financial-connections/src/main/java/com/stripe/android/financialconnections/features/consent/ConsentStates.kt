@@ -1,8 +1,13 @@
 package com.stripe.android.financialconnections.features.consent
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.ui.TextResource
+import com.airbnb.mvrx.Success
+import com.stripe.android.financialconnections.model.Bullet
+import com.stripe.android.financialconnections.model.ConsentPane
+import com.stripe.android.financialconnections.model.ConsentPaneBody
+import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.DataAccessNoticeBody
+import com.stripe.android.financialconnections.model.Image
 
 internal class ConsentStates : PreviewParameterProvider<ConsentState> {
     override val values = sequenceOf(
@@ -14,41 +19,57 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
 
     // TODO@carlosmuvi migrate to PreviewParameterProvider when showkase adds support.
     companion object {
-        fun canonical() = ConsentState(
-            title = TextResource.StringId(
-                R.string.stripe_consent_requested_data_title_no_businessname
-            ),
-            bullets = listOf(
-                R.drawable.stripe_ic_safe to TextResource.StringId(R.string.stripe_consent_pane_body1_no_businessname),
-                R.drawable.stripe_ic_shield to TextResource.StringId(R.string.stripe_consent_pane_body2),
-                R.drawable.stripe_ic_lock to TextResource.StringId(R.string.stripe_consent_pane_body3)
-            ),
-            requestedDataBullets = listOf(
-                Pair(
-                    TextResource.StringId(R.string.stripe_consent_requested_data_balances_title),
-                    TextResource.StringId(R.string.stripe_consent_requested_data_balances_desc)
-                ),
-                Pair(
-                    TextResource.StringId(R.string.stripe_consent_requested_data_ownership_title),
-                    TextResource.StringId(R.string.stripe_consent_requested_data_ownership_desc)
-                ),
-                Pair(
-                    TextResource.StringId(R.string.stripe_consent_requested_data_accountdetails_title),
-                    TextResource.StringId(R.string.stripe_consent_requested_data_accountdetails_desc)
-                ),
-                Pair(
-                    TextResource.StringId(R.string.stripe_consent_requested_data_transactions_title),
-                    TextResource.StringId(R.string.stripe_consent_requested_data_transactions_desc)
-                )
-            ),
-            requestedDataTitle = TextResource.StringId(
-                R.string.stripe_consent_requested_data_title_no_businessname
-            )
-        )
-
+        fun canonical() = ConsentState(consent = Success(sampleConsent()))
         fun manualEntryPlusMicrodeposits() = canonical().copy(
             manualEntryEnabled = true,
             manualEntryShowBusinessDaysNotice = true
+        )
+
+        fun sampleConsent(): ConsentPane = ConsentPane(
+            title = "Goldilocks works with Stripe to link your accounts",
+            body = ConsentPaneBody(
+                bullets = listOf(
+                    Bullet(
+                        icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+                        content = "Stripe will allow Goldilocks to access only the data requested",
+                        title = "Stripe will allow Goldilocks to access only the data requested"
+                    ),
+                    Bullet(
+                        icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+                        content = "Stripe will allow Goldilocks to access only the data requested",
+                        title = "Stripe will allow Goldilocks to access only the data requested"
+                    ),
+                    Bullet(
+                        icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+                        content = "Stripe will allow Goldilocks to access only the data requested",
+                        title = "Stripe will allow Goldilocks to access only the data requested"
+                    ),
+                )
+            ),
+            aboveCta = "Manually verify instead (takes 1-2 business days)",
+            belowCta = "Stripe will allow Goldilocks to access only the data requested." +
+                " We never share your login details with them.",
+            cta = "Agree",
+            dataAccessNotice = DataAccessNotice(
+                title = "Goldilocks works with Stripe to link your accounts",
+                body = DataAccessNoticeBody(
+                    bullets = listOf(
+                        Bullet(
+                            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+                            title = "Account details",
+                            content = "Account number, routing number, account type, account nickname."
+                        ),
+                        Bullet(
+                            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+                            title = "Account details",
+                            content = "Account number, routing number, account type, account nickname."
+                        ),
+                    )
+                ),
+                learnMore = "Learn more about data access",
+                connectedAccountNotice = "Connected account placeholder",
+                cta = "OK"
+            )
         )
     }
 }
