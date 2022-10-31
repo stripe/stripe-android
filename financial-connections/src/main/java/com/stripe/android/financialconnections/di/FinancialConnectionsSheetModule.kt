@@ -25,6 +25,7 @@ internal object FinancialConnectionsSheetModule {
         configuration = configuration,
         apiRequestFactory = apiRequestFactory,
         apiOptions = apiOptions,
-        logger = logger
+        logger = logger,
+        initialManifest = null
     )
 }

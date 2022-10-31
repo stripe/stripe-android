@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.features.manualentry.ManualEntryS
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
 import com.stripe.android.financialconnections.features.reset.ResetSubcomponent
 import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
@@ -29,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import java.util.Locale
 import java.util.UUID
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module(
@@ -85,13 +87,15 @@ internal class FinancialConnectionsSheetNativeModule {
         configuration: FinancialConnectionsSheet.Configuration,
         apiRequestFactory: ApiRequest.Factory,
         apiOptions: ApiRequest.Options,
-        logger: Logger
+        logger: Logger,
+        @Named(INITIAL_MANIFEST) initialManifest: FinancialConnectionsSessionManifest
     ) = FinancialConnectionsManifestRepository(
         requestExecutor = requestExecutor,
         configuration = configuration,
         apiRequestFactory = apiRequestFactory,
         apiOptions = apiOptions,
-        logger = logger
+        logger = logger,
+        initialManifest = initialManifest
     )
 
     @Singleton

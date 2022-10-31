@@ -125,8 +125,13 @@ internal class InstitutionPickerViewModel @Inject constructor(
         clearSearch()
         suspend {
             eventTracker.track(InstitutionSelected(NextPane.INSTITUTION_PICKER, fromFeatured))
-            // updates local manifest with active institution
-            updateLocalManifest { it.copy(activeInstitution = institution) }
+            // updates local manifest with active institution and cleans auth session if present.
+            updateLocalManifest {
+                it.copy(
+                    activeInstitution = institution,
+                    activeAuthSession = null
+                )
+            }
             // navigate to next step
             navigationManager.navigate(NavigationDirections.partnerAuth)
         }.execute { this }
