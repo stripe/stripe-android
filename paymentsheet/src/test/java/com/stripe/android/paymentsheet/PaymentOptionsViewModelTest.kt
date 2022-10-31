@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
+import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf

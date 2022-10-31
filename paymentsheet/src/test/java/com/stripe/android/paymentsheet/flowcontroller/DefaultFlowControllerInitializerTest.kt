@@ -11,7 +11,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.FakeCustomerRepository
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -23,6 +22,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
+import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

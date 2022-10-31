@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.model.StripeIntent
@@ -204,7 +205,7 @@ internal class PollingViewModel @Inject constructor(
                 .viewModel as T
         }
 
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector? {
             val args = argsSupplier()
 
             val config = IntentStatusPoller.Config(
@@ -220,6 +221,7 @@ internal class PollingViewModel @Inject constructor(
                 .ioDispatcher(Dispatchers.IO)
                 .build()
                 .inject(this)
+            return null
         }
     }
 
