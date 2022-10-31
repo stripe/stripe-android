@@ -3,11 +3,13 @@ package com.stripe.android.link.ui.wallet
 import androidx.lifecycle.Lifecycle
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryOwner
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -32,7 +34,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.FormFieldEntry
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,6 +60,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import javax.inject.Provider
+import kotlin.random.Random
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -292,6 +294,44 @@ class WalletViewModelTest {
         }
 
     @Test
+    fun `when selected payment method is not supported then wallet is expanded`() =
+        runTest {
+            // One card and one bank account
+            val paymentDetails = CONSUMER_PAYMENT_DETAILS.copy(
+                paymentDetails = listOf(
+                    CONSUMER_PAYMENT_DETAILS.paymentDetails[1],
+                    CONSUMER_PAYMENT_DETAILS.paymentDetails[2]
+                )
+            )
+            whenever(linkAccountManager.listPaymentDetails())
+                .thenReturn(Result.success(paymentDetails))
+
+            val viewModel = createViewModel()
+            assertThat(viewModel.uiState.value.paymentDetailsList)
+                .containsExactlyElementsIn(paymentDetails.paymentDetails)
+
+            // First item is default, so it should be selected and the list should be collapsed
+            val defaultItem = paymentDetails.paymentDetails.first()
+            assertThat(viewModel.uiState.value.selectedItem).isEqualTo(defaultItem)
+            assertThat(viewModel.uiState.value.isExpanded).isFalse()
+
+            whenever(linkAccountManager.deletePaymentDetails(anyOrNull()))
+                .thenReturn(Result.success(Unit))
+
+            // Only the bank account is returned, which is not supported
+            whenever(linkAccountManager.listPaymentDetails()).thenReturn(
+                Result.success(
+                    paymentDetails.copy(paymentDetails = listOf(paymentDetails.paymentDetails[1]))
+                )
+            )
+
+            // Delete the selected item
+            viewModel.deletePaymentMethod(defaultItem)
+
+            assertThat(viewModel.uiState.value.isExpanded).isTrue()
+        }
+
+    @Test
     fun `when payment method deletion fails then an error message is shown`() = runTest {
         whenever(linkAccountManager.listPaymentDetails())
             .thenReturn(Result.success(CONSUMER_PAYMENT_DETAILS))
@@ -510,6 +550,47 @@ class WalletViewModelTest {
     }
 
     @Test
+    fun `Updates payment method default selection correctly`() = runTest {
+        val originalPaymentDetails = mockCard(isDefault = false)
+        val updatedPaymentDetails = originalPaymentDetails.copy(isDefault = true)
+
+        val originalResponse = CONSUMER_PAYMENT_DETAILS.copy(
+            paymentDetails = CONSUMER_PAYMENT_DETAILS.paymentDetails.dropLast(1) + originalPaymentDetails
+        )
+        val updateResponse = CONSUMER_PAYMENT_DETAILS.copy(
+            paymentDetails = listOf(updatedPaymentDetails)
+        )
+
+        whenever(linkAccountManager.listPaymentDetails())
+            .thenReturn(Result.success(originalResponse))
+
+        whenever(linkAccountManager.updatePaymentDetails(any()))
+            .thenReturn(Result.success(updateResponse))
+
+        val viewModel = createViewModel()
+        viewModel.uiState.test {
+            // We need to skip the initial UI state
+            skipItems(1)
+
+            viewModel.setDefault(originalPaymentDetails)
+
+            val loadingUiState = awaitItem()
+            assertThat(loadingUiState.paymentMethodIdBeingUpdated).isEqualTo(originalPaymentDetails.id)
+
+            val finalUiState = awaitItem()
+            assertThat(finalUiState.paymentMethodIdBeingUpdated).isNull()
+
+            assertThat(
+                finalUiState.paymentDetailsList.filter { it.isDefault }.size
+            ).isEqualTo(1)
+
+            assertThat(
+                finalUiState.paymentDetailsList.single { it.isDefault }
+            ).isEqualTo(updatedPaymentDetails)
+        }
+    }
+
+    @Test
     fun `Factory gets initialized by Injector`() {
         val mockBuilder = mock<SignedInViewModelSubcomponent.Builder>()
         val mockSubComponent = mock<SignedInViewModelSubcomponent>()
@@ -554,14 +635,16 @@ class WalletViewModelTest {
 
     private fun mockCard(
         cvcCheck: CvcCheck = CvcCheck.Pass,
-        isExpired: Boolean = false
+        isExpired: Boolean = false,
+        isDefault: Boolean = true
     ): ConsumerPaymentDetails.Card {
+        val id = Random.nextInt()
         val currentYear = Calendar.getInstance().get(Calendar.YEAR)
         val expiryYear = if (isExpired) currentYear - 1 else currentYear + 1
 
         return ConsumerPaymentDetails.Card(
-            id = "id_123",
-            isDefault = true,
+            id = "id_$id",
+            isDefault = isDefault,
             expiryYear = expiryYear,
             expiryMonth = 12,
             brand = CardBrand.Visa,

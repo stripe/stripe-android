@@ -21,7 +21,6 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.viewModelFactoryFor
-import com.stripe.android.identity.viewmodel.ConsentFragmentViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -53,7 +52,8 @@ internal class ConsentFragmentTest {
                 privacyPolicy = CONSENT_PRIVACY_POLICY,
                 timeEstimate = CONSENT_TIME_ESTIMATE,
                 body = CONSENT_BODY,
-                declineButtonText = CONSENT_DECLINE_TEXT
+                declineButtonText = CONSENT_DECLINE_TEXT,
+                scrollToContinueButtonText = SCROLL_TO_CONTINUE_TEXT
             )
         )
         whenever(it.requirements).thenReturn(
@@ -84,8 +84,6 @@ internal class ConsentFragmentTest {
         on { verificationPage } doReturn verificationPageData
     }
 
-    private val mockConsentFragmentViewModel = mock<ConsentFragmentViewModel>()
-
     @Test
     fun `when viewCreated track screen finish`() {
         verificationPageData.postValue(Resource.success(verificationPageWithTimeAndPolicy))
@@ -111,7 +109,6 @@ internal class ConsentFragmentTest {
     ) {
         ConsentFragment(
             viewModelFactoryFor(mockIdentityViewModel),
-            viewModelFactoryFor(mockConsentFragmentViewModel),
             mock()
         )
     }.onFragment {
@@ -136,6 +133,7 @@ internal class ConsentFragmentTest {
         const val CONSENT_BODY = "this is the consent body"
         const val CONSENT_ACCEPT_TEXT = "yes"
         const val CONSENT_DECLINE_TEXT = "no"
+        const val SCROLL_TO_CONTINUE_TEXT = "scroll to continue"
 
         const val VERIFICATION_SESSION_ID = "id_5678"
         const val EPHEMERAL_KEY = "eak_5678"

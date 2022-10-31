@@ -146,6 +146,7 @@ internal data class CardInputWidgetPlacement(
      * @return a [Field] that represents the [View] to request focus, or `null`
      * if no such request is necessary.
      */
+    @Suppress("ComplexMethod")
     internal fun getFocusField(
         touchX: Int,
         frameStart: Int,

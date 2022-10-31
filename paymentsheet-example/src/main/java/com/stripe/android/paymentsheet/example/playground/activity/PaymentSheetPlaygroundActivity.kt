@@ -1,14 +1,16 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import androidx.annotation.NonNull
-import androidx.annotation.Nullable
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.MenuProvider
 import androidx.core.view.isInvisible
 import androidx.lifecycle.lifecycleScope
 import androidx.test.espresso.IdlingResource
@@ -27,13 +29,28 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.view.KeyboardController
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-
 class PaymentSheetPlaygroundActivity : AppCompatActivity() {
+
     private val viewBinding by lazy {
         ActivityPaymentSheetPlaygroundBinding.inflate(layoutInflater)
+    }
+
+    private val menuProvider: MenuProvider = object : MenuProvider {
+        override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+            menuInflater.inflate(R.menu.menu_playground, menu)
+        }
+
+        override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+            when (menuItem.itemId) {
+                R.id.appearance_picker -> showAppearancePicker()
+                else -> Unit
+            }
+            return true
+        }
     }
 
     @VisibleForTesting
@@ -104,10 +121,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private lateinit var paymentSheet: PaymentSheet
     private lateinit var flowController: PaymentSheet.FlowController
 
-    @Nullable
     private var multiStepUIReadyIdlingResource: CountingIdlingResource? = null
 
-    @Nullable
     private var singleStepUIReadyIdlingResource: CountingIdlingResource? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -161,6 +176,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 setAutomaticPaymentMethods = Toggle.SetAutomaticPaymentMethods.default as Boolean,
                 setDelayedPaymentMethods = Toggle.SetDelayedPaymentMethods.default as Boolean,
             )
+
+            viewBinding.customLabelTextField.text.clear()
         }
 
         viewBinding.reloadButton.setOnClickListener {
@@ -201,6 +218,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         viewBinding.paymentMethod.setOnClickListener {
+            viewBinding.customLabelTextField.clearFocus()
             flowController.presentPaymentOptions()
         }
 
@@ -255,6 +273,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             }
 
         disableViews()
+
+        addMenuProvider(menuProvider)
     }
 
     override fun onResume() {
@@ -344,6 +364,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     private fun startCompleteCheckout() {
         val clientSecret = viewModel.clientSecret.value ?: return
+        viewBinding.customLabelTextField.clearFocus()
 
         if (viewModel.checkoutMode == CheckoutMode.Setup) {
             paymentSheet.presentWithSetupIntent(
@@ -391,10 +412,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             phone = "+18008675309"
         ).takeIf { viewBinding.defaultBillingOnButton.isChecked }
 
-        val appearance: PaymentSheet.Appearance = intent.extras?.get(APPEARANCE_EXTRA)?.let {
-            it as PaymentSheet.Appearance
-        } ?: run {
-            PaymentSheet.Appearance()
+        val appearance = intent.extras?.getParcelable(APPEARANCE_EXTRA) ?: AppearanceStore.state
+
+        val customPrimaryButtonLabel = viewBinding.customLabelTextField.text.toString().takeUnless {
+            it.isBlank()
         }
 
         return PaymentSheet.Configuration(
@@ -403,7 +424,8 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             googlePay = googlePayConfig,
             defaultBillingDetails = defaultBilling,
             allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked,
-            appearance = appearance
+            appearance = appearance,
+            primaryButtonLabel = customPrimaryButtonLabel,
         )
     }
 
@@ -443,29 +465,31 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewModel.status.value = paymentResult.toString()
     }
 
+    private fun showAppearancePicker() {
+        val bottomSheet = AppearanceBottomSheetDialogFragment.newInstance()
+        bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+    }
+
     /**
      * Only called from test, creates and returns a [IdlingResource].
      */
     @VisibleForTesting
-    @NonNull
-    fun getMultiStepReadyIdlingResource(): IdlingResource? {
+    fun getMultiStepReadyIdlingResource(): IdlingResource {
         if (multiStepUIReadyIdlingResource == null) {
             multiStepUIReadyIdlingResource =
                 CountingIdlingResource("multiStepUIReadyIdlingResource")
         }
-        return multiStepUIReadyIdlingResource
+        return multiStepUIReadyIdlingResource!!
     }
 
     @VisibleForTesting
-    @NonNull
-    fun getSingleStepReadyIdlingResource(): IdlingResource? {
+    fun getSingleStepReadyIdlingResource(): IdlingResource {
         if (singleStepUIReadyIdlingResource == null) {
             singleStepUIReadyIdlingResource =
                 CountingIdlingResource("singleStepUIReadyIdlingResource")
         }
-        return singleStepUIReadyIdlingResource
+        return singleStepUIReadyIdlingResource!!
     }
-
 
     companion object {
         const val FORCE_DARK_MODE_EXTRA = "ForceDark"
@@ -473,37 +497,39 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         const val USE_SNAPSHOT_RETURNING_CUSTOMER_EXTRA = "UseSnapshotReturningCustomer"
         const val SUPPORTED_PAYMENT_METHODS_EXTRA = "SupportedPaymentMethods"
         private const val merchantName = "Example, Inc."
-        private const val sharedPreferencesName = "playgroundToggles"
 
         /**
          * This is a pairing of the countries to their default currency
          **/
         private val countryCurrencyPairs = CountryUtils.getOrderedCountries(Locale.getDefault())
-            .filter {
+            .filter { country ->
                 /**
                  * Modify this list if you want to change the countries displayed in the playground.
                  */
-                setOf("US", "GB", "AU", "FR").contains(it.code.value)
-            }.map {
+                country.code.value in setOf("US", "GB", "AU", "FR", "IN")
+            }.map { country ->
                 /**
                  * Modify this statement to change the default currency associated with each
                  * country.  The currency values should match the stripeSupportedCurrencies.
                  */
-                when (it.code.value) {
+                when (country.code.value) {
                     "GB" -> {
-                        it to "GBP"
+                        country to "GBP"
                     }
                     "FR" -> {
-                        it to "EUR"
+                        country to "EUR"
                     }
                     "AU" -> {
-                        it to "AUD"
+                        country to "AUD"
                     }
                     "US" -> {
-                        it to "USD"
+                        country to "USD"
+                    }
+                    "IN" -> {
+                        country to "INR"
                     }
                     else -> {
-                        it to "USD"
+                        country to "USD"
                     }
                 }
             }
@@ -511,12 +537,12 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         // List was created from: https://stripe.com/docs/currencies
         /** Modify this list if you want to change the currencies displayed in the playground **/
         private val stripeSupportedCurrencies = listOf(
-            "AUD", "EUR", "GBP", "USD",
+            "AUD", "EUR", "GBP", "USD", "INR"
 //            "AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS",  "AWG", "AZN", "BAM",
 //            "BBD", "BDT", "BGN", "BIF", "BMD", "BND", "BOB", "BRL", "BSD", "BWP", "BYN", "BZD",
 //            "CAD", "CDF", "CHF", "CLP", "CNY", "COP", "CRC", "CVE", "CZK", "DJF", "DKK", "DOP",
-//            "DZD", "EGP", "ETB", "FJD", "FKP",  "GEL", "GIP", "GMD", "GNF", "GTQ",
-//            "GYD", "HKD", "HNL", "HRK", "HTG", "HUF", "IDR", "ILS", "INR", "ISK", "JMD", "JPY",
+//            "DZD", "EGP", "ETB", "FJD", "FKP", "GEL", "GIP", "GMD", "GNF", "GTQ",
+//            "GYD", "HKD", "HNL", "HRK", "HTG", "HUF", "IDR", "ILS", "ISK", "JMD", "JPY",
 //            "KES", "KGS", "KHR", "KMF", "KRW", "KYD", "KZT", "LAK", "LBP", "LKR", "LRD", "LSL",
 //            "MAD", "MDL", "MGA", "MKD", "MMK", "MNT", "MOP", "MRO", "MUR", "MVR", "MWK", "MXN",
 //            "MYR", "MZN", "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "PAB", "PEN", "PGK", "PHP",

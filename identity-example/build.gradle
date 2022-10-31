@@ -19,7 +19,7 @@ android {
         applicationId "com.stripe.android.identity.example"
         minSdk 21
         targetSdk rootProject.ext.compileSdkVersion
-        versionCode 3
+        versionCode 5
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -27,7 +27,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }

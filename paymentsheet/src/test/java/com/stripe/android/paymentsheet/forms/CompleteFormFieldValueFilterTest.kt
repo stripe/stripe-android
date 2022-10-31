@@ -1,19 +1,19 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.elements.EmailConfig
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionController
 import com.stripe.android.ui.core.elements.SectionElement
+import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.forms.FormFieldEntry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 @ExperimentalCoroutinesApi
@@ -22,7 +22,7 @@ class CompleteFormFieldValueFilterTest {
     private val emailController = SimpleTextFieldController(EmailConfig())
     private var emailSection: SectionElement
 
-    private val hiddenIdentifersFlow = MutableStateFlow<List<IdentifierSpec>>(emptyList())
+    private val hiddenIdentifersFlow = MutableStateFlow<Set<IdentifierSpec>>(emptySet())
 
     private val fieldFlow = MutableStateFlow(
         mapOf(
@@ -80,7 +80,7 @@ class CompleteFormFieldValueFilterTest {
     @Test
     fun `If an hidden field is incomplete field pairs have the non-hidden values`() {
         runTest {
-            hiddenIdentifersFlow.value = listOf(IdentifierSpec.Email)
+            hiddenIdentifersFlow.value = setOf(IdentifierSpec.Email)
 
             val formFieldValues = transformElementToFormFieldValueFlow.filterFlow()
 
@@ -102,7 +102,7 @@ class CompleteFormFieldValueFilterTest {
                     IdentifierSpec.Email to FormFieldEntry("email@email.com", true)
                 )
 
-            hiddenIdentifersFlow.value = listOf(emailSection.fields[0].identifier)
+            hiddenIdentifersFlow.value = setOf(emailSection.fields[0].identifier)
 
             val formFieldValue = transformElementToFormFieldValueFlow.filterFlow().first()
 

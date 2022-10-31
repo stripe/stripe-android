@@ -1,10 +1,91 @@
 # CHANGELOG
 
-## X.X.X - 2022-XX-XX
+## XX.XX.XX - 2022-XX-XX
+
+### PaymentSheet
+
+* [ADDED][5729](https://github.com/stripe/stripe-android/pull/5729) Added support for a custom primary button label via `PaymentSheet.Configuration.primaryButtonLabel`.
+
+### CardScan
+
+* [FIXED][5749](https://github.com/stripe/stripe-android/pull/5749) Prevent multiple invocations to `/verify_frames`
+
+## 20.15.2 - 2022-10-25
+
+This release fixes a few bugs in `PaymentSession`, `PaymentSheet` and `CardScan`.
+
+### Payments
+
+* [FIXED][5722](https://github.com/stripe/stripe-android/pull/5722) Fix saving and restoring Google Pay selection in `PaymentSession`.
+
+### PaymentSheet
+
+* [FIXED][5738](https://github.com/stripe/stripe-android/pull/5738) Fix crash on Payment Sheet when integrating with Compose.
+
+### CardScan
+
+* [FIXED][5730](https://github.com/stripe/stripe-android/pull/5730) Fix crash during initialization.
+
+## 20.15.1 - 2022-10-17
+
+This release fixes some bugs in `ShippingInfoWidget`, `PaymentSheet`, and when the app is backgrounded during confirmation on Android 10 and 11.
+
+### Payments
+
+* [FIXED][5701](https://github.com/stripe/stripe-android/pull/5701) Treat blank fields as invalid in `ShippingInfoWidget`.
+* [FIXED][5667](https://github.com/stripe/stripe-android/pull/5667) Completed payments are no longer incorrectly reported as having failed if the app is backgrounded during confirmation on Android 10 and 11.
+
+### PaymentSheet
+
+* [FIXED][5715](https://github.com/stripe/stripe-android/pull/5715) Postal codes for countries other than US and Canada are no longer limited to a single character.
+
+## 20.15.0 - 2022-10-11
+
+This release adds Link as a payment method to the SDK and fixes a minor issue with CardScan.
+
+### PaymentSheet
+
+* [ADDED][5692](https://github.com/stripe/stripe-android/pull/5692) Enable Link as a payment method.
+
+### CardScan
+
+* [FIXED][5679](https://github.com/stripe/stripe-android/pull/5679) Fix oversized verification_frames payloads leading to failed scans.
+
+## 20.14.1 - 2022-10-03
+
+This release expands the `payment_method` field on ACH requests and fixes a formatting error in `CardInputWidget`, `CardMultilineWidget`, and `CardFormView`.
+
+### Payments
+
+* [FIXED][5547](https://github.com/stripe/stripe-android/pull/5547) Expiry dates in `CardInputWidget`, `CardMultilineWidget`, and `CardFormView` are no longer formatted incorrectly on certain devices.
+
+### PaymentSheet
+
+* [FIXED][5624](https://github.com/stripe/stripe-android/pull/5624) `CollectBankAccountResult` included intents will now contain the expanded `payment_method` field.
+
+## 20.14.0 - 2022-09-26
+This release fixes a payment-method related error in `PaymentSheet` and manages missing permissions
+on Financial Connections.
+
+### PaymentSheet
+
+* [FIXED][5592](https://github.com/stripe/stripe-android/pull/5592)[5613](https://github.com/stripe/stripe-android/pull/5613) Fix deletion of the last used payment method.
+
+### Financial Connections
+
+* [CHANGED][5583](https://github.com/stripe/stripe-android/pull/5583) Adds support for `account_numbers` permission.
+
+## 20.13.0 - 2022-09-19
+This release makes the `PaymentMethod.Card.networks` field public, fixes the Alipay integration and the card scan form encoding.
 
 ### Payments
 
 * [CHANGED] [5552](https://github.com/stripe/stripe-android/pull/5552) Make `PaymentMethod.Card.networks` field public.
+* [FIXED][5554](https://github.com/stripe/stripe-android/pull/5554) Fix Alipay integration when using the Alipay SDK.
+
+### CardScan
+
+* [FIXED] [5574](https://github.com/stripe/stripe-android/pull/5574) Fix encoding for form parameters for scan stats. 
 
 ## 20.12.0 - 2022-09-13
 This release upgrades `compileSdkVersion` to 33, updates Google Pay button to match the new brand 

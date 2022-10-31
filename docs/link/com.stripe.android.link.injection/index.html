@@ -4,10 +4,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>com.stripe.android.link.injection</title>
 <link href="../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
-const savedDarkMode = storage ? JSON.parse(storage) : false
-if(savedDarkMode === true){
-    document.getElementsByTagName("html")[0].classList.add("theme-dark")
-}</script>
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
 <script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
 <link href="../../styles/style.css" rel="Stylesheet">
 <link href="../../styles/jetbrains-mono.css" rel="Stylesheet">
@@ -18,7 +26,8 @@ if(savedDarkMode === true){
 <script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../scripts/main.js" defer></script>
-<script type="text/javascript" src="../../scripts/prism.js" async></script></head>
+<script type="text/javascript" src="../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
 <body>
 <div class="navigation-wrapper" id="navigation-wrapper">
     <div id="leftToggler"><span class="icon-toggler"></span></div>
@@ -38,77 +47,15 @@ if(savedDarkMode === true){
     </div>
     <div id="main">
 <div class="main-content" id="content" pageids="link::com.stripe.android.link.injection////PointingToDeclaration//1328945945">
-  <div class="breadcrumbs"><a href="../index.html">link</a><span class="delimiter">/</span><a href="index.html">com.stripe.android.link.injection</a></div>
+  <div class="breadcrumbs"><a href="../index.html">link</a><span class="delimiter">/</span><span class="current">com.stripe.android.link.injection</span></div>
   <div class="cover ">
-    <h1 class="cover"><span><span>Package</span></span> <span>com.</span><wbr><span>stripe.</span><wbr><span>android.</span><wbr><span>link.</span><wbr><span>injection</span></h1>
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Properties">Properties</button></div>
     <div class="tabs-section-body">
-      <h2 class="">Types</h2>
-      <div class="table" data-togglable="Types"><a data-name="1917989274%2FClasslikes%2F1328945945" anchor-label="LinkPaymentLauncherFactory" id="1917989274%2FClasslikes%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-link-payment-launcher-factory/index.html"><span>Link</span><wbr><span>Payment</span><wbr><span>Launcher</span><wbr><span><span>Factory</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1917989274%2FClasslikes%2F1328945945"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><span data-unresolved-link="dagger.assisted/AssistedFactory///PointingToDeclaration/"><span class="token annotation">AssistedFactory</span></span></div><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">interface </span><a href="-link-payment-launcher-factory/index.html">LinkPaymentLauncherFactory</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       <h2 class="">Properties</h2>
-      <div class="table" data-togglable="Properties"><a data-name="628673228%2FProperties%2F1328945945" anchor-label="CUSTOMER_EMAIL" id="628673228%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-c-u-s-t-o-m-e-r_-e-m-a-i-l.html"><span><span>CUSTOMER_EMAIL</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="628673228%2FProperties%2F1328945945"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><a data-name="628673228%2FProperties%2F1328945945" anchor-label="CUSTOMER_EMAIL" id="628673228%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">const </span><span class="token keyword">val </span><a href="-c-u-s-t-o-m-e-r_-e-m-a-i-l.html">CUSTOMER_EMAIL</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="628673228%2FProperties%2F1328945945" anchor-label="CUSTOMER_EMAIL" id="628673228%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><p class="paragraph">Identifies the email of the customer using the app, used to pre-fill the form.</p></div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-<a data-name="1460743975%2FProperties%2F1328945945" anchor-label="CUSTOMER_NAME" id="1460743975%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-c-u-s-t-o-m-e-r_-n-a-m-e.html"><span><span>CUSTOMER_NAME</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1460743975%2FProperties%2F1328945945"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><a data-name="1460743975%2FProperties%2F1328945945" anchor-label="CUSTOMER_NAME" id="1460743975%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">const </span><span class="token keyword">val </span><a href="-c-u-s-t-o-m-e-r_-n-a-m-e.html">CUSTOMER_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1460743975%2FProperties%2F1328945945" anchor-label="CUSTOMER_NAME" id="1460743975%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><p class="paragraph">Identifies the name of the customer using the app, used to pre-fill the form.</p></div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-<a data-name="-1687738054%2FProperties%2F1328945945" anchor-label="CUSTOMER_PHONE" id="-1687738054%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-c-u-s-t-o-m-e-r_-p-h-o-n-e.html"><span><span>CUSTOMER_PHONE</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1687738054%2FProperties%2F1328945945"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><a data-name="-1687738054%2FProperties%2F1328945945" anchor-label="CUSTOMER_PHONE" id="-1687738054%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">const </span><span class="token keyword">val </span><a href="-c-u-s-t-o-m-e-r_-p-h-o-n-e.html">CUSTOMER_PHONE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-1687738054%2FProperties%2F1328945945" anchor-label="CUSTOMER_PHONE" id="-1687738054%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><p class="paragraph">Identifies the phone number of the customer using the app, used to pre-fill the form.</p></div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-<a data-name="354301035%2FProperties%2F1328945945" anchor-label="LINK_ENABLED" id="354301035%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a>
+      <div class="table" data-togglable="Properties"><a data-name="354301035%2FProperties%2F1328945945" anchor-label="LINK_ENABLED" id="354301035%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a>
         <div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
@@ -118,37 +65,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><a data-name="354301035%2FProperties%2F1328945945" anchor-label="LINK_ENABLED" id="354301035%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">const </span><span class="token keyword">val </span><a href="-l-i-n-k_-e-n-a-b-l-e-d.html">LINK_ENABLED</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="354301035%2FProperties%2F1328945945" anchor-label="LINK_ENABLED" id="354301035%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><p class="paragraph">Identifies whether Link is enabled.</p></div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-<a data-name="45269905%2FProperties%2F1328945945" anchor-label="MERCHANT_NAME" id="45269905%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-m-e-r-c-h-a-n-t_-n-a-m-e.html"><span><span>MERCHANT_NAME</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="45269905%2FProperties%2F1328945945"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><a data-name="45269905%2FProperties%2F1328945945" anchor-label="MERCHANT_NAME" id="45269905%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">const </span><span class="token keyword">val </span><a href="-m-e-r-c-h-a-n-t_-n-a-m-e.html">MERCHANT_NAME</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="45269905%2FProperties%2F1328945945" anchor-label="MERCHANT_NAME" id="45269905%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><p class="paragraph">Identifies the customer-facing business name.</p></div></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-<a data-name="1038116096%2FProperties%2F1328945945" anchor-label="SHIPPING_VALUES" id="1038116096%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a>
-        <div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release">
-          <div class="main-subrow keyValue ">
-            <div class=""><span class="inline-flex">
-                <div><a href="-s-h-i-p-p-i-n-g_-v-a-l-u-e-s.html"><span><span>SHIPPING_VALUES</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1038116096%2FProperties%2F1328945945"></span>
-                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                </span></span></div>
-            <div>
-              <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><a data-name="1038116096%2FProperties%2F1328945945" anchor-label="SHIPPING_VALUES" id="1038116096%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-h-i-p-p-i-n-g_-v-a-l-u-e-s.html">SHIPPING_VALUES</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1038116096%2FProperties%2F1328945945" anchor-label="SHIPPING_VALUES" id="1038116096%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><p class="paragraph">Identifies the shipping address passed in from the customer, used to pre-fill address forms.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><a data-name="354301035%2FProperties%2F1328945945" anchor-label="LINK_ENABLED" id="354301035%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">const </span><span class="token keyword">val </span><a href="-l-i-n-k_-e-n-a-b-l-e-d.html">LINK_ENABLED</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><a data-name="354301035%2FProperties%2F1328945945" anchor-label="LINK_ENABLED" id="354301035%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><p class="paragraph">Identifies whether Link is enabled.</p></div></div></div>
               </div>
             </div>
           </div>

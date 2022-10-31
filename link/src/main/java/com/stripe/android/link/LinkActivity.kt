@@ -3,8 +3,8 @@ package com.stripe.android.link
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewTreeObserver
-import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
@@ -76,8 +76,7 @@ internal class LinkActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // TODO(brnunes-stripe): Migrate to androidx.compose.foundation 1.2.0 when out of beta
-        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        overridePendingTransition(R.anim.slide_up, 0)
 
         setContent {
             var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
@@ -123,9 +122,11 @@ internal class LinkActivity : ComponentActivity() {
                             accountStatus = linkAccount?.accountStatus
                         )
 
+                        BackHandler(onBack = viewModel::onBackPressed)
+
                         LinkAppBar(
                             state = appBarState,
-                            onBackPressed = viewModel::onBackPressed,
+                            onBackPressed = onBackPressedDispatcher::onBackPressed,
                             onLogout = viewModel::logout,
                             showBottomSheetContent = {
                                 if (it == null) {
@@ -151,18 +152,8 @@ internal class LinkActivity : ComponentActivity() {
                                 }
                             }
 
-                            composable(
-                                LinkScreen.SignUp.route,
-                                arguments = listOf(
-                                    navArgument(LinkScreen.SignUp.emailArg) {
-                                        type = NavType.StringType
-                                        nullable = true
-                                    }
-                                )
-                            ) { backStackEntry ->
-                                val email =
-                                    backStackEntry.arguments?.getString(LinkScreen.SignUp.emailArg)
-                                SignUpBody(viewModel.injector, email)
+                            composable(LinkScreen.SignUp.route) {
+                                SignUpBody(viewModel.injector)
                             }
 
                             composable(LinkScreen.Verification.route) {
@@ -250,8 +241,9 @@ internal class LinkActivity : ComponentActivity() {
                                 AccountStatus.NeedsVerification,
                                 AccountStatus.VerificationStarted ->
                                     LinkScreen.Verification
-                                AccountStatus.SignedOut ->
-                                    LinkScreen.SignUp(starterArgs.customerEmail)
+                                AccountStatus.SignedOut,
+                                AccountStatus.Error ->
+                                    LinkScreen.SignUp
                             },
                             clearBackStack = true
                         )
@@ -265,6 +257,11 @@ internal class LinkActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.unregisterFromActivity()
+    }
+
+    override fun finish() {
+        super.finish()
+        overridePendingTransition(0, R.anim.slide_down)
     }
 
     private fun dismiss(result: LinkActivityResult) {

@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.NonFallbackInjectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason.PayAnotherWay
@@ -31,8 +33,6 @@ import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.DateConfig
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.createExpiryDateFormFieldValues
-import com.stripe.android.ui.core.injection.NonFallbackInjectable
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -168,7 +168,7 @@ internal class WalletViewModel @Inject constructor(
     ): Result<ConsumerPaymentDetails> {
         val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams()
 
-        val updateParams = ConsumerPaymentDetailsUpdateParams.Card(
+        val updateParams = ConsumerPaymentDetailsUpdateParams(
             id = selectedPaymentDetails.id,
             isDefault = selectedPaymentDetails.isDefault,
             cardPaymentMethodCreateParams = paymentMethodCreateParams
@@ -238,6 +238,35 @@ internal class WalletViewModel @Inject constructor(
     fun editPaymentMethod(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {
         clearError()
         navigator.navigateTo(LinkScreen.CardEdit(paymentDetails.id))
+    }
+
+    fun setDefault(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {
+        _uiState.update {
+            it.copy(paymentMethodIdBeingUpdated = paymentDetails.id)
+        }
+
+        viewModelScope.launch {
+            val updateParams = ConsumerPaymentDetailsUpdateParams(
+                id = paymentDetails.id,
+                isDefault = true,
+                cardPaymentMethodCreateParams = null
+            )
+
+            linkAccountManager.updatePaymentDetails(updateParams)
+                .mapCatching { it.paymentDetails.single() }
+                .fold(
+                    onSuccess = { paymentDetails ->
+                        _uiState.update {
+                            it.updateWithSetDefaultResult(paymentDetails)
+                        }
+                    },
+                    onFailure = {
+                        _uiState.update {
+                            it.copy(paymentMethodIdBeingUpdated = null)
+                        }
+                    }
+                )
+        }
     }
 
     fun deletePaymentMethod(paymentDetails: ConsumerPaymentDetails.PaymentDetails) {

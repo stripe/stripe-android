@@ -39,14 +39,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.darken
 import com.stripe.android.ui.core.elements.TextFieldSection
-import com.stripe.android.ui.core.elements.annotatedStringResource
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.text.annotatedStringResource
 
 @VisibleForTesting
 internal const val TEST_TAG_ATTRIBUTION_DRAWABLE = "AutocompleteAttributionDrawable"

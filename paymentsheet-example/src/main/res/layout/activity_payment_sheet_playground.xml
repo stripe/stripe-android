@@ -141,10 +141,12 @@
 
         <Spinner
             android:id="@+id/merchant_country_spinner"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="48dp"
             android:orientation="horizontal"
             android:layout_marginStart="16dp"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintEnd_toStartOf="@id/currency_spinner"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/merchant_country_text_view" />
 
@@ -156,7 +158,7 @@
             android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
             app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintStart_toEndOf="@+id/merchant_country_spinner"
+            app:layout_constraintStart_toStartOf="@+id/currency_spinner"
             app:layout_constraintTop_toBottomOf="@+id/mode_radio_group" />
 
         <Spinner
@@ -164,8 +166,8 @@
             android:layout_width="wrap_content"
             android:layout_height="48dp"
             android:orientation="horizontal"
-            android:layout_marginStart="8dp"
             app:layout_constraintStart_toEndOf="@+id/merchant_country_spinner"
+            app:layout_constraintEnd_toStartOf="@id/google_pay_radio_group"
             app:layout_constraintTop_toBottomOf="@+id/currency_text_view" />
 
         <TextView
@@ -186,6 +188,7 @@
             android:orientation="horizontal"
             android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/currency_spinner"
             app:layout_constraintTop_toBottomOf="@+id/google_pay_text_view">
 
             <RadioButton
@@ -342,6 +345,21 @@
                 android:checked="false" />
         </RadioGroup>
 
+        <EditText
+            android:id="@+id/custom_label_text_field"
+            android:hint="Custom primary button label"
+            android:lines="1"
+            android:inputType="textCapSentences"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:importantForAutofill="no"
+            app:layout_constraintBottom_toTopOf="@id/reset_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/allowsDelayedPaymentMethods_radio_group" />
+
         <Button
             android:id="@+id/reset_button"
             android:text="@string/reset"
@@ -350,7 +368,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/allowsDelayedPaymentMethods_radio_group" />
+            app:layout_constraintTop_toBottomOf="@+id/custom_label_text_field" />
 
         <Button
             android:id="@+id/reload_button"

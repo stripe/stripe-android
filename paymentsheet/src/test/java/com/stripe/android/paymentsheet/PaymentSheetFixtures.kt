@@ -145,7 +145,6 @@ internal object PaymentSheetFixtures {
                 email = "email",
                 name = "Jenny Rosen",
                 phone = "+18008675309"
-            ),
-            injectorKey = DUMMY_INJECTOR_KEY
+            )
         )
 }

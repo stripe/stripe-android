@@ -5,6 +5,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.view.AuthActivityStarterHost.ActivityHost
+import com.stripe.android.view.AuthActivityStarterHost.FragmentHost
 
 /**
  * A representation of an Android component (i.e. [ComponentActivity] or [Fragment]) that can start
@@ -19,12 +22,15 @@ sealed class AuthActivityStarterHost {
         requestCode: Int
     )
 
-    internal abstract val statusBarColor: Int?
+    abstract val statusBarColor: Int?
+    abstract val lifecycleOwner: LifecycleOwner
 
     internal class ActivityHost(
         val activity: ComponentActivity,
         override val statusBarColor: Int?
     ) : AuthActivityStarterHost() {
+
+        override val lifecycleOwner: LifecycleOwner = activity
 
         @Suppress("DEPRECATION")
         override fun startActivityForResult(
@@ -42,6 +48,8 @@ sealed class AuthActivityStarterHost {
         val fragment: Fragment,
         override val statusBarColor: Int?
     ) : AuthActivityStarterHost() {
+
+        override val lifecycleOwner: LifecycleOwner = fragment
 
         @Suppress("DEPRECATION")
         override fun startActivityForResult(

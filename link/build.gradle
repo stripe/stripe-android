@@ -1,28 +1,15 @@
-plugins {
-    id "com.android.library"
-    id "kotlin-android"
-    id 'kotlin-kapt'
-    id 'org.jetbrains.dokka'
-    id "org.jetbrains.kotlin.plugin.parcelize"
-    id 'org.jetbrains.kotlin.plugin.serialization'
-}
+apply from: configs.androidLibrary
 
-assemble.dependsOn('lint')
-check.dependsOn('checkstyle')
-
-configurations {
-    ktlint
-}
-
-if (System.getenv("JITPACK")) {
-    group = 'com.github.stripe.stripe-android'
-}
+apply plugin: 'kotlin-kapt'
+apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
 dependencies {
     implementation project(':payments-core')
     implementation project(':stripe-core')
     implementation project(':payments-ui-core')
     implementation project(':financial-connections')
+    implementation project(':stripe-ui-core')
 
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
     implementation "androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion"
@@ -59,6 +46,7 @@ dependencies {
     testImplementation "org.robolectric:robolectric:$robolectricVersion"
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    testImplementation testLibs.turbine
 
     androidTestImplementation "com.google.truth:truth:$truthVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
@@ -75,41 +63,12 @@ dependencies {
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
-    defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion rootProject.ext.compileSdkVersion
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        vectorDrawables.useSupportLibrary = true
-
-        // From https://developer.android.com/training/testing/junit-runner:
-        // > To remove all shared state from your device"s CPU and memory after each test,
-        // > use the clearPackageData flag.
-        testInstrumentationRunnerArguments clearPackageData: "true"
-    }
-
-    sourceSets {
-        main {
-            res.srcDirs = ['res']
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
     kotlinOptions {
         freeCompilerArgs = [
                 "-Xuse-experimental=androidx.compose.ui.ExperimentalComposeUiApi",
                 "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
                 "-Xopt-in=kotlin.RequiresOptIn"
         ]
-        jvmTarget = "1.8"
     }
 
     buildFeatures {
@@ -129,28 +88,6 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
     }
-
-    dokkaHtml {
-        outputDirectory = new File("${project.rootDir}/docs/$project.name")
-    }
-}
-
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "src/**/*.kt"
-    // to generate report in checkstyle format prepend following args:
-    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
-    // see https://github.com/pinterest/ktlint#usage for more
-}
-check.dependsOn ktlint
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
 }
 
 ext {

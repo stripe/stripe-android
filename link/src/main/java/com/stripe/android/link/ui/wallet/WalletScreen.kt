@@ -33,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -41,6 +42,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.R
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -62,7 +64,6 @@ import com.stripe.android.model.CvcCheck
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.ui.core.elements.DateConfig
-import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.RowController
 import com.stripe.android.ui.core.elements.RowElement
@@ -72,7 +73,7 @@ import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
-import com.stripe.android.ui.core.injection.NonFallbackInjector
+import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.flow.flowOf
 import java.util.UUID
 
@@ -81,22 +82,29 @@ import java.util.UUID
 private fun WalletBodyPreview() {
     val paymentDetailsList = listOf(
         ConsumerPaymentDetails.Card(
-            "id1",
-            true,
-            2030,
-            12,
-            CardBrand.Visa,
-            "4242",
-            CvcCheck.Fail
+            id = "id1",
+            isDefault = false,
+            expiryYear = 2030,
+            expiryMonth = 12,
+            brand = CardBrand.Visa,
+            last4 = "4242",
+            cvcCheck = CvcCheck.Fail
         ),
         ConsumerPaymentDetails.Card(
-            "id2",
-            false,
-            2022,
-            1,
-            CardBrand.MasterCard,
-            "4444",
-            CvcCheck.Pass
+            id = "id2",
+            isDefault = false,
+            expiryYear = 2022,
+            expiryMonth = 1,
+            brand = CardBrand.MasterCard,
+            last4 = "4444",
+            cvcCheck = CvcCheck.Pass
+        ),
+        ConsumerPaymentDetails.BankAccount(
+            id = "id2",
+            isDefault = true,
+            bankIconCode = "icon",
+            bankName = "Stripe Bank With Long Name",
+            last4 = "6789"
         )
     )
 
@@ -106,7 +114,7 @@ private fun WalletBodyPreview() {
                 uiState = WalletUiState(
                     paymentDetailsList = paymentDetailsList,
                     supportedTypes = SupportedPaymentMethod.allTypes,
-                    selectedItem = paymentDetailsList.first(),
+                    selectedItem = paymentDetailsList[2],
                     isExpanded = true,
                     errorMessage = ErrorMessage.Raw("Something went wrong")
                 ),
@@ -117,6 +125,7 @@ private fun WalletBodyPreview() {
                 onItemSelected = {},
                 onAddNewPaymentMethodClick = {},
                 onEditPaymentMethod = {},
+                onSetDefault = {},
                 onDeletePaymentMethod = {},
                 onPrimaryButtonClick = {},
                 onPayAnotherWayClick = {},
@@ -178,6 +187,7 @@ internal fun WalletBody(
             onItemSelected = viewModel::onItemSelected,
             onAddNewPaymentMethodClick = viewModel::addNewPaymentMethod,
             onEditPaymentMethod = viewModel::editPaymentMethod,
+            onSetDefault = viewModel::setDefault,
             onDeletePaymentMethod = viewModel::deletePaymentMethod,
             onPrimaryButtonClick = viewModel::onConfirmPayment,
             onPayAnotherWayClick = viewModel::payAnotherWay,
@@ -196,6 +206,7 @@ internal fun WalletBody(
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onAddNewPaymentMethodClick: () -> Unit,
     onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onSetDefault: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClick: () -> Unit,
@@ -225,6 +236,14 @@ internal fun WalletBody(
         }
     }
 
+    val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(uiState.isProcessing) {
+        if (uiState.isProcessing) {
+            focusManager.clearFocus()
+        }
+    }
+
     ScrollableTopLevelColumn {
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -243,6 +262,10 @@ internal fun WalletBody(
                                 onEditClick = {
                                     showBottomSheetContent(null)
                                     onEditPaymentMethod(it)
+                                },
+                                onSetDefaultClick = {
+                                    showBottomSheetContent(null)
+                                    onSetDefault(it)
                                 },
                                 onRemoveClick = {
                                     showBottomSheetContent(null)
@@ -272,7 +295,7 @@ internal fun WalletBody(
 
         if (uiState.selectedItem is ConsumerPaymentDetails.BankAccount) {
             Html(
-                html = stringResource(R.string.wallet_bank_account_terms),
+                html = stringResource(R.string.wallet_bank_account_terms).replaceHyperlinks(),
                 imageGetter = emptyMap(),
                 color = MaterialTheme.colors.onSecondary,
                 style = MaterialTheme.typography.caption,
@@ -369,7 +392,7 @@ internal fun CardDetailsRecollectionForm(
             SectionElementUI(
                 enabled = true,
                 element = SectionElement.wrap(rowElement),
-                hiddenIdentifiers = emptyList(),
+                hiddenIdentifiers = emptySet(),
                 lastTextFieldIdentifier = rowElement.fields.last().identifier
             )
         }
@@ -411,7 +434,6 @@ internal fun CollapsedPaymentDetails(
             color = MaterialTheme.linkColors.disabledText
         )
         PaymentDetails(paymentDetails = selectedPaymentMethod, enabled = true)
-        Spacer(modifier = Modifier.weight(1f))
         Icon(
             painter = painterResource(id = R.drawable.ic_link_chevron),
             contentDescription = stringResource(id = R.string.wallet_expand_accessibility),
@@ -484,6 +506,7 @@ private fun ExpandedPaymentDetails(
                 enabled = isEnabled,
                 isSupported = uiState.supportedTypes.contains(item.type),
                 isSelected = uiState.selectedItem?.id == item.id,
+                isUpdating = uiState.paymentMethodIdBeingUpdated == item.id,
                 onClick = {
                     onItemSelected(item)
                 },
@@ -515,3 +538,8 @@ private fun ExpandedPaymentDetails(
         }
     }
 }
+
+private fun String.replaceHyperlinks() = this.replace(
+    "<terms>",
+    "<a href=\"https://stripe.com/legal/ach-payments/authorization\">"
+).replace("</terms>", "</a>")

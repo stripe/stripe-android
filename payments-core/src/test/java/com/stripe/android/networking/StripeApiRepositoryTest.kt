@@ -1224,6 +1224,28 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun retrieveObject_shouldFireExpectedRequestsAndNotParseResult() = runTest {
+        val responseBody = "not a valid json"
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(
+                StripeResponse(
+                    200,
+                    responseBody,
+                    emptyMap()
+                )
+            )
+
+        val response = create().retrieveObject(
+            StripeApiRepository.paymentMethodsUrl,
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(any())
+        assertThat(response.body).isEqualTo(responseBody)
+        verifyAnalyticsRequest(PaymentAnalyticsEvent.StripeUrlRetrieve)
+    }
+
+    @Test
     fun apiRequest_withErrorResponse_onUnsupportedSdkVersion_shouldNotBeTranslated() =
         runTest {
             Locale.setDefault(Locale.JAPAN)
@@ -1974,7 +1996,7 @@ internal class StripeApiRepositoryTest {
             val id = "id"
             val clientSecret = "secret"
             val isDefault = true
-            val paymentDetailsUpdateParams = ConsumerPaymentDetailsUpdateParams.Card(
+            val paymentDetailsUpdateParams = ConsumerPaymentDetailsUpdateParams(
                 id,
                 isDefault,
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD
@@ -2108,10 +2130,11 @@ internal class StripeApiRepositoryTest {
 
             val clientSecret = "pi_client_secret_123"
             val response = create().attachFinancialConnectionsSessionToPaymentIntent(
-                clientSecret,
-                "pi_12345",
-                "las_123456",
-                DEFAULT_OPTIONS
+                clientSecret = clientSecret,
+                paymentIntentId = "pi_12345",
+                financialConnectionsSessionId = "las_123456",
+                requestOptions = DEFAULT_OPTIONS,
+                expandFields = listOf("payment_method")
             )
 
             verify(stripeNetworkClient).executeRequest(
@@ -2159,10 +2182,11 @@ internal class StripeApiRepositoryTest {
 
             val clientSecret = "si_client_secret_123"
             val response = create().attachFinancialConnectionsSessionToSetupIntent(
-                clientSecret,
-                "si_12345",
-                "las_123456",
-                DEFAULT_OPTIONS
+                clientSecret = clientSecret,
+                setupIntentId = "si_12345",
+                financialConnectionsSessionId = "las_123456",
+                requestOptions = DEFAULT_OPTIONS,
+                expandFields = listOf("payment_method")
             )
 
             verify(stripeNetworkClient).executeRequest(

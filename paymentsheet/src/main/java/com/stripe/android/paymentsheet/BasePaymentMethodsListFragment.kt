@@ -9,15 +9,18 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.model.FragmentConfig
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.isSystemDarkTheme
+import kotlinx.coroutines.launch
 
 internal abstract class BasePaymentMethodsListFragment(
     private val canClickSelectedItem: Boolean
@@ -26,8 +29,9 @@ internal abstract class BasePaymentMethodsListFragment(
 ) {
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
+    @VisibleForTesting
+    lateinit var adapter: PaymentOptionsAdapter
     protected lateinit var config: FragmentConfig
-    private lateinit var adapter: PaymentOptionsAdapter
     private var editMenuItem: MenuItem? = null
 
     @VisibleForTesting
@@ -66,13 +70,6 @@ internal abstract class BasePaymentMethodsListFragment(
         isEditing = savedInstanceState?.getBoolean(IS_EDITING) ?: false
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        sheetViewModel.headerText.value =
-            getString(R.string.stripe_paymentsheet_select_payment_method)
-    }
-
     @Deprecated("Deprecated in Java")
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.paymentsheet_payment_methods_list, menu)
@@ -96,6 +93,7 @@ internal abstract class BasePaymentMethodsListFragment(
                 color = Color(appearance.getColors(context.isSystemDarkTheme()).appBarIcon),
                 fontFamily = appearance.typography.fontResId
             )
+            isVisible = adapter.hasSavedItems()
         }
     }
 
@@ -131,22 +129,31 @@ internal abstract class BasePaymentMethodsListFragment(
         }
 
         adapter = PaymentOptionsAdapter(
-            sheetViewModel.lpmResourceRepository.getRepository(),
-            canClickSelectedItem,
-            paymentOptionSelectedListener = ::onPaymentOptionSelected,
+            lpmRepository = sheetViewModel.lpmResourceRepository.getRepository(),
+            canClickSelectedItem = canClickSelectedItem,
+            paymentOptionSelected = ::onPaymentOptionsItemSelected,
             paymentMethodDeleteListener = ::deletePaymentMethod,
             addCardClickListener = ::transitionToAddPaymentMethod
         ).also {
             viewBinding.recycler.adapter = it
         }
 
-        adapter.setItems(
-            config,
-            sheetViewModel.paymentMethods.value.orEmpty(),
-            sheetViewModel is PaymentOptionsViewModel,
-            sheetViewModel is PaymentOptionsViewModel && sheetViewModel.isLinkEnabled.value == true,
-            sheetViewModel.selection.value
-        )
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                sheetViewModel.paymentOptionsState.collect { paymentOptionsState ->
+                    adapter.update(
+                        items = paymentOptionsState.items,
+                        selectedIndex = paymentOptionsState.selectedIndex,
+                    )
+                }
+            }
+        }
+
+        sheetViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
+            if (isEditing && paymentMethods.isEmpty()) {
+                isEditing = false
+            }
+        }
 
         sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
             adapter.isEnabled = !isProcessing
@@ -156,15 +163,13 @@ internal abstract class BasePaymentMethodsListFragment(
 
     abstract fun transitionToAddPaymentMethod()
 
-    open fun onPaymentOptionSelected(
-        paymentSelection: PaymentSelection,
-        isClick: Boolean
-    ) {
+    open fun onPaymentOptionsItemSelected(item: PaymentOptionsItem) {
+        val paymentSelection = item.toPaymentSelection()
         sheetViewModel.updateSelection(paymentSelection)
     }
 
-    private fun deletePaymentMethod(item: PaymentOptionsAdapter.Item.SavedPaymentMethod) {
-        adapter.removeItem(item)
+    @VisibleForTesting
+    fun deletePaymentMethod(item: PaymentOptionsItem.SavedPaymentMethod) {
         sheetViewModel.removePaymentMethod(item.paymentMethod)
     }
 

@@ -227,6 +227,22 @@ internal class WalletScreenTest {
     }
 
     @Test
+    fun when_no_selected_payment_method_then_wallet_is_expanded() {
+        var selectedItem: ConsumerPaymentDetails.PaymentDetails? = null
+        setContent(
+            selectedItem = null,
+            isExpanded = false,
+            onItemSelected = {
+                selectedItem = it
+            }
+        )
+
+        assertExpanded()
+        assertThat(selectedItem).isNull()
+        onPrimaryButton().assertIsNotEnabled()
+    }
+
+    @Test
     fun add_new_payment_method_click_triggers_action() {
         var count = 0
         setContent(
@@ -450,6 +466,7 @@ internal class WalletScreenTest {
         onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onAddNewPaymentMethodClick: () -> Unit = {},
         onEditPaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
+        onSetDefault: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onDeletePaymentMethod: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onPayButtonClick: () -> Unit = {},
         onPayAnotherWayClick: () -> Unit = {},
@@ -494,6 +511,7 @@ internal class WalletScreenTest {
                     onItemSelected = onItemSelected,
                     onAddNewPaymentMethodClick = onAddNewPaymentMethodClick,
                     onEditPaymentMethod = onEditPaymentMethod,
+                    onSetDefault = onSetDefault,
                     onDeletePaymentMethod = onDeletePaymentMethod,
                     onPrimaryButtonClick = onPayButtonClick,
                     onPayAnotherWayClick = onPayAnotherWayClick,

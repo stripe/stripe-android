@@ -2,8 +2,8 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.core.Logger
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures

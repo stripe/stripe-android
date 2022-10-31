@@ -3,12 +3,11 @@ package com.stripe.android.paymentsheet.addresselement
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.core.BuildConfig
-import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.NonFallbackInjector
+import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.paymentsheet.injection.DaggerAddressElementViewModelFactoryComponent
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import javax.inject.Inject
 
 internal class AddressElementViewModel @Inject internal constructor(
@@ -29,36 +28,15 @@ internal class AddressElementViewModel @Inject internal constructor(
         @Inject
         lateinit var viewModel: AddressElementViewModel
 
-        private lateinit var injector: NonFallbackInjector
-
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val logger = Logger.getInstance(BuildConfig.DEBUG)
             val starterArgs = starterArgsSupplier()
 
-            WeakMapInjectorRegistry.retrieve(starterArgs.injectorKey)?.let {
-                it as? NonFallbackInjector
-            }?.let {
-                logger.info(
-                    "Injector available, " +
-                        "injecting dependencies into ${this::class.java.canonicalName}"
-                )
-                injector = it
-                it.inject(this)
-            } ?: run {
-                logger.info(
-                    "Injector unavailable, " +
-                        "initializing dependencies of ${this::class.java.canonicalName}"
-                )
-                fallbackInitialize(
-                    FallbackInitializeParam(
-                        applicationSupplier(),
-                        starterArgs
-                    )
-                )
-            }
-
-            viewModel.injector = injector
+            val injector = injectWithFallback(
+                starterArgs.injectorKey,
+                FallbackInitializeParam(applicationSupplier(), starterArgs)
+            )
+            viewModel.injector = requireNotNull(injector as NonFallbackInjector)
             return viewModel as T
         }
 
@@ -68,28 +46,13 @@ internal class AddressElementViewModel @Inject internal constructor(
          * responsible for injecting them not only in itself, but also in the other ViewModel
          * factories of the module.
          */
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector {
             val viewModelComponent = DaggerAddressElementViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .starterArgs(arg.starterArgs)
                 .build()
-
-            injector = object : NonFallbackInjector {
-                override fun inject(injectable: Injectable<*>) {
-                    when (injectable) {
-                        is Factory -> viewModelComponent.inject(injectable)
-                        is InputAddressViewModel.Factory -> viewModelComponent.inject(injectable)
-                        is AutocompleteViewModel.Factory -> viewModelComponent.inject(injectable)
-                        else -> {
-                            throw IllegalArgumentException(
-                                "invalid Injectable $injectable requested in $this"
-                            )
-                        }
-                    }
-                }
-            }
-
             viewModelComponent.inject(this)
+            return viewModelComponent
         }
     }
 }

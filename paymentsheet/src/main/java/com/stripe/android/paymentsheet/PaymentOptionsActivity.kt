@@ -21,10 +21,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
-import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.utils.AnimationConstants
 import java.security.InvalidParameterException
 
 /**
@@ -176,9 +176,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewBinding.continueButton.lockVisible = false
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
-        viewBinding.continueButton.setLabel(
-            getString(R.string.stripe_continue_button_label)
-        )
+        val customLabel = starterArgs?.config?.primaryButtonLabel
+        val label = customLabel ?: getString(R.string.stripe_continue_button_label)
+
+        viewBinding.continueButton.setLabel(label)
 
         viewBinding.continueButton.setOnClickListener {
             clearErrorMessages()

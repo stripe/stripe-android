@@ -16,16 +16,14 @@ import com.stripe.android.ui.core.paymentsShapes
 internal fun AddressElementUI(
     enabled: Boolean,
     controller: AddressController,
-    hiddenIdentifiers: List<IdentifierSpec>?,
+    hiddenIdentifiers: Set<IdentifierSpec>,
     lastTextFieldIdentifier: IdentifierSpec?
 ) {
     val fields by controller.fieldsFlowable.collectAsState(null)
 
     // The last rendered field is not always the last field in the list.
     // So we need to pre filter so we know when to stop drawing dividers.
-    fields?.filter {
-        (hiddenIdentifiers?.contains(it.identifier) == false)
-    }?.let { fieldList ->
+    fields?.filterNot { hiddenIdentifiers.contains(it.identifier) }?.let { fieldList ->
         Column {
             fieldList.forEachIndexed { index, field ->
                 SectionFieldElementUI(

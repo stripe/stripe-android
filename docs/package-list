@@ -44,6 +44,7 @@ com.stripe.android.payments.core.authentication
 com.stripe.android.payments.core.injection
 com.stripe.android.payments.financialconnections
 com.stripe.android.payments.paymentlauncher
+com.stripe.android.polling
 com.stripe.android.utils
 com.stripe.android.view
 com.stripe.android.view.i18n
@@ -76,10 +77,14 @@ com.stripe.android.core.exception
 com.stripe.android.core.injection
 com.stripe.android.core.model
 com.stripe.android.core.model.parsers
+com.stripe.android.core.model.serializers
 com.stripe.android.core.networking
 com.stripe.android.core.storage
 com.stripe.android.core.utils
 com.stripe.android.core.version
+module:stripe-ui-core
+com.stripe.android.uicore.image
+com.stripe.android.uicore.text
 module:stripecardscan
 com.stripe.android.stripecardscan.cardimageverification
 com.stripe.android.stripecardscan.cardimageverification.exception
@@ -87,3 +92,6 @@ com.stripe.android.stripecardscan.cardscan
 com.stripe.android.stripecardscan.cardscan.exception
 com.stripe.android.stripecardscan.payment.card
 com.stripe.android.stripecardscan.scanui
+module:wechatpay
+com.stripe.android.payments.wechatpay
+com.stripe.android.payments.wechatpay.reflection

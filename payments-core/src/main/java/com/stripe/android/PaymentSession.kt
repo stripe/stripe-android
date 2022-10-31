@@ -155,17 +155,11 @@ class PaymentSession @VisibleForTesting internal constructor(
         resultCode: Int,
         data: Intent?
     ): Boolean {
-        // validate Intent
-        if (data == null) {
+        if (data == null || !isValidRequestCode(requestCode)) {
             return false
         }
 
-        // validate requestCode
-        if (!isValidRequestCode(requestCode)) {
-            return false
-        }
-
-        when (resultCode) {
+        return when (resultCode) {
             Activity.RESULT_CANCELED -> {
                 if (requestCode == PaymentMethodsActivityStarter.REQUEST_CODE) {
                     // If resultCode of `PaymentMethodsActivity` is `Activity.RESULT_CANCELED`,
@@ -174,9 +168,9 @@ class PaymentSession @VisibleForTesting internal constructor(
                 } else {
                     fetchCustomer()
                 }
-                return false
+                false
             }
-            Activity.RESULT_OK -> return when (requestCode) {
+            Activity.RESULT_OK -> when (requestCode) {
                 PaymentMethodsActivityStarter.REQUEST_CODE -> {
                     onPaymentMethodResult(data)
                     true
@@ -191,7 +185,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                     false
                 }
             }
-            else -> return false
+            else -> false
         }
     }
 
@@ -231,18 +225,22 @@ class PaymentSession @VisibleForTesting internal constructor(
      *
      *  1. If {@param userSelectedPaymentMethodId} is specified, use that
      *  2. If the instance's [PaymentSessionData.paymentMethod] is non-null, use that
-     *  3. If the instance's [PaymentSessionPrefs.getPaymentMethodId] is non-null, use that
+     *  3. If the instance's [PaymentSessionPrefs.getPaymentMethod] is non-null, use that
      *  4. Otherwise, choose the most recently added Payment Method
      *
      * @param selectedPaymentMethodId if non-null, the ID of the Payment Method that should be
      * initially selected on the Payment Method selection screen
      */
     fun presentPaymentMethodSelection(selectedPaymentMethodId: String? = null) {
+        val selection = viewModel.getSelectedPaymentMethod(selectedPaymentMethodId)
+        val useGooglePay = if (selection is PaymentSessionPrefs.SelectedPaymentMethod.GooglePay) {
+            true
+        } else {
+            viewModel.paymentSessionData.useGooglePay
+        }
         paymentMethodsActivityStarter.startForResult(
             PaymentMethodsActivityStarter.Args.Builder()
-                .setInitialPaymentMethodId(
-                    viewModel.getSelectedPaymentMethodId(selectedPaymentMethodId)
-                )
+                .setInitialPaymentMethodId(selection?.stringValue)
                 .setPaymentMethodsFooter(config.paymentMethodsFooterLayoutId)
                 .setAddPaymentMethodFooter(config.addPaymentMethodFooterLayoutId)
                 .setIsPaymentSessionActive(true)
@@ -251,7 +249,7 @@ class PaymentSession @VisibleForTesting internal constructor(
                 .setShouldShowGooglePay(config.shouldShowGooglePay)
                 .setWindowFlags(config.windowFlags)
                 .setBillingAddressFields(config.billingAddressFields)
-                .setUseGooglePay(viewModel.paymentSessionData.useGooglePay)
+                .setUseGooglePay(useGooglePay)
                 .setCanDeletePaymentMethods(config.canDeletePaymentMethods)
                 .build()
         )

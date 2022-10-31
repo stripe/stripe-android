@@ -30,6 +30,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
+import com.stripe.android.ui.core.elements.UpiSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 
 /**
@@ -86,6 +87,7 @@ class TransformSpecToElements(
                     shippingValues
                 )
                 is SepaMandateTextSpec -> it.transform(merchantName)
+                is UpiSpec -> it.transform()
             }
         }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
 }

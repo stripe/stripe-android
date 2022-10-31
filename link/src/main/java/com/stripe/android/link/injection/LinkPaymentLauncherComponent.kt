@@ -4,15 +4,17 @@ import android.content.Context
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
 import com.stripe.android.link.ui.verification.VerificationViewModel
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -39,26 +41,31 @@ internal abstract class LinkPaymentLauncherComponent {
     abstract val linkAccountManager: LinkAccountManager
     abstract val linkEventsReporter: LinkEventsReporter
     abstract val linkComponentBuilder: LinkComponent.Builder
+    abstract val configuration: LinkPaymentLauncher.Configuration
 
     abstract fun inject(factory: VerificationViewModel.Factory)
     abstract fun inject(factory: InlineSignupViewModel.Factory)
 
+    val injector: NonFallbackInjector = object : NonFallbackInjector {
+        override fun inject(injectable: Injectable<*>) {
+            when (injectable) {
+                is VerificationViewModel.Factory ->
+                    this@LinkPaymentLauncherComponent.inject(injectable)
+                is InlineSignupViewModel.Factory ->
+                    this@LinkPaymentLauncherComponent.inject(injectable)
+                else -> {
+                    throw IllegalArgumentException(
+                        "invalid Injectable $injectable requested in $this"
+                    )
+                }
+            }
+        }
+    }
+
     @Component.Builder
     interface Builder {
         @BindsInstance
-        fun merchantName(@Named(MERCHANT_NAME) merchantName: String): Builder
-
-        @BindsInstance
-        fun customerEmail(@Named(CUSTOMER_EMAIL) customerEmail: String?): Builder
-
-        @BindsInstance
-        fun customerPhone(@Named(CUSTOMER_PHONE) customerPhone: String?): Builder
-
-        @BindsInstance
-        fun customerName(@Named(CUSTOMER_NAME) customerName: String?): Builder
-
-        @BindsInstance
-        fun stripeIntent(@Named(LINK_INTENT) stripeIntent: StripeIntent): Builder
+        fun configuration(configuration: LinkPaymentLauncher.Configuration): Builder
 
         @BindsInstance
         fun context(context: Context): Builder

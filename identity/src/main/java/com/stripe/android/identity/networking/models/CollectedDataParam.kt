@@ -2,6 +2,7 @@ package com.stripe.android.identity.networking.models
 
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
+import com.stripe.android.identity.navigation.DocSelectionFragment
 import com.stripe.android.identity.networking.UploadedResult
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -29,7 +30,19 @@ internal data class CollectedDataParam(
         IDCARD,
 
         @SerialName("passport")
-        PASSPORT
+        PASSPORT;
+
+        companion object {
+            fun fromName(typeName: String) =
+                when (typeName) {
+                    DocSelectionFragment.PASSPORT_KEY -> PASSPORT
+                    DocSelectionFragment.DRIVING_LICENSE_KEY -> DRIVINGLICENSE
+                    DocSelectionFragment.ID_CARD_KEY -> IDCARD
+                    else -> {
+                        throw IllegalArgumentException("Unknown name $typeName")
+                    }
+                }
+        }
     }
 
     internal companion object {

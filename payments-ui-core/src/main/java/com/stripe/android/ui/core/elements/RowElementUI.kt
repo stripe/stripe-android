@@ -21,7 +21,7 @@ import com.stripe.android.ui.core.paymentsShapes
 internal fun RowElementUI(
     enabled: Boolean,
     controller: RowController,
-    hiddenIdentifiers: List<IdentifierSpec>,
+    hiddenIdentifiers: Set<IdentifierSpec>,
     lastTextFieldIdentifier: IdentifierSpec?
 ) {
     val visibleFields = controller.fields.filter { !hiddenIdentifiers.contains(it.identifier) }

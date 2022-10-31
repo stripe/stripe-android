@@ -32,6 +32,9 @@ def getAccountId() {
 dependencies {
     implementation project(':payments')
     implementation project(':financial-connections')
+
+    implementation("com.alipay.sdk:alipaysdk-android:15.8.11")
+
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
     implementation "androidx.recyclerview:recyclerview:$androidxRecyclerviewVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion"

@@ -43,3 +43,6 @@ const val HEADER_AUTHORIZATION = "Authorization"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val HEADER_IDEMPOTENCY_KEY = "Idempotency-Key"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val HEADER_X_STRIPE_USER_AGENT = "X-Stripe-User-Agent"

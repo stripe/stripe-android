@@ -137,7 +137,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         setupTopContainer()
 
         linkButton.apply {
-            onClick = { viewModel.launchLink(launchedDirectly = false) }
+            onClick = { config ->
+                viewModel.launchLink(config, launchedDirectly = false)
+            }
             linkPaymentLauncher = viewModel.linkLauncher
         }
 
@@ -261,15 +263,17 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override fun resetPrimaryButtonState() {
         viewBinding.buyButton.updateState(PrimaryButton.State.Ready)
 
-        if (viewModel.isProcessingPaymentIntent) {
-            viewBinding.buyButton.setLabel(
-                viewModel.amount.value?.buildPayButtonLabel(resources)
-            )
+        val customLabel = starterArgs?.config?.primaryButtonLabel
+
+        val label = if (customLabel != null) {
+            starterArgs?.config?.primaryButtonLabel
+        } else if (viewModel.isProcessingPaymentIntent) {
+            viewModel.amount.value?.buildPayButtonLabel(resources)
         } else {
-            viewBinding.buyButton.setLabel(
-                resources.getString(R.string.stripe_setup_button_label)
-            )
+            getString(R.string.stripe_setup_button_label)
         }
+
+        viewBinding.buyButton.setLabel(label)
 
         viewBinding.buyButton.setOnClickListener {
             clearErrorMessages()

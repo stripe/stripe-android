@@ -1,16 +1,7 @@
-plugins {
-    id 'com.android.library'
-    id 'kotlin-android'
-    id 'checkstyle'
-    id 'org.jetbrains.kotlin.plugin.parcelize'
-}
+apply from: configs.androidLibrary
 
-assemble.dependsOn('lint')
-check.dependsOn('checkstyle')
-
-configurations {
-    ktlint
-}
+apply plugin: 'checkstyle'
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
 dependencies {
     implementation project(':payments-core')
@@ -26,53 +17,9 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
     testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
     testImplementation "androidx.test:core-ktx:$androidTestVersion"
+    testImplementation "androidx.lifecycle:lifecycle-runtime-testing:$androidxLifecycleVersion"
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
-}
-
-android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-
-    defaultConfig {
-        minSdkVersion 21
-        targetSdkVersion rootProject.ext.compileSdkVersion
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    testOptions {
-        unitTests {
-            // Note: without this, all Robolectric tests using BuildConfig will fail.
-            includeAndroidResources = true
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-}
-
-task ktlint(type: JavaExec, group: "verification") {
-    description = "Check Kotlin code style."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "src/**/*.kt"
-    // to generate report in checkstyle format prepend following args:
-    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
-    // see https://github.com/pinterest/ktlint#usage for more
-}
-check.dependsOn ktlint
-
-task ktlintFormat(type: JavaExec, group: "formatting") {
-    description = "Fix Kotlin code style deviations."
-    mainClass = "com.pinterest.ktlint.Main"
-    classpath = configurations.ktlint
-    args "-F", "src/**/*.kt"
 }
 
 ext {

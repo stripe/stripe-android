@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,11 +20,12 @@ import com.stripe.android.ui.core.elements.menu.Checkbox
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun CheckboxElementUI(
+    modifier: Modifier = Modifier,
     automationTestTag: String = "",
     isChecked: Boolean = false,
     label: String? = null,
     isEnabled: Boolean = false,
-    onValueChange: (Boolean) -> Unit
+    onValueChange: (Boolean) -> Unit,
 ) {
     val accessibilityDescription = stringResource(
         if (isChecked) {
@@ -36,8 +36,8 @@ fun CheckboxElementUI(
     )
 
     Row(
-        modifier = Modifier
-            .requiredHeight(32.dp)
+        modifier = modifier
+            .padding(vertical = 4.dp)
             .semantics {
                 testTag = automationTestTag
                 stateDescription = accessibilityDescription

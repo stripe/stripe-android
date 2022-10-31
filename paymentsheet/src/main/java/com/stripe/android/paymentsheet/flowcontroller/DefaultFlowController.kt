@@ -12,8 +12,8 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -22,15 +22,15 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.injection.LinkPaymentLauncherFactory
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -43,6 +43,8 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
+import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.DaggerFlowControllerComponent
 import com.stripe.android.paymentsheet.injection.FlowControllerComponent
@@ -54,6 +56,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
+import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.validate
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -61,6 +64,7 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -86,6 +90,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @InjectorKey private val injectorKey: String,
     // Properties provided through injection
     private val flowControllerInitializer: FlowControllerInitializer,
+    private val customerApiRepository: CustomerApiRepository,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
@@ -101,8 +106,8 @@ internal class DefaultFlowController @Inject internal constructor(
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
-    private val linkPaymentLauncherFactory: LinkPaymentLauncherFactory
-) : PaymentSheet.FlowController, Injector {
+    private val linkLauncher: LinkPaymentLauncher
+) : PaymentSheet.FlowController, NonFallbackInjector {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val googlePayActivityLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
@@ -115,7 +120,7 @@ internal class DefaultFlowController @Inject internal constructor(
      */
     lateinit var flowControllerComponent: FlowControllerComponent
 
-    private var paymentLauncher: PaymentLauncher? = null
+    private var paymentLauncher: StripePaymentLauncher? = null
 
     private val resourceRepositories = listOf(lpmResourceRepository, addressResourceRepository)
 
@@ -144,10 +149,13 @@ internal class DefaultFlowController @Inject internal constructor(
                             PaymentLauncherContract(),
                             ::onPaymentResult
                         )
-                    )
+                    ).also {
+                        it.registerPollingAuthenticator()
+                    }
                 }
 
                 override fun onDestroy(owner: LifecycleOwner) {
+                    paymentLauncher?.unregisterPollingAuthenticator()
                     paymentLauncher = null
                 }
             }
@@ -466,26 +474,31 @@ internal class DefaultFlowController @Inject internal constructor(
             } else {
                 null
             }
-            val linkLauncher = linkPaymentLauncherFactory.create(
+            val customerEmail = config.defaultBillingDetails?.email ?: config.customer?.let {
+                customerApiRepository.retrieveCustomer(
+                    it.id,
+                    it.ephemeralKeySecret
+                )?.email
+            }
+            val linkConfig = LinkPaymentLauncher.Configuration(
+                stripeIntent = initData.stripeIntent,
                 merchantName = config.merchantDisplayName,
-                customerEmail = config.defaultBillingDetails?.email,
+                customerEmail = customerEmail,
                 customerPhone = customerPhone,
                 customerName = config.defaultBillingDetails?.name,
+                customerBillingCountryCode = config.defaultBillingDetails?.address?.country,
                 shippingValues = shippingAddress
             )
-            val accountStatus = linkLauncher.setup(
-                stripeIntent = initData.stripeIntent,
-                coroutineScope = lifecycleScope
-            )
+            val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
             // If a returning user is paying with a new card inline, launch Link to complete payment
             (paymentSelection as? PaymentSelection.New.LinkInline)?.takeIf {
                 accountStatus == AccountStatus.Verified
             }?.linkPaymentDetails?.originalParams?.let {
-                linkLauncher.present(linkActivityResultLauncher, it)
+                linkLauncher.present(linkConfig, linkActivityResultLauncher, it)
             } ?: run {
                 if (paymentSelection is PaymentSelection.Link) {
                     // User selected Link as the payment method, not inline
-                    linkLauncher.present(linkActivityResultLauncher)
+                    linkLauncher.present(linkConfig, linkActivityResultLauncher)
                 } else {
                     // New user paying inline, complete without launching Link
                     confirmPaymentSelection(paymentSelection, initData)
