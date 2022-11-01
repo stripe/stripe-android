@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.LocalContext
  * TextResource is a domain specific model to represent text.
  */
 internal sealed interface TextResource {
-    data class Text(val value: String) : TextResource
+    data class Text(val value: CharSequence) : TextResource
     data class StringId(
         @StringRes val value: Int,
         val args: List<String> = emptyList()

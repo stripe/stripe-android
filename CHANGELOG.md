@@ -2,6 +2,58 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+
+## 20.15.3 - 2022-10-31
+
+### PaymentSheet
+
+* [ADDED][5729](https://github.com/stripe/stripe-android/pull/5729) Added support for a custom primary button label via `PaymentSheet.Configuration.primaryButtonLabel`.
+
+### CardScan
+
+* [FIXED][5749](https://github.com/stripe/stripe-android/pull/5749) Prevent multiple invocations to `/verify_frames`
+
+## 20.15.2 - 2022-10-25
+
+This release fixes a few bugs in `PaymentSession`, `PaymentSheet` and `CardScan`.
+
+### Payments
+
+* [FIXED][5722](https://github.com/stripe/stripe-android/pull/5722) Fix saving and restoring Google Pay selection in `PaymentSession`.
+
+### PaymentSheet
+
+* [FIXED][5738](https://github.com/stripe/stripe-android/pull/5738) Fix crash on Payment Sheet when integrating with Compose.
+
+### CardScan
+
+* [FIXED][5730](https://github.com/stripe/stripe-android/pull/5730) Fix crash during initialization.
+
+## 20.15.1 - 2022-10-17
+
+This release fixes some bugs in `ShippingInfoWidget`, `PaymentSheet`, and when the app is backgrounded during confirmation on Android 10 and 11.
+
+### Payments
+
+* [FIXED][5701](https://github.com/stripe/stripe-android/pull/5701) Treat blank fields as invalid in `ShippingInfoWidget`.
+* [FIXED][5667](https://github.com/stripe/stripe-android/pull/5667) Completed payments are no longer incorrectly reported as having failed if the app is backgrounded during confirmation on Android 10 and 11.
+
+### PaymentSheet
+
+* [FIXED][5715](https://github.com/stripe/stripe-android/pull/5715) Postal codes for countries other than US and Canada are no longer limited to a single character.
+
+## 20.15.0 - 2022-10-11
+
+This release adds Link as a payment method to the SDK and fixes a minor issue with CardScan.
+
+### PaymentSheet
+
+* [ADDED][5692](https://github.com/stripe/stripe-android/pull/5692) Enable Link as a payment method.
+
+### CardScan
+
+* [FIXED][5679](https://github.com/stripe/stripe-android/pull/5679) Fix oversized verification_frames payloads leading to failed scans.
+
 ## 20.14.1 - 2022-10-03
 
 This release expands the `payment_method` field on ACH requests and fixes a formatting error in `CardInputWidget`, `CardMultilineWidget`, and `CardFormView`.

@@ -4,10 +4,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>InlineSignupViewState</title>
 <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
-const savedDarkMode = storage ? JSON.parse(storage) : false
-if(savedDarkMode === true){
-    document.getElementsByTagName("html")[0].classList.add("theme-dark")
-}</script>
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
 <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
 <link href="../../../styles/style.css" rel="Stylesheet">
 <link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
@@ -18,7 +26,8 @@ if(savedDarkMode === true){
 <script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../../scripts/main.js" defer></script>
-<script type="text/javascript" src="../../../scripts/prism.js" async></script></head>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
 <body>
 <div class="navigation-wrapper" id="navigation-wrapper">
     <div id="leftToggler"><span class="icon-toggler"></span></div>
@@ -38,20 +47,35 @@ if(savedDarkMode === true){
     </div>
     <div id="main">
 <div class="main-content" id="content" pageids="link::com.stripe.android.link.ui.inline/InlineSignupViewState///PointingToDeclaration//1328945945">
-  <div class="breadcrumbs"><a href="../../index.html">link</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.link.ui.inline</a><span class="delimiter">/</span><a href="index.html">InlineSignupViewState</a></div>
+  <div class="breadcrumbs"><a href="../../index.html">link</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.link.ui.inline</a><span class="delimiter">/</span><span class="current">InlineSignupViewState</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Inline</span><wbr><span>Signup</span><wbr><span>View</span><wbr><span><span>State</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">InlineSignupViewState</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><p class="paragraph">The LinkInlineSignup view state.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP.html">RestrictTo.Scope.LIBRARY_GROUP</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">InlineSignupViewState</a></div><p class="paragraph">The LinkInlineSignup view state.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Properties">Properties</button><button class="section-tab" data-togglable="Parameters">Parameters</button></div>
     <div class="tabs-section-body">
-      <h2 class="">Parameters</h2>
+      <h4 class="">Parameters</h4>
       <div data-togglable="Parameters">
-        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="Parameters"><div class="content sourceset-depenent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>user</span><wbr><span><span>Input</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The collected input from the user, always valid unless null.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>is</span><wbr><span><span>Expanded</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">Whether the checkbox is selected and the view is expanded.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>api</span><wbr><span><span>Failed</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">Whether an API call has failed. In such cases, we want to continue the     payment flow without Link.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><span>sign</span><wbr><span>Up</span><wbr><span><span>State</span></span></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The stage of the sign in or sign up flow.</p></div></div></div></div></div></div></div></div></div>
+        <div class="platform-hinted WithExtraAttributes" data-platform-hinted="data-platform-hinted" data-togglable="Parameters"><div class="content sourceset-dependent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><div data-togglable="Parameters"><div class="table" data-togglable="Parameters"><div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><u><span>user</span><wbr><span><span>Input</span></span></u></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The collected input from the user, always valid unless null.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><u><span>is</span><wbr><span><span>Expanded</span></span></u></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">Whether the checkbox is selected and the view is expanded.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><u><span>api</span><wbr><span><span>Failed</span></span></u></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">Whether an API call has failed. In such cases, we want to continue the     payment flow without Link.</p></div></div></div></div></div><div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release"><div class="main-subrow keyValue WithExtraAttributes"><div class=""><span class="inline-flex"><div><u><span>sign</span><wbr><span>Up</span><wbr><span><span>State</span></span></u></div></span></div><div><div class="title"><div data-togglable="Parameters"><p class="paragraph">The stage of the sign in or sign up flow.</p></div></div></div></div></div></div></div></div></div>
       </div>
       <h2 class="">Properties</h2>
-      <div class="table" data-togglable="Properties"><a data-name="-302710387%2FProperties%2F1328945945" anchor-label="useLink" id="-302710387%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a>
+      <div class="table" data-togglable="Properties"><a data-name="-803238791%2FProperties%2F1328945945" anchor-label="merchantName" id="-803238791%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="merchant-name.html"><span>merchant</span><wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-803238791%2FProperties%2F1328945945"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><a data-name="-803238791%2FProperties%2F1328945945" anchor-label="merchantName" id="-803238791%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="merchant-name.html">merchantName</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-302710387%2FProperties%2F1328945945" anchor-label="useLink" id="-302710387%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a>
         <div class="table-row" data-filterable-current=":link:dokkaHtmlPartial/release" data-filterable-set=":link:dokkaHtmlPartial/release">
           <div class="main-subrow keyValue ">
             <div class=""><span class="inline-flex">
@@ -61,7 +85,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><a data-name="-302710387%2FProperties%2F1328945945" anchor-label="useLink" id="-302710387%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="use-link.html">useLink</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-302710387%2FProperties%2F1328945945" anchor-label="useLink" id="-302710387%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><p class="paragraph">Whether the view is active and the payment should be processed through Link.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><a data-name="-302710387%2FProperties%2F1328945945" anchor-label="useLink" id="-302710387%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="use-link.html">useLink</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><a data-name="-302710387%2FProperties%2F1328945945" anchor-label="useLink" id="-302710387%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><p class="paragraph">Whether the view is active and the payment should be processed through Link.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -76,7 +100,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><a data-name="497584751%2FProperties%2F1328945945" anchor-label="userInput" id="497584751%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="user-input.html">userInput</a><span class="token operator">: </span><a href="../-user-input/index.html">UserInput</a><span class="token operator">?</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":link:dokkaHtmlPartial/release"><a data-name="497584751%2FProperties%2F1328945945" anchor-label="userInput" id="497584751%2FProperties%2F1328945945" data-filterable-set=":link:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="user-input.html">userInput</a><span class="token operator">: </span><a href="../-user-input/index.html">UserInput</a><span class="token operator">?</span></div></div></div>
               </div>
             </div>
           </div>

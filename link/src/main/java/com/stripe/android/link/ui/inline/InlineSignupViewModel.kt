@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.injection.NonFallbackInjectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
@@ -17,8 +19,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.ui.core.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.injection.NonFallbackInjectable
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -87,6 +87,8 @@ internal class InlineSignupViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
 
+    val accountEmail = linkAccountManager.linkAccount.map { it?.email }
+
     val requiresNameCollection: Boolean
         get() {
             val countryCode = when (val stripeIntent = config.stripeIntent) {
@@ -109,6 +111,12 @@ internal class InlineSignupViewModel @Inject constructor(
             hasExpanded = true
             watchUserInput()
             linkEventsReporter.onInlineSignupCheckboxChecked()
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            linkAccountManager.logout()
         }
     }
 

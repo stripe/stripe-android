@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.common
 
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -13,12 +14,46 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+
+@Composable
+@Suppress("MagicNumber")
+internal fun LoadingShimmerEffect(
+    content: @Composable (Brush) -> Unit
+) {
+    val gradient = listOf(
+        FinancialConnectionsTheme.colors.backgroundContainer,
+        FinancialConnectionsTheme.colors.textWhite,
+        FinancialConnectionsTheme.colors.backgroundContainer
+    )
+    val transition = rememberInfiniteTransition()
+    val translateAnimation = transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1000f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 1000,
+                easing = FastOutLinearInEasing
+            )
+        )
+    )
+    val brush = Brush.linearGradient(
+        colors = gradient,
+        start = Offset(200f, 200f),
+        end = Offset(
+            x = translateAnimation.value,
+            y = translateAnimation.value
+        )
+    )
+    content(brush)
+}
 
 @Composable
 internal fun LoadingContent(
@@ -68,7 +103,7 @@ internal fun LoadingSpinner() {
 private const val LOADING_SPINNER_ROTATION_MS = 1000
 
 @Composable
-@Preview()
+@Preview
 internal fun LoadingSpinnerPreview() {
     LoadingSpinner()
 }

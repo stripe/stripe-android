@@ -13,7 +13,7 @@ internal object DateUtils {
      *
      * @param expiryMonth An integer representing a month. Only values 1-12 are valid,
      * but this is called by user input, so we have to check outside that range.
-     * @param expiryYear An integer representing the full year (2017, not 17). Only positive values
+     * @param expiryYear An integer representing the year (either 2017 or 17). Only positive values
      * are valid, but this is called by user input, so we have to check outside
      * for otherwise nonsensical dates. This code cannot validate years greater
      * than [9980][MAX_VALID_YEAR] because of how we parse years in [convertTwoDigitYearToFour].
@@ -23,7 +23,12 @@ internal object DateUtils {
      */
     @JvmStatic
     fun isExpiryDataValid(expiryMonth: Int, expiryYear: Int): Boolean {
-        return isExpiryDataValid(expiryMonth, expiryYear, Calendar.getInstance())
+        val fullExpiryYear = if (expiryYear < 100) {
+            convertTwoDigitYearToFour(expiryYear)
+        } else {
+            expiryYear
+        }
+        return isExpiryDataValid(expiryMonth, fullExpiryYear, Calendar.getInstance())
     }
 
     @VisibleForTesting

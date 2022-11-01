@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.features.common.AccessibleDataCal
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutWithAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -48,14 +49,15 @@ internal fun SuccessScreen() {
             accessibleDataModel = payload.accessibleData,
             disconnectUrl = payload.disconnectUrl,
             accounts = payload.accounts.data,
+            institution = payload.institution,
             businessName = payload.businessName,
             loading = state.value.completeSession is Loading,
             onDoneClick = viewModel::onDoneClick,
             onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
-            onCloseClick = parentViewModel::onCloseWithConfirmationClick,
-            showLinkAnotherAccount = payload.showLinkAnotherAccount,
-            institution = payload.institution
-        )
+            onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
+            onDisconnectLinkClick = viewModel::onDisconnectLinkClick,
+            showLinkAnotherAccount = payload.showLinkAnotherAccount
+        ) { parentViewModel.onCloseWithConfirmationClick(NextPane.SUCCESS) }
     }
 }
 
@@ -71,14 +73,16 @@ private fun SuccessContent(
     onDoneClick: () -> Unit,
     onLinkAnotherAccountClick: () -> Unit,
     showLinkAnotherAccount: Boolean,
+    onLearnMoreAboutDataAccessClick: () -> Unit,
+    onDisconnectLinkClick: () -> Unit,
     onCloseClick: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
-                showBack = false
+                showBack = false,
+                onCloseClick = onCloseClick
             )
         }
     ) {
@@ -118,17 +122,21 @@ private fun SuccessContent(
                     model = accessibleDataModel,
                     accounts = accounts,
                     institution = institution,
+                    onLearnMoreClick = { onLearnMoreAboutDataAccessClick() }
                 )
             }
             Spacer(modifier = Modifier.size(12.dp))
             AnnotatedText(
                 text = TextResource.StringId(R.string.success_pane_disconnect),
-                onClickableTextClick = { uriHandler.openUri(disconnectUrl) },
+                onClickableTextClick = {
+                    onDisconnectLinkClick()
+                    uriHandler.openUri(disconnectUrl)
+                },
                 defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
                     color = FinancialConnectionsTheme.colors.textSecondary
                 ),
                 annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                    StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption
                         .toSpanStyle()
                         .copy(color = FinancialConnectionsTheme.colors.textBrand)
                 )
@@ -222,20 +230,23 @@ internal fun SuccessScreenPreview() {
                     supportedPaymentMethodTypes = emptyList()
                 )
             ),
-            loading = false,
-            onDoneClick = {},
-            businessName = "Random business",
-            onLinkAnotherAccountClick = {},
-            showLinkAnotherAccount = true,
-            onCloseClick = {},
             institution = FinancialConnectionsInstitution(
                 id = "id",
                 name = "name",
                 url = "url",
                 featured = true,
                 featuredOrder = null,
+                icon = null,
+                logo = null,
                 mobileHandoffCapable = false
-            )
-        )
+            ),
+            businessName = "Random business",
+            loading = false,
+            onDoneClick = {},
+            onLinkAnotherAccountClick = {},
+            onLearnMoreAboutDataAccessClick = {},
+            onDisconnectLinkClick = {},
+            showLinkAnotherAccount = true,
+        ) {}
     }
 }

@@ -40,9 +40,9 @@ class PostalCodeConfigTest {
             Truth.assertThat(determineStateForInput(" ").isValid()).isFalse()
             Truth.assertThat(determineStateForInput(" ").isFull()).isFalse()
             Truth.assertThat(determineStateForInput("a").isValid()).isTrue()
-            Truth.assertThat(determineStateForInput("a").isFull()).isTrue()
+            Truth.assertThat(determineStateForInput("a").isFull()).isFalse()
             Truth.assertThat(determineStateForInput("1").isValid()).isTrue()
-            Truth.assertThat(determineStateForInput("1").isFull()).isTrue()
+            Truth.assertThat(determineStateForInput("1").isFull()).isFalse()
             Truth.assertThat(determineStateForInput("aaaaaa").isValid()).isTrue()
             Truth.assertThat(determineStateForInput("111111").isValid()).isTrue()
         }

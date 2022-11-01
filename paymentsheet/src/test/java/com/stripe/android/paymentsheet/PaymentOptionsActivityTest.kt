@@ -18,10 +18,11 @@ import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
@@ -43,6 +44,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
+import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -75,7 +77,7 @@ internal class PaymentOptionsActivityTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
-    private lateinit var injector: Injector
+    private lateinit var injector: NonFallbackInjector
     private val addressRepository = AddressRepository(context.resources)
     private val lpmRepository = mock<LpmRepository>().apply {
         whenever(fromCode(any())).thenReturn(
@@ -175,9 +177,19 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `ContinueButton should be visible when showing add payment method form`() {
-        val scenario = activityScenario()
+        val scenario = activityScenario(
+            createViewModel(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
+                )
+            )
+        )
         scenario.launch(
-            createIntent()
+            createIntent(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
+                )
+            )
         ).use {
             it.onActivity { activity ->
                 assertThat(activity.viewBinding.continueButton.isVisible)
@@ -390,7 +402,7 @@ internal class PaymentOptionsActivityTest {
                 assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Some text")
                 assertThat(activity.viewBinding.continueButton.isEnabled).isFalse()
 
-                viewModel.updateSelection(mock())
+                viewModel.updateSelection(mock<PaymentSelection.New.Card>())
                 assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Continue")
                 assertThat(activity.viewBinding.continueButton.isEnabled).isTrue()
             }
@@ -430,10 +442,17 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `primary button appearance is set`() {
-        val scenario = activityScenario()
+        val scenario = activityScenario(
+            createViewModel(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
+                )
+            )
+        )
         scenario.launch(
             createIntent(
                 args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
                         appearance = PaymentSheet.Appearance(
                             primaryButton = PaymentSheet.PrimaryButton(
@@ -501,7 +520,9 @@ internal class PaymentOptionsActivityTest {
             addressResourceRepository = StaticAddressResourceRepository(addressRepository),
             savedStateHandle = SavedStateHandle(),
             linkLauncher = linkPaymentLauncher
-        )
+        ).also {
+            it.injector = injector
+        }
     }
 
     fun registerFormViewModelInjector() {
@@ -513,7 +534,6 @@ internal class PaymentOptionsActivityTest {
                 showCheckboxControlledFields = true,
                 merchantName = "Merchant, Inc.",
                 amount = Amount(50, "USD"),
-                injectorKey = "injectorTestKeyFormFragmentArgumentTest",
                 initialPaymentMethodCreateParams = null
             ),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
@@ -531,13 +551,12 @@ internal class PaymentOptionsActivityTest {
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
-        injector = object : Injector {
+        injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 (injectable as? FormViewModel.Factory)?.let {
                     injectable.subComponentBuilderProvider = mockFormSubComponentBuilderProvider
                 }
             }
         }
-        WeakMapInjectorRegistry.register(injector, DUMMY_INJECTOR_KEY)
     }
 }

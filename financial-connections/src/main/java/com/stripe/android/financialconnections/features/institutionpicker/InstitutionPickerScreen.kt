@@ -1,9 +1,9 @@
-@file:Suppress("TooManyFunctions")
+@file:Suppress("TooManyFunctions", "LongMethod")
 
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,11 +29,16 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -49,11 +54,15 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
+import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
@@ -61,6 +70,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.image.StripeImage
 
 @Composable
 internal fun InstitutionPickerScreen() {
@@ -75,13 +85,12 @@ internal fun InstitutionPickerScreen() {
         payload = state.payload,
         institutionsProvider = { state.searchInstitutions },
         searchMode = state.searchMode,
-        query = state.query,
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCancelSearchClick = viewModel::onCancelSearchClick,
-        onCloseClick = parentViewModel::onCloseNoConfirmationClick,
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.INSTITUTION_PICKER) },
         onSearchFocused = viewModel::onSearchFocused,
-        onManualEntryClick = viewModel::onManualEntryClick
+        onManualEntryClick = viewModel::onManualEntryClick,
     )
 }
 
@@ -90,9 +99,8 @@ private fun InstitutionPickerContent(
     payload: Async<Payload>,
     institutionsProvider: () -> Async<InstitutionResponse>,
     searchMode: Boolean,
-    query: String,
     onQueryChanged: (String) -> Unit,
-    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
+    onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     onCancelSearchClick: () -> Unit,
     onCloseClick: () -> Unit,
     onSearchFocused: () -> Unit,
@@ -109,7 +117,6 @@ private fun InstitutionPickerContent(
     ) {
         LoadedContent(
             searchMode = searchMode,
-            query = query,
             onQueryChanged = onQueryChanged,
             onSearchFocused = onSearchFocused,
             onCancelSearchClick = onCancelSearchClick,
@@ -124,15 +131,16 @@ private fun InstitutionPickerContent(
 @Composable
 private fun LoadedContent(
     searchMode: Boolean,
-    query: String,
     onQueryChanged: (String) -> Unit,
     onSearchFocused: () -> Unit,
     onCancelSearchClick: () -> Unit,
     institutionsProvider: () -> Async<InstitutionResponse>,
-    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
+    onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     payload: Async<Payload>,
     onManualEntryClick: () -> Unit
 ) {
+    var input by remember { mutableStateOf("") }
+    LaunchedEffect(searchMode) { if (!searchMode) input = "" }
     Column(
         modifier = Modifier
     ) {
@@ -149,18 +157,21 @@ private fun LoadedContent(
         Spacer(modifier = Modifier.size(16.dp))
         if (payload()?.searchDisabled == false) {
             FinancialConnectionsSearchRow(
-                query = query,
+                query = input,
                 searchMode = searchMode,
-                onQueryChanged = onQueryChanged,
+                onQueryChanged = {
+                    input = it
+                    onQueryChanged(input)
+                },
                 onSearchFocused = onSearchFocused,
                 onCancelSearchClick = onCancelSearchClick
             )
         }
-        if (query.isNotEmpty()) {
+        if (input.isNotEmpty()) {
             SearchInstitutionsList(
                 institutionsProvider = institutionsProvider,
                 onInstitutionSelected = onInstitutionSelected,
-                query = query,
+                query = input,
                 onManualEntryClick = onManualEntryClick,
                 manualEntryEnabled = payload()?.allowManualEntry ?: false
             )
@@ -205,9 +216,11 @@ private fun FinancialConnectionsSearchRow(
             modifier = Modifier
                 .onFocusChanged { if (it.isFocused) onSearchFocused() }
                 .weight(1f),
-            value = query,
+            value = if (searchMode) query else "",
             label = { Text(text = stringResource(id = R.string.stripe_search)) },
-            onValueChange = onQueryChanged
+            onValueChange = {
+                onQueryChanged(it)
+            }
         )
     }
 }
@@ -215,7 +228,7 @@ private fun FinancialConnectionsSearchRow(
 @Composable
 private fun SearchInstitutionsList(
     institutionsProvider: () -> Async<InstitutionResponse>,
-    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit,
+    onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     query: String,
     onManualEntryClick: () -> Unit,
     manualEntryEnabled: Boolean
@@ -255,7 +268,7 @@ private fun SearchInstitutionsList(
                         }
                     } else {
                         items(institutions().data, key = { it.id }) { institution ->
-                            InstitutionResultTile(onInstitutionSelected, institution)
+                            InstitutionResultTile({ onInstitutionSelected(it, false) }, institution)
                         }
                     }
                     item {
@@ -335,13 +348,16 @@ private fun InstitutionResultTile(
                 horizontal = 16.dp
             )
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        val modifier = Modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(6.dp))
+        StripeImage(
+            url = institution.icon?.default ?: "",
+            imageLoader = LocalImageLoader.current,
             contentDescription = null,
-            modifier = Modifier
-                .size(36.dp)
-                .clip(RoundedCornerShape(6.dp))
-
+            modifier = modifier,
+            contentScale = ContentScale.Crop,
+            errorContent = { InstitutionPlaceholder(modifier) }
         )
         Spacer(modifier = Modifier.size(8.dp))
         Column {
@@ -364,7 +380,7 @@ private fun InstitutionResultTile(
 @Composable
 private fun FeaturedInstitutionsGrid(
     payload: Async<Payload>,
-    onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit
+    onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -390,19 +406,43 @@ private fun FeaturedInstitutionsGrid(
                         modifier = Modifier
                             .height(80.dp)
                             .fillMaxWidth()
+                            .clip(RoundedCornerShape(6.dp))
                             .border(
                                 width = 1.dp,
                                 color = FinancialConnectionsTheme.colors.borderDefault,
                                 shape = RoundedCornerShape(4.dp)
                             )
-                            .clickable { onInstitutionSelected(institution) }
-                            .padding(8.dp)
+                            .clickable { onInstitutionSelected(institution, true) }
                     ) {
-                        Text(
-                            text = institution.name,
-                            color = FinancialConnectionsTheme.colors.textPrimary,
-                            style = FinancialConnectionsTheme.typography.bodyEmphasized,
-                            textAlign = TextAlign.Center
+                        StripeImage(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(8.dp),
+                            url = institution.logo?.default ?: "",
+                            imageLoader = LocalImageLoader.current,
+                            contentScale = ContentScale.Fit,
+                            loadingContent = {
+                                LoadingShimmerEffect { shimmer ->
+                                    Spacer(
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .height(20.dp)
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .fillMaxWidth(fraction = 0.5f)
+                                            .background(shimmer)
+                                    )
+                                }
+                            },
+                            errorContent = {
+                                Text(
+                                    modifier = Modifier.align(Alignment.Center),
+                                    text = institution.name,
+                                    color = FinancialConnectionsTheme.colors.textPrimary,
+                                    style = FinancialConnectionsTheme.typography.bodyEmphasized,
+                                    textAlign = TextAlign.Center
+                                )
+                            },
+                            contentDescription = "Institution logo"
                         )
                     }
                 }
@@ -441,12 +481,11 @@ internal fun SearchModeSearchingInstitutions(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
-            query = state.query,
             onQueryChanged = {},
-            onInstitutionSelected = {},
+            onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {}
+            onSearchFocused = {},
         ) {}
     }
 }
@@ -461,12 +500,11 @@ internal fun SearchModeWithResults(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
-            query = state.query,
             onQueryChanged = {},
-            onInstitutionSelected = {},
+            onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {}
+            onSearchFocused = {},
         ) {}
     }
 }
@@ -481,12 +519,11 @@ internal fun SearchModeNoResults(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
-            query = state.query,
             onQueryChanged = {},
-            onInstitutionSelected = {},
+            onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {}
+            onSearchFocused = {},
         ) {}
     }
 }
@@ -501,12 +538,11 @@ internal fun SearchModeFailed(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
-            query = state.query,
             onQueryChanged = {},
-            onInstitutionSelected = {},
+            onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {}
+            onSearchFocused = {},
         ) {}
     }
 }
@@ -521,12 +557,11 @@ internal fun SearchModeNoQuery(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
-            query = state.query,
             onQueryChanged = {},
-            onInstitutionSelected = {},
+            onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {}
+            onSearchFocused = {},
         ) {}
     }
 }
@@ -541,12 +576,11 @@ internal fun NoSearchMode(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
-            query = state.query,
             onQueryChanged = {},
-            onInstitutionSelected = {},
+            onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
-            onSearchFocused = {}
+            onSearchFocused = {},
         ) {}
     }
 }

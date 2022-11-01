@@ -26,13 +26,13 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     accounts = partnerAccountList(),
                     selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
                     accessibleData = accessibleCallout(),
-                    selectedIds = setOf("id1"),
                     singleAccount = false,
                     institutionSkipAccountSelection = false,
                     businessName = "Random business",
                     stripeDirect = false,
                 )
-            )
+            ),
+            selectedIds = setOf("id1"),
         )
 
         fun singleSelect() = AccountPickerState(
@@ -42,13 +42,13 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     accounts = partnerAccountList(),
                     selectionMode = AccountPickerState.SelectionMode.RADIO,
                     accessibleData = accessibleCallout(),
-                    selectedIds = setOf("id1"),
                     singleAccount = false,
                     institutionSkipAccountSelection = false,
                     businessName = "Random business",
                     stripeDirect = false,
                 )
-            )
+            ),
+            selectedIds = setOf("id1"),
         )
 
         fun dropdown(selectedIds: Set<String>) = AccountPickerState(
@@ -58,13 +58,13 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     accounts = partnerAccountList(),
                     selectionMode = AccountPickerState.SelectionMode.DROPDOWN,
                     accessibleData = accessibleCallout(),
-                    selectedIds = selectedIds,
                     singleAccount = true,
                     institutionSkipAccountSelection = true,
                     businessName = "Random business",
                     stripeDirect = true,
                 )
-            )
+            ),
+            selectedIds = setOf("id1"),
         )
 
         private fun partnerAccountList() = listOf(
@@ -81,6 +81,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     supportedPaymentMethodTypes = emptyList()
                 ),
                 enabled = true,
+                institutionIcon = null
                 formattedBalance = "$1,000"
             ),
             PartnerAccountUI(
@@ -93,7 +94,8 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = false,
+                enabled = true,
+                institutionIcon = null
                 formattedBalance = "$1,000"
             ),
             PartnerAccountUI(
@@ -106,7 +108,8 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = true,
+                enabled = false,
+                institutionIcon = null
                 formattedBalance = null
             ),
             PartnerAccountUI(
@@ -120,6 +123,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     supportedPaymentMethodTypes = emptyList()
                 ),
                 enabled = false,
+                institutionIcon = null
                 formattedBalance = null
             ),
             PartnerAccountUI(

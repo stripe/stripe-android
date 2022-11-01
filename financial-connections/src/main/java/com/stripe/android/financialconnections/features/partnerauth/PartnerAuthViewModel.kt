@@ -10,7 +10,9 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -19,7 +21,9 @@ import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOA
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -28,15 +32,15 @@ import javax.inject.Inject
 
 @Suppress("LongParameterList")
 internal class PartnerAuthViewModel @Inject constructor(
-    val completeAuthorizationSession: CompleteAuthorizationSession,
-    val createAuthorizationSession: PostAuthorizationSession,
-    val cancelAuthorizationSession: CancelAuthorizationSession,
-    val configuration: FinancialConnectionsSheet.Configuration,
-    val getManifest: GetManifest,
-    val goNext: GoNext,
-    val navigationManager: NavigationManager,
-    val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
-    val logger: Logger,
+    private val completeAuthorizationSession: CompleteAuthorizationSession,
+    private val createAuthorizationSession: PostAuthorizationSession,
+    private val cancelAuthorizationSession: CancelAuthorizationSession,
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val getManifest: GetManifest,
+    private val goNext: GoNext,
+    private val navigationManager: NavigationManager,
+    private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
+    private val logger: Logger,
     initialState: PartnerAuthState
 ) : MavericksViewModel<PartnerAuthState>(initialState) {
 
@@ -46,14 +50,14 @@ internal class PartnerAuthViewModel @Inject constructor(
         suspend {
             val manifest = getManifest()
             val authSession = createAuthorizationSession(
-                institution = manifest.activeInstitution!!,
+                institution = requireNotNull(manifest.activeInstitution),
                 allowManualEntry = manifest.allowManualEntry
             )
             Payload(
                 flow = authSession.flow,
                 showPrepane = authSession.flow?.isOAuth() ?: true,
                 showPartnerDisclosure = authSession.showPartnerDisclosure ?: false,
-                institutionName = manifest.activeInstitution.name
+                institution = manifest.activeInstitution
             )
         }.execute {
             copy(payload = it)
@@ -68,9 +72,14 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 
     private fun logErrors() {
-        onAsync(PartnerAuthState::payload, onFail = {
-            logger.error("Error fetching payload / posting AuthSession", it)
-        })
+        onAsync(
+            PartnerAuthState::payload,
+            onFail = {
+                logger.error("Error fetching payload / posting AuthSession", it)
+                eventTracker.track(FinancialConnectionsEvent.Error(NextPane.PARTNER_AUTH, it))
+            },
+            onSuccess = { eventTracker.track(PaneLoaded(NextPane.PARTNER_AUTH)) }
+        )
     }
 
     fun onLaunchAuthClick() {
@@ -78,6 +87,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             kotlin.runCatching { requireNotNull(getManifest().activeAuthSession) }
                 .onSuccess { setState { copy(url = it.url) } }
                 .onFailure {
+                    eventTracker.track(FinancialConnectionsEvent.Error(NextPane.PARTNER_AUTH, it))
                     logger.error("failed retrieving active session from cache", it)
                     setState { copy(authenticationStatus = Fail(it)) }
                 }
@@ -194,7 +204,7 @@ internal data class PartnerAuthState(
     val authenticationStatus: Async<String> = Uninitialized
 ) : MavericksState {
     data class Payload(
-        val institutionName: String,
+        val institution: FinancialConnectionsInstitution,
         val flow: Flow?,
         val showPartnerDisclosure: Boolean,
         val showPrepane: Boolean

@@ -1,10 +1,15 @@
 @file:OptIn(ExperimentalMaterialApi::class, ExperimentalMaterialApi::class)
+@file:Suppress("LongMethod", "TooManyFunctions")
 
 package com.stripe.android.financialconnections.features.consent
 
 import android.net.Uri
+import android.os.Build
+import android.text.Html
+import android.text.Spanned
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,7 +22,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
@@ -25,30 +29,41 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
+import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
+import com.airbnb.mvrx.Success
+import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
+import com.stripe.android.financialconnections.features.common.LoadingContent
+import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
+import com.stripe.android.financialconnections.model.ConsentPane
+import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.uicore.image.StripeImage
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
@@ -82,8 +97,7 @@ internal fun ConsentScreen() {
         onContinueClick = viewModel::onContinueClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-        onCloseClick = parentViewModel::onCloseNoConfirmationClick
-    )
+    ) { parentViewModel.onCloseNoConfirmationClick(NextPane.CONSENT) }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -119,42 +133,43 @@ private fun ConsentContent(
     onConfirmModalClick: () -> Unit,
     onCloseClick: () -> Unit
 ) {
-    val scrollState = rememberScrollState()
-    ModalBottomSheetLayout(
-        sheetState = bottomSheetState,
-        sheetBackgroundColor = FinancialConnectionsTheme.colors.backgroundSurface,
-        sheetShape = RoundedCornerShape(8.dp),
-        scrimColor = FinancialConnectionsTheme.colors.textSecondary.copy(alpha = 0.5f),
-        sheetContent = {
-            ConsentPermissionsBottomSheetContent(
-                requestedDataTitle = state.requestedDataTitle,
-                requestedDataBullets = state.requestedDataBullets,
-                onConfirmModalClick = onConfirmModalClick,
-                onClickableTextClick = onClickableTextClick
-            )
-        },
-        content = {
-            ConsentMainContent(
-                scrollState = scrollState,
-                state = state,
-                onClickableTextClick = onClickableTextClick,
-                onContinueClick = onContinueClick,
-                onCloseClick = onCloseClick
-            )
-        }
-    )
+    when (val consent = state.consent) {
+        Uninitialized, is Loading -> LoadingContent()
+        is Success -> LoadedContent(
+            consent = consent(),
+            acceptConsent = state.acceptConsent,
+            bottomSheetState = bottomSheetState,
+            onClickableTextClick = onClickableTextClick,
+            onCloseClick = onCloseClick,
+            onConfirmModalClick = onConfirmModalClick,
+            onContinueClick = onContinueClick
+        )
+
+        is Fail -> UnclassifiedErrorContent(error = consent.error, onCloseFromErrorClick = {})
+    }
 }
 
 @Composable
 private fun ConsentMainContent(
-    scrollState: ScrollState,
-    state: ConsentState,
+    consent: ConsentPane,
+    acceptConsent: Async<Unit>,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
     onCloseClick: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
+    val title = remember(consent.title) {
+        TextResource.Text(fromHtml(consent.title))
+    }
+    val bullets = remember(consent.body.bullets) {
+        consent.body.bullets.map { it.icon to TextResource.Text(fromHtml(it.content)) }
+    }
     FinancialConnectionsScaffold(
-        topBar = { FinancialConnectionsTopAppBar(onCloseClick = onCloseClick) }
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                onCloseClick = onCloseClick
+            )
+        }
     ) {
         Column(
             Modifier.fillMaxSize()
@@ -165,25 +180,27 @@ private fun ConsentMainContent(
                     .verticalScroll(scrollState)
                     .padding(24.dp)
             ) {
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = state.title.toText().toString(),
-                    textAlign = TextAlign.Center,
-                    color = FinancialConnectionsTheme.colors.textPrimary,
-                    style = FinancialConnectionsTheme.typography.subtitle
+                AnnotatedText(
+                    text = title,
+                    onClickableTextClick = { onClickableTextClick(it) },
+                    defaultStyle = typography.subtitle,
+                    annotationStyles = mapOf(
+                        StringAnnotation.CLICKABLE to typography.subtitle
+                            .toSpanStyle()
+                            .copy(color = colors.textBrand),
+                    )
                 )
                 Spacer(modifier = Modifier.size(24.dp))
-                state.bullets.forEach { (icon, text) ->
-                    ConsentBullet(icon, text) { onClickableTextClick(it) }
+                bullets.forEach { (iconUrl, text) ->
+                    ConsentBullet(iconUrl.default, text) { onClickableTextClick(it) }
                     Spacer(modifier = Modifier.size(16.dp))
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
             }
             ConsentFooter(
-                manualEntryEnabled = state.manualEntryEnabled,
-                manualEntryShowBusinessDaysNotice = state.manualEntryShowBusinessDaysNotice,
-                acceptConsent = state.acceptConsent,
+                consent = consent,
+                acceptConsent = acceptConsent,
                 onClickableTextClick = onClickableTextClick,
                 onContinueClick = onContinueClick
             )
@@ -192,20 +209,59 @@ private fun ConsentMainContent(
 }
 
 @Composable
+private fun LoadedContent(
+    consent: ConsentPane,
+    bottomSheetState: ModalBottomSheetState,
+    acceptConsent: Async<Unit>,
+    onContinueClick: () -> Unit,
+    onCloseClick: () -> Unit,
+    onClickableTextClick: (String) -> Unit,
+    onConfirmModalClick: () -> Unit,
+) {
+    ModalBottomSheetLayout(
+        sheetState = bottomSheetState,
+        sheetBackgroundColor = colors.backgroundSurface,
+        sheetShape = RoundedCornerShape(8.dp),
+        scrimColor = colors.textSecondary.copy(alpha = 0.5f),
+        sheetContent = {
+            ConsentPermissionsBottomSheetContent(
+                dataDialog = consent.dataAccessNotice,
+                onConfirmModalClick = onConfirmModalClick,
+                onClickableTextClick = onClickableTextClick
+            )
+        },
+        content = {
+            ConsentMainContent(
+                acceptConsent = acceptConsent,
+                consent = consent,
+                onClickableTextClick = onClickableTextClick,
+                onContinueClick = onContinueClick,
+                onCloseClick = onCloseClick
+            )
+        }
+    )
+}
+
+@Composable
 private fun ConsentFooter(
     acceptConsent: Async<Unit>,
-    manualEntryEnabled: Boolean,
+    consent: ConsentPane,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
-    manualEntryShowBusinessDaysNotice: Boolean
 ) {
+    val aboveCta = remember(consent.aboveCta) {
+        TextResource.Text(fromHtml(consent.aboveCta))
+    }
+    val belowCta = remember(consent.belowCta) {
+        consent.belowCta?.let { TextResource.Text(fromHtml(consent.belowCta)) }
+    }
     Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
         AnnotatedText(
-            text = TextResource.StringId(R.string.consent_pane_tc),
-            onClickableTextClick = { onClickableTextClick(it) },
-            defaultStyle = FinancialConnectionsTheme.typography.body.copy(
+            text = aboveCta,
+            onClickableTextClick = onClickableTextClick,
+            defaultStyle = typography.body.copy(
                 textAlign = TextAlign.Center,
-                color = FinancialConnectionsTheme.colors.textSecondary
+                color = colors.textSecondary
             )
         )
         Spacer(modifier = Modifier.size(16.dp))
@@ -215,20 +271,17 @@ private fun ConsentFooter(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(text = stringResource(R.string.stripe_consent_pane_agree))
+            Text(text = consent.cta)
         }
-        if (manualEntryEnabled) {
+        if (belowCta != null) {
             Spacer(modifier = Modifier.size(24.dp))
             AnnotatedText(
                 modifier = Modifier.fillMaxWidth(),
-                text = when (manualEntryShowBusinessDaysNotice) {
-                    true -> TextResource.StringId(R.string.consent_pane_manual_entry_microdeposits)
-                    false -> TextResource.StringId(R.string.consent_pane_manual_entry)
-                },
-                onClickableTextClick = { onClickableTextClick(it) },
-                defaultStyle = FinancialConnectionsTheme.typography.body.copy(
+                text = belowCta,
+                onClickableTextClick = onClickableTextClick,
+                defaultStyle = typography.body.copy(
                     textAlign = TextAlign.Center,
-                    color = FinancialConnectionsTheme.colors.textSecondary
+                    color = colors.textSecondary
                 )
             )
             Spacer(modifier = Modifier.size(16.dp))
@@ -238,11 +291,28 @@ private fun ConsentFooter(
 
 @Composable
 private fun ConsentPermissionsBottomSheetContent(
-    requestedDataTitle: TextResource,
-    requestedDataBullets: List<Pair<TextResource, TextResource>>,
+    dataDialog: DataAccessNotice,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit
 ) {
+    val title = remember(dataDialog.title) {
+        TextResource.Text(fromHtml(dataDialog.title))
+    }
+    val learnMore = remember(dataDialog.learnMore) {
+        TextResource.Text(fromHtml(dataDialog.learnMore))
+    }
+    val connectedAccountNotice = remember(dataDialog.connectedAccountNotice) {
+        dataDialog.connectedAccountNotice?.let { TextResource.Text(fromHtml(it)) }
+    }
+    val bullets = remember(dataDialog.body.bullets) {
+        dataDialog.body.bullets.map { body ->
+            Triple(
+                first = body.icon,
+                second = body.title?.let { TextResource.Text(fromHtml(body.title)) },
+                third = TextResource.Text(fromHtml(body.content))
+            )
+        }
+    }
     val scrollState = rememberScrollState()
     Column {
         Column(
@@ -250,16 +320,20 @@ private fun ConsentPermissionsBottomSheetContent(
                 .verticalScroll(scrollState)
                 .padding(24.dp)
         ) {
-            Text(
-                text = requestedDataTitle.toText().toString(),
-                color = FinancialConnectionsTheme.colors.textPrimary,
-                style = FinancialConnectionsTheme.typography.heading
+            AnnotatedText(
+                text = title,
+                defaultStyle = typography.heading.copy(
+                    color = colors.textPrimary
+                ),
+                annotationStyles = emptyMap(),
+                onClickableTextClick = onClickableTextClick
             )
-            requestedDataBullets.forEach { (title, description) ->
+            bullets.forEach { (iconUrl, title, description) ->
                 Spacer(modifier = Modifier.size(24.dp))
                 ConsentBottomSheetBullet(
-                    title = TextResource.Text(title.toText().toString()),
-                    description = TextResource.Text(description.toText().toString())
+                    iconUrl = iconUrl.default,
+                    title = title,
+                    description = description
                 )
             }
         }
@@ -270,16 +344,37 @@ private fun ConsentPermissionsBottomSheetContent(
                 end = 24.dp
             )
         ) {
+            if (connectedAccountNotice != null) {
+                AnnotatedText(
+                    text = connectedAccountNotice,
+                    onClickableTextClick = onClickableTextClick,
+                    defaultStyle = typography.caption.copy(
+                        color = colors.textSecondary
+                    ),
+                    annotationStyles = mapOf(
+                        StringAnnotation.CLICKABLE to typography.caption
+                            .toSpanStyle()
+                            .copy(color = colors.textBrand),
+                        StringAnnotation.BOLD to typography.captionEmphasized
+                            .toSpanStyle()
+                            .copy(color = colors.textSecondary),
+                    )
+                )
+                Spacer(modifier = Modifier.size(12.dp))
+            }
             AnnotatedText(
-                text = TextResource.StringId(R.string.stripe_consent_requested_data_learnmore),
-                onClickableTextClick = { onClickableTextClick(it) },
-                defaultStyle = FinancialConnectionsTheme.typography.body.copy(
-                    color = FinancialConnectionsTheme.colors.textSecondary
+                text = learnMore,
+                onClickableTextClick = onClickableTextClick,
+                defaultStyle = typography.caption.copy(
+                    color = colors.textSecondary
                 ),
                 annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption
+                    StringAnnotation.CLICKABLE to typography.caption
                         .toSpanStyle()
-                        .copy(color = FinancialConnectionsTheme.colors.textBrand)
+                        .copy(color = colors.textBrand),
+                    StringAnnotation.BOLD to typography.captionEmphasized
+                        .toSpanStyle()
+                        .copy(color = colors.textSecondary),
                 )
             )
             Spacer(modifier = Modifier.size(16.dp))
@@ -287,7 +382,7 @@ private fun ConsentPermissionsBottomSheetContent(
                 onClick = { onConfirmModalClick() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = stringResource(R.string.stripe_ok))
+                Text(text = dataDialog.cta)
             }
         }
     }
@@ -295,58 +390,79 @@ private fun ConsentPermissionsBottomSheetContent(
 
 @Composable
 private fun ConsentBottomSheetBullet(
-    title: TextResource,
-    description: TextResource
+    title: TextResource?,
+    description: TextResource?,
+    iconUrl: String
 ) {
     Row {
-        Icon(
-            painter = painterResource(id = R.drawable.stripe_ic_check_circle),
+        val modifier = Modifier
+            .size(16.dp)
+            .offset(y = 2.dp)
+        StripeImage(
+            url = iconUrl,
+            colorFilter = ColorFilter.tint(colors.iconSuccess),
+            errorContent = { InstitutionPlaceholder(modifier) },
+            imageLoader = LocalImageLoader.current,
             contentDescription = null,
-            tint = FinancialConnectionsTheme.colors.textSuccess,
-            modifier = Modifier
-                .size(16.dp)
+            modifier = modifier
         )
         Spacer(modifier = Modifier.size(8.dp))
         Column {
-            Text(
-                text = title.toText().toString(),
-                style = FinancialConnectionsTheme.typography.bodyEmphasized.copy(
-                    color = FinancialConnectionsTheme.colors.textPrimary
+            title?.let {
+                Text(
+                    text = it.toText().toString(),
+                    style = typography.bodyEmphasized.copy(
+                        color = colors.textPrimary
+                    )
                 )
-            )
-            Text(
-                text = description.toText().toString(),
-                style = FinancialConnectionsTheme.typography.caption.copy(
-                    color = FinancialConnectionsTheme.colors.textSecondary
+            }
+            description?.let {
+                Text(
+                    text = description.toText().toString(),
+                    style = typography.caption.copy(
+                        color = colors.textSecondary
+                    )
                 )
-            )
+            }
         }
     }
 }
 
 @Composable
 private fun ConsentBullet(
-    icon: Int,
+    iconUrl: String,
     text: TextResource,
     onClickableTextClick: ((String) -> Unit)? = null
 ) {
     Row {
-        Icon(
-            painter = painterResource(id = icon),
+        val modifier = Modifier
+            .size(16.dp)
+            .offset(y = 2.dp)
+        StripeImage(
+            url = iconUrl,
+            colorFilter = ColorFilter.tint(colors.textSecondary),
+            imageLoader = LocalImageLoader.current,
             contentDescription = null,
-            tint = FinancialConnectionsTheme.colors.textSecondary,
-            modifier = Modifier
-                .size(16.dp)
-                .offset(y = 4.dp)
+            errorContent = { InstitutionPlaceholder(modifier) },
+            modifier = modifier
         )
         Spacer(modifier = Modifier.size(8.dp))
         AnnotatedText(
             text,
             onClickableTextClick = { onClickableTextClick?.invoke(it) },
-            defaultStyle = FinancialConnectionsTheme.typography.body.copy(
-                color = FinancialConnectionsTheme.colors.textSecondary
+            defaultStyle = typography.body.copy(
+                color = colors.textSecondary
             )
         )
+    }
+}
+
+@SuppressWarnings("deprecation")
+private fun fromHtml(source: String): Spanned {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        Html.fromHtml(source, Html.FROM_HTML_MODE_LEGACY)
+    } else {
+        Html.fromHtml(source)
     }
 }
 
@@ -365,8 +481,25 @@ internal fun ContentPreview(
             onContinueClick = {},
             onClickableTextClick = {},
             onConfirmModalClick = {},
-            onCloseClick = {}
-        )
+        ) {}
+    }
+}
+
+@Composable
+@Preview(group = "Consent Pane", name = "requested data")
+// TODO@carlosmuvi add proper preview with expanded bottom sheet once related Compose bug gets fixed.
+// https://issuetracker.google.com/issues/241895902
+internal fun ContentRequestedDataPreview() {
+    FinancialConnectionsPreview {
+        Box(
+            Modifier.background(colors.backgroundSurface)
+        ) {
+            ConsentPermissionsBottomSheetContent(
+                dataDialog = ConsentStates.sampleConsent().dataAccessNotice,
+                onClickableTextClick = {},
+                onConfirmModalClick = {},
+            )
+        }
     }
 }
 
@@ -385,7 +518,6 @@ internal fun ContentManualEntryPlusMicrodeposits(
             onContinueClick = {},
             onClickableTextClick = {},
             onConfirmModalClick = {},
-            onCloseClick = {}
-        )
+        ) {}
     }
 }

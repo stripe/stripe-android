@@ -157,17 +157,17 @@ internal fun LinkInlineSignup(
                 modifier = modifier
                     .border(
                         border = MaterialTheme.getBorderStroke(isSelected = false),
-                        shape = MaterialTheme.linkShapes.medium
+                        shape = MaterialTheme.linkShapes.small
                     )
                     .background(
                         color = MaterialTheme.paymentsColors.component,
-                        shape = MaterialTheme.linkShapes.medium
+                        shape = MaterialTheme.linkShapes.small
                     )
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(MaterialTheme.linkShapes.medium)
+                        .clip(MaterialTheme.linkShapes.small)
                         .clickable {
                             toggleExpanded()
                         }

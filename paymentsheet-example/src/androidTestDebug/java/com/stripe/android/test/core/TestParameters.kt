@@ -10,7 +10,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPayment
 data class TestParameters(
     val paymentMethod: SupportedPaymentMethod,
     val customer: Customer,
-    val linkState: LinkState,
+    val linkState: LinkState = LinkState.Off,
     val googlePayState: GooglePayState,
     val currency: Currency,
     val intentType: IntentType,
@@ -27,7 +27,8 @@ data class TestParameters(
     val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
     val snapshotReturningCustomer: Boolean = false,
     val merchantCountryCode: String,
-    val supportedPaymentMethods: List<PaymentMethodCode> = listOf()
+    val supportedPaymentMethods: List<PaymentMethodCode> = listOf(),
+    val customPrimaryButtonLabel: String? = null,
 )
 
 /**
@@ -102,7 +103,8 @@ enum class Currency {
     USD,
     EUR,
     AUD,
-    GBP
+    GBP,
+    INR,
 }
 
 /**

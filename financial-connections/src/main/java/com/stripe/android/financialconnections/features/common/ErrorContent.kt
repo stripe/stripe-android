@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
@@ -31,17 +32,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.exception.AccountNumberRetrievalException
-import com.stripe.android.financialconnections.exception.InstitutionPlannedException
-import com.stripe.android.financialconnections.exception.InstitutionUnplannedException
-import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
-import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
+import com.stripe.android.financialconnections.exception.AccountLoadError
+import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
+import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
+import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
+import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.image.StripeImage
 import java.text.SimpleDateFormat
 
 @Composable
@@ -50,7 +53,7 @@ internal fun UnclassifiedErrorContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     ErrorContent(
-        painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        null, // TODO show warning icon.
         title = stringResource(R.string.stripe_error_generic_title),
         content = stringResource(R.string.stripe_error_generic_desc),
         primaryCta = stringResource(R.string.stripe_error_cta_close) to {
@@ -64,7 +67,7 @@ internal fun InstitutionUnknownErrorContent(
     onSelectAnotherBank: () -> Unit
 ) {
     ErrorContent(
-        iconPainter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        iconUrl = null, // TODO show institution icon.
         title = stringResource(R.string.stripe_error_generic_title),
         content = stringResource(R.string.stripe_error_unplanned_downtime_desc),
         primaryCta = Pair(
@@ -76,12 +79,12 @@ internal fun InstitutionUnknownErrorContent(
 
 @Composable
 internal fun InstitutionUnplannedDowntimeErrorContent(
-    exception: InstitutionUnplannedException,
+    exception: InstitutionUnplannedDowntimeError,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit
 ) {
     ErrorContent(
-        iconPainter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        iconUrl = exception.institution.icon?.default ?: "",
         title = stringResource(
             R.string.stripe_error_unplanned_downtime_title,
             exception.institution.name
@@ -104,7 +107,7 @@ internal fun InstitutionUnplannedDowntimeErrorContent(
 
 @Composable
 internal fun InstitutionPlannedDowntimeErrorContent(
-    exception: InstitutionPlannedException,
+    exception: InstitutionPlannedDowntimeError,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit
 ) {
@@ -113,7 +116,7 @@ internal fun InstitutionPlannedDowntimeErrorContent(
         SimpleDateFormat("dd/MM/yyyy HH:mm", javaLocale).format(exception.backUpAt)
     }
     ErrorContent(
-        iconPainter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        iconUrl = exception.institution.icon?.default ?: "",
         title = stringResource(
             R.string.stripe_error_planned_downtime_title,
             exception.institution.name
@@ -139,12 +142,12 @@ internal fun InstitutionPlannedDowntimeErrorContent(
 
 @Composable
 internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
-    exception: NoSupportedPaymentMethodTypeAccountsException,
+    exception: AccountNoneEligibleForPaymentMethodError,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit
 ) {
     ErrorContent(
-        painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        iconUrl = exception.institution.icon?.default ?: "",
         title = stringResource(
             R.string.stripe_account_picker_error_no_payment_method_title
         ),
@@ -171,7 +174,7 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
 
 @Composable
 internal fun NoAccountsAvailableErrorContent(
-    exception: NoAccountsAvailableException,
+    exception: AccountLoadError,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onTryAgain: () -> Unit
@@ -208,7 +211,7 @@ internal fun NoAccountsAvailableErrorContent(
     }
 
     ErrorContent(
-        painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        iconUrl = exception.institution.icon?.default ?: "",
         title = stringResource(
             R.string.stripe_account_picker_error_no_account_available_title,
             exception.institution.name
@@ -221,12 +224,12 @@ internal fun NoAccountsAvailableErrorContent(
 
 @Composable
 internal fun AccountNumberRetrievalErrorContent(
-    exception: AccountNumberRetrievalException,
+    exception: AccountNumberRetrievalError,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit
 ) {
     ErrorContent(
-        painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        iconUrl = exception.institution.icon?.default ?: "",
         title = stringResource(
             R.string.stripe_attachlinkedpaymentaccount_error_title
         ),
@@ -253,7 +256,7 @@ internal fun AccountNumberRetrievalErrorContent(
 
 @Composable
 internal fun ErrorContent(
-    iconPainter: Painter,
+    iconUrl: String?,
     badge: Pair<Painter, Shape> = Pair(
         painterResource(id = R.drawable.stripe_ic_warning_circle),
         CircleShape
@@ -274,7 +277,7 @@ internal fun ErrorContent(
                 .weight(1f)
                 .verticalScroll(scrollState)
         ) {
-            BadgedImage(iconPainter, badge)
+            BadgedInstitutionImage(iconUrl, badge)
             Spacer(modifier = Modifier.size(16.dp))
             Text(
                 text = title,
@@ -311,21 +314,24 @@ internal fun ErrorContent(
 }
 
 @Composable
-private fun BadgedImage(
-    iconPainter: Painter,
+private fun BadgedInstitutionImage(
+    institutionIconUrl: String?,
     badge: Pair<Painter, Shape>
 ) {
     Box(
         modifier = Modifier
             .size(40.dp)
     ) {
-        Image(
-            painter = iconPainter,
+        val modifier = Modifier
+            .size(36.dp)
+            .align(Alignment.BottomStart)
+            .clip(RoundedCornerShape(6.dp))
+        StripeImage(
+            url = institutionIconUrl ?: "",
+            imageLoader = LocalImageLoader.current,
+            errorContent = { InstitutionPlaceholder(modifier) },
             contentDescription = null,
-            modifier = Modifier
-                .size(36.dp)
-                .align(Alignment.BottomStart)
-                .clip(RoundedCornerShape(6.dp))
+            modifier = modifier
         )
         Icon(
             painter = badge.first,
@@ -347,7 +353,7 @@ private fun BadgedImage(
 internal fun UnclassifiedErrorContentPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
-            topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
+            topBar = { FinancialConnectionsTopAppBar { } }
         ) {
             UnclassifiedErrorContent(APIException()) {}
         }
@@ -359,16 +365,18 @@ internal fun UnclassifiedErrorContentPreview() {
 internal fun InstitutionPlannedDowntimeErrorContentPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
-            topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
+            topBar = { FinancialConnectionsTopAppBar { } }
         ) {
             InstitutionPlannedDowntimeErrorContent(
-                exception = InstitutionPlannedException(
+                exception = InstitutionPlannedDowntimeError(
                     institution = FinancialConnectionsInstitution(
                         id = "3",
                         name = "Random Institution",
                         url = "Random Institution url",
                         featured = false,
                         featuredOrder = null,
+                        icon = null,
+                        logo = null,
                         mobileHandoffCapable = false
                     ),
                     allowManualEntry = true,
@@ -388,16 +396,18 @@ internal fun InstitutionPlannedDowntimeErrorContentPreview() {
 internal fun NoAccountsAvailableErrorContentPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
-            topBar = { FinancialConnectionsTopAppBar(onCloseClick = { }) }
+            topBar = { FinancialConnectionsTopAppBar { } }
         ) {
             NoAccountsAvailableErrorContent(
-                exception = NoAccountsAvailableException(
+                exception = AccountLoadError(
                     institution = FinancialConnectionsInstitution(
                         id = "3",
                         name = "Random Institution",
                         url = "Random Institution url",
                         featured = false,
                         featuredOrder = null,
+                        icon = null,
+                        logo = null,
                         mobileHandoffCapable = false
                     ),
                     allowManualEntry = true,
@@ -410,4 +420,14 @@ internal fun NoAccountsAvailableErrorContentPreview() {
             )
         }
     }
+}
+
+@Composable
+internal fun InstitutionPlaceholder(modifier: Modifier) {
+    Image(
+        modifier = modifier,
+        painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+        contentDescription = "Bank icon placeholder",
+        contentScale = ContentScale.Crop
+    )
 }

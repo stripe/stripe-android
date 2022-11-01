@@ -6,42 +6,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".cardscan.CardScanActivity">
 
-    <FrameLayout
-        android:id="@+id/preview_frame"
+    <com.stripe.android.camera.scanui.CameraView
+        android:id="@+id/camera_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </FrameLayout>
-
-    <com.stripe.android.camera.scanui.ViewFinderBackground
-        android:id="@+id/view_finder_background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <View
-        android:id="@+id/view_finder_window"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.5"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintDimensionRatio="200:126"/>
-
-    <ImageView
-        android:id="@+id/view_finder_border"
-        android:contentDescription="@string/stripe_card_view_finder_description"
-        android:background="@drawable/stripe_card_border_not_found"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.5"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintDimensionRatio="200:126"/>
+        android:layout_height="match_parent"
+        app:borderDrawable="@drawable/stripe_card_border_not_found"
+        app:viewFinderType="creditCard" />
 
     <ImageView
         android:id="@+id/close_button"
@@ -95,7 +65,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toTopOf="@id/view_finder_window"
+        app:layout_constraintTop_toBottomOf="@id/swap_camera_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 

@@ -5,8 +5,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
@@ -21,15 +21,15 @@ internal fun PaymentMethodForm(
     enabled: Boolean,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     showCheckboxFlow: Flow<Boolean>,
+    injector: NonFallbackInjector,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val formViewModel: FormViewModel = viewModel(
         key = args.paymentMethodCode,
         factory = FormViewModel.Factory(
             config = args,
             showCheckboxFlow = showCheckboxFlow,
-            contextSupplier = { context }
+            injector = injector
         )
     )
 

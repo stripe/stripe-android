@@ -6,10 +6,10 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
 import kotlinx.coroutines.sync.Mutex
@@ -22,22 +22,7 @@ import kotlinx.coroutines.sync.withLock
 internal interface FinancialConnectionsManifestRepository {
 
     /**
-     * Generates an initial [FinancialConnectionsSessionManifest] to start the AuthFlow, and
-     * caches it locally.
-     */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    suspend fun generateFinancialConnectionsSessionManifest(
-        clientSecret: String,
-        applicationId: String
-    ): FinancialConnectionsSessionManifest
-
-    /**
-     * Retrieves the current cached [FinancialConnectionsSessionManifest] instance, or fetches
+     * Retrieves the current cached [SynchronizeSessionResponse] instance, or fetches
      * it from backend if no cached version available.
      */
     @Throws(
@@ -46,7 +31,25 @@ internal interface FinancialConnectionsManifestRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun getOrFetchManifest(): FinancialConnectionsSessionManifest
+    suspend fun getOrFetchSynchronizeFinancialConnectionsSession(
+        clientSecret: String,
+        applicationId: String
+    ): SynchronizeSessionResponse
+
+    /**
+     * Triggers a session synchronization, and caches the updated [SynchronizeSessionResponse] object
+     * received as result.
+     */
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun synchronizeFinancialConnectionsSession(
+        clientSecret: String,
+        applicationId: String
+    ): SynchronizeSessionResponse
 
     /**
      * Marks the consent pane as completed, and caches the updated [FinancialConnectionsSessionManifest] object
@@ -103,19 +106,17 @@ internal interface FinancialConnectionsManifestRepository {
     companion object {
         operator fun invoke(
             requestExecutor: FinancialConnectionsRequestExecutor,
-            configuration: FinancialConnectionsSheet.Configuration,
             apiRequestFactory: ApiRequest.Factory,
             apiOptions: ApiRequest.Options,
             logger: Logger,
-            initialManifest: FinancialConnectionsSessionManifest?
+            initialSync: SynchronizeSessionResponse?
         ): FinancialConnectionsManifestRepository =
             FinancialConnectionsManifestRepositoryImpl(
                 requestExecutor,
-                configuration,
                 apiRequestFactory,
                 apiOptions,
                 logger,
-                initialManifest
+                initialSync
             )
     }
 
@@ -127,58 +128,61 @@ internal interface FinancialConnectionsManifestRepository {
 @Suppress("TooManyFunctions")
 private class FinancialConnectionsManifestRepositoryImpl(
     val requestExecutor: FinancialConnectionsRequestExecutor,
-    val configuration: FinancialConnectionsSheet.Configuration,
     val apiRequestFactory: ApiRequest.Factory,
     val apiOptions: ApiRequest.Options,
     val logger: Logger,
-    initialManifest: FinancialConnectionsSessionManifest?
+    initialSync: SynchronizeSessionResponse?
 ) : FinancialConnectionsManifestRepository {
 
     /**
-     * Ensures that manifest accesses via [getOrFetchManifest] suspend until
+     * Ensures that manifest accesses via [getOrFetchSynchronizeFinancialConnectionsSession] suspend until
      * current writes are running.
      */
     val mutex = Mutex()
-    private var cachedManifest: FinancialConnectionsSessionManifest? = initialManifest
+    private var cachedSynchronizeSessionResponse: SynchronizeSessionResponse? = initialSync
 
-    override suspend fun getOrFetchManifest(): FinancialConnectionsSessionManifest =
-        mutex.withLock {
-            cachedManifest ?: run {
-                // fetch manifest and save it locally
-                val financialConnectionsRequest = apiRequestFactory.createGet(
-                    url = getManifestUrl,
-                    options = apiOptions,
-                    params = mapOf(
-                        NetworkConstants.PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
-                        "expand" to listOf("active_auth_session")
-                    )
-                )
-                return requestExecutor.execute(
-                    financialConnectionsRequest,
-                    FinancialConnectionsSessionManifest.serializer()
-                ).also { updateCachedManifest("get/fetch", it) }
-            }
-        }
-
-    override suspend fun generateFinancialConnectionsSessionManifest(
+    override suspend fun getOrFetchSynchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String
-    ): FinancialConnectionsSessionManifest = mutex.withLock {
-        val financialConnectionsRequest = apiRequestFactory.createPost(
-            url = generateHostedUrl,
-            options = apiOptions,
-            params = mapOf(
-                PARAMS_FULLSCREEN to true,
-                PARAMS_HIDE_CLOSE_BUTTON to true,
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
-                NetworkConstants.PARAMS_APPLICATION_ID to applicationId
-            )
-        )
+    ): SynchronizeSessionResponse = mutex.withLock {
+        cachedSynchronizeSessionResponse ?: run {
+            // fetch manifest and save it locally
+            return requestExecutor.execute(
+                synchronizeRequest(applicationId, clientSecret),
+                SynchronizeSessionResponse.serializer()
+            ).also { updateCachedSynchronizeSessionResponse("get/fetch", it) }
+        }
+    }
+
+    override suspend fun synchronizeFinancialConnectionsSession(
+        clientSecret: String,
+        applicationId: String
+    ): SynchronizeSessionResponse = mutex.withLock {
+        val financialConnectionsRequest = synchronizeRequest(applicationId, clientSecret)
         return requestExecutor.execute(
             financialConnectionsRequest,
-            FinancialConnectionsSessionManifest.serializer()
-        ).also { updateCachedManifest("generating", it) }
+            SynchronizeSessionResponse.serializer()
+        ).also { updateCachedSynchronizeSessionResponse("synchronize", it) }
     }
+
+    private fun synchronizeRequest(
+        applicationId: String,
+        clientSecret: String
+    ) = apiRequestFactory.createPost(
+        url = synchronizeSessionUrl,
+        options = apiOptions,
+        params = mapOf(
+            "locale" to "en-us",
+            "mobile" to mapOf(
+                "sdk_type" to "android",
+                PARAMS_FULLSCREEN to true,
+                PARAMS_HIDE_CLOSE_BUTTON to true,
+                "sdk_version" to 1,
+                NetworkConstants.PARAMS_APPLICATION_ID to applicationId
+            ),
+            NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
+        )
+    )
 
     override suspend fun markConsentAcquired(
         clientSecret: String
@@ -281,7 +285,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     ) {
-        cachedManifest
+        cachedSynchronizeSessionResponse?.manifest
             ?.let { block(it) }
             ?.let { updateCachedManifest("updateLocalManifest", it) }
     }
@@ -290,42 +294,47 @@ private class FinancialConnectionsManifestRepositoryImpl(
         source: String,
         institution: FinancialConnectionsInstitution
     ) {
-        logger.debug("MANIFEST: updating local active institution from $source")
-        cachedManifest = cachedManifest?.copy(
-            activeInstitution = institution
-        )
+        logger.debug("SYNC_CACHE: updating local active institution from $source")
+        cachedSynchronizeSessionResponse?.manifest?.copy(activeInstitution = institution)
+            ?.let { updateCachedManifest("updating active institution", it) }
     }
 
     private fun updateCachedActiveAuthSession(
         source: String,
         authSession: FinancialConnectionsAuthorizationSession
     ) {
-        logger.debug("MANIFEST: updating local active auth session from $source")
-        cachedManifest = cachedManifest?.copy(
-            activeAuthSession = authSession
-        )
+        logger.debug("SYNC_CACHE: updating local active auth session from $source")
+        cachedSynchronizeSessionResponse?.manifest?.copy(activeAuthSession = authSession)
+            ?.let { updateCachedManifest("updating active auth session", it) }
+    }
+
+    private fun updateCachedSynchronizeSessionResponse(
+        source: String,
+        synchronizeSessionResponse: SynchronizeSessionResponse
+    ) {
+        logger.debug("SYNC_CACHE: updating local sync object from $source")
+        cachedSynchronizeSessionResponse = synchronizeSessionResponse
     }
 
     private fun updateCachedManifest(
         source: String,
         manifest: FinancialConnectionsSessionManifest
     ) {
-        logger.debug("MANIFEST: updating local manifest from $source")
-        cachedManifest = manifest
+        logger.debug("SYNC_CACHE: updating local manifest from $source")
+        cachedSynchronizeSessionResponse = cachedSynchronizeSessionResponse?.copy(
+            manifest = manifest
+        )
     }
 
     companion object {
         internal const val PARAMS_FULLSCREEN = "fullscreen"
         internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
 
-        internal const val generateHostedUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/generate_hosted_url"
+        internal const val synchronizeSessionUrl: String =
+            "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
 
         internal const val cancelAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/cancel"
-
-        internal const val getManifestUrl: String =
-            "${ApiRequest.API_HOST}/v1/link_account_sessions/manifest"
 
         internal const val consentAcquiredUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/consent_acquired"

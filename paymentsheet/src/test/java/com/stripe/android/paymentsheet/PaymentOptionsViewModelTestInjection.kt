@@ -9,6 +9,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -24,6 +25,7 @@ import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
+import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
@@ -64,7 +66,13 @@ internal open class PaymentOptionsViewModelTestInjection {
     ): PaymentOptionsViewModel = runBlocking {
         val lpmRepository =
             LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources))
-        lpmRepository.forceUpdate(listOf(PaymentMethod.Type.Card.code, PaymentMethod.Type.USBankAccount.code), null)
+        lpmRepository.forceUpdate(
+            listOf(
+                PaymentMethod.Type.Card.code,
+                PaymentMethod.Type.USBankAccount.code
+            ),
+            null
+        )
         PaymentOptionsViewModel(
             args,
             prefsRepositoryFactory = {
@@ -100,7 +108,6 @@ internal open class PaymentOptionsViewModelTestInjection {
                 showCheckboxControlledFields = true,
                 merchantName = "Merchant, Inc.",
                 amount = Amount(50, "USD"),
-                injectorKey = "injectorTestKeyFormFragmentArgumentTest",
                 initialPaymentMethodCreateParams = null
             ),
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
@@ -110,7 +117,8 @@ internal open class PaymentOptionsViewModelTestInjection {
     ) {
         val mockBuilder = mock<PaymentOptionsViewModelSubcomponent.Builder>()
         val mockSubcomponent = mock<PaymentOptionsViewModelSubcomponent>()
-        val mockSubComponentBuilderProvider = mock<Provider<PaymentOptionsViewModelSubcomponent.Builder>>()
+        val mockSubComponentBuilderProvider =
+            mock<Provider<PaymentOptionsViewModelSubcomponent.Builder>>()
         whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
         whenever(mockBuilder.savedStateHandle(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.application(any())).thenReturn(mockBuilder)
@@ -120,13 +128,14 @@ internal open class PaymentOptionsViewModelTestInjection {
 
         val mockFormBuilder = mock<FormViewModelSubcomponent.Builder>()
         val mockFormSubcomponent = mock<FormViewModelSubcomponent>()
-        val mockFormSubComponentBuilderProvider = mock<Provider<FormViewModelSubcomponent.Builder>>()
+        val mockFormSubComponentBuilderProvider =
+            mock<Provider<FormViewModelSubcomponent.Builder>>()
         whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
         whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 
-        injector = object : Injector {
+        injector = object : NonFallbackInjector {
             override fun inject(injectable: Injectable<*>) {
                 (injectable as? PaymentOptionsViewModel.Factory)?.let {
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider

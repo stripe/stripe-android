@@ -6830,9 +6830,9 @@ public final class com/stripe/android/payments/core/authentication/OxxoAuthentic
 	public static fun newInstance (Lcom/stripe/android/payments/core/authentication/WebIntentAuthenticator;Lcom/stripe/android/payments/core/authentication/NoOpIntentAuthenticator;)Lcom/stripe/android/payments/core/authentication/OxxoAuthenticator;
 }
 
-public final class com/stripe/android/payments/core/authentication/PaymentAuthenticator$DefaultImpls {
-	public static fun onLauncherInvalidated (Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;)V
-	public static fun onNewActivityResultCaller (Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;Landroidx/activity/result/ActivityResultCaller;Landroidx/activity/result/ActivityResultCallback;)V
+public final class com/stripe/android/payments/core/authentication/PaymentAuthenticatorRegistry$DefaultImpls {
+	public static fun onLauncherInvalidated (Lcom/stripe/android/payments/core/authentication/PaymentAuthenticatorRegistry;)V
+	public static fun onNewActivityResultCaller (Lcom/stripe/android/payments/core/authentication/PaymentAuthenticatorRegistry;Landroidx/activity/result/ActivityResultCaller;Landroidx/activity/result/ActivityResultCallback;)V
 }
 
 public final class com/stripe/android/payments/core/authentication/SourceAuthenticator_Factory : dagger/internal/Factory {
@@ -6982,14 +6982,6 @@ public final class com/stripe/android/payments/core/injection/PaymentLauncherMod
 	public synthetic fun get ()Ljava/lang/Object;
 	public fun get ()Ljava/util/Map;
 	public static fun provideThreeDs1IntentReturnUrlMap (Lcom/stripe/android/payments/core/injection/PaymentLauncherModule;)Ljava/util/Map;
-}
-
-public final class com/stripe/android/payments/core/injection/PollingAuthenticatorModule_ProvideUpiAuthenticator$payments_core_releaseFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/payments/core/injection/PollingAuthenticatorModule;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/payments/core/injection/PollingAuthenticatorModule;Ljavax/inject/Provider;)Lcom/stripe/android/payments/core/injection/PollingAuthenticatorModule_ProvideUpiAuthenticator$payments_core_releaseFactory;
-	public fun get ()Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideUpiAuthenticator$payments_core_release (Lcom/stripe/android/payments/core/injection/PollingAuthenticatorModule;Lcom/stripe/android/payments/core/authentication/UnsupportedAuthenticator;)Lcom/stripe/android/payments/core/authentication/PaymentAuthenticator;
 }
 
 public final class com/stripe/android/payments/core/injection/Stripe3DSAuthenticatorModule_Companion_ProvidePaymentAuthConfigFactory : dagger/internal/Factory {
@@ -7252,6 +7244,14 @@ public final class com/stripe/android/payments/paymentlauncher/StripePaymentLaun
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncher_Factory;
 	public fun get (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroidx/activity/result/ActivityResultLauncher;)Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncher;
 	public static fun newInstance (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroidx/activity/result/ActivityResultLauncher;Landroid/content/Context;ZLkotlin/coroutines/CoroutineContext;Lkotlin/coroutines/CoroutineContext;Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/networking/PaymentAnalyticsRequestFactory;Ljava/util/Set;)Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncher;
+}
+
+public final class com/stripe/android/polling/DefaultIntentStatusPoller_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/polling/DefaultIntentStatusPoller_Factory;
+	public fun get ()Lcom/stripe/android/polling/DefaultIntentStatusPoller;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Ljavax/inject/Provider;Lcom/stripe/android/polling/IntentStatusPoller$Config;Lkotlinx/coroutines/CoroutineDispatcher;)Lcom/stripe/android/polling/DefaultIntentStatusPoller;
 }
 
 public abstract class com/stripe/android/view/ActivityStarter {

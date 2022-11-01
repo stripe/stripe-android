@@ -194,8 +194,17 @@ class ShippingInfoWidgetTest {
             .isFalse()
         assertThat(stateTextInputLayout.isErrorEnabled)
             .isFalse()
-        postalEditText.setText("")
 
+        nameEditText.setText("      ")
+        assertThat(shippingInfoWidget.validateAllFields())
+            .isFalse()
+        assertThat(nameTextInputLayout.isErrorEnabled)
+            .isTrue()
+        nameEditText.setText("Valid Name")
+        assertThat(shippingInfoWidget.validateAllFields())
+            .isTrue()
+
+        postalEditText.setText("")
         assertThat(shippingInfoWidget.validateAllFields())
             .isFalse()
         assertThat(postalCodeTextInputLayout.isErrorEnabled)

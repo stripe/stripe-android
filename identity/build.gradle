@@ -7,6 +7,7 @@ apply plugin: 'kotlin-kapt'
 dependencies {
     implementation project(":camera-core")
     implementation project(":stripe-core")
+    implementation project(":stripe-ui-core")
 
     // vanilla tflite library
     implementation "org.tensorflow:tensorflow-lite:2.10.0"
@@ -56,7 +57,7 @@ dependencies {
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation("androidx.compose.ui:ui-test-manifest:$androidxComposeVersion")
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
-    testImplementation "androidx.test.espresso:espresso-core:3.5.0-alpha07"
+    testImplementation "androidx.test.espresso:espresso-core:3.5.0-beta01"
 
 
     testImplementation "junit:junit:$junitVersion"

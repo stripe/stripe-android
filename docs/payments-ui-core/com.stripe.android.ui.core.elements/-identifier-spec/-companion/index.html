@@ -4,10 +4,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>Companion</title>
 <link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
-const savedDarkMode = storage ? JSON.parse(storage) : false
-if(savedDarkMode === true){
-    document.getElementsByTagName("html")[0].classList.add("theme-dark")
-}</script>
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
 <script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
 <link href="../../../../styles/style.css" rel="Stylesheet">
 <link href="../../../../styles/jetbrains-mono.css" rel="Stylesheet">
@@ -18,7 +26,8 @@ if(savedDarkMode === true){
 <script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../../../scripts/main.js" defer></script>
-<script type="text/javascript" src="../../../../scripts/prism.js" async></script></head>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
 <body>
 <div class="navigation-wrapper" id="navigation-wrapper">
     <div id="leftToggler"><span class="icon-toggler"></span></div>
@@ -38,10 +47,10 @@ if(savedDarkMode === true){
     </div>
     <div id="main">
 <div class="main-content" id="content" pageids="payments-ui-core::com.stripe.android.ui.core.elements/IdentifierSpec.Companion///PointingToDeclaration//1608493371">
-  <div class="breadcrumbs"><a href="../../../index.html">payments-ui-core</a><span class="delimiter">/</span><a href="../../index.html">com.stripe.android.ui.core.elements</a><span class="delimiter">/</span><a href="../index.html">IdentifierSpec</a><span class="delimiter">/</span><a href="index.html">Companion</a></div>
+  <div class="breadcrumbs"><a href="../../../index.html">payments-ui-core</a><span class="delimiter">/</span><a href="../../index.html">com.stripe.android.ui.core.elements</a><span class="delimiter">/</span><a href="../index.html">IdentifierSpec</a><span class="delimiter">/</span><span class="current">Companion</span></div>
   <div class="cover ">
     <h1 class="cover"><span><span>Companion</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Companion</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Companion</a></div></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
@@ -57,7 +66,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-generic.html"><span class="token function">Generic</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">_value<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="-generic.html"><span class="token function">Generic</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">_value<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -72,7 +81,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP_PREFIX.html">RestrictTo.Scope.LIBRARY_GROUP_PREFIX</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="get.html"><span class="token function">get</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.html"><span class="token annotation builtin">RestrictTo</span></a><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="token punctuation">[</span><span><a href="https://developer.android.com/reference/kotlin/androidx/annotation/RestrictTo.Scope.LIBRARY_GROUP_PREFIX.html">RestrictTo.Scope.LIBRARY_GROUP_PREFIX</a></span><wbr><span class="token punctuation">]</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword"></span><span class="token keyword">fun </span><a href="get.html"><span class="token function">get</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">value<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -89,7 +98,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="1945669411%2FProperties%2F1608493371" anchor-label="CardBrand" id="1945669411%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-card-brand.html">CardBrand</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="1945669411%2FProperties%2F1608493371" anchor-label="CardBrand" id="1945669411%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-card-brand.html">CardBrand</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -104,7 +113,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-766297158%2FProperties%2F1608493371" anchor-label="CardCvc" id="-766297158%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-card-cvc.html">CardCvc</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-766297158%2FProperties%2F1608493371" anchor-label="CardCvc" id="-766297158%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-card-cvc.html">CardCvc</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -119,7 +128,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-838279539%2FProperties%2F1608493371" anchor-label="CardExpMonth" id="-838279539%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-card-exp-month.html">CardExpMonth</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-838279539%2FProperties%2F1608493371" anchor-label="CardExpMonth" id="-838279539%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-card-exp-month.html">CardExpMonth</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -134,7 +143,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-1487899952%2FProperties%2F1608493371" anchor-label="CardExpYear" id="-1487899952%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-card-exp-year.html">CardExpYear</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-1487899952%2FProperties%2F1608493371" anchor-label="CardExpYear" id="-1487899952%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-card-exp-year.html">CardExpYear</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -149,7 +158,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="1120795943%2FProperties%2F1608493371" anchor-label="CardNumber" id="1120795943%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-card-number.html">CardNumber</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="1120795943%2FProperties%2F1608493371" anchor-label="CardNumber" id="1120795943%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-card-number.html">CardNumber</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -164,7 +173,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-485081931%2FProperties%2F1608493371" anchor-label="City" id="-485081931%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-city.html">City</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-485081931%2FProperties%2F1608493371" anchor-label="City" id="-485081931%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-city.html">City</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -179,7 +188,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-241276412%2FProperties%2F1608493371" anchor-label="Country" id="-241276412%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-country.html">Country</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-241276412%2FProperties%2F1608493371" anchor-label="Country" id="-241276412%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-country.html">Country</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -194,7 +203,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-1541831336%2FProperties%2F1608493371" anchor-label="DependentLocality" id="-1541831336%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-dependent-locality.html">DependentLocality</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-1541831336%2FProperties%2F1608493371" anchor-label="DependentLocality" id="-1541831336%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-dependent-locality.html">DependentLocality</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -209,7 +218,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="35621886%2FProperties%2F1608493371" anchor-label="Email" id="35621886%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-email.html">Email</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="35621886%2FProperties%2F1608493371" anchor-label="Email" id="35621886%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-email.html">Email</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -224,7 +233,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="1239130109%2FProperties%2F1608493371" anchor-label="Line1" id="1239130109%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-line1.html">Line1</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="1239130109%2FProperties%2F1608493371" anchor-label="Line1" id="1239130109%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-line1.html">Line1</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -239,7 +248,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="1270149916%2FProperties%2F1608493371" anchor-label="Line2" id="1270149916%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-line2.html">Line2</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="1270149916%2FProperties%2F1608493371" anchor-label="Line2" id="1270149916%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-line2.html">Line2</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -254,7 +263,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="1825234837%2FProperties%2F1608493371" anchor-label="Name" id="1825234837%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-name.html">Name</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="1825234837%2FProperties%2F1608493371" anchor-label="Name" id="1825234837%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-name.html">Name</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -269,7 +278,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-916596186%2FProperties%2F1608493371" anchor-label="OneLineAddress" id="-916596186%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-one-line-address.html">OneLineAddress</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-916596186%2FProperties%2F1608493371" anchor-label="OneLineAddress" id="-916596186%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-one-line-address.html">OneLineAddress</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -284,7 +293,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="2014177900%2FProperties%2F1608493371" anchor-label="Phone" id="2014177900%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-phone.html">Phone</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="2014177900%2FProperties%2F1608493371" anchor-label="Phone" id="2014177900%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-phone.html">Phone</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -299,7 +308,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="2110036776%2FProperties%2F1608493371" anchor-label="PostalCode" id="2110036776%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-postal-code.html">PostalCode</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="2110036776%2FProperties%2F1608493371" anchor-label="PostalCode" id="2110036776%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-postal-code.html">PostalCode</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -314,7 +323,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-1509076550%2FProperties%2F1608493371" anchor-label="SameAsShipping" id="-1509076550%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-same-as-shipping.html">SameAsShipping</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-1509076550%2FProperties%2F1608493371" anchor-label="SameAsShipping" id="-1509076550%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-same-as-shipping.html">SameAsShipping</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -329,7 +338,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-187274712%2FProperties%2F1608493371" anchor-label="SaveForFutureUse" id="-187274712%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-save-for-future-use.html">SaveForFutureUse</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-187274712%2FProperties%2F1608493371" anchor-label="SaveForFutureUse" id="-187274712%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-save-for-future-use.html">SaveForFutureUse</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -344,7 +353,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="661648873%2FProperties%2F1608493371" anchor-label="SortingCode" id="661648873%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-sorting-code.html">SortingCode</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="661648873%2FProperties%2F1608493371" anchor-label="SortingCode" id="661648873%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-sorting-code.html">SortingCode</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -359,7 +368,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-1773494103%2FProperties%2F1608493371" anchor-label="State" id="-1773494103%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-state.html">State</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-1773494103%2FProperties%2F1608493371" anchor-label="State" id="-1773494103%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-state.html">State</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -374,7 +383,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-484110868%2FProperties%2F1608493371" anchor-label="Upi" id="-484110868%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-upi.html">Upi</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-484110868%2FProperties%2F1608493371" anchor-label="Upi" id="-484110868%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-upi.html">Upi</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>
@@ -389,7 +398,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-987005869%2FProperties%2F1608493371" anchor-label="Vpa" id="-987005869%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-vpa.html">Vpa</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-ui-core:dokkaHtmlPartial/release"><a data-name="-987005869%2FProperties%2F1608493371" anchor-label="Vpa" id="-987005869%2FProperties%2F1608493371" data-filterable-set=":payments-ui-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="-vpa.html">Vpa</a><span class="token operator">: </span><a href="../index.html">IdentifierSpec</a></div></div></div>
               </div>
             </div>
           </div>

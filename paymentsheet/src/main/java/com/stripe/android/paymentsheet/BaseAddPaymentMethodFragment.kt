@@ -19,14 +19,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
+import com.stripe.android.link.ui.inline.LinkInlineSignedIn
 import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -106,13 +107,31 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             }
 
             val paymentSelection by sheetViewModel.selection.observeAsState()
+            val linkInlineSelection by sheetViewModel.linkInlineSelection.observeAsState()
             var linkSignupState by remember {
                 mutableStateOf<InlineSignupViewState?>(null)
             }
 
-            LaunchedEffect(paymentSelection, linkSignupState) {
-                linkSignupState?.let {
-                    onLinkSignupStateChanged(linkConfig!!, it, paymentSelection)
+            LaunchedEffect(paymentSelection, linkSignupState, linkInlineSelection) {
+                val state = linkSignupState
+                if (state != null) {
+                    onLinkSignupStateChanged(linkConfig!!, state, paymentSelection)
+                } else if (linkInlineSelection != null) {
+                    (paymentSelection as? PaymentSelection.New.Card)?.let {
+                        sheetViewModel.updatePrimaryButtonUIState(
+                            PrimaryButton.UIState(
+                                label = null,
+                                onClick = {
+                                    sheetViewModel.payWithLinkInline(
+                                        linkConfig!!,
+                                        null
+                                    )
+                                },
+                                enabled = true,
+                                visible = true
+                            )
+                        )
+                    }
                 }
             }
 
@@ -133,7 +152,15 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     onLinkSignupStateChanged = { _, inlineSignupViewState ->
                         linkSignupState = inlineSignupViewState
                     },
-                    formArguments = arguments
+                    formArguments = arguments,
+                    onFormFieldValuesChanged = { formValues ->
+                        sheetViewModel.updateSelection(
+                            transformToPaymentSelection(
+                                formValues,
+                                selectedItem
+                            )
+                        )
+                    }
                 )
             }
         } else {
@@ -151,8 +178,13 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         showCheckboxFlow: Flow<Boolean>,
         onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
         onLinkSignupStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit,
-        formArguments: FormFragmentArguments
+        formArguments: FormFragmentArguments,
+        onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     ) {
+        val horizontalPadding = dimensionResource(
+            id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
+        )
+
         Column(modifier = Modifier.fillMaxWidth()) {
             if (supportedPaymentMethods.size > 1) {
                 PaymentMethodsUI(
@@ -162,41 +194,47 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     isEnabled = enabled,
                     paymentMethods = supportedPaymentMethods,
                     onItemSelectedListener = onItemSelectedListener,
-                    modifier = Modifier.padding(top = 18.dp, bottom = 6.dp)
+                    modifier = Modifier.padding(top = 26.dp, bottom = 12.dp),
                 )
             }
 
             if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
                 (activity as BaseSheetActivity<*>).formArgs = formArguments
-                Column(Modifier.padding(horizontal = 20.dp)) {
+                Column(modifier = Modifier.padding(horizontal = horizontalPadding)) {
                     AndroidViewBinding(FragmentAchBinding::inflate)
                 }
             } else {
                 PaymentMethodForm(
                     args = formArguments,
                     enabled = enabled,
-                    onFormFieldValuesChanged = { formValues ->
-                        sheetViewModel.updateSelection(
-                            transformToPaymentSelection(
-                                formValues,
-                                selectedItem
-                            )
-                        )
-                    },
+                    onFormFieldValuesChanged = onFormFieldValuesChanged,
                     showCheckboxFlow = showCheckboxFlow,
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                    injector = sheetViewModel.injector,
+                    modifier = Modifier.padding(horizontal = horizontalPadding)
                 )
             }
 
             if (showLinkInlineSignup) {
-                LinkInlineSignup(
-                    linkPaymentLauncher = linkPaymentLauncher,
-                    enabled = enabled,
-                    onStateChanged = onLinkSignupStateChanged,
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp, vertical = 6.dp)
-                        .fillMaxWidth()
-                )
+                if (sheetViewModel.linkInlineSelection.value != null) {
+                    LinkInlineSignedIn(
+                        linkPaymentLauncher = linkPaymentLauncher,
+                        onLogout = {
+                            sheetViewModel.linkInlineSelection.value = null
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = horizontalPadding, vertical = 6.dp)
+                            .fillMaxWidth()
+                    )
+                } else {
+                    LinkInlineSignup(
+                        linkPaymentLauncher = linkPaymentLauncher,
+                        enabled = enabled,
+                        onStateChanged = onLinkSignupStateChanged,
+                        modifier = Modifier
+                            .padding(horizontal = horizontalPadding, vertical = 6.dp)
+                            .fillMaxWidth()
+                    )
+                }
             }
         }
     }
@@ -236,7 +274,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     AccountStatus.VerificationStarted,
                     AccountStatus.SignedOut
                 ) ||
-                    sheetViewModel.newPaymentSelection is PaymentSelection.New.LinkInline
+                    sheetViewModel.linkInlineSelection.value != null
                 )
     }
 
@@ -286,7 +324,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         config = sheetViewModel.config,
         merchantName = sheetViewModel.merchantName,
         amount = sheetViewModel.amount.value,
-        injectorKey = sheetViewModel.injectorKey,
         newLpm = sheetViewModel.newPaymentSelection,
         isShowingLinkInlineSignup = showLinkInlineSignup
     )
@@ -334,7 +371,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             config: PaymentSheet.Configuration?,
             merchantName: String,
             amount: Amount? = null,
-            @InjectorKey injectorKey: String,
             newLpm: PaymentSelection.New?,
             isShowingLinkInlineSignup: Boolean = false
         ): FormFragmentArguments {
@@ -351,7 +387,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 amount = amount,
                 billingDetails = config?.defaultBillingDetails,
                 shippingDetails = config?.shippingDetails,
-                injectorKey = injectorKey,
                 initialPaymentMethodCreateParams =
                 if (newLpm is PaymentSelection.New.LinkInline) {
                     newLpm.linkPaymentDetails.originalParams

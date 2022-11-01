@@ -2,14 +2,12 @@ package com.stripe.android.financialconnections.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.navigation.NavHostController
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
+import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-
-internal val LocalNavHostController = staticCompositionLocalOf<NavHostController> {
-    error("No NavHostController provided")
-}
+import com.stripe.android.uicore.image.NetworkImageDecoder
+import com.stripe.android.uicore.image.StripeImageLoader
 
 /**
  * Provides the entire context needed to render a preview.
@@ -25,6 +23,13 @@ internal fun FinancialConnectionsPreview(
     FinancialConnectionsTheme {
         CompositionLocalProvider(
             LocalNavHostController provides navController,
+            LocalImageLoader provides StripeImageLoader(
+                context = LocalContext.current,
+                logger = Logger.noop(),
+                memoryCache = null,
+                networkImageDecoder = NetworkImageDecoder(),
+                diskCache = null
+            ),
             content = content
         )
     }

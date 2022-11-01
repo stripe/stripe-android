@@ -41,10 +41,10 @@ import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.ui.core.elements.Html
 import com.stripe.android.ui.core.getBackgroundColor
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.text.Html
 import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt

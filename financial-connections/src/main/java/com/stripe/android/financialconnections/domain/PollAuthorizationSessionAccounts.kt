@@ -3,8 +3,8 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
-import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
+import com.stripe.android.financialconnections.exception.AccountLoadError
+import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -40,7 +40,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
                     sessionId = authSession.id
                 )
                 if (accounts.data.isEmpty()) {
-                    throw NoAccountsAvailableException(
+                    throw AccountLoadError(
                         institution = requireNotNull(manifest.activeInstitution),
                         allowManualEntry = manifest.allowManualEntry,
                         canRetry = canRetry,
@@ -69,7 +69,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
         when {
             institution == null -> this
             stripeError?.extraFields?.get("reason") == "no_supported_payment_method_type_accounts_found" ->
-                NoSupportedPaymentMethodTypeAccountsException(
+                AccountNoneEligibleForPaymentMethodError(
                     allowManualEntry = allowManualEntry,
                     accountsCount = stripeError?.extraFields?.get("total_accounts_count")?.toInt()
                         ?: 0,
@@ -78,7 +78,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
                     merchantName = businessName ?: ""
                 )
 
-            else -> NoAccountsAvailableException(
+            else -> AccountLoadError(
                 allowManualEntry = allowManualEntry,
                 institution = institution,
                 canRetry = canRetry,

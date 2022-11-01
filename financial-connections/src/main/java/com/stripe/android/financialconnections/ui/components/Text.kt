@@ -2,8 +2,11 @@
 
 package com.stripe.android.financialconnections.ui.components
 
+import android.graphics.Typeface
 import android.text.Annotation
 import android.text.SpannedString
+import android.text.style.StyleSpan
+import android.text.style.URLSpan
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -50,6 +53,21 @@ internal fun AnnotatedText(
     )
 }
 
+private fun Any.toAnnotation(): Annotation? = when (this) {
+    is StyleSpan -> when (this.style) {
+        Typeface.BOLD -> Annotation(StringAnnotation.BOLD.value, "")
+        Typeface.NORMAL,
+        Typeface.ITALIC,
+        Typeface.BOLD_ITALIC -> null
+
+        else -> null
+    }
+
+    is URLSpan -> Annotation(StringAnnotation.CLICKABLE.value, url)
+    is Annotation -> this
+    else -> null
+}
+
 @Composable
 private fun annotatedStringResource(
     resource: TextResource,
@@ -58,17 +76,21 @@ private fun annotatedStringResource(
     val spannedString = SpannedString(resource.toText())
     val resultBuilder = AnnotatedString.Builder()
     resultBuilder.append(spannedString.toString())
-    spannedString.getSpans<Annotation>(0, spannedString.length).forEach { annotation ->
-        val spanStart = spannedString.getSpanStart(annotation)
-        val spanEnd = spannedString.getSpanEnd(annotation)
-        resultBuilder.addStringAnnotation(
-            tag = annotation.key,
-            annotation = annotation.value,
-            start = spanStart,
-            end = spanEnd
-        )
-        spanStyles(annotation)?.let { resultBuilder.addStyle(it, spanStart, spanEnd) }
-    }
+    spannedString
+        .getSpans<Any>(0, spannedString.length)
+        .forEach { annotation ->
+            val spanStart = spannedString.getSpanStart(annotation)
+            val spanEnd = spannedString.getSpanEnd(annotation)
+            annotation.toAnnotation()?.let {
+                resultBuilder.addStringAnnotation(
+                    tag = it.key,
+                    annotation = it.value,
+                    start = spanStart,
+                    end = spanEnd
+                )
+                spanStyles(it)?.let { resultBuilder.addStyle(it, spanStart, spanEnd) }
+            }
+        }
     return resultBuilder.toAnnotatedString()
 }
 

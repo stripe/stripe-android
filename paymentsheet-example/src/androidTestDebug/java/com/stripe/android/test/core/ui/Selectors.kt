@@ -45,7 +45,7 @@ class Selectors(
     val composeTestRule: ComposeTestRule,
     testParameters: TestParameters
 ) {
-    val testMode = EspressoIdButton(R.id.testmode)
+    val reset = EspressoIdButton(R.id.reset_button)
     val continueButton = EspressoIdButton(R.id.continue_button)
     val complete = EspressoLabelIdButton(R.string.checkout_complete)
     val reload = EspressoLabelIdButton(R.string.reload_paymentsheet)
@@ -107,6 +107,8 @@ class Selectors(
     val buyButton = BuyButton(device)
 
     val editButton = EditButton(device)
+
+    val addPaymentMethodButton = AddPaymentMethodButton(device)
 
     val selectBrowserPrompt = UiAutomatorText("Verify your payment", device = device)
 
@@ -298,7 +300,10 @@ class Selectors(
         EspressoText(
             CountryUtils.getDisplayCountry(CountryCode(merchantCountryCode), Locale.getDefault())
         ).click()
+    }
 
+    fun enterCustomPrimaryButtonLabel(text: String) {
+        EspressoEditText(id = R.id.custom_label_text_field).enter(text)
     }
 
     companion object {

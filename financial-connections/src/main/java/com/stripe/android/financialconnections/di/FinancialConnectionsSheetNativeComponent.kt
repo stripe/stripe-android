@@ -13,7 +13,7 @@ import com.stripe.android.financialconnections.features.manualentrysuccess.Manua
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
 import com.stripe.android.financialconnections.features.reset.ResetSubcomponent
 import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -51,8 +51,8 @@ internal interface FinancialConnectionsSheetNativeComponent {
     interface Builder {
 
         @BindsInstance
-        fun initialManifest(
-            @Named(INITIAL_MANIFEST) manifest: FinancialConnectionsSessionManifest
+        fun initialSyncResponse(
+            @Named(INITIAL_SYNC_RESPONSE) initialSyncResponse: SynchronizeSessionResponse
         ): Builder
 
         @BindsInstance

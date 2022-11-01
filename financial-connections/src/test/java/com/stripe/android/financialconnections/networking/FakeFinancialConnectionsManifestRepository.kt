@@ -4,14 +4,13 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 
 internal class FakeFinancialConnectionsManifestRepository : FinancialConnectionsManifestRepository {
 
-    var generateFinancialConnectionsSessionManifestProvider: () -> FinancialConnectionsSessionManifest =
-        { ApiKeyFixtures.sessionManifest() }
-    var getManifestProvider: () -> FinancialConnectionsSessionManifest =
-        { ApiKeyFixtures.sessionManifest() }
+    var getSynchronizeSessionResponseProvider: () -> SynchronizeSessionResponse =
+        { ApiKeyFixtures.syncResponse() }
     var markConsentAcquiredProvider: () -> FinancialConnectionsSessionManifest =
         { ApiKeyFixtures.sessionManifest() }
     var postAuthorizationSessionProvider: () -> FinancialConnectionsAuthorizationSession =
@@ -21,15 +20,10 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
     var postMarkLinkingMoreAccountsProvider: () -> FinancialConnectionsSessionManifest =
         { ApiKeyFixtures.sessionManifest() }
 
-    override suspend fun generateFinancialConnectionsSessionManifest(
+    override suspend fun getOrFetchSynchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String
-    ): FinancialConnectionsSessionManifest {
-        return generateFinancialConnectionsSessionManifestProvider()
-    }
-
-    override suspend fun getOrFetchManifest(): FinancialConnectionsSessionManifest =
-        getManifestProvider()
+    ): SynchronizeSessionResponse = getSynchronizeSessionResponseProvider()
 
     override suspend fun markConsentAcquired(
         clientSecret: String
@@ -54,6 +48,11 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         clientSecret: String,
         sessionId: String
     ): FinancialConnectionsAuthorizationSession = cancelAuthorizationSessionProvider()
+
+    override suspend fun synchronizeFinancialConnectionsSession(
+        clientSecret: String,
+        applicationId: String
+    ): SynchronizeSessionResponse = getSynchronizeSessionResponseProvider()
 
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest

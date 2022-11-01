@@ -2,7 +2,6 @@
 
 package com.stripe.android.financialconnections.features.common
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,20 +32,26 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.image.StripeImage
 
 private const val COLLAPSE_ACCOUNTS_THRESHOLD = 5
 
 @Composable
 internal fun AccessibleDataCallout(
-    model: AccessibleDataCalloutModel
+    model: AccessibleDataCalloutModel,
+    onLearnMoreClick: () -> Unit
 ) {
     AccessibleDataCalloutBox {
-        AccessibleDataText(model)
+        AccessibleDataText(
+            model = model,
+            onLearnMoreClick = onLearnMoreClick
+        )
     }
 }
 
@@ -55,12 +59,14 @@ internal fun AccessibleDataCallout(
 internal fun AccessibleDataCalloutWithAccounts(
     model: AccessibleDataCalloutModel,
     institution: FinancialConnectionsInstitution,
-    accounts: List<PartnerAccount>
+    accounts: List<PartnerAccount>,
+    onLearnMoreClick: () -> Unit
 ) {
     AccessibleDataCalloutBox {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (accounts.count() >= COLLAPSE_ACCOUNTS_THRESHOLD) {
                 AccountRow(
+                    iconUrl = institution.icon?.default,
                     text = institution.name,
                     subText = stringResource(
                         id = R.string.stripe_success_infobox_accounts,
@@ -68,11 +74,19 @@ internal fun AccessibleDataCalloutWithAccounts(
                     )
                 )
             } else {
-                accounts.forEach { AccountRow(it.fullName) }
+                accounts.forEach {
+                    AccountRow(
+                        iconUrl = institution.icon?.default,
+                        text = it.fullName
+                    )
+                }
             }
 
             Divider(color = FinancialConnectionsTheme.colors.backgroundBackdrop)
-            AccessibleDataText(model)
+            AccessibleDataText(
+                model = model,
+                onLearnMoreClick = onLearnMoreClick
+            )
         }
     }
 }
@@ -80,7 +94,8 @@ internal fun AccessibleDataCalloutWithAccounts(
 @Composable
 private fun AccountRow(
     text: String,
-    subText: String? = null
+    subText: String? = null,
+    iconUrl: String?
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -91,12 +106,15 @@ private fun AccountRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+            val modifier = Modifier
+                .size(24.dp)
+                .clip(RoundedCornerShape(4.dp))
+            StripeImage(
+                url = iconUrl ?: "",
+                imageLoader = LocalImageLoader.current,
                 contentDescription = null,
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(RoundedCornerShape(4.dp))
+                modifier = modifier,
+                errorContent = { InstitutionPlaceholder(modifier) }
             )
             Text(
                 text,
@@ -116,7 +134,8 @@ private fun AccountRow(
 
 @Composable
 private fun AccessibleDataText(
-    model: AccessibleDataCalloutModel
+    model: AccessibleDataCalloutModel,
+    onLearnMoreClick: () -> Unit
 ) {
     val uriHandler = LocalUriHandler.current
     val permissionsReadable = remember(model.permissions) { model.permissions.toStringRes() }
@@ -138,12 +157,15 @@ private fun AccessibleDataText(
                 readableListOfPermissions(permissionsReadable)
             )
         ),
-        onClickableTextClick = { uriHandler.openUri(model.dataPolicyUrl) },
+        onClickableTextClick = {
+            uriHandler.openUri(model.dataPolicyUrl)
+            onLearnMoreClick()
+        },
         defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
             color = FinancialConnectionsTheme.colors.textSecondary
         ),
         annotationStyles = mapOf(
-            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption
                 .toSpanStyle()
                 .copy(color = FinancialConnectionsTheme.colors.textBrand),
             StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
@@ -231,7 +253,8 @@ internal fun AccessibleDataCalloutPreview() {
                 ),
                 isStripeDirect = true,
                 dataPolicyUrl = ""
-            )
+            ),
+            onLearnMoreClick = {}
         )
     }
 }
@@ -301,9 +324,12 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
                 name = "name",
                 url = "url",
                 featured = true,
+                icon = null,
+                logo = null,
                 featuredOrder = null,
                 mobileHandoffCapable = false
-            )
+            ),
+            onLearnMoreClick = {}
         )
     }
 }
@@ -351,9 +377,12 @@ internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
                 name = "name",
                 url = "url",
                 featured = true,
+                icon = null,
+                logo = null,
                 featuredOrder = null,
                 mobileHandoffCapable = false
-            )
+            ),
+            onLearnMoreClick = {}
         )
     }
 }
@@ -393,8 +422,11 @@ internal fun AccessibleDataCalloutWithOneAccountPreview() {
                 url = "url",
                 featured = true,
                 featuredOrder = null,
+                icon = null,
+                logo = null,
                 mobileHandoffCapable = false
-            )
+            ),
+            onLearnMoreClick = {}
         )
     }
 }

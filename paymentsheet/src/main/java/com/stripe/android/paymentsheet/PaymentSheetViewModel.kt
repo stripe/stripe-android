@@ -20,7 +20,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -40,12 +42,14 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
+import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
@@ -194,7 +198,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    internal var paymentLauncher: PaymentLauncher? = null
+    private var paymentLauncher: StripePaymentLauncher? = null
 
     init {
         eventReporter.onInit(config)
@@ -409,7 +413,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 PaymentLauncherContract(),
                 ::onPaymentResult
             )
-        )
+        ).also {
+            it.registerPollingAuthenticator()
+        }
     }
 
     /**
@@ -417,6 +423,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * Must be called from the Activity's `onDestroy`.
      */
     fun unregisterFromActivity() {
+        paymentLauncher?.unregisterPollingAuthenticator()
         linkActivityResultLauncher = null
         paymentLauncher = null
     }
@@ -461,7 +468,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         _showLinkVerificationDialog.value = true
                     }
                     AccountStatus.SignedOut,
-                    AccountStatus.Error -> {}
+                    AccountStatus.Error -> {
+                    }
                 }
                 activeLinkSession.value = accountStatus == AccountStatus.Verified
                 _isLinkEnabled.value = accountStatus != AccountStatus.Error
@@ -689,20 +697,26 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         ): T {
             val args = starterArgsSupplier()
 
-            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
+            val injector =
+                injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
 
-            return subComponentBuilderProvider.get()
+            val subcomponent = subComponentBuilderProvider.get()
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
                 .savedStateHandle(savedStateHandle)
-                .build().viewModel as T
+                .build()
+            val viewModel = subcomponent.viewModel
+            viewModel.injector = requireNotNull(injector as NonFallbackInjector)
+            return viewModel as T
         }
 
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
-            DaggerPaymentSheetLauncherComponent
+        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector {
+            val component = DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(arg.application)
                 .injectorKey(DUMMY_INJECTOR_KEY)
-                .build().inject(this)
+                .build()
+            component.inject(this)
+            return component
         }
     }
 

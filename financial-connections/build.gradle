@@ -25,6 +25,7 @@ shot {
 
 dependencies {
     api project(":stripe-core")
+    api project(":stripe-ui-core")
     api project(":payments-model")
 
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"

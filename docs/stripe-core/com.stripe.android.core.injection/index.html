@@ -4,10 +4,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
     <title>com.stripe.android.core.injection</title>
 <link href="../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
-const savedDarkMode = storage ? JSON.parse(storage) : false
-if(savedDarkMode === true){
-    document.getElementsByTagName("html")[0].classList.add("theme-dark")
-}</script>
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
 <script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
 <link href="../../styles/style.css" rel="Stylesheet">
 <link href="../../styles/jetbrains-mono.css" rel="Stylesheet">
@@ -18,7 +26,8 @@ if(savedDarkMode === true){
 <script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
 <script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
 <script type="text/javascript" src="../../scripts/main.js" defer></script>
-<script type="text/javascript" src="../../scripts/prism.js" async></script></head>
+<script type="text/javascript" src="../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
 <body>
 <div class="navigation-wrapper" id="navigation-wrapper">
     <div id="leftToggler"><span class="icon-toggler"></span></div>
@@ -38,9 +47,9 @@ if(savedDarkMode === true){
     </div>
     <div id="main">
 <div class="main-content" id="content" pageids="stripe-core::com.stripe.android.core.injection////PointingToDeclaration//1458831206">
-  <div class="breadcrumbs"><a href="../index.html">stripe-core</a><span class="delimiter">/</span><a href="index.html">com.stripe.android.core.injection</a></div>
+  <div class="breadcrumbs"><a href="../index.html">stripe-core</a><span class="delimiter">/</span><span class="current">com.stripe.android.core.injection</span></div>
   <div class="cover ">
-    <h1 class="cover"><span><span>Package</span></span> <span>com.</span><wbr><span>stripe.</span><wbr><span>android.</span><wbr><span>core.</span><wbr><span>injection</span></h1>
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="Types">Types</button><button class="section-tab" data-togglable="Functions">Functions</button><button class="section-tab" data-togglable="Properties">Properties</button></div>
@@ -56,7 +65,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><span data-unresolved-link="dagger/Module///PointingToDeclaration/"><span class="token annotation">Module</span></span></div></div><span class="token keyword">class </span><a href="-core-common-module/index.html">CoreCommonModule</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="dagger/Module///PointingToDeclaration/"><span class="token annotation builtin">Module</span></span></div></div><span class="token keyword">class </span><a href="-core-common-module/index.html">CoreCommonModule</a></div></div></div>
               </div>
             </div>
           </div>
@@ -71,7 +80,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><span data-unresolved-link="dagger/Module///PointingToDeclaration/"><span class="token annotation">Module</span></span></div></div><span class="token keyword">class </span><a href="-coroutine-context-module/index.html">CoroutineContextModule</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="dagger/Module///PointingToDeclaration/"><span class="token annotation builtin">Module</span></span></div></div><span class="token keyword">class </span><a href="-coroutine-context-module/index.html">CoroutineContextModule</a></div></div></div>
               </div>
             </div>
           </div>
@@ -86,7 +95,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-injectable/index.html">Injectable</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-injectable/index.html">FallbackInitializeParam</a><span class="token operator">&gt;</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Mark a class that can be injected by a <a href="-injector/index.html">Injector</a>. This should be implemented by classes that cannot directly have their dependencies injected through constructor and need to have them injected through lateinit properties.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-injectable/index.html">Injectable</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="-injectable/index.html">FallbackInitializeParam</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Mark a class that can be injected by a <a href="-injector/index.html">Injector</a>. This should be implemented by classes that cannot directly have their dependencies injected through constructor and need to have them injected through lateinit properties.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -101,7 +110,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-injector/index.html">Injector</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Mark a class that can inject into <a href="-injectable/index.html">Injectable</a>s.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-injector/index.html">Injector</a></div><div class="brief "><p class="paragraph">Mark a class that can inject into <a href="-injectable/index.html">Injectable</a>s.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -116,7 +125,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><span data-unresolved-link="javax.inject/Qualifier///PointingToDeclaration/"><span class="token annotation">Qualifier</span></span></div></div><span class="token keyword">annotation class </span><a href="-injector-key/index.html">InjectorKey</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Annotation to identify an <a href="-injector/index.html">Injector</a> instance.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="javax.inject/Qualifier///PointingToDeclaration/"><span class="token annotation builtin">Qualifier</span></span></div></div><span class="token keyword">annotation class </span><a href="-injector-key/index.html">InjectorKey</a></div><div class="brief "><p class="paragraph">Annotation to identify an <a href="-injector/index.html">Injector</a> instance.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -131,7 +140,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-injector-registry/index.html">InjectorRegistry</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">A registry to maintain <a href="-injector/index.html">Injector</a> instances so that they can be retrieved from Activitys and Fragments. This registry is needed for dagger injection because the SDK can't access Application, and thus Activitys can't get required <span data-unresolved-link="dagger/Component///PointingToDeclaration/">Component</span> from by downcasting  Activity.getApplication.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-injector-registry/index.html">InjectorRegistry</a></div><div class="brief "><p class="paragraph">A registry to maintain <a href="-injector/index.html">Injector</a> instances so that they can be retrieved from Activitys and Fragments. This registry is needed for dagger injection because the SDK can't access Application, and thus Activitys can't get required <span data-unresolved-link="dagger/Component///PointingToDeclaration/">Component</span> from by downcasting  Activity.getApplication.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -146,7 +155,37 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><span data-unresolved-link="javax.inject/Qualifier///PointingToDeclaration/"><span class="token annotation">Qualifier</span></span></div></div><span class="token keyword">annotation class </span><a href="-i-o-context/index.html">IOContext</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph"><span data-unresolved-link="javax.inject/Qualifier///PointingToDeclaration/">Qualifier</span> for coroutine context used for IO.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="javax.inject/Qualifier///PointingToDeclaration/"><span class="token annotation builtin">Qualifier</span></span></div></div><span class="token keyword">annotation class </span><a href="-i-o-context/index.html">IOContext</a></div><div class="brief "><p class="paragraph"><span data-unresolved-link="javax.inject/Qualifier///PointingToDeclaration/">Qualifier</span> for coroutine context used for IO.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="-813710901%2FClasslikes%2F1458831206" anchor-label="NonFallbackInjectable" id="-813710901%2FClasslikes%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-non-fallback-injectable/index.html"><span>Non</span><wbr><span>Fallback</span><wbr><span><span>Injectable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-813710901%2FClasslikes%2F1458831206"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-non-fallback-injectable/index.html">NonFallbackInjectable</a> : <a href="-injectable/index.html">Injectable</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Mark a class that can be injected by a <a href="-injector/index.html">Injector</a> and does not support fallback. It's implemented by ViewModel Factories when the ViewModel lifecycle is shorter than the activity that contains it. In those cases, they receive the <a href="-injector/index.html">Injector</a> directly as a constructor parameter and should not be responsible for recreating the dependency graph.</p></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+<a data-name="1950360162%2FClasslikes%2F1458831206" anchor-label="NonFallbackInjector" id="1950360162%2FClasslikes%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
+        <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
+          <div class="main-subrow keyValue ">
+            <div class=""><span class="inline-flex">
+                <div><a href="-non-fallback-injector/index.html"><span>Non</span><wbr><span>Fallback</span><wbr><span><span>Injector</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1950360162%2FClasslikes%2F1458831206"></span>
+                  <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                </span></span></div>
+            <div>
+              <div class="title">
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-non-fallback-injector/index.html">NonFallbackInjector</a> : <a href="-injector/index.html">Injector</a></div><div class="brief "><p class="paragraph">Mark an <a href="-injector/index.html">Injector</a> that can inject into <a href="-non-fallback-injectable/index.html">NonFallbackInjectable</a> classes.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -161,7 +200,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation">@</span><span data-unresolved-link="javax.inject/Qualifier///PointingToDeclaration/"><span class="token annotation">Qualifier</span></span></div></div><span class="token keyword">annotation class </span><a href="-u-i-context/index.html">UIContext</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph"><span data-unresolved-link="javax.inject/Qualifier///PointingToDeclaration/">Qualifier</span> for coroutine context used for UI.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="javax.inject/Qualifier///PointingToDeclaration/"><span class="token annotation builtin">Qualifier</span></span></div></div><span class="token keyword">annotation class </span><a href="-u-i-context/index.html">UIContext</a></div><div class="brief "><p class="paragraph"><span data-unresolved-link="javax.inject/Qualifier///PointingToDeclaration/">Qualifier</span> for coroutine context used for UI.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -176,7 +215,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="-weak-map-injector-registry/index.html">WeakMapInjectorRegistry</a> : <a href="-injector-registry/index.html">InjectorRegistry</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">A <a href="-injector-registry/index.html">InjectorRegistry</a> implemented with a weak map. An entry from the map will be  will be garbage collected once the <a href="-injector/index.html">Injector</a> instance is no longer held elsewhere.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">object </span><a href="-weak-map-injector-registry/index.html">WeakMapInjectorRegistry</a> : <a href="-injector-registry/index.html">InjectorRegistry</a></div><div class="brief "><p class="paragraph">A <a href="-injector-registry/index.html">InjectorRegistry</a> implemented with a weak map. An entry from the map will be  will be garbage collected once the <a href="-injector/index.html">Injector</a> instance is no longer held elsewhere.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -193,7 +232,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="inject-with-fallback.html">FallbackInitializeParam</a><span class="token operator">&gt; </span><a href="-injectable/index.html">Injectable</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="inject-with-fallback.html">FallbackInitializeParam</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="inject-with-fallback.html"><span class="token function">injectWithFallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">injectorKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">fallbackInitializeParam<span class="token operator">: </span><a href="inject-with-fallback.html">FallbackInitializeParam</a></span></span><span class="token punctuation">)</span><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><p class="paragraph">Try use an <a href="-injector-key/index.html">InjectorKey</a> to retrieve an <a href="-injector/index.html">Injector</a> and inject, if no <a href="-injector/index.html">Injector</a> is found, invoke <a href="-injectable/fallback-initialize.html">Injectable.fallbackInitialize</a> with <a href="inject-with-fallback.html">fallbackInitializeParam</a>.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="inject-with-fallback.html">FallbackInitializeParam</a><span class="token operator">&gt; </span><a href="-injectable/index.html">Injectable</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="inject-with-fallback.html">FallbackInitializeParam</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="inject-with-fallback.html"><span class="token function">injectWithFallback</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">injectorKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">fallbackInitializeParam<span class="token operator">: </span><a href="inject-with-fallback.html">FallbackInitializeParam</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-injector/index.html">Injector</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Try to use an <a href="-injector-key/index.html">InjectorKey</a> to retrieve an <a href="-injector/index.html">Injector</a> and inject, if no <a href="-injector/index.html">Injector</a> is found, invoke <a href="-injectable/fallback-initialize.html">Injectable.fallbackInitialize</a> with <a href="inject-with-fallback.html">fallbackInitializeParam</a>.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -210,7 +249,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><a data-name="2095703383%2FProperties%2F1458831206" anchor-label="DUMMY_INJECTOR_KEY" id="2095703383%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-u-m-m-y_-i-n-j-e-c-t-o-r_-k-e-y.html">DUMMY_INJECTOR_KEY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="2095703383%2FProperties%2F1458831206" anchor-label="DUMMY_INJECTOR_KEY" id="2095703383%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><p class="paragraph">Dummy key when an <a href="-injector/index.html">Injector</a> is not available.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><a data-name="2095703383%2FProperties%2F1458831206" anchor-label="DUMMY_INJECTOR_KEY" id="2095703383%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-d-u-m-m-y_-i-n-j-e-c-t-o-r_-k-e-y.html">DUMMY_INJECTOR_KEY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><a data-name="2095703383%2FProperties%2F1458831206" anchor-label="DUMMY_INJECTOR_KEY" id="2095703383%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><p class="paragraph">Dummy key when an <a href="-injector/index.html">Injector</a> is not available.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -225,7 +264,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><a data-name="-1702208673%2FProperties%2F1458831206" anchor-label="ENABLE_LOGGING" id="-1702208673%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-e-n-a-b-l-e_-l-o-g-g-i-n-g.html">ENABLE_LOGGING</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-1702208673%2FProperties%2F1458831206" anchor-label="ENABLE_LOGGING" id="-1702208673%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><p class="paragraph">Name for injected boolean to denote if logging is enabled.</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><a data-name="-1702208673%2FProperties%2F1458831206" anchor-label="ENABLE_LOGGING" id="-1702208673%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-e-n-a-b-l-e_-l-o-g-g-i-n-g.html">ENABLE_LOGGING</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><a data-name="-1702208673%2FProperties%2F1458831206" anchor-label="ENABLE_LOGGING" id="-1702208673%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><p class="paragraph">Name for injected boolean to denote if logging is enabled.</p></div></div></div>
               </div>
             </div>
           </div>
@@ -240,7 +279,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><a data-name="-590686587%2FProperties%2F1458831206" anchor-label="INITIAL_VALUES" id="-590686587%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-i-n-i-t-i-a-l_-v-a-l-u-e-s.html">INITIAL_VALUES</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="-590686587%2FProperties%2F1458831206" anchor-label="INITIAL_VALUES" id="-590686587%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><p class="paragraph">Name for form initial values</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><a data-name="-590686587%2FProperties%2F1458831206" anchor-label="INITIAL_VALUES" id="-590686587%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-i-n-i-t-i-a-l_-v-a-l-u-e-s.html">INITIAL_VALUES</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><a data-name="-590686587%2FProperties%2F1458831206" anchor-label="INITIAL_VALUES" id="-590686587%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><p class="paragraph">Name for form initial values</p></div></div></div>
               </div>
             </div>
           </div>
@@ -255,7 +294,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><a data-name="1757389295%2FProperties%2F1458831206" anchor-label="PUBLISHABLE_KEY" id="1757389295%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-p-u-b-l-i-s-h-a-b-l-e_-k-e-y.html">PUBLISHABLE_KEY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1757389295%2FProperties%2F1458831206" anchor-label="PUBLISHABLE_KEY" id="1757389295%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><p class="paragraph">Name for user's publishable key</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><a data-name="1757389295%2FProperties%2F1458831206" anchor-label="PUBLISHABLE_KEY" id="1757389295%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-p-u-b-l-i-s-h-a-b-l-e_-k-e-y.html">PUBLISHABLE_KEY</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><a data-name="1757389295%2FProperties%2F1458831206" anchor-label="PUBLISHABLE_KEY" id="1757389295%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><p class="paragraph">Name for user's publishable key</p></div></div></div>
               </div>
             </div>
           </div>
@@ -270,7 +309,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><a data-name="1140804645%2FProperties%2F1458831206" anchor-label="SHIPPING_VALUES" id="1140804645%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-h-i-p-p-i-n-g_-v-a-l-u-e-s.html">SHIPPING_VALUES</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="1140804645%2FProperties%2F1458831206" anchor-label="SHIPPING_VALUES" id="1140804645%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><p class="paragraph">Name for user's shipping address</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><a data-name="1140804645%2FProperties%2F1458831206" anchor-label="SHIPPING_VALUES" id="1140804645%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-h-i-p-p-i-n-g_-v-a-l-u-e-s.html">SHIPPING_VALUES</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><a data-name="1140804645%2FProperties%2F1458831206" anchor-label="SHIPPING_VALUES" id="1140804645%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><p class="paragraph">Name for user's shipping address</p></div></div></div>
               </div>
             </div>
           </div>
@@ -285,7 +324,7 @@ if(savedDarkMode === true){
                 </span></span></div>
             <div>
               <div class="title">
-                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-depenent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><a data-name="816743417%2FProperties%2F1458831206" anchor-label="STRIPE_ACCOUNT_ID" id="816743417%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-t-r-i-p-e_-a-c-c-o-u-n-t_-i-d.html">STRIPE_ACCOUNT_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="top-right-position"><span class="copy-icon"></span><div class="copy-popup-wrapper popup-to-left"><span class="copy-popup-icon"></span><span>Content copied to clipboard</span></div></span></div><div class="brief "><a data-name="816743417%2FProperties%2F1458831206" anchor-label="STRIPE_ACCOUNT_ID" id="816743417%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><p class="paragraph">Name for user's account id</p></div></div></div>
+                <div class="platform-hinted " data-platform-hinted="data-platform-hinted" data-togglable="Properties"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><a data-name="816743417%2FProperties%2F1458831206" anchor-label="STRIPE_ACCOUNT_ID" id="816743417%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-s-t-r-i-p-e_-a-c-c-o-u-n-t_-i-d.html">STRIPE_ACCOUNT_ID</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><a data-name="816743417%2FProperties%2F1458831206" anchor-label="STRIPE_ACCOUNT_ID" id="816743417%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a><p class="paragraph">Name for user's account id</p></div></div></div>
               </div>
             </div>
           </div>

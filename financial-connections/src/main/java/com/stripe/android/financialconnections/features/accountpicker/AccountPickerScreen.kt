@@ -3,7 +3,6 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,7 +38,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -52,26 +50,30 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
-import com.stripe.android.financialconnections.exception.NoSupportedPaymentMethodTypeAccountsException
+import com.stripe.android.financialconnections.exception.AccountLoadError
+import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.PartnerAccountUI
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.financialconnections.ui.theme.Success100
 
 @Composable
@@ -84,12 +86,13 @@ internal fun AccountPickerScreen() {
         state = state.value,
         onAccountClicked = viewModel::onAccountClicked,
         onSubmit = viewModel::onSubmit,
+        onSelectAllAccountsClicked = viewModel::onSelectAllAccountsClicked,
         onSelectAnotherBank = viewModel::selectAnotherBank,
-        onCloseClick = parentViewModel::onCloseWithConfirmationClick,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
-        onSelectAllAccountsClicked = viewModel::onSelectAllAccountsClicked,
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(NextPane.ACCOUNT_PICKER) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
+        onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick
     )
 }
 
@@ -116,13 +119,14 @@ private fun AccountPickerContent(
     onEnterDetailsManually: () -> Unit,
     onLoadAccountsAgain: () -> Unit,
     onCloseClick: () -> Unit,
+    onLearnMoreAboutDataAccessClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
-                showBack = false
+                showBack = false,
+                onCloseClick = onCloseClick
             )
         }
     ) {
@@ -136,26 +140,27 @@ private fun AccountPickerContent(
                     submitEnabled = state.submitEnabled,
                     submitLoading = state.submitLoading,
                     accounts = payload().accounts,
-                    allAccountsSelected = payload().allAccountsSelected,
+                    allAccountsSelected = state.allAccountsSelected,
                     subtitle = payload().subtitle,
-                    selectedIds = payload().selectedIds,
+                    selectedIds = state.selectedIds,
                     onAccountClicked = onAccountClicked,
                     onSubmit = onSubmit,
                     selectionMode = payload().selectionMode,
                     accessibleDataCalloutModel = payload().accessibleData,
                     onSelectAllAccountsClicked = onSelectAllAccountsClicked,
+                    onLearnMoreAboutDataAccessClick = onLearnMoreAboutDataAccessClick
                 )
             }
 
             is Fail -> when (val error = payload.error) {
-                is NoSupportedPaymentMethodTypeAccountsException ->
+                is AccountNoneEligibleForPaymentMethodError ->
                     NoSupportedPaymentMethodTypeAccountsErrorContent(
                         exception = error,
                         onSelectAnotherBank = onSelectAnotherBank,
                         onEnterDetailsManually = onEnterDetailsManually
                     )
 
-                is NoAccountsAvailableException -> NoAccountsAvailableErrorContent(
+                is AccountLoadError -> NoAccountsAvailableErrorContent(
                     exception = error,
                     onEnterDetailsManually = onEnterDetailsManually,
                     onTryAgain = onLoadAccountsAgain,
@@ -192,6 +197,7 @@ private fun AccountPickerLoaded(
     onAccountClicked: (PartnerAccount) -> Unit,
     onSelectAllAccountsClicked: () -> Unit,
     onSubmit: () -> Unit,
+    onLearnMoreAboutDataAccessClick: () -> Unit,
     subtitle: TextResource?
 ) {
     Column(
@@ -241,7 +247,7 @@ private fun AccountPickerLoaded(
             }
             Spacer(modifier = Modifier.weight(1f))
         }
-        accessibleDataCalloutModel?.let { AccessibleDataCallout(it) }
+        accessibleDataCalloutModel?.let { AccessibleDataCallout(it, onLearnMoreAboutDataAccessClick) }
         Spacer(modifier = Modifier.size(12.dp))
         FinancialConnectionsButton(
             enabled = submitEnabled,
@@ -269,10 +275,9 @@ private fun DropdownContent(
     onAccountClicked: (PartnerAccount) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val selectedOptionText: String? = remember(selectedIds) {
+    val selectedOption: PartnerAccountUI? = remember(selectedIds) {
         accounts
             .firstOrNull { selectedIds.contains(it.account.id) }
-            ?.let { "${it.account.name} ${it.account.encryptedNumbers}" }
     }
     Spacer(modifier = Modifier.size(12.dp))
     ExposedDropdownMenuBox(
@@ -281,10 +286,12 @@ private fun DropdownContent(
     ) {
         FinancialConnectionsOutlinedTextField(
             readOnly = true,
-            value = selectedOptionText
+            value = selectedOption?.let { "${it.account.name} ${it.account.encryptedNumbers}" }
                 ?: stringResource(id = R.string.stripe_account_picker_dropdown_hint),
             onValueChange = { },
-            leadingIcon = { if (selectedOptionText != null) InstitutionIcon() },
+            leadingIcon = {
+                if (selectedOption != null) InstitutionIcon(selectedOption.institutionIcon)
+            },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(
                     expanded = expanded
@@ -324,7 +331,7 @@ private fun AccountDropdownItem(
         onClick = { onAccountClicked(account.account) }
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            InstitutionIcon()
+            InstitutionIcon(account.institutionIcon)
             Spacer(modifier = Modifier.size(8.dp))
             val (title, subtitle) = getAccountTexts(accountUI = account)
             Column {
@@ -351,13 +358,16 @@ private fun AccountDropdownItem(
 }
 
 @Composable
-private fun InstitutionIcon() {
-    Image(
-        painter = painterResource(id = R.drawable.stripe_ic_brandicon_institution),
+private fun InstitutionIcon(institutionIcon: String?) {
+    val modifier = Modifier
+        .size(36.dp)
+        .clip(RoundedCornerShape(6.dp))
+    StripeImage(
+        url = institutionIcon ?: "",
+        errorContent = { InstitutionPlaceholder(modifier) },
+        imageLoader = LocalImageLoader.current,
         contentDescription = null,
-        modifier = Modifier
-            .size(36.dp)
-            .clip(RoundedCornerShape(6.dp))
+        modifier = modifier
     )
 }
 
@@ -544,13 +554,13 @@ internal fun AccountPickerPreviewMultiSelect() {
             AccountPickerStates.multiSelect(),
             onAccountClicked = {},
             onSubmit = {},
+            onSelectAllAccountsClicked = {},
             onSelectAnotherBank = {},
-            onCloseClick = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseFromErrorClick = {},
-            onSelectAllAccountsClicked = {}
-        )
+            onCloseClick = {},
+            onLearnMoreAboutDataAccessClick = {}
+        ) {}
     }
 }
 
@@ -566,13 +576,13 @@ internal fun AccountPickerPreviewSingleSelect() {
             AccountPickerStates.singleSelect(),
             onAccountClicked = {},
             onSubmit = {},
+            onSelectAllAccountsClicked = {},
             onSelectAnotherBank = {},
-            onCloseClick = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseFromErrorClick = {},
-            onSelectAllAccountsClicked = {}
-        )
+            onCloseClick = {},
+            onLearnMoreAboutDataAccessClick = {}
+        ) {}
     }
 }
 
@@ -591,12 +601,12 @@ internal fun AccountPickerPreviewDropdown() {
             AccountPickerStates.dropdown(setOf(selectedAccount)),
             onAccountClicked = { selectedAccount = it.id },
             onSubmit = {},
+            onSelectAllAccountsClicked = {},
             onSelectAnotherBank = {},
-            onCloseClick = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseFromErrorClick = {},
-            onSelectAllAccountsClicked = {}
-        )
+            onCloseClick = {},
+            onLearnMoreAboutDataAccessClick = {}
+        ) {}
     }
 }

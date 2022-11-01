@@ -5,12 +5,13 @@ import com.airbnb.mvrx.PersistState
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 
 /**
  *  Class containing all of the data needed to represent the screen.
  */
 internal data class FinancialConnectionsSheetState(
-    val initialArgs: FinancialConnectionsSheetActivityArgs,
+    val initialArgs: FinancialConnectionsSheetActivityArgs = emptyArgs(),
     val activityRecreated: Boolean = false,
     @PersistState val manifest: FinancialConnectionsSessionManifest? = null,
     @PersistState val webAuthFlowActive: Boolean = false,
@@ -26,6 +27,17 @@ internal data class FinancialConnectionsSheetState(
     constructor(args: FinancialConnectionsSheetActivityArgs) : this(
         initialArgs = args
     )
+
+    private companion object {
+        fun emptyArgs(): FinancialConnectionsSheetActivityArgs {
+            return FinancialConnectionsSheetActivityArgs.ForData(
+                FinancialConnectionsSheet.Configuration(
+                    financialConnectionsSessionClientSecret = "",
+                    publishableKey = ""
+                )
+            )
+        }
+    }
 }
 
 /**
@@ -40,7 +52,7 @@ internal sealed class FinancialConnectionsSheetViewEffect {
      */
     data class OpenNativeAuthFlow(
         val configuration: FinancialConnectionsSheet.Configuration,
-        val manifest: FinancialConnectionsSessionManifest
+        val initialSyncResponse: SynchronizeSessionResponse
     ) : FinancialConnectionsSheetViewEffect()
 
     /**
@@ -51,7 +63,7 @@ internal sealed class FinancialConnectionsSheetViewEffect {
     ) : FinancialConnectionsSheetViewEffect()
 
     /**
-     * Finish [FinancialConnectionsSheetActivity] with the given FinancialConnectionsSheetActivityResult]
+     * Finish [FinancialConnectionsSheetActivity] with a given [FinancialConnectionsSheetActivityResult]
      */
     data class FinishWithResult(
         val result: FinancialConnectionsSheetActivityResult

@@ -7,6 +7,10 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PollAttachPaymentsSucceeded
 import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
@@ -17,12 +21,14 @@ import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.measureTimeMillis
 import javax.inject.Inject
 
 @Suppress("LongParameterList")
 internal class AttachPaymentViewModel @Inject constructor(
     initialState: AttachPaymentState,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getAuthorizationSessionAccounts: GetAuthorizationSessionAccounts,
     private val navigationManager: NavigationManager,
     private val getManifest: GetManifest,
@@ -47,21 +53,36 @@ internal class AttachPaymentViewModel @Inject constructor(
             val accounts = getAuthorizationSessionAccounts(authSession.id).data
             require(accounts.size == 1)
             val id = accounts.first().linkedAccountId
-            pollAttachPaymentAccount(
-                allowManualEntry = manifest.allowManualEntry,
-                activeInstitution = activeInstitution,
-                params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
-            ).also { goNext(it.nextPane ?: NextPane.SUCCESS) }
+            val (result, millis) = measureTimeMillis {
+                pollAttachPaymentAccount(
+                    allowManualEntry = manifest.allowManualEntry,
+                    activeInstitution = activeInstitution,
+                    params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
+                ).also { goNext(it.nextPane ?: NextPane.SUCCESS) }
+            }
+            eventTracker.track(PollAttachPaymentsSucceeded(authSession.id, millis))
+            result
         }.execute { copy(linkPaymentAccount = it) }
     }
 
     private fun logErrors() {
-        onAsync(AttachPaymentState::payload, onFail = {
-            logger.error("Error retrieving accounts to attach payment", it)
-        })
-        onAsync(AttachPaymentState::linkPaymentAccount, onFail = {
-            logger.error("Error Attaching payment account", it)
-        })
+        onAsync(
+            AttachPaymentState::payload,
+            onFail = {
+                logger.error("Error retrieving accounts to attach payment", it)
+                eventTracker.track(Error(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT, it))
+            },
+            onSuccess = {
+                eventTracker.track(PaneLoaded(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT))
+            }
+        )
+        onAsync(
+            AttachPaymentState::linkPaymentAccount,
+            onFail = {
+                eventTracker.track(Error(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT, it))
+                logger.error("Error Attaching payment account", it)
+            }
+        )
     }
 
     fun onEnterDetailsManually() = navigationManager.navigate(NavigationDirections.manualEntry)
