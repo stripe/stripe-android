@@ -255,7 +255,14 @@ private fun ConsentFooter(
     val belowCta = remember(consent.belowCta) {
         consent.belowCta?.let { TextResource.Text(fromHtml(consent.belowCta)) }
     }
-    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
+    Column(
+        modifier = Modifier.padding(
+            start = 24.dp,
+            end = 24.dp,
+            top = 16.dp,
+            bottom = 24.dp
+        )
+    ) {
         AnnotatedText(
             text = aboveCta,
             onClickableTextClick = onClickableTextClick,
@@ -339,7 +346,7 @@ private fun ConsentPermissionsBottomSheetContent(
         }
         Column(
             Modifier.padding(
-                bottom = 16.dp,
+                bottom = 24.dp,
                 start = 24.dp,
                 end = 24.dp
             )
@@ -400,7 +407,7 @@ private fun ConsentBottomSheetBullet(
             .offset(y = 2.dp)
         StripeImage(
             url = iconUrl,
-            colorFilter = ColorFilter.tint(colors.iconSuccess),
+            colorFilter = ColorFilter.tint(colors.textSuccess),
             errorContent = { InstitutionPlaceholder(modifier) },
             imageLoader = LocalImageLoader.current,
             contentDescription = null,

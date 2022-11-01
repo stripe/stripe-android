@@ -6,8 +6,6 @@ import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.model.ConsentPane
 
 internal data class ConsentState(
-    val manualEntryEnabled: Boolean = false,
-    val manualEntryShowBusinessDaysNotice: Boolean = false,
     val consent: Async<ConsentPane> = Uninitialized,
     val acceptConsent: Async<Unit> = Uninitialized,
     val viewEffect: ViewEffect? = null

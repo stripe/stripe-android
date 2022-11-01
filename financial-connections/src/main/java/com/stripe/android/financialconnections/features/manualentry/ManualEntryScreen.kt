@@ -174,10 +174,7 @@ private fun ManualEntryFooter(
     onSubmit: () -> Unit
 ) {
     Column(
-        modifier = Modifier.padding(
-            horizontal = 24.dp,
-            vertical = 16.dp
-        )
+        modifier = Modifier.padding(24.dp)
     ) {
         FinancialConnectionsButton(
             enabled = isValidForm,

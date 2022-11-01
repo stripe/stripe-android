@@ -89,12 +89,7 @@ private fun SuccessContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(
-                    top = 24.dp,
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 16.dp
-                )
+                .padding(24.dp)
         ) {
             Icon(
                 modifier = Modifier.size(40.dp),

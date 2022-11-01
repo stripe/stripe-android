@@ -73,8 +73,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.financialconnections.ui.theme.Success100
+import com.stripe.android.uicore.image.StripeImage
 
 @Composable
 internal fun AccountPickerScreen() {
@@ -203,7 +203,7 @@ private fun AccountPickerLoaded(
     Column(
         Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(24.dp)
     ) {
         Column(
             modifier = Modifier
@@ -427,7 +427,8 @@ private fun MultiSelectContent(
                         supportedPaymentMethodTypes = emptyList()
                     ),
                     enabled = true,
-                    formattedBalance = null
+                    formattedBalance = null,
+                    institutionIcon = null
                 )
             ) {
                 Checkbox(
@@ -598,7 +599,7 @@ internal fun AccountPickerPreviewDropdown() {
             mutableStateOf("")
         }
         AccountPickerContent(
-            AccountPickerStates.dropdown(setOf(selectedAccount)),
+            AccountPickerStates.dropdown(),
             onAccountClicked = { selectedAccount = it.id },
             onSubmit = {},
             onSelectAllAccountsClicked = {},

@@ -11,7 +11,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
     override val values = sequenceOf(
         multiSelect(),
         singleSelect(),
-        dropdown(emptySet())
+        dropdown()
     )
 
     override val count: Int
@@ -51,7 +51,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
             selectedIds = setOf("id1"),
         )
 
-        fun dropdown(selectedIds: Set<String>) = AccountPickerState(
+        fun dropdown() = AccountPickerState(
             payload = Success(
                 AccountPickerState.Payload(
                     skipAccountSelection = false,
@@ -81,7 +81,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     supportedPaymentMethodTypes = emptyList()
                 ),
                 enabled = true,
-                institutionIcon = null
+                institutionIcon = null,
                 formattedBalance = "$1,000"
             ),
             PartnerAccountUI(
@@ -95,7 +95,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     supportedPaymentMethodTypes = emptyList()
                 ),
                 enabled = true,
-                institutionIcon = null
+                institutionIcon = null,
                 formattedBalance = "$1,000"
             ),
             PartnerAccountUI(
@@ -109,7 +109,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     supportedPaymentMethodTypes = emptyList()
                 ),
                 enabled = false,
-                institutionIcon = null
+                institutionIcon = null,
                 formattedBalance = null
             ),
             PartnerAccountUI(
@@ -123,7 +123,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     supportedPaymentMethodTypes = emptyList()
                 ),
                 enabled = false,
-                institutionIcon = null
+                institutionIcon = null,
                 formattedBalance = null
             ),
             PartnerAccountUI(
@@ -138,6 +138,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     supportedPaymentMethodTypes = emptyList()
                 ),
                 enabled = true,
+                institutionIcon = null,
                 formattedBalance = null
             )
         )

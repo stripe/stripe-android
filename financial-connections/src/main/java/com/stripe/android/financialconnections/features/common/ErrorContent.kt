@@ -38,8 +38,8 @@ import com.stripe.android.financialconnections.exception.AccountNumberRetrievalE
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -269,7 +269,7 @@ internal fun ErrorContent(
     val scrollState = rememberScrollState()
     Column(
         Modifier
-            .padding(16.dp)
+            .padding(24.dp)
             .fillMaxSize()
     ) {
         Column(

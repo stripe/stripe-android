@@ -25,7 +25,6 @@ internal class InstitutionPickerStates :
             searchInstitutions = Uninitialized,
             searchMode = false,
             allowManualEntry = true,
-            query = ""
         )
         // Search mode - searching institutions
         fun searchModeSearchingInstitutions() = InstitutionPickerState(
@@ -48,11 +47,11 @@ internal class InstitutionPickerStates :
             searchMode = false,
         )
 
-        // Search mode: No results
+        // Search mode: failed
         fun searchModeFailed() = InstitutionPickerState(
             payload = Success(payload()),
             searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
-            searchMode = false,
+            searchMode = true,
         )
 
         // Search mode: no query

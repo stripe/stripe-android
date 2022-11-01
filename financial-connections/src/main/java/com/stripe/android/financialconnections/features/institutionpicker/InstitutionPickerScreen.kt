@@ -62,8 +62,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
-import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
@@ -141,14 +141,12 @@ private fun LoadedContent(
 ) {
     var input by remember { mutableStateOf("") }
     LaunchedEffect(searchMode) { if (!searchMode) input = "" }
-    Column(
-        modifier = Modifier
-    ) {
+    Column {
         if (searchMode.not()) {
             Spacer(Modifier.size(24.dp))
             Text(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 24.dp)
                     .fillMaxWidth(),
                 text = stringResource(R.string.stripe_institutionpicker_pane_select_bank),
                 style = FinancialConnectionsTheme.typography.subtitle
@@ -195,7 +193,7 @@ private fun FinancialConnectionsSearchRow(
     val focusManager = LocalFocusManager.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = Modifier.padding(horizontal = 24.dp)
     ) {
         FinancialConnectionsOutlinedTextField(
             leadingIcon = if (searchMode) {
@@ -295,11 +293,11 @@ private fun SearchInstitutionsFailedRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                horizontal = 16.dp,
+                horizontal = 24.dp,
                 vertical = 8.dp
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Icon(
             painter = painterResource(R.drawable.stripe_ic_warning),
@@ -345,7 +343,7 @@ private fun InstitutionResultTile(
             .clickable { onInstitutionSelected(institution) }
             .padding(
                 vertical = 8.dp,
-                horizontal = 16.dp
+                horizontal = 24.dp
             )
     ) {
         val modifier = Modifier
@@ -386,8 +384,8 @@ private fun FeaturedInstitutionsGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(
             top = 16.dp,
-            start = 16.dp,
-            end = 16.dp
+            start = 24.dp,
+            end = 24.dp
         ),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -461,9 +459,8 @@ internal fun InitialLoading(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
-            query = state.query,
             onQueryChanged = {},
-            onInstitutionSelected = {},
+            onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
             onCloseClick = {},
             onSearchFocused = {}

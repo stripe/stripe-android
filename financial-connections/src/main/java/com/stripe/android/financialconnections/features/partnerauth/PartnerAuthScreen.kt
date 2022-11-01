@@ -43,8 +43,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
-import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -186,12 +186,7 @@ private fun PrePaneContent(
 ) {
     Column(
         modifier = Modifier
-            .padding(
-                top = 24.dp,
-                start = 16.dp,
-                end = 16.dp,
-                bottom = 16.dp
-            )
+            .padding(24.dp)
     ) {
         val modifier = Modifier
             .size(36.dp)
