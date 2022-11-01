@@ -173,6 +173,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
         url = synchronizeSessionUrl,
         options = apiOptions,
         params = mapOf(
+            "expand" to listOf("manifest.active_auth_session"),
             "locale" to "en-us",
             "mobile" to mapOf(
                 "sdk_type" to "android",
