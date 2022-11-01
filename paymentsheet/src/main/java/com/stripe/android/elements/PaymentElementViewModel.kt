@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -16,9 +17,9 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -31,25 +32,29 @@ import kotlinx.coroutines.flow.stateIn
 internal class PaymentElementViewModel internal constructor(
     val supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
     private val paymentElementConfig: PaymentElementConfig,
-    context: Context,
-    lifecycleScope: CoroutineScope
+    context: Context
 ) : AndroidViewModel(context.applicationContext as Application) {
     val selectedPaymentMethod = MutableStateFlow(getInitiallySelectedPaymentMethod())
 
+    /**
+     * Holds the last valid `PaymentSelection`, so that the value is remembered if the user switches to a different
+     * payment method and comes back.
+     */
     private var lastPaymentSelection = paymentElementConfig.initialSelection
 
     val formArgumentsFlow = selectedPaymentMethod.map { selectedItem ->
         getFormArgumentsForPaymentMethod(selectedItem)
     }.stateIn(
-        lifecycleScope,
-        SharingStarted.Eagerly,
+        viewModelScope,
+        SharingStarted.Lazily,
         getFormArgumentsForPaymentMethod(selectedPaymentMethod.value)
     )
 
-    val paymentSelectionFlow = MutableStateFlow<PaymentSelection.New?>(null)
+    private val _paymentSelectionFlow = MutableStateFlow<PaymentSelection.New?>(null)
+    val paymentSelectionFlow: StateFlow<PaymentSelection.New?> = _paymentSelectionFlow
 
     internal fun onFormFieldValuesChanged(values: FormFieldValues?) {
-        paymentSelectionFlow.value = values?.let { formFieldValues ->
+        _paymentSelectionFlow.value = values?.let { formFieldValues ->
             FieldValuesToParamsMapConverter
                 .transformToPaymentMethodCreateParams(
                     formFieldValues.fieldValuePairs
@@ -92,7 +97,8 @@ internal class PaymentElementViewModel internal constructor(
         selectedItem: LpmRepository.SupportedPaymentMethod
     ) = selectedItem.getPMAddForm(
         paymentElementConfig.stripeIntent,
-        paymentElementConfig.paymentSheetConfig
+        paymentElementConfig.hasCustomerConfiguration,
+        paymentElementConfig.allowsDelayedPaymentMethods
     ).let { layoutFormDescriptor ->
         FormFragmentArguments(
             paymentMethodCode = selectedItem.code,
@@ -110,8 +116,8 @@ internal class PaymentElementViewModel internal constructor(
             } else {
                 null
             },
-            billingDetails = paymentElementConfig.paymentSheetConfig?.defaultBillingDetails,
-            shippingDetails = paymentElementConfig.paymentSheetConfig?.shippingDetails,
+            billingDetails = paymentElementConfig.defaultBillingDetails,
+            shippingDetails = paymentElementConfig.shippingDetails,
             initialPaymentMethodCreateParams = lastPaymentSelection?.takeIf {
                 it.paymentMethodCreateParams.typeCode == selectedItem.code ||
                     (
@@ -148,8 +154,7 @@ internal class PaymentElementViewModel internal constructor(
     internal class Factory(
         private val supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
         private val paymentElementConfig: PaymentElementConfig,
-        private val context: Context,
-        private val lifecycleScope: CoroutineScope
+        private val context: Context
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
@@ -157,8 +162,7 @@ internal class PaymentElementViewModel internal constructor(
             return PaymentElementViewModel(
                 supportedPaymentMethods,
                 paymentElementConfig,
-                context,
-                lifecycleScope
+                context
             ) as T
         }
     }

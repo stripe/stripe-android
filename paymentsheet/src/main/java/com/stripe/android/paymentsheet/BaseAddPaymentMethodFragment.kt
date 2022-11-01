@@ -17,15 +17,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.map
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.PaymentElementConfig
-import com.stripe.android.elements.PaymentElementHorizontalPadding
 import com.stripe.android.elements.PaymentElementViewModel
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -59,13 +58,15 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     factory = PaymentElementViewModel.Factory(
                         supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
                         paymentElementConfig = PaymentElementConfig(
-                            paymentSheetConfig = sheetViewModel.config,
                             stripeIntent = requireNotNull(sheetViewModel.stripeIntent.value),
                             merchantName = sheetViewModel.merchantName,
-                            initialSelection = sheetViewModel.newPaymentSelection
+                            initialSelection = sheetViewModel.newPaymentSelection,
+                            defaultBillingDetails = sheetViewModel.config?.defaultBillingDetails,
+                            shippingDetails = sheetViewModel.config?.shippingDetails,
+                            hasCustomerConfiguration = sheetViewModel.config?.customer != null,
+                            allowsDelayedPaymentMethods = sheetViewModel.config?.allowsDelayedPaymentMethods == true
                         ),
-                        context = requireContext(),
-                        lifecycleScope = lifecycleScope
+                        context = requireContext()
                     )
                 )
 
@@ -138,8 +139,12 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             )
 
             if (showLinkInlineSignup) {
-                val modifier = Modifier.fillMaxWidth()
-                    .padding(horizontal = PaymentElementHorizontalPadding, vertical = 6.dp)
+                val modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
+                        vertical = 6.dp
+                    )
                 if (isLinkInlineActive) {
                     LinkInlineSignedIn(
                         linkPaymentLauncher = sheetViewModel.linkLauncher,

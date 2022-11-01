@@ -8,19 +8,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentAchBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.FlowPreview
-
-internal val PaymentElementHorizontalPadding = 20.dp
 
 @Composable
 internal fun PaymentElement(
@@ -74,7 +74,10 @@ internal fun PaymentElement(
         }
 
         if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
-            Column(modifier = Modifier.padding(horizontal = PaymentElementHorizontalPadding)) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal))
+            ) {
                 AndroidViewBinding(FragmentAchBinding::inflate)
             }
         } else {
@@ -84,7 +87,8 @@ internal fun PaymentElement(
                 showCheckbox = showCheckbox,
                 onFormFieldValuesChanged = onFormFieldValuesChanged,
                 injector = injector,
-                modifier = Modifier.padding(horizontal = PaymentElementHorizontalPadding)
+                modifier = Modifier
+                    .padding(horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal))
             )
         }
     }

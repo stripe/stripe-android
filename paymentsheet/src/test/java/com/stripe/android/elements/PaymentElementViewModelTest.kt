@@ -7,12 +7,10 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import kotlinx.coroutines.MainScope
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -20,10 +18,13 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentElementViewModelTest {
     private val config = PaymentElementConfig(
-        paymentSheetConfig = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         merchantName = "Merchant",
-        initialSelection = null
+        initialSelection = null,
+        defaultBillingDetails = null,
+        shippingDetails = null,
+        hasCustomerConfiguration = true,
+        allowsDelayedPaymentMethods = true
     )
 
     @Test
@@ -157,8 +158,7 @@ internal class PaymentElementViewModelTest {
     ) = PaymentElementViewModel(
         supportedPaymentMethods = supportedPaymentMethods,
         paymentElementConfig = paymentElementConfig,
-        context = context,
-        lifecycleScope = MainScope()
+        context = context
     )
 
     companion object {
