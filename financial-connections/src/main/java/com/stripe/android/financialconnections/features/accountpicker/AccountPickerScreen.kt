@@ -463,6 +463,7 @@ private fun MultiSelectContent(
 }
 
 @Composable
+@Suppress("MagicNumber")
 private fun AccountItem(
     selected: Boolean,
     onAccountClicked: (PartnerAccount) -> Unit,
