@@ -1,9 +1,9 @@
 package com.stripe.android.financialconnections.repository
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,6 +18,7 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.willSuspendableAnswer
 
@@ -31,7 +32,6 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         initialSync: SynchronizeSessionResponse? = null
     ) = FinancialConnectionsManifestRepository(
         requestExecutor = mockRequestExecutor,
-        configuration = configuration,
         apiRequestFactory = apiRequestFactory,
         apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
         logger = Logger.noop(),
@@ -41,7 +41,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
     @Test
     fun `getOrFetchManifest - when manifest retrieved twice concurrently, API call runs once`() =
         runTest {
-            givenSyncSessionRequestReturnsAfterDelay(syncResponse())
+            givenSyncSessionRequestReturnsAfterDelay(ApiKeyFixtures.syncResponse())
 
             val repository = buildRepository()
 
@@ -57,7 +57,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
     @Test
     fun `getOrFetchManifest - when initial manifest passed in constructor, returns it and no network interaction`() =
         runTest {
-            val initialSync = syncResponse()
+            val initialSync = ApiKeyFixtures.syncResponse()
             val repository = buildRepository(initialSync = initialSync)
 
             val returnedManifest =

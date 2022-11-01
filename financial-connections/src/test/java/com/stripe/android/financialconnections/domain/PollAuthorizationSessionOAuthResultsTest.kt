@@ -53,7 +53,7 @@ internal class PollAuthorizationSessionOAuthResultsTest {
         state = "State",
         code = null,
         status = null,
-        memberGuid = "memberGuid"
+        publicToken = "memberGuid"
     )
 
     private fun acceptedRequest(): InvalidRequestException {
