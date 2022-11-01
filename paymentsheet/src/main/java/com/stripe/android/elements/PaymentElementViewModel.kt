@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -17,8 +18,6 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.injection.NonFallbackInjector
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -155,7 +154,7 @@ internal class PaymentElementViewModel internal constructor(
 
     internal class Factory(
         private val supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
-        private val paymentElementConfig: PaymentElementController.Config,
+        private val paymentElementConfig: PaymentElementConfig,
         private val context: Context,
         val injector: NonFallbackInjector
     ) : ViewModelProvider.Factory {

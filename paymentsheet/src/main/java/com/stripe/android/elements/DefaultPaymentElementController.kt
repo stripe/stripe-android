@@ -6,6 +6,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -27,7 +28,6 @@ import com.stripe.android.paymentsheet.repositories.initializeRepositoryAndGetSt
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -52,7 +52,6 @@ internal class DefaultPaymentElementController @Inject internal constructor(
 ) : PaymentElementController {
     lateinit var injector: NonFallbackInjector
     private var paymentLauncher: StripePaymentLauncher? = null
-
 
     private var paymentSheetConfig: PaymentSheet.Configuration? = null
     lateinit var clientSecret: ClientSecret
@@ -102,12 +101,15 @@ internal class DefaultPaymentElementController @Inject internal constructor(
             )
         )
     }.let { stripeIntent ->
-        val config = PaymentElementController.Config(
-            paymentSheetConfig = paymentSheetConfig,
+        val config = PaymentElementConfig(
             stripeIntent = stripeIntent,
             merchantName = paymentSheetConfig?.merchantDisplayName
                 ?: appContext.applicationInfo.loadLabel(appContext.packageManager).toString(),
-            initialSelection = null
+            initialSelection = null,
+            defaultBillingDetails = paymentSheetConfig?.defaultBillingDetails,
+            shippingDetails = paymentSheetConfig?.shippingDetails,
+            hasCustomerConfiguration = paymentSheetConfig?.customer != null,
+            allowsDelayedPaymentMethods = paymentSheetConfig?.allowsDelayedPaymentMethods == true
         )
 
         PaymentElementViewModel.Factory(
@@ -118,7 +120,6 @@ internal class DefaultPaymentElementController @Inject internal constructor(
             ),
             paymentElementConfig = config,
             context = appContext,
-            lifecycleScope = lifecycleScope,
             injector = injector
         )
     }

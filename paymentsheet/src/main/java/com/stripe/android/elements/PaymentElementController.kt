@@ -7,13 +7,12 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.elements.injection.DaggerPaymentElementComponent
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -70,13 +69,6 @@ interface PaymentElementController {
             }
         }
     }
-
-    data class Config(
-        val paymentSheetConfig: PaymentSheet.Configuration?,
-        val stripeIntent: StripeIntent,
-        val merchantName: String,
-        val initialSelection: PaymentSelection.New?
-    )
 }
 
 fun interface PaymentElementResultCallback {

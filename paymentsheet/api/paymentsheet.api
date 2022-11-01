@@ -1,3 +1,50 @@
+public final class com/stripe/android/elements/DefaultPaymentElementController_Factory : dagger/internal/Factory {
+	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
+	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/elements/DefaultPaymentElementController_Factory;
+	public fun get ()Lcom/stripe/android/elements/DefaultPaymentElementController;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun newInstance (Landroid/content/Context;Lkotlin/coroutines/CoroutineContext;Lkotlinx/coroutines/CoroutineScope;Landroidx/lifecycle/LifecycleOwner;Landroidx/activity/result/ActivityResultCaller;Lcom/stripe/android/elements/PaymentElementResultCallback;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository;Lcom/stripe/android/paymentsheet/model/StripeIntentValidator;Ljavax/inject/Provider;Lcom/stripe/android/payments/paymentlauncher/StripePaymentLauncherAssistedFactory;Lcom/stripe/android/paymentsheet/analytics/EventReporter;)Lcom/stripe/android/elements/DefaultPaymentElementController;
+}
+
+public abstract interface class com/stripe/android/elements/PaymentElementController {
+	public static final field Companion Lcom/stripe/android/elements/PaymentElementController$Companion;
+	public abstract fun completePayment (Lcom/stripe/android/paymentsheet/model/PaymentSelection;)V
+	public abstract fun configureWithPaymentIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;)V
+	public abstract fun getViewModelFactory (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/elements/PaymentElementController$Companion {
+	public final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/elements/PaymentElementResultCallback;)Lcom/stripe/android/elements/PaymentElementController;
+}
+
+public final class com/stripe/android/elements/PaymentElementKt {
+	public static final fun PaymentElement (Lcom/stripe/android/elements/PaymentElementController;ZLkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
+}
+
+public abstract interface class com/stripe/android/elements/PaymentElementResultCallback {
+	public abstract fun onPaymentResult (Lcom/stripe/android/payments/paymentlauncher/PaymentResult;)V
+}
+
+public final class com/stripe/android/elements/injection/DaggerPaymentElementComponent {
+	public static fun builder ()Lcom/stripe/android/elements/injection/PaymentElementComponent$Builder;
+}
+
+public final class com/stripe/android/elements/injection/PaymentElementModule_Companion_ProvideEventReporterModeFactory : dagger/internal/Factory {
+	public fun <init> ()V
+	public static fun create ()Lcom/stripe/android/elements/injection/PaymentElementModule_Companion_ProvideEventReporterModeFactory;
+	public fun get ()Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
+	public synthetic fun get ()Ljava/lang/Object;
+	public static fun provideEventReporterMode ()Lcom/stripe/android/paymentsheet/analytics/EventReporter$Mode;
+}
+
+public final class com/stripe/android/elements/injection/PaymentElementModule_Companion_ProvideProductUsageTokensFactory : dagger/internal/Factory {
+	public fun <init> ()V
+	public static fun create ()Lcom/stripe/android/elements/injection/PaymentElementModule_Companion_ProvideProductUsageTokensFactory;
+	public synthetic fun get ()Ljava/lang/Object;
+	public fun get ()Ljava/util/Set;
+	public static fun provideProductUsageTokens ()Ljava/util/Set;
+}
+
 public final class com/stripe/android/paymentsheet/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
