@@ -29,7 +29,11 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -80,7 +84,6 @@ internal fun InstitutionPickerScreen() {
         payload = state.payload,
         institutionsProvider = { state.searchInstitutions },
         searchMode = state.searchMode,
-        query = state.query,
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCancelSearchClick = viewModel::onCancelSearchClick,
@@ -95,7 +98,6 @@ private fun InstitutionPickerContent(
     payload: Async<Payload>,
     institutionsProvider: () -> Async<InstitutionResponse>,
     searchMode: Boolean,
-    query: String,
     onQueryChanged: (String) -> Unit,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     onCancelSearchClick: () -> Unit,
@@ -114,7 +116,6 @@ private fun InstitutionPickerContent(
     ) {
         LoadedContent(
             searchMode = searchMode,
-            query = query,
             onQueryChanged = onQueryChanged,
             onSearchFocused = onSearchFocused,
             onCancelSearchClick = onCancelSearchClick,
@@ -129,7 +130,6 @@ private fun InstitutionPickerContent(
 @Composable
 private fun LoadedContent(
     searchMode: Boolean,
-    query: String,
     onQueryChanged: (String) -> Unit,
     onSearchFocused: () -> Unit,
     onCancelSearchClick: () -> Unit,
@@ -138,6 +138,8 @@ private fun LoadedContent(
     payload: Async<Payload>,
     onManualEntryClick: () -> Unit
 ) {
+    var input by remember { mutableStateOf("") }
+    LaunchedEffect(searchMode) { if (!searchMode) input = "" }
     Column(
         modifier = Modifier
     ) {
@@ -154,18 +156,21 @@ private fun LoadedContent(
         Spacer(modifier = Modifier.size(16.dp))
         if (payload()?.searchDisabled == false) {
             FinancialConnectionsSearchRow(
-                query = query,
+                query = input,
                 searchMode = searchMode,
-                onQueryChanged = onQueryChanged,
+                onQueryChanged = {
+                    input = it
+                    onQueryChanged(input)
+                },
                 onSearchFocused = onSearchFocused,
                 onCancelSearchClick = onCancelSearchClick
             )
         }
-        if (query.isNotEmpty()) {
+        if (input.isNotEmpty()) {
             SearchInstitutionsList(
                 institutionsProvider = institutionsProvider,
                 onInstitutionSelected = onInstitutionSelected,
-                query = query,
+                query = input,
                 onManualEntryClick = onManualEntryClick,
                 manualEntryEnabled = payload()?.allowManualEntry ?: false
             )
@@ -210,9 +215,11 @@ private fun FinancialConnectionsSearchRow(
             modifier = Modifier
                 .onFocusChanged { if (it.isFocused) onSearchFocused() }
                 .weight(1f),
-            value = query,
+            value = if (searchMode) query else "",
             label = { Text(text = stringResource(id = R.string.stripe_search)) },
-            onValueChange = onQueryChanged
+            onValueChange = {
+                onQueryChanged(it)
+            }
         )
     }
 }
@@ -453,7 +460,6 @@ internal fun SearchModeSearchingInstitutions(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
-            query = state.query,
             onQueryChanged = {},
             onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
@@ -473,7 +479,6 @@ internal fun SearchModeWithResults(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
-            query = state.query,
             onQueryChanged = {},
             onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
@@ -493,7 +498,6 @@ internal fun SearchModeNoResults(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
-            query = state.query,
             onQueryChanged = {},
             onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
@@ -513,7 +517,6 @@ internal fun SearchModeFailed(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
-            query = state.query,
             onQueryChanged = {},
             onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
@@ -533,7 +536,6 @@ internal fun SearchModeNoQuery(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
-            query = state.query,
             onQueryChanged = {},
             onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},
@@ -553,7 +555,6 @@ internal fun NoSearchMode(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
             searchMode = state.searchMode,
-            query = state.query,
             onQueryChanged = {},
             onInstitutionSelected = { _, _ -> },
             onCancelSearchClick = {},

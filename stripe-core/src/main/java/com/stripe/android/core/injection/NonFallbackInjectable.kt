@@ -1,8 +1,6 @@
-package com.stripe.android.ui.core.injection
+package com.stripe.android.core.injection
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.injection.Injectable
-import com.stripe.android.core.injection.Injector
 
 /**
  * Mark a class that can be injected by a [Injector] and does not support fallback.
@@ -16,8 +14,8 @@ import com.stripe.android.core.injection.Injector
 interface NonFallbackInjectable : Injectable<Unit> {
 
     /**
-     * LinkInjectable classes don't implement fallback because they receive the injector directly
-     * as a constructor parameter.
+     * NonFallbackInjectable classes don't implement fallback because they receive the injector
+     * directly as a constructor parameter.
      */
     override fun fallbackInitialize(arg: Unit) =
         throw IllegalStateException(

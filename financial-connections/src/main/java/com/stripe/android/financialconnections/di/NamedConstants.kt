@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.di
 
 /**
- * Name for user's publishable key
+ * Name for user's publishable key.
  */
 internal const val PUBLISHABLE_KEY = "publishableKey"
 
@@ -11,6 +11,6 @@ internal const val PUBLISHABLE_KEY = "publishableKey"
 internal const val APPLICATION_ID = "applicationId"
 
 /**
- * Host's applicationId.
+ * Initial sync session response.
  */
-internal const val INITIAL_MANIFEST = "initial_manifest"
+internal const val INITIAL_SYNC_RESPONSE = "initial_sync_response"

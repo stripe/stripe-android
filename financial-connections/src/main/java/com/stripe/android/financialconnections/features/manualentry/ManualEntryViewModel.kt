@@ -71,7 +71,7 @@ internal class ManualEntryViewModel @Inject constructor(
             ManualEntryState::linkPaymentAccount,
             onFail = {
                 logger.error("Error linking payment account", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(it))
+                eventTracker.track(FinancialConnectionsEvent.Error(NextPane.MANUAL_ENTRY, it))
             },
         )
     }

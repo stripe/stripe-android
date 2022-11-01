@@ -5,6 +5,7 @@ import com.airbnb.mvrx.PersistState
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 
 /**
  *  Class containing all of the data needed to represent the screen.
@@ -51,7 +52,7 @@ internal sealed class FinancialConnectionsSheetViewEffect {
      */
     data class OpenNativeAuthFlow(
         val configuration: FinancialConnectionsSheet.Configuration,
-        val manifest: FinancialConnectionsSessionManifest
+        val initialSyncResponse: SynchronizeSessionResponse
     ) : FinancialConnectionsSheetViewEffect()
 
     /**

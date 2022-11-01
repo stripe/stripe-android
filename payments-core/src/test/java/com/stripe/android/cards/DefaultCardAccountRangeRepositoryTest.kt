@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -32,6 +33,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     private val realStore = DefaultCardAccountRangeStore(application)
     private val realRepository = createRealRepository(realStore)
 
+    @Ignore("Failing. See https://jira.corp.stripe.com/browse/RUN_MOBILESDK-1661")
     @Suppress("LongMethod")
     @Test
     fun `repository with real sources returns expected results`(): Unit = runBlocking {

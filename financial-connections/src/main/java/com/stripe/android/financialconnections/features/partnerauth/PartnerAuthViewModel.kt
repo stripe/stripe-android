@@ -81,7 +81,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             PartnerAuthState::payload,
             onFail = {
                 logger.error("Error fetching payload / posting AuthSession", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(it))
+                eventTracker.track(FinancialConnectionsEvent.Error(NextPane.PARTNER_AUTH, it))
             },
             onSuccess = { eventTracker.track(PaneLoaded(NextPane.PARTNER_AUTH)) }
         )
@@ -94,7 +94,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                     it.url?.let { setState { copy(viewEffect = OpenPartnerAuth(it)) } }
                 }
                 .onFailure {
-                    eventTracker.track(FinancialConnectionsEvent.Error(it))
+                    eventTracker.track(FinancialConnectionsEvent.Error(NextPane.PARTNER_AUTH, it))
                     logger.error("failed retrieving active session from cache", it)
                     setState { copy(authenticationStatus = Fail(it)) }
                 }

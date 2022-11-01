@@ -27,7 +27,8 @@ data class TestParameters(
     val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
     val snapshotReturningCustomer: Boolean = false,
     val merchantCountryCode: String,
-    val supportedPaymentMethods: List<PaymentMethodCode> = listOf()
+    val supportedPaymentMethods: List<PaymentMethodCode> = listOf(),
+    val customPrimaryButtonLabel: String? = null,
 )
 
 /**

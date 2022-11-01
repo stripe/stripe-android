@@ -3,9 +3,8 @@ package com.stripe.android.financialconnections.repository
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -27,46 +26,58 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
 
     private val mockRequestExecutor = mock<FinancialConnectionsRequestExecutor>()
     private val apiRequestFactory = mock<ApiRequest.Factory>()
-    private val configuration = FinancialConnectionsSheet.Configuration(
-        ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-    )
 
-    private fun buildRepository() = FinancialConnectionsManifestRepository(
+    private fun buildRepository(
+        initialSync: SynchronizeSessionResponse? = null
+    ) = FinancialConnectionsManifestRepository(
         requestExecutor = mockRequestExecutor,
         configuration = configuration,
         apiRequestFactory = apiRequestFactory,
         apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
-        logger = Logger.noop()
+        logger = Logger.noop(),
+        initialSync = initialSync
     )
 
     @Test
     fun `getOrFetchManifest - when manifest retrieved twice concurrently, API call runs once`() =
         runTest {
-            givenFetchManifestRequestReturnsAfterDelay(sessionManifest())
+            givenSyncSessionRequestReturnsAfterDelay(syncResponse())
 
             val repository = buildRepository()
 
             // simulates to concurrent accesses to manifest.
             awaitAll(
-                async { repository.getOrFetchManifest() },
-                async { repository.getOrFetchManifest() }
+                async { repository.getOrFetchSynchronizeFinancialConnectionsSession("", "") },
+                async { repository.getOrFetchSynchronizeFinancialConnectionsSession("", "") }
             )
 
             verify(mockRequestExecutor, times(1)).execute(any(), any<KSerializer<*>>())
         }
 
+    @Test
+    fun `getOrFetchManifest - when initial manifest passed in constructor, returns it and no network interaction`() =
+        runTest {
+            val initialSync = syncResponse()
+            val repository = buildRepository(initialSync = initialSync)
+
+            val returnedManifest =
+                repository.getOrFetchSynchronizeFinancialConnectionsSession("", "")
+
+            assertThat(returnedManifest).isEqualTo(initialSync)
+            verifyNoInteractions(mockRequestExecutor)
+        }
+
     /**
      * Simulates an API call to retrieve manifest that takes some time.
      */
-    private suspend fun givenFetchManifestRequestReturnsAfterDelay(
-        manifest: FinancialConnectionsSessionManifest
+    private suspend fun givenSyncSessionRequestReturnsAfterDelay(
+        syncResponse: SynchronizeSessionResponse
     ) {
         val mock = mock<ApiRequest>()
-        whenever(apiRequestFactory.createGet(any(), any(), any())).thenReturn(mock)
+        whenever(apiRequestFactory.createPost(any(), any(), any())).thenReturn(mock)
         given(mockRequestExecutor.execute(any(), any<KSerializer<*>>())).willSuspendableAnswer {
             delay(100)
-            manifest
+            syncResponse
         }
     }
 }

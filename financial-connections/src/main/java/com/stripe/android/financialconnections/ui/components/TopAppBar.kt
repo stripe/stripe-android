@@ -2,6 +2,7 @@
 
 package com.stripe.android.financialconnections.ui.components
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.TopAppBar
@@ -26,12 +27,14 @@ internal fun FinancialConnectionsTopAppBar(
     showBack: Boolean = true,
     onCloseClick: () -> Unit
 ) {
+    val localBackPressed = LocalOnBackPressedDispatcherOwner.current
+        ?.onBackPressedDispatcher
     val navController = LocalNavHostController.current
     TopAppBar(
         title = title,
         navigationIcon = if (navController.previousBackStackEntry != null && showBack) {
             {
-                IconButton(onClick = { navController.navigateUp() }) {
+                IconButton(onClick = { localBackPressed?.onBackPressed() }) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back icon",

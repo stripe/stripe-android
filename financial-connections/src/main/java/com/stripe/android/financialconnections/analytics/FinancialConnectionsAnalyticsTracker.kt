@@ -45,10 +45,7 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
             stripeNetworkClient.executeRequest(
                 request
             )
-            logger.debug(
-                "tracked event: ${event.eventName}" +
-                    "\nparams: ${request.params}"
-            )
+            logger.debug("EVENT: ${request.eventName}: ${request.params}")
         }.onFailure {
             logger.error("Exception while making analytics request", it)
         }
@@ -64,7 +61,7 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
             "key" to configuration.publishableKey,
             "stripe_account" to configuration.stripeAccountId,
             "logger_id" to loggerId,
-            "navigator_language" to locale.language,
+            "navigator_language" to locale.toLanguageTag(),
             "is_webview" to false.toString(),
             "livemode" to manifest.livemode.toString(),
             "product" to manifest.product.value,

@@ -49,8 +49,8 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
-import com.stripe.android.financialconnections.exception.NoAccountsAvailableException
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.PartnerAccountUI
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
@@ -146,7 +146,7 @@ private fun AccountPickerContent(
                         onEnterDetailsManually = onEnterDetailsManually
                     )
 
-                is NoAccountsAvailableException -> NoAccountsAvailableErrorContent(
+                is AccountLoadError -> NoAccountsAvailableErrorContent(
                     exception = error,
                     onEnterDetailsManually = onEnterDetailsManually,
                     onTryAgain = onLoadAccountsAgain,

@@ -8,7 +8,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LinkMoreAccounts
@@ -28,6 +28,7 @@ internal class ResetViewModel @Inject constructor(
         logErrors()
         suspend {
             val updatedManifest = linkMoreAccounts()
+            eventTracker.track(PaneLoaded(NextPane.RESET))
             goNext(updatedManifest.nextPane)
             Unit
         }.execute { copy(payload = it) }
@@ -36,11 +37,10 @@ internal class ResetViewModel @Inject constructor(
     private fun logErrors() {
         onAsync(
             ResetState::payload,
-            onFail = {
-                logger.error("Error linking more accounts", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(it))
+            onFail = { error ->
+                logger.error("Error linking more accounts", error)
+                eventTracker.track(Error(NextPane.RESET, error))
             },
-            onSuccess = { eventTracker.track(PaneLoaded(NextPane.RESET)) }
         )
     }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.consent
 
+import android.webkit.URLUtil
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
@@ -10,14 +11,15 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ConsentAgree
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
 import com.stripe.android.financialconnections.domain.AcceptConsent
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.features.MarkdownParser
+import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
@@ -27,7 +29,7 @@ internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
     private val acceptConsent: AcceptConsent,
     private val goNext: GoNext,
-    private val getManifest: GetManifest,
+    private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val uriUtils: UriUtils,
@@ -36,33 +38,20 @@ internal class ConsentViewModel @Inject constructor(
 
     init {
         logErrors()
-        viewModelScope.launch {
-            val manifest = getManifest()
-            setState {
-                copy(
-                    manualEntryEnabled = manifest.allowManualEntry,
-                    manualEntryShowBusinessDaysNotice =
-                    !manifest.customManualEntryHandling && manifest.manualEntryUsesMicrodeposits,
-                    disconnectUrl = FinancialConnectionsUrlResolver.getDisconnectUrl(manifest),
-                    faqUrl = FinancialConnectionsUrlResolver.getFAQUrl(manifest),
-                    dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest),
-                    stripeToSUrl = FinancialConnectionsUrlResolver.getStripeTOSUrl(manifest),
-                    privacyCenterUrl = FinancialConnectionsUrlResolver.getPrivacyCenterUrl(manifest),
-                    title = ConsentTextBuilder.getConsentTitle(manifest),
-                    bullets = ConsentTextBuilder.getBullets(manifest),
-                    requestedDataTitle = ConsentTextBuilder.getDataRequestedTitle(manifest),
-                    requestedDataBullets = ConsentTextBuilder.getRequestedDataBullets(manifest)
-                )
-            }
-            // TODO move to payload onSuccess once dynamic consent is in place.
-            // TODO log error on payload onError
-            eventTracker.track(FinancialConnectionsEvent.PaneLoaded(NextPane.CONSENT))
-        }
+        suspend {
+            val sync = getOrFetchSync()
+            MarkdownParser.toHtml(sync.text!!.consent!!)
+        }.execute { copy(consent = it) }
     }
 
     private fun logErrors() {
+        onAsync(
+            ConsentState::consent,
+            onSuccess = { eventTracker.track(FinancialConnectionsEvent.PaneLoaded(NextPane.CONSENT)) },
+            onFail = { logger.error("Error retrieving consent content", it) }
+        )
         onAsync(ConsentState::acceptConsent, onFail = {
-            eventTracker.track(Error(it))
+            eventTracker.track(Error(NextPane.CONSENT, it))
             logger.error("Error accepting consent", it)
         })
     }
@@ -76,40 +65,30 @@ internal class ConsentViewModel @Inject constructor(
         }.execute { copy(acceptConsent = it) }
     }
 
-    fun onClickableTextClick(tag: String) {
-        val logClick: (String) -> Unit = {
-            viewModelScope.launch {
-                eventTracker.track(Click(it, pane = NextPane.CONSENT))
+    fun onClickableTextClick(uri: String) {
+        // if clicked uri contains an eventName query param, track click event.
+        viewModelScope.launch {
+            uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
+                eventTracker.track(Click(eventName, pane = NextPane.CONSENT))
             }
         }
-        uriUtils.getQueryParameter(tag, "eventName")?.let { logClick(it) }
-        when (ConsentClickableText.values().firstOrNull { it.value == tag }) {
-            ConsentClickableText.TERMS ->
-                setState { copy(viewEffect = OpenUrl(stripeToSUrl)) }
 
-            ConsentClickableText.PRIVACY ->
-                setState { copy(viewEffect = OpenUrl(FinancialConnectionsUrls.StripePrivacyPolicy)) }
+        if (URLUtil.isNetworkUrl(uri)) {
+            setState { copy(viewEffect = OpenUrl(uri)) }
+        } else {
+            val managedUri = ConsentClickableText.values()
+                .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
+            when (managedUri) {
+                ConsentClickableText.DATA -> {
+                    setState { copy(viewEffect = ViewEffect.OpenBottomSheet) }
+                }
 
-            ConsentClickableText.DISCONNECT ->
-                setState { copy(viewEffect = OpenUrl(disconnectUrl)) }
+                ConsentClickableText.MANUAL_ENTRY -> {
+                    navigationManager.navigate(NavigationDirections.manualEntry)
+                }
 
-            ConsentClickableText.DATA -> {
-                logClick("click.data_requested")
-                setState { copy(viewEffect = ConsentState.ViewEffect.OpenBottomSheet) }
+                null -> logger.error("Unrecognized clickable text: $uri")
             }
-
-            ConsentClickableText.PRIVACY_CENTER ->
-                setState { copy(viewEffect = OpenUrl(privacyCenterUrl)) }
-
-            ConsentClickableText.DATA_ACCESS ->
-                setState { copy(viewEffect = OpenUrl(dataPolicyUrl)) }
-
-            ConsentClickableText.MANUAL_ENTRY -> {
-                logClick("click.manual_entry")
-                navigationManager.navigate(NavigationDirections.manualEntry)
-            }
-
-            null -> logger.error("Unrecognized clickable text: $tag")
         }
     }
 
