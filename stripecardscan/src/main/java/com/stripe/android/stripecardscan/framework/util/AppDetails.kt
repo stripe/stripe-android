@@ -1,6 +1,7 @@
 package com.stripe.android.stripecardscan.framework.util
 
 import android.content.Context
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.stripecardscan.BuildConfig
 
 internal data class AppDetails(
@@ -33,8 +34,7 @@ private fun getApplicationId(): String = "" // no longer available in later vers
 
 internal fun getLibraryPackageName(): String = BuildConfig.LIBRARY_PACKAGE_NAME
 
-// TODO: replace this with something like BuildConfig.SDK_VERSION_STRING
-internal fun getSdkVersion(): String = "1.0.0000"
+internal fun getSdkVersion(): String = StripeSdkVersion.VERSION_NAME
 
 private fun getSdkVersionCode(): Int = -1 // no longer available in later versions of gradle.
 
