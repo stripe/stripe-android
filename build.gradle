@@ -76,7 +76,7 @@ ext {
     androidxSecurityVersion = '1.1.0-alpha03'
 
     kotlinCoroutinesVersion = '1.6.4'
-    kotlinSerializationVersion = '1.4.0'
+    kotlinSerializationVersion = '1.4.1'
     accompanistVersion = '0.25.1'
     ktlintVersion = '0.47.1'
     // material 1.6 causes paymentsheet to not render correctly.

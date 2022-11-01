@@ -10,4 +10,6 @@
     <string name="description_time_estimate">estimated time to complete verification icon</string>
     <!-- Content description for the icon for privacy policy -->
     <string name="description_privacy_policy">privacy policy icon</string>
+    <!-- Content description for exclamation icon -->
+    <string name="description_exclamation">exclamation icon</string>
 </resources>

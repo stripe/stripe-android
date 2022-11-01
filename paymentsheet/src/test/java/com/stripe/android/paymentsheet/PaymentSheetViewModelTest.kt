@@ -49,6 +49,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.S
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
+import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
