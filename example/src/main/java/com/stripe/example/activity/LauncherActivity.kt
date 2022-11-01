@@ -164,6 +164,11 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 activity.getString(R.string.manual_us_bank_account_example),
                 ManualUSBankAccountPaymentMethodActivity::class.java
+            ),
+            // This is for internal use so as not to confuse the user.
+            Item(
+                "StripeImage Example",
+                StripeImageActivity::class.java
             )
         )
 
