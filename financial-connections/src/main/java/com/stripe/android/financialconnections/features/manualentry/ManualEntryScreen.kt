@@ -134,8 +134,11 @@ private fun ManualEntryContent(
                         style = FinancialConnectionsTheme.typography.body
                     )
                 }
+                Spacer(modifier = Modifier.size(8.dp))
+
                 InputWithError(
                     label = R.string.stripe_manualentry_routing,
+                    hint = "123456789",
                     inputWithError = routing,
                     onInputChanged = onRoutingEntered,
                     onFocusGained = { currentCheck = R.drawable.stripe_check_routing }
@@ -143,6 +146,7 @@ private fun ManualEntryContent(
                 Spacer(modifier = Modifier.size(24.dp))
                 InputWithError(
                     label = R.string.stripe_manualentry_account,
+                    hint = "000123456789",
                     inputWithError = account,
                     onInputChanged = onAccountEntered,
                     onFocusGained = { currentCheck = R.drawable.stripe_check_account }
@@ -150,12 +154,13 @@ private fun ManualEntryContent(
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
                     text = stringResource(R.string.stripe_manualentry_account_type_disclaimer),
-                    color = FinancialConnectionsTheme.colors.textPrimary,
-                    style = FinancialConnectionsTheme.typography.body
+                    color = FinancialConnectionsTheme.colors.textSecondary,
+                    style = FinancialConnectionsTheme.typography.caption
                 )
                 Spacer(modifier = Modifier.size(24.dp))
                 InputWithError(
                     label = R.string.stripe_manualentry_accountconfirm,
+                    hint = "000123456789",
                     inputWithError = accountConfirm,
                     onInputChanged = onAccountConfirmEntered,
                     onFocusGained = { currentCheck = R.drawable.stripe_check_account }
@@ -191,13 +196,26 @@ private fun ManualEntryFooter(
 private fun InputWithError(
     inputWithError: Pair<String?, Int?>,
     label: Int,
+    hint: String,
     onFocusGained: () -> Unit,
     onInputChanged: (String) -> Unit
 ) {
     var text by remember { mutableStateOf("") }
+    Text(
+        text = stringResource(id = label),
+        color = FinancialConnectionsTheme.colors.textSecondary,
+        style = FinancialConnectionsTheme.typography.body
+    )
+    Spacer(modifier = Modifier.size(4.dp))
     FinancialConnectionsOutlinedTextField(
-        label = { Text(stringResource(label)) },
         value = text,
+        placeholder = {
+            Text(
+                text = hint,
+                style = FinancialConnectionsTheme.typography.body,
+                color = FinancialConnectionsTheme.colors.textDisabled
+            )
+        },
         visualTransformation = NumbersOnlyTransformation(),
         isError = inputWithError.second != null,
         onValueChange = { text = it; onInputChanged(it) },
