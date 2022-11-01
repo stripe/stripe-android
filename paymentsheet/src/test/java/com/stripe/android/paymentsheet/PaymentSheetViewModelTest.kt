@@ -87,22 +87,28 @@ internal class PaymentSheetViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    private lateinit var viewModel: PaymentSheetViewModel
+
     private val eventReporter = mock<EventReporter>()
-    private val viewModel: PaymentSheetViewModel by lazy { createViewModel() }
     private val application = ApplicationProvider.getApplicationContext<Application>()
-    private val lpmRepository =
-        LpmRepository(LpmRepository.LpmRepositoryArguments(application.resources)).apply {
-            this.forceUpdate(
-                listOf(
-                    PaymentMethod.Type.Card.code,
-                    PaymentMethod.Type.USBankAccount.code,
-                    PaymentMethod.Type.Ideal.code,
-                    PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Sofort.code
-                ),
-                null
-            )
-        }
+
+    private val lpmRepository = LpmRepository(
+        arguments = LpmRepository.LpmRepositoryArguments(application.resources),
+    ).apply {
+        this.forceUpdate(
+            listOf(
+                PaymentMethod.Type.Card.code,
+                PaymentMethod.Type.USBankAccount.code,
+                PaymentMethod.Type.Ideal.code,
+                PaymentMethod.Type.SepaDebit.code,
+                PaymentMethod.Type.Sofort.code,
+                PaymentMethod.Type.Affirm.code,
+                PaymentMethod.Type.AfterpayClearpay.code,
+            ),
+            null
+        )
+    }
+
     private val prefsRepository = FakePrefsRepository()
     private val lpmResourceRepository = StaticLpmResourceRepository(lpmRepository)
     private val linkLauncher = mock<LinkPaymentLauncher>()
@@ -119,6 +125,7 @@ internal class PaymentSheetViewModelTest {
 
     @BeforeTest
     fun setup() {
+        viewModel = createViewModel()
         MockitoAnnotations.openMocks(this)
     }
 
@@ -129,7 +136,6 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `init should fire analytics event`() {
-        createViewModel()
         verify(eventReporter)
             .onInit(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY)
     }
@@ -828,26 +834,74 @@ internal class PaymentSheetViewModelTest {
             )
     }
 
-    fun `Verify supported payment methods exclude afterpay if no shipping`() {
+    @Test
+    fun `Verify supported payment methods exclude afterpay if no shipping and no allow flag`() {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                    shippingDetails = null,
+                    allowsPaymentMethodsRequiringShippingAddress = false,
+                )
+            )
+        )
+
         viewModel.setStripeIntent(
             PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("afterpay_clearpay"),
-                shipping = null
+                shipping = null,
             )
         )
 
-        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(0)
+        assertThat(viewModel.supportedPaymentMethods).isEmpty()
+    }
+
+    @Test
+    fun `Verify supported payment methods include afterpay if allow flag but no shipping`() {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                    shippingDetails = null,
+                    allowsPaymentMethodsRequiringShippingAddress = true,
+                )
+            )
+        )
 
         viewModel.setStripeIntent(
             PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
-                paymentMethodTypes = listOf("afterpay_clearpay")
+                paymentMethodTypes = listOf("afterpay_clearpay"),
             )
         )
 
-        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
-        assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-            lpmRepository.fromCode("afterpay_clearpay")!!
+        val expectedPaymentMethod = lpmRepository.fromCode("afterpay_clearpay")
+        assertThat(viewModel.supportedPaymentMethods).containsExactly(expectedPaymentMethod)
+    }
+
+    @Test
+    fun `Verify supported payment methods include afterpay if shipping but no allow flag`() {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                    shippingDetails = AddressDetails(
+                        name = "Test Name",
+                        address = PaymentSheet.Address(
+                            line1 = "123 Main Street",
+                            postalCode = "12345",
+                            country = "US",
+                        ),
+                    ),
+                    allowsPaymentMethodsRequiringShippingAddress = false,
+                )
+            )
         )
+
+        viewModel.setStripeIntent(
+            PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+                paymentMethodTypes = listOf("afterpay_clearpay"),
+            )
+        )
+
+        val expectedPaymentMethod = lpmRepository.fromCode("afterpay_clearpay")
+        assertThat(viewModel.supportedPaymentMethods).containsExactly(expectedPaymentMethod)
     }
 
     fun `Verify PI off_session excludes LPMs requiring mandate`() {
@@ -1118,12 +1172,8 @@ internal class PaymentSheetViewModelTest {
 
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
-        stripeIntentRepository: StripeIntentRepository = StripeIntentRepository.Static(
-            PAYMENT_INTENT
-        ),
-        customerRepository: CustomerRepository = FakeCustomerRepository(
-            PAYMENT_METHODS
-        )
+        stripeIntentRepository: StripeIntentRepository = StripeIntentRepository.Static(PAYMENT_INTENT),
+        customerRepository: CustomerRepository = FakeCustomerRepository(PAYMENT_METHODS),
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return PaymentSheetViewModel(
