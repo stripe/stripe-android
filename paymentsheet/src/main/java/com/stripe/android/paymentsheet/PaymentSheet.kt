@@ -148,7 +148,6 @@ class PaymentSheet internal constructor(
          */
         val allowsDelayedPaymentMethods: Boolean = false,
 
-
         /**
          * If true, allows payment methods that require a shipping address, like Afterpay and
          * Affirm. Defaults to false.
