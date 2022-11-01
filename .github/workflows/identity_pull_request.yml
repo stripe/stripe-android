@@ -94,4 +94,4 @@ jobs:
         with:
           artifact_path: identity-example/build/outputs/bundle/theme1Release/identity-example-theme1-release.aab
           emerge_api_key: ${{ secrets.EMERGE_API_KEY }}
-          build_type: release # Optional, change if your workflow builds a specific type
+          build_type: pull_request

@@ -17,15 +17,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.map
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.elements.PaymentElement
-import com.stripe.android.elements.PaymentElementController
-import com.stripe.android.elements.PaymentElementHorizontalPadding
+import com.stripe.android.elements.PaymentElementConfig
 import com.stripe.android.elements.PaymentElementViewModel
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -58,14 +57,16 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 val paymentElementViewModel: PaymentElementViewModel = viewModel(
                     factory = PaymentElementViewModel.Factory(
                         supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
-                        paymentElementConfig = PaymentElementController.Config(
-                            paymentSheetConfig = sheetViewModel.config,
+                        paymentElementConfig = PaymentElementConfig(
                             stripeIntent = requireNotNull(sheetViewModel.stripeIntent.value),
                             merchantName = sheetViewModel.merchantName,
-                            initialSelection = sheetViewModel.newPaymentSelection
+                            initialSelection = sheetViewModel.newPaymentSelection,
+                            defaultBillingDetails = sheetViewModel.config?.defaultBillingDetails,
+                            shippingDetails = sheetViewModel.config?.shippingDetails,
+                            hasCustomerConfiguration = sheetViewModel.config?.customer != null,
+                            allowsDelayedPaymentMethods = sheetViewModel.config?.allowsDelayedPaymentMethods == true
                         ),
                         context = requireContext(),
-                        lifecycleScope = lifecycleScope,
                         injector = sheetViewModel.injector
                     )
                 )
@@ -116,13 +117,17 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         }
 
         LaunchedEffect(selectedItem) {
-            sheetViewModel.updatePrimaryButtonUIState(null)
+            if (selectedItem.code != PaymentMethod.Type.USBankAccount.code) {
+                sheetViewModel.updatePrimaryButtonUIState(null)
+            }
         }
 
         var linkSignupState by remember { mutableStateOf<InlineSignupViewState?>(null) }
 
         LaunchedEffect(paymentSelection, linkSignupState, isLinkInlineActive) {
-            updateButtonState(paymentSelection, linkSignupState, isLinkInlineActive, linkConfig)
+            if (selectedItem.code == PaymentMethod.Type.Link.code) {
+                updateButtonState(paymentSelection, linkSignupState, isLinkInlineActive, linkConfig)
+            }
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -131,21 +136,23 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 enabled = enabled,
                 showCheckbox = arguments.showCheckbox && !showLinkInlineSignup,
                 injector = sheetViewModel.injector,
-                modifier = Modifier.padding(top = 26.dp)
+                modifier = Modifier.padding(top = 20.dp)
             )
+
             if (showLinkInlineSignup) {
+                val modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
+                        vertical = 6.dp
+                    )
                 if (isLinkInlineActive) {
                     LinkInlineSignedIn(
                         linkPaymentLauncher = sheetViewModel.linkLauncher,
                         onLogout = {
                             isLinkInlineActive = false
                         },
-                        modifier = Modifier
-                            .padding(
-                                horizontal = PaymentElementHorizontalPadding,
-                                vertical = 6.dp
-                            )
-                            .fillMaxWidth()
+                        modifier = modifier
                     )
                 } else {
                     LinkInlineSignup(
@@ -154,12 +161,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                         onStateChanged = { _, inlineSignupViewState ->
                             linkSignupState = inlineSignupViewState
                         },
-                        modifier = Modifier
-                            .padding(
-                                horizontal = PaymentElementHorizontalPadding,
-                                vertical = 6.dp
-                            )
-                            .fillMaxWidth()
+                        modifier = modifier
                     )
                 }
             }

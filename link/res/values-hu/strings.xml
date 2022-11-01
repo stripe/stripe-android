@@ -22,6 +22,8 @@
   <string name="sign_up_terms"><![CDATA[A Linkhez történő csatlakozással Őn elfogadja a <terms>feltételeket</terms> és az </privacy>adatvédelmi szabályzatot<privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="verification_change_email">E-mail-cím módosítása</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="verification_code_sent">Kód elküldve</string>
   <!-- Two factor authentication screen heading -->
   <string name="verification_header">Adja meg az ellenőrző kódot</string>
   <!-- Two factor authentication screen heading -->

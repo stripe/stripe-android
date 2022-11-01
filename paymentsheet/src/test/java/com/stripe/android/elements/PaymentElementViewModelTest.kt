@@ -7,27 +7,28 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import kotlinx.coroutines.MainScope
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentElementViewModelTest {
-    private val config = PaymentElementController.Config(
-        paymentSheetConfig = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+    private val config = PaymentElementConfig(
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         merchantName = "Merchant",
-        initialSelection = null
+        initialSelection = null,
+        defaultBillingDetails = null,
+        shippingDetails = null,
+        hasCustomerConfiguration = true,
+        allowsDelayedPaymentMethods = true
     )
 
     @Test
-    fun `FormArguments newLPM with customer requested save and Generic`() {
+    fun `when payment method does not support reuse then checkbox is not shown`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodTypes = listOf("card", "bancontact")
         )
@@ -58,33 +59,43 @@ internal class PaymentElementViewModelTest {
 
         assertThat(actualFromArguments.initialPaymentMethodCreateParams)
             .isEqualTo(paymentMethodCreateParams)
-        assertThat(actualFromArguments.showCheckbox)
-            .isFalse()
-        assertThat(actualFromArguments.showCheckboxControlledFields)
-            .isFalse()
+        assertThat(actualFromArguments.showCheckbox).isFalse()
+        assertThat(actualFromArguments.showCheckboxControlledFields).isFalse()
     }
 
     @Test
-    fun `getFormArguments newLPM WITH customer requested save and Card`() {
+    fun `when customer requested reuse then showCheckboxControlledFields is true`() {
         val actualFromArguments = testCardFormArguments(
             PaymentSelection.CustomerRequestedSave.RequestReuse
         )
 
-        assertThat(actualFromArguments.showCheckboxControlledFields)
-            .isTrue()
+        assertThat(actualFromArguments.showCheckbox).isTrue()
+        assertThat(actualFromArguments.showCheckboxControlledFields).isTrue()
     }
 
     @Test
-    fun `getFormArguments newLPM WITH NO customer requested save and Card`() {
+    fun `when customer requested no reuse then showCheckboxControlledFields is false`() {
+        val actualFromArguments = testCardFormArguments(
+            PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        )
+
+        assertThat(actualFromArguments.showCheckbox).isTrue()
+        assertThat(actualFromArguments.showCheckboxControlledFields).isFalse()
+    }
+
+    @Test
+    fun `when customer did not requested reuse then showCheckboxControlledFields is false`() {
         val actualFromArguments = testCardFormArguments(
             PaymentSelection.CustomerRequestedSave.NoRequest
         )
 
-        assertThat(actualFromArguments.showCheckboxControlledFields)
-            .isFalse()
+        assertThat(actualFromArguments.showCheckbox).isTrue()
+        assertThat(actualFromArguments.showCheckboxControlledFields).isFalse()
     }
 
-    private fun testCardFormArguments(customerReuse: PaymentSelection.CustomerRequestedSave): FormFragmentArguments {
+    private fun testCardFormArguments(
+        customerReuse: PaymentSelection.CustomerRequestedSave
+    ): FormFragmentArguments {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodTypes = listOf("card", "bancontact")
         )
@@ -138,7 +149,7 @@ internal class PaymentElementViewModelTest {
     }
 
     private fun createViewModel(
-        paymentElementConfig: PaymentElementController.Config = config,
+        paymentElementConfig: PaymentElementConfig = config,
         supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod> = listOf(
             LpmRepository.HardcodedCard,
             Bancontact,
@@ -147,8 +158,7 @@ internal class PaymentElementViewModelTest {
     ) = PaymentElementViewModel(
         supportedPaymentMethods = supportedPaymentMethods,
         paymentElementConfig = paymentElementConfig,
-        context = context,
-        lifecycleScope = MainScope()
+        context = context
     )
 
     companion object {

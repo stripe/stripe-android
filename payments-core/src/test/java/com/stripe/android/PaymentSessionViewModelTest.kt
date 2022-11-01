@@ -87,24 +87,37 @@ class PaymentSessionViewModelTest {
     }
 
     @Test
-    fun getSelectedPaymentMethodId_whenPrefsNotSet_returnsNull() {
+    fun getSelectedPaymentMethod_whenPrefsNotSet_returnsNull() {
         whenever(customerSession.cachedCustomer)
             .thenReturn(FIRST_CUSTOMER)
-        assertThat(viewModel.getSelectedPaymentMethodId(null))
+        assertThat(viewModel.getSelectedPaymentMethod(null))
             .isNull()
     }
 
     @Test
-    fun getSelectedPaymentMethodId_whenHasPrefsSet_returnsExpectedId() {
+    fun getSelectedPaymentMethod_whenHasPrefsSet_returnsExpectedId() {
         val customerId = requireNotNull(FIRST_CUSTOMER.id)
-        whenever(paymentSessionPrefs.getPaymentMethodId(customerId))
-            .thenReturn("pm_12345")
+        whenever(paymentSessionPrefs.getPaymentMethod(customerId))
+            .thenReturn(PaymentSessionPrefs.SelectedPaymentMethod.Saved("pm_12345"))
 
         whenever(customerSession.cachedCustomer).thenReturn(FIRST_CUSTOMER)
         CustomerSession.instance = customerSession
 
-        assertThat(viewModel.getSelectedPaymentMethodId())
+        assertThat(viewModel.getSelectedPaymentMethod()?.stringValue)
             .isEqualTo("pm_12345")
+    }
+
+    @Test
+    fun getSelectedPaymentMethod_whenGooglePay_returnsExpectedValue() {
+        val customerId = requireNotNull(FIRST_CUSTOMER.id)
+        whenever(paymentSessionPrefs.getPaymentMethod(customerId))
+            .thenReturn(PaymentSessionPrefs.SelectedPaymentMethod.GooglePay)
+
+        whenever(customerSession.cachedCustomer).thenReturn(FIRST_CUSTOMER)
+        CustomerSession.instance = customerSession
+
+        assertThat(viewModel.getSelectedPaymentMethod())
+            .isEqualTo(PaymentSessionPrefs.SelectedPaymentMethod.GooglePay)
     }
 
     @Test
@@ -144,8 +157,8 @@ class PaymentSessionViewModelTest {
             startingAfter = anyOrNull(),
             listener = any()
         )
-        whenever(paymentSessionPrefs.getPaymentMethodId("cus_123"))
-            .thenReturn(customerPaymentMethods.last().id)
+        whenever(paymentSessionPrefs.getPaymentMethod("cus_123"))
+            .thenReturn(PaymentSessionPrefs.SelectedPaymentMethod.fromString(customerPaymentMethods.last().id))
 
         var onCompleteCallbackCount = 0
         viewModel.onCustomerRetrieved(
@@ -183,8 +196,8 @@ class PaymentSessionViewModelTest {
             startingAfter = anyOrNull(),
             listener = any()
         )
-        whenever(paymentSessionPrefs.getPaymentMethodId("cus_123"))
-            .thenReturn("pm_not_in_list")
+        whenever(paymentSessionPrefs.getPaymentMethod("cus_123"))
+            .thenReturn(PaymentSessionPrefs.SelectedPaymentMethod.Saved("pm_not_in_list"))
 
         var onCompleteCallbackCount = 0
         viewModel.onCustomerRetrieved(
@@ -214,7 +227,7 @@ class PaymentSessionViewModelTest {
 
     @Test
     fun onCustomerRetrieved_whenIsInitialFetchAndPreviouslyUsedPaymentMethodDoesNotExist_shouldNotFetchPaymentMethods() {
-        whenever(paymentSessionPrefs.getPaymentMethodId("cus_123"))
+        whenever(paymentSessionPrefs.getPaymentMethod("cus_123"))
             .thenReturn(null)
 
         var onCompleteCallbackCount = 0

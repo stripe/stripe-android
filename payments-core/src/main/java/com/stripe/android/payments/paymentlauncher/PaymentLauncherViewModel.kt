@@ -13,6 +13,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.injection.injectWithFallback
@@ -326,7 +327,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
          * Fallback call to initialize dependencies when injection is not available, this might happen
          * when app process is killed by system and [WeakMapInjectorRegistry] is cleared.
          */
-        override fun fallbackInitialize(arg: FallbackInitializeParam) {
+        override fun fallbackInitialize(arg: FallbackInitializeParam): Injector? {
             DaggerPaymentLauncherViewModelFactoryComponent.builder()
                 .context(arg.application)
                 .enableLogging(arg.enableLogging)
@@ -334,6 +335,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 .stripeAccountIdProvider { arg.stripeAccountId }
                 .productUsage(arg.productUsage)
                 .build().inject(this)
+            return null
         }
     }
 

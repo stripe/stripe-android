@@ -1,7 +1,7 @@
 package com.stripe.android.identity.ui
 
+import android.net.Uri
 import android.os.Build
-import android.widget.ImageView
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
@@ -17,7 +17,6 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
@@ -32,12 +31,12 @@ class ConsentScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val onMerchantViewCreatedMock = mock<(ImageView) -> Unit>()
     private val onSuccessMock = mock<(VerificationPage) -> Unit>()
     private val onFallbackMock = mock<(String) -> Unit>()
     private val onErrorMock = mock<(Throwable) -> Unit>()
     private val onConsentAgreedMock = mock<(Boolean) -> Unit>()
     private val onConsentDeclinedMock = mock<(Boolean) -> Unit>()
+    private val merchantLogoUri: Uri = mock()
 
     private val verificationPageWithTimeAndPolicy = mock<VerificationPage>().also {
         whenever(it.biometricConsent).thenReturn(
@@ -98,12 +97,11 @@ class ConsentScreenTest {
             onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
             verify(onSuccessMock).invoke(same(verificationPageWithTimeAndPolicy))
 
-            verify(onMerchantViewCreatedMock).invoke(any())
             onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
-            onNodeWithTag(TIME_ESTIMATE_TAG).assertExists() // TODO: assert text after migrating to compose Text
-            onNodeWithTag(PRIVACY_POLICY_TAG).assertExists() // TODO: assert text after migrating to compose Text
+            onNodeWithTag(TIME_ESTIMATE_TAG).assertTextEquals(CONSENT_TIME_ESTIMATE)
+            onNodeWithTag(PRIVACY_POLICY_TAG).assertTextEquals(CONSENT_PRIVACY_POLICY)
             onNodeWithTag(DIVIDER_TAG).assertExists()
-            onNodeWithTag(BODY_TAG).assertExists() // TODO: assert text after migrating to compose Text
+            onNodeWithTag(BODY_TAG).assertTextEquals(CONSENT_BODY)
 
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
@@ -121,12 +119,11 @@ class ConsentScreenTest {
             onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
             verify(onSuccessMock).invoke(same(verificationPageWithOutTimeAndPolicy))
 
-            verify(onMerchantViewCreatedMock).invoke(any())
             onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
             onNodeWithTag(TIME_ESTIMATE_TAG).assertDoesNotExist()
             onNodeWithTag(PRIVACY_POLICY_TAG).assertDoesNotExist()
             onNodeWithTag(DIVIDER_TAG).assertDoesNotExist()
-            onNodeWithTag(BODY_TAG).assertExists() // TODO: assert text after migrating to compose Text
+            onNodeWithTag(BODY_TAG).assertTextEquals(CONSENT_BODY)
 
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
@@ -178,8 +175,8 @@ class ConsentScreenTest {
     ) {
         composeTestRule.setContent {
             ConsentScreen(
+                merchantLogoUri = merchantLogoUri,
                 verificationState = verificationState,
-                onMerchantViewCreated = onMerchantViewCreatedMock,
                 onSuccess = onSuccessMock,
                 onFallbackUrl = onFallbackMock,
                 onError = onErrorMock,

@@ -13,12 +13,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.FragmentAchBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -27,11 +30,8 @@ import com.stripe.android.paymentsheet.ui.Loading
 import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
-
-val PaymentElementHorizontalPadding = 20.dp
 
 @Composable
 fun PaymentElement(
@@ -121,12 +121,15 @@ internal fun PaymentElement(
                 paymentMethods = supportedPaymentMethods,
                 onItemSelectedListener = onItemSelectedListener
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
         if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
-            Column(modifier = Modifier.padding(horizontal = PaymentElementHorizontalPadding)) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal))
+            ) {
                 AndroidViewBinding(FragmentAchBinding::inflate)
             }
         } else {
@@ -136,7 +139,8 @@ internal fun PaymentElement(
                 showCheckbox = showCheckbox,
                 onFormFieldValuesChanged = onFormFieldValuesChanged,
                 injector = injector,
-                modifier = Modifier.padding(horizontal = PaymentElementHorizontalPadding)
+                modifier = Modifier
+                    .padding(horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal))
             )
         }
     }

@@ -58,6 +58,7 @@ import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.ui.core.elements.TextFieldSection
 import com.stripe.android.ui.core.paymentsColors
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.launch
 
 /**
@@ -191,20 +192,23 @@ internal class USBankAccountFormFragment : Fragment() {
                 }
             }
         }
+
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.saveForFutureUse.collect { saved ->
-                    updateMandateText(
-                        if (saved) {
-                            getString(
-                                R.string.stripe_paymentsheet_ach_save_mandate,
-                                viewModel.formattedMerchantName()
-                            )
-                        } else {
-                            ACHText.getContinueMandateText(requireContext())
-                        }
-                    )
-                }
+                viewModel.saveForFutureUse
+                    .filterNot { viewModel.currentScreenState.value is NameAndEmailCollection }
+                    .collect { saved ->
+                        updateMandateText(
+                            if (saved) {
+                                getString(
+                                    R.string.stripe_paymentsheet_ach_save_mandate,
+                                    viewModel.formattedMerchantName()
+                                )
+                            } else {
+                                ACHText.getContinueMandateText(requireContext())
+                            }
+                        )
+                    }
             }
         }
 
@@ -321,7 +325,7 @@ internal class USBankAccountFormFragment : Fragment() {
         Column(Modifier.fillMaxWidth()) {
             H6Text(
                 text = stringResource(R.string.stripe_paymentsheet_pay_with_bank_title),
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp)
             )
             Box(
                 modifier = Modifier
@@ -412,10 +416,11 @@ internal class USBankAccountFormFragment : Fragment() {
             }
             if (formArgs.showCheckbox) {
                 SaveForFutureUseElementUI(
-                    true,
-                    viewModel.saveForFutureUseElement.apply {
+                    enabled = true,
+                    element = viewModel.saveForFutureUseElement.apply {
                         this.controller.onValueChange(saveForFutureUsage)
-                    }
+                    },
+                    modifier = Modifier.padding(top = 8.dp)
                 )
             }
         }

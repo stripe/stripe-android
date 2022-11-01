@@ -42,7 +42,6 @@
     <string name="currency_gbp">GBP</string>
     <string name="currency_aud">AUD</string>
     <string name="show_sheet">Show Sheet</string>
-    <string name="appearance_playground">"Appearance Customization"</string>
     <string name="payment_element">"Payment Element"</string>
     <string name="merchant_country">Merchant</string>
 </resources>

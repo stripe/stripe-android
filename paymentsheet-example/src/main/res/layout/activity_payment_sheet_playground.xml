@@ -345,6 +345,21 @@
                 android:checked="false" />
         </RadioGroup>
 
+        <EditText
+            android:id="@+id/custom_label_text_field"
+            android:hint="Custom primary button label"
+            android:lines="1"
+            android:inputType="textCapSentences"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:importantForAutofill="no"
+            app:layout_constraintBottom_toTopOf="@id/reset_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/allowsDelayedPaymentMethods_radio_group" />
+
         <Button
             android:id="@+id/reset_button"
             android:text="@string/reset"
@@ -353,7 +368,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/allowsDelayedPaymentMethods_radio_group" />
+            app:layout_constraintTop_toBottomOf="@+id/custom_label_text_field" />
 
         <Button
             android:id="@+id/reload_button"

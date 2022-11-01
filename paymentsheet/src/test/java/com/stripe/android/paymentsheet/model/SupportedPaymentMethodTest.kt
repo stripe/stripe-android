@@ -10,7 +10,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_CUSTOMER
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import kotlinx.serialization.Serializable
@@ -38,8 +37,9 @@ class SupportedPaymentMethodTest {
         assertThat(
             LpmRepository.HardcodedCard
                 .getSpecWithFullfilledRequirements(
-                    PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET,
-                    CONFIG_CUSTOMER
+                    stripeIntent = PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET,
+                    hasCustomerConfiguration = true,
+                    allowsDelayedPaymentMethods = false
                 )?.showCheckbox
         ).isFalse()
     }
@@ -61,7 +61,11 @@ class SupportedPaymentMethodTest {
             )
 
             generatePaymentIntentScenarios().mapIndexed { index, testInput ->
-                val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
+                val formDescriptor = lpm.getSpecWithFullfilledRequirements(
+                    testInput.getIntent(lpm),
+                    testInput.hasCustomer,
+                    testInput.allowsDelayedPayment
+                )
                 val testOutput = TestOutput.create(
                     supportCustomerSavedCard = getSupportedSavedCustomerPMs(
                         testInput.getIntent(lpm),
@@ -204,10 +208,14 @@ class SupportedPaymentMethodTest {
         val allowsDelayedPayment: Boolean = true
     ) {
         companion object {
-            fun toCsvHeader() = "hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms"
+            fun toCsvHeader() =
+                "hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms"
         }
 
-        fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${intentPMs.joinToString("/")}"
+        fun toCsv() =
+            "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${
+            intentPMs.joinToString("/")
+            }"
 
         fun getIntent(lpm: SupportedPaymentMethod) = when (intentHasShipping) {
             false ->

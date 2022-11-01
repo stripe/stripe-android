@@ -63,8 +63,7 @@
         tools:layout="@layout/driver_license_upload_fragment" />
     <fragment
         android:id="@+id/cameraPermissionDeniedFragment"
-        android:name="com.stripe.android.identity.navigation.CameraPermissionDeniedFragment"
-        tools:layout="@layout/base_error_fragment">
+        android:name="com.stripe.android.identity.navigation.CameraPermissionDeniedFragment">
         <argument
             android:name="scanType"
             app:argType="com.stripe.android.identity.networking.models.CollectedDataParam$Type" />

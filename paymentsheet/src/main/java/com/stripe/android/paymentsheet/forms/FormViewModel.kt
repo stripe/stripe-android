@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.core.injection.NonFallbackInjectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -18,8 +20,6 @@ import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.ui.core.injection.NonFallbackInjectable
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -62,7 +62,7 @@ internal class FormViewModel @Inject internal constructor(
         }
     }
 
-    private val showCheckboxFlow = MutableStateFlow(false)
+    private val checkboxVisibleFlow = MutableStateFlow(false)
 
     val elementsFlow = flowOf(
         TransformSpecToElements(
@@ -109,7 +109,7 @@ internal class FormViewModel @Inject internal constructor(
     }
 
     internal val hiddenIdentifiers = combine(
-        showCheckboxFlow,
+        checkboxVisibleFlow,
         cardBillingElement.map {
             it?.hiddenIdentifiers ?: flowOf(emptySet())
         }.flattenConcat(),
@@ -131,7 +131,7 @@ internal class FormViewModel @Inject internal constructor(
         combine(
             hiddenIdentifiers,
             elementsFlow.map {
-                it ?: emptyList()
+                it
             }
         ) { hiddenIdentifiers, formElements ->
             formElements.filterIsInstance<MandateTextElement>().firstOrNull()?.let { mandate ->
@@ -143,7 +143,7 @@ internal class FormViewModel @Inject internal constructor(
     private val userRequestedReuse =
         combine(
             elementsFlow.filterNotNull(),
-            showCheckboxFlow
+            checkboxVisibleFlow
         ) { elementsList, showCheckbox ->
             combine(
                 elementsList.map { it.getFormFieldValueFlow() },
@@ -197,7 +197,7 @@ internal class FormViewModel @Inject internal constructor(
         }
     }
 
-    fun setShowCheckbox(showCheckbox: Boolean) {
-        showCheckboxFlow.value = showCheckbox
+    fun setCheckboxVisible(visible: Boolean) {
+        checkboxVisibleFlow.value = visible
     }
 }
