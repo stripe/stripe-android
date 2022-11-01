@@ -9,6 +9,12 @@ enum class CheckoutMode(val value: String) {
     PaymentWithSetup("payment_with_setup")
 }
 
+enum class Shipping(val value: String) {
+    On("on"),
+    OnWithDefaults("on_with_defaults"),
+    Off("off"),
+}
+
 data class CheckoutCurrency(val value: String) {
     companion object {
         val USD = CheckoutCurrency("usd")
@@ -24,7 +30,7 @@ data class SavedToggles(
     val currency: String,
     val merchantCountryCode: String,
     val mode: String,
-    val setShippingAddress: Boolean,
+    val shippingAddress: String,
     val setAutomaticPaymentMethods: Boolean,
     val setDelayedPaymentMethods: Boolean,
     val setDefaultBillingAddress: Boolean,
@@ -38,7 +44,7 @@ enum class Toggle(val key: String, val default: Any) {
     Currency("currency", CheckoutCurrency.USD.value),
     MerchantCountryCode("merchantCountry", "US"),
     Mode("mode", CheckoutMode.Payment.value),
-    SetShippingAddress("setShippingAddress", true),
+    ShippingAddress("shippingAddress", Shipping.On.value),
     SetDefaultBillingAddress("setDefaultBillingAddress", true),
     SetAutomaticPaymentMethods("setAutomaticPaymentMethods", true),
     SetDelayedPaymentMethods("setDelayedPaymentMethods", false)

@@ -148,6 +148,20 @@ class PaymentSheet internal constructor(
          */
         val allowsDelayedPaymentMethods: Boolean = false,
 
+
+        /**
+         * If true, allows payment methods that require a shipping address, like Afterpay and
+         * Affirm. Defaults to false.
+         *
+         * Set this to true if you collect shipping addresses and set [shippingDetails] or set
+         * `shipping` details directly on the PaymentIntent.
+         *
+         * Note: PaymentSheet considers this property `true` and allows payment methods that require
+         * a shipping address if `shipping` details are present on the PaymentIntent when
+         * PaymentSheet loads.
+         */
+        val allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
+
         /**
          * Describes the appearance of Payment Sheet.
          */
@@ -173,6 +187,7 @@ class PaymentSheet internal constructor(
             private var defaultBillingDetails: BillingDetails? = null
             private var shippingDetails: AddressDetails? = null
             private var allowsDelayedPaymentMethods: Boolean = false
+            private var allowsPaymentMethodsRequiringShippingAddress: Boolean = false
             private var appearance: Appearance = Appearance()
 
             fun merchantDisplayName(merchantDisplayName: String) =
@@ -203,6 +218,13 @@ class PaymentSheet internal constructor(
             fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) =
                 apply { this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods }
 
+            fun allowsPaymentMethodsRequiringShippingAddress(
+                allowsPaymentMethodsRequiringShippingAddress: Boolean,
+            ) = apply {
+                this.allowsPaymentMethodsRequiringShippingAddress =
+                    allowsPaymentMethodsRequiringShippingAddress
+            }
+
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
 
@@ -214,6 +236,7 @@ class PaymentSheet internal constructor(
                 defaultBillingDetails,
                 shippingDetails,
                 allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress,
                 appearance
             )
         }

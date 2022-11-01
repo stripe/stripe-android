@@ -262,7 +262,14 @@
 
             <RadioButton
                 android:id="@+id/shipping_on_button"
-                android:text="@string/on"
+                android:text="On"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="false" />
+
+            <RadioButton
+                android:id="@+id/shipping_on_with_defaults_button"
+                android:text="On w/ defaults"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:checked="true" />

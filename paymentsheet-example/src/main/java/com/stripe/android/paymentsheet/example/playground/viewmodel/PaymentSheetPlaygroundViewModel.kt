@@ -46,7 +46,7 @@ class PaymentSheetPlaygroundViewModel(
         currency: String,
         merchantCountryCode: String,
         mode: String,
-        setShippingAddress: Boolean,
+        shipping: String,
         setDefaultBillingAddress: Boolean,
         setAutomaticPaymentMethods: Boolean,
         setDelayedPaymentMethods: Boolean,
@@ -63,7 +63,7 @@ class PaymentSheetPlaygroundViewModel(
         editor.putString(Toggle.Currency.key, currency)
         editor.putString(Toggle.MerchantCountryCode.key, merchantCountryCode)
         editor.putString(Toggle.Mode.key, mode)
-        editor.putBoolean(Toggle.SetShippingAddress.key, setShippingAddress)
+        editor.putString(Toggle.ShippingAddress.key, shipping)
         editor.putBoolean(Toggle.SetDefaultBillingAddress.key, setDefaultBillingAddress)
         editor.putBoolean(Toggle.SetAutomaticPaymentMethods.key, setAutomaticPaymentMethods)
         editor.putBoolean(Toggle.SetDelayedPaymentMethods.key, setDelayedPaymentMethods)
@@ -96,9 +96,9 @@ class PaymentSheetPlaygroundViewModel(
             Toggle.Mode.key,
             Toggle.Mode.default.toString()
         )
-        val setShippingAddress = sharedPreferences.getBoolean(
-            Toggle.SetShippingAddress.key,
-            Toggle.SetShippingAddress.default as Boolean
+        val shippingAddress = sharedPreferences.getString(
+            Toggle.ShippingAddress.key,
+            Toggle.ShippingAddress.default as String
         )
         val setAutomaticPaymentMethods = sharedPreferences.getBoolean(
             Toggle.SetAutomaticPaymentMethods.key,
@@ -123,7 +123,7 @@ class PaymentSheetPlaygroundViewModel(
             currency = currency.toString(),
             merchantCountryCode = merchantCountryCode.toString(),
             mode = mode.toString(),
-            setShippingAddress = setShippingAddress,
+            shippingAddress = shippingAddress!!,
             setAutomaticPaymentMethods = setAutomaticPaymentMethods,
             setDelayedPaymentMethods = setDelayedPaymentMethods,
             setDefaultBillingAddress = setDefaultBillingAddress,
