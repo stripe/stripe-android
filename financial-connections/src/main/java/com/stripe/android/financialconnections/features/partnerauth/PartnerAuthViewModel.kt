@@ -47,17 +47,13 @@ internal class PartnerAuthViewModel @Inject constructor(
 ) : MavericksViewModel<PartnerAuthState>(initialState) {
     init {
         logErrors()
+        launchAuthIfSkipPrepane()
         suspend {
-            /**
-             * if viewModel dies while WebAuth happens, avoid creating a new auth session.
-             * [FinancialConnectionsSessionManifest] gets re-fetched, and the existing
-             * [FinancialConnectionsSessionManifest.activeAuthSession] will be used instead.
-             */
             val manifest: FinancialConnectionsSessionManifest = getManifest()
             val authSession = createAuthorizationSession(
                 institution = requireNotNull(manifest.activeInstitution),
                 allowManualEntry = manifest.allowManualEntry
-            ).also { launchAuthIfSkipPrepane() }
+            )
             Payload(
                 flow = authSession.flow,
                 showPrepane = authSession.isOAuth,
