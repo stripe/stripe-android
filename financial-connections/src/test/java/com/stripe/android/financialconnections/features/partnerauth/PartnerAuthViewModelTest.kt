@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOA
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
 import com.stripe.android.financialconnections.model.MixedOAuthParams
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -23,7 +24,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
-
+@OptIn(ExperimentalCoroutinesApi::class)
 internal class PartnerAuthViewModelTest {
 
     @get:Rule
@@ -145,5 +146,4 @@ internal class PartnerAuthViewModelTest {
             initialState = initialState
         )
     }
-
 }

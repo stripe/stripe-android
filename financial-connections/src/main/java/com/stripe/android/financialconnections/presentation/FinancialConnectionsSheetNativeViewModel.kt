@@ -254,10 +254,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         private fun baseUrl(applicationId: String) =
             "stripe://auth-redirect/$applicationId"
 
-        private const val PARAM_CODE = "code"
+        private const val PARAM_CODE = "status"
         private const val SUCCESS = "success"
         private const val CANCEL = "cancel"
-        private const val FAIL = "fail"
+        private const val FAIL = "failure"
 
         override fun create(
             viewModelContext: ViewModelContext,

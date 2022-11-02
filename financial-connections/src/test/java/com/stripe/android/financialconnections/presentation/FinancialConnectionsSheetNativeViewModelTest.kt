@@ -35,12 +35,11 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     private val applicationId = "com.sample.applicationid"
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
 
-
     @Test
     fun `handleOnNewIntent - when deeplink with success code received, webAuthFlow async succeeds`() {
         whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         val viewModel = createViewModel()
-        val intent = intent("stripe://auth-redirect/$applicationId?code=success")
+        val intent = intent("stripe://auth-redirect/$applicationId?status=success")
         viewModel.handleOnNewIntent(intent)
 
         withState(viewModel) {
@@ -52,7 +51,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     fun `handleOnNewIntent - when deeplink with unknown code received, webAuthFlow async fails`() {
         whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         val viewModel = createViewModel()
-        val intent = intent("stripe://auth-redirect/$applicationId?code=unknown")
+        val intent = intent("stripe://auth-redirect/$applicationId?status=unknown")
         viewModel.handleOnNewIntent(intent)
 
         withState(viewModel) {
@@ -66,7 +65,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     fun `handleOnNewIntent - when deeplink with cancel code received, webAuthFlow async fails`() {
         whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         val viewModel = createViewModel()
-        val intent = intent("stripe://auth-redirect/$applicationId?code=cancel")
+        val intent = intent("stripe://auth-redirect/$applicationId?status=cancel")
         viewModel.handleOnNewIntent(intent)
 
         withState(viewModel) {
@@ -113,5 +112,4 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         logger = mock(),
         initialState = initialState
     )
-
 }
