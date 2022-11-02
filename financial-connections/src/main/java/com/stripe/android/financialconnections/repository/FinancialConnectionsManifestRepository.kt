@@ -6,6 +6,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -14,6 +15,7 @@ import com.stripe.android.financialconnections.network.FinancialConnectionsReque
 import com.stripe.android.financialconnections.network.NetworkConstants
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.Date
 
 /**
  * Repository to centralize reads and writes to the [FinancialConnectionsSessionManifest]
@@ -77,6 +79,13 @@ internal interface FinancialConnectionsManifestRepository {
         institution: FinancialConnectionsInstitution,
     ): FinancialConnectionsAuthorizationSession
 
+    suspend fun postAuthorizationSessionEvent(
+        clientSecret: String,
+        clientTimestamp: Date,
+        sessionId: String,
+        authSessionEvents: List<AuthSessionEvent>
+    ): FinancialConnectionsAuthorizationSession
+
     @Throws(
         AuthenticationException::class,
         InvalidRequestException::class,
@@ -104,6 +113,10 @@ internal interface FinancialConnectionsManifestRepository {
         sessionId: String
     ): FinancialConnectionsAuthorizationSession
 
+    fun updateLocalManifest(
+        block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
+    )
+
     companion object {
         operator fun invoke(
             requestExecutor: FinancialConnectionsRequestExecutor,
@@ -120,10 +133,6 @@ internal interface FinancialConnectionsManifestRepository {
                 initialSync
             )
     }
-
-    fun updateLocalManifest(
-        block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
-    )
 }
 
 @Suppress("TooManyFunctions")
@@ -225,6 +234,29 @@ private class FinancialConnectionsManifestRepositoryImpl(
             updateActiveInstitution("postAuthorizationSession", institution)
             updateCachedActiveAuthSession("postAuthorizationSession", it)
         }
+    }
+
+    override suspend fun postAuthorizationSessionEvent(
+        clientSecret: String,
+        clientTimestamp: Date,
+        sessionId: String,
+        authSessionEvents: List<AuthSessionEvent>
+    ): FinancialConnectionsAuthorizationSession {
+        val request = apiRequestFactory.createPost(
+            url = eventsAuthSessionUrl,
+            options = apiOptions,
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "client_timestamp" to clientTimestamp.time.toString(),
+                NetworkConstants.PARAMS_ID to sessionId,
+            ) + authSessionEvents.mapIndexed { index, event ->
+                "frontend_events[$index]" to event.toMap()
+            }
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsAuthorizationSession.serializer()
+        )
     }
 
     override suspend fun cancelAuthorizationSession(
@@ -340,6 +372,9 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal const val cancelAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/cancel"
+
+        internal const val eventsAuthSessionUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/events"
 
         internal const val consentAcquiredUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/consent_acquired"

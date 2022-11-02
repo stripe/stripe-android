@@ -190,7 +190,7 @@ internal sealed class FinancialConnectionsEvent(
     }
 }
 
-private fun Throwable.toEventParams(): Map<String, String?> = when (this) {
+internal fun Throwable.toEventParams(): Map<String, String?> = when (this) {
     is FinancialConnectionsError -> mapOf(
         "error" to this.name,
         "error_type" to this.name,
