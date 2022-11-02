@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.SnackbarDefaults.backgroundColor
 import androidx.compose.material.Surface
@@ -153,7 +154,7 @@ internal fun UploadScreen(
 
                 if (shouldShowBack) {
                     var shouldShowBackDialog by remember { mutableStateOf(false) }
-
+                    Divider(modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin)))
                     val backUploadedUiState by remember {
                         derivedStateOf {
                             collectedData.idDocumentBack?.let {
