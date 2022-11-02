@@ -16,7 +16,6 @@ import kotlinx.parcelize.Parcelize
 /**
  * A drop-in class that presents a bottom sheet to collect a customer's address.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressLauncher internal constructor(
     private val activityResultLauncher: ActivityResultLauncher<AddressElementActivityContract.Args>
 ) {
@@ -74,7 +73,6 @@ class AddressLauncher internal constructor(
 
     /** Configuration for [AddressLauncher] **/
     @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Configuration @JvmOverloads constructor(
         /**
          * Configuration for the look and feel of the UI
