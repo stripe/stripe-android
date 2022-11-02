@@ -55,24 +55,6 @@ internal class FinancialConnectionsSheetNativeModule {
 
     @Singleton
     @Provides
-    fun providesAnalyticsTracker(
-        context: Application,
-        logger: Logger,
-        getManifest: GetManifest,
-        configuration: FinancialConnectionsSheet.Configuration,
-        stripeNetworkClient: StripeNetworkClient
-    ): FinancialConnectionsAnalyticsTracker = FinancialConnectionsAnalyticsTrackerImpl(
-        context = context,
-        configuration = configuration,
-        getManifest = getManifest,
-        logger = logger,
-        locale = Locale.getDefault(),
-        loggerId = UUID.randomUUID().toString(),
-        stripeNetworkClient = stripeNetworkClient
-    )
-
-    @Singleton
-    @Provides
     fun providesImageLoader(
         context: Application
     ) = StripeImageLoader(

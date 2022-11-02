@@ -10,10 +10,11 @@ import com.stripe.android.financialconnections.utils.filterNotNullValues
  */
 internal sealed class FinancialConnectionsEvent(
     private val name: String,
-    val params: Map<String, String>? = null
-) {
+    val params: Map<String, String>? = null,
+    private val includePrefix: Boolean = true
+    ) {
 
-    val eventName = "$EVENT_PREFIX.$name"
+    val eventName = if (includePrefix) "$EVENT_PREFIX.$name" else name
 
     class PaneLaunched(
         pane: NextPane,
@@ -178,6 +179,19 @@ internal sealed class FinancialConnectionsEvent(
                 .plus(exception.toEventParams())
                 .filterNotNullValues()
             )
+    )
+
+    class Exposure(
+        experimentName: String,
+        assignmentEventId: String,
+        accountHolderId: String
+    ) : FinancialConnectionsEvent(
+        name = "preloaded_experiment_retrieved",
+        mapOf(
+            "experiment_retrieved" to experimentName,
+            "arb_id" to assignmentEventId,
+            "account_holder_id" to accountHolderId
+        ).filterNotNullValues()
     )
 
     object ConsentAgree : FinancialConnectionsEvent(

@@ -11,6 +11,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
@@ -27,7 +29,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
-import com.stripe.android.financialconnections.model.nativeAuthFlowEnabled
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
 import kotlinx.coroutines.launch
@@ -43,6 +44,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
     private val eventReporter: FinancialConnectionsEventReporter,
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
     initialState: FinancialConnectionsSheetState
 ) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
 
@@ -89,15 +91,49 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun openAuthFlow(synchronizeSessionResponse: SynchronizeSessionResponse) {
         // stores manifest in state for future references.
         val manifest = synchronizeSessionResponse.manifest
+        val nativeAuthFlowEnabled = nativeAuthFlowEnabled(synchronizeSessionResponse)
+        viewModelScope.launch {
+            logExposure(synchronizeSessionResponse)
+        }
         setState {
             copy(
                 manifest = manifest,
-                webAuthFlowActive = manifest.nativeAuthFlowEnabled.not(),
-                viewEffect = if (manifest.nativeAuthFlowEnabled) {
+                webAuthFlowActive = nativeAuthFlowEnabled.not(),
+                viewEffect = if (nativeAuthFlowEnabled) {
                     OpenNativeAuthFlow(initialArgs.configuration, synchronizeSessionResponse)
                 } else {
                     OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
                 }
+            )
+        }
+    }
+
+    private fun nativeAuthFlowKillSwitchActive(synchronizeSessionResponse: SynchronizeSessionResponse): Boolean {
+        return synchronizeSessionResponse.manifest.features?.any { it.key == "bank_connections_mobile_native_version_killswitch" && it.value }
+            ?: true
+    }
+
+    private fun nativeAuthFlowEnabled(synchronizeSessionResponse: SynchronizeSessionResponse): Boolean {
+        if (nativeAuthFlowKillSwitchActive(synchronizeSessionResponse)) return false
+        // If experiments are not assigned, or native experiment is missing, fallback to webView.
+        return synchronizeSessionResponse.manifest.experimentAssignments?.any { it.key == "connections_mobile_native" && it.value == "treatment" }
+            ?: false
+    }
+
+    private suspend fun logExposure(synchronizeSessionResponse: SynchronizeSessionResponse) {
+        val killSwitchDisabled = !nativeAuthFlowKillSwitchActive(synchronizeSessionResponse)
+        val experimentVariantIsPresent =
+            synchronizeSessionResponse.manifest.experimentAssignments?.any { it.key == "connections_mobile_native" }
+                ?: false
+        val assignmentEventId = synchronizeSessionResponse.manifest.assignmentEventId
+        val accountHolderId = synchronizeSessionResponse.manifest.accountholderToken
+        if (killSwitchDisabled && experimentVariantIsPresent && assignmentEventId != null && accountHolderId != null) {
+            eventTracker.track(
+                FinancialConnectionsEvent.Exposure(
+                    experimentName = "connections_mobile_native",
+                    assignmentEventId = assignmentEventId,
+                    accountHolderId = accountHolderId
+                )
             )
         }
     }
