@@ -292,13 +292,12 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify that UPI is supported when it is enabled`() {
+    fun `Verify that UPI is supported when it's expected`() {
         val lpmRepository = LpmRepository(
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
                 isFinancialConnectionsAvailable = { false },
-                isUpiEnabled = true
             )
         )
 
@@ -308,24 +307,5 @@ class LpmRepositoryTest {
         )
 
         assertThat(lpmRepository.fromCode("upi")).isNotNull()
-    }
-
-    @Test
-    fun `Verify that UPI is not supported when it is disabled`() {
-        val lpmRepository = LpmRepository(
-            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-            arguments = LpmRepository.LpmRepositoryArguments(
-                resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                isFinancialConnectionsAvailable = { false },
-                isUpiEnabled = false
-            )
-        )
-
-        lpmRepository.forceUpdate(
-            expectedLpms = listOf("upi"),
-            serverLpmSpecs = "[]" // UPI doesn't come from the backend; we rely on the local specs
-        )
-
-        assertThat(lpmRepository.fromCode("upi")).isNull()
     }
 }
