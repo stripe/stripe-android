@@ -8,9 +8,22 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 internal data class SingleSideDocumentUploadState(
-    val highResResult: Resource<UploadedResult> = Resource.loading(),
-    val lowResResult: Resource<UploadedResult> = Resource.loading()
+    val highResResult: Resource<UploadedResult> = Resource.idle(),
+    val lowResResult: Resource<UploadedResult> = Resource.idle()
 ) : Parcelable {
+
+    fun updateLoading(
+        isHighRes: Boolean
+    ) = if (isHighRes) {
+        this.copy(
+            highResResult = Resource.loading()
+        )
+    } else {
+        this.copy(
+            lowResResult = Resource.loading()
+        )
+    }
+
     fun update(
         isHighRes: Boolean,
         newResult: UploadedResult

@@ -30,9 +30,8 @@ internal class PairMediatorLiveData<DataType>(
                 Status.ERROR -> {
                     postValue(Resource.error("$firstLiveData posts ERROR."))
                 }
-                Status.LOADING -> {
-                    // no-op
-                }
+                Status.LOADING -> {} // no-op
+                Status.IDLE -> {} // no-op
             }
         }
         addSource(secondLiveData) {
@@ -44,9 +43,8 @@ internal class PairMediatorLiveData<DataType>(
                 Status.ERROR -> {
                     postValue(Resource.error("$secondLiveData posts ERROR."))
                 }
-                Status.LOADING -> {
-                    // no-op
-                }
+                Status.LOADING -> {} // no-op
+                Status.IDLE -> {} // no-op
             }
         }
     }

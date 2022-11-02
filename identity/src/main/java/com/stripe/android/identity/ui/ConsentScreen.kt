@@ -100,6 +100,7 @@ internal fun ConsentScreen(
             Status.LOADING -> {
                 LoadingUI()
             }
+            Status.IDLE -> {} // no-op
         }
     }
 }

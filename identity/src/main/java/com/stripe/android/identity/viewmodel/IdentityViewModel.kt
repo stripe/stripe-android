@@ -53,8 +53,11 @@ import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
@@ -81,10 +84,17 @@ internal class IdentityViewModel constructor(
      */
     private val _documentFrontUploadedState =
         MutableStateFlow(
-            savedStateHandle.get<SingleSideDocumentUploadState>(DOCUMENT_FRONT_UPLOAD_STATE)
-                ?: run {
+            savedStateHandle.get<SingleSideDocumentUploadState>(DOCUMENT_FRONT_UPLOAD_STATE)?.let {
+                // If saved as Loading, the uploading coroutine would fail as the app is destroyed.
+                // Clear the state when recovered.
+                if (it.isLoading()) {
                     SingleSideDocumentUploadState()
+                } else {
+                    it
                 }
+            } ?: run {
+                SingleSideDocumentUploadState()
+            }
         )
     val documentFrontUploadedState: StateFlow<SingleSideDocumentUploadState> =
         _documentFrontUploadedState
@@ -94,7 +104,15 @@ internal class IdentityViewModel constructor(
      */
     private val _documentBackUploadedState =
         MutableStateFlow(
-            savedStateHandle.get<SingleSideDocumentUploadState>(DOCUMENT_BACK_UPLOAD_STATE) ?: run {
+            savedStateHandle.get<SingleSideDocumentUploadState>(DOCUMENT_BACK_UPLOAD_STATE)?.let {
+                // If saved as Loading, the uploading coroutine would fail as the app is destroyed.
+                // Clear the state when recovered.
+                if (it.isLoading()) {
+                    SingleSideDocumentUploadState()
+                } else {
+                    it
+                }
+            } ?: run {
                 SingleSideDocumentUploadState()
             }
         )
@@ -105,7 +123,7 @@ internal class IdentityViewModel constructor(
      * StateFlow to track the upload status of high/low resolution images of selfies.
      */
     private val _selfieUploadedState = MutableStateFlow(
-        savedStateHandle.get<SelfieUploadState>(SELFIE_UPLOAD_STATE) ?: run {
+        savedStateHandle[SELFIE_UPLOAD_STATE] ?: run {
             SelfieUploadState()
         }
     )
@@ -115,11 +133,49 @@ internal class IdentityViewModel constructor(
      * StateFlow to track analytics status.
      */
     private val _analyticsState = MutableStateFlow(
-        savedStateHandle.get<AnalyticsState>(ANALYTICS_STATE) ?: run {
+        savedStateHandle[ANALYTICS_STATE] ?: run {
             AnalyticsState()
         }
     )
     val analyticsState: StateFlow<AnalyticsState> = _analyticsState
+
+    /**
+     * StateFlow to track the data collected so far.
+     */
+    private val _collectedData = MutableStateFlow(
+        savedStateHandle[COLLECTED_DATA] ?: run {
+            CollectedDataParam()
+        }
+    )
+    val collectedData: StateFlow<CollectedDataParam> = _collectedData
+
+    /**
+     * StateFlow to track missing requirements.
+     */
+    private val _missingRequirements = MutableStateFlow<List<Requirement>>(
+        savedStateHandle[MISSING_REQUIREMENTS] ?: run {
+            listOf()
+        }
+    )
+    val missingRequirements: StateFlow<List<Requirement>> = _missingRequirements
+
+    val frontCollectedInfo =
+        _documentFrontUploadedState.combine(_collectedData) { upload, collected ->
+            (upload to collected)
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            (SingleSideDocumentUploadState() to CollectedDataParam())
+        )
+
+    val backCollectedInfo =
+        _documentBackUploadedState.combine(_collectedData) { upload, collected ->
+            (upload to collected)
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            (SingleSideDocumentUploadState() to CollectedDataParam())
+        )
 
     /**
      * Response for initial VerificationPage, used for building UI.
@@ -138,12 +194,6 @@ internal class IdentityViewModel constructor(
      */
     private val _faceDetectorModelFile = MutableLiveData<Resource<File>>()
     val faceDetectorModelFile: LiveData<Resource<File>> = _faceDetectorModelFile
-
-    /**
-     * Keep track of data collected so far.
-     */
-    private val _collectedData = MutableStateFlow(CollectedDataParam())
-    private val collectedData: StateFlow<CollectedDataParam> = _collectedData
 
     data class PageAndModelFiles(
         val page: VerificationPage,
@@ -172,6 +222,7 @@ internal class IdentityViewModel constructor(
                         postValue(Resource.error("$verificationPage posts error"))
                     }
                     Status.LOADING -> {} // no-op
+                    Status.IDLE -> {}
                 }
             }
             addSource(idDetectorModelFile) {
@@ -184,6 +235,7 @@ internal class IdentityViewModel constructor(
                         postValue(Resource.error("$idDetectorModelFile posts error"))
                     }
                     Status.LOADING -> {} // no-op
+                    Status.IDLE -> {} // no-op
                 }
             }
             addSource(faceDetectorModelFile) {
@@ -197,6 +249,7 @@ internal class IdentityViewModel constructor(
                         postValue(Resource.error("$faceDetectorModelFile posts error"))
                     }
                     Status.LOADING -> {} // no-op
+                    Status.IDLE -> {} // no-op
                 }
             }
         }
@@ -432,6 +485,14 @@ internal class IdentityViewModel constructor(
         compressionQuality: Float
     ) {
         viewModelScope.launch {
+            if (isFront) {
+                _documentFrontUploadedState
+            } else {
+                _documentBackUploadedState
+            }.updateStateAndSave { currentState ->
+                currentState.updateLoading(isHighRes = isHighRes)
+            }
+
             runCatching {
                 var uploadTime = 0L
                 identityRepository.uploadImage(
@@ -466,46 +527,31 @@ internal class IdentityViewModel constructor(
                         }
                     }
                     if (isFront) {
-                        _documentFrontUploadedState.updateStateAndSave { currentState ->
-                            currentState.update(
-                                isHighRes = isHighRes,
-                                newResult = UploadedResult(
-                                    fileTimePair.first,
-                                    scores,
-                                    uploadMethod
-                                )
-                            )
-                        }
+                        _documentFrontUploadedState
                     } else {
-                        _documentBackUploadedState.updateStateAndSave { currentState ->
-                            currentState.update(
-                                isHighRes = isHighRes,
-                                newResult = UploadedResult(
-                                    fileTimePair.first,
-                                    scores,
-                                    uploadMethod
-                                )
+                        _documentBackUploadedState
+                    }.updateStateAndSave { currentState ->
+                        currentState.update(
+                            isHighRes = isHighRes,
+                            newResult = UploadedResult(
+                                fileTimePair.first,
+                                scores,
+                                uploadMethod
                             )
-                        }
+                        )
                     }
                 },
                 onFailure = {
                     if (isFront) {
-                        _documentFrontUploadedState.updateStateAndSave { currentState ->
-                            currentState.updateError(
-                                isHighRes = isHighRes,
-                                message = "Failed to upload file : ${imageFile.name}",
-                                throwable = it
-                            )
-                        }
+                        _documentFrontUploadedState
                     } else {
-                        _documentBackUploadedState.updateStateAndSave { currentState ->
-                            currentState.updateError(
-                                isHighRes = isHighRes,
-                                message = "Failed to upload file : ${imageFile.name}",
-                                throwable = it
-                            )
-                        }
+                        _documentBackUploadedState
+                    }.updateStateAndSave { currentState ->
+                        currentState.updateError(
+                            isHighRes = isHighRes,
+                            message = "Failed to upload file : ${imageFile.name}",
+                            throwable = it
+                        )
                     }
                 }
             )
@@ -652,6 +698,7 @@ internal class IdentityViewModel constructor(
                     onFailure(requireNotNull(resource.throwable))
                 }
                 Status.LOADING -> {} // no-op
+                Status.IDLE -> {} // no-op
             }
         }
     }
@@ -668,15 +715,18 @@ internal class IdentityViewModel constructor(
                     verificationArgs.ephemeralKeySecret
                 )
             }.fold(
-                onSuccess = {
-                    _verificationPage.postValue(Resource.success(it))
-                    identityAnalyticsRequestFactory.verificationPage = it
+                onSuccess = { verificagionPage ->
+                    _verificationPage.postValue(Resource.success(verificagionPage))
+                    identityAnalyticsRequestFactory.verificationPage = verificagionPage
+                    _missingRequirements.updateStateAndSave {
+                        verificagionPage.requirements.missing
+                    }
                     if (shouldRetrieveModel) {
                         downloadModelAndPost(
-                            it.documentCapture.models.idDetectorUrl,
+                            verificagionPage.documentCapture.models.idDetectorUrl,
                             _idDetectorModelFile
                         )
-                        it.selfieCapture?.let { selfieCapture ->
+                        verificagionPage.selfieCapture?.let { selfieCapture ->
                             downloadModelAndPost(
                                 selfieCapture.models.faceDetectorUrl,
                                 _faceDetectorModelFile
@@ -744,11 +794,16 @@ internal class IdentityViewModel constructor(
             verificationArgs.ephemeralKeySecret,
             collectedDataParam,
             calculateClearDataParam(collectedDataParam)
-        ).let {
-            _collectedData.update { oldValue ->
+        ).let { verificationPageData ->
+            _collectedData.updateStateAndSave { oldValue ->
                 oldValue.mergeWith(collectedDataParam)
             }
-            return it
+            _missingRequirements.updateStateAndSave {
+                requireNotNull(verificationPageData.requirements.missings) {
+                    "VerificationPageDataRequirements.missings is null"
+                }
+            }
+            return verificationPageData
         }
     }
 
@@ -807,25 +862,34 @@ internal class IdentityViewModel constructor(
     }
 
     fun clearCollectedData(field: Requirement) {
-        _collectedData.update {
+        _collectedData.updateStateAndSave {
             it.clearData(field)
+        }
+    }
+
+    fun clearUploadedData() {
+        listOf(_documentFrontUploadedState, _documentBackUploadedState).forEach {
+            it.updateStateAndSave {
+                SingleSideDocumentUploadState()
+            }
         }
     }
 
     private fun <State> MutableStateFlow<State>.updateStateAndSave(function: (State) -> State) {
         this.update(function)
-        savedStateHandle.set(
+        savedStateHandle[
             when (this) {
                 _selfieUploadedState -> SELFIE_UPLOAD_STATE
                 _analyticsState -> ANALYTICS_STATE
                 _documentFrontUploadedState -> DOCUMENT_FRONT_UPLOAD_STATE
                 _documentBackUploadedState -> DOCUMENT_BACK_UPLOAD_STATE
+                _collectedData -> COLLECTED_DATA
+                _missingRequirements -> MISSING_REQUIREMENTS
                 else -> {
                     throw IllegalStateException("Unexpected state flow: $this")
                 }
-            }, // key
-            this.value // value
-        )
+            }
+        ] = this.value
     }
 
     internal class IdentityViewModelFactory(
@@ -866,5 +930,7 @@ internal class IdentityViewModel constructor(
         private const val DOCUMENT_BACK_UPLOAD_STATE = "document_back_upload_state"
         private const val SELFIE_UPLOAD_STATE = "selfie_upload_state"
         private const val ANALYTICS_STATE = "analytics_upload_state"
+        private const val COLLECTED_DATA = "collected_data"
+        private const val MISSING_REQUIREMENTS = "missing_requirements"
     }
 }

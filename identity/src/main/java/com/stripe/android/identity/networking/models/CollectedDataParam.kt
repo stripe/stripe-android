@@ -1,14 +1,17 @@
 package com.stripe.android.identity.networking.models
 
+import android.os.Parcelable
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
 import com.stripe.android.identity.navigation.DocSelectionFragment
 import com.stripe.android.identity.networking.UploadedResult
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
+@Parcelize
 internal data class CollectedDataParam(
     @SerialName("biometric_consent")
     val biometricConsent: Boolean? = null,
@@ -20,7 +23,7 @@ internal data class CollectedDataParam(
     val idDocumentBack: DocumentUploadParam? = null,
     @SerialName("face")
     val face: FaceUploadParam? = null
-) {
+) : Parcelable {
     @Serializable
     internal enum class Type {
         @SerialName("driving_license")

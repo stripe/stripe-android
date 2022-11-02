@@ -144,24 +144,6 @@ public final class com/stripe/android/identity/analytics/ScreenTracker_Factory :
 	public static fun newInstance (Lcom/stripe/android/identity/analytics/IdentityAnalyticsRequestFactory;Lcom/stripe/android/identity/networking/IdentityRepository;)Lcom/stripe/android/identity/analytics/ScreenTracker;
 }
 
-public final class com/stripe/android/identity/databinding/DriverLicenseUploadFragmentBinding : androidx/viewbinding/ViewBinding {
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/DriverLicenseUploadFragmentBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/FrameLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/DriverLicenseUploadFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/DriverLicenseUploadFragmentBinding;
-}
-
-public final class com/stripe/android/identity/databinding/GetLocalImageDialogBinding : androidx/viewbinding/ViewBinding {
-	public final field chooseFile Lcom/google/android/material/button/MaterialButton;
-	public final field takePhoto Lcom/google/android/material/button/MaterialButton;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/GetLocalImageDialogBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/GetLocalImageDialogBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/GetLocalImageDialogBinding;
-}
-
 public final class com/stripe/android/identity/databinding/IdentityActivityBinding : androidx/viewbinding/ViewBinding {
 	public final field identityNavHost Landroidx/fragment/app/FragmentContainerView;
 	public final field topAppBar Lcom/google/android/material/appbar/MaterialToolbar;
@@ -184,27 +166,6 @@ public final class com/stripe/android/identity/databinding/IdentityDocumentScanF
 	public fun getRoot ()Landroid/widget/FrameLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/IdentityDocumentScanFragmentBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityDocumentScanFragmentBinding;
-}
-
-public final class com/stripe/android/identity/databinding/IdentityUploadFragmentBinding : androidx/viewbinding/ViewBinding {
-	public final field backUpload Landroid/widget/RelativeLayout;
-	public final field contentText Landroid/widget/TextView;
-	public final field finishedCheckMarkBack Landroid/widget/ImageView;
-	public final field finishedCheckMarkFront Landroid/widget/ImageView;
-	public final field kontinue Lcom/stripe/android/identity/ui/LoadingButton;
-	public final field labelBack Landroid/widget/TextView;
-	public final field labelFront Landroid/widget/TextView;
-	public final field progressCircularBack Lcom/google/android/material/progressindicator/CircularProgressIndicator;
-	public final field progressCircularFront Lcom/google/android/material/progressindicator/CircularProgressIndicator;
-	public final field selectBack Lcom/google/android/material/button/MaterialButton;
-	public final field selectFront Lcom/google/android/material/button/MaterialButton;
-	public final field separator Landroid/view/View;
-	public final field titleText Landroid/widget/TextView;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/IdentityUploadFragmentBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/IdentityUploadFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/IdentityUploadFragmentBinding;
 }
 
 public final class com/stripe/android/identity/databinding/LoadingButtonBinding : androidx/viewbinding/ViewBinding {
@@ -313,6 +274,41 @@ public final class com/stripe/android/identity/networking/UploadedResult$Creator
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/identity/networking/UploadedResult;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/networking/models/CollectedDataParam$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/CollectedDataParam;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/CollectedDataParam;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/networking/models/DocumentUploadParam$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/DocumentUploadParam;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/DocumentUploadParam;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/networking/models/FaceUploadParam$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/FaceUploadParam;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/FaceUploadParam;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/ui/ComposableSingletons$UploadScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$UploadScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public static field lambda-2 Lkotlin/jvm/functions/Function3;
+	public static field lambda-3 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-2$identity_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-3$identity_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/identity/utils/ContentUriResult {

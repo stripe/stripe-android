@@ -33,7 +33,7 @@ import com.stripe.android.identity.injection.IdentityActivitySubcomponent
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
-import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
+import com.stripe.android.identity.utils.clearDataAndNavigateUp
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
 import javax.inject.Provider
@@ -314,7 +314,7 @@ internal class IdentityActivity :
                         R.drawable.ic_baseline_arrow_back_24
                     )
                 this.setNavigationOnClickListener {
-                    navController.navigateUpAndSetArgForUploadFragment(identityViewModel)
+                    navController.clearDataAndNavigateUp(identityViewModel)
                 }
             }
         }
@@ -373,7 +373,7 @@ internal class IdentityActivity :
                 }
                 // On other fragments, clicking back navigates up
                 else -> {
-                    navController.navigateUpAndSetArgForUploadFragment(identityViewModel)
+                    navController.clearDataAndNavigateUp(identityViewModel)
                 }
             }
         }

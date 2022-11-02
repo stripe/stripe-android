@@ -21,7 +21,6 @@ import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.utils.InjectableActivityScenario
 import com.stripe.android.identity.utils.injectableActivityScenario
-import com.stripe.android.identity.utils.isNavigatedUpTo
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -240,7 +239,6 @@ internal class IdentityActivityTest {
             navUpButton.callOnClick()
 
             assertThat(navController.currentDestination?.id).isEqualTo(R.id.IDUploadFragment)
-            assertThat(navController.isNavigatedUpTo()).isEqualTo(true)
         }
     }
 
@@ -270,7 +268,6 @@ internal class IdentityActivityTest {
             identityActivity.onBackPressed()
 
             assertThat(navController.currentDestination?.id).isEqualTo(R.id.IDUploadFragment)
-            assertThat(navController.isNavigatedUpTo()).isEqualTo(true)
         }
     }
 
@@ -294,7 +291,6 @@ internal class IdentityActivityTest {
             navUpButton.callOnClick()
 
             assertThat(navController.currentDestination?.id).isEqualTo(R.id.IDScanFragment)
-            assertThat(navController.isNavigatedUpTo()).isEqualTo(false)
         }
     }
 
@@ -318,7 +314,6 @@ internal class IdentityActivityTest {
             identityActivity.onBackPressed()
 
             assertThat(navController.currentDestination?.id).isEqualTo(R.id.IDScanFragment)
-            assertThat(navController.isNavigatedUpTo()).isEqualTo(false)
         }
     }
 
