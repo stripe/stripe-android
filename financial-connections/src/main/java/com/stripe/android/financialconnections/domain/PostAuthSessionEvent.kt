@@ -9,9 +9,9 @@ import java.util.Date
 import javax.inject.Inject
 
 internal class PostAuthSessionEvent @Inject constructor(
-    val repository: FinancialConnectionsManifestRepository,
-    val logger: Logger,
-    val configuration: FinancialConnectionsSheet.Configuration,
+    private val repository: FinancialConnectionsManifestRepository,
+    private val logger: Logger,
+    private val configuration: FinancialConnectionsSheet.Configuration,
 ) {
 
     suspend operator fun invoke(

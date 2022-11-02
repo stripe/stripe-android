@@ -1,11 +1,13 @@
 package com.stripe.android.financialconnections.networking
 
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
+import java.util.Date
 
 internal class FakeFinancialConnectionsManifestRepository : FinancialConnectionsManifestRepository {
 
@@ -19,6 +21,8 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         { ApiKeyFixtures.authorizationSession() }
     var postMarkLinkingMoreAccountsProvider: () -> FinancialConnectionsSessionManifest =
         { ApiKeyFixtures.sessionManifest() }
+    var postAuthSessionEvent: () -> FinancialConnectionsAuthorizationSession =
+        { ApiKeyFixtures.authorizationSession() }
 
     override suspend fun getOrFetchSynchronizeFinancialConnectionsSession(
         clientSecret: String,
@@ -34,6 +38,13 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         applicationId: String,
         institution: FinancialConnectionsInstitution
     ): FinancialConnectionsAuthorizationSession = postAuthorizationSessionProvider()
+
+    override suspend fun postAuthorizationSessionEvent(
+        clientSecret: String,
+        clientTimestamp: Date,
+        sessionId: String,
+        authSessionEvents: List<AuthSessionEvent>
+    ): FinancialConnectionsAuthorizationSession = postAuthSessionEvent()
 
     override suspend fun completeAuthorizationSession(
         clientSecret: String,
