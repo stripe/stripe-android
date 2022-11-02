@@ -3,19 +3,23 @@
 ## XX.XX.XX - 2022-XX-XX
 
 ### Payments
+
 * [CHANGED][5789](https://github.com/stripe/stripe-android/pull/5789) We now disable the back button while confirming intents with `PaymentLauncher` to prevent them from incorrectly being displayed as failed.
 
 ### PaymentSheet
 
 * [ADDED][5676](https://github.com/stripe/stripe-android/pull/5676) Added `AddressLauncher`, an [activity](https://stripe.com/docs/elements/address-element?platform=android) that collects local and international addresses for your customers.
+* [ADDED][5769](https://github.com/stripe/stripe-android/pull/5769) Added support for showing payment methods that require a shipping address via `PaymentSheet.Configuration.allowsPaymentMethodsRequiringShippingAddress`. If set to `true`, PaymentSheet displays these payment methods even if no `shippingDetails` are passed in.
 
 ## 20.15.4 - 2022-11-07
 
 ### CardScan
+
 * [FIXED][5768](https://github.com/stripe/stripe-android/pull/5768) Fixed SDK version reporting in cardscan scan stats
 
 ### Identity
-* [FIXED][5762](https://github.com/stripe/stripe-android/pull/5762) Use a custom implementation of FileProvider to avoid collision with client app. 
+
+* [FIXED][5762](https://github.com/stripe/stripe-android/pull/5762) Use a custom implementation of FileProvider to avoid collision with client app.
 
 ## 20.15.3 - 2022-10-31
 
