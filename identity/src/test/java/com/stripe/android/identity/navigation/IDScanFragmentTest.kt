@@ -34,7 +34,6 @@ import com.stripe.android.identity.navigation.IdentityDocumentScanFragment.Compa
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.UploadedResult
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -189,7 +188,7 @@ internal class IDScanFragmentTest {
 
                 documentFrontUploadState.update { frontUploadedState }
                 // post returns not missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_MISSING_BACK
                 )
 
@@ -281,7 +280,7 @@ internal class IDScanFragmentTest {
                 documentFrontUploadState.update { frontUploadedState }
 
                 // post returns missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_MISSING_BACK
                 )
 
@@ -302,9 +301,6 @@ internal class IDScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT
                     )
                 )
 
@@ -348,9 +344,6 @@ internal class IDScanFragmentTest {
                             backHighResResult = BACK_HIGH_RES_RESULT,
                             backLowResResult = BACK_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_TO_CONFIRM
                     )
                 )
 
@@ -403,7 +396,7 @@ internal class IDScanFragmentTest {
                 documentFrontUploadState.update { frontUploadedState }
 
                 // post returns missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_MISSING_BACK
                 )
 
@@ -424,9 +417,6 @@ internal class IDScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT
                     )
                 )
 
@@ -470,9 +460,6 @@ internal class IDScanFragmentTest {
                             backHighResResult = BACK_HIGH_RES_RESULT,
                             backLowResResult = BACK_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_TO_SELFIE
                     )
                 )
 
@@ -525,7 +512,7 @@ internal class IDScanFragmentTest {
                 documentFrontUploadState.update { frontUploadedState }
 
                 // post returns not missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
                 )
 
@@ -546,9 +533,6 @@ internal class IDScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT
                     )
                 )
 
@@ -601,7 +585,7 @@ internal class IDScanFragmentTest {
                 documentFrontUploadState.update { frontUploadedState }
 
                 // post returns not missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
                 )
 
@@ -622,9 +606,6 @@ internal class IDScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT_SELFIE
                     )
                 )
 

@@ -30,7 +30,7 @@ class DocSelectScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val onDocTypeSelectedMock = mock<(CollectedDataParam.Type, Boolean) -> Unit>()
+    private val onDocTypeSelectedMock = mock<(CollectedDataParam.Type) -> Unit>()
 
     private val verificationPageWithMultiChoice = mock<VerificationPage> {
         on { it.documentSelect } doReturn DOC_SELECT_MULTI_CHOICE
@@ -56,8 +56,7 @@ class DocSelectScreenTest {
 
             onNodeWithTag(DRIVING_LICENSE_KEY).onChildAt(0).performClick()
             verify(onDocTypeSelectedMock).invoke(
-                CollectedDataParam.Type.DRIVINGLICENSE,
-                false
+                CollectedDataParam.Type.DRIVINGLICENSE
             )
         }
     }
@@ -75,8 +74,7 @@ class DocSelectScreenTest {
 
             onNodeWithTag(singleSelectionTag).onChildAt(1).performClick()
             verify(onDocTypeSelectedMock).invoke(
-                CollectedDataParam.Type.PASSPORT,
-                false
+                CollectedDataParam.Type.PASSPORT
             )
         }
     }
