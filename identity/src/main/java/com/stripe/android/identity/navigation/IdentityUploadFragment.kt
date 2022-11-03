@@ -181,7 +181,9 @@ internal abstract class IdentityUploadFragment(
                             }
                         }
                     }
-                } else null
+                } else {
+                    null
+                }
             ) {
                 identityViewModel.observeForVerificationPage(
                     viewLifecycleOwner,
