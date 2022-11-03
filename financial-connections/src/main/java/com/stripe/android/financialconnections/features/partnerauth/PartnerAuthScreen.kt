@@ -98,8 +98,8 @@ private fun PartnerAuthScreenContent(
     ) {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> LoadingContent(
-                stringResource(id = R.string.stripe_picker_loading_title),
-                stringResource(id = R.string.stripe_picker_loading_desc)
+                stringResource(id = R.string.stripe_partnerauth_loading_title),
+                stringResource(id = R.string.stripe_partnerauth_loading_desc)
             )
 
             is Fail -> ErrorContent(
@@ -160,14 +160,14 @@ private fun LoadedContent(
             )
 
             false -> LoadingContent(
-                stringResource(id = R.string.stripe_picker_loading_title),
-                stringResource(id = R.string.stripe_picker_loading_desc)
+                stringResource(id = R.string.stripe_partnerauth_loading_title),
+                stringResource(id = R.string.stripe_partnerauth_loading_desc)
             )
         }
 
         is Loading, is Success -> LoadingContent(
-            stringResource(id = R.string.stripe_picker_loading_title),
-            stringResource(id = R.string.stripe_picker_loading_desc)
+            stringResource(id = R.string.stripe_partnerauth_loading_title),
+            stringResource(id = R.string.stripe_partnerauth_loading_desc)
         )
 
         is Fail -> {
