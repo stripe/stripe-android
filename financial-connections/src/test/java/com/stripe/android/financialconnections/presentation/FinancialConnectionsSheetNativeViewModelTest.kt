@@ -32,8 +32,13 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
     @get:Rule
     val mvrxRule = MvRxTestRule(testDispatcher = UnconfinedTestDispatcher())
-    private val applicationId = "com.sample.applicationid"
+
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
+    private val applicationId = "com.sample.applicationid"
+    private val configuration = FinancialConnectionsSheet.Configuration(
+        financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
+        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+    )
 
     @Test
     fun `handleOnNewIntent - when deeplink with success code received, webAuthFlow async succeeds`() {
@@ -94,10 +99,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     private fun createViewModel(
         initialState: FinancialConnectionsSheetNativeState = FinancialConnectionsSheetNativeState(
             FinancialConnectionsSheetNativeActivityArgs(
-                configuration = FinancialConnectionsSheet.Configuration(
-                    financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                    publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-                ),
+                configuration = configuration,
                 initialSyncResponse = ApiKeyFixtures.syncResponse(),
             )
         )
