@@ -94,7 +94,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     baseUrl(applicationId)
-                ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_CODE)) {
+                ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)) {
                     SUCCESS -> setState {
                         copy(webAuthFlow = Success(receivedUrl))
                     }
@@ -104,16 +104,28 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     }
 
                     FAIL -> setState {
-                        copy(webAuthFlow = Fail(WebAuthFlowFailedException(receivedUrl)))
+                        copy(
+                            webAuthFlow = Fail(
+                                WebAuthFlowFailedException("Received return_url with failed status: $receivedUrl")
+                            )
+                        )
                     }
 
                     else -> setState {
-                        copy(webAuthFlow = Fail(WebAuthFlowFailedException(receivedUrl)))
+                        copy(
+                            webAuthFlow = Fail(
+                                WebAuthFlowFailedException("Received return_url with unknown status: $receivedUrl")
+                            )
+                        )
                     }
                 }
 
                 else -> setState {
-                    copy(webAuthFlow = Fail(WebAuthFlowFailedException(url = null)))
+                    copy(
+                        webAuthFlow = Fail(
+                            WebAuthFlowFailedException("Received unknown return_url: $receivedUrl")
+                        )
+                    )
                 }
             }
         }
@@ -254,7 +266,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         private fun baseUrl(applicationId: String) =
             "stripe://auth-redirect/$applicationId"
 
-        private const val PARAM_CODE = "status"
+        private const val PARAM_STATUS = "status"
         private const val SUCCESS = "success"
         private const val CANCEL = "cancel"
         private const val FAIL = "failure"

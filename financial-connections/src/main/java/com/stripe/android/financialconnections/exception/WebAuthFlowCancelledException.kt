@@ -9,4 +9,4 @@ internal class WebAuthFlowCancelledException : Exception()
  * Something went wrong while on the Web auth flow.
  * TODO@carlosmuvi add better exception granularity to auth flow failures.
  */
-internal class WebAuthFlowFailedException(val url: String?) : Exception()
+internal class WebAuthFlowFailedException(message: String?) : Exception(message)
