@@ -84,7 +84,12 @@ internal fun ManualEntrySuccessContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp)
+                .padding(
+                    top = 16.dp,
+                    start = 24.dp,
+                    end = 24.dp,
+                    bottom = 24.dp
+                )
         ) {
             Icon(
                 modifier = Modifier.size(40.dp),

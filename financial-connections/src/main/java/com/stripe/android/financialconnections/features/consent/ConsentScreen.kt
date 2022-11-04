@@ -61,6 +61,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
+import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.uicore.image.StripeImage
@@ -167,7 +168,8 @@ private fun ConsentMainContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick
+                onCloseClick = onCloseClick,
+                elevation = scrollState.elevation
             )
         }
     ) {
@@ -178,7 +180,12 @@ private fun ConsentMainContent(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(scrollState)
-                    .padding(24.dp)
+                    .padding(
+                        top = 16.dp,
+                        start = 24.dp,
+                        end = 24.dp,
+                        bottom = 24.dp
+                    )
             ) {
                 AnnotatedText(
                     text = title,

@@ -186,7 +186,12 @@ private fun PrePaneContent(
 ) {
     Column(
         modifier = Modifier
-            .padding(24.dp)
+            .padding(
+                top = 8.dp,
+                start = 24.dp,
+                end = 24.dp,
+                bottom = 24.dp
+            )
     ) {
         val modifier = Modifier
             .size(36.dp)

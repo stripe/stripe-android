@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +38,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
+import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -77,85 +80,105 @@ private fun SuccessContent(
     onDisconnectLinkClick: () -> Unit,
     onCloseClick: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
     val uriHandler = LocalUriHandler.current
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
                 showBack = false,
-                onCloseClick = onCloseClick
+                onCloseClick = onCloseClick,
+                elevation = scrollState.elevation
             )
         }
     ) {
         Column(
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
-                .padding(24.dp)
         ) {
-            Icon(
-                modifier = Modifier.size(40.dp),
-                painter = painterResource(R.drawable.stripe_ic_check_circle_emtpy),
-                contentDescription = null,
-                tint = FinancialConnectionsTheme.colors.textSuccess
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            Text(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(),
-                text = stringResource(R.string.stripe_success_title),
-                style = FinancialConnectionsTheme.typography.subtitle
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                text = getSubtitle(businessName, accounts),
-                style = FinancialConnectionsTheme.typography.body
-            )
-            if (accounts.isNotEmpty()) {
-                Spacer(modifier = Modifier.size(24.dp))
-                AccessibleDataCalloutWithAccounts(
-                    model = accessibleDataModel,
-                    accounts = accounts,
-                    institution = institution,
-                    onLearnMoreClick = { onLearnMoreAboutDataAccessClick() }
+                    .weight(1f)
+                    .verticalScroll(scrollState)
+                    .padding(
+                        top = 8.dp,
+                        start = 24.dp,
+                        end = 24.dp
+                    )
+            ) {
+                Icon(
+                    modifier = Modifier.size(40.dp),
+                    painter = painterResource(R.drawable.stripe_ic_check_circle_emtpy),
+                    contentDescription = null,
+                    tint = FinancialConnectionsTheme.colors.textSuccess
                 )
+                Spacer(modifier = Modifier.size(16.dp))
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = stringResource(R.string.stripe_success_title),
+                    style = FinancialConnectionsTheme.typography.subtitle
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    text = getSubtitle(businessName, accounts),
+                    style = FinancialConnectionsTheme.typography.body
+                )
+                if (accounts.isNotEmpty()) {
+                    Spacer(modifier = Modifier.size(24.dp))
+                    AccessibleDataCalloutWithAccounts(
+                        model = accessibleDataModel,
+                        accounts = accounts,
+                        institution = institution,
+                        onLearnMoreClick = { onLearnMoreAboutDataAccessClick() }
+                    )
+                }
+                Spacer(modifier = Modifier.size(12.dp))
+                AnnotatedText(
+                    text = TextResource.StringId(R.string.success_pane_disconnect),
+                    onClickableTextClick = {
+                        onDisconnectLinkClick()
+                        uriHandler.openUri(disconnectUrl)
+                    },
+                    defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+                        color = FinancialConnectionsTheme.colors.textSecondary
+                    ),
+                    annotationStyles = mapOf(
+                        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption
+                            .toSpanStyle()
+                            .copy(color = FinancialConnectionsTheme.colors.textBrand)
+                    )
+                )
+                Spacer(modifier = Modifier.weight(1f))
             }
-            Spacer(modifier = Modifier.size(12.dp))
-            AnnotatedText(
-                text = TextResource.StringId(R.string.success_pane_disconnect),
-                onClickableTextClick = {
-                    onDisconnectLinkClick()
-                    uriHandler.openUri(disconnectUrl)
-                },
-                defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                    color = FinancialConnectionsTheme.colors.textSecondary
-                ),
-                annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption
-                        .toSpanStyle()
-                        .copy(color = FinancialConnectionsTheme.colors.textBrand)
+            Column(
+                Modifier.padding(
+                    bottom = 24.dp,
+                    start = 24.dp,
+                    end = 24.dp
                 )
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            if (showLinkAnotherAccount) {
+            ) {
+                if (showLinkAnotherAccount) {
+                    FinancialConnectionsButton(
+                        enabled = loading.not(),
+                        type = FinancialConnectionsButton.Type.Secondary,
+                        onClick = onLinkAnotherAccountClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(text = stringResource(R.string.success_pane_link_more_accounts))
+                    }
+                    Spacer(modifier = Modifier.size(8.dp))
+                }
                 FinancialConnectionsButton(
-                    enabled = loading.not(),
-                    type = FinancialConnectionsButton.Type.Secondary,
-                    onClick = onLinkAnotherAccountClick,
+                    loading = loading,
+                    onClick = onDoneClick,
                     modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    Text(text = stringResource(R.string.success_pane_link_more_accounts))
+                    Text(text = stringResource(R.string.success_pane_done))
                 }
-                Spacer(modifier = Modifier.size(8.dp))
-            }
-            FinancialConnectionsButton(
-                loading = loading,
-                onClick = onDoneClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(text = stringResource(R.string.success_pane_done))
             }
         }
     }

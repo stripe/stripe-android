@@ -269,7 +269,12 @@ internal fun ErrorContent(
     val scrollState = rememberScrollState()
     Column(
         Modifier
-            .padding(24.dp)
+            .padding(
+                top = 8.dp,
+                start = 24.dp,
+                end = 24.dp,
+                bottom = 24.dp
+            )
             .fillMaxSize()
     ) {
         Column(

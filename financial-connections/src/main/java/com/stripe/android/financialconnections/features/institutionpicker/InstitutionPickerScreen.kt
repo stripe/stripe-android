@@ -143,7 +143,7 @@ private fun LoadedContent(
     LaunchedEffect(searchMode) { if (!searchMode) input = "" }
     Column {
         if (searchMode.not()) {
-            Spacer(Modifier.size(24.dp))
+            Spacer(Modifier.size(16.dp))
             Text(
                 modifier = Modifier
                     .padding(horizontal = 24.dp)

@@ -203,7 +203,12 @@ private fun AccountPickerLoaded(
     Column(
         Modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(
+                top = 16.dp,
+                start = 24.dp,
+                end = 24.dp,
+                bottom = 24.dp
+            )
     ) {
         Column(
             modifier = Modifier
@@ -247,7 +252,12 @@ private fun AccountPickerLoaded(
             }
             Spacer(modifier = Modifier.weight(1f))
         }
-        accessibleDataCalloutModel?.let { AccessibleDataCallout(it, onLearnMoreAboutDataAccessClick) }
+        accessibleDataCalloutModel?.let {
+            AccessibleDataCallout(
+                it,
+                onLearnMoreAboutDataAccessClick
+            )
+        }
         Spacer(modifier = Modifier.size(12.dp))
         FinancialConnectionsButton(
             enabled = submitEnabled,
