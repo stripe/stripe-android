@@ -209,8 +209,8 @@ private fun AccountPickerLoaded(
                 text = stringResource(R.string.stripe_account_picker_multiselect_account),
                 style = FinancialConnectionsTheme.typography.subtitle
             )
-            Spacer(modifier = Modifier.size(16.dp))
             subtitle?.let {
+                Spacer(modifier = Modifier.size(8.dp))
                 Text(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -218,6 +218,7 @@ private fun AccountPickerLoaded(
                     style = FinancialConnectionsTheme.typography.body
                 )
             }
+            Spacer(modifier = Modifier.size(24.dp))
             when (selectionMode) {
                 SelectionMode.RADIO -> SingleSelectContent(
                     accounts = accounts,
@@ -266,7 +267,7 @@ private fun SingleSelectContent(
     onAccountClicked: (PartnerAccount) -> Unit
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(top = 12.dp),
+        contentPadding = PaddingValues(bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(accounts, key = { it.account.id }) { account ->
@@ -298,7 +299,7 @@ private fun MultiSelectContent(
     allAccountsSelected: Boolean
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(top = 12.dp),
+        contentPadding = PaddingValues(bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item("select_all_accounts") {

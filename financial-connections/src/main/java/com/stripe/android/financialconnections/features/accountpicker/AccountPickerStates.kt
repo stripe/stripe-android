@@ -43,7 +43,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     accounts = partnerAccountList(),
                     selectionMode = AccountPickerState.SelectionMode.RADIO,
                     accessibleData = accessibleCallout(),
-                    singleAccount = false,
+                    singleAccount = true,
                     institutionSkipAccountSelection = false,
                     businessName = "Random business",
                     stripeDirect = false,
