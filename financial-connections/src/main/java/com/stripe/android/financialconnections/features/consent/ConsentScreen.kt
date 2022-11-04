@@ -273,9 +273,17 @@ private fun ConsentFooter(
         AnnotatedText(
             text = aboveCta,
             onClickableTextClick = onClickableTextClick,
-            defaultStyle = typography.body.copy(
+            defaultStyle = typography.detail.copy(
                 textAlign = TextAlign.Center,
                 color = colors.textSecondary
+            ),
+            annotationStyles = mapOf(
+                StringAnnotation.CLICKABLE to typography.detailEmphasized
+                    .toSpanStyle()
+                    .copy(color = colors.textBrand),
+                StringAnnotation.BOLD to typography.detailEmphasized
+                    .toSpanStyle()
+                    .copy(color = colors.textSecondary)
             )
         )
         Spacer(modifier = Modifier.size(16.dp))
@@ -293,9 +301,17 @@ private fun ConsentFooter(
                 modifier = Modifier.fillMaxWidth(),
                 text = belowCta,
                 onClickableTextClick = onClickableTextClick,
-                defaultStyle = typography.body.copy(
+                defaultStyle = typography.detail.copy(
                     textAlign = TextAlign.Center,
                     color = colors.textSecondary
+                ),
+                annotationStyles = mapOf(
+                    StringAnnotation.CLICKABLE to typography.detailEmphasized
+                        .toSpanStyle()
+                        .copy(color = colors.textBrand),
+                    StringAnnotation.BOLD to typography.detailEmphasized
+                        .toSpanStyle()
+                        .copy(color = colors.textSecondary)
                 )
             )
             Spacer(modifier = Modifier.size(16.dp))
@@ -466,6 +482,14 @@ private fun ConsentBullet(
             onClickableTextClick = { onClickableTextClick?.invoke(it) },
             defaultStyle = typography.body.copy(
                 color = colors.textSecondary
+            ),
+            annotationStyles = mapOf(
+                StringAnnotation.CLICKABLE to typography.bodyEmphasized
+                    .toSpanStyle()
+                    .copy(color = colors.textBrand),
+                StringAnnotation.BOLD to typography.bodyEmphasized
+                    .toSpanStyle()
+                    .copy(color = colors.textSecondary)
             )
         )
     }
