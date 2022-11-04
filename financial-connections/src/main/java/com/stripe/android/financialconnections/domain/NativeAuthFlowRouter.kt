@@ -19,10 +19,9 @@ internal class NativeAuthFlowRouter @Inject constructor(
     }
 
     fun nativeAuthFlowEnabled(synchronizeSessionResponse: SynchronizeSessionResponse): Boolean {
-        if (nativeAuthFlowKillSwitchActive(synchronizeSessionResponse)) return false
-        // If experiments are not assigned, or native experiment is missing, fallback to webView.
-        return synchronizeSessionResponse.manifest.experimentAssignments?.any { it.key == "connections_mobile_native" && it.value == "treatment" }
-            ?: false
+        val killSwitchEnabled = nativeAuthFlowKillSwitchActive(synchronizeSessionResponse)
+        val nativeExperimentEnabled = synchronizeSessionResponse.manifest.experimentAssignments?.any { it.key == "connections_mobile_native" && it.value == "treatment" } ?: false
+        return killSwitchEnabled.not() && nativeExperimentEnabled
     }
 
      suspend fun logExposure(synchronizeSessionResponse: SynchronizeSessionResponse) {
