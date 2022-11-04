@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
+import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
@@ -44,7 +45,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
     private val eventReporter: FinancialConnectionsEventReporter,
-    private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val nativeRouter: NativeAuthFlowRouter,
     initialState: FinancialConnectionsSheetState
 ) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
 
@@ -91,9 +92,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun openAuthFlow(synchronizeSessionResponse: SynchronizeSessionResponse) {
         // stores manifest in state for future references.
         val manifest = synchronizeSessionResponse.manifest
-        val nativeAuthFlowEnabled = nativeAuthFlowEnabled(synchronizeSessionResponse)
+        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(synchronizeSessionResponse)
         viewModelScope.launch {
-            logExposure(synchronizeSessionResponse)
+            nativeRouter.logExposure(synchronizeSessionResponse)
         }
         setState {
             copy(
@@ -104,36 +105,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 } else {
                     OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
                 }
-            )
-        }
-    }
-
-    private fun nativeAuthFlowKillSwitchActive(synchronizeSessionResponse: SynchronizeSessionResponse): Boolean {
-        return synchronizeSessionResponse.manifest.features?.any { it.key == "bank_connections_mobile_native_version_killswitch" && it.value }
-            ?: true
-    }
-
-    private fun nativeAuthFlowEnabled(synchronizeSessionResponse: SynchronizeSessionResponse): Boolean {
-        if (nativeAuthFlowKillSwitchActive(synchronizeSessionResponse)) return false
-        // If experiments are not assigned, or native experiment is missing, fallback to webView.
-        return synchronizeSessionResponse.manifest.experimentAssignments?.any { it.key == "connections_mobile_native" && it.value == "treatment" }
-            ?: false
-    }
-
-    private suspend fun logExposure(synchronizeSessionResponse: SynchronizeSessionResponse) {
-        val killSwitchDisabled = !nativeAuthFlowKillSwitchActive(synchronizeSessionResponse)
-        val experimentVariantIsPresent =
-            synchronizeSessionResponse.manifest.experimentAssignments?.any { it.key == "connections_mobile_native" }
-                ?: false
-        val assignmentEventId = synchronizeSessionResponse.manifest.assignmentEventId
-        val accountHolderId = synchronizeSessionResponse.manifest.accountholderToken
-        if (killSwitchDisabled && experimentVariantIsPresent && assignmentEventId != null && accountHolderId != null) {
-            eventTracker.track(
-                FinancialConnectionsEvent.Exposure(
-                    experimentName = "connections_mobile_native",
-                    assignmentEventId = assignmentEventId,
-                    accountHolderId = accountHolderId
-                )
             )
         }
     }
