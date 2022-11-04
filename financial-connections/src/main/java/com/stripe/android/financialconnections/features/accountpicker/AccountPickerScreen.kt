@@ -366,7 +366,7 @@ private fun AccountItem(
         modifier = Modifier
             .fillMaxWidth()
             .border(
-                width = 2.dp,
+                width = if (selected) 2.dp else 1.dp,
                 color = when {
                     selected -> FinancialConnectionsTheme.colors.textBrand
                     else -> FinancialConnectionsTheme.colors.borderDefault
@@ -404,7 +404,7 @@ private fun AccountItem(
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         color = FinancialConnectionsTheme.colors.textDisabled,
-                        style = FinancialConnectionsTheme.typography.body
+                        style = FinancialConnectionsTheme.typography.captionTight
                     )
                 }
             }

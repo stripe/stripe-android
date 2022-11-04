@@ -191,18 +191,18 @@ private fun AccessibleDataCalloutBox(
 
 @Composable
 private fun readableListOfPermissions(permissionsReadable: List<Int>): String =
-    permissionsReadable.map {
-        stringResource(id = it).replaceFirstChar { char ->
-            if (char.isLowerCase()) char.titlecase() else char.toString()
-        }
-    }.foldIndexed("") { index, current, arg ->
+    permissionsReadable
         // TODO@carlosmuvi localize enumeration of permissions once more languages are supported.
-        when {
-            index == 0 -> arg
-            permissionsReadable.lastIndex == index -> "$current and $arg"
-            else -> "$current, $arg"
+        .map { stringResource(id = it) }
+        .foldIndexed("") { index, current, arg ->
+            when {
+                index == 0 -> arg.replaceFirstChar { char ->
+                    if (char.isLowerCase()) char.titlecase() else char.toString()
+                }
+                permissionsReadable.lastIndex == index -> "$current and $arg"
+                else -> "$current, $arg"
+            }
         }
-    }
 
 private fun List<Permissions>.toStringRes(): List<Int> = mapNotNull {
     when (it) {
