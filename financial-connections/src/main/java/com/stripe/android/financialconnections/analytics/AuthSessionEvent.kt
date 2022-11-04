@@ -44,7 +44,9 @@ internal sealed class AuthSessionEvent(
     ) : AuthSessionEvent(
         name = "failure",
         timestamp = timestamp,
-        rawEventDetails = error.toEventParams().filterNotNullValues()
+        rawEventDetails = error
+            .toEventParams()
+            .filterNotNullValues()
     )
 
     data class Cancel(

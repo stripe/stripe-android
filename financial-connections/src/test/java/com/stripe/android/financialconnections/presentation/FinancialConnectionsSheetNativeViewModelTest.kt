@@ -53,6 +53,24 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     }
 
     @Test
+    fun `handleOnNewIntent - when deeplink with error code received, webAuthFlow async fails`() {
+        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
+        val viewModel = createViewModel()
+        val errorReason = "random_reason"
+        val intent = intent(
+            "stripe://auth-redirect/$applicationId?status=fail&error_reason=$errorReason"
+        )
+        viewModel.handleOnNewIntent(intent)
+
+        withState(viewModel) {
+            val webAuthFlow = it.webAuthFlow
+            assertIs<Fail<*>>(webAuthFlow)
+            val error = webAuthFlow.error as WebAuthFlowFailedException
+            assertThat(error.reason).isEqualTo(errorReason)
+        }
+    }
+
+    @Test
     fun `handleOnNewIntent - when deeplink with unknown code received, webAuthFlow async fails`() {
         whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         val viewModel = createViewModel()
