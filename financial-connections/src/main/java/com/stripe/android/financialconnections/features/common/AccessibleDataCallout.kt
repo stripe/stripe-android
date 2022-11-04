@@ -3,7 +3,6 @@
 package com.stripe.android.financialconnections.features.common
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -37,7 +36,8 @@ import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.uicore.image.StripeImage
 
 private const val COLLAPSE_ACCOUNTS_THRESHOLD = 5
@@ -82,7 +82,7 @@ internal fun AccessibleDataCalloutWithAccounts(
                 }
             }
 
-            Divider(color = FinancialConnectionsTheme.colors.backgroundBackdrop)
+            Divider(color = colors.backgroundBackdrop)
             AccessibleDataText(
                 model = model,
                 onLearnMoreClick = onLearnMoreClick
@@ -118,15 +118,15 @@ private fun AccountRow(
             )
             Text(
                 text,
-                style = FinancialConnectionsTheme.typography.captionTightEmphasized,
-                color = FinancialConnectionsTheme.colors.textSecondary
+                style = typography.captionTightEmphasized,
+                color = colors.textSecondary
             )
         }
         if (subText != null) {
             Text(
                 subText,
-                style = FinancialConnectionsTheme.typography.captionTightEmphasized,
-                color = FinancialConnectionsTheme.colors.textSecondary
+                style = typography.captionTightEmphasized,
+                color = colors.textSecondary
             )
         }
     }
@@ -161,16 +161,16 @@ private fun AccessibleDataText(
             uriHandler.openUri(model.dataPolicyUrl)
             onLearnMoreClick()
         },
-        defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-            color = FinancialConnectionsTheme.colors.textSecondary
+        defaultStyle = typography.caption.copy(
+            color = colors.textSecondary
         ),
         annotationStyles = mapOf(
-            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption
+            StringAnnotation.CLICKABLE to typography.caption
                 .toSpanStyle()
-                .copy(color = FinancialConnectionsTheme.colors.textBrand),
-            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
+                .copy(color = colors.textBrand),
+            StringAnnotation.BOLD to typography.captionEmphasized
                 .toSpanStyle()
-                .copy(color = FinancialConnectionsTheme.colors.textSecondary)
+                .copy(color = colors.textSecondary)
         )
     )
 }
@@ -182,12 +182,8 @@ private fun AccessibleDataCalloutBox(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                shape = RoundedCornerShape(8.dp),
-                color = FinancialConnectionsTheme.colors.borderDefault
-            )
-            .background(color = FinancialConnectionsTheme.colors.backgroundContainer)
+            .clip(shape = RoundedCornerShape(8.dp))
+            .background(color = colors.backgroundContainer)
             .padding(12.dp),
         content = content
     )

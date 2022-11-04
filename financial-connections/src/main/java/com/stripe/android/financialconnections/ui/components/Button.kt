@@ -89,9 +89,10 @@ internal object FinancialConnectionsButton {
         object Primary : Type() {
             @Composable
             override fun buttonColors(): ButtonColors {
-                return ButtonDefaults.outlinedButtonColors(
+                return buttonColors(
                     backgroundColor = colors.textBrand,
                     contentColor = colors.textWhite,
+                    disabledBackgroundColor = colors.textBrand.copy(alpha = 0.12f),
                     disabledContentColor = colors.textWhite
                 )
             }
@@ -103,9 +104,10 @@ internal object FinancialConnectionsButton {
         object Secondary : Type() {
             @Composable
             override fun buttonColors(): ButtonColors {
-                return ButtonDefaults.outlinedButtonColors(
+                return buttonColors(
                     backgroundColor = colors.textWhite,
                     contentColor = colors.textPrimary,
+                    disabledBackgroundColor = colors.textWhite,
                     disabledContentColor = colors.textPrimary.copy(alpha = 0.12f)
                 )
             }
@@ -181,14 +183,21 @@ internal fun FinancialConnectionsButtonPreview() {
                 loading = false,
                 onClick = { }
             ) {
-                Text(text = "Sample text")
+                Text(text = "Primary")
             }
             FinancialConnectionsButton(
                 modifier = Modifier.fillMaxWidth(),
                 loading = true,
                 onClick = { }
             ) {
-                Text(text = "Sample text")
+                Text(text = "Primary - loading")
+            }
+            FinancialConnectionsButton(
+                modifier = Modifier.fillMaxWidth(),
+                enabled = false,
+                onClick = { }
+            ) {
+                Text(text = "Primary - disabled")
             }
             FinancialConnectionsButton(
                 modifier = Modifier.fillMaxWidth(),
@@ -196,7 +205,7 @@ internal fun FinancialConnectionsButtonPreview() {
                 loading = false,
                 onClick = { }
             ) {
-                Text(text = "Sample text")
+                Text(text = "Secondary")
             }
             FinancialConnectionsButton(
                 modifier = Modifier.fillMaxWidth(),

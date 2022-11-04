@@ -415,7 +415,7 @@ private fun FeaturedInstitutionsGrid(
                             .border(
                                 width = 1.dp,
                                 color = FinancialConnectionsTheme.colors.borderDefault,
-                                shape = RoundedCornerShape(4.dp)
+                                shape = RoundedCornerShape(6.dp)
                             )
                             .clickable { onInstitutionSelected(institution, true) }
                     ) {

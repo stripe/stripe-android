@@ -2,10 +2,8 @@ package com.stripe.android.financialconnections.features.common
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,12 +34,8 @@ internal fun PartnerCallout(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
+                .clip(shape = RoundedCornerShape(8.dp))
                 .background(color = FinancialConnectionsTheme.colors.backgroundContainer)
-                .border(
-                    border = BorderStroke(1.dp, FinancialConnectionsTheme.colors.borderDefault),
-                    shape = RoundedCornerShape(8.dp)
-                )
                 .padding(12.dp)
         ) {
             Image(
