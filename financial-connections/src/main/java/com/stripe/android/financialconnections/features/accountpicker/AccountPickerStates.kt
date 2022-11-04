@@ -13,7 +13,6 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
     override val values = sequenceOf(
         multiSelect(),
         singleSelect(),
-        dropdown()
     )
 
     override val count: Int
@@ -48,22 +47,6 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     institutionSkipAccountSelection = false,
                     businessName = "Random business",
                     stripeDirect = false,
-                )
-            ),
-            selectedIds = setOf("id1"),
-        )
-
-        fun dropdown() = AccountPickerState(
-            payload = Success(
-                AccountPickerState.Payload(
-                    skipAccountSelection = false,
-                    accounts = partnerAccountList(),
-                    selectionMode = AccountPickerState.SelectionMode.DROPDOWN,
-                    accessibleData = accessibleCallout(),
-                    singleAccount = true,
-                    institutionSkipAccountSelection = true,
-                    businessName = "Random business",
-                    stripeDirect = true,
                 )
             ),
             selectedIds = setOf("id1"),

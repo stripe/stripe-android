@@ -21,19 +21,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ExposedDropdownMenuBox
-import androidx.compose.material.ExposedDropdownMenuDefaults
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -56,7 +49,6 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.AccessibleDataCallout
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
-import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
@@ -66,15 +58,12 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Success100
-import com.stripe.android.uicore.image.StripeImage
 
 @Composable
 internal fun AccountPickerScreen() {
@@ -230,12 +219,6 @@ private fun AccountPickerLoaded(
                 )
             }
             when (selectionMode) {
-                SelectionMode.DROPDOWN -> DropdownContent(
-                    accounts = accounts,
-                    selectedIds = selectedIds,
-                    onAccountClicked = onAccountClicked
-                )
-
                 SelectionMode.RADIO -> SingleSelectContent(
                     accounts = accounts,
                     selectedIds = selectedIds,
@@ -274,111 +257,6 @@ private fun AccountPickerLoaded(
             )
         }
     }
-}
-
-@Suppress("LongMethod")
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun DropdownContent(
-    accounts: List<PartnerAccountUI>,
-    selectedIds: Set<String>,
-    onAccountClicked: (PartnerAccount) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val selectedOption: PartnerAccountUI? = remember(selectedIds) {
-        accounts
-            .firstOrNull { selectedIds.contains(it.account.id) }
-    }
-    Spacer(modifier = Modifier.size(12.dp))
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
-    ) {
-        FinancialConnectionsOutlinedTextField(
-            readOnly = true,
-            value = selectedOption?.let { "${it.account.name} ${it.account.encryptedNumbers}" }
-                ?: stringResource(id = R.string.stripe_account_picker_dropdown_hint),
-            onValueChange = { },
-            leadingIcon = {
-                if (selectedOption != null) InstitutionIcon(selectedOption.institutionIcon)
-            },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded
-                )
-            }
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            modifier = Modifier.background(
-                color = FinancialConnectionsTheme.colors.backgroundSurface
-            ),
-            onDismissRequest = {
-                expanded = false
-            }
-        ) {
-            accounts.forEach { account ->
-                AccountDropdownItem(
-                    onAccountClicked = {
-                        if (account.enabled) {
-                            expanded = false
-                            onAccountClicked(it)
-                        }
-                    },
-                    account = account
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AccountDropdownItem(
-    onAccountClicked: (PartnerAccount) -> Unit,
-    account: PartnerAccountUI
-) {
-    DropdownMenuItem(
-        onClick = { onAccountClicked(account.account) }
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            InstitutionIcon(account.institutionIcon)
-            Spacer(modifier = Modifier.size(8.dp))
-            val (title, subtitle) = getAccountTexts(accountUI = account)
-            Column {
-                Text(
-                    text = title,
-                    color = if (account.enabled) {
-                        FinancialConnectionsTheme.colors.textPrimary
-                    } else {
-                        FinancialConnectionsTheme.colors.textDisabled
-                    },
-                    style = FinancialConnectionsTheme.typography.body
-                )
-                subtitle?.let {
-                    Spacer(Modifier.size(4.dp))
-                    Text(
-                        text = it,
-                        color = FinancialConnectionsTheme.colors.textDisabled,
-                        style = FinancialConnectionsTheme.typography.caption
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun InstitutionIcon(institutionIcon: String?) {
-    val modifier = Modifier
-        .size(36.dp)
-        .clip(RoundedCornerShape(6.dp))
-    StripeImage(
-        url = institutionIcon ?: "",
-        errorContent = { InstitutionPlaceholder(modifier) },
-        imageLoader = LocalImageLoader.current,
-        contentDescription = null,
-        modifier = modifier
-    )
 }
 
 @Composable
@@ -587,31 +465,6 @@ internal fun AccountPickerPreviewSingleSelect() {
         AccountPickerContent(
             AccountPickerStates.singleSelect(),
             onAccountClicked = {},
-            onSubmit = {},
-            onSelectAllAccountsClicked = {},
-            onSelectAnotherBank = {},
-            onEnterDetailsManually = {},
-            onLoadAccountsAgain = {},
-            onCloseClick = {},
-            onLearnMoreAboutDataAccessClick = {}
-        ) {}
-    }
-}
-
-@Preview(
-    showBackground = true,
-    group = "Account Picker Pane",
-    name = "Dropdown - account selected"
-)
-@Composable
-internal fun AccountPickerPreviewDropdown() {
-    FinancialConnectionsPreview {
-        var selectedAccount by remember {
-            mutableStateOf("")
-        }
-        AccountPickerContent(
-            AccountPickerStates.dropdown(),
-            onAccountClicked = { selectedAccount = it.id },
             onSubmit = {},
             onSelectAllAccountsClicked = {},
             onSelectAnotherBank = {},
