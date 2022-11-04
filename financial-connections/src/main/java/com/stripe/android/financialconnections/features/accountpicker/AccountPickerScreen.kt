@@ -3,6 +3,7 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,10 +21,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
-import androidx.compose.material.RadioButton
-import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -31,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -63,6 +62,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.Success100
 
 @Composable
@@ -93,7 +93,7 @@ private fun LinkedAccountBadge() {
             .background(color = Success100)
             .padding(horizontal = 4.dp, vertical = 2.dp),
         text = "Linked",
-        color = FinancialConnectionsTheme.colors.textSuccess,
+        color = colors.textSuccess,
         style = FinancialConnectionsTheme.typography.caption
     )
 }
@@ -275,17 +275,12 @@ private fun SingleSelectContent(
                 selected = selectedIds.contains(account.account.id),
                 onAccountClicked = onAccountClicked,
                 accountUI = account,
-            ) {
-                RadioButton(
-                    selected = selectedIds.contains(account.account.id),
-                    colors = RadioButtonDefaults.colors(
-                        selectedColor = FinancialConnectionsTheme.colors.textBrand,
-                        unselectedColor = FinancialConnectionsTheme.colors.borderDefault,
-                        disabledColor = FinancialConnectionsTheme.colors.textDisabled
-                    ),
-                    onClick = null
-                )
-            }
+                selectorContent = {
+                    FinancialConnectionRadioButton(
+                        checked = selectedIds.contains(account.account.id),
+                    )
+                },
+            )
         }
     }
 }
@@ -320,14 +315,8 @@ private fun MultiSelectContent(
                     institutionIcon = null
                 )
             ) {
-                Checkbox(
-                    checked = allAccountsSelected,
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = FinancialConnectionsTheme.colors.textBrand,
-                        checkmarkColor = FinancialConnectionsTheme.colors.textWhite,
-                        uncheckedColor = FinancialConnectionsTheme.colors.borderDefault
-                    ),
-                    onCheckedChange = null
+                FinancialConnectionCheckbox(
+                    allAccountsSelected,
                 )
             }
         }
@@ -337,18 +326,45 @@ private fun MultiSelectContent(
                 onAccountClicked = onAccountClicked,
                 accountUI = account
             ) {
-                Checkbox(
+                FinancialConnectionCheckbox(
                     checked = selectedIds.contains(account.account.id),
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = FinancialConnectionsTheme.colors.textBrand,
-                        checkmarkColor = FinancialConnectionsTheme.colors.textWhite,
-                        uncheckedColor = FinancialConnectionsTheme.colors.borderDefault
-                    ),
-                    onCheckedChange = null
                 )
             }
         }
     }
+}
+
+@Composable
+private fun FinancialConnectionCheckbox(
+    checked: Boolean,
+) {
+    Image(
+        painter = painterResource(
+            if (checked) {
+                R.drawable.stripe_ic_checkbox_yes
+            } else {
+                R.drawable.stripe_ic_checkbox_no
+            },
+        ),
+        contentDescription = null,
+    )
+}
+
+@Composable
+private fun FinancialConnectionRadioButton(
+    checked: Boolean,
+) {
+    Image(
+        modifier = Modifier.size(16.dp),
+        painter = painterResource(
+            if (checked) {
+                R.drawable.stripe_ic_radio_yes
+            } else {
+                R.drawable.stripe_ic_radio_no
+            },
+        ),
+        contentDescription = null,
+    )
 }
 
 @Composable
@@ -357,32 +373,34 @@ private fun AccountItem(
     selected: Boolean,
     onAccountClicked: (PartnerAccount) -> Unit,
     accountUI: PartnerAccountUI,
-    selectorContent: @Composable () -> Unit
+    selectorContent: @Composable RowScope.() -> Unit
 ) {
     val account = accountUI.account
-    val padding =
+    val verticalPadding =
         remember(account) { if (account.displayableAccountNumbers != null) 10.dp else 12.dp }
+    val shape = remember { RoundedCornerShape(8.dp) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(shape)
             .border(
                 width = if (selected) 2.dp else 1.dp,
                 color = when {
-                    selected -> FinancialConnectionsTheme.colors.textBrand
-                    else -> FinancialConnectionsTheme.colors.borderDefault
+                    selected -> colors.textBrand
+                    else -> colors.borderDefault
                 },
-                shape = RoundedCornerShape(8.dp)
+                shape = shape
             )
             .clickable(enabled = accountUI.enabled) { onAccountClicked(account) }
-            .padding(padding)
+            .padding(vertical = verticalPadding, horizontal = 16.dp)
     ) {
         Row(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
             selectorContent()
-            val (title, subtitle) = getAccountTexts(accountUI = accountUI)
             Spacer(modifier = Modifier.size(16.dp))
+            val (title, subtitle) = getAccountTexts(accountUI = accountUI)
             Column(
                 Modifier.weight(0.7f)
             ) {
@@ -391,9 +409,9 @@ private fun AccountItem(
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     color = if (accountUI.enabled) {
-                        FinancialConnectionsTheme.colors.textPrimary
+                        colors.textPrimary
                     } else {
-                        FinancialConnectionsTheme.colors.textDisabled
+                        colors.textDisabled
                     },
                     style = FinancialConnectionsTheme.typography.bodyEmphasized
                 )
@@ -403,7 +421,7 @@ private fun AccountItem(
                         text = it,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
-                        color = FinancialConnectionsTheme.colors.textDisabled,
+                        color = colors.textDisabled,
                         style = FinancialConnectionsTheme.typography.captionTight
                     )
                 }

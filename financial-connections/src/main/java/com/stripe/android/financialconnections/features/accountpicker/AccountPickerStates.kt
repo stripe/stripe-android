@@ -116,7 +116,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     authorization = "Authorization",
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id5",
-                    name = "Already linked",
+                    name = "Very long institution that is already linked",
                     displayableAccountNumbers = "1234",
                     linkedAccountId = "linkedAccountId",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
