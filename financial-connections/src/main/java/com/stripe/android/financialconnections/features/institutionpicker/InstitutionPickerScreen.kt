@@ -28,6 +28,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -209,7 +210,13 @@ private fun FinancialConnectionsSearchRow(
                     )
                 }
             } else {
-                null
+                {
+                    Icon(
+                        Icons.Filled.Search,
+                        tint = FinancialConnectionsTheme.colors.textPrimary,
+                        contentDescription = "Search icon",
+                    )
+                }
             },
             modifier = Modifier
                 .onFocusChanged { if (it.isFocused) onSearchFocused() }
