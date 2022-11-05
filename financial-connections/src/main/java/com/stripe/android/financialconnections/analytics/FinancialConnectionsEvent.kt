@@ -187,11 +187,12 @@ internal sealed class FinancialConnectionsEvent(
         accountHolderId: String
     ) : FinancialConnectionsEvent(
         name = "preloaded_experiment_retrieved",
-        mapOf(
+        params = mapOf(
             "experiment_retrieved" to experimentName,
             "arb_id" to assignmentEventId,
             "account_holder_id" to accountHolderId
-        ).filterNotNullValues()
+        ).filterNotNullValues(),
+        includePrefix = false,
     )
 
     object ConsentAgree : FinancialConnectionsEvent(
