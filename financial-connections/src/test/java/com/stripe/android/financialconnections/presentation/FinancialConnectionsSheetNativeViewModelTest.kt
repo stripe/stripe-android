@@ -58,7 +58,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val viewModel = createViewModel()
         val errorReason = "random_reason"
         val intent = intent(
-            "stripe://auth-redirect/$applicationId?status=fail&error_reason=$errorReason"
+            "stripe://auth-redirect/$applicationId?status=failure&error_reason=$errorReason"
         )
         viewModel.handleOnNewIntent(intent)
 

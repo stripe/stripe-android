@@ -94,16 +94,16 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     baseUrl(applicationId)
-                ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)) {
-                    SUCCESS -> setState {
+                ) -> when (getStatusFromUrl(receivedUrl)) {
+                    STATUS_SUCCESS -> setState {
                         copy(webAuthFlow = Success(receivedUrl))
                     }
 
-                    CANCEL -> setState {
+                    STATUS_CANCEL -> setState {
                         copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
                     }
 
-                    FAIL -> setState {
+                    STATUS_FAILURE -> setState {
                         copy(
                             webAuthFlow = Fail(
                                 WebAuthFlowFailedException(
@@ -142,6 +142,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun getStatusFromUrl(receivedUrl: String): String? {
+        return uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)
+            // TODO@carlosmuvi remove once test mode returns [PARAM_STATUS] instead of code.
+            ?: uriUtils.getQueryParameter(receivedUrl, "code")
     }
 
     /**
@@ -281,9 +287,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
         private const val PARAM_STATUS = "status"
         private const val PARAM_ERROR_REASON = "error_reason"
-        private const val SUCCESS = "success"
-        private const val CANCEL = "cancel"
-        private const val FAIL = "failure"
+        private const val STATUS_SUCCESS = "success"
+        private const val STATUS_CANCEL = "cancel"
+        private const val STATUS_FAILURE = "failure"
 
         override fun create(
             viewModelContext: ViewModelContext,
