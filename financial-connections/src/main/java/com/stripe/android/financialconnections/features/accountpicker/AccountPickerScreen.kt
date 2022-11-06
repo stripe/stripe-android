@@ -3,6 +3,7 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -338,32 +339,36 @@ private fun MultiSelectContent(
 private fun FinancialConnectionCheckbox(
     checked: Boolean,
 ) {
-    Image(
-        painter = painterResource(
-            if (checked) {
-                R.drawable.stripe_ic_checkbox_yes
-            } else {
-                R.drawable.stripe_ic_checkbox_no
-            },
-        ),
-        contentDescription = null,
-    )
+    Crossfade(targetState = checked) {
+        Image(
+            painter = painterResource(
+                if (it) {
+                    R.drawable.stripe_ic_checkbox_yes
+                } else {
+                    R.drawable.stripe_ic_checkbox_no
+                },
+            ),
+            contentDescription = null,
+        )
+    }
 }
 
 @Composable
 private fun FinancialConnectionRadioButton(
     checked: Boolean,
 ) {
-    Image(
-        painter = painterResource(
-            if (checked) {
-                R.drawable.stripe_ic_radio_yes
-            } else {
-                R.drawable.stripe_ic_radio_no
-            },
-        ),
-        contentDescription = null,
-    )
+    Crossfade(targetState = checked) {
+        Image(
+            painter = painterResource(
+                if (it) {
+                    R.drawable.stripe_ic_radio_yes
+                } else {
+                    R.drawable.stripe_ic_radio_no
+                },
+            ),
+            contentDescription = null,
+        )
+    }
 }
 
 @Composable
