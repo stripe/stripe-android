@@ -23,8 +23,8 @@ import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithRequirementError
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -53,14 +53,12 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
     identityViewModel: IdentityViewModel,
     collectedDataParam: CollectedDataParam,
-    clearDataParam: ClearDataParam,
     @IdRes fromFragment: Int,
     notSubmitBlock: ((verificationPageData: VerificationPageData) -> Unit)? = null
 ) {
     postVerificationPageData(
         identityViewModel,
         collectedDataParam,
-        clearDataParam,
         fromFragment
     ) { postedVerificationPageData ->
         notSubmitBlock?.invoke(postedVerificationPageData) ?: run {
@@ -134,7 +132,6 @@ internal suspend fun Fragment.submitVerificationPageDataAndNavigate(
 internal suspend fun Fragment.postVerificationPageData(
     identityViewModel: IdentityViewModel,
     collectedDataParam: CollectedDataParam,
-    clearDataParam: ClearDataParam,
     @IdRes fromFragment: Int,
     onCorrectResponse: suspend ((verificationPageDataWithNoError: VerificationPageData) -> Unit)
 ) {
@@ -142,7 +139,7 @@ internal suspend fun Fragment.postVerificationPageData(
         fromFragment.fragmentIdToScreenName()
     )
     runCatching {
-        identityViewModel.postVerificationPageData(collectedDataParam, clearDataParam)
+        identityViewModel.postVerificationPageData(collectedDataParam)
     }.fold(
         onSuccess = { postedVerificationPageData ->
             if (postedVerificationPageData.hasError()) {
@@ -223,7 +220,7 @@ internal fun Fragment.navigateToUploadFragment(
  * This makes it possible to tell in upload fragment whether it is reached through
  * [NavController.navigateUp] or [NavController.navigate].
  */
-internal fun NavController.navigateUpAndSetArgForUploadFragment(): Boolean {
+internal fun NavController.navigateUpAndSetArgForUploadFragment(identityViewModel: IdentityViewModel): Boolean {
     if (isBackingToUploadFragment()) {
         previousBackStackEntry?.destination?.addArgument(
             ARG_IS_NAVIGATED_UP_TO,
@@ -232,6 +229,10 @@ internal fun NavController.navigateUpAndSetArgForUploadFragment(): Boolean {
                 .build()
         )
     }
+    currentBackStackEntry?.destination?.id?.fragmentIdToRequirement()
+        ?.forEach(identityViewModel::clearCollectedData)
+    previousBackStackEntry?.destination?.id?.fragmentIdToRequirement()
+        ?.forEach(identityViewModel::clearCollectedData)
     return navigateUp()
 }
 
@@ -244,6 +245,39 @@ private fun NavController.isBackingToUploadFragment() =
     previousBackStackEntry?.destination?.id == R.id.IDUploadFragment ||
         previousBackStackEntry?.destination?.id == R.id.passportUploadFragment ||
         previousBackStackEntry?.destination?.id == R.id.driverLicenseUploadFragment
+
+internal fun Int.fragmentIdToRequirement(): List<Requirement> = when (this) {
+    R.id.consentFragment -> {
+        listOf(Requirement.BIOMETRICCONSENT)
+    }
+    R.id.docSelectionFragment -> {
+        listOf(Requirement.IDDOCUMENTTYPE)
+    }
+    R.id.IDUploadFragment -> {
+        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
+    }
+    R.id.passportUploadFragment -> {
+        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
+    }
+    R.id.driverLicenseUploadFragment -> {
+        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
+    }
+    R.id.IDScanFragment -> {
+        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
+    }
+    R.id.passportScanFragment -> {
+        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
+    }
+    R.id.driverLicenseScanFragment -> {
+        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
+    }
+    R.id.selfieFragment -> {
+        listOf(Requirement.FACE)
+    }
+    else -> {
+        listOf()
+    }
+}
 
 internal fun Int.fragmentIdToScreenName(): String = when (this) {
     R.id.consentFragment -> {

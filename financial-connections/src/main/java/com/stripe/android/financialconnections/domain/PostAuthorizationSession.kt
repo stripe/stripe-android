@@ -2,12 +2,14 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.time.Duration.Companion.seconds
 
 /**
@@ -17,7 +19,8 @@ import kotlin.time.Duration.Companion.seconds
  */
 internal class PostAuthorizationSession @Inject constructor(
     val repository: FinancialConnectionsManifestRepository,
-    val configuration: FinancialConnectionsSheet.Configuration
+    val configuration: FinancialConnectionsSheet.Configuration,
+    @Named(APPLICATION_ID) private val applicationId: String
 ) {
 
     /**
@@ -31,7 +34,8 @@ internal class PostAuthorizationSession @Inject constructor(
         return try {
             repository.postAuthorizationSession(
                 configuration.financialConnectionsSessionClientSecret,
-                institution = institution
+                institution = institution,
+                applicationId = applicationId
             )
         } catch (
             @Suppress("SwallowedException") e: StripeException
@@ -53,6 +57,7 @@ internal class PostAuthorizationSession @Inject constructor(
                     allowManualEntry = allowManualEntry,
                     stripeException = this
                 )
+
                 else -> InstitutionPlannedDowntimeError(
                     institution = institution,
                     allowManualEntry = allowManualEntry,
@@ -61,6 +66,7 @@ internal class PostAuthorizationSession @Inject constructor(
                     stripeException = this
                 )
             }
+
             else -> this
         }
     } ?: this

@@ -33,7 +33,6 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.CollectedDataParam.Type
 import com.stripe.android.identity.networking.models.VerificationPage
-import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 
 internal const val docSelectionTitleTag = "Title"
 internal const val singleSelectionTag = "SingleSelection"
@@ -41,7 +40,7 @@ internal const val singleSelectionTag = "SingleSelection"
 @Composable
 internal fun DocSelectionScreen(
     verificationPageState: Resource<VerificationPage>?,
-    onDocTypeSelected: (Type, Boolean) -> Unit
+    onDocTypeSelected: (Type) -> Unit
 ) {
     MdcTheme {
         require(verificationPageState != null && verificationPageState.status == Status.SUCCESS) {
@@ -49,8 +48,6 @@ internal fun DocSelectionScreen(
         }
         val documentSelect =
             remember { requireNotNull(verificationPageState.data).documentSelect }
-        val requireSelfie =
-            remember { requireNotNull(verificationPageState.data).requireSelfie() }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -76,7 +73,6 @@ internal fun DocSelectionScreen(
             if (documentSelect.idDocumentTypeAllowlist.count() > 1) {
                 MultiSelection(
                     documentSelect.idDocumentTypeAllowlist,
-                    requireSelfie = requireSelfie,
                     onDocTypeSelected = onDocTypeSelected
                 )
             } else {
@@ -84,7 +80,6 @@ internal fun DocSelectionScreen(
                     allowedType = documentSelect.idDocumentTypeAllowlist.entries.first().key,
                     buttonText = documentSelect.buttonText,
                     bodyText = documentSelect.body,
-                    requireSelfie = requireSelfie,
                     onDocTypeSelected = onDocTypeSelected
                 )
             }
@@ -95,8 +90,7 @@ internal fun DocSelectionScreen(
 @Composable
 internal fun MultiSelection(
     idDocumentTypeAllowlist: Map<String, String>,
-    requireSelfie: Boolean,
-    onDocTypeSelected: (Type, Boolean) -> Unit
+    onDocTypeSelected: (Type) -> Unit
 ) {
     var selectedTypeValue by remember { mutableStateOf(SELECTION_NONE) }
 
@@ -115,7 +109,7 @@ internal fun MultiSelection(
         ) {
             TextButton(
                 onClick = {
-                    onDocTypeSelected(Type.fromName(allowedType), requireSelfie)
+                    onDocTypeSelected(Type.fromName(allowedType))
                     selectedTypeValue = allowedTypeValue
                 },
                 colors = ButtonDefaults.textButtonColors(
@@ -150,8 +144,7 @@ internal fun SingleSelection(
     allowedType: String,
     buttonText: String,
     bodyText: String?,
-    requireSelfie: Boolean,
-    onDocTypeSelected: (Type, Boolean) -> Unit
+    onDocTypeSelected: (Type) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -163,7 +156,7 @@ internal fun SingleSelection(
         var buttonState by remember { mutableStateOf(LoadingButtonState.Idle) }
         LoadingButton(text = buttonText, state = buttonState) {
             buttonState = LoadingButtonState.Loading
-            onDocTypeSelected(Type.fromName(allowedType), requireSelfie)
+            onDocTypeSelected(Type.fromName(allowedType))
         }
     }
 }

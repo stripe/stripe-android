@@ -30,7 +30,6 @@ import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SelfieUploadState
 import com.stripe.android.identity.networking.UploadedResult
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
@@ -232,8 +231,7 @@ internal class SelfieFragmentTest {
                             faceScoreVariance = SCORE_VARIANCE,
                             numFrames = NUM_FRAMES
                         )
-                    ),
-                    eq(ClearDataParam.SELFIE_TO_CONFIRM)
+                    )
                 )
             }
         }

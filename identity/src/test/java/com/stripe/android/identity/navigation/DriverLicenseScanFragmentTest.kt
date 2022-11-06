@@ -32,7 +32,6 @@ import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBindi
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.UploadedResult
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -183,7 +182,7 @@ internal class DriverLicenseScanFragmentTest {
 
                 documentFrontUploadState.update { frontUploadedState }
                 // post returns not missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_MISSING_BACK
                 )
 
@@ -274,7 +273,7 @@ internal class DriverLicenseScanFragmentTest {
                 documentFrontUploadState.update { frontUploadedState }
 
                 // post returns missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_MISSING_BACK
                 )
 
@@ -295,9 +294,6 @@ internal class DriverLicenseScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT
                     )
                 )
 
@@ -341,9 +337,6 @@ internal class DriverLicenseScanFragmentTest {
                             backHighResResult = BACK_HIGH_RES_RESULT,
                             backLowResResult = BACK_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_TO_CONFIRM
                     )
                 )
 
@@ -396,7 +389,7 @@ internal class DriverLicenseScanFragmentTest {
                 documentFrontUploadState.update { frontUploadedState }
 
                 // post returns missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_MISSING_BACK
                 )
 
@@ -417,9 +410,6 @@ internal class DriverLicenseScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT
                     )
                 )
 
@@ -463,9 +453,6 @@ internal class DriverLicenseScanFragmentTest {
                             backHighResResult = BACK_HIGH_RES_RESULT,
                             backLowResResult = BACK_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_TO_SELFIE
                     )
                 )
 
@@ -518,7 +505,7 @@ internal class DriverLicenseScanFragmentTest {
                 documentFrontUploadState.update { frontUploadedState }
 
                 // post returns not missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
                 )
 
@@ -539,9 +526,6 @@ internal class DriverLicenseScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT
                     )
                 )
 
@@ -594,7 +578,7 @@ internal class DriverLicenseScanFragmentTest {
                 documentFrontUploadState.update { frontUploadedState }
 
                 // post returns not missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
                 )
 
@@ -615,9 +599,6 @@ internal class DriverLicenseScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT_SELFIE
                     )
                 )
 

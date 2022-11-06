@@ -124,6 +124,7 @@ internal class IdentityActivity :
         supportFragmentManager.fragmentFactory = subcomponent.identityFragmentFactory
 
         super.onCreate(savedInstanceState)
+
         fallbackUrlLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {
@@ -306,7 +307,7 @@ internal class IdentityActivity :
                         R.drawable.ic_baseline_arrow_back_24
                     )
                 this.setNavigationOnClickListener {
-                    navController.navigateUpAndSetArgForUploadFragment()
+                    navController.navigateUpAndSetArgForUploadFragment(identityViewModel)
                 }
             }
         }
@@ -365,7 +366,7 @@ internal class IdentityActivity :
                 }
                 // On other fragments, clicking back navigates up
                 else -> {
-                    navController.navigateUpAndSetArgForUploadFragment()
+                    navController.navigateUpAndSetArgForUploadFragment(identityViewModel)
                 }
             }
         }

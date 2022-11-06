@@ -19,7 +19,6 @@ internal fun LinkTerms(
 ) {
     Html(
         html = stringResource(R.string.sign_up_terms).replaceHyperlinks(),
-        imageGetter = emptyMap(),
         color = MaterialTheme.paymentsColors.placeholderText,
         style = MaterialTheme.typography.subtitle1,
         modifier = modifier,

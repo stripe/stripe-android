@@ -20,6 +20,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarBack
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ClickNavBarClose
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Complete
+import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
@@ -39,6 +40,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 @Suppress("LongParameterList", "TooManyFunctions")
 internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
@@ -53,6 +55,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
+    @Named(APPLICATION_ID) private val applicationId: String,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
@@ -86,21 +89,65 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      */
     fun handleOnNewIntent(intent: Intent?) {
         viewModelScope.launch {
-            val receivedUrl: String? = intent?.data?.toString()
+            val receivedUrl: String = intent?.data?.toString() ?: ""
             when {
-                receivedUrl == null -> setState {
-                    copy(webAuthFlow = Fail(WebAuthFlowFailedException(url = null)))
-                }
+                uriUtils.compareSchemeAuthorityAndPath(
+                    receivedUrl,
+                    baseUrl(applicationId)
+                ) -> when (getStatusFromUrl(receivedUrl)) {
+                    STATUS_SUCCESS -> setState {
+                        copy(webAuthFlow = Success(receivedUrl))
+                    }
 
-                uriUtils.compareSchemeAuthorityAndPath(receivedUrl, SUCCESS_URL) -> setState {
-                    copy(webAuthFlow = Success(receivedUrl))
-                }
+                    STATUS_CANCEL -> setState {
+                        copy(webAuthFlow = Fail(WebAuthFlowCancelledException()))
+                    }
 
+                    STATUS_FAILURE -> setState {
+                        copy(
+                            webAuthFlow = Fail(
+                                WebAuthFlowFailedException(
+                                    message = "Received return_url with failed status: $receivedUrl",
+                                    reason = uriUtils.getQueryParameter(
+                                        receivedUrl,
+                                        PARAM_ERROR_REASON
+                                    )
+                                )
+                            )
+                        )
+                    }
+
+                    // received unknown / non-handleable [PARAM_STATUS]
+                    else -> setState {
+                        copy(
+                            webAuthFlow = Fail(
+                                WebAuthFlowFailedException(
+                                    message = "Received return_url with unknown status: $receivedUrl",
+                                    reason = null
+                                )
+                            )
+                        )
+                    }
+                }
+                // received unknown / non-handleable return url.
                 else -> setState {
-                    copy(webAuthFlow = Fail(WebAuthFlowFailedException(receivedUrl)))
+                    copy(
+                        webAuthFlow = Fail(
+                            WebAuthFlowFailedException(
+                                message = "Received unknown return_url: $receivedUrl",
+                                reason = null
+                            )
+                        )
+                    )
                 }
             }
         }
+    }
+
+    private fun getStatusFromUrl(receivedUrl: String): String? {
+        return uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)
+            // TODO@carlosmuvi remove once test mode returns [PARAM_STATUS] instead of code.
+            ?: uriUtils.getQueryParameter(receivedUrl, "code")
     }
 
     /**
@@ -235,8 +282,14 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     companion object :
         MavericksViewModelFactory<FinancialConnectionsSheetNativeViewModel, FinancialConnectionsSheetNativeState> {
 
-        // TODO@carlosmuvi: temporary redirect url for native.
-        private const val SUCCESS_URL = "stripe-auth://link-accounts/login"
+        private fun baseUrl(applicationId: String) =
+            "stripe://auth-redirect/$applicationId"
+
+        private const val PARAM_STATUS = "status"
+        private const val PARAM_ERROR_REASON = "error_reason"
+        private const val STATUS_SUCCESS = "success"
+        private const val STATUS_CANCEL = "cancel"
+        private const val STATUS_FAILURE = "failure"
 
         override fun create(
             viewModelContext: ViewModelContext,

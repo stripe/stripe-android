@@ -31,8 +31,8 @@ fun AfterpayClearpayElementUI(
     Html(
         html = messageFormatString,
         enabled = enabled,
-        imageGetter = mapOf(
-            "afterpay" to EmbeddableImage(
+        imageLoader = mapOf(
+            "afterpay" to EmbeddableImage.Drawable(
                 if (isClearpay()) {
                     R.drawable.stripe_ic_clearpay_logo
                 } else {
