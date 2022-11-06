@@ -20,11 +20,9 @@ import androidx.navigation.NavArgument
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdentityUploadFragmentBinding
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
-import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBack
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
@@ -316,7 +314,6 @@ internal abstract class IdentityUploadFragment(
                         identityViewModel = identityViewModel,
                         collectedDataParam =
                         collectedDataParam,
-                        clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_FRONT_SELFIE else ClearDataParam.UPLOAD_FRONT,
                         fromFragment = fragmentId
                     ) { verificationPageDataWithNoError ->
                         showFrontDone()
@@ -353,7 +350,6 @@ internal abstract class IdentityUploadFragment(
                         identityViewModel = identityViewModel,
                         collectedDataParam =
                         collectedDataParam,
-                        clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_TO_SELFIE else ClearDataParam.UPLOAD_TO_CONFIRM,
                         fromFragment = fragmentId
                     ) {
                         showBackDone()

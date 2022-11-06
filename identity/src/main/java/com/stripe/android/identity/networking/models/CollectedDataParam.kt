@@ -11,7 +11,7 @@ import kotlinx.serialization.json.Json
 @Serializable
 internal data class CollectedDataParam(
     @SerialName("biometric_consent")
-    val biometricConsent: Boolean = true,
+    val biometricConsent: Boolean? = null,
     @SerialName("id_document_type")
     val idDocumentType: Type? = null,
     @SerialName("id_document_front")
@@ -134,5 +134,60 @@ internal data class CollectedDataParam(
                 trainingConsent = trainingConsent
             )
         )
+
+        fun CollectedDataParam.mergeWith(another: CollectedDataParam?): CollectedDataParam {
+            return another?.let {
+                this.copy(
+                    biometricConsent = another.biometricConsent ?: this.biometricConsent,
+                    idDocumentType = another.idDocumentType ?: this.idDocumentType,
+                    idDocumentFront = another.idDocumentFront ?: this.idDocumentFront,
+                    idDocumentBack = another.idDocumentBack ?: this.idDocumentBack,
+                    face = another.face ?: this.face
+                )
+            } ?: this
+        }
+
+        fun CollectedDataParam.clearData(field: Requirement): CollectedDataParam {
+            return when (field) {
+                Requirement.BIOMETRICCONSENT ->
+                    this.copy(
+                        biometricConsent = null
+                    )
+                Requirement.IDDOCUMENTBACK ->
+                    this.copy(
+                        idDocumentBack = null
+                    )
+                Requirement.IDDOCUMENTFRONT ->
+                    this.copy(
+                        idDocumentFront = null
+                    )
+                Requirement.IDDOCUMENTTYPE ->
+                    this.copy(
+                        idDocumentType = null
+                    )
+                Requirement.FACE ->
+                    this.copy(face = null)
+            }
+        }
+
+        fun CollectedDataParam.collectedRequirements(): Set<Requirement> {
+            val requirements = mutableSetOf<Requirement>()
+            this.biometricConsent?.let {
+                requirements.add(Requirement.BIOMETRICCONSENT)
+            }
+            this.idDocumentType?.let {
+                requirements.add(Requirement.IDDOCUMENTTYPE)
+            }
+            this.idDocumentFront?.let {
+                requirements.add(Requirement.IDDOCUMENTFRONT)
+            }
+            this.idDocumentBack?.let {
+                requirements.add(Requirement.IDDOCUMENTBACK)
+            }
+            this.face?.let {
+                requirements.add(Requirement.FACE)
+            }
+            return requirements
+        }
     }
 }
