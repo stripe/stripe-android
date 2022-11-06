@@ -1,13 +1,15 @@
 package com.stripe.android.financialconnections.features.common
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -16,34 +18,35 @@ internal fun CloseDialog(
     onDismissClick: () -> Unit
 ) {
     AlertDialog(
+        shape = RoundedCornerShape(8.dp),
         backgroundColor = FinancialConnectionsTheme.colors.backgroundContainer,
         onDismissRequest = onDismissClick,
         title = {
             Text(
                 text = stringResource(R.string.stripe_close_dialog_title),
-                style = FinancialConnectionsTheme.typography.subtitle
             )
         },
         text = {
             Text(
                 text = stringResource(R.string.stripe_close_dialog_desc),
-                style = FinancialConnectionsTheme.typography.body
             )
         },
         confirmButton = {
-            FinancialConnectionsButton(
-                size = FinancialConnectionsButton.Size.Pill,
-                type = FinancialConnectionsButton.Type.Critical,
-                onClick = onConfirmClick
+            TextButton(
+                onClick = onConfirmClick,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = FinancialConnectionsTheme.colors.textCritical
+                ),
             ) {
                 Text(stringResource(R.string.stripe_close_dialog_confirm))
             }
         },
         dismissButton = {
-            FinancialConnectionsButton(
-                size = FinancialConnectionsButton.Size.Pill,
-                type = FinancialConnectionsButton.Type.Secondary,
-                onClick = onDismissClick
+            TextButton(
+                onClick = onDismissClick,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = FinancialConnectionsTheme.colors.textPrimary
+                ),
             ) {
                 Text(stringResource(R.string.stripe_close_dialog_back))
             }
@@ -54,7 +57,7 @@ internal fun CloseDialog(
 @Composable
 @Preview
 internal fun CloseDialogPreview() {
-    FinancialConnectionsPreview {
+    FinancialConnectionsTheme {
         CloseDialog(
             {}, {}
         )
