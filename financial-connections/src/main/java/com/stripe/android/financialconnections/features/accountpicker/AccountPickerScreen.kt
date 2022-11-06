@@ -355,7 +355,6 @@ private fun FinancialConnectionRadioButton(
     checked: Boolean,
 ) {
     Image(
-        modifier = Modifier.size(16.dp),
         painter = painterResource(
             if (checked) {
                 R.drawable.stripe_ic_radio_yes
