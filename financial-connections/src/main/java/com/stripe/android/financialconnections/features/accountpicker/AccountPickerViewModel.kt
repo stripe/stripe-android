@@ -23,7 +23,6 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
-import com.stripe.android.financialconnections.features.partnerauth.isOAuth
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -161,7 +160,7 @@ internal class AccountPickerViewModel @Inject constructor(
         when {
             manifest.singleAccount -> when {
                 manifest.activeAuthSession?.institutionSkipAccountSelection == true &&
-                    manifest.activeAuthSession.flow?.isOAuth() == true -> SelectionMode.DROPDOWN
+                    manifest.activeAuthSession.isOAuth -> SelectionMode.DROPDOWN
 
                 else -> SelectionMode.RADIO
             }

@@ -28,9 +28,6 @@ appId: com.stripe.android.financialconnections.example
 - assertVisible: "Continue"
 - takeScreenshot: TestOAuth_Prepane
 - tapOn: "Continue"
-- assertVisible: "Establishing connection"
-- takeScreenshot: TestOAuth_Loading_PartnerAuth
-- assertVisible: "Retrieving accounts"
 - takeScreenshot: TestOAuth_Loading_Accounts
 - assertVisible: "Select all accounts"
 - takeScreenshot: TestOAuth_AccountPicker
@@ -41,7 +38,22 @@ appId: com.stripe.android.financialconnections.example
     text: ".*Select account.*"
     index: 1
 - assertVisible: "Done"
+# START LINK MORE ACCOUNTS FLOW
 - assertVisible: "Link another account"
 - takeScreenshot: TestOAuth_Success
+- tapOn: "Link another account"
+# LEGACY - SELECT ALL ACCOUNTS
+- assertVisible: "Test Institution"
+- tapOn: "Test Institution"
+- assertVisible: "Select all accounts"
+- takeScreenshot: TestLegacy_AccountPicker
+- tapOn: "Select all accounts" # select all accounts
+- takeScreenshot: TestLegacy_AccountPicker_AllAccounts
+- scroll
+- tapOn:
+    text: ".*Select account.*"
+    index: 1
+- assertVisible: "Done"
+- assertVisible: "Link another account"
 - tapOn: "Done"
 - assertVisible: ".*StripeBank - Success.*"

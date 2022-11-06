@@ -32,34 +32,22 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
      */
     private fun Uri.toIntent(): Intent? =
         when {
-            isFinancialConnectionsUrl().not() -> null
-            else -> {
-                when {
-                    path?.contains(PATH_CANCEL) == true ||
-                        path?.contains(PATH_SUCCESS) == true -> Intent(
-                        this@FinancialConnectionsSheetRedirectActivity,
-                        FinancialConnectionsSheetActivity::class.java
-                    )
-                    // TODO@carlosmuvi - temporary deep link for native.
-                    path?.contains(PATH_LOGIN) == true -> Intent(
-                        this@FinancialConnectionsSheetRedirectActivity,
-                        FinancialConnectionsSheetNativeActivity::class.java
-                    )
-                    else -> null
-                }
-            }
+            isFinancialConnectionsScheme().not() -> null
+            // auth-redirect hosts: redirections from Abstract Auth in web back to native SDK
+            host == "auth-redirect" ->
+                Intent(
+                    this@FinancialConnectionsSheetRedirectActivity,
+                    FinancialConnectionsSheetNativeActivity::class.java
+                )
+            // link-accounts hosts: redirections embedded web AuthFlow back to non-native SDK.
+            host == "link-accounts" -> Intent(
+                this@FinancialConnectionsSheetRedirectActivity,
+                FinancialConnectionsSheetActivity::class.java
+            )
+            else -> null
         }
+}
 
-    private fun Uri.isFinancialConnectionsUrl(): Boolean {
-        return this.scheme == SCHEME && this.host == HOST
-    }
-
-    private companion object {
-        private const val SCHEME = "stripe-auth"
-        private const val HOST = "link-accounts"
-
-        private const val PATH_CANCEL = "cancel"
-        private const val PATH_SUCCESS = "success"
-        private const val PATH_LOGIN = "login"
-    }
+private fun Uri.isFinancialConnectionsScheme(): Boolean {
+    return (this.scheme == "stripe-auth" || this.scheme == "stripe")
 }

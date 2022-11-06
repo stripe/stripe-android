@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.presentation
+package com.stripe.android.financialconnections.features.institutionpicker
 
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.test.MvRxTestRule
@@ -11,8 +11,6 @@ import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
-import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState
-import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerViewModel
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.InstitutionResponse

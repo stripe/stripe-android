@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.exception.FinancialConnectionsError
+import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 
@@ -190,12 +191,17 @@ internal sealed class FinancialConnectionsEvent(
     }
 }
 
-private fun Throwable.toEventParams(): Map<String, String?> = when (this) {
+internal fun Throwable.toEventParams(): Map<String, String?> = when (this) {
+    is WebAuthFlowFailedException -> mapOf(
+        "error_type" to reason,
+        "error_message" to message,
+        "code" to null
+    )
     is FinancialConnectionsError -> mapOf(
-        "error" to this.name,
-        "error_type" to this.name,
-        "error_message" to (stripeError?.message ?: this.message),
-        "code" to (stripeError?.code ?: this.statusCode.toString())
+        "error" to name,
+        "error_type" to name,
+        "error_message" to (stripeError?.message ?: message),
+        "code" to (stripeError?.code ?: statusCode.toString())
     )
 
     is StripeException -> mapOf(
@@ -206,7 +212,7 @@ private fun Throwable.toEventParams(): Map<String, String?> = when (this) {
 
     else -> mapOf(
         "error_type" to this::class.java.simpleName,
-        "error_message" to this.message?.take(MAX_LOG_LENGTH),
+        "error_message" to message?.take(MAX_LOG_LENGTH),
         "code" to null
     )
 }

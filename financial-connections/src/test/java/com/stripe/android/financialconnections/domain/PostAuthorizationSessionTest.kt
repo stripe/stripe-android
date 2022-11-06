@@ -5,6 +5,7 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -20,8 +21,9 @@ internal class PostAuthorizationSessionTest {
         repository = repository,
         configuration = FinancialConnectionsSheet.Configuration(
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-        )
+            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        ),
+        APPLICATION_ID
     )
     private val selectedInstitution = FinancialConnectionsInstitution(
         id = "id",
