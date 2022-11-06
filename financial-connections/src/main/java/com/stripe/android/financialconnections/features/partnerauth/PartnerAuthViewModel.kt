@@ -20,6 +20,8 @@ import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.ClearPartnerWebAuth
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -45,6 +47,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val postAuthSessionEvent: PostAuthSessionEvent,
     private val getManifest: GetManifest,
+    private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val goNext: GoNext,
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
@@ -128,6 +131,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     ) {
         logger.debug("Web AuthFlow status received $webStatus")
         viewModelScope.launch {
+            nativeAuthFlowCoordinator().emit(ClearPartnerWebAuth)
             when (webStatus) {
                 is Uninitialized -> {}
                 is Loading -> setState { copy(authenticationStatus = Loading()) }
