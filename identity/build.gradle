@@ -40,8 +40,6 @@ dependencies {
     // Compose
     implementation "androidx.compose.runtime:runtime:$androidxComposeVersion"
     implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    // Integration with activities
-    implementation "androidx.activity:activity-compose:$androidxComposeVersion"
     // Integration with ViewModels
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$androidxLifecycleVersion"
     // Integration with Navigation

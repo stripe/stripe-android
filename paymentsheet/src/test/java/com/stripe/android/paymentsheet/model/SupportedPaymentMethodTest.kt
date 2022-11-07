@@ -25,7 +25,6 @@ class SupportedPaymentMethodTest {
     private val lpmRepository = LpmRepository(
         arguments = LpmRepository.LpmRepositoryArguments(
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
-            isUpiEnabled = true
         )
     ).apply {
         this.forceUpdate(this.supportedPaymentMethods, null)

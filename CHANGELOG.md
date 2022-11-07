@@ -2,6 +2,20 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+### CardScan
+* [FIXED][5768](https://github.com/stripe/stripe-android/pull/5768) Fixed SDK version reporting in cardscan scan stats
+
+### Identity
+* [FIXED][5762](https://github.com/stripe/stripe-android/pull/5762) Use a custom implementation of FileProvider to avoid collision with client app. 
+
+## 20.15.3 - 2022-10-31
+
+### PaymentSheet
+
+* [ADDED][5729](https://github.com/stripe/stripe-android/pull/5729) Added support for a custom primary button label via `PaymentSheet.Configuration.primaryButtonLabel`.
+
+### CardScan
+
 * [FIXED][5749](https://github.com/stripe/stripe-android/pull/5749) Prevent multiple invocations to `/verify_frames`
 
 ## 20.15.2 - 2022-10-25
