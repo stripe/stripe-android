@@ -701,6 +701,8 @@ class PaymentSheet internal constructor(
      */
     interface FlowController {
 
+        var shippingDetails: AddressDetails?
+
         /**
          * Configure the FlowController to process a [PaymentIntent].
          *

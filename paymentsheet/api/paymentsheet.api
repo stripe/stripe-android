@@ -360,7 +360,9 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentSheet$Flo
 	public static fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public static fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public abstract fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public abstract fun getShippingDetails ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
 	public abstract fun presentPaymentOptions ()V
+	public abstract fun setShippingDetails (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)V
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$Companion {

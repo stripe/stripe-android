@@ -227,6 +227,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         viewBinding.customCheckoutButton.setOnClickListener {
+            flowController.shippingDetails = shippingAddress
             flowController.confirm()
         }
 
@@ -238,6 +239,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         viewBinding.paymentMethod.setOnClickListener {
             viewBinding.customLabelTextField.clearFocus()
+            flowController.shippingDetails = shippingAddress
             flowController.presentPaymentOptions()
         }
 
