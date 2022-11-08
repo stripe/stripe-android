@@ -52,7 +52,6 @@ internal class IdentityActivity :
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         IdentityViewModel.IdentityViewModelFactory(
-            this,
             { uiContext },
             { workContext },
             { subcomponent }

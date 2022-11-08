@@ -107,10 +107,7 @@ class LinkActivityViewModelTest {
         }
         WeakMapInjectorRegistry.register(injector, INJECTOR_KEY)
 
-        val factory = LinkActivityViewModel.Factory(
-            { ApplicationProvider.getApplicationContext() },
-            { defaultArgs }
-        )
+        val factory = LinkActivityViewModel.Factory { defaultArgs }
         val factorySpy = spy(factory)
         val createdViewModel = factorySpy.create(LinkActivityViewModel::class.java)
         verify(factorySpy, times(0)).fallbackInitialize(any())
@@ -130,10 +127,7 @@ class LinkActivityViewModelTest {
         whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
 
         val context = ApplicationProvider.getApplicationContext<Application>()
-        val factory = LinkActivityViewModel.Factory(
-            { ApplicationProvider.getApplicationContext() },
-            { defaultArgs }
-        )
+        val factory = LinkActivityViewModel.Factory { defaultArgs }
         val factorySpy = spy(factory)
 
         assertNotNull(factorySpy.create(LinkActivityViewModel::class.java))
