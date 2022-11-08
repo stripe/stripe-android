@@ -259,6 +259,9 @@ public final class com/stripe/android/identity/injection/IdentityCommonModule_Co
 	public static fun provideStripeNetworkClient ()Lcom/stripe/android/core/networking/StripeNetworkClient;
 }
 
+public abstract interface annotation class com/stripe/android/identity/injection/IdentityVerificationScope : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/identity/navigation/IdentityFragmentFactory_Factory : dagger/internal/Factory {
 	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
 	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/identity/navigation/IdentityFragmentFactory_Factory;

@@ -97,7 +97,9 @@ internal class IDScanFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         on { it.fpsTracker } doReturn mockFPSTracker
         on { it.screenTracker } doReturn mockScreenTracker
         on { uiContext } doReturn testDispatcher

@@ -94,7 +94,9 @@ internal class DriverLicenseScanFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         on { it.fpsTracker } doReturn mock()
         on { it.screenTracker } doReturn mockScreenTracker
         on { uiContext } doReturn testDispatcher

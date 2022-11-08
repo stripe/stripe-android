@@ -67,7 +67,9 @@ internal class DocSelectionFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         )
         on { screenTracker }.thenReturn(mockScreenTracker)
         on { uiContext } doReturn testDispatcher

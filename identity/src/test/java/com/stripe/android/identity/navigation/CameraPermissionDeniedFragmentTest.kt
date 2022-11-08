@@ -49,7 +49,9 @@ class CameraPermissionDeniedFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         on { screenTracker } doReturn mockScreenTracker
         on { uiContext } doReturn testDispatcher
         on { workContext } doReturn testDispatcher
