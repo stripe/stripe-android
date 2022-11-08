@@ -94,7 +94,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     baseUrl(applicationId)
-                ) -> when (getStatusFromUrl(receivedUrl)) {
+                ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)) {
                     STATUS_SUCCESS -> setState {
                         copy(webAuthFlow = Success(receivedUrl))
                     }
@@ -142,12 +142,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun getStatusFromUrl(receivedUrl: String): String? {
-        return uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)
-            // TODO@carlosmuvi remove once test mode returns [PARAM_STATUS] instead of code.
-            ?: uriUtils.getQueryParameter(receivedUrl, "code")
     }
 
     /**
