@@ -4,15 +4,16 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -828,19 +829,16 @@ internal class IdentityViewModel constructor(
     }
 
     internal class IdentityViewModelFactory(
-        savedStateRegistryOwner: SavedStateRegistryOwner,
         private val uiContextSupplier: () -> CoroutineContext,
         private val workContextSupplier: () -> CoroutineContext,
         private val subcomponentSupplier: () -> IdentityActivitySubcomponent
-    ) : AbstractSavedStateViewModelFactory(savedStateRegistryOwner, null) {
+    ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(
-            key: String,
-            modelClass: Class<T>,
-            handle: SavedStateHandle
-        ): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val subcomponent = subcomponentSupplier()
+            val savedStateHandle = extras.createSavedStateHandle()
+
             return IdentityViewModel(
                 subcomponent.verificationArgs,
                 subcomponent.identityRepository,
@@ -849,7 +847,7 @@ internal class IdentityViewModel constructor(
                 subcomponent.identityAnalyticsRequestFactory,
                 subcomponent.fpsTracker,
                 subcomponent.screenTracker,
-                handle,
+                savedStateHandle,
                 uiContextSupplier(),
                 workContextSupplier()
             ) as T

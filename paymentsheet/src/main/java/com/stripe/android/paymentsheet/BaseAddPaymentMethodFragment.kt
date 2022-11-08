@@ -53,7 +53,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @FlowPreview
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
-    abstract val viewModelFactory: ViewModelProvider.Factory
     abstract val sheetViewModel: BaseSheetViewModel<*>
 
     override fun onCreateView(

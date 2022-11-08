@@ -1,13 +1,13 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
 import android.app.Application
-import android.os.Bundle
 import android.os.SystemClock
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
@@ -17,6 +17,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.DaggerPollingComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.PollingViewModelSubcomponent
 import com.stripe.android.polling.IntentStatusPoller
+import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -175,12 +176,8 @@ internal class PollingViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val applicationSupplier: () -> Application,
         private val argsSupplier: () -> Args,
-        owner: SavedStateRegistryOwner,
-        defaultArgs: Bundle? = null
-    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
-        Injectable<Factory.FallbackInitializeParam> {
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application
         )
@@ -189,14 +186,13 @@ internal class PollingViewModel @Inject constructor(
         lateinit var subcomponentBuilderProvider: Provider<PollingViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(
-            key: String,
-            modelClass: Class<T>,
-            savedStateHandle: SavedStateHandle
-        ): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val args = argsSupplier()
 
-            injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
+            val application = extras.requireApplication()
+            val savedStateHandle = extras.createSavedStateHandle()
+
+            injectWithFallback(args.injectorKey, FallbackInitializeParam(application))
 
             return subcomponentBuilderProvider.get()
                 .args(args)

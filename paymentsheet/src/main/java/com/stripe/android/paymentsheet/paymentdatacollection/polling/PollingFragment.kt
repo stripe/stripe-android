@@ -30,18 +30,14 @@ internal class PollingFragment : BottomSheetDialogFragment() {
     }
 
     private val viewModel by viewModels<PollingViewModel> {
-        PollingViewModel.Factory(
-            applicationSupplier = { requireActivity().application },
-            argsSupplier = {
-                PollingViewModel.Args(
-                    clientSecret = args.clientSecret,
-                    timeLimit = args.timeLimitInSeconds.seconds,
-                    initialDelay = args.initialDelayInSeconds.seconds,
-                    maxAttempts = args.maxAttempts,
-                )
-            },
-            owner = this,
-        )
+        PollingViewModel.Factory {
+            PollingViewModel.Args(
+                clientSecret = args.clientSecret,
+                timeLimit = args.timeLimitInSeconds.seconds,
+                initialDelay = args.initialDelayInSeconds.seconds,
+                maxAttempts = args.maxAttempts,
+            )
+        }
     }
 
     override fun onCreateView(

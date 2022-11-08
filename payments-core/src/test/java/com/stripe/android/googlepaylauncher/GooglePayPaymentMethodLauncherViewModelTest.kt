@@ -163,7 +163,6 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             val injectorKey = "testInjectorKey"
             WeakMapInjectorRegistry.register(injector, injectorKey)
             val factory = GooglePayPaymentMethodLauncherViewModel.Factory(
-                ApplicationProvider.getApplicationContext(),
                 GooglePayPaymentMethodLauncherContract.Args(
                     mock(),
                     "usd",
@@ -176,8 +175,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                         "key",
                         null
                     )
-                ),
-                fragment
+                )
             )
             val factorySpy = spy(factory)
             val createdViewModel =
@@ -198,7 +196,6 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             PaymentConfiguration.init(context, publishableKey)
 
             val factory = GooglePayPaymentMethodLauncherViewModel.Factory(
-                context,
                 GooglePayPaymentMethodLauncherContract.Args(
                     GooglePayPaymentMethodLauncher.Config(
                         GooglePayEnvironment.Test,
@@ -215,8 +212,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                         publishableKey,
                         null
                     )
-                ),
-                fragment
+                )
             )
             val factorySpy = spy(factory)
             assertNotNull(factorySpy.create(GooglePayPaymentMethodLauncherViewModel::class.java))

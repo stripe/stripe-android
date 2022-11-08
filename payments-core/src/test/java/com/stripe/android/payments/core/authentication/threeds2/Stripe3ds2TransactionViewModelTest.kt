@@ -93,6 +93,7 @@ class Stripe3ds2TransactionViewModelTest {
     fun `Stripe3ds2TransactionViewModel gets initialized by Injector when Injector is available`() {
         scenario.onFragment { savedStateRegistryOwner ->
             // The reason the ViewModel cannot be mocked here is because
+            // TODO
             // AbstractSavedStateViewModelFactory will call viewModel.setTagIfAbsent, which accesses
             // ViewModel.mBagOfTags that's initialized in base class.
             // Mocking it would leave this field null, causing an NPE.
@@ -126,11 +127,7 @@ class Stripe3ds2TransactionViewModelTest {
             }
             WeakMapInjectorRegistry.register(injector, INJECTOR_KEY)
 
-            val factory = Stripe3ds2TransactionViewModelFactory(
-                { ApplicationProvider.getApplicationContext() },
-                savedStateRegistryOwner,
-                { ARGS }
-            )
+            val factory = Stripe3ds2TransactionViewModelFactory { ARGS }
             val factorySpy = spy(factory)
             val createdViewModel =
                 factorySpy.create(Stripe3ds2TransactionViewModel::class.java)
@@ -145,11 +142,7 @@ class Stripe3ds2TransactionViewModelTest {
     fun `Stripe3ds2TransactionViewModel gets initialized with fallback when no Injector is available`() {
         scenario.onFragment { savedStateRegistryOwner ->
             val application = ApplicationProvider.getApplicationContext<Application>()
-            val factory = Stripe3ds2TransactionViewModelFactory(
-                { application },
-                savedStateRegistryOwner,
-                { ARGS }
-            )
+            val factory = Stripe3ds2TransactionViewModelFactory { ARGS }
             val factorySpy = spy(factory)
 
             assertNotNull(factorySpy.create(Stripe3ds2TransactionViewModel::class.java))
