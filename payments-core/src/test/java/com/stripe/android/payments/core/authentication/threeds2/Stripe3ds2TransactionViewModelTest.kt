@@ -25,6 +25,7 @@ import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
+import com.stripe.android.utils.fakeCreationExtras
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -91,25 +92,8 @@ class Stripe3ds2TransactionViewModelTest {
 
     @Test
     fun `Stripe3ds2TransactionViewModel gets initialized by Injector when Injector is available`() {
-        scenario.onFragment { savedStateRegistryOwner ->
-            // The reason the ViewModel cannot be mocked here is because
-            // TODO
-            // AbstractSavedStateViewModelFactory will call viewModel.setTagIfAbsent, which accesses
-            // ViewModel.mBagOfTags that's initialized in base class.
-            // Mocking it would leave this field null, causing an NPE.
-            val viewModel = Stripe3ds2TransactionViewModel(
-                ARGS,
-                mock(),
-                mock(),
-                mock(),
-                mock(),
-                mock(),
-                mock(),
-                mock(),
-                mock(),
-                mock(),
-                false
-            )
+        scenario.onFragment { fragment ->
+            val viewModel: Stripe3ds2TransactionViewModel = mock()
             val mockBuilder = mock<Stripe3ds2TransactionViewModelSubcomponent.Builder>()
             val mockSubcomponent = mock<Stripe3ds2TransactionViewModelSubcomponent>()
 
@@ -129,8 +113,12 @@ class Stripe3ds2TransactionViewModelTest {
 
             val factory = Stripe3ds2TransactionViewModelFactory { ARGS }
             val factorySpy = spy(factory)
-            val createdViewModel =
-                factorySpy.create(Stripe3ds2TransactionViewModel::class.java)
+
+            val createdViewModel = factorySpy.create(
+                modelClass = Stripe3ds2TransactionViewModel::class.java,
+                extras = fragment.fakeCreationExtras(),
+            )
+
             verify(factorySpy, times(0)).fallbackInitialize(any())
             assertThat(createdViewModel).isEqualTo(viewModel)
 
@@ -140,12 +128,18 @@ class Stripe3ds2TransactionViewModelTest {
 
     @Test
     fun `Stripe3ds2TransactionViewModel gets initialized with fallback when no Injector is available`() {
-        scenario.onFragment { savedStateRegistryOwner ->
+        scenario.onFragment { fragment ->
             val application = ApplicationProvider.getApplicationContext<Application>()
             val factory = Stripe3ds2TransactionViewModelFactory { ARGS }
             val factorySpy = spy(factory)
 
-            assertNotNull(factorySpy.create(Stripe3ds2TransactionViewModel::class.java))
+            assertNotNull(
+                factorySpy.create(
+                    modelClass = Stripe3ds2TransactionViewModel::class.java,
+                    extras = fragment.fakeCreationExtras(),
+                )
+            )
+
             verify(factorySpy).fallbackInitialize(
                 argWhere {
                     it.application == application &&

@@ -30,6 +30,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
+import com.stripe.android.utils.fakeCreationExtras
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -162,6 +163,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             }
             val injectorKey = "testInjectorKey"
             WeakMapInjectorRegistry.register(injector, injectorKey)
+
             val factory = GooglePayPaymentMethodLauncherViewModel.Factory(
                 GooglePayPaymentMethodLauncherContract.Args(
                     mock(),
@@ -177,9 +179,13 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     )
                 )
             )
+
             val factorySpy = spy(factory)
-            val createdViewModel =
-                factorySpy.create(GooglePayPaymentMethodLauncherViewModel::class.java)
+            val createdViewModel = factorySpy.create(
+                modelClass = GooglePayPaymentMethodLauncherViewModel::class.java,
+                extras = fragment.fakeCreationExtras(),
+            )
+
             verify(factorySpy, times(0)).fallbackInitialize(any())
             assertThat(createdViewModel).isEqualTo(viewModel)
 
@@ -190,10 +196,10 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     @Test
     fun `Factory gets initialized with fallback when no Injector is available`() {
         scenario.onFragment { fragment ->
-            val context = ApplicationProvider.getApplicationContext<Application>()
+            val application = ApplicationProvider.getApplicationContext<Application>()
             val productUsage = setOf("TestProductUsage")
             val publishableKey = "publishable_key"
-            PaymentConfiguration.init(context, publishableKey)
+            PaymentConfiguration.init(application, publishableKey)
 
             val factory = GooglePayPaymentMethodLauncherViewModel.Factory(
                 GooglePayPaymentMethodLauncherContract.Args(
@@ -214,11 +220,19 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                     )
                 )
             )
+
             val factorySpy = spy(factory)
-            assertNotNull(factorySpy.create(GooglePayPaymentMethodLauncherViewModel::class.java))
+
+            assertNotNull(
+                factorySpy.create(
+                    modelClass = GooglePayPaymentMethodLauncherViewModel::class.java,
+                    extras = fragment.fakeCreationExtras(),
+                )
+            )
+
             verify(factorySpy).fallbackInitialize(
                 argWhere {
-                    it.application == context &&
+                    it.application == application &&
                         it.productUsage == productUsage &&
                         it.publishableKey == publishableKey
                 }

@@ -3,10 +3,10 @@ package com.stripe.android.payments.paymentlauncher
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
-import androidx.savedstate.SavedStateRegistry
-import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -35,6 +35,7 @@ import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
+import com.stripe.android.utils.fakeCreationExtras
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -61,6 +62,8 @@ import kotlin.test.assertNotNull
 class PaymentLauncherViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
+    internal class TestFragment : Fragment()
 
     private val stripeApiRepository = mock<StripeApiRepository>()
     private val authenticatorRegistry = mock<PaymentAuthenticatorRegistry>()
@@ -444,25 +447,12 @@ class PaymentLauncherViewModelTest {
     fun `Factory gets initialized by Injector when Injector is available`() {
         val mockBuilder = mock<PaymentLauncherViewModelSubcomponent.Builder>()
         val mockSubComponent = mock<PaymentLauncherViewModelSubcomponent>()
-        // The reason the ViewModel cannot be mocked here is because
-        // TODO
-        // AbstractSavedStateViewModelFactory will call viewmodel.setTagIfAbsent, which accesses
-        // ViewModel.mBagOfTags that's initialized in base class.
-        // Mocking it would leave this field null, causing an NPE.
-        val vmToBeReturned = createViewModel(isPaymentIntent = true)
+        val vmToBeReturned: PaymentLauncherViewModel = mock()
 
         whenever(mockBuilder.build()).thenReturn(mockSubComponent)
         whenever(mockBuilder.isPaymentIntent(any())).thenReturn(mockBuilder)
         whenever(mockBuilder.savedStateHandle(any())).thenReturn(mockBuilder)
-        whenever((mockSubComponent.viewModel)).thenReturn(vmToBeReturned)
-
-        val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
-        val mockSavedStateRegistry = mock<SavedStateRegistry>()
-        val mockLifeCycle = mock<Lifecycle>()
-
-        whenever(mockSavedStateRegistryOwner.savedStateRegistry).thenReturn(mockSavedStateRegistry)
-        whenever(mockSavedStateRegistryOwner.lifecycle).thenReturn(mockLifeCycle)
-        whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
+        whenever(mockSubComponent.viewModel).thenReturn(vmToBeReturned)
 
         val injector = object : Injector {
             override fun inject(injectable: Injectable<*>) {
@@ -470,8 +460,10 @@ class PaymentLauncherViewModelTest {
                 factory.subComponentBuilderProvider = Provider { mockBuilder }
             }
         }
+
         val injectorKey = WeakMapInjectorRegistry.nextKey("testKey")
         WeakMapInjectorRegistry.register(injector, injectorKey)
+
         val factory = PaymentLauncherViewModel.Factory {
             PaymentLauncherContract.Args.IntentConfirmationArgs(
                 injectorKey,
@@ -482,17 +474,28 @@ class PaymentLauncherViewModelTest {
                 mock<ConfirmPaymentIntentParams>()
             )
         }
-        val factorySpy = spy(factory)
-        val createdViewModel = factorySpy.create(PaymentLauncherViewModel::class.java)
-        verify(factorySpy, times(0)).fallbackInitialize(any())
-        assertThat(createdViewModel).isEqualTo(vmToBeReturned)
+
+        val fragmentScenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
+            TestFragment()
+        }
+
+        fragmentScenario.onFragment { fragment ->
+            val factorySpy = spy(factory)
+            val createdViewModel = factorySpy.create(
+                modelClass = PaymentLauncherViewModel::class.java,
+                extras = fragment.fakeCreationExtras(),
+            )
+
+            verify(factorySpy, times(0)).fallbackInitialize(any())
+            assertThat(createdViewModel).isEqualTo(vmToBeReturned)
+        }
 
         WeakMapInjectorRegistry.clear()
     }
 
     @Test
     fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
-        val context = ApplicationProvider.getApplicationContext<Application>()
+        val application = ApplicationProvider.getApplicationContext<Application>()
         val factory = PaymentLauncherViewModel.Factory {
             PaymentLauncherContract.Args.IntentConfirmationArgs(
                 DUMMY_INJECTOR_KEY,
@@ -503,14 +506,27 @@ class PaymentLauncherViewModelTest {
                 mock<ConfirmPaymentIntentParams>()
             )
         }
-        val factorySpy = spy(factory)
 
-        assertNotNull(factorySpy.create(PaymentLauncherViewModel::class.java))
-        verify(factorySpy).fallbackInitialize(
-            argWhere {
-                it.application == context
-            }
-        )
+        val fragmentScenario = launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
+            TestFragment()
+        }
+
+        fragmentScenario.onFragment { fragment ->
+            val factorySpy = spy(factory)
+
+            assertNotNull(
+                factorySpy.create(
+                    modelClass = PaymentLauncherViewModel::class.java,
+                    extras = fragment.fakeCreationExtras(),
+                )
+            )
+
+            verify(factorySpy).fallbackInitialize(
+                argWhere {
+                    it.application == application
+                }
+            )
+        }
     }
 
     companion object {
