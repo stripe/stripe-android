@@ -23,7 +23,6 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
     private lateinit var financialConnectionsPaymentsProxy: FinancialConnectionsPaymentsProxy
 
     private val viewModel: CollectBankAccountViewModel by viewModels {
-        // TODO: Do we need to add defaultArgs to CreationExtras?
         CollectBankAccountViewModel.Factory {
             requireNotNull(starterArgs)
         }
