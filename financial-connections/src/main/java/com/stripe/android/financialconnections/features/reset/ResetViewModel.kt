@@ -12,6 +12,8 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LinkMoreAccounts
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.ClearPartnerWebAuth
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
@@ -19,6 +21,7 @@ import javax.inject.Inject
 internal class ResetViewModel @Inject constructor(
     initialState: ResetState,
     private val linkMoreAccounts: LinkMoreAccounts,
+    private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val goNext: GoNext,
     private val logger: Logger
@@ -28,6 +31,7 @@ internal class ResetViewModel @Inject constructor(
         logErrors()
         suspend {
             val updatedManifest = linkMoreAccounts()
+            nativeAuthFlowCoordinator().emit(ClearPartnerWebAuth)
             eventTracker.track(PaneLoaded(NextPane.RESET))
             goNext(updatedManifest.nextPane)
             Unit
