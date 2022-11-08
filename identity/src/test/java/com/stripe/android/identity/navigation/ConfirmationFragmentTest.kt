@@ -40,7 +40,9 @@ class ConfirmationFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         )
         on { uiContext } doReturn testDispatcher
         on { workContext } doReturn testDispatcher

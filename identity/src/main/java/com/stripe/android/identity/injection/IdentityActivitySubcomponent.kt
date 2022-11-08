@@ -16,6 +16,7 @@ import com.stripe.android.identity.utils.IdentityIO
 import dagger.BindsInstance
 import dagger.Subcomponent
 
+@IdentityVerificationScope
 @Subcomponent
 internal interface IdentityActivitySubcomponent {
     val identityFragmentFactory: IdentityFragmentFactory

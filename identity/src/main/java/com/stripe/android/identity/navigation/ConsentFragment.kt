@@ -3,7 +3,6 @@ package com.stripe.android.identity.navigation
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -56,6 +55,15 @@ internal class ConsentFragment(
                             requireSelfie = verificationPage.requireSelfie()
                         )
                     }
+                    lifecycleScope.launch(identityViewModel.workContext) {
+                        identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONSENT)
+                    }
+
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                            screenName = SCREEN_NAME_CONSENT
+                        )
+                    )
                 },
                 onFallbackUrl = this@ConsentFragment::logErrorAndLaunchFallback,
                 onError = this@ConsentFragment::logErrorAndNavigateToError,
@@ -63,19 +71,6 @@ internal class ConsentFragment(
                 onConsentDeclined = this@ConsentFragment::declineConsentAndPost
             )
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launch(identityViewModel.workContext) {
-            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONSENT)
-        }
-
-        identityViewModel.sendAnalyticsRequest(
-            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                screenName = SCREEN_NAME_CONSENT
-            )
-        )
     }
 
     private fun logErrorAndLaunchFallback(fallbackUrl: String) {

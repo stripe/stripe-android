@@ -88,7 +88,9 @@ class PassportUploadFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         )
         whenever(it.screenTracker).thenReturn(mockScreenTracker)
         whenever(it.uiContext).thenReturn(testDispatcher)
