@@ -203,7 +203,6 @@ class AddressLauncher internal constructor(
 
     companion object {
         @Composable
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun rememberLauncher(
             callback: AddressLauncherResultCallback
         ): AddressLauncher {

@@ -7,7 +7,7 @@
 
 ### PaymentSheet
 
-* [ADDED][5676](https://github.com/stripe/stripe-android/pull/5676) Added `AddressLauncher`, an embeddable UI component that collects local and international addresses for your customers. See https://stripe.com/docs/elements/address-element?platform=android.
+* [ADDED][5676](https://github.com/stripe/stripe-android/pull/5676) Added `AddressLauncher`, an [embeddable UI component](https://stripe.com/docs/elements/address-element?platform=android) that collects local and international addresses for your customers.
 
 ## 20.15.4 - 2022-11-07
 
