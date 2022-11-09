@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,37 +37,41 @@ internal fun InputAddressScreen(
     checkboxContent: @Composable ColumnScope.() -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-
-    ScrollableColumn(
+    Scaffold(
         modifier = Modifier
             .fillMaxHeight()
-            .imePadding()
-            .background(MaterialTheme.colors.surface)
-    ) {
-        AddressOptionsAppBar(
-            isRootScreen = true,
-            onButtonClick = {
-                focusManager.clearFocus()
-                onCloseClick()
-            }
-        )
-        Column(
-            Modifier
-                .padding(horizontal = 20.dp)
-        ) {
-            Text(
-                title,
-                style = MaterialTheme.typography.h4,
-                modifier = Modifier.padding(bottom = 8.dp)
+            .imePadding(),
+        backgroundColor = MaterialTheme.colors.surface,
+        topBar = {
+            AddressOptionsAppBar(
+                isRootScreen = true,
+                onButtonClick = {
+                    focusManager.clearFocus()
+                    onCloseClick()
+                }
             )
-            formContent()
-            checkboxContent()
-            AddressElementPrimaryButton(
-                isEnabled = primaryButtonEnabled,
-                text = primaryButtonText
+        }
+    ) {
+        ScrollableColumn(
+            modifier = Modifier.padding(it)
+        ) {
+            Column(
+                Modifier.padding(horizontal = 20.dp)
             ) {
-                focusManager.clearFocus()
-                onPrimaryButtonClick()
+                Text(
+                    title,
+                    style = MaterialTheme.typography.h4,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                formContent()
+                checkboxContent()
+                AddressElementPrimaryButton(
+                    isEnabled = primaryButtonEnabled,
+                    text = primaryButtonText
+                ) {
+                    focusManager.clearFocus()
+                    onPrimaryButtonClick()
+                }
             }
         }
     }
