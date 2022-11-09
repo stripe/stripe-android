@@ -207,6 +207,8 @@ internal fun SuccessScreenPreview() {
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id2",
                     name = "Account 2 - no acct numbers",
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                     supportedPaymentMethodTypes = emptyList()
                 ),
@@ -215,6 +217,8 @@ internal fun SuccessScreenPreview() {
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id3",
                     name = "Account 3",
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     displayableAccountNumbers = "1234",
                     subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
                     supportedPaymentMethodTypes = emptyList()
@@ -224,6 +228,8 @@ internal fun SuccessScreenPreview() {
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id4",
                     name = "Account 4",
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     displayableAccountNumbers = "1234",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()

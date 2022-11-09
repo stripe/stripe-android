@@ -77,9 +77,8 @@ internal class AccountPickerViewModel @Inject constructor(
                 AccountPickerState.PartnerAccountUI(
                     account = account,
                     institutionIcon = activeInstitution?.icon?.default,
-                    enabled = account.enabled(manifest)
                 )
-            }.sortedBy { it.enabled }
+            }.sortedBy { it.account.allowSelection }
 
             AccountPickerState.Payload(
                 skipAccountSelection = activeAuthSession.skipAccountSelection == true,
@@ -122,7 +121,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 payload.selectionMode == SelectionMode.DROPDOWN -> setState {
                     copy(
                         selectedIds = setOfNotNull(
-                            payload.accounts.firstOrNull { it.enabled }?.account?.id
+                            payload.accounts.firstOrNull { it.account.allowSelection }?.account?.id
                         )
                     )
                 }
@@ -167,11 +166,6 @@ internal class AccountPickerViewModel @Inject constructor(
 
             else -> SelectionMode.CHECKBOXES
         }
-
-    private fun PartnerAccount.enabled(
-        manifest: FinancialConnectionsSessionManifest
-    ) = manifest.paymentMethodType == null ||
-        supportedPaymentMethodTypes.contains(manifest.paymentMethodType)
 
     fun onAccountClicked(account: PartnerAccount) {
         withState { state ->
@@ -309,7 +303,7 @@ internal data class AccountPickerState(
     ) {
 
         val selectableAccounts
-            get() = accounts.filter { it.enabled }
+            get() = accounts.filter { it.account.allowSelection }
 
         val subtitle: TextResource?
             get() = when {
@@ -331,7 +325,6 @@ internal data class AccountPickerState(
 
     data class PartnerAccountUI(
         val account: PartnerAccount,
-        val enabled: Boolean,
         val institutionIcon: String?
     )
 

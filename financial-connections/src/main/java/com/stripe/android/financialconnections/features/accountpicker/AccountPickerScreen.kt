@@ -323,12 +323,11 @@ private fun AccountDropdownItem(
             Spacer(modifier = Modifier.size(8.dp))
             val (title, subtitle) = getAccountTexts(
                 account = account.account,
-                enabled = account.enabled
             )
             Column {
                 Text(
                     text = title,
-                    color = if (account.enabled) {
+                    color = if (account.account.allowSelection) {
                         FinancialConnectionsTheme.colors.textPrimary
                     } else {
                         FinancialConnectionsTheme.colors.textDisabled
@@ -377,7 +376,6 @@ private fun SingleSelectContent(
                 selected = selectedIds.contains(account.account.id),
                 onAccountClicked = onAccountClicked,
                 account = account.account,
-                enabled = account.enabled
             ) {
                 RadioButton(
                     selected = selectedIds.contains(account.account.id),
@@ -407,11 +405,12 @@ private fun MultiSelectContent(
     ) {
         item("select_all_accounts") {
             AccountItem(
-                enabled = true,
                 selected = allAccountsSelected,
                 onAccountClicked = { onSelectAllAccountsClicked() },
                 account = PartnerAccount(
                     id = "select_all_accounts",
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     authorization = "",
                     category = FinancialConnectionsAccount.Category.UNKNOWN,
                     subcategory = FinancialConnectionsAccount.Subcategory.UNKNOWN,
@@ -432,7 +431,6 @@ private fun MultiSelectContent(
         }
         items(accounts, key = { it.account.id }) { account ->
             AccountItem(
-                enabled = account.enabled,
                 selected = selectedIds.contains(account.account.id),
                 onAccountClicked = onAccountClicked,
                 account = account.account
@@ -453,7 +451,6 @@ private fun MultiSelectContent(
 
 @Composable
 private fun AccountItem(
-    enabled: Boolean,
     selected: Boolean,
     onAccountClicked: (PartnerAccount) -> Unit,
     account: PartnerAccount,
@@ -472,7 +469,7 @@ private fun AccountItem(
                 },
                 shape = RoundedCornerShape(8.dp)
             )
-            .clickable(enabled = enabled) { onAccountClicked(account) }
+            .clickable(enabled = account.allowSelection) { onAccountClicked(account) }
             .padding(padding)
     ) {
         Row(
@@ -482,13 +479,12 @@ private fun AccountItem(
             selectorContent()
             val (title, subtitle) = getAccountTexts(
                 account = account,
-                enabled = enabled
             )
             Spacer(modifier = Modifier.size(16.dp))
             Column {
                 Text(
                     text = title,
-                    color = if (enabled) {
+                    color = if (account.allowSelection) {
                         FinancialConnectionsTheme.colors.textPrimary
                     } else {
                         FinancialConnectionsTheme.colors.textDisabled
@@ -511,7 +507,6 @@ private fun AccountItem(
 @Composable
 private fun getAccountTexts(
     account: PartnerAccount,
-    enabled: Boolean
 ): Pair<String, String?> {
     val balance = if (account.balanceAmount != null && account.currency != null) {
         NumberFormat
@@ -524,7 +519,7 @@ private fun getAccountTexts(
         else -> account.name
     }
     val subtitle = when {
-        enabled.not() -> stringResource(id = R.string.stripe_account_picker_must_be_bank_account)
+        account.allowSelection.not() -> account.allowSelectionMessage
         balance != null -> balance
         account.encryptedNumbers.isNotEmpty() -> account.encryptedNumbers
         else -> null
