@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+## 20.15.4 - 2022-11-07
+
 ### CardScan
 * [FIXED][5768](https://github.com/stripe/stripe-android/pull/5768) Fixed SDK version reporting in cardscan scan stats
 

@@ -50,7 +50,9 @@ internal class IdentityActivityTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = ARGS
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         )
         on { verificationPage }.thenReturn(mock())
         on { screenTracker }.thenReturn(mock())

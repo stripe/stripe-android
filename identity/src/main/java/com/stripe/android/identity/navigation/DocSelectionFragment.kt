@@ -50,7 +50,10 @@ internal class DocSelectionFragment(
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             val verificationPage by identityViewModel.verificationPage.observeAsState()
-            DocSelectionScreen(verificationPage, ::postVerificationPageDataAndNavigate)
+            DocSelectionScreen(
+                verificationPage,
+                ::postVerificationPageDataAndNavigate
+            )
         }
     }
 

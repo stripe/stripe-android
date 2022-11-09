@@ -670,6 +670,7 @@ internal class IdentityViewModel constructor(
             }.fold(
                 onSuccess = {
                     _verificationPage.postValue(Resource.success(it))
+                    identityAnalyticsRequestFactory.verificationPage = it
                     if (shouldRetrieveModel) {
                         downloadModelAndPost(
                             it.documentCapture.models.idDetectorUrl,
@@ -690,7 +691,7 @@ internal class IdentityViewModel constructor(
                     "Failed to retrieve verification page with " +
                         (
                             "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: " +
-                                "${verificationArgs.ephemeralKeySecret}"
+                                verificationArgs.ephemeralKeySecret
                             ).let { msg ->
                             _verificationPage.postValue(
                                 Resource.error(
