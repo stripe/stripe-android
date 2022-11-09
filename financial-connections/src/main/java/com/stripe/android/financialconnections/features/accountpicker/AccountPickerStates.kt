@@ -77,10 +77,11 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     balanceAmount = 1000,
                     displayableAccountNumbers = "1234",
                     currency = "$",
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = true,
                 institutionIcon = null
             ),
             PartnerAccountUI(
@@ -89,10 +90,11 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id2",
                     name = "Account 2 - no acct numbers",
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = true,
                 institutionIcon = null
             ),
             PartnerAccountUI(
@@ -103,9 +105,10 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     name = "Account 3",
                     displayableAccountNumbers = "1234",
                     subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
+                    allowSelection = false,
+                    allowSelectionMessage = "Cannot be selected",
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = false,
                 institutionIcon = null
             ),
             PartnerAccountUI(
@@ -116,9 +119,10 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     name = "Account 4",
                     displayableAccountNumbers = "1234",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+                    allowSelection = false,
+                    allowSelectionMessage = "Cannot be selected",
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = false,
                 institutionIcon = null
             )
         )
