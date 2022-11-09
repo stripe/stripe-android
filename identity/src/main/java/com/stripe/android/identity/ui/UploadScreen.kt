@@ -39,7 +39,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.identity.R
@@ -47,6 +46,7 @@ import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.uicore.text.dimensionResourceSp
 
 internal data class DocumentUploadSideInfo(
     val description: String,
@@ -75,39 +75,89 @@ internal fun UploadScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(
-                    horizontal = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    vertical = dimensionResource(id = R.dimen.page_vertical_margin)
+                    start = dimensionResource(id = R.dimen.page_horizontal_margin),
+                    end = dimensionResource(id = R.dimen.page_horizontal_margin),
+                    top = 64.dp,
+                    bottom = dimensionResource(id = R.dimen.page_vertical_margin)
                 )
+                .testTag(SCROLLABLE_COLUMN_TAG)
         ) {
-            val scrollState = rememberScrollState()
-            Column(
-                modifier = Modifier
-                    .padding(top = 40.dp)
-                    .weight(1f)
-                    .verticalScroll(scrollState)
-                    .testTag(SCROLLABLE_COLUMN_TAG)
-            ) {
-                Text(
-                    text = title,
-                    fontSize = dimensionResource(id = R.dimen.upload_title_text_size).value.sp,
-                    modifier = Modifier.padding(
-                        vertical = dimensionResource(id = R.dimen.item_vertical_margin)
-                    )
-                )
-                Text(
-                    text = context,
-                    modifier = Modifier.padding(
-                        bottom = 32.dp
-                    )
-                )
+            Text(
+                text = title,
+                fontSize = dimensionResourceSp(id = R.dimen.upload_title_text_size),
 
-                val frontUploadedUiState by remember {
+                modifier = Modifier.padding(
+                    vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+                )
+            )
+            Text(
+                text = context,
+                modifier = Modifier.padding(
+                    bottom = 32.dp
+                )
+            )
+
+            val frontUploadedUiState by remember {
+                derivedStateOf {
+                    collectedData.idDocumentFront?.let {
+                        DocumentUploadUIState.Done
+                    } ?: run {
+                        when (frontUploadState.highResResult.status) {
+                            Status.SUCCESS -> DocumentUploadUIState.Loading
+                            Status.LOADING -> DocumentUploadUIState.Loading
+                            Status.IDLE -> DocumentUploadUIState.Idle
+                            // place holder, Error will redirect to ErrorScreen
+                            Status.ERROR -> DocumentUploadUIState.Idle
+                        }
+                    }
+                }
+            }
+
+            var shouldShowFrontDialog by remember { mutableStateOf(false) }
+            SingleSideUploadRow(
+                modifier = Modifier.testTag(FRONT_ROW_TAG),
+                uploadUiState = frontUploadedUiState,
+                uploadInfo = frontInfo,
+            ) { shouldShowFrontDialog = true }
+
+            if (shouldShowFrontDialog) {
+                UploadImageDialog(
+                    frontInfo,
+                    onDismissRequest = { shouldShowFrontDialog = false }
+                ) { shouldShowFrontDialog = false }
+            }
+
+            // decide should show back or not
+            val shouldShowBack by remember {
+                derivedStateOf {
+                    // If front and back are collected, it means the user has already uploaded both sides,
+                    // should show both sides done and enable continue button
+                    if (collectedData.idDocumentFront != null && collectedData.idDocumentBack != null) {
+                        true
+                    }
+                    // Otherwise show back when all the follows are true
+                    //  * backInfo is not null - e.g not a passport scan where backInfo is null
+                    //  * collectedData.idDocumentFront not null - front is already scanned
+                    //  * missing BACK - front already scanned and server returns missing back
+                    else {
+                        backInfo != null && collectedData.idDocumentFront != null && missings.contains(
+                            Requirement.IDDOCUMENTBACK
+                        )
+                    }
+                }
+            }
+
+            if (shouldShowBack) {
+                var shouldShowBackDialog by remember { mutableStateOf(false) }
+                Divider(modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin)))
+                val backUploadedUiState by remember {
                     derivedStateOf {
-                        collectedData.idDocumentFront?.let {
+                        collectedData.idDocumentBack?.let {
                             DocumentUploadUIState.Done
                         } ?: run {
-                            when (frontUploadState.highResResult.status) {
+                            when (backUploadState.highResResult.status) {
                                 Status.SUCCESS -> DocumentUploadUIState.Loading
                                 Status.LOADING -> DocumentUploadUIState.Loading
                                 Status.IDLE -> DocumentUploadUIState.Idle
@@ -117,96 +167,42 @@ internal fun UploadScreen(
                         }
                     }
                 }
-
-                var shouldShowFrontDialog by remember { mutableStateOf(false) }
                 SingleSideUploadRow(
-                    modifier = Modifier.testTag(FRONT_ROW_TAG),
-                    uploadUiState = frontUploadedUiState,
-                    uploadInfo = frontInfo,
-                ) { shouldShowFrontDialog = true }
+                    modifier = Modifier.testTag(BACK_ROW_TAG),
+                    uploadUiState = backUploadedUiState,
+                    uploadInfo = requireNotNull(backInfo),
+                ) { shouldShowBackDialog = true }
 
-                if (shouldShowFrontDialog) {
+                if (shouldShowBackDialog) {
                     UploadImageDialog(
-                        frontInfo,
-                        onDismissRequest = { shouldShowFrontDialog = false }
-                    ) { shouldShowFrontDialog = false }
+                        backInfo,
+                        onDismissRequest = { shouldShowBackDialog = false }
+                    ) { shouldShowBackDialog = false }
                 }
+            }
 
-                // decide should show back or not
-                val shouldShowBack by remember {
-                    derivedStateOf {
-                        // If front and back are collected, it means the user has already uploaded both sides,
-                        // should show both sides done and enable continue button
-                        if (collectedData.idDocumentFront != null && collectedData.idDocumentBack != null) {
-                            true
-                        }
-                        // Otherwise show back when all the follows are true
-                        //  * backInfo is not null - e.g not a passport scan where backInfo is null
-                        //  * collectedData.idDocumentFront not null - front is already scanned
-                        //  * missing BACK - front already scanned and server returns missing back
-                        else {
-                            backInfo != null && collectedData.idDocumentFront != null && missings.contains(
-                                Requirement.IDDOCUMENTBACK
-                            )
-                        }
+            Spacer(modifier = Modifier.weight(1f))
+
+            // enable LoadingButton when collectedData has both front and back
+            var continueButtonState by remember(missings) {
+                mutableStateOf(
+                    if (missings.contains(Requirement.IDDOCUMENTFRONT) || missings.contains(
+                            Requirement.IDDOCUMENTBACK
+                        )
+                    ) {
+                        LoadingButtonState.Disabled
+                    } else {
+                        LoadingButtonState.Idle
                     }
-                }
-
-                if (shouldShowBack) {
-                    var shouldShowBackDialog by remember { mutableStateOf(false) }
-                    Divider(modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin)))
-                    val backUploadedUiState by remember {
-                        derivedStateOf {
-                            collectedData.idDocumentBack?.let {
-                                DocumentUploadUIState.Done
-                            } ?: run {
-                                when (backUploadState.highResResult.status) {
-                                    Status.SUCCESS -> DocumentUploadUIState.Loading
-                                    Status.LOADING -> DocumentUploadUIState.Loading
-                                    Status.IDLE -> DocumentUploadUIState.Idle
-                                    // place holder, Error will redirect to ErrorScreen
-                                    Status.ERROR -> DocumentUploadUIState.Idle
-                                }
-                            }
-                        }
-                    }
-                    SingleSideUploadRow(
-                        modifier = Modifier.testTag(BACK_ROW_TAG),
-                        uploadUiState = backUploadedUiState,
-                        uploadInfo = requireNotNull(backInfo),
-                    ) { shouldShowBackDialog = true }
-
-                    if (shouldShowBackDialog) {
-                        UploadImageDialog(
-                            backInfo,
-                            onDismissRequest = { shouldShowBackDialog = false }
-                        ) { shouldShowBackDialog = false }
-                    }
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                // enable LoadingButton when collectedData has both front and back
-                var continueButtonState by remember(missings) {
-                    mutableStateOf(
-                        if (missings.contains(Requirement.IDDOCUMENTFRONT) || missings.contains(
-                                Requirement.IDDOCUMENTBACK
-                            )
-                        ) {
-                            LoadingButtonState.Disabled
-                        } else {
-                            LoadingButtonState.Idle
-                        }
-                    )
-                }
-                LoadingButton(
-                    modifier = Modifier.testTag(UPLOAD_SCREEN_CONTINUE_BUTTON_TAG),
-                    text = stringResource(id = R.string.kontinue).uppercase(),
-                    state = continueButtonState
-                ) {
-                    continueButtonState = LoadingButtonState.Loading
-                    onContinueClicked()
-                }
+                )
+            }
+            LoadingButton(
+                modifier = Modifier.testTag(UPLOAD_SCREEN_CONTINUE_BUTTON_TAG),
+                text = stringResource(id = R.string.kontinue).uppercase(),
+                state = continueButtonState
+            ) {
+                continueButtonState = LoadingButtonState.Loading
+                onContinueClicked()
             }
         }
     }
@@ -250,41 +246,45 @@ internal fun UploadImageDialog(
                     fontWeight = FontWeight.Bold
                 )
                 if (uploadInfo.shouldShowTakePhoto) {
-                    TextButton(
-                        modifier = Modifier.testTag(SHOULD_SHOW_TAKE_PHOTO_TAG),
-                        contentPadding = PaddingValues(horizontal = 0.dp),
-                        onClick = {
-                            onUploadMethodSelected()
-                            uploadInfo.onPhotoSelected(UploadMethod.TAKE_PHOTO)
-                        }
+                    DialogListItem(
+                        text = stringResource(id = R.string.take_photo),
+                        testTag = SHOULD_SHOW_TAKE_PHOTO_TAG
                     ) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(id = R.string.take_photo),
-                            color = MaterialTheme.colors.onBackground.copy(alpha = 0.6f),
-                            textAlign = TextAlign.Start
-                        )
+                        onUploadMethodSelected()
+                        uploadInfo.onPhotoSelected(UploadMethod.TAKE_PHOTO)
                     }
                 }
                 if (uploadInfo.shouldShowChoosePhoto) {
-                    TextButton(
-                        modifier = Modifier.testTag(SHOULD_SHOW_CHOOSE_PHOTO_TAG),
-                        contentPadding = PaddingValues(horizontal = 0.dp),
-                        onClick = {
-                            onUploadMethodSelected()
-                            uploadInfo.onPhotoSelected(UploadMethod.CHOOSE_PHOTO)
-                        }
+                    DialogListItem(
+                        text = stringResource(id = R.string.choose_file),
+                        testTag = SHOULD_SHOW_CHOOSE_PHOTO_TAG
                     ) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(id = R.string.choose_file),
-                            color = MaterialTheme.colors.onBackground.copy(alpha = 0.6f),
-                            textAlign = TextAlign.Start
-                        )
+                        onUploadMethodSelected()
+                        uploadInfo.onPhotoSelected(UploadMethod.CHOOSE_PHOTO)
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun DialogListItem(
+    text: String,
+    testTag: String,
+    onSelected: () -> Unit,
+) {
+    TextButton(
+        modifier = Modifier.testTag(testTag),
+        contentPadding = PaddingValues(horizontal = 0.dp),
+        onClick = onSelected
+    ) {
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = text,
+            color = MaterialTheme.colors.onBackground.copy(alpha = 0.6f),
+            textAlign = TextAlign.Start
+        )
     }
 }
 

@@ -715,18 +715,18 @@ internal class IdentityViewModel constructor(
                     verificationArgs.ephemeralKeySecret
                 )
             }.fold(
-                onSuccess = { verificagionPage ->
-                    _verificationPage.postValue(Resource.success(verificagionPage))
-                    identityAnalyticsRequestFactory.verificationPage = verificagionPage
+                onSuccess = { verificationPage ->
+                    _verificationPage.postValue(Resource.success(verificationPage))
+                    identityAnalyticsRequestFactory.verificationPage = verificationPage
                     _missingRequirements.updateStateAndSave {
-                        verificagionPage.requirements.missing
+                        verificationPage.requirements.missing
                     }
                     if (shouldRetrieveModel) {
                         downloadModelAndPost(
-                            verificagionPage.documentCapture.models.idDetectorUrl,
+                            verificationPage.documentCapture.models.idDetectorUrl,
                             _idDetectorModelFile
                         )
-                        verificagionPage.selfieCapture?.let { selfieCapture ->
+                        verificationPage.selfieCapture?.let { selfieCapture ->
                             downloadModelAndPost(
                                 selfieCapture.models.faceDetectorUrl,
                                 _faceDetectorModelFile
