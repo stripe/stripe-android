@@ -89,7 +89,7 @@ internal class FinancialConnectionsSheetNativeModule {
         apiOptions: ApiRequest.Options,
         locale: Locale?,
         logger: Logger,
-        @Named(INITIAL_SYNC_RESPONSE) initialSynchronizeSessionResponse: SynchronizeSessionResponse
+        @Named(INITIAL_SYNC_RESPONSE) initialSynchronizeSessionResponse: SynchronizeSessionResponse?
     ) = FinancialConnectionsManifestRepository(
         requestExecutor = requestExecutor,
         apiRequestFactory = apiRequestFactory,
