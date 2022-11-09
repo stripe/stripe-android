@@ -2,8 +2,9 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -119,7 +120,11 @@ internal class DefaultFlowControllerTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory = ActivityScenarioFactory(context)
 
-    private val activityResultCaller = mock<ActivityResultCaller>()
+    private val activityResultRegistry: ActivityResultRegistry = mock()
+
+    private val activityResultRegistryOwner = ActivityResultRegistryOwner {
+        this@DefaultFlowControllerTest.activityResultRegistry
+    }
 
     private lateinit var activity: ComponentActivity
 
@@ -135,35 +140,40 @@ internal class DefaultFlowControllerTest {
         }
 
         whenever(
-            activityResultCaller.registerForActivityResult(
+            activityResultRegistry.register(
+                any(),
                 any<PaymentOptionContract>(),
                 any()
             )
         ).thenReturn(paymentOptionActivityLauncher)
 
         whenever(
-            activityResultCaller.registerForActivityResult(
+            activityResultRegistry.register(
+                any(),
                 any<AddressElementActivityContract>(),
                 any()
             )
         ).thenReturn(addressElementActivityLauncher)
 
         whenever(
-            activityResultCaller.registerForActivityResult(
+            activityResultRegistry.register(
+                any(),
                 any<GooglePayPaymentMethodLauncherContract>(),
                 any()
             )
         ).thenReturn(googlePayActivityLauncher)
 
         whenever(
-            activityResultCaller.registerForActivityResult(
+            activityResultRegistry.register(
+                any(),
                 any<LinkActivityContract>(),
                 any()
             )
         ).thenReturn(linkActivityResultLauncher)
 
         whenever(
-            activityResultCaller.registerForActivityResult(
+            activityResultRegistry.register(
+                any(),
                 any<PaymentLauncherContract>(),
                 any()
             )
@@ -986,11 +996,11 @@ internal class DefaultFlowControllerTest {
     ) = DefaultFlowController(
         testScope,
         lifeCycleOwner,
+        activityResultRegistryOwner,
         { activity.window.statusBarColor },
         PaymentOptionFactory(activity.resources),
         paymentOptionCallback,
         paymentResultCallback,
-        activityResultCaller,
         INJECTOR_KEY,
         flowControllerInitializer,
         mock(),

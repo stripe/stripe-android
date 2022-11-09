@@ -141,6 +141,7 @@ internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
     private val lifecycleScope: CoroutineScope,
     lifecycleOwner: LifecycleOwner,
+    activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val statusBarColor: () -> Int?,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
@@ -200,7 +201,7 @@ internal class DefaultFlowController @Inject internal constructor(
         UUID.randomUUID().toString()
     }
 
-    private fun <I, O> ActivityResultRegistryOwner.registerInFlowController(
+    private fun <I, O> ActivityResultRegistryOwner.register(
         contract: ActivityResultContract<I, O>,
         callback: ActivityResultCallback<O>,
     ): ActivityResultLauncher<I> {
@@ -213,26 +214,25 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     init {
-        val registryOwner = requireNotNull(lifecycleOwner as? ActivityResultRegistryOwner) {
-            "Some error here!"
-        }
-
-        val paymentLauncherActivityResultLauncher = registryOwner.registerInFlowController(
+        val paymentLauncherActivityResultLauncher = activityResultRegistryOwner.register(
             PaymentLauncherContract(),
             ::onPaymentResult
         )
 
-        paymentOptionActivityLauncher = registryOwner.registerInFlowController(
+        // TODO: What about unregister and re-register?
+        paymentOptionActivityLauncher = activityResultRegistryOwner.register(
             PaymentOptionContract(),
             ::onPaymentOptionResult
         )
 
-        googlePayActivityLauncher = registryOwner.registerInFlowController(
+        // TODO: What about unregister and re-register?
+        googlePayActivityLauncher = activityResultRegistryOwner.register(
             GooglePayPaymentMethodLauncherContract(),
             ::onGooglePayResult
         )
 
-        linkActivityResultLauncher = registryOwner.registerInFlowController(
+        // TODO: What about unregister and re-register?
+        linkActivityResultLauncher = activityResultRegistryOwner.register(
             LinkActivityContract(),
             ::onLinkActivityResult
         )
