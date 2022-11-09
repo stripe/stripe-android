@@ -27,7 +27,6 @@
 
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="true">
             <intent-filter>
@@ -38,7 +37,6 @@
 
         <activity android:name=".samples.activity.LaunchPaymentSheetCompleteActivity" />
         <activity android:name=".samples.activity.LaunchPaymentSheetCustomActivity" />
-        <activity android:name=".playground.activity.AppearancePlaygroundActivity"/>
         <activity android:name=".playground.activity.PaymentSheetPlaygroundActivity" />
     </application>
 

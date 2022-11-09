@@ -112,7 +112,9 @@ internal class SelfieFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         on { fpsTracker } doReturn mockFPSTracker
         on { screenTracker } doReturn mockScreenTracker
         on { uiContext } doReturn testDispatcher

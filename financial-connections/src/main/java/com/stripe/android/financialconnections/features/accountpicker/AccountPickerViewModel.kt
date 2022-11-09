@@ -88,7 +88,7 @@ internal class AccountPickerViewModel @Inject constructor(
                             .format(account.balanceAmount)
                     } else null
                 )
-            }.sortedBy { it.enabled }
+            }.sortedBy { it.account.allowSelection }
 
             AccountPickerState.Payload(
                 skipAccountSelection = activeAuthSession.skipAccountSelection == true,
@@ -148,10 +148,26 @@ internal class AccountPickerViewModel @Inject constructor(
         )
     }
 
-    private fun PartnerAccount.enabled(
+    /**
+     * in the special case that this is single account and the institution would have
+     * skipped account selection but _didn't_ (because we still saw this), we should
+     * render the variant of the AccountPicker which uses a select dropdown. This is
+     * meant to prevent showing a radio-button account picker immediately after the user
+     * interacted with a checkbox select picker, which is the predominant UX of oauth popovers today.
+     */
+    private fun selectionConfig(
         manifest: FinancialConnectionsSessionManifest
-    ) = manifest.paymentMethodType == null ||
-        supportedPaymentMethodTypes.contains(manifest.paymentMethodType)
+    ): SelectionMode =
+        when {
+            manifest.singleAccount -> when {
+                manifest.activeAuthSession?.institutionSkipAccountSelection == true &&
+                    manifest.activeAuthSession.isOAuth -> SelectionMode.DROPDOWN
+
+                else -> SelectionMode.RADIO
+            }
+
+            else -> SelectionMode.CHECKBOXES
+        }
 
     fun onAccountClicked(account: PartnerAccount) {
         withState { state ->
@@ -288,7 +304,7 @@ internal data class AccountPickerState(
     ) {
 
         val selectableAccounts
-            get() = accounts.filter { it.enabled }
+            get() = accounts.filter { it.account.allowSelection }
 
         val subtitle: TextResource?
             get() = when {
@@ -310,7 +326,6 @@ internal data class AccountPickerState(
 
     data class PartnerAccountUI(
         val account: PartnerAccount,
-        val enabled: Boolean,
         val institutionIcon: String?,
         val formattedBalance: String?,
     )

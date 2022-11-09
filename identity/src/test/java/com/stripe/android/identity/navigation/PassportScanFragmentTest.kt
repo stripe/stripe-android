@@ -91,7 +91,9 @@ class PassportScanFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         on { fpsTracker } doReturn mock()
         on { screenTracker } doReturn mockScreenTracker
         on { uiContext } doReturn testDispatcher

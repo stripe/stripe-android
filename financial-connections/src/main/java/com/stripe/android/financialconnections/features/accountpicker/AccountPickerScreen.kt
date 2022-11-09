@@ -305,13 +305,14 @@ private fun MultiSelectContent(
                 accountUI = PartnerAccountUI(
                     PartnerAccount(
                         id = "select_all_accounts",
+                        allowSelection = true,
+                        allowSelectionMessage = "",
                         authorization = "",
                         category = FinancialConnectionsAccount.Category.UNKNOWN,
                         subcategory = FinancialConnectionsAccount.Subcategory.UNKNOWN,
                         name = stringResource(R.string.stripe_account_picker_select_all_accounts),
                         supportedPaymentMethodTypes = emptyList()
                     ),
-                    enabled = true,
                     formattedBalance = null,
                     institutionIcon = null
                 )
@@ -395,7 +396,7 @@ private fun AccountItem(
                 },
                 shape = shape
             )
-            .clickable(enabled = accountUI.enabled) { onAccountClicked(account) }
+            .clickable(enabled = accountUI.allowSelection) { onAccountClicked(account) }
             .padding(vertical = verticalPadding, horizontal = 16.dp)
     ) {
         Row(
@@ -412,7 +413,7 @@ private fun AccountItem(
                     text = title,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
-                    color = if (accountUI.enabled) {
+                    color = if (accountUI.account.allowSelection) {
                         colors.textPrimary
                     } else {
                         colors.textDisabled
@@ -439,7 +440,7 @@ private fun AccountItem(
 
 @Composable
 private fun getAccountTexts(
-    accountUI: PartnerAccountUI,
+    account: PartnerAccount,
 ): Pair<String, String?> {
     val account = accountUI.account
     val title = when {
@@ -447,8 +448,8 @@ private fun getAccountTexts(
         else -> account.name
     }
     val subtitle = when {
-        accountUI.enabled.not() -> stringResource(id = R.string.stripe_account_picker_must_be_bank_account)
-        accountUI.formattedBalance != null -> accountUI.formattedBalance
+        account.allowSelection.not() -> account.allowSelectionMessage
+        account.formattedBalance != null -> account.formattedBalance
         account.encryptedNumbers.isNotEmpty() -> account.encryptedNumbers
         else -> null
     }

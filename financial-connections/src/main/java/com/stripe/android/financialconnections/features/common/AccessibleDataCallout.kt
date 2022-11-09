@@ -279,6 +279,8 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id1",
                     name = "Account 1 - no acct numbers",
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
                 ),
@@ -287,6 +289,8 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id2",
                     name = "Account 2 - no acct numbers",
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                     supportedPaymentMethodTypes = emptyList()
                 ),
@@ -295,6 +299,8 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id3",
                     name = "Account 3 - no acct numbers",
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                     supportedPaymentMethodTypes = emptyList()
                 ),
@@ -303,6 +309,8 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id4",
                     name = "Account 4 - no acct numbers",
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                     supportedPaymentMethodTypes = emptyList()
                 ),
@@ -311,6 +319,8 @@ internal fun AccessibleDataCalloutWithManyAccountsPreview() {
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id5",
                     name = "Account 5 - no acct numbers",
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                     supportedPaymentMethodTypes = emptyList()
                 )
@@ -357,6 +367,8 @@ internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
                     displayableAccountNumbers = "1234",
                     currency = "$",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     supportedPaymentMethodTypes = emptyList()
                 ),
                 PartnerAccount(
@@ -365,6 +377,8 @@ internal fun AccessibleDataCalloutWithMultipleAccountsPreview() {
                     id = "id2",
                     name = "Account 2 - no acct numbers",
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     supportedPaymentMethodTypes = emptyList()
                 )
             ),
@@ -409,6 +423,8 @@ internal fun AccessibleDataCalloutWithOneAccountPreview() {
                     displayableAccountNumbers = "1234",
                     currency = "$",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+                    allowSelection = true,
+                    allowSelectionMessage = "",
                     supportedPaymentMethodTypes = emptyList()
                 )
             ),

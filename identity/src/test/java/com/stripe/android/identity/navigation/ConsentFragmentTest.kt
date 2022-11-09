@@ -75,7 +75,9 @@ internal class ConsentFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = ARGS
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         )
         on { screenTracker }.thenReturn(mockScreenTracker)
         on { uiContext } doReturn testDispatcher
