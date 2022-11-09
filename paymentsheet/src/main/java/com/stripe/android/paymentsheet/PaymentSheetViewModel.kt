@@ -705,25 +705,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             return viewModel as T
         }
 
-//        @Suppress("UNCHECKED_CAST")
-//        override fun <T : ViewModel> create(
-//            key: String,
-//            modelClass: Class<T>,
-//            savedStateHandle: SavedStateHandle
-//        ): T {
-//            val args = starterArgsSupplier()
-//
-//            val injector = injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
-//
-//            val subcomponent = subComponentBuilderProvider.get()
-//                .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))
-//                .savedStateHandle(savedStateHandle)
-//                .build()
-//            val viewModel = subcomponent.viewModel
-//            viewModel.injector = requireNotNull(injector as NonFallbackInjector)
-//            return viewModel as T
-//        }
-
         override fun fallbackInitialize(arg: FallbackInitializeParam): Injector {
             val component = DaggerPaymentSheetLauncherComponent
                 .builder()
