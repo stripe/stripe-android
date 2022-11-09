@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.example.samples.activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.res.stringResource
@@ -11,10 +12,10 @@ import androidx.lifecycle.map
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.flowcontroller.rememberPaymentSheetFlowController
 import com.stripe.android.paymentsheet.model.PaymentOption
 
 internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
-    private lateinit var flowController: PaymentSheet.FlowController
 
     private val isLoading = MutableLiveData(true)
     private val paymentCompleted = MutableLiveData(false)
@@ -22,12 +23,6 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        flowController = PaymentSheet.FlowController.create(
-            this,
-            ::onPaymentOption,
-            ::onPaymentSheetResult
-        )
 
         val selectedPaymentMethodLabel = selectedPaymentMethod.map {
             it?.label ?: resources.getString(R.string.select)
@@ -38,6 +33,27 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
 
         setContent {
             MaterialTheme {
+                val flowController = rememberPaymentSheetFlowController(
+                    paymentOptionCallback = ::onPaymentOption,
+                    paymentResultCallback = ::onPaymentSheetResult,
+                )
+
+                LaunchedEffect(Unit) {
+                    val (customerConfig, clientSecret) = prepareCheckout()
+                    flowController.configureWithPaymentIntent(
+                        paymentIntentClientSecret = clientSecret,
+                        configuration = makeConfiguration(customerConfig)
+                    ) { success, error ->
+                        if (success) {
+                            onPaymentOption(flowController.getPaymentOption())
+                        } else {
+                            viewModel.status.postValue(
+                                "Failed to configure PaymentSheetFlowController: ${error?.message}"
+                            )
+                        }
+                    }
+                }
+
                 val isLoadingState by isLoading.observeAsState(true)
                 val paymentCompletedState by paymentCompleted.observeAsState(false)
                 val status by viewModel.status.observeAsState("")
@@ -69,14 +85,6 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
                 }
             }
         }
-
-        prepareCheckout { customerConfig, clientSecret ->
-            flowController.configureWithPaymentIntent(
-                clientSecret,
-                makeConfiguration(customerConfig),
-                ::onConfigured
-            )
-        }
     }
 
     private fun makeConfiguration(
@@ -90,16 +98,6 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
             // methods that complete payment after a delay, like SEPA Debit and Sofort.
             allowsDelayedPaymentMethods = true
         )
-    }
-
-    private fun onConfigured(success: Boolean, error: Throwable?) {
-        if (success) {
-            onPaymentOption(flowController.getPaymentOption())
-        } else {
-            viewModel.status.postValue(
-                "Failed to configure PaymentSheetFlowController: ${error?.message}"
-            )
-        }
     }
 
     private fun onPaymentOption(paymentOption: PaymentOption?) {

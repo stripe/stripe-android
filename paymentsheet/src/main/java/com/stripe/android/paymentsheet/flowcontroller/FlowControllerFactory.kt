@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
@@ -18,7 +18,7 @@ internal class FlowControllerFactory(
     private val lifecycleScope: CoroutineScope,
     private val lifecycleOwner: LifecycleOwner,
     private val appContext: Context,
-    private val activityResultCaller: ActivityResultCaller,
+    private val activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val statusBarColor: () -> Int?,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
@@ -29,15 +29,15 @@ internal class FlowControllerFactory(
         paymentOptionCallback: PaymentOptionCallback,
         paymentResultCallback: PaymentSheetResultCallback
     ) : this(
-        activity,
-        activity.lifecycleScope,
-        activity,
-        activity.applicationContext,
-        activity,
-        { activity.window.statusBarColor },
-        PaymentOptionFactory(activity.resources),
-        paymentOptionCallback,
-        paymentResultCallback
+        viewModelStoreOwner = activity,
+        lifecycleScope = activity.lifecycleScope,
+        lifecycleOwner = activity,
+        appContext = activity.applicationContext,
+        activityResultRegistryOwner = activity,
+        statusBarColor = { activity.window.statusBarColor },
+        paymentOptionFactory = PaymentOptionFactory(activity.resources),
+        paymentOptionCallback = paymentOptionCallback,
+        paymentResultCallback = paymentResultCallback,
     )
 
     constructor(
@@ -45,27 +45,26 @@ internal class FlowControllerFactory(
         paymentOptionCallback: PaymentOptionCallback,
         paymentResultCallback: PaymentSheetResultCallback
     ) : this(
-        fragment,
-        fragment.lifecycleScope,
-        fragment,
-        fragment.requireContext(),
-        fragment,
-        { fragment.activity?.window?.statusBarColor },
-        PaymentOptionFactory(fragment.resources),
-        paymentOptionCallback,
-        paymentResultCallback
+        viewModelStoreOwner = fragment,
+        lifecycleScope = fragment.lifecycleScope,
+        lifecycleOwner = fragment,
+        appContext = fragment.requireContext(),
+        activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner) ?: fragment.requireActivity(),
+        statusBarColor = { fragment.activity?.window?.statusBarColor },
+        paymentOptionFactory = PaymentOptionFactory(fragment.resources),
+        paymentOptionCallback = paymentOptionCallback,
+        paymentResultCallback = paymentResultCallback,
     )
 
-    fun create(): PaymentSheet.FlowController =
-        DefaultFlowController.getInstance(
-            appContext = appContext,
-            viewModelStoreOwner = viewModelStoreOwner,
-            lifecycleScope = lifecycleScope,
-            lifecycleOwner = lifecycleOwner,
-            activityResultCaller = activityResultCaller,
-            statusBarColor = statusBarColor,
-            paymentOptionFactory = paymentOptionFactory,
-            paymentOptionCallback = paymentOptionCallback,
-            paymentResultCallback = paymentResultCallback
-        )
+    fun create(): PaymentSheet.FlowController = DefaultFlowController.getInstance(
+        appContext = appContext,
+        viewModelStoreOwner = viewModelStoreOwner,
+        lifecycleScope = lifecycleScope,
+        lifecycleOwner = lifecycleOwner,
+        activityResultRegistryOwner = activityResultRegistryOwner,
+        statusBarColor = statusBarColor,
+        paymentOptionFactory = paymentOptionFactory,
+        paymentOptionCallback = paymentOptionCallback,
+        paymentResultCallback = paymentResultCallback
+    )
 }

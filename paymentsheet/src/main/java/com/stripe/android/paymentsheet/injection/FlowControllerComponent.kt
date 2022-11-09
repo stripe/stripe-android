@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.core.injection.CoreCommonModule
@@ -54,7 +54,9 @@ internal interface FlowControllerComponent {
         fun lifeCycleOwner(lifecycleOwner: LifecycleOwner): Builder
 
         @BindsInstance
-        fun activityResultCaller(activityResultCaller: ActivityResultCaller): Builder
+        fun activityResultRegistryOwner(
+            activityResultRegistryOwner: ActivityResultRegistryOwner,
+        ): Builder
 
         @BindsInstance
         fun statusBarColor(statusBarColor: () -> Int?): Builder

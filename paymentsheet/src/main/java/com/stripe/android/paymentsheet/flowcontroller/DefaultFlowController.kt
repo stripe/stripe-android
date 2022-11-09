@@ -2,13 +2,23 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.os.Parcelable
-import androidx.activity.result.ActivityResultCaller
+import androidx.activity.compose.LocalActivityResultRegistryOwner
+import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.VisibleForTesting
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.Injectable
@@ -70,11 +80,60 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
+
+@Composable
+fun rememberPaymentSheetFlowController(
+    paymentOptionCallback: PaymentOptionCallback,
+    paymentResultCallback: PaymentSheetResultCallback,
+): PaymentSheet.FlowController {
+    val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
+        "PaymentSheet.FlowController should be created with access to a ViewModelStoreOwner"
+    }
+
+    val activityResultRegistryOwner = requireNotNull(
+        LocalActivityResultRegistryOwner.current
+    ) {
+        "PaymentSheet.FlowController should be created with access to a ActivityResultRegistryOwner"
+    }
+
+    val appContext = LocalContext.current.applicationContext
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    val activity = requireActivity(LocalContext.current) {
+        "PaymentSheet.FlowController should be created in the context of an Activity"
+    }
+
+    return remember {
+        FlowControllerFactory(
+            viewModelStoreOwner = viewModelStoreOwner,
+            lifecycleScope = lifecycleOwner.lifecycleScope,
+            lifecycleOwner = lifecycleOwner,
+            appContext = appContext,
+            activityResultRegistryOwner = activityResultRegistryOwner,
+            statusBarColor = { activity.window?.statusBarColor },
+            paymentOptionFactory = PaymentOptionFactory(appContext.resources),
+            paymentOptionCallback = paymentOptionCallback,
+            paymentResultCallback = paymentResultCallback,
+        ).create()
+    }
+}
+
+private fun requireActivity(context: Context, errorMessage: () -> String): Activity {
+    var currentContext = context
+    while (currentContext is ContextWrapper) {
+        if (currentContext is Activity) {
+            return currentContext
+        }
+        currentContext = currentContext.baseContext
+    }
+    throw IllegalStateException(errorMessage())
+}
 
 @FlowPreview
 @Singleton
@@ -86,7 +145,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
-    activityResultCaller: ActivityResultCaller,
     @InjectorKey private val injectorKey: String,
     // Properties provided through injection
     private val flowControllerInitializer: FlowControllerInitializer,
@@ -138,44 +196,73 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
+    private val uuid: String by lazy {
+        UUID.randomUUID().toString()
+    }
+
+    private fun <I, O> ActivityResultRegistryOwner.registerInFlowController(
+        contract: ActivityResultContract<I, O>,
+        callback: ActivityResultCallback<O>,
+    ): ActivityResultLauncher<I> {
+        val key = "FlowController_${uuid}_${contract::class.java.name}"
+        return activityResultRegistry.register(
+            key,
+            contract,
+            callback,
+        )
+    }
+
     init {
+        val registryOwner = requireNotNull(lifecycleOwner as? ActivityResultRegistryOwner) {
+            "Some error here!"
+        }
+
+        val paymentLauncherActivityResultLauncher = registryOwner.registerInFlowController(
+            PaymentLauncherContract(),
+            ::onPaymentResult
+        )
+
+        paymentOptionActivityLauncher = registryOwner.registerInFlowController(
+            PaymentOptionContract(),
+            ::onPaymentOptionResult
+        )
+
+        googlePayActivityLauncher = registryOwner.registerInFlowController(
+            GooglePayPaymentMethodLauncherContract(),
+            ::onGooglePayResult
+        )
+
+        linkActivityResultLauncher = registryOwner.registerInFlowController(
+            LinkActivityContract(),
+            ::onLinkActivityResult
+        )
+
+        val activityResultLaunchers = setOf(
+            paymentLauncherActivityResultLauncher,
+            paymentOptionActivityLauncher,
+            googlePayActivityLauncher,
+            linkActivityResultLauncher,
+        )
+
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onCreate(owner: LifecycleOwner) {
                     paymentLauncher = paymentLauncherFactory.create(
-                        { lazyPaymentConfiguration.get().publishableKey },
-                        { lazyPaymentConfiguration.get().stripeAccountId },
-                        activityResultCaller.registerForActivityResult(
-                            PaymentLauncherContract(),
-                            ::onPaymentResult
-                        )
+                        publishableKey = { lazyPaymentConfiguration.get().publishableKey },
+                        stripeAccountId = { lazyPaymentConfiguration.get().stripeAccountId },
+                        hostActivityLauncher = paymentLauncherActivityResultLauncher,
                     ).also {
                         it.registerPollingAuthenticator()
                     }
                 }
 
                 override fun onDestroy(owner: LifecycleOwner) {
+                    activityResultLaunchers.forEach { it.unregister() }
                     paymentLauncher?.unregisterPollingAuthenticator()
                     paymentLauncher = null
                 }
             }
         )
-
-        paymentOptionActivityLauncher =
-            activityResultCaller.registerForActivityResult(
-                PaymentOptionContract(),
-                ::onPaymentOptionResult
-            )
-        googlePayActivityLauncher =
-            activityResultCaller.registerForActivityResult(
-                GooglePayPaymentMethodLauncherContract(),
-                ::onGooglePayResult
-            )
-        linkActivityResultLauncher =
-            activityResultCaller.registerForActivityResult(
-                LinkActivityContract(),
-                ::onLinkActivityResult
-            )
     }
 
     override fun configureWithPaymentIntent(
@@ -564,7 +651,7 @@ internal class DefaultFlowController @Inject internal constructor(
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleScope: CoroutineScope,
             lifecycleOwner: LifecycleOwner,
-            activityResultCaller: ActivityResultCaller,
+            activityResultRegistryOwner: ActivityResultRegistryOwner,
             statusBarColor: () -> Int?,
             paymentOptionFactory: PaymentOptionFactory,
             paymentOptionCallback: PaymentOptionCallback,
@@ -579,7 +666,8 @@ internal class DefaultFlowController @Inject internal constructor(
                 .viewModelStoreOwner(viewModelStoreOwner)
                 .lifecycleScope(lifecycleScope)
                 .lifeCycleOwner(lifecycleOwner)
-                .activityResultCaller(activityResultCaller)
+//                .activityResultCaller(activityResultCaller)
+                .activityResultRegistryOwner(activityResultRegistryOwner)
                 .statusBarColor(statusBarColor)
                 .paymentOptionFactory(paymentOptionFactory)
                 .paymentOptionCallback(paymentOptionCallback)
