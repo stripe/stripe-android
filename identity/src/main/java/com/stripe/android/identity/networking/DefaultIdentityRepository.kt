@@ -27,6 +27,7 @@ import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.net.URLEncoder
 import javax.inject.Inject
 
 internal class DefaultIdentityRepository @Inject constructor(
@@ -41,6 +42,11 @@ internal class DefaultIdentityRepository @Inject constructor(
         encodeDefaults = true
     }
 
+    /**
+     * URL-encode a string. This is useful for sanitizing untrusted data for use in URLs.
+     */
+    private fun urlEncode(value: String): String = URLEncoder.encode(value, Charsets.UTF_8.name())
+
     private val stripeErrorJsonParser = StripeErrorJsonParser()
     private val stripeFileJsonParser = StripeFileJsonParser()
 
@@ -53,7 +59,7 @@ internal class DefaultIdentityRepository @Inject constructor(
         ephemeralKey: String
     ): VerificationPage = executeRequestWithKSerializer(
         apiRequestFactory.createGet(
-            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id",
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}",
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
             )
@@ -68,7 +74,7 @@ internal class DefaultIdentityRepository @Inject constructor(
         clearDataParam: ClearDataParam
     ): VerificationPageData = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
-            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id/$DATA",
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$DATA",
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
             ),
@@ -85,7 +91,7 @@ internal class DefaultIdentityRepository @Inject constructor(
         ephemeralKey: String
     ): VerificationPageData = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
-            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id/$SUBMIT",
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$SUBMIT",
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
             )

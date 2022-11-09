@@ -6,6 +6,7 @@ import com.stripe.android.core.networking.toMap
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
+import java.net.URLEncoder
 import java.nio.charset.Charset
 
 private val json = Json {
@@ -40,3 +41,8 @@ internal fun <T> encodeToJson(serializer: SerializationStrategy<T>, value: T): S
  */
 internal fun <T> decodeFromJson(deserializer: DeserializationStrategy<T>, value: String): T =
     json.decodeFromString(deserializer, value)
+
+/**
+ * URL-encode a string. This is useful for sanitizing untrusted data for use in URLs.
+ */
+internal fun urlEncode(value: String): String = URLEncoder.encode(value, Charsets.UTF_8.name())
