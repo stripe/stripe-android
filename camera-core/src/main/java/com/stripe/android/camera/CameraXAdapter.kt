@@ -192,7 +192,9 @@ class CameraXAdapter(
             activity.display
         } else {
             null
-        } ?: @Suppress("Deprecation") activity.windowManager.defaultDisplay
+        }
+            ?: @Suppress("Deprecation")
+            activity.windowManager.defaultDisplay
     }
 
     private val displayRotation by lazy { display.rotation }
