@@ -445,7 +445,8 @@ private fun getAccountTexts(
 ): Pair<String, String?> {
     val account = accountUI.account
     val title = when {
-        accountUI.formattedBalance != null -> "${account.name} ${account.encryptedNumbers}"
+        account.allowSelection.not() ||
+            accountUI.formattedBalance != null -> "${account.name} ${account.encryptedNumbers}"
         else -> account.name
     }
     val subtitle = when {

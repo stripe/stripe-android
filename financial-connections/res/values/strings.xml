@@ -52,7 +52,7 @@
     <string name="stripe_account_picker_loading_title">Retrieving accounts</string>
     <string name="stripe_account_picker_loading_desc">Please wait while Stripe loads your accounts</string>
     <string name="stripe_account_picker_select_account">Select your account</string>
-    <string name="stripe_account_picker_singleselect_account">Confirm account</string>
+    <string name="stripe_account_picker_singleselect_account">Confirm your account</string>
     <string name="stripe_account_picker_multiselect_account">Select accounts</string>
     <string name="stripe_account_picker_confirm">Confirm</string>
     <string name="stripe_success_title">Success!</string>
