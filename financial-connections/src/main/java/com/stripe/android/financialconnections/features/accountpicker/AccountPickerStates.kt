@@ -123,10 +123,10 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     name = "Very long institution that is already linked",
                     displayableAccountNumbers = "1234",
                     linkedAccountId = "linkedAccountId",
+                    allowSelection = true,
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                enabled = true,
                 institutionIcon = null,
                 formattedBalance = null
             )

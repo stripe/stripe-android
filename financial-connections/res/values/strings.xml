@@ -52,11 +52,9 @@
     <string name="stripe_account_picker_loading_title">Retrieving accounts</string>
     <string name="stripe_account_picker_loading_desc">Please wait while Stripe loads your accounts</string>
     <string name="stripe_account_picker_select_account">Select your account</string>
+    <string name="stripe_account_picker_singleselect_account">Confirm account</string>
     <string name="stripe_account_picker_multiselect_account">Select accounts</string>
-    <plurals name="stripe_account_picker_confirm">
-        <item quantity="one">Select account</item>
-        <item quantity="other">Select accounts</item>
-    </plurals>
+    <string name="stripe_account_picker_confirm">Confirm</string>
     <string name="stripe_success_title">Success!</string>
     <string name="stripe_search">Search</string>
     <string name="stripe_account_picker_dropdown_hint">Choose one</string>
@@ -128,7 +126,6 @@
     <string name="stripe_accountpicker_singleaccount_description_withstripe">Stripe only needs one account at this time.</string>
     <string name="stripe_accountpicker_singleaccount_description">%1$s only needs one account at this time.</string>
     <string name="stripe_accountpicker_singleaccount_description_nobusinessname">This merchant only needs one account at this time.</string>
-    <string name="stripe_account_picker_must_be_bank_account">Must be checking or savings account</string>
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
     <plurals name="stripe_success_desc">
         <item quantity="zero" />

@@ -31,7 +31,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -207,7 +206,12 @@ private fun AccountPickerLoaded(
             Text(
                 modifier = Modifier
                     .fillMaxWidth(),
-                text = stringResource(R.string.stripe_account_picker_multiselect_account),
+                text = stringResource(
+                    when (selectionMode) {
+                        SelectionMode.RADIO -> R.string.stripe_account_picker_singleselect_account
+                        SelectionMode.CHECKBOXES -> R.string.stripe_account_picker_multiselect_account
+                    }
+                ),
                 style = FinancialConnectionsTheme.typography.subtitle
             )
             subtitle?.let {
@@ -252,10 +256,7 @@ private fun AccountPickerLoaded(
                 .fillMaxWidth()
         ) {
             Text(
-                text = pluralStringResource(
-                    R.plurals.stripe_account_picker_confirm,
-                    selectedIds.size
-                )
+                text = stringResource(R.string.stripe_account_picker_confirm)
             )
         }
     }
@@ -396,7 +397,7 @@ private fun AccountItem(
                 },
                 shape = shape
             )
-            .clickable(enabled = accountUI.allowSelection) { onAccountClicked(account) }
+            .clickable(enabled = accountUI.account.allowSelection) { onAccountClicked(account) }
             .padding(vertical = verticalPadding, horizontal = 16.dp)
     ) {
         Row(
@@ -440,7 +441,7 @@ private fun AccountItem(
 
 @Composable
 private fun getAccountTexts(
-    account: PartnerAccount,
+    accountUI: PartnerAccountUI,
 ): Pair<String, String?> {
     val account = accountUI.account
     val title = when {
@@ -449,7 +450,7 @@ private fun getAccountTexts(
     }
     val subtitle = when {
         account.allowSelection.not() -> account.allowSelectionMessage
-        account.formattedBalance != null -> account.formattedBalance
+        accountUI.formattedBalance != null -> accountUI.formattedBalance
         account.encryptedNumbers.isNotEmpty() -> account.encryptedNumbers
         else -> null
     }

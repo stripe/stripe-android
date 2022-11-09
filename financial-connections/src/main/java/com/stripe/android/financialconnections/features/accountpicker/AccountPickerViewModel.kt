@@ -23,7 +23,6 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -79,7 +78,6 @@ internal class AccountPickerViewModel @Inject constructor(
                 AccountPickerState.PartnerAccountUI(
                     account = account,
                     institutionIcon = activeInstitution?.icon?.default,
-                    enabled = account.enabled(manifest),
                     formattedBalance =
                     if (account.balanceAmount != null && account.currency != null) {
                         NumberFormat
@@ -88,7 +86,7 @@ internal class AccountPickerViewModel @Inject constructor(
                             .format(account.balanceAmount)
                     } else null
                 )
-            }.sortedBy { it.account.allowSelection }
+            }.sortedBy { it.account.allowSelection.not() }
 
             AccountPickerState.Payload(
                 skipAccountSelection = activeAuthSession.skipAccountSelection == true,
@@ -147,27 +145,6 @@ internal class AccountPickerViewModel @Inject constructor(
             }
         )
     }
-
-    /**
-     * in the special case that this is single account and the institution would have
-     * skipped account selection but _didn't_ (because we still saw this), we should
-     * render the variant of the AccountPicker which uses a select dropdown. This is
-     * meant to prevent showing a radio-button account picker immediately after the user
-     * interacted with a checkbox select picker, which is the predominant UX of oauth popovers today.
-     */
-    private fun selectionConfig(
-        manifest: FinancialConnectionsSessionManifest
-    ): SelectionMode =
-        when {
-            manifest.singleAccount -> when {
-                manifest.activeAuthSession?.institutionSkipAccountSelection == true &&
-                    manifest.activeAuthSession.isOAuth -> SelectionMode.DROPDOWN
-
-                else -> SelectionMode.RADIO
-            }
-
-            else -> SelectionMode.CHECKBOXES
-        }
 
     fun onAccountClicked(account: PartnerAccount) {
         withState { state ->
