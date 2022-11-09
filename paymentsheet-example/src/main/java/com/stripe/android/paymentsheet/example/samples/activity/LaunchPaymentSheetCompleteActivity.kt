@@ -6,15 +6,16 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.rememberPaymentSheet
 
 internal class LaunchPaymentSheetCompleteActivity : BasePaymentSheetActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
-
         setContent {
             MaterialTheme {
+                val paymentSheet = rememberPaymentSheet(callback = ::onPaymentSheetResult)
+
                 val inProgress by viewModel.inProgress.observeAsState(false)
                 val status by viewModel.status.observeAsState("")
 

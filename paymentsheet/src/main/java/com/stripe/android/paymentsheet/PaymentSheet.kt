@@ -1,13 +1,20 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import android.content.Context
 import android.content.res.ColorStateList
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
 import com.stripe.android.link.account.CookieStore
 import com.stripe.android.model.PaymentIntent
@@ -19,12 +26,32 @@ import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
 
+@Composable
+fun rememberPaymentSheet(
+    callback: PaymentSheetResultCallback,
+): PaymentSheet {
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        contract = PaymentSheetContract(),
+        onResult = callback::onPaymentSheetResult,
+    )
+
+    val paymentSheetLauncher = DefaultPaymentSheetLauncher(
+        activityResultLauncher = activityResultLauncher,
+        application = LocalContext.current.applicationContext as Application,
+    )
+
+    return remember {
+        PaymentSheet(paymentSheetLauncher)
+    }
+}
+
 /**
  * A drop-in class that presents a bottom sheet to collect and process a customer's payment.
  */
 class PaymentSheet internal constructor(
     private val paymentSheetLauncher: PaymentSheetLauncher
 ) {
+
     /**
      * Constructor to be used when launching the payment sheet from an Activity.
      *
@@ -35,7 +62,13 @@ class PaymentSheet internal constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback
     ) : this(
-        DefaultPaymentSheetLauncher(activity, callback)
+        DefaultPaymentSheetLauncher(
+            activityResultLauncher = activity.registerForActivityResult(
+                PaymentSheetContract(),
+                callback::onPaymentSheetResult,
+            ),
+            application = activity.application,
+        )
     )
 
     /**
@@ -48,7 +81,13 @@ class PaymentSheet internal constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback
     ) : this(
-        DefaultPaymentSheetLauncher(fragment, callback)
+        DefaultPaymentSheetLauncher(
+            activityResultLauncher = fragment.registerForActivityResult(
+                PaymentSheetContract(),
+                callback::onPaymentSheetResult,
+            ),
+            application = fragment.requireActivity().application,
+        )
     )
 
     /**
