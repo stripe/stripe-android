@@ -666,7 +666,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 .viewModelStoreOwner(viewModelStoreOwner)
                 .lifecycleScope(lifecycleScope)
                 .lifeCycleOwner(lifecycleOwner)
-//                .activityResultCaller(activityResultCaller)
                 .activityResultRegistryOwner(activityResultRegistryOwner)
                 .statusBarColor(statusBarColor)
                 .paymentOptionFactory(paymentOptionFactory)

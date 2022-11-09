@@ -33,13 +33,14 @@ fun rememberPaymentSheet(
         onResult = callback::onPaymentSheetResult,
     )
 
-    val paymentSheetLauncher = DefaultPaymentSheetLauncher(
-        activityResultLauncher = activityResultLauncher,
-        application = LocalContext.current.applicationContext as Application,
-    )
+    val context = LocalContext.current
 
     return remember {
-        PaymentSheet(paymentSheetLauncher)
+        val launcher = DefaultPaymentSheetLauncher(
+            activityResultLauncher = activityResultLauncher,
+            application = context.applicationContext as Application,
+        )
+        PaymentSheet(launcher)
     }
 }
 
@@ -49,7 +50,6 @@ fun rememberPaymentSheet(
 class PaymentSheet internal constructor(
     private val paymentSheetLauncher: PaymentSheetLauncher
 ) {
-
     /**
      * Constructor to be used when launching the payment sheet from an Activity.
      *
@@ -60,13 +60,7 @@ class PaymentSheet internal constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback
     ) : this(
-        DefaultPaymentSheetLauncher(
-            activityResultLauncher = activity.registerForActivityResult(
-                PaymentSheetContract(),
-                callback::onPaymentSheetResult,
-            ),
-            application = activity.application,
-        )
+        DefaultPaymentSheetLauncher(activity, callback)
     )
 
     /**
@@ -79,13 +73,7 @@ class PaymentSheet internal constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback
     ) : this(
-        DefaultPaymentSheetLauncher(
-            activityResultLauncher = fragment.registerForActivityResult(
-                PaymentSheetContract(),
-                callback::onPaymentSheetResult,
-            ),
-            application = fragment.requireActivity().application,
-        )
+        DefaultPaymentSheetLauncher(fragment, callback)
     )
 
     /**
