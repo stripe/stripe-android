@@ -58,12 +58,12 @@ class ImageLruDiskCache(
             try {
                 editor = diskLruCache.edit(hashedKey)
                 if (editor == null) return
-                val (compressFormat, quality) = getBitmapConfigFromUrl(key)
+                val compressFormat = compressFormatFromUrl(key)
                 if (writeBitmapToFile(
                         bitmap = data,
                         editor = editor,
                         compressFormat = compressFormat,
-                        compressQuality = quality
+                        compressQuality = compressFormat.quality()
                     )
                 ) {
                     diskLruCache.flush()
@@ -80,14 +80,18 @@ class ImageLruDiskCache(
         }
     }
 
-    private fun getBitmapConfigFromUrl(url: String): Pair<CompressFormat, Int> {
+    private fun compressFormatFromUrl(url: String): CompressFormat {
         return when {
-            url.endsWith("png") -> CompressFormat.PNG to PNG_COMPRESS_QUALITY
-            url.endsWith("jpg") ||
-                url.endsWith("jpeg") -> CompressFormat.JPEG to JPEG_COMPRESS_QUALITY
-            url.endsWith("webp") -> CompressFormat.WEBP to WEBP_COMPRESS_QUALITY
-            else -> CompressFormat.JPEG to JPEG_COMPRESS_QUALITY
+            url.endsWith("png") -> CompressFormat.PNG
+            url.endsWith("webp") -> CompressFormat.WEBP
+            else -> CompressFormat.JPEG
         }
+    }
+
+    private fun CompressFormat.quality(): Int = when (this) {
+        CompressFormat.PNG -> PNG_COMPRESS_QUALITY
+        CompressFormat.WEBP -> WEBP_COMPRESS_QUALITY
+        else -> JPEG_COMPRESS_QUALITY
     }
 
     fun getBitmap(key: String): Bitmap? {
