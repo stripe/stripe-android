@@ -860,7 +860,6 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
-                    shippingDetails = null,
                     allowsPaymentMethodsRequiringShippingAddress = true,
                 )
             )
@@ -869,6 +868,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.setStripeIntent(
             PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("afterpay_clearpay"),
+                shipping = null,
             )
         )
 
@@ -881,14 +881,6 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
-                    shippingDetails = AddressDetails(
-                        name = "Test Name",
-                        address = PaymentSheet.Address(
-                            line1 = "123 Main Street",
-                            postalCode = "12345",
-                            country = "US",
-                        ),
-                    ),
                     allowsPaymentMethodsRequiringShippingAddress = false,
                 )
             )
