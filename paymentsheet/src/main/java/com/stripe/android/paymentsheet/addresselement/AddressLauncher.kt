@@ -200,20 +200,18 @@ class AddressLauncher internal constructor(
             REQUIRED
         }
     }
+}
 
-    companion object {
-        @Composable
-        fun rememberLauncher(
-            callback: AddressLauncherResultCallback
-        ): AddressLauncher {
-            val activityResultLauncher = rememberLauncherForActivityResult(
-                contract = AddressElementActivityContract(),
-                onResult = callback::onAddressLauncherResult
-            )
+@Composable
+fun rememberAddressLauncher(
+    callback: AddressLauncherResultCallback
+): AddressLauncher {
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        contract = AddressElementActivityContract(),
+        onResult = callback::onAddressLauncherResult
+    )
 
-            return remember {
-                AddressLauncher(activityResultLauncher)
-            }
-        }
+    return remember {
+        AddressLauncher(activityResultLauncher)
     }
 }
