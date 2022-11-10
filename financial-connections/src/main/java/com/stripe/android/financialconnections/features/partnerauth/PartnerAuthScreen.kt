@@ -1,21 +1,17 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -237,19 +233,10 @@ private fun PrePaneContent(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(R.string.stripe_prepane_continue),
-                    modifier = Modifier.align(Alignment.Center),
-                    textAlign = TextAlign.Center
-                )
-                Icon(
-                    painterResource(id = R.drawable.stripe_ic_external),
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                    tint = FinancialConnectionsTheme.colors.textWhite,
-                    contentDescription = stringResource(R.string.stripe_prepane_continue)
-                )
-            }
+            Text(
+                text = stringResource(R.string.stripe_prepane_continue),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

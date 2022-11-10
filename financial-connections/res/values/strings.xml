@@ -3,26 +3,6 @@
     <string name="consent_pane_tc">You agree to Stripe\'s <annotation clickable="terms">Terms</annotation> and <annotation clickable="privacy">Privacy Policy</annotation>. <annotation clickable="privacy_center">Learn more</annotation></string>
     <string name="consent_pane_manual_entry"><annotation clickable="manual_entry">Enter account details manually instead</annotation></string>
     <string name="consent_pane_manual_entry_microdeposits"><annotation clickable="manual_entry">Enter account details manually instead</annotation> (takes 1–2 business days)</string>
-    <string name="stripe_consent_pane_title">%1$s works with Stripe to link your accounts</string>
-    <string name="stripe_consent_pane_title_no_businessname">This business works with Stripe to link your accounts</string>
-    <string name="stripe_consent_pane_title_connected_account">%1$s and %2%s work with Stripe to link your accounts</string>
-    <string name="stripe_consent_pane_body1">Stripe will allow %1$s to access only the <annotation clickable="data">data requested</annotation>. We never share your login details with them.</string>
-    <string name="stripe_consent_pane_body1_connected_account">%1$s partners with %2$s. Stripe will allow them to access only the <annotation clickable="data">data requested</annotation>.</string>
-    <string name="stripe_consent_pane_body1_no_businessname">tripe will allow this business to access only the <annotation clickable="data">data requested</annotation>. We never share your login details with them.</string>
-    <string name="stripe_consent_pane_body2">Your data is encrypted for your protection.</string>
-    <string name="stripe_consent_pane_body3">You can <annotation clickable="disconnect">disconnect</annotation> your accounts at anytime.</string>
-    <string name="stripe_consent_pane_agree">Agree</string>
-    <string name="stripe_consent_requested_data_title">Data requested by %1$s for the account you link:</string>
-    <string name="stripe_consent_requested_data_title_no_businessname">Data requested by this business for the account you link:</string>
-    <string name="stripe_consent_requested_data_accountdetails_title">Account details</string>
-    <string name="stripe_consent_requested_data_accountdetails_desc">Account number, routing number, account type, account nickname</string>
-    <string name="stripe_consent_requested_data_balances_title">Balances</string>
-    <string name="stripe_consent_requested_data_balances_desc">Current and pending balances when requested</string>
-    <string name="stripe_consent_requested_data_transactions_title">Transactions</string>
-    <string name="stripe_consent_requested_data_transactions_desc">Current and pending transactions when requested</string>
-    <string name="stripe_consent_requested_data_ownership_title">Account owner information</string>
-    <string name="stripe_consent_requested_data_ownership_desc">Account owner name and mailing address associated with your account</string>
-    <string name="stripe_consent_requested_data_learnmore"><annotation clickable="data_access">Learn more about data access</annotation></string>
     <string name="stripe_ok">OK</string>
     <string name="stripe_prepane_title">Link with %1$s</string>
     <string name="stripe_prepane_desc">A new window will open for you to log in and select the %1$s account(s) you want to link.\n\nThis page will update once you’re done.</string>
