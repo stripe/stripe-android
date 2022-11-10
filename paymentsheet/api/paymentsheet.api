@@ -1635,9 +1635,6 @@ public final class com/stripe/android/paymentsheet/repositories/StripeIntentRepo
 	public static fun newInstance (Lcom/stripe/android/networking/StripeRepository;Ljavax/inject/Provider;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/paymentsheet/repositories/StripeIntentRepository$Api;
 }
 
-public final class com/stripe/android/paymentsheet/ui/AddressOptionsAppBarKt {
-}
-
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentMethodFormKt {
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentMethodFormKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
