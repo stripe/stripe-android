@@ -88,7 +88,9 @@ class PassportUploadFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         )
         whenever(it.screenTracker).thenReturn(mockScreenTracker)
         whenever(it.uiContext).thenReturn(testDispatcher)
@@ -165,7 +167,7 @@ class PassportUploadFragmentTest {
     fun `upload front - kontinue enabled`() {
         launchFragment { binding, _, fragment ->
             runBlocking {
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
                 )
 

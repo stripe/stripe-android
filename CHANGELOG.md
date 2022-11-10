@@ -2,6 +2,13 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+## 20.15.4 - 2022-11-07
+
+### CardScan
+* [FIXED][5768](https://github.com/stripe/stripe-android/pull/5768) Fixed SDK version reporting in cardscan scan stats
+
+### Identity
+* [FIXED][5762](https://github.com/stripe/stripe-android/pull/5762) Use a custom implementation of FileProvider to avoid collision with client app. 
 
 ## 20.15.3 - 2022-10-31
 

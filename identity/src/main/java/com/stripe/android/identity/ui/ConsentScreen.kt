@@ -41,7 +41,6 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isUnsupportedClient
-import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.getDrawableFromUri
@@ -65,8 +64,8 @@ internal fun ConsentScreen(
     onSuccess: (VerificationPage) -> Unit,
     onFallbackUrl: (String) -> Unit,
     onError: (Throwable) -> Unit,
-    onConsentAgreed: (Boolean) -> Unit,
-    onConsentDeclined: (Boolean) -> Unit
+    onConsentAgreed: () -> Unit,
+    onConsentDeclined: () -> Unit
 ) {
     MdcTheme {
         when (verificationState.status) {
@@ -109,10 +108,9 @@ internal fun ConsentScreen(
 private fun SuccessUI(
     merchantLogoUri: Uri,
     verificationPage: VerificationPage,
-    onConsentAgreed: (Boolean) -> Unit,
-    onConsentDeclined: (Boolean) -> Unit
+    onConsentAgreed: () -> Unit,
+    onConsentDeclined: () -> Unit
 ) {
-    val requireSelfie = verificationPage.requireSelfie()
     val consentPage = verificationPage.biometricConsent
 
     Column(
@@ -289,7 +287,7 @@ private fun SuccessUI(
         ) {
             acceptState = LoadingButtonState.Loading
             declineState = LoadingButtonState.Disabled
-            onConsentAgreed(requireSelfie)
+            onConsentAgreed()
         }
 
         LoadingButton(
@@ -300,7 +298,7 @@ private fun SuccessUI(
         ) {
             acceptState = LoadingButtonState.Disabled
             declineState = LoadingButtonState.Loading
-            onConsentDeclined(requireSelfie)
+            onConsentDeclined()
         }
     }
 }

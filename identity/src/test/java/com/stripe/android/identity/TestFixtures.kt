@@ -2,10 +2,10 @@ package com.stripe.android.identity
 
 import com.stripe.android.identity.networking.VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING
 import com.stripe.android.identity.networking.VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING
+import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
-import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import kotlinx.serialization.json.Json
 
 internal const val ERROR_BODY = "errorBody"
@@ -37,7 +37,7 @@ internal val VERIFICATION_PAGE_DATA_MISSING_BACK = VerificationPageData(
     objectType = "type",
     requirements = VerificationPageDataRequirements(
         errors = emptyList(),
-        missings = listOf(VerificationPageRequirements.Missing.IDDOCUMENTBACK)
+        missings = listOf(Requirement.IDDOCUMENTBACK)
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
     submitted = false

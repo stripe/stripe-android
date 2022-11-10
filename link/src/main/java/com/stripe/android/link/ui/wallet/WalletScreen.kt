@@ -296,7 +296,6 @@ internal fun WalletBody(
         if (uiState.selectedItem is ConsumerPaymentDetails.BankAccount) {
             Html(
                 html = stringResource(R.string.wallet_bank_account_terms).replaceHyperlinks(),
-                imageGetter = emptyMap(),
                 color = MaterialTheme.colors.onSecondary,
                 style = MaterialTheme.typography.caption,
                 modifier = Modifier
