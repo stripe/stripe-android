@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
@@ -45,6 +46,10 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
         }.getOrElse {
             finishWithResult(PaymentResult.Failed(it))
             return
+        }
+
+        onBackPressedDispatcher.addCallback {
+            // Prevent back presses while confirming payment
         }
 
         args.statusBarColor?.let {

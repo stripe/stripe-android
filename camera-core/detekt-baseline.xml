@@ -27,6 +27,7 @@
     <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter$360</ID>
     <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter.CameraPreview$8</ID>
     <ID>MagicNumber:CameraAdapter.kt$CameraAdapter.Companion$90</ID>
+    <ID>MagicNumber:CameraXAdapter.kt$4</ID>
     <ID>MagicNumber:Duration.kt$10</ID>
     <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$1000</ID>
     <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$12</ID>
@@ -67,16 +68,18 @@
     <ID>SwallowedException:Camera1Adapter.kt$Camera1Adapter$t: Throwable</ID>
     <ID>SwallowedException:Camera1Adapter.kt$Camera1Adapter.CameraPreview$t: Throwable</ID>
     <ID>SwallowedException:CameraAdapter.kt$CameraAdapter$e: ClosedSendChannelException</ID>
+    <ID>SwallowedException:CameraXAdapter.kt$ex: ReadOnlyBufferException</ID>
     <ID>SwallowedException:NV21Image.kt$ex: ReadOnlyBufferException</ID>
     <ID>ThrowsCount:Retry.kt$internal fun &lt;T> retrySync( times: Int = DEFAULT_RETRIES, excluding: List&lt;Class&lt;out Throwable>> = emptyList(), task: () -> T ): T</ID>
     <ID>TooGenericExceptionCaught:Camera1Adapter.kt$Camera1Adapter$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Camera1Adapter.kt$Camera1Adapter.CameraPreview$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:CameraAdapter.kt$CameraAdapter$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:CameraXAdapter.kt$CameraXAdapter$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Loop.kt$AnalyzerLoop$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Retry.kt$t: Throwable</ID>
     <ID>TooManyFunctions:BitmapExtensions.kt$com.stripe.android.camera.framework.image.BitmapExtensions.kt</ID>
-    <ID>TooManyFunctions:Camera1Adapter.kt$Camera1Adapter : CameraAdapterPreviewCallback</ID>
     <ID>TooManyFunctions:CameraAdapter.kt$CameraAdapter&lt;CameraOutput> : LifecycleEventObserver</ID>
+    <ID>TooManyFunctions:CameraXAdapter.kt$CameraXAdapter : CameraAdapter</ID>
     <ID>TooManyFunctions:Duration.kt$Duration : Comparable</ID>
     <ID>TooManyFunctions:Layout.kt$com.stripe.android.camera.framework.util.Layout.kt</ID>
     <ID>TooManyFunctions:Memoize.kt$com.stripe.android.camera.framework.util.Memoize.kt</ID>

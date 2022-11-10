@@ -18,7 +18,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
-        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.11.1"
+        classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.12.1"
         classpath 'com.karumi:shot:5.14.1'
         classpath buildLibs.detektGradlePlugin
     }
@@ -68,7 +68,7 @@ ext {
     androidxConstraintlayoutComposeVersion = '1.0.1'
     androidxConstraintlayoutVersion = '2.1.4'
     androidxCoreVersion = '1.9.0'
-    androidxFragmentVersion = '1.5.3'
+    androidxFragmentVersion = '1.5.4'
     androidxLifecycleVersion = '2.5.1'
     androidxNavigationVersion = '2.5.3'
     androidxPreferenceVersion = '1.2.0'
@@ -86,6 +86,7 @@ ext {
     playServicesWalletVersion = '19.1.0'
     placesVersion = '2.6.0'
     playServicesVersion = '1.6.4'
+    leakCanaryVersion = '2.9.1'
 
     androidTestVersion = '1.4.0'
     androidTestJunitVersion = '1.1.3'
