@@ -8,7 +8,6 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
-import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
@@ -30,7 +29,6 @@ import java.security.InvalidParameterException
 /**
  * An `Activity` for selecting a payment option.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>() {
     @VisibleForTesting
     internal val viewBinding by lazy {

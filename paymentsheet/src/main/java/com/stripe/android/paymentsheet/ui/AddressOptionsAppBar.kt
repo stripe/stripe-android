@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Icon
@@ -15,8 +14,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.paymentsColors
 
 @Composable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun AddressOptionsAppBar(
+internal fun AddressOptionsAppBar(
     isRootScreen: Boolean,
     onButtonClick: () -> Unit
 ) {

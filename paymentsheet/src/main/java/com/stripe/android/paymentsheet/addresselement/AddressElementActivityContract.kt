@@ -5,14 +5,12 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
-import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class AddressElementActivityContract :
     ActivityResultContract<AddressElementActivityContract.Args, AddressLauncherResult>() {
 
