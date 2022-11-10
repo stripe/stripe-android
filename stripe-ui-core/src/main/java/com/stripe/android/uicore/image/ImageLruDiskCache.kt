@@ -82,10 +82,11 @@ class ImageLruDiskCache(
 
     private fun getBitmapConfigFromUrl(url: String): Pair<CompressFormat, Int> {
         return when {
-            url.endsWith("png") -> CompressFormat.PNG to 100
-            url.endsWith("jpg") -> CompressFormat.JPEG to 80
-            url.endsWith("webp") -> CompressFormat.WEBP to 80
-            else -> CompressFormat.JPEG to 80
+            url.endsWith("png") -> CompressFormat.PNG to PNG_COMPRESS_QUALITY
+            url.endsWith("jpg") ||
+                url.endsWith("jpeg") -> CompressFormat.JPEG to JPEG_COMPRESS_QUALITY
+            url.endsWith("webp") -> CompressFormat.WEBP to WEBP_COMPRESS_QUALITY
+            else -> CompressFormat.JPEG to JPEG_COMPRESS_QUALITY
         }
     }
 
@@ -178,5 +179,9 @@ class ImageLruDiskCache(
         private const val APP_VERSION = 1
         private const val VALUE_COUNT = 1
         private const val IO_BUFFER_SIZE = 8 * 1024
+
+        private const val PNG_COMPRESS_QUALITY = 100
+        private const val JPEG_COMPRESS_QUALITY = 80
+        private const val WEBP_COMPRESS_QUALITY = 80
     }
 }
