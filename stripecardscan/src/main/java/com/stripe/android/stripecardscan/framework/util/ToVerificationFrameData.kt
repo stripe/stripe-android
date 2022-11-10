@@ -4,6 +4,7 @@ import androidx.annotation.CheckResult
 import com.stripe.android.camera.framework.image.determineViewFinderCrop
 import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.move
+import com.stripe.android.core.utils.b64Encode
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrame
 import com.stripe.android.stripecardscan.framework.api.dto.PayloadInfo
 import com.stripe.android.stripecardscan.framework.api.dto.VerificationFrameData

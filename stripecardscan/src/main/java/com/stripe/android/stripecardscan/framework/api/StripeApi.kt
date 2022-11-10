@@ -24,8 +24,8 @@ import com.stripe.android.stripecardscan.framework.api.dto.VerifyFramesResult
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.framework.util.ScanConfig
-import com.stripe.android.stripecardscan.framework.util.encodeToJson
-import com.stripe.android.stripecardscan.framework.util.urlEncode
+import com.stripe.android.core.utils.encodeToJson
+import com.stripe.android.core.utils.urlEncode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

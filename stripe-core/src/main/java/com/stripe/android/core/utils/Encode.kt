@@ -1,4 +1,4 @@
-package com.stripe.android.stripecardscan.framework.util
+package com.stripe.android.core.utils
 
 import android.util.Base64
 import com.stripe.android.core.networking.QueryStringFactory
@@ -15,17 +15,17 @@ private val json = Json {
     encodeDefaults = true
 }
 
-internal fun b64Encode(s: String): String =
+fun b64Encode(s: String): String =
     Base64.encodeToString(s.toByteArray(Charset.defaultCharset()), Base64.NO_WRAP)
 
-internal fun b64Encode(b: ByteArray): String =
+fun b64Encode(b: ByteArray): String =
     Base64.encodeToString(b, Base64.NO_WRAP)
 
 /**
  * Encode a serializable object to a x-www-url-encoded string. The source object must convert to a
  * [Map] so that the parameters can be named.
  */
-internal fun <T> encodeToXWWWFormUrl(serializer: SerializationStrategy<T>, value: T): String =
+fun <T> encodeToXWWWFormUrl(serializer: SerializationStrategy<T>, value: T): String =
     QueryStringFactory.createFromParamsWithEmptyValues(
         json.encodeToJsonElement(serializer, value).toMap()
     )
@@ -33,16 +33,16 @@ internal fun <T> encodeToXWWWFormUrl(serializer: SerializationStrategy<T>, value
 /**
  * Encode a serializable object to a JSON string
  */
-internal fun <T> encodeToJson(serializer: SerializationStrategy<T>, value: T): String =
+fun <T> encodeToJson(serializer: SerializationStrategy<T>, value: T): String =
     json.encodeToString(serializer, value)
 
 /**
  * Decode an object from a JSON string
  */
-internal fun <T> decodeFromJson(deserializer: DeserializationStrategy<T>, value: String): T =
+fun <T> decodeFromJson(deserializer: DeserializationStrategy<T>, value: String): T =
     json.decodeFromString(deserializer, value)
 
 /**
  * URL-encode a string. This is useful for sanitizing untrusted data for use in URLs.
  */
-internal fun urlEncode(value: String): String = URLEncoder.encode(value, Charsets.UTF_8.name())
+fun urlEncode(value: String): String = URLEncoder.encode(value, Charsets.UTF_8.name())

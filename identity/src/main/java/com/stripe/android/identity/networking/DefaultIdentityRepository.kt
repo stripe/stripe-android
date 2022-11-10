@@ -17,6 +17,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.responseJson
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -27,7 +28,6 @@ import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
-import java.net.URLEncoder
 import javax.inject.Inject
 
 internal class DefaultIdentityRepository @Inject constructor(
@@ -41,11 +41,6 @@ internal class DefaultIdentityRepository @Inject constructor(
         isLenient = true
         encodeDefaults = true
     }
-
-    /**
-     * URL-encode a string. This is useful for sanitizing untrusted data for use in URLs.
-     */
-    private fun urlEncode(value: String): String = URLEncoder.encode(value, Charsets.UTF_8.name())
 
     private val stripeErrorJsonParser = StripeErrorJsonParser()
     private val stripeFileJsonParser = StripeFileJsonParser()
