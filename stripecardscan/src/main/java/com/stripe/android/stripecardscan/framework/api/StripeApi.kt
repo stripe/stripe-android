@@ -5,6 +5,8 @@ package com.stripe.android.stripecardscan.framework.api
 
 import android.util.Log
 import androidx.annotation.CheckResult
+import com.stripe.android.core.utils.encodeToJson
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrame
 import com.stripe.android.stripecardscan.framework.api.dto.AppInfo
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsRequest
@@ -24,8 +26,6 @@ import com.stripe.android.stripecardscan.framework.api.dto.VerifyFramesResult
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.framework.util.ScanConfig
-import com.stripe.android.core.utils.encodeToJson
-import com.stripe.android.core.utils.urlEncode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
