@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.samples.activity
 
+import androidx.activity.viewModels
 import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
@@ -42,9 +43,7 @@ import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.viewmodel.PaymentSheetViewModel
 
 internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
-    protected val viewModel: PaymentSheetViewModel by lazy {
-        PaymentSheetViewModel(application)
-    }
+    protected val viewModel: PaymentSheetViewModel by viewModels()
     
     protected val snackbar by lazy {
         Snackbar.make(findViewById(android.R.id.content), "", Snackbar.LENGTH_SHORT)
