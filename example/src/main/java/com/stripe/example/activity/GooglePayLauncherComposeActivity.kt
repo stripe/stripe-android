@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Scaffold
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayLauncher
+import com.stripe.android.googlepaylauncher.rememberGooglePayLauncher
 import kotlinx.coroutines.launch
 
 class GooglePayLauncherComposeActivity : StripeIntentActivity() {
@@ -78,7 +80,7 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
             }
         }
 
-        val googlePayLauncher = GooglePayLauncher.rememberLauncher(
+        val googlePayLauncher = rememberGooglePayLauncher(
             config = googlePayConfig,
             readyCallback = { ready ->
                 if (googlePayReady == null) {
@@ -130,8 +132,8 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
         completed: Boolean,
         onLaunchGooglePay: (String) -> Unit
     ) {
-        Scaffold(scaffoldState = scaffoldState) {
-            Column(Modifier.fillMaxWidth()) {
+        Scaffold(scaffoldState = scaffoldState) { paddingValues ->
+            Column(Modifier.fillMaxWidth().padding(paddingValues)) {
                 if (googlePayReady == null || clientSecret.isBlank()) {
                     LinearProgressIndicator(Modifier.fillMaxWidth())
                 }
