@@ -43,6 +43,8 @@ jobs:
   diffuse:
     needs: [build-master, build-pr]
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@v1
       - name: Download APKs

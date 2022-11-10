@@ -1,5 +1,5 @@
 # Global - fallback to this group if the following groups don't match
-*   @jaynewstrom-stripe @tillh-stripe @ccen-stripe @awush-stripe @jameswoo-stripe
+*   @jaynewstrom-stripe @tillh-stripe @ccen-stripe @awush-stripe @jameswoo-stripe @carlosmuvi-stripe
 
 # Payments SDK
 /payments/ @jaynewstrom-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe

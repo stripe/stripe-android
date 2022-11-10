@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+### Payments
+* [CHANGED][5789](https://github.com/stripe/stripe-android/pull/5789) We now disable the back button while confirming intents with `PaymentLauncher` to prevent them from incorrectly being displayed as failed.
+
 ## 20.15.4 - 2022-11-07
 
 ### CardScan

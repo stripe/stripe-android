@@ -103,6 +103,7 @@ dependencies {
     // MdcTheme
     implementation "com.google.android.material:compose-theme-adapter:1.1.18"
 
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
 }
 
 task ktlint(type: JavaExec, group: "verification") {

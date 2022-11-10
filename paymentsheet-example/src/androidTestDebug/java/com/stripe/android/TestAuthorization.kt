@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.test.espresso.intent.Intents
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -55,7 +56,7 @@ class TestAuthorization {
 
     @After
     fun after() {
-        androidx.test.espresso.intent.Intents.release()
+        Intents.release()
     }
 
     private val bancontactNewUser = TestParameters(
