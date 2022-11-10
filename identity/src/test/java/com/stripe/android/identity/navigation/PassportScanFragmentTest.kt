@@ -29,7 +29,6 @@ import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBindi
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.UploadedResult
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -92,7 +91,9 @@ class PassportScanFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         on { fpsTracker } doReturn mock()
         on { screenTracker } doReturn mockScreenTracker
         on { uiContext } doReturn testDispatcher
@@ -189,7 +190,7 @@ class PassportScanFragmentTest {
                 documentUploadState.update { frontUploadedState }
 
                 // post returns valid result
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
                 )
 
@@ -209,9 +210,6 @@ class PassportScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT
                     )
                 )
 
@@ -272,7 +270,7 @@ class PassportScanFragmentTest {
                 documentUploadState.update { frontUploadedState }
 
                 // post returns valid result
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
                 )
 
@@ -292,9 +290,6 @@ class PassportScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT_SELFIE
                     )
                 )
 

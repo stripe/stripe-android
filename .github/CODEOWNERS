@@ -1,31 +1,25 @@
-# global - fallback to this group if the following groups don't match
-*   @brnunes-stripe @tillh-stripe @ccen-stripe @awush-stripe @jameswoo-stripe
+# Global - fallback to this group if the following groups don't match
+*   @jaynewstrom-stripe @tillh-stripe @ccen-stripe @awush-stripe @jameswoo-stripe
 
-# payment sdk
-/payments/ @brnunes-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
-/payments-core/ @brnunes-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
-/payments-model/ @brnunes-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
-/paymentsheet/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
-/example/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
-/paymentsheet-example/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
-/wechatpay/ @brnunes-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
-/stripe-test-e2e/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
-/link/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
+# Payments SDK
+/payments/ @jaynewstrom-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
+/payments-model/ @jaynewstrom-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
+/paymentsheet/ @jaynewstrom-stripe @tillh-stripe @jameswoo-stripe
+/wechatpay/ @jaynewstrom-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
+/stripe-test-e2e/ @jaynewstrom-stripe @tillh-stripe @jameswoo-stripe
+/link/ @jaynewstrom-stripe @tillh-stripe @jameswoo-stripe
 
-# stripecardscan sdk
+# CardScan SDK
 /stripecardscan/ @awush-stripe @ccen-stripe
 /stripecardscan-example/ @awush-stripe @ccen-stripe
 
-# identity sdk
+# Identity SDK
 /identity/ @ccen-stripe @awush-stripe
 /identity-example/ @ccen-stripe @awush-stripe
 
-# financial connections sdk
+# Financial Connections SDK
 /financial-connections/ @carlosmuvi-stripe
 /financial-connections-example/ @carlosmuvi-stripe
 
-# shared modules
-/stripe-core/ @ccen-stripe
-/stripe-ui-core/ @carlosmuvi-stripe
-/payments-ui-core/ @brnunes-stripe @tillh-stripe @jameswoo-stripe
+# Shared modules
 /camera-core/ @ccen-stripe @awush-stripe

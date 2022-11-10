@@ -22,6 +22,7 @@ import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.camera.framework.time.asEpochMillisecondsClockMark
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
+import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
@@ -30,6 +31,7 @@ import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.injection.DaggerIdentityActivityFallbackComponent
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
 import com.stripe.android.identity.navigation.ErrorFragment
+import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -93,10 +95,11 @@ internal class IdentityActivity :
     @IOContext
     lateinit var workContext: CoroutineContext
 
-    override fun fallbackInitialize(arg: Context) {
+    override fun fallbackInitialize(arg: Context): Injector? {
         DaggerIdentityActivityFallbackComponent.builder()
             .context(arg)
             .build().inject(this)
+        return null
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -122,10 +125,10 @@ internal class IdentityActivity :
         supportFragmentManager.fragmentFactory = subcomponent.identityFragmentFactory
 
         super.onCreate(savedInstanceState)
+        identityViewModel.retrieveAndBufferVerificationPage()
         fallbackUrlLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {
-            identityViewModel.retrieveAndBufferVerificationPage()
             identityViewModel.observeForVerificationPage(
                 this,
                 onSuccess = {
@@ -159,11 +162,19 @@ internal class IdentityActivity :
             )
         }
 
-        if (savedInstanceState?.getBoolean(KEY_PRESENTED, false) != true) {
-            identityViewModel.sendAnalyticsRequest(
-                identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
-            )
-        }
+        identityViewModel.observeForVerificationPage(
+            this,
+            onSuccess = {
+                if (savedInstanceState?.getBoolean(KEY_PRESENTED, false) != true) {
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
+                    )
+                }
+            },
+            onFailure = {
+                navController.navigateToErrorFragmentWithDefaultValues(this, it)
+            }
+        )
 
         identityViewModel.screenTracker.screenTransitionStart(
             startedAt = starterArgs.presentTime.asEpochMillisecondsClockMark()
@@ -177,7 +188,6 @@ internal class IdentityActivity :
             // The Activity is newly created, set up navigation flow normally
             setContentView(binding.root)
             setUpNavigationController()
-            identityViewModel.retrieveAndBufferVerificationPage()
         } else {
             // The Activity is being recreated after being destroyed by OS.
             // This happens when a fallback URL Activity is in front and IdentityActivity is destroyed.
@@ -304,7 +314,7 @@ internal class IdentityActivity :
                         R.drawable.ic_baseline_arrow_back_24
                     )
                 this.setNavigationOnClickListener {
-                    navController.navigateUpAndSetArgForUploadFragment()
+                    navController.navigateUpAndSetArgForUploadFragment(identityViewModel)
                 }
             }
         }
@@ -363,7 +373,7 @@ internal class IdentityActivity :
                 }
                 // On other fragments, clicking back navigates up
                 else -> {
-                    navController.navigateUpAndSetArgForUploadFragment()
+                    navController.navigateUpAndSetArgForUploadFragment(identityViewModel)
                 }
             }
         }

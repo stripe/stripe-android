@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.core.injection.NonFallbackInjectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -18,8 +20,6 @@ import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.ui.core.injection.NonFallbackInjectable
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

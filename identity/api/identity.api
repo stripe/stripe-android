@@ -144,20 +144,6 @@ public final class com/stripe/android/identity/analytics/ScreenTracker_Factory :
 	public static fun newInstance (Lcom/stripe/android/identity/analytics/IdentityAnalyticsRequestFactory;Lcom/stripe/android/identity/networking/IdentityRepository;)Lcom/stripe/android/identity/analytics/ScreenTracker;
 }
 
-public final class com/stripe/android/identity/databinding/BaseErrorFragmentBinding : androidx/viewbinding/ViewBinding {
-	public final field bottomButton Lcom/google/android/material/button/MaterialButton;
-	public final field buttons Landroid/widget/LinearLayout;
-	public final field message1 Landroid/widget/TextView;
-	public final field message2 Landroid/widget/TextView;
-	public final field titleText Landroid/widget/TextView;
-	public final field topButton Lcom/google/android/material/button/MaterialButton;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/BaseErrorFragmentBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/identity/databinding/BaseErrorFragmentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/identity/databinding/BaseErrorFragmentBinding;
-}
-
 public final class com/stripe/android/identity/databinding/DriverLicenseUploadFragmentBinding : androidx/viewbinding/ViewBinding {
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/identity/databinding/DriverLicenseUploadFragmentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;

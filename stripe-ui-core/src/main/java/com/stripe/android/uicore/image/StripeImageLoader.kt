@@ -46,9 +46,17 @@ class StripeImageLoader(
         url: String,
         width: Int,
         height: Int
-    ): Result<Bitmap> = withContext(Dispatchers.IO) {
+    ): Result<Bitmap?> = withContext(Dispatchers.IO) {
         withMutexByUrlLock(url) {
             loadFromMemory(url) ?: loadFromDisk(url) ?: loadFromNetwork(url, width, height)
+        }
+    }
+
+    suspend fun load(
+        url: String
+    ): Result<Bitmap?> = withContext(Dispatchers.IO) {
+        withMutexByUrlLock(url) {
+            loadFromMemory(url) ?: loadFromDisk(url) ?: loadFromNetwork(url)
         }
     }
 
@@ -85,12 +93,25 @@ class StripeImageLoader(
         url: String,
         width: Int,
         height: Int
-    ): Result<Bitmap> = kotlin.runCatching {
+    ): Result<Bitmap?> = kotlin.runCatching {
+        debug("Image $url loading from internet ($width x $height)")
+        networkImageDecoder.decode(url, width, height)?.let { bitmap ->
+            diskCache?.put(url, bitmap)
+            memoryCache?.put(url, bitmap)
+            bitmap
+        }
+    }.onFailure { logger.error("$TAG: Could not load image from network", it) }
+
+    @WorkerThread
+    private suspend fun loadFromNetwork(
+        url: String
+    ): Result<Bitmap?> = kotlin.runCatching {
         debug("Image $url loading from internet")
-        val bitmap = networkImageDecoder.decode(url, width, height)
-        diskCache?.put(url, bitmap)
-        memoryCache?.put(url, bitmap)
-        bitmap
+        networkImageDecoder.decode(url)?.let { bitmap ->
+            diskCache?.put(url, bitmap)
+            memoryCache?.put(url, bitmap)
+            bitmap
+        }
     }.onFailure { logger.error("$TAG: Could not load image from network", it) }
 
     /**

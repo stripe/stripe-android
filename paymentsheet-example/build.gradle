@@ -78,7 +78,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-contrib:$espressoVersion") {
         exclude group: 'org.checkerframework', module: 'checker'
     }
-    debugImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
     androidTestImplementation("androidx.test.espresso:espresso-accessibility:$espressoVersion") {
         exclude group: 'org.checkerframework', module: 'checker'
     }
@@ -97,6 +97,8 @@ dependencies {
     androidTestImplementation project(path: ':payments-ui-core')
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
+
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
 }
 
 shot {

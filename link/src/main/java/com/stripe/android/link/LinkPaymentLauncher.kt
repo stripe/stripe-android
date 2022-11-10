@@ -8,6 +8,8 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.core.injection.NonFallbackInjectable
+import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
@@ -31,8 +33,6 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import com.stripe.android.ui.core.injection.NonFallbackInjectable
-import com.stripe.android.ui.core.injection.NonFallbackInjector
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named

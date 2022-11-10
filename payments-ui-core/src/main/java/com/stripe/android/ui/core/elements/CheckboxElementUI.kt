@@ -20,11 +20,12 @@ import com.stripe.android.ui.core.elements.menu.Checkbox
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun CheckboxElementUI(
+    modifier: Modifier = Modifier,
     automationTestTag: String = "",
     isChecked: Boolean = false,
     label: String? = null,
     isEnabled: Boolean = false,
-    onValueChange: (Boolean) -> Unit
+    onValueChange: (Boolean) -> Unit,
 ) {
     val accessibilityDescription = stringResource(
         if (isChecked) {
@@ -35,7 +36,7 @@ fun CheckboxElementUI(
     )
 
     Row(
-        modifier = Modifier
+        modifier = modifier
             .padding(vertical = 4.dp)
             .semantics {
                 testTag = automationTestTag

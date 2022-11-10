@@ -6,13 +6,13 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
-import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.Automatic
 import com.stripe.android.test.core.Billing
 import com.stripe.android.test.core.Currency
 import com.stripe.android.test.core.Customer
 import com.stripe.android.test.core.DelayedPMs
+import com.stripe.android.test.core.DisableAnimationsRule
 import com.stripe.android.test.core.GooglePayState
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.test.core.IntentType
@@ -246,6 +246,26 @@ class TestHardCodedLpms {
                 merchantCountryCode = "GB",
                 automatic = Automatic.Off
             )
+        )
+    }
+
+    @Test
+    fun testUpi() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = newUser.copy(
+                paymentMethod = lpmRepository.fromCode("upi")!!,
+                currency = Currency.INR,
+                merchantCountryCode = "IN",
+                automatic = Automatic.Off,
+                authorizationAction = null,
+            ),
+            populateCustomLpmFields = {
+                composeTestRule.onNodeWithText("UPI ID").apply {
+                    performTextInput(
+                        "payment.success@stripeupi"
+                    )
+                }
+            }
         )
     }
 }

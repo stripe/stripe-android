@@ -16,6 +16,6 @@ ext.libs = [
 ]
 
 ext.testLibs = [
-        turbine: "app.cash.turbine:turbine:0.11.0",
+        turbine: "app.cash.turbine:turbine:0.12.1",
         mavericks: "com.airbnb.android:mavericks-testing:$versions.mavericks"
 ]

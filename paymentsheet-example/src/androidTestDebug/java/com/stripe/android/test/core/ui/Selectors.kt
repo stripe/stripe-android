@@ -46,7 +46,6 @@ class Selectors(
     testParameters: TestParameters
 ) {
     val reset = EspressoIdButton(R.id.reset_button)
-    val testMode = EspressoIdButton(R.id.testmode)
     val continueButton = EspressoIdButton(R.id.continue_button)
     val complete = EspressoLabelIdButton(R.string.checkout_complete)
     val reload = EspressoLabelIdButton(R.string.reload_paymentsheet)
@@ -301,7 +300,10 @@ class Selectors(
         EspressoText(
             CountryUtils.getDisplayCountry(CountryCode(merchantCountryCode), Locale.getDefault())
         ).click()
+    }
 
+    fun enterCustomPrimaryButtonLabel(text: String) {
+        EspressoEditText(id = R.id.custom_label_text_field).enter(text)
     }
 
     companion object {

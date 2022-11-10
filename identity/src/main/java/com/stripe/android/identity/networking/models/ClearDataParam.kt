@@ -30,72 +30,12 @@ internal data class ClearDataParam(
                 this
             ).toMap()
 
-        internal val CONSENT_TO_DOC_SELECT = ClearDataParam(
-            biometricConsent = false,
-            idDocumentType = true,
-            idDocumentFront = true,
-            idDocumentBack = true
-        )
-
-        internal val CONSENT_TO_DOC_SELECT_WITH_SELFIE = ClearDataParam(
-            biometricConsent = false,
-            idDocumentType = true,
-            idDocumentFront = true,
-            idDocumentBack = true,
-            face = true
-        )
-
-        internal val DOC_SELECT_TO_UPLOAD = ClearDataParam(
-            biometricConsent = false,
-            idDocumentType = false,
-            idDocumentFront = true,
-            idDocumentBack = true
-        )
-
-        internal val DOC_SELECT_TO_UPLOAD_WITH_SELFIE = ClearDataParam(
-            biometricConsent = false,
-            idDocumentType = false,
-            idDocumentFront = true,
-            idDocumentBack = true,
-            face = true
-        )
-
-        internal val UPLOAD_FRONT = ClearDataParam(
-            biometricConsent = false,
-            idDocumentType = false,
-            idDocumentFront = false,
-            idDocumentBack = true
-        )
-
-        internal val UPLOAD_FRONT_SELFIE = ClearDataParam(
-            biometricConsent = false,
-            idDocumentType = false,
-            idDocumentFront = false,
-            idDocumentBack = true,
-            face = true
-        )
-
-        internal val UPLOAD_TO_CONFIRM = ClearDataParam(
-            biometricConsent = false,
-            idDocumentType = false,
-            idDocumentFront = false,
-            idDocumentBack = false
-        )
-
-        internal val UPLOAD_TO_SELFIE = ClearDataParam(
-            biometricConsent = false,
-            idDocumentType = false,
-            idDocumentFront = false,
-            idDocumentBack = false,
-            face = true
-        )
-
-        internal val SELFIE_TO_CONFIRM = ClearDataParam(
-            biometricConsent = false,
-            idDocumentType = false,
-            idDocumentFront = false,
-            idDocumentBack = false,
-            face = false
+        fun createFromRequirements(requirements: Set<Requirement>) = ClearDataParam(
+            biometricConsent = requirements.contains(Requirement.BIOMETRICCONSENT),
+            idDocumentType = requirements.contains(Requirement.IDDOCUMENTTYPE),
+            idDocumentFront = requirements.contains(Requirement.IDDOCUMENTFRONT),
+            idDocumentBack = requirements.contains(Requirement.IDDOCUMENTBACK),
+            face = requirements.contains(Requirement.FACE)
         )
     }
 }

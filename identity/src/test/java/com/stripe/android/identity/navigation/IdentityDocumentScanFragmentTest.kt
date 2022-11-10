@@ -78,7 +78,9 @@ class IdentityDocumentScanFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
             )
         on { it.fpsTracker } doReturn mock()
         on { screenTracker } doReturn mock()
