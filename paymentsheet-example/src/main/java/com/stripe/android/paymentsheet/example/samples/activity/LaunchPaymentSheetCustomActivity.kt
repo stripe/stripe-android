@@ -12,6 +12,8 @@ import androidx.lifecycle.map
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.flowcontroller.FlowControllerConfigResult
+import com.stripe.android.paymentsheet.flowcontroller.configureWithPaymentIntent
 import com.stripe.android.paymentsheet.flowcontroller.rememberPaymentSheetFlowController
 import com.stripe.android.paymentsheet.model.PaymentOption
 
@@ -40,15 +42,19 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
 
                 LaunchedEffect(Unit) {
                     val (customerConfig, clientSecret) = prepareCheckout()
-                    flowController.configureWithPaymentIntent(
+
+                    val configResult = flowController.configureWithPaymentIntent(
                         paymentIntentClientSecret = clientSecret,
-                        configuration = makeConfiguration(customerConfig)
-                    ) { success, error ->
-                        if (success) {
+                        configuration = makeConfiguration(customerConfig),
+                    )
+
+                    when (configResult) {
+                        is FlowControllerConfigResult.Success -> {
                             onPaymentOption(flowController.getPaymentOption())
-                        } else {
+                        }
+                        is FlowControllerConfigResult.Failure -> {
                             viewModel.status.postValue(
-                                "Failed to configure PaymentSheetFlowController: ${error?.message}"
+                                "Failed to configure PaymentSheetFlowController: ${configResult.error.message}"
                             )
                         }
                     }

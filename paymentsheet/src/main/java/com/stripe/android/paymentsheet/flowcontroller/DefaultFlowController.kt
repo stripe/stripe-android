@@ -77,6 +77,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
@@ -86,6 +87,52 @@ import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.resume
+
+sealed interface FlowControllerConfigResult {
+    object Success : FlowControllerConfigResult
+    data class Failure(val error: Throwable) : FlowControllerConfigResult
+}
+
+suspend fun PaymentSheet.FlowController.configureWithPaymentIntent(
+    paymentIntentClientSecret: String,
+    configuration: PaymentSheet.Configuration? = null,
+): FlowControllerConfigResult {
+    return suspendCancellableCoroutine { continuation ->
+        configureWithPaymentIntent(
+            paymentIntentClientSecret = paymentIntentClientSecret,
+            configuration = configuration,
+            callback = { _, error ->
+                val result = if (error != null) {
+                    FlowControllerConfigResult.Failure(error)
+                } else {
+                    FlowControllerConfigResult.Success
+                }
+                continuation.resume(result)
+            }
+        )
+    }
+}
+
+suspend fun PaymentSheet.FlowController.configureWithSetupIntent(
+    setupIntentClientSecret: String,
+    configuration: PaymentSheet.Configuration? = null,
+): FlowControllerConfigResult {
+    return suspendCancellableCoroutine { continuation ->
+        configureWithSetupIntent(
+            setupIntentClientSecret = setupIntentClientSecret,
+            configuration = configuration,
+            callback = { _, error ->
+                val result = if (error != null) {
+                    FlowControllerConfigResult.Failure(error)
+                } else {
+                    FlowControllerConfigResult.Success
+                }
+                continuation.resume(result)
+            }
+        )
+    }
+}
 
 @Composable
 fun rememberPaymentSheetFlowController(
