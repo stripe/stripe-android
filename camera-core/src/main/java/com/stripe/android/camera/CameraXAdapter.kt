@@ -167,12 +167,13 @@ class CameraXAdapter(
     private val activity: Activity,
     private val previewView: ViewGroup,
     private val minimumResolution: Size,
-    private val cameraErrorListener: CameraErrorListener
+    private val cameraErrorListener: CameraErrorListener,
+    private val startWithBackCamera: Boolean = true
 ) : CameraAdapter<CameraPreviewImage<Bitmap>>() {
 
     override val implementationName: String = "CameraX"
 
-    private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
+    private var lensFacing: Int = LENS_UNINITIALIZED
 
     private val mainThreadHandler = Handler(activity.mainLooper)
 
@@ -293,17 +294,16 @@ class CameraXAdapter(
 
     private fun setUpCamera() {
         withCameraProvider {
-            lensFacing = when {
-                hasBackCamera(it) -> CameraSelector.LENS_FACING_BACK
-                hasFrontCamera(it) -> CameraSelector.LENS_FACING_FRONT
-                else -> {
-                    mainThreadHandler.post {
-                        cameraErrorListener.onCameraUnsupportedError(IllegalStateException("No camera is available"))
-                    }
-                    CameraSelector.LENS_FACING_BACK
+            lensFacing = if (startWithBackCamera && hasBackCamera(it)) {
+                CameraSelector.LENS_FACING_BACK
+            } else if (!startWithBackCamera && hasFrontCamera(it)) {
+                CameraSelector.LENS_FACING_FRONT
+            } else {
+                mainThreadHandler.post {
+                    cameraErrorListener.onCameraUnsupportedError(IllegalStateException("No camera is available"))
                 }
+                CameraSelector.LENS_FACING_BACK
             }
-
             bindCameraUseCases(it)
         }
     }
@@ -405,5 +405,6 @@ class CameraXAdapter(
 
     private companion object {
         val logTag: String = CameraXAdapter::class.java.simpleName
+        val LENS_UNINITIALIZED = -1
     }
 }
