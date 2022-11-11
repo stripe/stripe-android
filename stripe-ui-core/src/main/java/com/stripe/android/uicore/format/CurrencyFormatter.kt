@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core
+package com.stripe.android.uicore.format
 
 import androidx.annotation.RestrictTo
 import java.text.DecimalFormat

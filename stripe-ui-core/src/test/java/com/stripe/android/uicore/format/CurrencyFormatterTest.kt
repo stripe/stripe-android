@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core
+package com.stripe.android.uicore.format
 
 import android.icu.text.NumberFormat
 import com.google.common.truth.Truth.assertThat
