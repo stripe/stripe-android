@@ -95,7 +95,7 @@ ext {
     robolectricVersion = '4.8.2'
     mockitoCoreVersion = '4.8.1'
     mockitoKotlinVersion = '4.0.0'
-    espressoVersion = '3.4.0'
+    espressoVersion = '3.5.0'
     jsonVersion = '20220924'
     uiautomator = '2.2.0'
 
