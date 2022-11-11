@@ -94,7 +94,7 @@ class CurrencyFormatterTest {
                 it.currencyCode
             }
             .forEach {
-                print(String.format("%s, ", it.currencyCode))
+                print(String.format(Locale.getDefault(), "%s, ", it.currencyCode))
             }
     }
 
