@@ -2,6 +2,8 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.toLowerCase
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.autocomplete.DefaultIsPlacesAvailable
@@ -160,7 +162,10 @@ open class AddressElement constructor(
             is AddressType.ShippingCondensed -> {
                 // If the merchant has supplied Google Places API key, Google Places SDK is
                 // available, and country is supported, use autocomplete
-                val autocompleteSupportsCountry = autocompleteSupportedCountries.contains(country)
+                val supportedCountries = addressType.autocompleteCountries
+                val autocompleteSupportsCountry = supportedCountries
+                    ?.map { it.toLowerCase(Locale.current) }
+                    ?.contains(country?.toLowerCase(Locale.current)) == true
                 val autocompleteAvailable = DefaultIsPlacesAvailable().invoke() &&
                     !addressType.googleApiKey.isNullOrBlank()
                 if (autocompleteSupportsCountry && autocompleteAvailable) {
@@ -219,12 +224,5 @@ open class AddressElement constructor(
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         this.rawValuesMap = rawValuesMap
-    }
-
-    companion object {
-        private val autocompleteSupportedCountries = setOf(
-            "AU", "BE", "BR", "CA", "CH", "DE", "ES", "FR", "GB", "IE", "IN", "IT", "JP", "MX", "MY",
-            "NO", "NL", "PH", "PL", "RU", "SE", "SG", "TR", "US", "ZA"
-        )
     }
 }

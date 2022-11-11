@@ -127,7 +127,6 @@ class PaymentSheet internal constructor(
         val defaultBillingDetails: BillingDetails? = null,
 
         /**
-         * 🏗 Under construction
          * The shipping information for the customer.
          * If set, PaymentSheet will pre-populate the form fields with the values provided.
          * This is used to display a "Billing address is same as shipping" checkbox if `defaultBillingDetails` is not provided.
@@ -701,6 +700,8 @@ class PaymentSheet internal constructor(
      * A class that presents the individual steps of a payment sheet flow.
      */
     interface FlowController {
+
+        var shippingDetails: AddressDetails?
 
         /**
          * Configure the FlowController to process a [PaymentIntent].

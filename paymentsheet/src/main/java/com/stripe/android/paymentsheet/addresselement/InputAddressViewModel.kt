@@ -115,6 +115,7 @@ internal class InputAddressViewModel @Inject constructor(
                 showLabel = false,
                 type = AddressType.ShippingCondensed(
                     googleApiKey = args.config?.googlePlacesApiKey,
+                    autocompleteCountries = args.config?.autocompleteCountries,
                     phoneNumberState = phoneNumberState
                 ) {
                     viewModelScope.launch {
