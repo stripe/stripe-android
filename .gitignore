@@ -48,3 +48,5 @@ example/bin
 example/target
 example/gen
 
+# Exclude internal google services configuration files.
+/financial-connections-example/google-services.json
