@@ -41,16 +41,6 @@ fun ResolvableString.resolve(resources: Resources): String {
     }
 }
 
-//@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-//fun resolvableString(text: String): ResolvableString {
-//    return ResolvableString.Value(text)
-//}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun String.toResolvableString(): ResolvableString {
-    return ResolvableString.Value(this)
-}
-
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun resolvableString(
     @StringRes id: Int,
@@ -58,4 +48,9 @@ fun resolvableString(
     transform: (String) -> String = { it }
 ): ResolvableString {
     return ResolvableString.Resource(id, args.toList(), transform)
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun String.toResolvableString(): ResolvableString {
+    return ResolvableString.Value(this)
 }

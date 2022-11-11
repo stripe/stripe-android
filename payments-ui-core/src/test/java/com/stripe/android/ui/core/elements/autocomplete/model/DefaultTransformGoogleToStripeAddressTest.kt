@@ -10,7 +10,8 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class TransformGoogleToStripeAddressTest {
+@Suppress("LongMethod")
+class DefaultTransformGoogleToStripeAddressTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
@@ -65,7 +66,8 @@ class TransformGoogleToStripeAddressTest {
             """.trimIndent()
         )
 
-        val stripeAddress = place.transformGoogleToStripeAddress(context)
+        val transform = DefaultTransformGoogleToStripeAddress(context)
+        val stripeAddress = transform(place)
 
         assertThat(stripeAddress).isEqualTo(
             Address(
@@ -130,7 +132,8 @@ class TransformGoogleToStripeAddressTest {
             """.trimIndent()
         )
 
-        val stripeAddress = place.transformGoogleToStripeAddress(context)
+        val transform = DefaultTransformGoogleToStripeAddress(context)
+        val stripeAddress = transform(place)
 
         assertThat(stripeAddress).isEqualTo(
             Address(
@@ -190,7 +193,8 @@ class TransformGoogleToStripeAddressTest {
             """.trimIndent()
         )
 
-        val stripeAddress = place.transformGoogleToStripeAddress(context)
+        val transform = DefaultTransformGoogleToStripeAddress(context)
+        val stripeAddress = transform(place)
 
         assertThat(stripeAddress).isEqualTo(
             Address(
@@ -250,7 +254,8 @@ class TransformGoogleToStripeAddressTest {
             """.trimIndent()
         )
 
-        val stripeAddress = place.transformGoogleToStripeAddress(context)
+        val transform = DefaultTransformGoogleToStripeAddress(context)
+        val stripeAddress = transform(place)
 
         assertThat(stripeAddress).isEqualTo(
             Address(
@@ -320,7 +325,8 @@ class TransformGoogleToStripeAddressTest {
             """.trimIndent()
         )
 
-        val stripeAddress = place.transformGoogleToStripeAddress(context)
+        val transform = DefaultTransformGoogleToStripeAddress(context)
+        val stripeAddress = transform(place)
 
         assertThat(stripeAddress).isEqualTo(
             Address(
@@ -385,7 +391,8 @@ class TransformGoogleToStripeAddressTest {
             """.trimIndent()
         )
 
-        val stripeAddress = place.transformGoogleToStripeAddress(context)
+        val transform = DefaultTransformGoogleToStripeAddress(context)
+        val stripeAddress = transform(place)
 
         assertThat(stripeAddress).isEqualTo(
             Address(

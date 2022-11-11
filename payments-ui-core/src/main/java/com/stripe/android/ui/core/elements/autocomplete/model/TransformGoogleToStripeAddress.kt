@@ -188,6 +188,7 @@ class DefaultTransformGoogleToStripeAddress @Inject constructor(
     private val context: Context,
 ) : TransformGoogleToStripeAddress {
 
+    @Suppress("LongMethod", "ComplexMethod")
     override fun invoke(place: Place): com.stripe.android.model.Address {
         var address = Address()
         val addressLine1 = AddressLine1()
