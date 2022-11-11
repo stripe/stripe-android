@@ -201,6 +201,10 @@ class AddressLauncher internal constructor(
     }
 }
 
+/**
+ * Creates an [AddressLauncher] that is remembered across compositions.
+ * This *must* be called unconditionally, as part of the initialization path.
+ */
 @Composable
 fun rememberAddressLauncher(
     callback: AddressLauncherResultCallback
