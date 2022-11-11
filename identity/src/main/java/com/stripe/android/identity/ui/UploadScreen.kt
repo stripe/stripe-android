@@ -235,14 +235,17 @@ internal fun UploadImageDialog(
             Column(
                 modifier = Modifier
                     .padding(
-                        top = 16.dp,
-                        bottom = 16.dp,
-                        start = 24.dp,
-                        end = 24.dp
+                        vertical = dimensionResource(id = R.dimen.item_vertical_margin)
                     )
             ) {
                 Text(
-                    modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin)),
+                    modifier = Modifier.padding(
+                        bottom = dimensionResource(
+                            id = R.dimen.item_vertical_margin
+                        ),
+                        start = 24.dp,
+                        end = 24.dp
+                    ),
                     text = getTitleFromScanType(scanType = uploadInfo.scanType),
                     style = MaterialTheme.typography.subtitle1,
                     fontWeight = FontWeight.Bold
@@ -288,7 +291,9 @@ private fun DialogListItem(
         contentAlignment = Alignment.CenterStart,
     ) {
         Text(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
             text = text,
             color = MaterialTheme.colors.onBackground.copy(alpha = 0.6f),
             textAlign = TextAlign.Start
