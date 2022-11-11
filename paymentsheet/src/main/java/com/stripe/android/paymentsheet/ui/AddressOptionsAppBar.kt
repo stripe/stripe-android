@@ -20,7 +20,8 @@ internal fun AddressOptionsAppBar(
 ) {
     TopAppBar(
         modifier = Modifier.fillMaxWidth(),
-        elevation = 0.dp
+        elevation = 0.dp,
+        backgroundColor = MaterialTheme.colors.surface
     ) {
         IconButton(
             onClick = onButtonClick
