@@ -11,12 +11,14 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.ResolvableString
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.resolvableString
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -55,7 +57,6 @@ import javax.inject.Provider
 
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
-    private val application: Application,
     private val stripeRepository: StripeRepository,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     private val savedStateHandle: SavedStateHandle
@@ -80,9 +81,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             USBankAccountFormScreenState.NameAndEmailCollection(
                 name = name.value,
                 email = email.value,
-                primaryButtonText = application.getString(
-                    R.string.stripe_continue_button_label
-                )
+                primaryButtonText = resolvableString(R.string.stripe_continue_button_label),
             )
         )
     val currentScreenState: StateFlow<USBankAccountFormScreenState>
@@ -259,9 +258,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 error = error,
                 name = name.value,
                 email = email.value,
-                primaryButtonText = application.getString(
-                    R.string.stripe_continue_button_label
-                )
+                primaryButtonText = resolvableString(R.string.stripe_continue_button_label),
             )
         }
     }
@@ -354,7 +351,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     }
 
                     val paymentSelection = PaymentSelection.New.USBankAccount(
-                        labelResource = application.getString(
+                        labelResource = resolvableString(
                             R.string.paymentsheet_payment_method_item_card_number,
                             last4
                         ),
@@ -417,31 +414,27 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
-    private fun buildPrimaryButtonText(): String? {
+    private fun buildPrimaryButtonText(): ResolvableString? {
         return when {
             args.isCompleteFlow -> {
                 if (args.clientSecret is PaymentIntentClientSecret) {
-                    args.formArgs.amount?.buildPayButtonLabel(application.resources)
+                    args.formArgs.amount?.buildPayButtonLabel()
                 } else {
-                    application.getString(
-                        R.string.stripe_setup_button_label
-                    )
+                    resolvableString(R.string.stripe_setup_button_label)
                 }
             }
-            else -> application.getString(
-                R.string.stripe_continue_button_label
-            )
+            else -> resolvableString(R.string.stripe_continue_button_label)
         }
     }
 
-    private fun buildMandateText(): String {
+    private fun buildMandateText(): ResolvableString {
         return if (saveForFutureUse.value) {
-            application.getString(
+            resolvableString(
                 R.string.stripe_paymentsheet_ach_save_mandate,
                 formattedMerchantName()
             )
         } else {
-            ACHText.getContinueMandateText(application)
+            ACHText.getContinueMandateText()
         }
     }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
+import android.app.Application
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -18,6 +19,8 @@ import dagger.Provides
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
+
+internal const val APPLICATION_NAME_PROVIDER = "APPLICATION_NAME_PROVIDER"
 
 @Module
 internal abstract class PaymentSheetCommonModule {
@@ -56,12 +59,23 @@ internal abstract class PaymentSheetCommonModule {
 
         @Provides
         @Named(STRIPE_ACCOUNT_ID)
-        fun provideStripeAccountId(paymentConfiguration: Provider<PaymentConfiguration>):
-            () -> String? = { paymentConfiguration.get().stripeAccountId }
+        fun provideStripeAccountId(
+            paymentConfiguration: Provider<PaymentConfiguration>,
+        ): () -> String? = { paymentConfiguration.get().stripeAccountId }
 
         @Provides
         @Singleton
         @Named(ENABLE_LOGGING)
         fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG
+
+        @Provides
+        @Singleton
+        @Named(APPLICATION_NAME_PROVIDER)
+        fun provideApplicationNameProvider(appContext: Context): () -> String {
+            return {
+                val application = appContext as Application
+                application.applicationInfo.loadLabel(application.packageManager).toString()
+            }
+        }
     }
 }

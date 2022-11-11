@@ -1,23 +1,24 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import androidx.annotation.StringRes
+import com.stripe.android.core.ResolvableString
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 
 internal sealed class USBankAccountFormScreenState(
     @StringRes open val error: Int? = null
 ) {
-    abstract val primaryButtonText: String?
-    abstract val mandateText: String?
+    abstract val primaryButtonText: ResolvableString?
+    abstract val mandateText: ResolvableString?
 
     class NameAndEmailCollection(
         @StringRes override val error: Int? = null,
         val name: String,
         val email: String?,
-        override val primaryButtonText: String?
+        override val primaryButtonText: ResolvableString?
     ) : USBankAccountFormScreenState() {
 
-        override val mandateText: String? = null
+        override val mandateText: ResolvableString? = null
 
         override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
             NameAndEmailCollection(
@@ -34,8 +35,8 @@ internal sealed class USBankAccountFormScreenState(
         val paymentAccount: FinancialConnectionsAccount,
         val financialConnectionsSessionId: String,
         val intentId: String,
-        override val primaryButtonText: String?,
-        override val mandateText: String?,
+        override val primaryButtonText: ResolvableString?,
+        override val mandateText: ResolvableString?,
         val saveForFutureUsage: Boolean
     ) : USBankAccountFormScreenState() {
         override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
@@ -48,8 +49,8 @@ internal sealed class USBankAccountFormScreenState(
         val paymentAccount: BankAccount,
         val financialConnectionsSessionId: String,
         val intentId: String,
-        override val primaryButtonText: String?,
-        override val mandateText: String?,
+        override val primaryButtonText: ResolvableString?,
+        override val mandateText: ResolvableString?,
         val saveForFutureUsage: Boolean
     ) : USBankAccountFormScreenState() {
         override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =
@@ -63,8 +64,8 @@ internal sealed class USBankAccountFormScreenState(
         val intentId: String,
         val bankName: String,
         val last4: String?,
-        override val primaryButtonText: String?,
-        override val mandateText: String?,
+        override val primaryButtonText: ResolvableString?,
+        override val mandateText: ResolvableString?,
         val saveForFutureUsage: Boolean
     ) : USBankAccountFormScreenState() {
         override fun updateInputs(name: String, email: String?, saveForFutureUsage: Boolean) =

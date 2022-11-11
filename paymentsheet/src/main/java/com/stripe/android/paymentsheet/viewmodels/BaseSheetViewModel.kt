@@ -1,20 +1,21 @@
 package com.stripe.android.paymentsheet.viewmodels
 
-import android.app.Application
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
+import com.stripe.android.core.ResolvableString
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
+import com.stripe.android.core.toResolvableString
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -66,7 +67,7 @@ import kotlin.coroutines.CoroutineContext
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
 internal abstract class BaseSheetViewModel<TransitionTargetType>(
-    application: Application,
+    applicationNameProvider: () -> String,
     internal val config: PaymentSheet.Configuration?,
     internal val eventReporter: EventReporter,
     protected val customerRepository: CustomerRepository,
@@ -78,7 +79,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     val addressResourceRepository: ResourceRepository<AddressRepository>,
     val savedStateHandle: SavedStateHandle,
     val linkLauncher: LinkPaymentLauncher
-) : AndroidViewModel(application) {
+) : ViewModel() {
     /**
      * This ViewModel exists during the whole user flow, and needs to share the Dagger dependencies
      * with the other, screen-specific ViewModels. So it holds a reference to the injector which is
@@ -87,8 +88,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     lateinit var injector: NonFallbackInjector
 
     internal val customerConfig = config?.customer
-    internal val merchantName = config?.merchantDisplayName
-        ?: application.applicationInfo.loadLabel(application.packageManager).toString()
+    internal val merchantName = config?.merchantDisplayName ?: applicationNameProvider()
 
     // a fatal error
     protected val _fatal = MutableLiveData<Throwable>()
@@ -189,8 +189,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _primaryButtonState = MutableLiveData<PrimaryButton.State>()
     val primaryButtonState: LiveData<PrimaryButton.State> = _primaryButtonState
 
-    private val _notesText = MutableLiveData<String?>()
-    internal val notesText: LiveData<String?> = _notesText
+    private val _notesText = MutableLiveData<ResolvableString?>()
+    internal val notesText: LiveData<ResolvableString?> = _notesText
 
     protected val _showLinkVerificationDialog = MutableLiveData(false)
     val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog
@@ -427,9 +427,13 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         _primaryButtonState.value = state
     }
 
-    fun updateBelowButtonText(text: String?) {
+    fun updateBelowButtonText(text: ResolvableString?) {
         _notesText.value = text
     }
+
+//    fun updateBelowButtonText(text: String?) {
+//        _notesText.value = text
+//    }
 
     open fun updateSelection(selection: PaymentSelection?) {
         if (selection is PaymentSelection.New) {
@@ -565,8 +569,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                                     // If successful, the account was fetched or created, so try again
                                     payWithLinkInline(configuration, userInput)
                                 },
-                                onFailure = {
-                                    onError(it.localizedMessage)
+                                onFailure = { error ->
+                                    val message = error.localizedMessage?.toResolvableString()
+                                    onError(message)
+
                                     savedStateHandle[SAVE_PROCESSING] = false
                                     updatePrimaryButtonState(PrimaryButton.State.Ready)
                                 }
@@ -609,9 +615,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     abstract fun onError(@StringRes error: Int? = null)
 
-    abstract fun onError(error: String? = null)
+    abstract fun onError(error: ResolvableString? = null)
 
-    data class UserErrorMessage(val message: String)
+    data class UserErrorMessage(val message: ResolvableString)
 
     /**
      * Used as a wrapper for data that is exposed via a LiveData that represents an event.

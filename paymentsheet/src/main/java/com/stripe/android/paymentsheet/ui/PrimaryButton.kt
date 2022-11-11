@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
+import com.stripe.android.core.ResolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.ui.core.PaymentsTheme
@@ -220,7 +221,7 @@ internal class PrimaryButton @JvmOverloads constructor(
      * Used to override the current UI state of the Primary Button
      */
     internal data class UIState(
-        val label: String?,
+        val label: ResolvableString?,
         val onClick: (() -> Unit)?,
         val enabled: Boolean,
         val visible: Boolean

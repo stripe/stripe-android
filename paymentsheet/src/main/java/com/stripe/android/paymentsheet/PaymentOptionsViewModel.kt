@@ -12,12 +12,14 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
+import com.stripe.android.core.ResolvableString
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.resolvableString
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
@@ -26,6 +28,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.injection.APPLICATION_NAME_PROVIDER
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.FragmentConfig
@@ -41,18 +44,18 @@ import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @JvmSuppressWildcards
 internal class PaymentOptionsViewModel @Inject constructor(
     args: PaymentOptionContract.Args,
-    prefsRepositoryFactory:
-        (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+    prefsRepositoryFactory: (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+    @Named(APPLICATION_NAME_PROVIDER) applicationNameProvider: () -> String,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
     @IOContext workContext: CoroutineContext,
-    application: Application,
     logger: Logger,
     @InjectorKey injectorKey: String,
     lpmResourceRepository: ResourceRepository<LpmRepository>,
@@ -60,7 +63,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     linkLauncher: LinkPaymentLauncher
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
-    application = application,
+    applicationNameProvider = applicationNameProvider,
     config = args.config,
     prefsRepository = prefsRepositoryFactory(args.config?.customer),
     eventReporter = eventReporter,
@@ -77,9 +80,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
     internal val paymentOptionResult: LiveData<PaymentOptionResult> = _paymentOptionResult
 
-    private val _error = MutableLiveData<String>()
-    internal val error: LiveData<String>
-        get() = _error
+    private val _error = MutableLiveData<ResolvableString>()
+    internal val error: LiveData<ResolvableString> = _error
 
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
@@ -141,10 +143,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
         onUserSelection()
     }
 
-    override fun onError(@StringRes error: Int?) =
-        onError(error?.let { getApplication<Application>().getString(it) })
+    override fun onError(@StringRes error: Int?) = onError(error?.let { resolvableString(it) })
 
-    override fun onError(error: String?) {
+    override fun onError(error: ResolvableString?) {
         error?.let {
             _error.value = it
         }
@@ -221,13 +222,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
             selection is PaymentSelection.Saved &&
                 selection.paymentMethod.type == PaymentMethod.Type.USBankAccount -> {
                 updateBelowButtonText(
-                    ACHText.getContinueMandateText(getApplication())
+                    ACHText.getContinueMandateText()
                 )
                 updatePrimaryButtonUIState(
                     PrimaryButton.UIState(
-                        label = getApplication<Application>().getString(
-                            R.string.stripe_continue_button_label
-                        ),
+                        label = resolvableString(R.string.stripe_continue_button_label),
                         visible = true,
                         enabled = true,
                         onClick = {
@@ -247,9 +246,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             else -> {
                 updatePrimaryButtonUIState(
                     primaryButtonUIState.value?.copy(
-                        label = getApplication<Application>().getString(
-                            R.string.stripe_continue_button_label
-                        ),
+                        label = resolvableString(R.string.stripe_continue_button_label),
                         visible = true,
                         enabled = true,
                         onClick = {

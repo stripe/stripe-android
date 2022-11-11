@@ -3,6 +3,9 @@ package com.stripe.android.ui.core
 import android.content.res.Resources
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ResolvableString
+import com.stripe.android.core.resolvableString
+import com.stripe.android.core.resolve
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -15,9 +18,15 @@ data class Amount(val value: Long, val currencyCode: String) : Parcelable {
     /**
      * Builds a localized label in the format "Pay $10.99".
      */
-    fun buildPayButtonLabel(resources: Resources) =
-        resources.getString(
+    fun buildPayButtonLabel(resources: Resources): String = buildPayButtonLabel().resolve(resources)
+
+    /**
+     * Builds a localized label in the format "Pay $10.99".
+     */
+    fun buildPayButtonLabel(): ResolvableString {
+        return resolvableString(
             R.string.stripe_pay_button_amount,
             CurrencyFormatter.format(value, currencyCode)
         )
+    }
 }

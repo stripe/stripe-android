@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Application
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -17,7 +16,7 @@ import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldIcon
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
-import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
+import com.stripe.android.ui.core.elements.autocomplete.model.TransformGoogleToStripeAddress
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -29,7 +28,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -39,15 +37,14 @@ internal class AutocompleteViewModel @Inject constructor(
     private val placesClient: PlacesClientProxy?,
     private val autocompleteArgs: Args,
     private val eventReporter: AddressLauncherEventReporter,
-    application: Application
-) : AndroidViewModel(application) {
+    private val transformGoogleToStripeAddress: TransformGoogleToStripeAddress,
+) : ViewModel() {
+
     private val _predictions = MutableStateFlow<List<AutocompletePrediction>?>(null)
-    val predictions: StateFlow<List<AutocompletePrediction>?>
-        get() = _predictions
+    val predictions: StateFlow<List<AutocompletePrediction>?> = _predictions
 
     private val _loading = MutableStateFlow(false)
-    val loading: StateFlow<Boolean>
-        get() = _loading
+    val loading: StateFlow<Boolean> = _loading
 
     @VisibleForTesting
     val addressResult = MutableStateFlow<Result<AddressDetails?>?>(null)
@@ -119,7 +116,7 @@ internal class AutocompleteViewModel @Inject constructor(
             )?.fold(
                 onSuccess = {
                     _loading.value = false
-                    val address = it.place.transformGoogleToStripeAddress(getApplication())
+                    val address = transformGoogleToStripeAddress(it.place)
                     addressResult.value = Result.success(
                         AddressDetails(
                             address = PaymentSheet.Address(

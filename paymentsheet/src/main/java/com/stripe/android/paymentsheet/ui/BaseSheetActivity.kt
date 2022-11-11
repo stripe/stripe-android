@@ -32,6 +32,7 @@ import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.stripe.android.core.resolve
 import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
@@ -214,7 +215,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         userMessage?.message.let { message ->
             viewModel.config?.appearance?.let {
                 messageView.text = createTextSpanFromTextStyle(
-                    text = message,
+                    text = message?.resolve(this),
                     context = this,
                     fontSizeDp = (
                         it.typography.sizeScaleFactor
@@ -256,7 +257,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 primaryButton.setOnClickListener {
                     state.onClick?.invoke()
                 }
-                primaryButton.setLabel(state.label)
+                primaryButton.setLabel(state.label?.resolve(this))
                 primaryButton.isVisible = state.visible
                 bottomSpacer.isVisible = state.visible
             } ?: run {
@@ -291,7 +292,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 notesView.setContent {
                     PaymentsTheme {
                         Html(
-                            html = text,
+                            html = text.resolve(this),
                             color = MaterialTheme.paymentsColors.subtitle,
                             style = MaterialTheme.typography.body1.copy(
                                 textAlign = TextAlign.Center

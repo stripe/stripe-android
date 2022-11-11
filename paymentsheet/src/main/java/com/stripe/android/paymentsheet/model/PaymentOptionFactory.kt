@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.res.Resources
+import com.stripe.android.core.resolve
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.createCardLabel
 import com.stripe.android.paymentsheet.ui.getCardBrandIcon
@@ -55,7 +56,7 @@ internal class PaymentOptionFactory(
             is PaymentSelection.New.USBankAccount -> {
                 PaymentOption(
                     drawableResourceId = selection.iconResource,
-                    label = selection.labelResource
+                    label = selection.labelResource.resolve(resources),
                 )
             }
         }

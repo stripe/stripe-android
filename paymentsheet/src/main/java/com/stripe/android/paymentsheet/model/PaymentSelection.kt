@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.model
 
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
+import com.stripe.android.core.ResolvableString
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -50,7 +51,7 @@ internal sealed class PaymentSelection : Parcelable {
 
         @Parcelize
         data class USBankAccount(
-            val labelResource: String,
+            val labelResource: ResolvableString,
             @DrawableRes val iconResource: Int,
             val bankName: String,
             val last4: String,

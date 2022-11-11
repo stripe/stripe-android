@@ -17,6 +17,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.ResolvableString
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
@@ -24,6 +25,8 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
+import com.stripe.android.core.resolvableString
+import com.stripe.android.core.toResolvableString
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
@@ -50,6 +53,7 @@ import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShip
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
+import com.stripe.android.paymentsheet.injection.APPLICATION_NAME_PROVIDER
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
@@ -76,18 +80,19 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal class PaymentSheetViewModel @Inject internal constructor(
     // Properties provided through PaymentSheetViewModelComponent.Builder
-    application: Application,
     internal val args: PaymentSheetContract.Args,
     eventReporter: EventReporter,
     // Properties provided through injection
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
+    @Named(APPLICATION_NAME_PROVIDER) applicationNameProvider: () -> String,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
     lpmResourceRepository: ResourceRepository<LpmRepository>,
@@ -100,7 +105,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     savedStateHandle: SavedStateHandle,
     linkLauncher: LinkPaymentLauncher
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
-    application = application,
+    applicationNameProvider = applicationNameProvider,
     config = args.config,
     eventReporter = eventReporter,
     customerRepository = customerRepository,
@@ -326,9 +331,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun resetViewState(userErrorMessage: String? = null) {
-        _viewState.value =
-            PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
+    private fun resetViewState(errorMessage: ResolvableString? = null) {
+        val userErrorMessage = errorMessage?.let { UserErrorMessage(it) }
+        _viewState.value = PaymentSheetViewState.Reset(userErrorMessage)
         savedStateHandle[SAVE_PROCESSING] = false
     }
 
@@ -386,9 +391,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         when (selection) {
             is PaymentSelection.Saved -> {
                 if (selection.paymentMethod.type == PaymentMethod.Type.USBankAccount) {
-                    updateBelowButtonText(
-                        ACHText.getContinueMandateText(getApplication())
-                    )
+                    updateBelowButtonText(ACHText.getContinueMandateText())
                 }
             }
             else -> {
@@ -597,12 +600,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     stripeIntentValidator.requireValid(stripeIntent)
                 }.fold(
                     onSuccess = {
-                        resetViewState(
-                            when (paymentResult) {
-                                is PaymentResult.Failed -> paymentResult.throwable.localizedMessage
-                                else -> null // indicates canceled payment
-                            }
-                        )
+                        val errorMessage = when (paymentResult) {
+                            is PaymentResult.Failed -> paymentResult.throwable.localizedMessage
+                            else -> null // indicates canceled payment
+                        }
+                        resetViewState(errorMessage?.toResolvableString())
                     },
                     onFailure = ::onFatal
                 )
@@ -644,10 +646,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         _paymentSheetResult.value = PaymentSheetResult.Completed
     }
 
-    override fun onError(@IntegerRes error: Int?) =
-        onError(error?.let { getApplication<Application>().resources.getString(it) })
+    override fun onError(@IntegerRes error: Int?) = onError(error?.let { resolvableString(it) })
 
-    override fun onError(error: String?) = resetViewState(error)
+    override fun onError(error: ResolvableString?) {
+        resetViewState(error)
+    }
 
     private fun LinkActivityResult.convertToPaymentResult() =
         when (this) {

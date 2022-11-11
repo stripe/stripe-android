@@ -36,6 +36,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.stripe.android.core.ResolvableString
+import com.stripe.android.core.resolvableString
+import com.stripe.android.core.resolve
+import com.stripe.android.core.toResolvableString
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -185,12 +189,12 @@ internal class USBankAccountFormFragment : Fragment() {
                     .collect { saved ->
                         updateMandateText(
                             if (saved) {
-                                getString(
+                                resolvableString(
                                     R.string.stripe_paymentsheet_ach_save_mandate,
                                     viewModel.formattedMerchantName()
                                 )
                             } else {
-                                ACHText.getContinueMandateText(requireContext())
+                                ACHText.getContinueMandateText()
                             }
                         )
                     }
@@ -437,7 +441,7 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     private fun updatePrimaryButton(
-        text: String?,
+        text: ResolvableString?,
         onClick: () -> Unit,
         shouldShowProcessingWhenClicked: Boolean = true,
         enabled: Boolean = true,
@@ -466,7 +470,7 @@ internal class USBankAccountFormFragment : Fragment() {
         )
     }
 
-    private fun updateMandateText(mandateText: String?) {
+    private fun updateMandateText(mandateText: ResolvableString?) {
         val microdepositsText =
             if (viewModel.currentScreenState.value
                 is USBankAccountFormScreenState.VerifyWithMicrodeposits
@@ -478,13 +482,15 @@ internal class USBankAccountFormFragment : Fragment() {
             } else {
                 ""
             }
+
         val updatedText = mandateText?.let {
             """
                 $microdepositsText
                 
-                $mandateText
+                ${mandateText.resolve(requireContext())}
             """.trimIndent()
-        } ?: run { null }
-        sheetViewModel?.updateBelowButtonText(updatedText)
+        }
+
+        sheetViewModel?.updateBelowButtonText(updatedText?.toResolvableString())
     }
 }

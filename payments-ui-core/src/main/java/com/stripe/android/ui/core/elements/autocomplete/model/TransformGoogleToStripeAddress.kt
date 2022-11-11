@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RestrictTo
 import java.util.Locale
+import javax.inject.Inject
 
 // Largely duplicated from
 // https://git.corp.stripe.com/stripe-internal/stripe-js-v3/blob/1c111621/src/elements/inner/autocomplete_suggestions/utils/transformGoogleToStripeAddress.ts#L248-L325
@@ -178,84 +179,92 @@ internal fun Address.modifyStripeAddressByCountry(place: Place): Address {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun Place.transformGoogleToStripeAddress(
-    context: Context
-): com.stripe.android.model.Address {
-    var address = Address()
-    val addressLine1 = AddressLine1()
+interface TransformGoogleToStripeAddress {
+    operator fun invoke(place: Place): com.stripe.android.model.Address
+}
 
-    addressComponents?.forEach { field ->
-        when (field.types[0]) {
-            Place.Type.STREET_NUMBER.value -> {
-                addressLine1.streetNumber = field.longName
-            }
-            Place.Type.ROUTE.value -> {
-                addressLine1.route = field.longName
-            }
-            Place.Type.PREMISE.value -> {
-                address.addressLine2 = field.longName
-            }
-            Place.Type.LOCALITY.value,
-            Place.Type.SUBLOCALITY.value,
-            Place.Type.POSTAL_TOWN.value -> {
-                address.locality = field.longName
-            }
-            Place.Type.ADMINISTRATIVE_AREA_LEVEL_1.value -> {
-                address.administrativeArea = field.shortName
-            }
-            Place.Type.ADMINISTRATIVE_AREA_LEVEL_3.value -> {
-                if (address.locality == null) {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultTransformGoogleToStripeAddress @Inject constructor(
+    private val context: Context,
+) : TransformGoogleToStripeAddress {
+
+    override fun invoke(place: Place): com.stripe.android.model.Address {
+        var address = Address()
+        val addressLine1 = AddressLine1()
+
+        place.addressComponents?.forEach { field ->
+            when (field.types[0]) {
+                Place.Type.STREET_NUMBER.value -> {
+                    addressLine1.streetNumber = field.longName
+                }
+                Place.Type.ROUTE.value -> {
+                    addressLine1.route = field.longName
+                }
+                Place.Type.PREMISE.value -> {
+                    address.addressLine2 = field.longName
+                }
+                Place.Type.LOCALITY.value,
+                Place.Type.SUBLOCALITY.value,
+                Place.Type.POSTAL_TOWN.value -> {
                     address.locality = field.longName
                 }
-            }
-            Place.Type.ADMINISTRATIVE_AREA_LEVEL_2.value -> {
-                if (address.administrativeArea == null && address.dependentLocality == null) {
-                    address.dependentLocality = field.longName
-                } else {
+                Place.Type.ADMINISTRATIVE_AREA_LEVEL_1.value -> {
                     address.administrativeArea = field.shortName
                 }
-            }
-            Place.Type.NEIGHBORHOOD.value -> {
-                if (address.locality == null) {
-                    address.locality = field.longName
-                } else {
-                    address.dependentLocality = field.longName
+                Place.Type.ADMINISTRATIVE_AREA_LEVEL_3.value -> {
+                    if (address.locality == null) {
+                        address.locality = field.longName
+                    }
                 }
-            }
-            Place.Type.POSTAL_CODE.value -> {
-                address.postalCode = field.longName
-            }
-            Place.Type.COUNTRY.value -> {
-                address.country = field.shortName
-            }
-            Place.Type.SUBLOCALITY_LEVEL_1.value -> {
-                if (address.locality == null) {
-                    address.dependentLocality = field.longName
-                } else {
-                    address.locality = field.longName
+                Place.Type.ADMINISTRATIVE_AREA_LEVEL_2.value -> {
+                    if (address.administrativeArea == null && address.dependentLocality == null) {
+                        address.dependentLocality = field.longName
+                    } else {
+                        address.administrativeArea = field.shortName
+                    }
                 }
-            }
-            Place.Type.SUBLOCALITY_LEVEL_2.value -> {
-                addressLine1.subLocalityLevel2 = field.longName
-            }
-            Place.Type.SUBLOCALITY_LEVEL_3.value -> {
-                addressLine1.subLocalityLevel3 = field.longName
-            }
-            Place.Type.SUBLOCALITY_LEVEL_4.value -> {
-                addressLine1.subLocalityLevel4 = field.longName
+                Place.Type.NEIGHBORHOOD.value -> {
+                    if (address.locality == null) {
+                        address.locality = field.longName
+                    } else {
+                        address.dependentLocality = field.longName
+                    }
+                }
+                Place.Type.POSTAL_CODE.value -> {
+                    address.postalCode = field.longName
+                }
+                Place.Type.COUNTRY.value -> {
+                    address.country = field.shortName
+                }
+                Place.Type.SUBLOCALITY_LEVEL_1.value -> {
+                    if (address.locality == null) {
+                        address.dependentLocality = field.longName
+                    } else {
+                        address.locality = field.longName
+                    }
+                }
+                Place.Type.SUBLOCALITY_LEVEL_2.value -> {
+                    addressLine1.subLocalityLevel2 = field.longName
+                }
+                Place.Type.SUBLOCALITY_LEVEL_3.value -> {
+                    addressLine1.subLocalityLevel3 = field.longName
+                }
+                Place.Type.SUBLOCALITY_LEVEL_4.value -> {
+                    addressLine1.subLocalityLevel4 = field.longName
+                }
             }
         }
+
+        address.addressLine1 = composeAddressLine1(context, addressLine1, address)
+        address = address.modifyStripeAddressByCountry(place)
+
+        return com.stripe.android.model.Address.Builder()
+            .setLine1(address.addressLine1)
+            .setLine2(address.addressLine2)
+            .setCity(address.locality)
+            .setState(address.administrativeArea)
+            .setCountry(address.country)
+            .setPostalCode(address.postalCode)
+            .build()
     }
-
-    address.addressLine1 = composeAddressLine1(context, addressLine1, address)
-    address = address.modifyStripeAddressByCountry(this)
-
-    return com.stripe.android.model.Address.Builder()
-        .setLine1(address.addressLine1)
-        .setLine2(address.addressLine2)
-        .setCity(address.locality)
-        .setState(address.administrativeArea)
-        .setCountry(address.country)
-        .setPostalCode(address.postalCode)
-        .build()
 }
