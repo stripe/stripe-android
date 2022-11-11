@@ -1,21 +1,17 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,6 +41,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -202,10 +199,10 @@ private fun PrePaneContent(
     Column(
         modifier = Modifier
             .padding(
-                top = 24.dp,
-                start = 16.dp,
-                end = 16.dp,
-                bottom = 16.dp
+                top = 8.dp,
+                start = 24.dp,
+                end = 24.dp,
+                bottom = 24.dp
             )
     ) {
         val modifier = Modifier
@@ -236,19 +233,10 @@ private fun PrePaneContent(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(R.string.stripe_prepane_continue),
-                    modifier = Modifier.align(Alignment.Center),
-                    textAlign = TextAlign.Center
-                )
-                Icon(
-                    painterResource(id = R.drawable.stripe_ic_external),
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                    tint = FinancialConnectionsTheme.colors.textWhite,
-                    contentDescription = stringResource(R.string.stripe_prepane_continue)
-                )
-            }
+            Text(
+                text = stringResource(R.string.stripe_prepane_continue),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
@@ -256,7 +244,7 @@ private fun PrePaneContent(
 @Composable
 @Preview
 internal fun PrepaneContentPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         PartnerAuthScreenContent(
             state = PartnerAuthState(
                 payload = Success(

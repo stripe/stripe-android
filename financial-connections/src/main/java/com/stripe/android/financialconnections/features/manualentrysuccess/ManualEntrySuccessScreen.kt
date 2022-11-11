@@ -1,4 +1,4 @@
-@file:Suppress("TooManyFunctions")
+@file:Suppress("TooManyFunctions", "LongMethod")
 
 package com.stripe.android.financialconnections.features.manualentrysuccess
 
@@ -40,6 +40,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
 import com.stripe.android.financialconnections.navigation.NavigationDirections.ManualEntrySuccess
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -83,18 +84,29 @@ internal fun ManualEntrySuccessContent(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(
+                    top = 16.dp,
+                    start = 24.dp,
+                    end = 24.dp,
+                    bottom = 24.dp
+                )
         ) {
             Icon(
                 modifier = Modifier.size(40.dp),
-                painter = painterResource(R.drawable.stripe_ic_check_circle),
+                painter = painterResource(R.drawable.stripe_ic_check_circle_emtpy),
                 contentDescription = null,
                 tint = FinancialConnectionsTheme.colors.textSuccess
             )
             Text(
                 modifier = Modifier
                     .fillMaxWidth(),
-                text = stringResource(R.string.stripe_manualentrysuccess_title),
+                text = when (microdepositVerificationMethod) {
+                    MicrodepositVerificationMethod.UNKNOWN,
+                    MicrodepositVerificationMethod.AMOUNTS ->
+                        stringResource(R.string.stripe_manualentrysuccess_title)
+                    MicrodepositVerificationMethod.DESCRIPTOR_CODE ->
+                        stringResource(R.string.stripe_manualentrysuccess_title_descriptorcode)
+                },
                 style = FinancialConnectionsTheme.typography.subtitle.copy(
                     color = FinancialConnectionsTheme.colors.textPrimary
                 )
@@ -164,29 +176,43 @@ internal fun TransactionHistoryTable(
             Modifier
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
         ) {
+
             val titleColor = FinancialConnectionsTheme.colors.textSecondary
-            val tableData = buildTableRows(microdepositVerificationMethod)
+            val tableData =
+                buildTableRows(microdepositVerificationMethod)
             last4?.let {
-                Text(
-                    text = stringResource(R.string.stripe_manualentrysuccess_table_title, it),
-                    style = FinancialConnectionsTheme.typography.body.copy(color = titleColor)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.stripe_ic_bank),
+                        tint = FinancialConnectionsTheme.colors.textSecondary,
+                        contentDescription = "Bank icon"
+                    )
+                    Text(
+                        text = stringResource(R.string.stripe_manualentrysuccess_table_title, it),
+                        style = FinancialConnectionsTheme.typography.bodyCode.copy(color = titleColor)
+                    )
+                }
+                Spacer(Modifier.size(8.dp))
             }
             Row {
-                TableCell(text = "Transaction", titleColor)
-                TableCell(text = "Amount", titleColor)
-                TableCell(text = "Type", titleColor)
+                TitleCell(text = "Transaction")
+                TitleCell(text = "Amount")
+                TitleCell(text = "Type")
             }
             Divider(
                 modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
                 color = FinancialConnectionsTheme.colors.borderDefault
             )
-            for (item in tableData) {
+            tableData.withIndex().forEach { (index, item) ->
                 val (transaction, amount, type) = item
+                val highlight = tableData.lastIndex != index
                 Row(Modifier.fillMaxWidth()) {
-                    TableCell(text = transaction.first, transaction.second)
-                    TableCell(text = amount.first, amount.second)
-                    TableCell(text = type.first, type.second)
+                    TableCell(text = transaction.first, transaction.second, highlight)
+                    TableCell(text = amount.first, amount.second, highlight)
+                    TableCell(text = type.first, type.second, highlight)
                 }
             }
         }
@@ -194,7 +220,7 @@ internal fun TransactionHistoryTable(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(36.dp)
+                .height(26.dp)
                 .align(Alignment.BottomCenter)
                 .background(
                     brush = Brush.verticalGradient(
@@ -231,17 +257,36 @@ private fun buildTableRows(
 }
 
 @Composable
-private fun RowScope.TableCell(
+private fun RowScope.TitleCell(
     text: String,
-    color: Color
 ) {
     Text(
         text = text,
-        style = FinancialConnectionsTheme.typography.detailEmphasized.copy(
-            color = color
+        style = FinancialConnectionsTheme.typography.caption.copy(
+            color = FinancialConnectionsTheme.colors.textSecondary
         ),
         modifier = Modifier
-            .padding(4.dp)
+            .padding(vertical = 4.dp)
+            .weight(1f)
+    )
+}
+
+@Composable
+private fun RowScope.TableCell(
+    text: String,
+    color: Color,
+    highlight: Boolean
+) {
+    val typography = if (highlight) {
+        FinancialConnectionsTheme.typography.captionCodeEmphasized
+    } else {
+        FinancialConnectionsTheme.typography.captionCode
+    }
+    Text(
+        text = text,
+        style = typography.copy(color = color),
+        modifier = Modifier
+            .padding(vertical = 4.dp)
             .weight(1f)
     )
 }
@@ -249,7 +294,7 @@ private fun RowScope.TableCell(
 @Preview
 @Composable
 internal fun ManualEntrySuccessScreenPreviewAmount() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.AMOUNTS,
             last4 = "1234",
@@ -262,7 +307,7 @@ internal fun ManualEntrySuccessScreenPreviewAmount() {
 @Preview
 @Composable
 internal fun ManualEntrySuccessScreenPreviewDescriptor() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.DESCRIPTOR_CODE,
             last4 = "1234",
@@ -275,7 +320,7 @@ internal fun ManualEntrySuccessScreenPreviewDescriptor() {
 @Preview
 @Composable
 internal fun ManualEntrySuccessScreenPreviewAmountNoAccount() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.AMOUNTS,
             last4 = null,
@@ -288,7 +333,7 @@ internal fun ManualEntrySuccessScreenPreviewAmountNoAccount() {
 @Preview
 @Composable
 internal fun ManualEntrySuccessScreenPreviewDescriptorNoAccount() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         ManualEntrySuccessContent(
             MicrodepositVerificationMethod.DESCRIPTOR_CODE,
             last4 = null,

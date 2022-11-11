@@ -1,3 +1,5 @@
+@file:Suppress("LongMethod")
+
 package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -11,7 +13,6 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
     override val values = sequenceOf(
         multiSelect(),
         singleSelect(),
-        dropdown()
     )
 
     override val count: Int
@@ -42,26 +43,10 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     accounts = partnerAccountList(),
                     selectionMode = AccountPickerState.SelectionMode.RADIO,
                     accessibleData = accessibleCallout(),
-                    singleAccount = false,
+                    singleAccount = true,
                     institutionSkipAccountSelection = false,
                     businessName = "Random business",
                     stripeDirect = false,
-                )
-            ),
-            selectedIds = setOf("id1"),
-        )
-
-        fun dropdown() = AccountPickerState(
-            payload = Success(
-                AccountPickerState.Payload(
-                    skipAccountSelection = false,
-                    accounts = partnerAccountList(),
-                    selectionMode = AccountPickerState.SelectionMode.DROPDOWN,
-                    accessibleData = accessibleCallout(),
-                    singleAccount = true,
-                    institutionSkipAccountSelection = true,
-                    businessName = "Random business",
-                    stripeDirect = true,
                 )
             ),
             selectedIds = setOf("id1"),
@@ -73,7 +58,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     authorization = "Authorization",
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id1",
-                    name = "Account 1",
+                    name = "With balance",
                     balanceAmount = 1000,
                     displayableAccountNumbers = "1234",
                     currency = "$",
@@ -82,48 +67,68 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                institutionIcon = null
+                institutionIcon = null,
+                formattedBalance = "$1,000"
             ),
             PartnerAccountUI(
                 PartnerAccount(
                     authorization = "Authorization",
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id2",
-                    name = "Account 2 - no acct numbers",
+                    name = "With balance disabled",
+                    balanceAmount = 1000,
                     allowSelection = true,
                     allowSelectionMessage = "",
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                institutionIcon = null
+                institutionIcon = null,
+                formattedBalance = "$1,000"
             ),
             PartnerAccountUI(
                 PartnerAccount(
                     authorization = "Authorization",
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id3",
-                    name = "Account 3",
+                    name = "No balance",
                     displayableAccountNumbers = "1234",
                     subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
                     allowSelection = false,
                     allowSelectionMessage = "Cannot be selected",
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                institutionIcon = null
+                institutionIcon = null,
+                formattedBalance = null
             ),
             PartnerAccountUI(
                 PartnerAccount(
                     authorization = "Authorization",
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id4",
-                    name = "Account 4",
+                    name = "No balance disabled",
                     displayableAccountNumbers = "1234",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     allowSelection = false,
                     allowSelectionMessage = "Cannot be selected",
                     supportedPaymentMethodTypes = emptyList()
                 ),
-                institutionIcon = null
+                institutionIcon = null,
+                formattedBalance = null
+            ),
+            PartnerAccountUI(
+                PartnerAccount(
+                    authorization = "Authorization",
+                    category = FinancialConnectionsAccount.Category.CASH,
+                    id = "id5",
+                    name = "Very long institution that is already linked",
+                    displayableAccountNumbers = "1234",
+                    linkedAccountId = "linkedAccountId",
+                    allowSelection = true,
+                    subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+                    supportedPaymentMethodTypes = emptyList()
+                ),
+                institutionIcon = null,
+                formattedBalance = null
             )
         )
 

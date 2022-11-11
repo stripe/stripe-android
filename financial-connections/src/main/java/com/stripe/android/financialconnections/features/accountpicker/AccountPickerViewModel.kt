@@ -23,7 +23,6 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -33,6 +32,8 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Currency
 import javax.inject.Inject
 
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -77,13 +78,20 @@ internal class AccountPickerViewModel @Inject constructor(
                 AccountPickerState.PartnerAccountUI(
                     account = account,
                     institutionIcon = activeInstitution?.icon?.default,
+                    formattedBalance =
+                    if (account.balanceAmount != null && account.currency != null) {
+                        NumberFormat
+                            .getCurrencyInstance()
+                            .also { it.currency = Currency.getInstance(account.currency) }
+                            .format(account.balanceAmount)
+                    } else null
                 )
-            }.sortedBy { it.account.allowSelection }
+            }.sortedBy { it.account.allowSelection.not() }
 
             AccountPickerState.Payload(
                 skipAccountSelection = activeAuthSession.skipAccountSelection == true,
                 accounts = accounts,
-                selectionMode = selectionConfig(manifest),
+                selectionMode = if (manifest.singleAccount) SelectionMode.RADIO else SelectionMode.CHECKBOXES,
                 accessibleData = AccessibleDataCalloutModel(
                     businessName = ConsentTextBuilder.getBusinessName(manifest),
                     permissions = manifest.permissions,
@@ -117,14 +125,6 @@ internal class AccountPickerViewModel @Inject constructor(
                     selectedIds = setOf(payload.accounts.first().account.id),
                     updateLocalCache = true
                 )
-
-                payload.selectionMode == SelectionMode.DROPDOWN -> setState {
-                    copy(
-                        selectedIds = setOfNotNull(
-                            payload.accounts.firstOrNull { it.account.allowSelection }?.account?.id
-                        )
-                    )
-                }
             }
         })
     }
@@ -146,32 +146,10 @@ internal class AccountPickerViewModel @Inject constructor(
         )
     }
 
-    /**
-     * in the special case that this is single account and the institution would have
-     * skipped account selection but _didn't_ (because we still saw this), we should
-     * render the variant of the AccountPicker which uses a select dropdown. This is
-     * meant to prevent showing a radio-button account picker immediately after the user
-     * interacted with a checkbox select picker, which is the predominant UX of oauth popovers today.
-     */
-    private fun selectionConfig(
-        manifest: FinancialConnectionsSessionManifest
-    ): SelectionMode =
-        when {
-            manifest.singleAccount -> when {
-                manifest.activeAuthSession?.institutionSkipAccountSelection == true &&
-                    manifest.activeAuthSession.isOAuth -> SelectionMode.DROPDOWN
-
-                else -> SelectionMode.RADIO
-            }
-
-            else -> SelectionMode.CHECKBOXES
-        }
-
     fun onAccountClicked(account: PartnerAccount) {
         withState { state ->
             state.payload()?.let { payload ->
                 when (payload.selectionMode) {
-                    SelectionMode.DROPDOWN,
                     SelectionMode.RADIO -> setState {
                         copy(selectedIds = setOf(account.id))
                     }
@@ -307,7 +285,7 @@ internal data class AccountPickerState(
 
         val subtitle: TextResource?
             get() = when {
-                selectionMode != SelectionMode.DROPDOWN || singleAccount.not() -> null
+                singleAccount.not() -> null
                 stripeDirect -> TextResource.StringId(
                     R.string.stripe_accountpicker_singleaccount_description_withstripe
                 )
@@ -325,10 +303,11 @@ internal data class AccountPickerState(
 
     data class PartnerAccountUI(
         val account: PartnerAccount,
-        val institutionIcon: String?
+        val institutionIcon: String?,
+        val formattedBalance: String?,
     )
 
     enum class SelectionMode {
-        DROPDOWN, RADIO, CHECKBOXES
+        RADIO, CHECKBOXES
     }
 }

@@ -61,6 +61,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
+import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.uicore.image.StripeImage
@@ -167,7 +168,8 @@ private fun ConsentMainContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick
+                onCloseClick = onCloseClick,
+                elevation = scrollState.elevation
             )
         }
     ) {
@@ -178,7 +180,12 @@ private fun ConsentMainContent(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(scrollState)
-                    .padding(24.dp)
+                    .padding(
+                        top = 16.dp,
+                        start = 24.dp,
+                        end = 24.dp,
+                        bottom = 24.dp
+                    )
             ) {
                 AnnotatedText(
                     text = title,
@@ -255,13 +262,28 @@ private fun ConsentFooter(
     val belowCta = remember(consent.belowCta) {
         consent.belowCta?.let { TextResource.Text(fromHtml(consent.belowCta)) }
     }
-    Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
+    Column(
+        modifier = Modifier.padding(
+            start = 24.dp,
+            end = 24.dp,
+            top = 16.dp,
+            bottom = 24.dp
+        )
+    ) {
         AnnotatedText(
             text = aboveCta,
             onClickableTextClick = onClickableTextClick,
-            defaultStyle = typography.body.copy(
+            defaultStyle = typography.detail.copy(
                 textAlign = TextAlign.Center,
                 color = colors.textSecondary
+            ),
+            annotationStyles = mapOf(
+                StringAnnotation.CLICKABLE to typography.detailEmphasized
+                    .toSpanStyle()
+                    .copy(color = colors.textBrand),
+                StringAnnotation.BOLD to typography.detailEmphasized
+                    .toSpanStyle()
+                    .copy(color = colors.textSecondary)
             )
         )
         Spacer(modifier = Modifier.size(16.dp))
@@ -279,9 +301,17 @@ private fun ConsentFooter(
                 modifier = Modifier.fillMaxWidth(),
                 text = belowCta,
                 onClickableTextClick = onClickableTextClick,
-                defaultStyle = typography.body.copy(
+                defaultStyle = typography.detail.copy(
                     textAlign = TextAlign.Center,
                     color = colors.textSecondary
+                ),
+                annotationStyles = mapOf(
+                    StringAnnotation.CLICKABLE to typography.detailEmphasized
+                        .toSpanStyle()
+                        .copy(color = colors.textBrand),
+                    StringAnnotation.BOLD to typography.detailEmphasized
+                        .toSpanStyle()
+                        .copy(color = colors.textSecondary)
                 )
             )
             Spacer(modifier = Modifier.size(16.dp))
@@ -339,7 +369,7 @@ private fun ConsentPermissionsBottomSheetContent(
         }
         Column(
             Modifier.padding(
-                bottom = 16.dp,
+                bottom = 24.dp,
                 start = 24.dp,
                 end = 24.dp
             )
@@ -400,7 +430,7 @@ private fun ConsentBottomSheetBullet(
             .offset(y = 2.dp)
         StripeImage(
             url = iconUrl,
-            colorFilter = ColorFilter.tint(colors.iconSuccess),
+            colorFilter = ColorFilter.tint(colors.textSuccess),
             errorContent = { InstitutionPlaceholder(modifier) },
             imageLoader = LocalImageLoader.current,
             contentDescription = null,
@@ -452,6 +482,14 @@ private fun ConsentBullet(
             onClickableTextClick = { onClickableTextClick?.invoke(it) },
             defaultStyle = typography.body.copy(
                 color = colors.textSecondary
+            ),
+            annotationStyles = mapOf(
+                StringAnnotation.CLICKABLE to typography.bodyEmphasized
+                    .toSpanStyle()
+                    .copy(color = colors.textBrand),
+                StringAnnotation.BOLD to typography.bodyEmphasized
+                    .toSpanStyle()
+                    .copy(color = colors.textSecondary)
             )
         )
     }

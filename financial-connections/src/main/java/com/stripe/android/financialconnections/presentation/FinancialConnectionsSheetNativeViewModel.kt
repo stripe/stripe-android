@@ -9,6 +9,7 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
+import com.airbnb.mvrx.PersistState
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -60,6 +61,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
     init {
+        setState { copy(firstInit = false) }
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
                 when (message) {
@@ -94,7 +96,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     baseUrl(applicationId)
-                ) -> when (getStatusFromUrl(receivedUrl)) {
+                ) -> when (uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)) {
                     STATUS_SUCCESS -> setState {
                         copy(webAuthFlow = Success(receivedUrl))
                     }
@@ -142,12 +144,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun getStatusFromUrl(receivedUrl: String): String? {
-        return uriUtils.getQueryParameter(receivedUrl, PARAM_STATUS)
-            // TODO@carlosmuvi remove once test mode returns [PARAM_STATUS] instead of code.
-            ?: uriUtils.getQueryParameter(receivedUrl, "code")
     }
 
     /**
@@ -298,7 +294,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             val args = viewModelContext.args<FinancialConnectionsSheetNativeActivityArgs>()
             return DaggerFinancialConnectionsSheetNativeComponent
                 .builder()
-                .initialSyncResponse(args.initialSyncResponse)
+                .initialSyncResponse(args.initialSyncResponse.takeIf { state.firstInit })
                 .application(viewModelContext.app())
                 .configuration(state.configuration)
                 .initialState(state)
@@ -310,6 +306,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
 internal data class FinancialConnectionsSheetNativeState(
     val webAuthFlow: Async<String>,
+    /**
+     * Tracks whether this state was recreated from a process kill.
+     */
+    @PersistState
+    val firstInit: Boolean,
     val configuration: FinancialConnectionsSheet.Configuration,
     val showCloseDialog: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
@@ -322,6 +323,7 @@ internal data class FinancialConnectionsSheetNativeState(
     @Suppress("Unused")
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
+        firstInit = true,
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
         showCloseDialog = false,

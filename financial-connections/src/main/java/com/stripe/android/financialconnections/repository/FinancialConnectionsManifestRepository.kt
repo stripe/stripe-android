@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.network.NetworkConstants
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.Date
+import java.util.Locale
 
 /**
  * Repository to centralize reads and writes to the [FinancialConnectionsSessionManifest]
@@ -123,12 +124,14 @@ internal interface FinancialConnectionsManifestRepository {
             apiRequestFactory: ApiRequest.Factory,
             apiOptions: ApiRequest.Options,
             logger: Logger,
+            locale: Locale,
             initialSync: SynchronizeSessionResponse?
         ): FinancialConnectionsManifestRepository =
             FinancialConnectionsManifestRepositoryImpl(
                 requestExecutor,
                 apiRequestFactory,
                 apiOptions,
+                locale,
                 logger,
                 initialSync
             )
@@ -140,6 +143,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     val requestExecutor: FinancialConnectionsRequestExecutor,
     val apiRequestFactory: ApiRequest.Factory,
     val apiOptions: ApiRequest.Options,
+    val locale: Locale,
     val logger: Logger,
     initialSync: SynchronizeSessionResponse?
 ) : FinancialConnectionsManifestRepository {
@@ -183,9 +187,10 @@ private class FinancialConnectionsManifestRepositoryImpl(
         options = apiOptions,
         params = mapOf(
             "expand" to listOf("manifest.active_auth_session"),
-            "locale" to "en-us",
+            "locale" to locale.toLanguageTag(),
             "mobile" to mapOf(
                 "sdk_type" to "android",
+                // EXPAND!
                 PARAMS_FULLSCREEN to true,
                 PARAMS_HIDE_CLOSE_BUTTON to true,
                 "sdk_version" to 1,

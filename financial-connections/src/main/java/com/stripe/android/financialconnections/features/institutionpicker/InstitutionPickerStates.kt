@@ -4,6 +4,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
+import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 
@@ -19,6 +20,12 @@ internal class InstitutionPickerStates :
 
     // TODO@carlosmuvi migrate to PreviewParameterProvider when showkase adds support.
     companion object {
+        fun initialLoading() = InstitutionPickerState(
+            payload = Loading(),
+            searchInstitutions = Uninitialized,
+            searchMode = false,
+            allowManualEntry = true,
+        )
         // Search mode - searching institutions
         fun searchModeSearchingInstitutions() = InstitutionPickerState(
             payload = Success(payload()),
@@ -40,11 +47,11 @@ internal class InstitutionPickerStates :
             searchMode = false,
         )
 
-        // Search mode: No results
+        // Search mode: failed
         fun searchModeFailed() = InstitutionPickerState(
             payload = Success(payload()),
             searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
-            searchMode = false,
+            searchMode = true,
         )
 
         // Search mode: no query

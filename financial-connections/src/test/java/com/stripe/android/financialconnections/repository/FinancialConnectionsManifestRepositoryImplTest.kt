@@ -21,6 +21,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.willSuspendableAnswer
+import java.util.Locale
 
 @ExperimentalCoroutinesApi
 internal class FinancialConnectionsManifestRepositoryImplTest {
@@ -35,7 +36,8 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         apiRequestFactory = apiRequestFactory,
         apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
         logger = Logger.noop(),
-        initialSync = initialSync
+        initialSync = initialSync,
+        locale = Locale.US
     )
 
     @Test

@@ -2,14 +2,21 @@
 
 package com.stripe.android.financialconnections.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonColors
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ProvideTextStyle
@@ -19,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 
@@ -35,6 +43,13 @@ internal fun FinancialConnectionsButton(
     Button(
         onClick = { if (!loading) onClick() },
         modifier = modifier,
+        elevation = ButtonDefaults.elevation(
+            defaultElevation = 0.dp,
+            pressedElevation = 2.dp,
+            disabledElevation = 0.dp,
+            hoveredElevation = 0.dp,
+            focusedElevation = 0.dp,
+        ),
         enabled = enabled,
         shape = RoundedCornerShape(size = size.radius),
         contentPadding = size.paddingValues(),
@@ -72,8 +87,8 @@ internal object FinancialConnectionsButton {
                 return buttonColors(
                     backgroundColor = colors.textBrand,
                     contentColor = colors.textWhite,
-                    disabledBackgroundColor = colors.textBrand.copy(alpha = 0.12f),
-                    disabledContentColor = colors.textWhite
+                    disabledBackgroundColor = colors.textBrand,
+                    disabledContentColor = colors.textWhite.copy(alpha = 0.5f)
                 )
             }
         }
@@ -82,9 +97,9 @@ internal object FinancialConnectionsButton {
             @Composable
             override fun buttonColors(): ButtonColors {
                 return buttonColors(
-                    backgroundColor = colors.textWhite,
+                    backgroundColor = colors.backgroundContainer,
                     contentColor = colors.textPrimary,
-                    disabledBackgroundColor = colors.textWhite,
+                    disabledBackgroundColor = colors.backgroundContainer,
                     disabledContentColor = colors.textPrimary.copy(alpha = 0.12f)
                 )
             }
@@ -138,70 +153,61 @@ internal object FinancialConnectionsButton {
 @Composable
 @Preview(group = "Components", name = "Button - primary - idle")
 internal fun FinancialConnectionsButtonPreview() {
-    FinancialConnectionsTheme {
-        FinancialConnectionsButton(
-            loading = false,
-            onClick = { }
+    FinancialConnectionsPreview {
+        Column(
+            modifier = Modifier
+                .background(colors.backgroundSurface)
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceEvenly
         ) {
-            Text(text = "Sample text")
-        }
-    }
-}
-
-@Composable
-@Preview(group = "Components", name = "Button - primary - loading")
-internal fun FinancialConnectionsButtonLoadingPreview() {
-    FinancialConnectionsTheme {
-        FinancialConnectionsButton(
-            loading = true,
-            onClick = { }
-        ) {
-            Text(text = "Sample text")
-        }
-    }
-}
-
-@Composable
-@Preview(group = "Components", name = "Button - secondary - idle")
-internal fun FinancialConnectionsButtonSecondaryPreview() {
-    FinancialConnectionsTheme {
-        FinancialConnectionsButton(
-            type = FinancialConnectionsButton.Type.Secondary,
-            loading = false,
-            onClick = { }
-        ) {
-            Text(text = "Sample text")
-        }
-    }
-}
-
-@Composable
-@Preview(group = "Components", name = "Button - secondary - disabled")
-internal fun FinancialConnectionsButtonSecondaryDisabledPreview() {
-    FinancialConnectionsTheme {
-        FinancialConnectionsButton(
-            type = FinancialConnectionsButton.Type.Secondary,
-            loading = false,
-            enabled = false,
-            onClick = { }
-        ) {
-            Text(text = "Sample text")
-        }
-    }
-}
-
-@Composable
-@Preview(group = "Components", name = "Pill button - critical - disabled")
-internal fun FinancialConnectionsButtonCriticalPreview() {
-    FinancialConnectionsTheme {
-        FinancialConnectionsButton(
-            type = FinancialConnectionsButton.Type.Critical,
-            size = FinancialConnectionsButton.Size.Pill,
-            loading = false,
-            enabled = true,
-            onClick = { }
-        ) {
-            Text(text = "Sample text")
+            FinancialConnectionsButton(
+                modifier = Modifier.fillMaxWidth(),
+                loading = false,
+                onClick = { }
+            ) {
+                Text(text = "Primary")
+            }
+            FinancialConnectionsButton(
+                modifier = Modifier.fillMaxWidth(),
+                loading = true,
+                onClick = { }
+            ) {
+                Text(text = "Primary - loading")
+            }
+            FinancialConnectionsButton(
+                modifier = Modifier.fillMaxWidth(),
+                enabled = false,
+                onClick = { }
+            ) {
+                Text(text = "Primary - disabled")
+            }
+            FinancialConnectionsButton(
+                modifier = Modifier.fillMaxWidth(),
+                type = FinancialConnectionsButton.Type.Secondary,
+                loading = false,
+                onClick = { }
+            ) {
+                Text(text = "Secondary")
+            }
+            FinancialConnectionsButton(
+                modifier = Modifier.fillMaxWidth(),
+                type = FinancialConnectionsButton.Type.Secondary,
+                loading = false,
+                enabled = false,
+                onClick = { }
+            ) {
+                Text(text = "Sample text")
+            }
+            FinancialConnectionsButton(
+                type = FinancialConnectionsButton.Type.Critical,
+                size = FinancialConnectionsButton.Size.Pill,
+                loading = false,
+                enabled = true,
+                onClick = { }
+            ) {
+                Text(text = "Pill critical text")
+            }
         }
     }
 }

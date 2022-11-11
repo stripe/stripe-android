@@ -59,6 +59,7 @@ internal class FinancialConnectionsSheetNativeModule {
         context: Application,
         logger: Logger,
         getManifest: GetManifest,
+        locale: Locale?,
         configuration: FinancialConnectionsSheet.Configuration,
         stripeNetworkClient: StripeNetworkClient
     ): FinancialConnectionsAnalyticsTracker = FinancialConnectionsAnalyticsTrackerImpl(
@@ -66,7 +67,7 @@ internal class FinancialConnectionsSheetNativeModule {
         configuration = configuration,
         getManifest = getManifest,
         logger = logger,
-        locale = Locale.getDefault(),
+        locale = locale ?: Locale.getDefault(),
         loggerId = UUID.randomUUID().toString(),
         stripeNetworkClient = stripeNetworkClient
     )
@@ -86,12 +87,14 @@ internal class FinancialConnectionsSheetNativeModule {
         requestExecutor: FinancialConnectionsRequestExecutor,
         apiRequestFactory: ApiRequest.Factory,
         apiOptions: ApiRequest.Options,
+        locale: Locale?,
         logger: Logger,
-        @Named(INITIAL_SYNC_RESPONSE) initialSynchronizeSessionResponse: SynchronizeSessionResponse
+        @Named(INITIAL_SYNC_RESPONSE) initialSynchronizeSessionResponse: SynchronizeSessionResponse?
     ) = FinancialConnectionsManifestRepository(
         requestExecutor = requestExecutor,
         apiRequestFactory = apiRequestFactory,
         apiOptions = apiOptions,
+        locale = locale ?: Locale.getDefault(),
         logger = logger,
         initialSync = initialSynchronizeSessionResponse
     )
