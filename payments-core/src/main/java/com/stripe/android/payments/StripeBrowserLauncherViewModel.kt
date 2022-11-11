@@ -1,14 +1,14 @@
 package com.stripe.android.payments
 
-import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -18,6 +18,7 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.utils.requireApplication
 import kotlin.properties.Delegates
 
 internal class StripeBrowserLauncherViewModel(
@@ -97,17 +98,13 @@ internal class StripeBrowserLauncherViewModel(
         )
     }
 
-    class Factory(
-        private val application: Application,
-        owner: SavedStateRegistryOwner
-    ) : AbstractSavedStateViewModelFactory(owner, null) {
+    class Factory : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(
-            key: String,
-            modelClass: Class<T>,
-            handle: SavedStateHandle
-        ): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            val application = extras.requireApplication()
+            val savedStateHandle = extras.createSavedStateHandle()
+
             val config = PaymentConfiguration.getInstance(application)
             val browserCapabilitiesSupplier = BrowserCapabilitiesSupplier(application)
 
@@ -119,7 +116,7 @@ internal class StripeBrowserLauncherViewModel(
                 ),
                 browserCapabilitiesSupplier.get(),
                 application.getString(R.string.stripe_verify_your_payment),
-                handle
+                savedStateHandle
             ) as T
         }
     }

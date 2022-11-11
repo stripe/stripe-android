@@ -1,14 +1,14 @@
 package com.stripe.android.googlepaylauncher
 
 import android.app.Application
-import android.os.Bundle
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.distinctUntilChanged
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
@@ -25,6 +25,7 @@ import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMeth
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherViewModelSubcomponent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.first
 import org.json.JSONObject
 import javax.inject.Inject
@@ -124,19 +125,15 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val application: Application,
         private val args: GooglePayPaymentMethodLauncherContract.Args,
-        owner: SavedStateRegistryOwner,
-        defaultArgs: Bundle? = null
-    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
-        Injectable<Factory.FallbackInjectionParams> {
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInjectionParams> {
 
         internal data class FallbackInjectionParams(
             val application: Application,
             val enableLogging: Boolean,
             val publishableKey: String,
             val stripeAccountId: String?,
-            val productUsage: Set<String>
+            val productUsage: Set<String>,
         )
 
         @Inject
@@ -144,14 +141,13 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             GooglePayPaymentMethodLauncherViewModelSubcomponent.Builder
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel?> create(
-            key: String,
-            modelClass: Class<T>,
-            savedStateHandle: SavedStateHandle
-        ): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            val application = extras.requireApplication()
+            val savedStateHandle = extras.createSavedStateHandle()
+
             injectWithFallback(
-                args.injectionParams?.injectorKey,
-                FallbackInjectionParams(
+                injectorKey = args.injectionParams?.injectorKey,
+                fallbackInitializeParam = FallbackInjectionParams(
                     application,
                     args.injectionParams?.enableLogging ?: false,
                     args.injectionParams?.publishableKey

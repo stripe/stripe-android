@@ -84,10 +84,7 @@ internal abstract class IdentityUploadFragment(
 
     @VisibleForTesting
     internal var identityUploadViewModelFactory: ViewModelProvider.Factory =
-        IdentityUploadViewModel.FrontBackUploadViewModelFactory(
-            { this },
-            identityIO
-        )
+        IdentityUploadViewModel.FrontBackUploadViewModelFactory(identityIO)
 
     private val identityUploadViewModel: IdentityUploadViewModel by viewModels {
         identityUploadViewModelFactory

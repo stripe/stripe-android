@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import android.app.Activity
-import android.app.Application
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
@@ -14,7 +13,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.savedstate.SavedStateRegistryOwner
 import com.stripe.android.PaymentSession.PaymentSessionListener
 import com.stripe.android.view.ActivityStarter
 import com.stripe.android.view.PaymentFlowActivity
@@ -34,10 +32,8 @@ import com.stripe.android.view.PaymentMethodsActivityStarter
  */
 class PaymentSession @VisibleForTesting internal constructor(
     private val context: Context,
-    application: Application,
     viewModelStoreOwner: ViewModelStoreOwner,
     private val lifecycleOwner: LifecycleOwner,
-    savedStateRegistryOwner: SavedStateRegistryOwner,
     private val config: PaymentSessionConfig,
     customerSession: CustomerSession,
     private val paymentMethodsActivityStarter:
@@ -50,8 +46,6 @@ class PaymentSession @VisibleForTesting internal constructor(
         ViewModelProvider(
             viewModelStoreOwner,
             PaymentSessionViewModel.Factory(
-                application,
-                savedStateRegistryOwner,
                 paymentSessionData,
                 customerSession
             )
@@ -102,8 +96,6 @@ class PaymentSession @VisibleForTesting internal constructor(
      */
     constructor(activity: ComponentActivity, config: PaymentSessionConfig) : this(
         activity.applicationContext,
-        activity.application,
-        activity,
         activity,
         activity,
         config,
@@ -122,8 +114,6 @@ class PaymentSession @VisibleForTesting internal constructor(
      */
     constructor(fragment: Fragment, config: PaymentSessionConfig) : this(
         fragment.requireActivity().applicationContext,
-        fragment.requireActivity().application,
-        fragment,
         fragment,
         fragment,
         config,

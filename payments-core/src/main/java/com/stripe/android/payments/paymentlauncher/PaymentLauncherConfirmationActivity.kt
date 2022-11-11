@@ -23,12 +23,9 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
     }
 
     @VisibleForTesting
-    internal var viewModelFactory: ViewModelProvider.Factory =
-        PaymentLauncherViewModel.Factory(
-            { requireNotNull(starterArgs) },
-            { application },
-            this
-        )
+    internal var viewModelFactory: ViewModelProvider.Factory = PaymentLauncherViewModel.Factory {
+        requireNotNull(starterArgs)
+    }
 
     @VisibleForTesting
     internal val viewModel: PaymentLauncherViewModel by viewModels { viewModelFactory }

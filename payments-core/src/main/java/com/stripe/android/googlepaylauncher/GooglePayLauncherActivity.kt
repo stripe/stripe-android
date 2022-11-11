@@ -34,11 +34,7 @@ import org.json.JSONObject
  */
 internal class GooglePayLauncherActivity : AppCompatActivity() {
     private val viewModel: GooglePayLauncherViewModel by viewModels {
-        GooglePayLauncherViewModel.Factory(
-            application,
-            args,
-            this
-        )
+        GooglePayLauncherViewModel.Factory(args)
     }
 
     private lateinit var args: GooglePayLauncherContract.Args
