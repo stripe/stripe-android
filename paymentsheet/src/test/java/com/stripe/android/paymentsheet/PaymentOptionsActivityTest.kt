@@ -20,6 +20,8 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.resolvableString
+import com.stripe.android.core.toResolvableString
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentIntentFixtures
@@ -99,7 +101,7 @@ internal class PaymentOptionsActivityTest {
     private val viewModel = createViewModel()
 
     private val primaryButtonUIState = PrimaryButton.UIState(
-        label = "Test",
+        label = "Test".toResolvableString(),
         onClick = {},
         enabled = true,
         visible = true
@@ -378,7 +380,7 @@ internal class PaymentOptionsActivityTest {
             it.onActivity { activity ->
                 viewModel.updatePrimaryButtonUIState(
                     primaryButtonUIState.copy(
-                        label = "Some text"
+                        label = "Some text".toResolvableString()
                     )
                 )
                 assertThat(activity.viewBinding.continueButton.externalLabel).isEqualTo("Some text")
@@ -395,7 +397,7 @@ internal class PaymentOptionsActivityTest {
             it.onActivity { activity ->
                 viewModel.updatePrimaryButtonUIState(
                     primaryButtonUIState.copy(
-                        label = "Some text",
+                        label = "Some text".toResolvableString(),
                         enabled = false
                     )
                 )
@@ -417,7 +419,7 @@ internal class PaymentOptionsActivityTest {
         ).use {
             it.onActivity { activity ->
                 viewModel.updateBelowButtonText(
-                    ApplicationProvider.getApplicationContext<Context>().getString(
+                    resolvableString(
                         com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_payment_method_us_bank_account
                     )
                 )
@@ -513,7 +515,7 @@ internal class PaymentOptionsActivityTest {
             eventReporter = eventReporter,
             customerRepository = FakeCustomerRepository(),
             workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext(),
+            applicationNameProvider = { "AppName" },
             logger = Logger.noop(),
             injectorKey = DUMMY_INJECTOR_KEY,
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),

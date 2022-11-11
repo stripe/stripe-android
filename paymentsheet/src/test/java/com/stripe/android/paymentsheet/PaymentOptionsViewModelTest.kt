@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
@@ -297,13 +296,13 @@ internal class PaymentOptionsViewModelTest {
         eventReporter = eventReporter,
         customerRepository = customerRepository,
         workContext = testDispatcher,
-        application = ApplicationProvider.getApplicationContext(),
         logger = Logger.noop(),
         injectorKey = DUMMY_INJECTOR_KEY,
         lpmResourceRepository = lpmResourceRepository,
         addressResourceRepository = mock(),
         savedStateHandle = SavedStateHandle(),
-        linkLauncher = linkLauncher
+        linkLauncher = linkLauncher,
+        applicationNameProvider = { "AppName" },
     )
 
     private companion object {

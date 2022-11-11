@@ -2,10 +2,10 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.toResolvableString
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -290,7 +290,7 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel(
                 defaultArgs.copy(
                     savedPaymentMethod = PaymentSelection.New.USBankAccount(
-                        labelResource = "Test",
+                        labelResource = "Test".toResolvableString(),
                         iconResource = 0,
                         bankName = "Test",
                         last4 = "Test",
@@ -321,7 +321,6 @@ class USBankAccountFormViewModelTest {
         )
         return USBankAccountFormViewModel(
             args = args,
-            application = ApplicationProvider.getApplicationContext(),
             stripeRepository = stripeRepository,
             lazyPaymentConfig = { paymentConfiguration },
             savedStateHandle = savedStateHandle

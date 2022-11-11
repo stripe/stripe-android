@@ -88,12 +88,12 @@ internal open class PaymentSheetViewModelTestInjection {
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): PaymentSheetViewModel = runBlocking {
         PaymentSheetViewModel(
-            ApplicationProvider.getApplicationContext(),
             args,
             eventReporter,
             { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
             StripeIntentRepository.Static(stripeIntent),
             StripeIntentValidator(),
+            applicationNameProvider = { "AppName" },
             FakeCustomerRepository(customerRepositoryPMs),
             FakePrefsRepository(),
             lpmResourceRepository = StaticLpmResourceRepository(

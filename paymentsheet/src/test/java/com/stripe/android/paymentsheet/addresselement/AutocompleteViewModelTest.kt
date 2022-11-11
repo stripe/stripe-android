@@ -1,10 +1,9 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import android.app.Application
 import android.text.SpannableString
 import androidx.lifecycle.viewModelScope
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.ui.core.elements.TextFieldIcon
@@ -13,6 +12,7 @@ import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePredic
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
+import com.stripe.android.ui.core.elements.autocomplete.model.TransformGoogleToStripeAddress
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.stateIn
@@ -40,20 +40,23 @@ import kotlin.test.BeforeTest
 class AutocompleteViewModelTest {
     private val args = mock<AddressElementActivityContract.Args>()
     private val navigator = mock<AddressElementNavigator>()
-    private val application = ApplicationProvider.getApplicationContext<Application>()
     private val mockClient = mock<PlacesClientProxy>()
     private val mockEventReporter = mock<AddressLauncherEventReporter>()
+
+    private val transformGoogleToStripeAddress = object : TransformGoogleToStripeAddress {
+        override fun invoke(place: Place): Address {
+            return Address()
+        }
+    }
 
     private fun createViewModel() =
         AutocompleteViewModel(
             args,
             navigator,
             mockClient,
-            AutocompleteViewModel.Args(
-                "US"
-            ),
+            AutocompleteViewModel.Args("US"),
             mockEventReporter,
-            application
+            transformGoogleToStripeAddress,
         )
 
     @BeforeTest

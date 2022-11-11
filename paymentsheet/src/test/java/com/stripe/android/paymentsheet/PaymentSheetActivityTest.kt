@@ -17,6 +17,8 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.core.resolvableString
+import com.stripe.android.core.toResolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
@@ -132,7 +134,7 @@ internal class PaymentSheetActivityTest {
     )
 
     private val primaryButtonUIState = PrimaryButton.UIState(
-        label = "Test",
+        label = "Test".toResolvableString(),
         onClick = {},
         enabled = true,
         visible = true
@@ -775,7 +777,7 @@ internal class PaymentSheetActivityTest {
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
             val errorMessage = "Error message"
             viewModel._viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage.toResolvableString()))
 
             assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
             assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
@@ -796,7 +798,7 @@ internal class PaymentSheetActivityTest {
 
             val errorMessage = "Error message"
             viewModel._viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage.toResolvableString()))
 
             assertThat(activity.viewBinding.message.isVisible).isTrue()
             assertThat(activity.viewBinding.message.text.toString()).isEqualTo(errorMessage)
@@ -812,7 +814,7 @@ internal class PaymentSheetActivityTest {
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
             viewModel._viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage.toResolvableString()))
 
             assertThat(activity.viewBinding.message.isVisible).isFalse()
             assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
@@ -842,7 +844,7 @@ internal class PaymentSheetActivityTest {
 
             val errorMessage = "Error message"
             viewModel._viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage.toResolvableString()))
 
             assertThat(activity.viewBinding.message.isVisible).isTrue()
             assertThat(activity.viewBinding.message.text.toString()).isEqualTo(errorMessage)
@@ -858,7 +860,7 @@ internal class PaymentSheetActivityTest {
 
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
             viewModel._viewState.value =
-                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
+                PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage.toResolvableString()))
 
             assertThat(activity.viewBinding.message.isVisible).isFalse()
             assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
@@ -939,7 +941,7 @@ internal class PaymentSheetActivityTest {
 
             viewModel.updatePrimaryButtonUIState(
                 primaryButtonUIState.copy(
-                    label = "Some text"
+                    label = "Some text".toResolvableString()
                 )
             )
             assertThat(activity.viewBinding.buyButton.externalLabel).isEqualTo("Some text")
@@ -957,7 +959,7 @@ internal class PaymentSheetActivityTest {
 
             viewModel.updatePrimaryButtonUIState(
                 primaryButtonUIState.copy(
-                    label = "Some text",
+                    label = "Some text".toResolvableString(),
                     enabled = false
                 )
             )
@@ -979,7 +981,7 @@ internal class PaymentSheetActivityTest {
             idleLooper()
 
             viewModel.updateBelowButtonText(
-                context.getString(
+                resolvableString(
                     R.string.stripe_paymentsheet_payment_method_us_bank_account
                 )
             )
@@ -1049,12 +1051,12 @@ internal class PaymentSheetActivityTest {
         registerFormViewModelInjector()
 
         PaymentSheetViewModel(
-            ApplicationProvider.getApplicationContext(),
             PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
             eventReporter,
             { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
             StripeIntentRepository.Static(paymentIntent),
             StripeIntentValidator(),
+            applicationNameProvider = { "AppName" },
             FakeCustomerRepository(paymentMethods),
             FakePrefsRepository(),
             StaticLpmResourceRepository(lpmRepository),

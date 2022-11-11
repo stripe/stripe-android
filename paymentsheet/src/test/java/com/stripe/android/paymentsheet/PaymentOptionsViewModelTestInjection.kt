@@ -81,7 +81,7 @@ internal open class PaymentOptionsViewModelTestInjection {
             eventReporter = eventReporter,
             customerRepository = FakeCustomerRepository(paymentMethods),
             workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext(),
+            applicationNameProvider = { "AppName" },
             logger = Logger.noop(),
             injectorKey = injectorKey,
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),

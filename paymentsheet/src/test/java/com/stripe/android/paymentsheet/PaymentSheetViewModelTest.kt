@@ -12,6 +12,7 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
+import com.stripe.android.core.toResolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -108,7 +109,7 @@ internal class PaymentSheetViewModelTest {
     private val linkLauncher = mock<LinkPaymentLauncher>()
 
     private val primaryButtonUIState = PrimaryButton.UIState(
-        label = "Test",
+        label = "Test".toResolvableString(),
         onClick = {},
         enabled = true,
         visible = true
@@ -571,10 +572,11 @@ internal class PaymentSheetViewModelTest {
         )
 
         assertThat(processing.size).isEqualTo(2)
-
         assertThat(viewState.size).isEqualTo(2)
-        assertThat(viewState[1])
-            .isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage("An internal error occurred.")))
+
+        val expectedErrorMessage = UserErrorMessage("An internal error occurred.".toResolvableString())
+        assertThat(viewState[1]).isEqualTo(PaymentSheetViewState.Reset(expectedErrorMessage))
+
         assertThat(processing[1]).isFalse()
     }
 
@@ -700,16 +702,10 @@ internal class PaymentSheetViewModelTest {
             val errorMessage = "very helpful error message"
             viewModel.onPaymentResult(PaymentResult.Failed(Throwable(errorMessage)))
 
-            assertThat(viewStateList[0])
-                .isEqualTo(
-                    PaymentSheetViewState.Reset(null)
-                )
-            assertThat(viewStateList[1])
-                .isEqualTo(
-                    PaymentSheetViewState.Reset(
-                        UserErrorMessage(errorMessage)
-                    )
-                )
+            assertThat(viewStateList[0]).isEqualTo(PaymentSheetViewState.Reset(null))
+
+            val expectedErrorMessage = UserErrorMessage(errorMessage.toResolvableString())
+            assertThat(viewStateList[1]).isEqualTo(PaymentSheetViewState.Reset(expectedErrorMessage))
         }
 
     @Test
@@ -1089,10 +1085,7 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        assertThat(viewModel.notesText.value)
-            .isEqualTo(
-                ACHText.getContinueMandateText(ApplicationProvider.getApplicationContext())
-            )
+        assertThat(viewModel.notesText.value).isEqualTo(ACHText.getContinueMandateText())
 
         viewModel.updateSelection(
             PaymentSelection.New.GenericPaymentMethod(
@@ -1127,12 +1120,12 @@ internal class PaymentSheetViewModelTest {
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return PaymentSheetViewModel(
-            application,
             args,
             eventReporter,
             { paymentConfiguration },
             stripeIntentRepository,
             StripeIntentValidator(),
+            applicationNameProvider = { "AppName" },
             customerRepository,
             prefsRepository,
             lpmResourceRepository,
