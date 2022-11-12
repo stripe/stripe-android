@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core
+package com.stripe.android.uicore.format
 
 import android.icu.text.NumberFormat
 import com.google.common.truth.Truth.assertThat
@@ -94,7 +94,7 @@ class CurrencyFormatterTest {
                 it.currencyCode
             }
             .forEach {
-                print(String.format("%s, ", it.currencyCode))
+                print(String.format(Locale.getDefault(), "%s, ", it.currencyCode))
             }
     }
 
