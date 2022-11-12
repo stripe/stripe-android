@@ -31,9 +31,9 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.measureTimeMillis
+import com.stripe.android.uicore.format.CurrencyFormatter
 import kotlinx.coroutines.launch
-import java.text.NumberFormat
-import java.util.Currency
+import java.util.Locale
 import javax.inject.Inject
 
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -43,6 +43,7 @@ internal class AccountPickerViewModel @Inject constructor(
     private val selectAccounts: SelectAccounts,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
+    private val locale: Locale?,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
@@ -80,10 +81,12 @@ internal class AccountPickerViewModel @Inject constructor(
                     institutionIcon = activeInstitution?.icon?.default,
                     formattedBalance =
                     if (account.balanceAmount != null && account.currency != null) {
-                        NumberFormat
-                            .getCurrencyInstance()
-                            .also { it.currency = Currency.getInstance(account.currency) }
-                            .format(account.balanceAmount)
+                        CurrencyFormatter
+                            .format(
+                                amount = account.balanceAmount.toLong(),
+                                amountCurrencyCode = account.currency,
+                                targetLocale = locale ?: Locale.getDefault()
+                            )
                     } else null
                 )
             }.sortedBy { it.account.allowSelection.not() }
