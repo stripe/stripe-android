@@ -5,14 +5,12 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
-import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal class AddressElementActivityContract :
     ActivityResultContract<AddressElementActivityContract.Args, AddressLauncherResult>() {
 
@@ -42,7 +40,7 @@ internal class AddressElementActivityContract :
         @ColorInt internal val statusBarColor: Int? = null
     ) : ActivityStarter.Args {
 
-        companion object {
+        internal companion object {
             internal fun fromIntent(intent: Intent): Args? {
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
@@ -56,7 +54,7 @@ internal class AddressElementActivityContract :
         override fun toBundle() = bundleOf(EXTRA_RESULT to this)
     }
 
-    companion object {
+    internal companion object {
         const val EXTRA_ARGS =
             "com.stripe.android.paymentsheet.addresselement" +
                 ".AddressElementActivityContract.extra_args"

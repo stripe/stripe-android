@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -73,29 +72,19 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     private val paymentSheetViewModelFactory: ViewModelProvider.Factory by lazy {
-        PaymentSheetViewModel.Factory(
-            { requireActivity().application },
-            {
-                requireNotNull(
-                    requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
-                )
-            },
-            (activity as? AppCompatActivity) ?: this,
-            (activity as? AppCompatActivity)?.intent?.extras
-        )
+        PaymentSheetViewModel.Factory {
+            requireNotNull(
+                requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
+            )
+        }
     }
 
     private val paymentOptionsViewModelFactory: ViewModelProvider.Factory by lazy {
-        PaymentOptionsViewModel.Factory(
-            { requireActivity().application },
-            {
-                requireNotNull(
-                    requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
-                )
-            },
-            (activity as? AppCompatActivity) ?: this,
-            (activity as? AppCompatActivity)?.intent?.extras
-        )
+        PaymentOptionsViewModel.Factory {
+            requireNotNull(
+                requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
+            )
+        }
     }
 
     private val sheetViewModel: BaseSheetViewModel<*>? by lazy {
@@ -129,29 +118,25 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     private val viewModel by activityViewModels<USBankAccountFormViewModel> {
-        USBankAccountFormViewModel.Factory(
-            applicationSupplier = { requireActivity().application },
-            argsSupplier = {
-                val savedPaymentMethod =
-                    sheetViewModel?.newPaymentSelection as? PaymentSelection.New.USBankAccount
+        USBankAccountFormViewModel.Factory {
+            val savedPaymentMethod =
+                sheetViewModel?.newPaymentSelection as? PaymentSelection.New.USBankAccount
 
-                USBankAccountFormViewModel.Args(
-                    formArgs = formArgs,
-                    isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
-                    clientSecret = clientSecret,
-                    savedPaymentMethod = savedPaymentMethod,
-                    shippingDetails = sheetViewModel?.config?.shippingDetails,
-                    onConfirmStripeIntent = { params ->
-                        (sheetViewModel as? PaymentSheetViewModel)?.confirmStripeIntent(params)
-                    },
-                    onUpdateSelectionAndFinish = { paymentSelection ->
-                        sheetViewModel?.updateSelection(paymentSelection)
-                        sheetViewModel?.onFinish()
-                    }
-                )
-            },
-            owner = this
-        )
+            USBankAccountFormViewModel.Args(
+                formArgs = formArgs,
+                isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
+                clientSecret = clientSecret,
+                savedPaymentMethod = savedPaymentMethod,
+                shippingDetails = sheetViewModel?.config?.shippingDetails,
+                onConfirmStripeIntent = { params ->
+                    (sheetViewModel as? PaymentSheetViewModel)?.confirmStripeIntent(params)
+                },
+                onUpdateSelectionAndFinish = { paymentSelection ->
+                    sheetViewModel?.updateSelection(paymentSelection)
+                    sheetViewModel?.onFinish()
+                }
+            )
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

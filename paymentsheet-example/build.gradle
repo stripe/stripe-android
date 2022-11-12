@@ -10,6 +10,10 @@ def getBackendUrl() {
     return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_BACKEND_URL') ?: ""
 }
 
+def getGooglePlacesApiKey() {
+    return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_GOOGLE_PLACES_API_KEY') ?: ""
+}
+
 dependencies {
     implementation project(':payments-core')
     implementation project(':paymentsheet')
@@ -127,7 +131,8 @@ android {
         testInstrumentationRunner "com.karumi.shot.ShotTestRunner"
 
         manifestPlaceholders = [
-                BACKEND_URL: getBackendUrl()
+                BACKEND_URL: getBackendUrl(),
+                GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey()
         ]
     }
 

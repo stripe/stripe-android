@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Surface
@@ -103,12 +102,11 @@ internal class AddressElementActivity : ComponentActivity() {
                 }
             }
 
-            ModalBottomSheetLayout(
-                sheetState = modalBottomSheetState,
-                sheetContent = {
-                    PaymentsTheme {
+            PaymentsTheme {
+                ModalBottomSheetLayout(
+                    sheetState = modalBottomSheetState,
+                    sheetContent = {
                         Surface(
-                            color = MaterialTheme.colors.surface,
                             modifier = Modifier.fillMaxSize()
                         ) {
                             AnimatedNavHost(
@@ -138,13 +136,13 @@ internal class AddressElementActivity : ComponentActivity() {
                                 }
                             }
                         }
-                    }
-                },
-                content = {},
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .systemBarsPadding()
-            )
+                    },
+                    content = {},
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .systemBarsPadding()
+                )
+            }
         }
     }
 

@@ -1,10 +1,10 @@
 package com.stripe.android.link
 
 import android.app.Application
-import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.navigation.NavHostController
-import androidx.savedstate.SavedStateRegistry
-import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.injection.Injectable
@@ -29,7 +29,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.spy
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -38,6 +37,7 @@ import kotlin.test.assertNotNull
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class LinkActivityViewModelTest {
+
     private val config = LinkPaymentLauncher.Configuration(
         stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
@@ -107,13 +107,14 @@ class LinkActivityViewModelTest {
         }
         WeakMapInjectorRegistry.register(injector, INJECTOR_KEY)
 
-        val factory = LinkActivityViewModel.Factory(
-            { ApplicationProvider.getApplicationContext() },
-            { defaultArgs }
-        )
+        val factory = LinkActivityViewModel.Factory { defaultArgs }
         val factorySpy = spy(factory)
-        val createdViewModel = factorySpy.create(LinkActivityViewModel::class.java)
-        verify(factorySpy, times(0)).fallbackInitialize(any())
+
+        val createdViewModel = factorySpy.create(
+            modelClass = LinkActivityViewModel::class.java,
+            extras = fakeCreationExtras(),
+        )
+        verify(factorySpy, never()).fallbackInitialize(any())
         assertThat(createdViewModel).isEqualTo(vmToBeReturned)
 
         WeakMapInjectorRegistry.staticCacheMap.clear()
@@ -121,25 +122,19 @@ class LinkActivityViewModelTest {
 
     @Test
     fun `Factory gets initialized with fallback when no Injector is available`() = runTest {
-        val mockSavedStateRegistryOwner = mock<SavedStateRegistryOwner>()
-        val mockSavedStateRegistry = mock<SavedStateRegistry>()
-        val mockLifeCycle = mock<Lifecycle>()
-
-        whenever(mockSavedStateRegistryOwner.savedStateRegistry).thenReturn(mockSavedStateRegistry)
-        whenever(mockSavedStateRegistryOwner.lifecycle).thenReturn(mockLifeCycle)
-        whenever(mockLifeCycle.currentState).thenReturn(Lifecycle.State.CREATED)
-
-        val context = ApplicationProvider.getApplicationContext<Application>()
-        val factory = LinkActivityViewModel.Factory(
-            { ApplicationProvider.getApplicationContext() },
-            { defaultArgs }
-        )
+        val application = ApplicationProvider.getApplicationContext<Application>()
+        val factory = LinkActivityViewModel.Factory { defaultArgs }
         val factorySpy = spy(factory)
 
-        assertNotNull(factorySpy.create(LinkActivityViewModel::class.java))
+        val viewModel = factorySpy.create(
+            modelClass = LinkActivityViewModel::class.java,
+            extras = fakeCreationExtras(),
+        )
+        assertNotNull(viewModel)
+
         verify(factorySpy).fallbackInitialize(
             argWhere {
-                it.application == context
+                it.application == application
             }
         )
     }
@@ -212,6 +207,13 @@ class LinkActivityViewModelTest {
         }
         whenever(navigator.userNavigationEnabled).thenReturn(userNavigationEnabled)
         whenever(navigator.navigationController).thenReturn(mockNavController)
+    }
+
+    private fun fakeCreationExtras(): CreationExtras {
+        val application = ApplicationProvider.getApplicationContext<Application>()
+        return MutableCreationExtras().apply {
+            set(ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY, application)
+        }
     }
 
     private companion object {

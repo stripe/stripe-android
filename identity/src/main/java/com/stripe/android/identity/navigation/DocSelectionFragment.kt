@@ -97,6 +97,7 @@ internal class DocSelectionFragment(
                                         tryNavigateToUploadFragment(type)
                                     }
                                     Status.LOADING -> {} // no-op
+                                    Status.IDLE -> {} // no-op
                                 }
                             }
                         },

@@ -59,11 +59,9 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterialApi::class)
 internal class LinkActivity : ComponentActivity() {
     @VisibleForTesting
-    internal var viewModelFactory: ViewModelProvider.Factory =
-        LinkActivityViewModel.Factory(
-            applicationSupplier = { application },
-            starterArgsSupplier = { starterArgs }
-        )
+    internal var viewModelFactory: ViewModelProvider.Factory = LinkActivityViewModel.Factory {
+        starterArgs
+    }
 
     private val viewModel: LinkActivityViewModel by viewModels { viewModelFactory }
 

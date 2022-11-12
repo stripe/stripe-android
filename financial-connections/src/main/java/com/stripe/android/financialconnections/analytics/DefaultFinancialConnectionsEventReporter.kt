@@ -5,6 +5,7 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.utils.filterNotNullValues
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -52,6 +53,8 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                     mapOf(
                         PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
                         PARAM_SESSION_RESULT to "failure"
+                    ).plus(
+                        financialConnectionsSheetResult.error.toEventParams().filterNotNullValues()
                     )
                 )
         }

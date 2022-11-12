@@ -2,16 +2,18 @@ package com.stripe.android
 
 import android.app.Application
 import androidx.annotation.IntRange
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.utils.requireApplication
 import com.stripe.android.view.PaymentMethodsActivityStarter
 
 internal class PaymentSessionViewModel(
@@ -234,19 +236,15 @@ internal class PaymentSessionViewModel(
     }
 
     internal class Factory(
-        private val application: Application,
-        owner: SavedStateRegistryOwner,
         private val paymentSessionData: PaymentSessionData,
         private val customerSession: CustomerSession
-    ) : AbstractSavedStateViewModelFactory(owner, null) {
-        override fun <T : ViewModel?> create(
-            key: String,
-            modelClass: Class<T>,
-            handle: SavedStateHandle
-        ): T {
+    ) : ViewModelProvider.Factory {
+
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return PaymentSessionViewModel(
-                application,
-                handle,
+                extras.requireApplication(),
+                extras.createSavedStateHandle(),
                 paymentSessionData,
                 customerSession
             ) as T
