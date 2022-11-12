@@ -55,7 +55,7 @@ dependencies {
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation("androidx.compose.ui:ui-test-manifest:$androidxComposeVersion")
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
-    testImplementation "androidx.test.espresso:espresso-core:3.5.0-beta01"
+    testImplementation "androidx.test.espresso:espresso-core:3.5.0"
 
 
     testImplementation "junit:junit:$junitVersion"
