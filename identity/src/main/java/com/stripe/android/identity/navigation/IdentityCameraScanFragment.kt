@@ -161,6 +161,7 @@ internal abstract class IdentityCameraScanFragment(
                     }
                 }
                 Status.LOADING -> {} // no-op
+                Status.IDLE -> {} // no-op
                 Status.ERROR -> {
                     throw InvalidResponseException(
                         cause = it.throwable,

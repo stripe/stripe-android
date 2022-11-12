@@ -23,6 +23,7 @@ import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCaptureModels
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
@@ -56,6 +57,7 @@ internal class IdentityViewModelTest {
     private val mockVerificationPage = mock<VerificationPage> {
         on { documentCapture }.thenReturn(DOCUMENT_CAPTURE)
         on { selfieCapture }.thenReturn(SELFIE_CAPTURE)
+        on { requirements }.thenReturn(REQUIREMENTS_NO_MISSING)
     }
     private val mockIdentityRepository = mock<IdentityRepository> {
         onBlocking {
@@ -120,8 +122,12 @@ internal class IdentityViewModelTest {
     @Test
     fun `resetDocumentUploadedState does reset _documentUploadedState`() {
         viewModel.resetDocumentUploadedState()
-        assertThat(viewModel.documentFrontUploadedState.value).isEqualTo(SingleSideDocumentUploadState())
-        assertThat(viewModel.documentBackUploadedState.value).isEqualTo(SingleSideDocumentUploadState())
+        assertThat(viewModel.documentFrontUploadedState.value).isEqualTo(
+            SingleSideDocumentUploadState()
+        )
+        assertThat(viewModel.documentBackUploadedState.value).isEqualTo(
+            SingleSideDocumentUploadState()
+        )
     }
 
     @Test
@@ -228,6 +234,10 @@ internal class IdentityViewModelTest {
 
             assertThat(viewModel.verificationPage.value).isEqualTo(
                 Resource.success(mockVerificationPage)
+            )
+
+            assertThat(viewModel.missingRequirements.value).isEqualTo(
+                REQUIREMENTS_NO_MISSING.missing
             )
 
             verify(mockIdentityModelFetcher).fetchIdentityModel(
@@ -579,6 +589,8 @@ internal class IdentityViewModelTest {
                 highResImageCropPadding = 0.5f,
                 consentText = "consent"
             )
+
+        val REQUIREMENTS_NO_MISSING = VerificationPageRequirements(missing = listOf())
 
         val UPLOADED_STRIPE_FILE = StripeFile()
         val UPLOADED_FAILURE_EXCEPTION = APIException()

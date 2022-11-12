@@ -24,6 +24,9 @@ public final class com/stripe/android/uicore/image/StripeImageKt {
 public final class com/stripe/android/uicore/image/UiUtilsKt {
 }
 
+public final class com/stripe/android/uicore/text/DimentionResourceSpKt {
+}
+
 public final class com/stripe/android/uicore/text/EmbeddableImage$Bitmap : com/stripe/android/uicore/text/EmbeddableImage {
 	public static final field $stable I
 	public fun <init> (Landroid/graphics/Bitmap;)V
