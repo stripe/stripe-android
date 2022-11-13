@@ -49,7 +49,7 @@ internal class ConsentFragment(
             ConsentScreen(
                 merchantLogoUri = identityViewModel.verificationArgs.brandLogo,
                 verificationState = verificationState,
-                onSuccess = { verificationPage ->
+                onComposeFinish = { verificationPage ->
                     identityViewModel.updateAnalyticsState { oldState ->
                         oldState.copy(
                             requireSelfie = verificationPage.requireSelfie()

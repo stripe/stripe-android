@@ -37,6 +37,7 @@ class UploadScreenTest {
     private val onContinueClicked = mock<() -> Unit>()
     private val onDismissRequest = mock<() -> Unit>()
     private val onUploadMethodSelected = mock<() -> Unit>()
+    private val onComposeFinish = mock<() -> Unit>()
 
     private val documentFrontUploadState = MutableStateFlow(IDLE_STATE)
     private val documentBackUploadState = MutableStateFlow(IDLE_STATE)
@@ -184,6 +185,7 @@ class UploadScreenTest {
                 } else {
                     null
                 },
+                onComposeFinish = onComposeFinish,
                 onContinueClicked = onContinueClicked
             )
         }

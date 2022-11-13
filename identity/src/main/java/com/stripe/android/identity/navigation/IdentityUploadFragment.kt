@@ -180,6 +180,22 @@ internal abstract class IdentityUploadFragment(
                     }
                 } else {
                     null
+                },
+                onComposeFinish = {
+                    identityViewModel.observeForVerificationPage(
+                        this@IdentityUploadFragment,
+                        onSuccess = {
+                            lifecycleScope.launch(identityViewModel.workContext) {
+                                identityViewModel.screenTracker.screenTransitionFinish(fragmentId.fragmentIdToScreenName())
+                            }
+                            identityViewModel.sendAnalyticsRequest(
+                                identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                                    scanType = frontScanType,
+                                    screenName = fragmentId.fragmentIdToScreenName()
+                                )
+                            )
+                        }
+                    )
                 }
             ) {
                 identityViewModel.observeForVerificationPage(
@@ -205,16 +221,6 @@ internal abstract class IdentityUploadFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         collectedUploadState()
-
-        lifecycleScope.launch(identityViewModel.workContext) {
-            identityViewModel.screenTracker.screenTransitionFinish(fragmentId.fragmentIdToScreenName())
-        }
-        identityViewModel.sendAnalyticsRequest(
-            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                scanType = frontScanType,
-                screenName = fragmentId.fragmentIdToScreenName()
-            )
-        )
     }
 
     /**

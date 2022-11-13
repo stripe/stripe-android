@@ -75,15 +75,19 @@ internal abstract class IdentityDocumentScanFragment(
             identityViewModel.resetDocumentUploadedState()
         }
         super.onViewCreated(view, savedInstanceState)
-
-        lifecycleScope.launch(identityViewModel.workContext) {
-            identityViewModel.screenTracker.screenTransitionFinish(fragmentId.fragmentIdToScreenName())
-        }
-        identityViewModel.sendAnalyticsRequest(
-            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                scanType = frontScanType,
-                screenName = fragmentId.fragmentIdToScreenName()
-            )
+        identityViewModel.observeForVerificationPage(
+            this,
+            onSuccess = {
+                lifecycleScope.launch(identityViewModel.workContext) {
+                    identityViewModel.screenTracker.screenTransitionFinish(fragmentId.fragmentIdToScreenName())
+                }
+                identityViewModel.sendAnalyticsRequest(
+                    identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                        scanType = frontScanType,
+                        screenName = fragmentId.fragmentIdToScreenName()
+                    )
+                )
+            }
         )
     }
 
