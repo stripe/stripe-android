@@ -8,8 +8,8 @@
 ### PaymentSheet
 * [ADDED][5676](https://github.com/stripe/stripe-android/pull/5676) Added `AddressLauncher`, an [activity](https://stripe.com/docs/elements/address-element?platform=android) that collects local and international addresses for your customers.
 
-### Identtiy
-* [FIXED][5816](https://github.com/stripe/stripe-android/pull/5816) Wait for VerificaionPage response to return when process is killed.
+### Identity
+* [FIXED][5816](https://github.com/stripe/stripe-android/pull/5816) Fixed an issue where the SDK would crash when recovering from process death.
 
 ## 20.15.4 - 2022-11-07
 
