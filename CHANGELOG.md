@@ -6,8 +6,10 @@
 * [CHANGED][5789](https://github.com/stripe/stripe-android/pull/5789) We now disable the back button while confirming intents with `PaymentLauncher` to prevent them from incorrectly being displayed as failed.
 
 ### PaymentSheet
-
 * [ADDED][5676](https://github.com/stripe/stripe-android/pull/5676) Added `AddressLauncher`, an [activity](https://stripe.com/docs/elements/address-element?platform=android) that collects local and international addresses for your customers.
+
+### Identtiy
+* [FIXED][5816](https://github.com/stripe/stripe-android/pull/5816) Wait for VerificaionPage response to return when process is killed.
 
 ## 20.15.4 - 2022-11-07
 
