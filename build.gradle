@@ -86,7 +86,7 @@ ext {
     materialVersion = '1.5.0'
     daggerVersion = '2.44'
     playServicesWalletVersion = '19.1.0'
-    placesVersion = '2.6.0'
+    placesVersion = '2.7.0'
     playServicesVersion = '1.6.4'
     leakCanaryVersion = '2.9.1'
 
