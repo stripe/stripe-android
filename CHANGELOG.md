@@ -9,7 +9,7 @@
 ### PaymentSheet
 
 * [ADDED][5676](https://github.com/stripe/stripe-android/pull/5676) Added `AddressLauncher`, an [activity](https://stripe.com/docs/elements/address-element?platform=android) that collects local and international addresses for your customers.
-* [ADDED][5769](https://github.com/stripe/stripe-android/pull/5769) Added `PaymentSheet.Configuration.allowsPaymentMethodsRequiringShippingAddress`. Previously, to allow payment methods that require a shipping address (e.g. Afterpay and Affirm) in `PaymentSheet`, you attached a shipping address to the PaymentIntent before initializing `PaymentSheet`. Now, you can instead set this property to `true` and update `PaymentSheet.FlowController.shippingDetails` whenever your customer’s shipping address becomes available. The shipping address will be attached to the PaymentIntent when the customer completes the checkout.
+* [ADDED][5769](https://github.com/stripe/stripe-android/pull/5769) Added `PaymentSheet.Configuration.allowsPaymentMethodsRequiringShippingAddress`. Previously, to allow payment methods that require a shipping address (e.g. Afterpay and Affirm) in `PaymentSheet`, you attached a shipping address to the PaymentIntent before initializing `PaymentSheet`. Now, you can instead set this property to `true` and set `PaymentSheet.Configuration.shippingDetails` or `PaymentSheet.FlowController.shippingDetails` whenever your customer’s shipping address becomes available. The shipping address will be attached to the PaymentIntent when the customer completes the checkout.
 
 ## 20.15.4 - 2022-11-07
 
