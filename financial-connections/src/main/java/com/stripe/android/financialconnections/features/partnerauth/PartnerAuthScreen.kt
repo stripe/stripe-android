@@ -167,6 +167,7 @@ private fun LoadedContent(
             true -> PrePaneContent(
                 institution = payload.institution,
                 flow = payload.authSession.flow,
+                isStripeDirect = payload.isStripeDirect,
                 showPartnerDisclosure = payload.authSession.showPartnerDisclosure ?: false,
                 onContinueClick = onContinueClick
             )
@@ -194,6 +195,7 @@ private fun PrePaneContent(
     institution: FinancialConnectionsInstitution,
     flow: Flow?,
     showPartnerDisclosure: Boolean,
+    isStripeDirect: Boolean,
     onContinueClick: () -> Unit
 ) {
     Column(
@@ -226,7 +228,7 @@ private fun PrePaneContent(
             style = FinancialConnectionsTheme.typography.body
         )
         Spacer(modifier = Modifier.weight(1f))
-        if (flow != null && showPartnerDisclosure) PartnerCallout(flow)
+        if (flow != null && showPartnerDisclosure) PartnerCallout(flow, isStripeDirect)
         Spacer(modifier = Modifier.size(16.dp))
         FinancialConnectionsButton(
             onClick = onContinueClick,
@@ -266,6 +268,7 @@ internal fun PrepaneContentPreview() {
                             nextPane = NextPane.PARTNER_AUTH,
                             id = "1234"
                         ),
+                        isStripeDirect = false
                     )
                 ),
                 authenticationStatus = Uninitialized,

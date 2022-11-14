@@ -50,5 +50,12 @@ internal object FinancialConnectionsUrlResolver {
         }
     }
 
+    fun getPartnerNotice(isStripeDirect: Boolean): String {
+        return when (isStripeDirect) {
+            true -> FinancialConnectionsUrls.PartnerNotice.stripe
+            false -> FinancialConnectionsUrls.PartnerNotice.merchant
+        }
+    }
+
     const val supportUrl: String = "https://support.stripe.com/contact"
 }
