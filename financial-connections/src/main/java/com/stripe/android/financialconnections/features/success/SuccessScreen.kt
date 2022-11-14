@@ -59,8 +59,9 @@ internal fun SuccessScreen() {
             onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
             onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
             onDisconnectLinkClick = viewModel::onDisconnectLinkClick,
-            showLinkAnotherAccount = payload.showLinkAnotherAccount
-        ) { parentViewModel.onCloseWithConfirmationClick(NextPane.SUCCESS) }
+            showLinkAnotherAccount = payload.showLinkAnotherAccount,
+            onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.SUCCESS) }
+        )
     }
 }
 
