@@ -21,14 +21,21 @@ import androidx.compose.material.ButtonDefaults.buttonColors
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.Text
+import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.theme.Brand400
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.Neutral50
 
 @Composable
 internal fun FinancialConnectionsButton(
@@ -40,37 +47,50 @@ internal fun FinancialConnectionsButton(
     loading: Boolean = false,
     content: @Composable (RowScope.() -> Unit)
 ) {
-    Button(
-        onClick = { if (!loading) onClick() },
-        modifier = modifier,
-        elevation = ButtonDefaults.elevation(
-            defaultElevation = 0.dp,
-            pressedElevation = 2.dp,
-            disabledElevation = 0.dp,
-            hoveredElevation = 0.dp,
-            focusedElevation = 0.dp,
-        ),
-        enabled = enabled,
-        shape = RoundedCornerShape(size = size.radius),
-        contentPadding = size.paddingValues(),
-        colors = type.buttonColors(),
-        content = {
-            ProvideTextStyle(
-                value = FinancialConnectionsTheme.typography.bodyEmphasized
-            ) {
-                Row {
-                    if (loading) {
-                        CircularProgressIndicator(
-                            strokeWidth = 4.dp,
-                            modifier = Modifier.size(21.dp),
-                            color = colors.textWhite
-                        )
-                        Spacer(modifier = Modifier.size(8.dp))
+    CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
+        Button(
+            onClick = onClick,
+            modifier = modifier,
+            elevation = ButtonDefaults.elevation(
+                defaultElevation = 0.dp,
+                pressedElevation = 0.dp,
+                disabledElevation = 0.dp,
+                hoveredElevation = 0.dp,
+                focusedElevation = 0.dp,
+            ),
+            enabled = enabled,
+            shape = RoundedCornerShape(size = size.radius),
+            contentPadding = size.paddingValues(),
+            colors = type.buttonColors(),
+            content = {
+                ProvideTextStyle(
+                    value = FinancialConnectionsTheme.typography.bodyEmphasized
+                ) {
+                    Row {
+                        if (loading) {
+                            CircularProgressIndicator(
+                                strokeWidth = 4.dp,
+                                modifier = Modifier.size(21.dp),
+                                color = colors.textWhite
+                            )
+                            Spacer(modifier = Modifier.size(8.dp))
+                        }
+                        content()
                     }
-                    content()
                 }
             }
-        }
+        )
+    }
+}
+
+private fun FinancialConnectionsButton.Type.rippleTheme() = object : RippleTheme {
+    @Composable
+    override fun defaultColor() = Color.White
+
+    @Composable
+    override fun rippleAlpha(): RippleAlpha = RippleTheme.defaultRippleAlpha(
+        buttonColors().contentColor(enabled = true).value,
+        lightTheme = true
     )
 }
 
@@ -80,6 +100,7 @@ internal object FinancialConnectionsButton {
 
         @Composable
         abstract fun buttonColors(): ButtonColors
+        abstract fun rippleColor(): Color
 
         object Primary : Type() {
             @Composable
@@ -88,9 +109,11 @@ internal object FinancialConnectionsButton {
                     backgroundColor = colors.textBrand,
                     contentColor = colors.textWhite,
                     disabledBackgroundColor = colors.textBrand,
-                    disabledContentColor = colors.textWhite.copy(alpha = 0.5f)
+                    disabledContentColor = colors.textWhite.copy(alpha = 0.3f)
                 )
             }
+
+            override fun rippleColor(): Color = Brand400
         }
 
         object Secondary : Type() {
@@ -103,6 +126,8 @@ internal object FinancialConnectionsButton {
                     disabledContentColor = colors.textPrimary.copy(alpha = 0.12f)
                 )
             }
+
+            override fun rippleColor(): Color = Neutral50
         }
 
         object Critical : Type() {
@@ -115,6 +140,8 @@ internal object FinancialConnectionsButton {
                     disabledContentColor = colors.textPrimary.copy(alpha = 0.12f)
                 )
             }
+
+            override fun rippleColor(): Color = Neutral50
         }
     }
 
@@ -197,16 +224,7 @@ internal fun FinancialConnectionsButtonPreview() {
                 enabled = false,
                 onClick = { }
             ) {
-                Text(text = "Sample text")
-            }
-            FinancialConnectionsButton(
-                type = FinancialConnectionsButton.Type.Critical,
-                size = FinancialConnectionsButton.Size.Pill,
-                loading = false,
-                enabled = true,
-                onClick = { }
-            ) {
-                Text(text = "Pill critical text")
+                Text(text = "Secondary disabled")
             }
         }
     }
