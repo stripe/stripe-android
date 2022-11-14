@@ -149,15 +149,14 @@ class PaymentSheet internal constructor(
         val allowsDelayedPaymentMethods: Boolean = false,
 
         /**
-         * If true, allows payment methods that require a shipping address, like Afterpay and
-         * Affirm. Defaults to false.
+         * If `true`, allows payment methods that require a shipping address, like Afterpay and
+         * Affirm. Defaults to `false`.
          *
-         * Set this to true if you collect shipping addresses and set [shippingDetails] or set
-         * `shipping` details directly on the PaymentIntent.
+         * Set this to `true` if you collect shipping addresses via [shippingDetails] or
+         * [FlowController.shippingDetails].
          *
-         * Note: PaymentSheet considers this property `true` and allows payment methods that require
-         * a shipping address if `shipping` details are present on the PaymentIntent when
-         * PaymentSheet loads.
+         * **Note**: PaymentSheet considers this property `true` if `shipping` details are present
+         * on the PaymentIntent when PaymentSheet loads.
          */
         val allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
 
