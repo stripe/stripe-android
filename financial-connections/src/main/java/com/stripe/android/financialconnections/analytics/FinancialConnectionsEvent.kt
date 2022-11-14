@@ -11,7 +11,7 @@ internal sealed class FinancialConnectionsEvent(
     private val name: String,
     val params: Map<String, String>? = null,
     private val includePrefix: Boolean = true
-    ) {
+) {
 
     val eventName = if (includePrefix) "$EVENT_PREFIX.$name" else name
 
@@ -201,6 +201,28 @@ internal sealed class FinancialConnectionsEvent(
 
     override fun toString(): String {
         return "FinancialConnectionsEvent(name='$name', params=$params)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as FinancialConnectionsEvent
+
+        if (name != other.name) return false
+        if (params != other.params) return false
+        if (includePrefix != other.includePrefix) return false
+        if (eventName != other.eventName) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + (params?.hashCode() ?: 0)
+        result = 31 * result + includePrefix.hashCode()
+        result = 31 * result + eventName.hashCode()
+        return result
     }
 }
 

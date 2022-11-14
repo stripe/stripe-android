@@ -13,32 +13,50 @@ internal class NativeAuthFlowRouter @Inject constructor(
     val eventTracker: FinancialConnectionsAnalyticsTracker
 ) {
 
-    private fun nativeAuthFlowKillSwitchActive(synchronizeSessionResponse: SynchronizeSessionResponse): Boolean {
-        return synchronizeSessionResponse.manifest.features?.any { it.key == "bank_connections_mobile_native_version_killswitch" && it.value }
-            ?: true
-    }
-
-    fun nativeAuthFlowEnabled(synchronizeSessionResponse: SynchronizeSessionResponse): Boolean {
-        val killSwitchEnabled = nativeAuthFlowKillSwitchActive(synchronizeSessionResponse)
-        val nativeExperimentEnabled = synchronizeSessionResponse.manifest.experimentAssignments?.any { it.key == "connections_mobile_native" && it.value == "treatment" } ?: false
+    fun nativeAuthFlowEnabled(sync: SynchronizeSessionResponse): Boolean {
+        val killSwitchEnabled = nativeKillSwitchActive(sync)
+        val nativeExperimentEnabled =
+            sync.experimentAssignment(EXPERIMENT_KEY_NATIVE) == EXPERIMENT_VALUE_NATIVE_TREATMENT
         return killSwitchEnabled.not() && nativeExperimentEnabled
     }
 
-     suspend fun logExposure(synchronizeSessionResponse: SynchronizeSessionResponse) {
-        val killSwitchDisabled = !nativeAuthFlowKillSwitchActive(synchronizeSessionResponse)
-        val experimentVariantIsPresent =
-            synchronizeSessionResponse.manifest.experimentAssignments?.any { it.key == "connections_mobile_native" }
-                ?: false
-        val assignmentEventId = synchronizeSessionResponse.manifest.assignmentEventId
-        val accountHolderId = synchronizeSessionResponse.manifest.accountholderToken
-        if (killSwitchDisabled && experimentVariantIsPresent && assignmentEventId != null && accountHolderId != null) {
+    @Suppress("ComplexCondition")
+    suspend fun logExposure(sync: SynchronizeSessionResponse) {
+        val assignmentEventId = sync.manifest.assignmentEventId
+        val accountHolderId = sync.manifest.accountholderToken
+        if (
+            nativeKillSwitchActive(sync).not() &&
+            sync.experimentPresent(EXPERIMENT_KEY_NATIVE) &&
+            assignmentEventId != null &&
+            accountHolderId != null
+        ) {
             eventTracker.track(
                 FinancialConnectionsEvent.Exposure(
-                    experimentName = "connections_mobile_native",
+                    experimentName = EXPERIMENT_KEY_NATIVE,
                     assignmentEventId = assignmentEventId,
                     accountHolderId = accountHolderId
                 )
             )
         }
+    }
+
+    private fun nativeKillSwitchActive(sync: SynchronizeSessionResponse): Boolean =
+        sync.manifest.features
+            ?.any { it.key == FEATURE_KEY_NATIVE_KILLSWITCH && it.value }
+            ?: true
+
+    private fun SynchronizeSessionResponse.experimentPresent(
+        experimentKey: String
+    ): Boolean = experimentAssignment(experimentKey) != null
+
+    private fun SynchronizeSessionResponse.experimentAssignment(
+        experimentKey: String
+    ): String? = manifest.experimentAssignments?.get(experimentKey)
+
+    companion object {
+        private const val FEATURE_KEY_NATIVE_KILLSWITCH =
+            "bank_connections_mobile_native_version_killswitch"
+        private const val EXPERIMENT_KEY_NATIVE = "connections_mobile_native"
+        private const val EXPERIMENT_VALUE_NATIVE_TREATMENT = "treatment"
     }
 }

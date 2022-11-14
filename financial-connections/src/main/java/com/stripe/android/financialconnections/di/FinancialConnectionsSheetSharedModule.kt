@@ -23,7 +23,6 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.serialization.json.Json
 import java.util.Locale
-import java.util.UUID
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -82,6 +81,7 @@ internal object FinancialConnectionsSheetSharedModule {
         context: Application,
         logger: Logger,
         getManifest: GetManifest,
+        locale: Locale?,
         configuration: FinancialConnectionsSheet.Configuration,
         stripeNetworkClient: StripeNetworkClient
     ): FinancialConnectionsAnalyticsTracker = FinancialConnectionsAnalyticsTrackerImpl(
@@ -89,11 +89,9 @@ internal object FinancialConnectionsSheetSharedModule {
         configuration = configuration,
         getManifest = getManifest,
         logger = logger,
-        locale = Locale.getDefault(),
-        loggerId = UUID.randomUUID().toString(),
+        locale = locale ?: Locale.getDefault(),
         stripeNetworkClient = stripeNetworkClient
     )
-
 
     @Provides
     @Singleton
