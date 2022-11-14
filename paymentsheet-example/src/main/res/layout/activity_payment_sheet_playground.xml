@@ -218,24 +218,26 @@
 
         <RadioGroup
             android:id="@+id/default_billing_radio_group"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/default_billing_address">
 
             <RadioButton
                 android:id="@+id/default_billing_on_button"
                 android:text="@string/on"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="false" />
 
             <RadioButton
                 android:id="@+id/default_billing_off_button"
                 android:text="@string/off"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true" />
         </RadioGroup>
@@ -245,32 +247,41 @@
             android:text="@string/shipping_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintTop_toBottomOf="@+id/google_pay_radio_group" />
+            app:layout_constraintTop_toBottomOf="@+id/default_billing_radio_group" />
 
         <RadioGroup
             android:id="@+id/shipping_radio_group"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/shipping_address">
 
             <RadioButton
                 android:id="@+id/shipping_on_button"
                 android:text="@string/on"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false" />
+
+            <RadioButton
+                android:id="@+id/shipping_on_with_defaults_button"
+                android:text="@string/on_with_defaults"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true" />
 
             <RadioButton
                 android:id="@+id/shipping_off_button"
                 android:text="@string/off"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="false" />
         </RadioGroup>
@@ -284,7 +295,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/default_billing_radio_group" />
+            app:layout_constraintTop_toBottomOf="@+id/shipping_radio_group" />
 
         <RadioGroup
             android:id="@+id/allowsDelayedPaymentMethods_radio_group"

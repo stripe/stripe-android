@@ -33,10 +33,10 @@ import com.stripe.android.paymentsheet.example.databinding.ActivityPaymentSheetP
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.model.Shipping
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.view.KeyboardController
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -113,8 +113,15 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val linkEnabled: Boolean
         get() = viewBinding.linkRadioGroup.checkedRadioButtonId == R.id.link_on_button
 
-    private val setShippingAddress: Boolean
-        get() = viewBinding.shippingRadioGroup.checkedRadioButtonId == R.id.shipping_on_button
+    private val shipping: Shipping
+        get() = when (viewBinding.shippingRadioGroup.checkedRadioButtonId) {
+            R.id.shipping_on_button -> Shipping.On
+            R.id.shipping_on_with_defaults_button -> Shipping.OnWithDefaults
+            else -> Shipping.Off
+        }
+
+    private val setDefaultShippingAddress: Boolean
+        get() = shipping == Shipping.OnWithDefaults
 
     private val setDefaultBillingAddress: Boolean
         get() = viewBinding.defaultBillingRadioGroup.checkedRadioButtonId == R.id.default_billing_on_button
@@ -184,7 +191,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 currency = Toggle.Currency.default.toString(),
                 merchantCountryCode = Toggle.MerchantCountryCode.default.toString(),
                 mode = Toggle.Mode.default.toString(),
-                setShippingAddress = Toggle.SetShippingAddress.default as Boolean,
+                shippingAddress = Toggle.ShippingAddress.default.toString(),
                 setDefaultBillingAddress = Toggle.SetDefaultBillingAddress.default as Boolean,
                 setAutomaticPaymentMethods = Toggle.SetAutomaticPaymentMethods.default as Boolean,
                 setDelayedPaymentMethods = Toggle.SetDelayedPaymentMethods.default as Boolean,
@@ -201,7 +208,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 currency = currency.value,
                 merchantCountryCode = merchantCountryCode.value,
                 mode = mode.value,
-                setShippingAddress = setShippingAddress,
+                shipping = shipping.value,
                 setDefaultBillingAddress = setDefaultBillingAddress,
                 setAutomaticPaymentMethods = setAutomaticPaymentMethods,
                 setDelayedPaymentMethods = setDelayedPaymentMethods
@@ -214,7 +221,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     merchantCountryCode,
                     mode,
                     linkEnabled,
-                    setShippingAddress,
+                    setDefaultShippingAddress,
                     setAutomaticPaymentMethods,
                     settings.playgroundBackendUrl,
                     intent.extras?.getStringArray(SUPPORTED_PAYMENT_METHODS_EXTRA)?.toList()
@@ -309,7 +316,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             currency = savedToggles.currency,
             merchantCountryCode = savedToggles.merchantCountryCode,
             mode = savedToggles.mode,
-            setShippingAddress = savedToggles.setShippingAddress,
+            shippingAddress = savedToggles.shippingAddress,
             setAutomaticPaymentMethods = savedToggles.setAutomaticPaymentMethods,
             setDelayedPaymentMethods = savedToggles.setDelayedPaymentMethods,
             setDefaultBillingAddress = savedToggles.setDefaultBillingAddress
@@ -323,7 +330,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         currency: String?,
         merchantCountryCode: String,
         mode: String?,
-        setShippingAddress: Boolean,
+        shippingAddress: String,
         setDefaultBillingAddress: Boolean,
         setAutomaticPaymentMethods: Boolean,
         setDelayedPaymentMethods: Boolean
@@ -357,9 +364,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             else -> viewBinding.modeRadioGroup.check(R.id.mode_setup_button)
         }
 
-        when (setShippingAddress) {
-            true -> viewBinding.shippingRadioGroup.check(R.id.shipping_on_button)
-            false -> viewBinding.shippingRadioGroup.check(R.id.shipping_off_button)
+        when (shippingAddress) {
+            Shipping.On.value -> viewBinding.shippingRadioGroup.check(R.id.shipping_on_button)
+            Shipping.OnWithDefaults.value -> viewBinding.shippingRadioGroup.check(R.id.shipping_on_with_defaults_button)
+            Shipping.Off.value -> viewBinding.shippingRadioGroup.check(R.id.shipping_off_button)
         }
 
         when (setDefaultBillingAddress) {
@@ -510,6 +518,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             defaultBillingDetails = defaultBilling,
             shippingDetails = shippingAddress,
             allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked,
+            allowsPaymentMethodsRequiringShippingAddress = viewBinding.shippingOnButton.isChecked,
             appearance = appearance,
             primaryButtonLabel = customPrimaryButtonLabel,
         )

@@ -19,6 +19,7 @@
     <string name="link">Link</string>
     <string name="google_pay">Google Pay</string>
     <string name="on">On</string>
+    <string name="on_with_defaults">On w/ defaults</string>
     <string name="off">Off</string>
     <string name="checkout_mode">Checkout Mode</string>
     <string name="payment">Pay</string>
