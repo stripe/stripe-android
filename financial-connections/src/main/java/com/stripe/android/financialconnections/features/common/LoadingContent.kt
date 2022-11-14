@@ -62,9 +62,9 @@ internal fun LoadingContent(
 ) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 24.dp)
     ) {
-        Spacer(modifier = Modifier.size(24.dp))
+        Spacer(modifier = Modifier.size(8.dp))
         LoadingSpinner()
         if (title != null) {
             Spacer(modifier = Modifier.size(16.dp))

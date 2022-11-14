@@ -20,7 +20,6 @@ import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_SELECT
 import com.stripe.android.identity.networking.Status
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Type
 import com.stripe.android.identity.states.IdentityScanState
@@ -51,7 +50,10 @@ internal class DocSelectionFragment(
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             val verificationPage by identityViewModel.verificationPage.observeAsState()
-            DocSelectionScreen(verificationPage, ::postVerificationPageDataAndNavigate)
+            DocSelectionScreen(
+                verificationPage,
+                ::postVerificationPageDataAndNavigate
+            )
         }
     }
 
@@ -70,13 +72,11 @@ internal class DocSelectionFragment(
     /**
      * Post VerificationPageData with the type and navigate base on its result.
      */
-    private fun postVerificationPageDataAndNavigate(type: Type, requireSelfie: Boolean) {
+    private fun postVerificationPageDataAndNavigate(type: Type) {
         lifecycleScope.launch {
             postVerificationPageDataAndMaybeSubmit(
                 identityViewModel = identityViewModel,
                 collectedDataParam = CollectedDataParam(idDocumentType = type),
-                clearDataParam =
-                if (requireSelfie) ClearDataParam.DOC_SELECT_TO_UPLOAD_WITH_SELFIE else ClearDataParam.DOC_SELECT_TO_UPLOAD,
                 fromFragment = R.id.docSelectionFragment,
                 notSubmitBlock = {
                     cameraPermissionEnsureable.ensureCameraPermission(
@@ -97,6 +97,7 @@ internal class DocSelectionFragment(
                                         tryNavigateToUploadFragment(type)
                                     }
                                     Status.LOADING -> {} // no-op
+                                    Status.IDLE -> {} // no-op
                                 }
                             }
                         },

@@ -79,6 +79,10 @@ internal data class PartnerAccount(
 
     @SerialName(value = "institution_name") val institutionName: String? = null,
 
+    @SerialName(value = "allow_selection") val allowSelection: Boolean,
+
+    @SerialName(value = "allow_selection_message") val allowSelectionMessage: String? = null,
+
     @SerialName(value = "institution_url") val institutionUrl: String? = null,
 
     @SerialName(value = "linked_account_id") val linkedAccountId: String? = null,
@@ -88,7 +92,7 @@ internal data class PartnerAccount(
     @SerialName(value = "status") val status: FinancialConnectionsAccount.Status? = null
 
 ) {
-    internal val encryptedNumbers get() = displayableAccountNumbers?.let { "•••• $it" } ?: ""
+    internal val encryptedNumbers get() = displayableAccountNumbers?.let { "••••$it" } ?: ""
 
     internal val fullName get() = "${this.name} $encryptedNumbers"
 }

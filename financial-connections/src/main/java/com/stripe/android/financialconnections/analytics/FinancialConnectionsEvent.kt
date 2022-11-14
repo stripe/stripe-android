@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.analytics
 
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.exception.FinancialConnectionsError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
@@ -205,26 +204,4 @@ internal sealed class FinancialConnectionsEvent(
     }
 }
 
-private fun Throwable.toEventParams(): Map<String, String?> = when (this) {
-    is FinancialConnectionsError -> mapOf(
-        "error" to this.name,
-        "error_type" to this.name,
-        "error_message" to (stripeError?.message ?: this.message),
-        "code" to (stripeError?.code ?: this.statusCode.toString())
-    )
-
-    is StripeException -> mapOf(
-        "error_type" to (stripeError?.type ?: this::class.java.simpleName),
-        "error_message" to (stripeError?.message ?: this.message)?.take(MAX_LOG_LENGTH),
-        "code" to (stripeError?.code ?: this.statusCode.toString())
-    )
-
-    else -> mapOf(
-        "error_type" to this::class.java.simpleName,
-        "error_message" to this.message?.take(MAX_LOG_LENGTH),
-        "code" to null
-    )
-}
-
-private const val MAX_LOG_LENGTH = 100
 private const val EVENT_PREFIX = "linked_accounts"

@@ -38,6 +38,7 @@ import com.stripe.android.financialconnections.exception.AccountNumberRetrievalE
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -268,7 +269,12 @@ internal fun ErrorContent(
     val scrollState = rememberScrollState()
     Column(
         Modifier
-            .padding(16.dp)
+            .padding(
+                top = 8.dp,
+                start = 24.dp,
+                end = 24.dp,
+                bottom = 24.dp
+            )
             .fillMaxSize()
     ) {
         Column(
@@ -350,7 +356,7 @@ private fun BadgedInstitutionImage(
 @Composable
 @Preview(group = "Errors", name = "unclassified error")
 internal fun UnclassifiedErrorContentPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
             topBar = { FinancialConnectionsTopAppBar { } }
         ) {
@@ -362,7 +368,7 @@ internal fun UnclassifiedErrorContentPreview() {
 @Composable
 @Preview(group = "Errors", name = "institution down planned error")
 internal fun InstitutionPlannedDowntimeErrorContentPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
             topBar = { FinancialConnectionsTopAppBar { } }
         ) {
@@ -370,8 +376,8 @@ internal fun InstitutionPlannedDowntimeErrorContentPreview() {
                 exception = InstitutionPlannedDowntimeError(
                     institution = FinancialConnectionsInstitution(
                         id = "3",
-                        name = "RandomInstitution",
-                        url = "RandomInstitution url",
+                        name = "Random Institution",
+                        url = "Random Institution url",
                         featured = false,
                         featuredOrder = null,
                         icon = null,
@@ -393,7 +399,7 @@ internal fun InstitutionPlannedDowntimeErrorContentPreview() {
 @Composable
 @Preview(group = "Errors", name = "no accounts available error")
 internal fun NoAccountsAvailableErrorContentPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
             topBar = { FinancialConnectionsTopAppBar { } }
         ) {
@@ -401,8 +407,8 @@ internal fun NoAccountsAvailableErrorContentPreview() {
                 exception = AccountLoadError(
                     institution = FinancialConnectionsInstitution(
                         id = "3",
-                        name = "RandomInstitution",
-                        url = "RandomInstitution url",
+                        name = "Random Institution",
+                        url = "Random Institution url",
                         featured = false,
                         featuredOrder = null,
                         icon = null,

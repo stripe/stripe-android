@@ -124,6 +124,16 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private val resourceRepositories = listOf(lpmResourceRepository, addressResourceRepository)
 
+    override var shippingDetails: AddressDetails?
+        get() = viewModel.initData.config?.shippingDetails
+        set(value) {
+            viewModel.initData = viewModel.initData.copy(
+                config = viewModel.initData.config?.copy(
+                    shippingDetails = value
+                )
+            )
+        }
+
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
             is PaymentOptionsViewModel.Factory -> {

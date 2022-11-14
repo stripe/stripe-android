@@ -382,7 +382,7 @@ internal open class CardImageVerificationActivity :
             }
         is NetworkResult.Error -> {
             launch(Dispatchers.Main) {
-                scanFailure(StripeNetworkException("Unable to get CIV details"))
+                scanFailure(StripeNetworkException(result.error.error.message))
             }
             null
         }

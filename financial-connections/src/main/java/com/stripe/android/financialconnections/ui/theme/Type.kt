@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 
 @Immutable
 internal data class FinancialConnectionsTypography(
@@ -23,13 +24,18 @@ internal data class FinancialConnectionsTypography(
     val caption: TextStyle,
     val captionEmphasized: TextStyle,
     val captionTight: TextStyle,
-    val captionTightEmphasized: TextStyle
+    val captionTightEmphasized: TextStyle,
+    val bodyCode: TextStyle,
+    val bodyCodeEmphasized: TextStyle,
+    val captionCode: TextStyle,
+    val captionCodeEmphasized: TextStyle,
+
 )
 
 @Composable
 @Preview(group = "Components", name = "Type")
 internal fun TypePreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         Column {
             Text(
                 text = "subtitle",

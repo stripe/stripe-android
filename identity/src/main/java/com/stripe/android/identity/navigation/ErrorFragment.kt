@@ -15,11 +15,11 @@ import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
+import com.stripe.android.identity.networking.models.Requirement.Companion.matchesFromFragment
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
-import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError.Requirement.Companion.matchesFromFragment
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
-import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
+import com.stripe.android.identity.utils.clearDataAndNavigateUp
 
 /**
  * Fragment to show generic error.
@@ -72,7 +72,7 @@ internal class ErrorFragment(
                                     navController.currentDestination?.id != destination
                                 ) {
                                     shouldContinueNavigateUp =
-                                        navController.navigateUpAndSetArgForUploadFragment()
+                                        navController.clearDataAndNavigateUp(identityViewModel)
                                 }
                             }
                         }

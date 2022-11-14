@@ -1,6 +1,6 @@
 ext.versions = [
         detekt: "1.21.0",
-        mavericks: "2.7.0"
+        mavericks: "3.0.1"
 ]
 
 ext.buildLibs = [
@@ -17,6 +17,6 @@ ext.libs = [
 ]
 
 ext.testLibs = [
-        turbine: "app.cash.turbine:turbine:0.11.0",
+        turbine: "app.cash.turbine:turbine:0.12.1",
         mavericks: "com.airbnb.android:mavericks-testing:$versions.mavericks"
 ]

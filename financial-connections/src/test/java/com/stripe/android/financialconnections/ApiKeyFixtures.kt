@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections
 
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 
@@ -48,7 +48,8 @@ internal object ApiKeyFixtures {
         showPartnerDisclosure = null,
         skipAccountSelection = null,
         url = null,
-        urlQrCode = null
+        urlQrCode = null,
+        isOAuth = true
     )
 
     fun partnerAccountList() = PartnerAccountsList(

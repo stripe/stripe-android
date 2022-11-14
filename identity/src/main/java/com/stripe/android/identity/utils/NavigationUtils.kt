@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.navigation.NavArgument
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
@@ -23,8 +22,8 @@ import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithRequirementError
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
+import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -53,14 +52,12 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
     identityViewModel: IdentityViewModel,
     collectedDataParam: CollectedDataParam,
-    clearDataParam: ClearDataParam,
     @IdRes fromFragment: Int,
     notSubmitBlock: ((verificationPageData: VerificationPageData) -> Unit)? = null
 ) {
     postVerificationPageData(
         identityViewModel,
         collectedDataParam,
-        clearDataParam,
         fromFragment
     ) { postedVerificationPageData ->
         notSubmitBlock?.invoke(postedVerificationPageData) ?: run {
@@ -134,15 +131,14 @@ internal suspend fun Fragment.submitVerificationPageDataAndNavigate(
 internal suspend fun Fragment.postVerificationPageData(
     identityViewModel: IdentityViewModel,
     collectedDataParam: CollectedDataParam,
-    clearDataParam: ClearDataParam,
     @IdRes fromFragment: Int,
-    onCorrectResponse: suspend ((verificationPageDataWithNoError: VerificationPageData) -> Unit)
+    onCorrectResponse: suspend ((verificationPageDataWithNoError: VerificationPageData) -> Unit) = {}
 ) {
     identityViewModel.screenTracker.screenTransitionStart(
         fromFragment.fragmentIdToScreenName()
     )
     runCatching {
-        identityViewModel.postVerificationPageData(collectedDataParam, clearDataParam)
+        identityViewModel.postVerificationPageData(collectedDataParam)
     }.fold(
         onSuccess = { postedVerificationPageData ->
             if (postedVerificationPageData.hasError()) {
@@ -217,33 +213,61 @@ internal fun Fragment.navigateToUploadFragment(
 }
 
 /**
- * Navigates up with this NavController, if the previousBackStackEntry is upload fragment,
- * sets [ARG_IS_NAVIGATED_UP_TO] to true as its NavArgument.
- *
- * This makes it possible to tell in upload fragment whether it is reached through
- * [NavController.navigateUp] or [NavController.navigate].
+ * Clear [IdentityViewModel.collectedData], [IdentityViewModel.documentFrontUploadedState] and
+ * [IdentityViewModel.documentBackUploadedState] when the corresponding data collections screens
+ * are about to be popped from navigation stack.
+ * Then pop the screen by calling [NavController.navigateUp].
  */
-internal fun NavController.navigateUpAndSetArgForUploadFragment(): Boolean {
-    if (isBackingToUploadFragment()) {
-        previousBackStackEntry?.destination?.addArgument(
-            ARG_IS_NAVIGATED_UP_TO,
-            NavArgument.Builder()
-                .setDefaultValue(true)
-                .build()
-        )
+internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityViewModel): Boolean {
+    currentBackStackEntry?.destination?.id?.let { currentEntryId ->
+        if (DOCUMENT_UPLOAD_SCREENS.contains(currentEntryId)) {
+            identityViewModel.clearUploadedData()
+        }
+        currentEntryId.fragmentIdToRequirement().forEach(identityViewModel::clearCollectedData)
     }
+
+    previousBackStackEntry?.destination?.id?.let { previousEntryId ->
+        if (DOCUMENT_UPLOAD_SCREENS.contains(previousEntryId)) {
+            identityViewModel.clearUploadedData()
+        }
+        previousEntryId.fragmentIdToRequirement().forEach(identityViewModel::clearCollectedData)
+    }
+
     return navigateUp()
 }
 
-internal fun NavController.isNavigatedUpTo(): Boolean {
-    return this.currentDestination?.arguments?.get(ARG_IS_NAVIGATED_UP_TO)?.defaultValue
-        as? Boolean == true
+internal fun Int.fragmentIdToRequirement(): List<Requirement> = when (this) {
+    R.id.consentFragment -> {
+        listOf(Requirement.BIOMETRICCONSENT)
+    }
+    R.id.docSelectionFragment -> {
+        listOf(Requirement.IDDOCUMENTTYPE)
+    }
+    R.id.IDUploadFragment -> {
+        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
+    }
+    R.id.passportUploadFragment -> {
+        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
+    }
+    R.id.driverLicenseUploadFragment -> {
+        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
+    }
+    R.id.IDScanFragment -> {
+        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
+    }
+    R.id.passportScanFragment -> {
+        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
+    }
+    R.id.driverLicenseScanFragment -> {
+        listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
+    }
+    R.id.selfieFragment -> {
+        listOf(Requirement.FACE)
+    }
+    else -> {
+        listOf()
+    }
 }
-
-private fun NavController.isBackingToUploadFragment() =
-    previousBackStackEntry?.destination?.id == R.id.IDUploadFragment ||
-        previousBackStackEntry?.destination?.id == R.id.passportUploadFragment ||
-        previousBackStackEntry?.destination?.id == R.id.driverLicenseUploadFragment
 
 internal fun Int.fragmentIdToScreenName(): String = when (this) {
     R.id.consentFragment -> {
@@ -291,6 +315,18 @@ internal fun Int.fragmentIdToScreenName(): String = when (this) {
 }
 
 /**
+ * ID of all screens that collect front/back of a document.
+ */
+private val DOCUMENT_UPLOAD_SCREENS = setOf(
+    R.id.IDUploadFragment,
+    R.id.passportUploadFragment,
+    R.id.driverLicenseUploadFragment,
+    R.id.IDScanFragment,
+    R.id.passportScanFragment,
+    R.id.driverLicenseScanFragment
+)
+
+/**
  * Argument to indicate if take photo option should be shown when picking an image.
  */
 internal const val ARG_SHOULD_SHOW_TAKE_PHOTO = "shouldShowTakePhoto"
@@ -299,10 +335,5 @@ internal const val ARG_SHOULD_SHOW_TAKE_PHOTO = "shouldShowTakePhoto"
  * Argument to indicate if choose photo option should be shown when picking an image.
  */
 internal const val ARG_SHOULD_SHOW_CHOOSE_PHOTO = "shouldShowChoosePhoto"
-
-/**
- * Navigation Argument to indicate if the current Fragment is reached through navigateUp.
- */
-internal const val ARG_IS_NAVIGATED_UP_TO = "isNavigatedUpTo"
 
 private const val TAG = "NAVIGATION_UTIL"

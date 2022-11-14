@@ -57,8 +57,10 @@ fun StripeImage(
             launch {
                 imageLoader
                     .load(url, width, height)
-                    .onSuccess { bitmap ->
-                        state.value = Success(BitmapPainter(bitmap.asImageBitmap()))
+                    .onSuccess {
+                        it?.let { bitmap ->
+                            state.value = Success(BitmapPainter(bitmap.asImageBitmap()))
+                        }
                     }
                     .onFailure {
                         state.value = Error

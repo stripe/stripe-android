@@ -323,8 +323,6 @@ class PaymentSessionTest {
     ): PaymentSession {
         return PaymentSession(
             activity,
-            activity.application,
-            activity,
             activity,
             activity,
             config,

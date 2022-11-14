@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -23,6 +24,7 @@ internal fun FinancialConnectionsOutlinedTextField(
     onValueChange: (String) -> Unit,
     readOnly: Boolean = false,
     isError: Boolean = false,
+    placeholder: @Composable (() -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -33,6 +35,7 @@ internal fun FinancialConnectionsOutlinedTextField(
         modifier = modifier.fillMaxWidth(),
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
+        placeholder = placeholder,
         visualTransformation = visualTransformation,
         readOnly = readOnly,
         isError = isError,
@@ -59,7 +62,7 @@ internal fun FinancialConnectionsOutlinedTextField(
 @Composable
 @Preview(group = "Components", name = "TextField - idle")
 internal fun FinancialConnectionsOutlinedTextFieldPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         Column {
             FinancialConnectionsOutlinedTextField(value = "test", onValueChange = {})
         }

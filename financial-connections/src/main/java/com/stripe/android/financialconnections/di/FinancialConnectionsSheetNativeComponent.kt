@@ -52,7 +52,7 @@ internal interface FinancialConnectionsSheetNativeComponent {
 
         @BindsInstance
         fun initialSyncResponse(
-            @Named(INITIAL_SYNC_RESPONSE) initialSyncResponse: SynchronizeSessionResponse
+            @Named(INITIAL_SYNC_RESPONSE) initialSyncResponse: SynchronizeSessionResponse?
         ): Builder
 
         @BindsInstance

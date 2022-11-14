@@ -32,6 +32,7 @@ def getAccountId() {
 dependencies {
     implementation project(':payments')
     implementation project(':financial-connections')
+    implementation project(':stripe-ui-core')
 
     implementation("com.alipay.sdk:alipaysdk-android:15.8.11")
 
@@ -56,11 +57,10 @@ dependencies {
 
     implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
-
 
     // Jetpack Compose
     // Integration with activities

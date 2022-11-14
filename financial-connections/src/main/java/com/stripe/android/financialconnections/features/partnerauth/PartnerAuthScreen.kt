@@ -1,21 +1,17 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,11 +34,14 @@ import com.stripe.android.financialconnections.features.common.InstitutionUnplan
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PartnerCallout
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.PartnerAuthViewEffect.OpenPartnerAuth
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -61,10 +60,7 @@ internal fun PartnerAuthScreen() {
     val viewModel: PartnerAuthViewModel = mavericksViewModel()
     val state: State<PartnerAuthState> = viewModel.collectAsState()
 
-    LaunchedEffect(state.value.url) {
-        val url = state.value.url
-        if (url != null) activityViewModel.openPartnerAuthFlowInBrowser(url)
-    }
+    ObserveViewEffect(state, activityViewModel, viewModel)
     LaunchedEffect(webAuthFlow.value) {
         viewModel.onWebAuthFlowFinished(webAuthFlow.value)
     }
@@ -76,6 +72,23 @@ internal fun PartnerAuthScreen() {
         onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.PARTNER_AUTH) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
+}
+
+@Composable
+private fun ObserveViewEffect(
+    state: State<PartnerAuthState>,
+    activityViewModel: FinancialConnectionsSheetNativeViewModel,
+    viewModel: PartnerAuthViewModel
+) {
+    LaunchedEffect(state.value.viewEffect) {
+        when (val viewEffect = state.value.viewEffect) {
+            null -> Unit
+            is OpenPartnerAuth -> {
+                activityViewModel.openPartnerAuthFlowInBrowser(viewEffect.url)
+                viewModel.onViewEffectLaunched()
+            }
+        }
+    }
 }
 
 @Composable
@@ -97,8 +110,8 @@ private fun PartnerAuthScreenContent(
     ) {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> LoadingContent(
-                stringResource(id = R.string.stripe_picker_loading_title),
-                stringResource(id = R.string.stripe_picker_loading_desc)
+                stringResource(id = R.string.stripe_partnerauth_loading_title),
+                stringResource(id = R.string.stripe_partnerauth_loading_desc)
             )
 
             is Fail -> ErrorContent(
@@ -150,23 +163,23 @@ private fun LoadedContent(
     onSelectAnotherBank: () -> Unit
 ) {
     when (authenticationStatus) {
-        is Uninitialized -> when (payload.showPrepane) {
+        is Uninitialized -> when (payload.authSession.isOAuth) {
             true -> PrePaneContent(
                 institution = payload.institution,
-                flow = payload.flow,
-                showPartnerDisclosure = payload.showPartnerDisclosure,
+                flow = payload.authSession.flow,
+                showPartnerDisclosure = payload.authSession.showPartnerDisclosure ?: false,
                 onContinueClick = onContinueClick
             )
 
             false -> LoadingContent(
-                stringResource(id = R.string.stripe_picker_loading_title),
-                stringResource(id = R.string.stripe_picker_loading_desc)
+                stringResource(id = R.string.stripe_partnerauth_loading_title),
+                stringResource(id = R.string.stripe_partnerauth_loading_desc)
             )
         }
 
         is Loading, is Success -> LoadingContent(
-            stringResource(id = R.string.stripe_picker_loading_title),
-            stringResource(id = R.string.stripe_picker_loading_desc)
+            stringResource(id = R.string.stripe_partnerauth_loading_title),
+            stringResource(id = R.string.stripe_partnerauth_loading_desc)
         )
 
         is Fail -> {
@@ -186,10 +199,10 @@ private fun PrePaneContent(
     Column(
         modifier = Modifier
             .padding(
-                top = 24.dp,
-                start = 16.dp,
-                end = 16.dp,
-                bottom = 16.dp
+                top = 8.dp,
+                start = 24.dp,
+                end = 24.dp,
+                bottom = 24.dp
             )
     ) {
         val modifier = Modifier
@@ -220,19 +233,10 @@ private fun PrePaneContent(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(R.string.stripe_prepane_continue),
-                    modifier = Modifier.align(Alignment.Center),
-                    textAlign = TextAlign.Center
-                )
-                Icon(
-                    painterResource(id = R.drawable.stripe_ic_external),
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                    tint = FinancialConnectionsTheme.colors.textWhite,
-                    contentDescription = stringResource(R.string.stripe_prepane_continue)
-                )
-            }
+            Text(
+                text = stringResource(R.string.stripe_prepane_continue),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
@@ -240,7 +244,7 @@ private fun PrePaneContent(
 @Composable
 @Preview
 internal fun PrepaneContentPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         PartnerAuthScreenContent(
             state = PartnerAuthState(
                 payload = Success(
@@ -255,13 +259,17 @@ internal fun PrepaneContentPreview() {
                             featuredOrder = null,
                             mobileHandoffCapable = false
                         ),
-                        flow = Flow.FINICITY_CONNECT_V2_OAUTH,
-                        showPartnerDisclosure = true,
-                        showPrepane = true
+                        authSession = FinancialConnectionsAuthorizationSession(
+                            flow = Flow.FINICITY_CONNECT_V2_OAUTH,
+                            showPartnerDisclosure = true,
+                            isOAuth = true,
+                            nextPane = NextPane.PARTNER_AUTH,
+                            id = "1234"
+                        ),
                     )
                 ),
                 authenticationStatus = Uninitialized,
-                url = null
+                viewEffect = null
             ),
             onContinueClick = {},
             onSelectAnotherBank = {},

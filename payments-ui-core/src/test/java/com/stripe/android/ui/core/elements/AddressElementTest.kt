@@ -172,7 +172,7 @@ class AddressElementTest {
             IdentifierSpec.Generic("address"),
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(null, PhoneNumberState.REQUIRED) { },
+            addressType = AddressType.ShippingCondensed(null, setOf(), PhoneNumberState.REQUIRED) { },
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -190,7 +190,7 @@ class AddressElementTest {
             IdentifierSpec.Generic("address"),
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(null, PhoneNumberState.HIDDEN) { },
+            addressType = AddressType.ShippingCondensed(null, setOf(), PhoneNumberState.HIDDEN) { },
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -207,7 +207,7 @@ class AddressElementTest {
             IdentifierSpec.Generic("address"),
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(null, PhoneNumberState.OPTIONAL) { },
+            addressType = AddressType.ShippingCondensed(null, setOf(), PhoneNumberState.OPTIONAL) { },
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -319,6 +319,7 @@ class AddressElementTest {
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingCondensed(
                 "some key",
+                setOf("US", "CA"),
                 PhoneNumberState.OPTIONAL
             ) { },
             sameAsShippingElement = null,
@@ -339,6 +340,7 @@ class AddressElementTest {
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingCondensed(
                 null,
+                setOf(),
                 PhoneNumberState.OPTIONAL
             ) { },
             sameAsShippingElement = null,

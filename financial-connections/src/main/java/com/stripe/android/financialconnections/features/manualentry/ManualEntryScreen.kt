@@ -36,10 +36,12 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
+import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.visualtransformation.NumbersOnlyTransformation
 
@@ -82,7 +84,8 @@ private fun ManualEntryContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick
+                onCloseClick = onCloseClick,
+                elevation = scrollState.elevation
             )
         }
     ) {
@@ -133,8 +136,11 @@ private fun ManualEntryContent(
                         style = FinancialConnectionsTheme.typography.body
                     )
                 }
+                Spacer(modifier = Modifier.size(8.dp))
+
                 InputWithError(
                     label = R.string.stripe_manualentry_routing,
+                    hint = "123456789",
                     inputWithError = routing,
                     onInputChanged = onRoutingEntered,
                     onFocusGained = { currentCheck = R.drawable.stripe_check_routing }
@@ -142,6 +148,7 @@ private fun ManualEntryContent(
                 Spacer(modifier = Modifier.size(24.dp))
                 InputWithError(
                     label = R.string.stripe_manualentry_account,
+                    hint = "000123456789",
                     inputWithError = account,
                     onInputChanged = onAccountEntered,
                     onFocusGained = { currentCheck = R.drawable.stripe_check_account }
@@ -149,12 +156,13 @@ private fun ManualEntryContent(
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
                     text = stringResource(R.string.stripe_manualentry_account_type_disclaimer),
-                    color = FinancialConnectionsTheme.colors.textPrimary,
-                    style = FinancialConnectionsTheme.typography.body
+                    color = FinancialConnectionsTheme.colors.textSecondary,
+                    style = FinancialConnectionsTheme.typography.caption
                 )
                 Spacer(modifier = Modifier.size(24.dp))
                 InputWithError(
                     label = R.string.stripe_manualentry_accountconfirm,
+                    hint = "000123456789",
                     inputWithError = accountConfirm,
                     onInputChanged = onAccountConfirmEntered,
                     onFocusGained = { currentCheck = R.drawable.stripe_check_account }
@@ -173,10 +181,7 @@ private fun ManualEntryFooter(
     onSubmit: () -> Unit
 ) {
     Column(
-        modifier = Modifier.padding(
-            horizontal = 24.dp,
-            vertical = 16.dp
-        )
+        modifier = Modifier.padding(24.dp)
     ) {
         FinancialConnectionsButton(
             enabled = isValidForm,
@@ -193,13 +198,26 @@ private fun ManualEntryFooter(
 private fun InputWithError(
     inputWithError: Pair<String?, Int?>,
     label: Int,
+    hint: String,
     onFocusGained: () -> Unit,
     onInputChanged: (String) -> Unit
 ) {
     var text by remember { mutableStateOf("") }
+    Text(
+        text = stringResource(id = label),
+        color = FinancialConnectionsTheme.colors.textSecondary,
+        style = FinancialConnectionsTheme.typography.body
+    )
+    Spacer(modifier = Modifier.size(4.dp))
     FinancialConnectionsOutlinedTextField(
-        label = { Text(stringResource(label)) },
         value = text,
+        placeholder = {
+            Text(
+                text = hint,
+                style = FinancialConnectionsTheme.typography.body,
+                color = FinancialConnectionsTheme.colors.textDisabled
+            )
+        },
         visualTransformation = NumbersOnlyTransformation(),
         isError = inputWithError.second != null,
         onValueChange = { text = it; onInputChanged(it) },
@@ -218,7 +236,7 @@ private fun InputWithError(
 @Preview
 @Composable
 internal fun ManualEntryScreenPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         ManualEntryContent(
             routing = "" to null,
             account = "" to null,
@@ -237,7 +255,7 @@ internal fun ManualEntryScreenPreview() {
 @Preview
 @Composable
 internal fun ManualEntryScreenErrorPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         ManualEntryContent(
             routing = "" to null,
             account = "" to null,

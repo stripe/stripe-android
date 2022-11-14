@@ -1,16 +1,15 @@
 package com.stripe.android.googlepaylauncher
 
-import android.app.Application
 import android.content.Intent
-import android.os.Bundle
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
@@ -31,6 +30,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.utils.requireApplication
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -219,19 +219,15 @@ internal class GooglePayLauncherViewModel(
         }.getOrElse { GooglePayLauncher.Result.Failed(it) }
 
     internal class Factory(
-        private val application: Application,
         private val args: GooglePayLauncherContract.Args,
-        owner: SavedStateRegistryOwner,
         private val enableLogging: Boolean = false,
         private val workContext: CoroutineContext = Dispatchers.IO,
-        defaultArgs: Bundle? = null
-    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
+    ) : ViewModelProvider.Factory {
+
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(
-            key: String,
-            modelClass: Class<T>,
-            handle: SavedStateHandle
-        ): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            val application = extras.requireApplication()
+
             val googlePayEnvironment = args.config.environment
             val logger = Logger.getInstance(enableLogging)
 
@@ -284,7 +280,7 @@ internal class GooglePayLauncherViewModel(
                     isJcbEnabled = args.config.isJcbEnabled
                 ),
                 googlePayRepository,
-                handle
+                extras.createSavedStateHandle()
             ) as T
         }
     }

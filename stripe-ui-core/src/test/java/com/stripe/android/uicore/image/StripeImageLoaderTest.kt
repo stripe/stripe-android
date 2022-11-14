@@ -23,6 +23,8 @@ class StripeImageLoaderTest {
 
     private val mockBitmap = mock<Bitmap>()
     private val key: String = "image-key"
+    private val keyNoSize: String = "image-key-no-size"
+    private val mockBitmapNoSize = mock<Bitmap>()
 
     private val imageLoader = StripeImageLoader(
         context,
@@ -41,6 +43,13 @@ class StripeImageLoaderTest {
 
             assertThat(bitmap.getOrThrow()).isEqualTo(mockBitmap)
             verifyNoInteractions(networkImageDecoder)
+
+            memoryCacheReturns(keyNoSize, mockBitmapNoSize)
+
+            val bitmapUnknownSize = imageLoader.load(keyNoSize)
+
+            assertThat(bitmapUnknownSize.getOrThrow()).isEqualTo(mockBitmapNoSize)
+            verifyNoInteractions(networkImageDecoder)
         }
 
     @Test
@@ -53,6 +62,15 @@ class StripeImageLoaderTest {
 
             assertThat(bitmap.getOrThrow()).isEqualTo(mockBitmap)
             verify(memoryCache).put(key, mockBitmap)
+            verifyNoInteractions(networkImageDecoder)
+
+            memoryCacheReturns(keyNoSize, null)
+            diskCacheReturns(keyNoSize, mockBitmapNoSize)
+
+            val bitmapUnknownSize = imageLoader.load(keyNoSize)
+
+            assertThat(bitmapUnknownSize.getOrThrow()).isEqualTo(mockBitmapNoSize)
+            verify(memoryCache).put(keyNoSize, mockBitmapNoSize)
             verifyNoInteractions(networkImageDecoder)
         }
 
@@ -68,6 +86,16 @@ class StripeImageLoaderTest {
             assertThat(bitmap.getOrThrow()).isEqualTo(mockBitmap)
             verify(diskCache).put(key, mockBitmap)
             verify(memoryCache).put(key, mockBitmap)
+
+            memoryCacheReturns(keyNoSize, null)
+            diskCacheReturns(keyNoSize, null)
+            networkCacheReturns(keyNoSize, mockBitmapNoSize)
+
+            val bitmapNoSize = imageLoader.load(keyNoSize)
+
+            assertThat(bitmapNoSize.getOrThrow()).isEqualTo(mockBitmapNoSize)
+            verify(diskCache).put(keyNoSize, mockBitmapNoSize)
+            verify(memoryCache).put(keyNoSize, mockBitmapNoSize)
         }
 
     private fun memoryCacheReturns(key: String, bitmap: Bitmap?) {
@@ -85,5 +113,12 @@ class StripeImageLoaderTest {
         bitmap: Bitmap
     ) {
         whenever(networkImageDecoder.decode(key, width, height)).thenReturn(bitmap)
+    }
+
+    private suspend fun networkCacheReturns(
+        key: String,
+        bitmap: Bitmap
+    ) {
+        whenever(networkImageDecoder.decode(key)).thenReturn(bitmap)
     }
 }

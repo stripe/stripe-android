@@ -28,6 +28,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -62,6 +63,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
@@ -140,14 +142,12 @@ private fun LoadedContent(
 ) {
     var input by remember { mutableStateOf("") }
     LaunchedEffect(searchMode) { if (!searchMode) input = "" }
-    Column(
-        modifier = Modifier
-    ) {
+    Column {
         if (searchMode.not()) {
-            Spacer(Modifier.size(24.dp))
+            Spacer(Modifier.size(16.dp))
             Text(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 24.dp)
                     .fillMaxWidth(),
                 text = stringResource(R.string.stripe_institutionpicker_pane_select_bank),
                 style = FinancialConnectionsTheme.typography.subtitle
@@ -194,7 +194,7 @@ private fun FinancialConnectionsSearchRow(
     val focusManager = LocalFocusManager.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = Modifier.padding(horizontal = 24.dp)
     ) {
         FinancialConnectionsOutlinedTextField(
             leadingIcon = if (searchMode) {
@@ -210,7 +210,13 @@ private fun FinancialConnectionsSearchRow(
                     )
                 }
             } else {
-                null
+                {
+                    Icon(
+                        Icons.Filled.Search,
+                        tint = FinancialConnectionsTheme.colors.textPrimary,
+                        contentDescription = "Search icon",
+                    )
+                }
             },
             modifier = Modifier
                 .onFocusChanged { if (it.isFocused) onSearchFocused() }
@@ -294,11 +300,11 @@ private fun SearchInstitutionsFailedRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                horizontal = 16.dp,
+                horizontal = 24.dp,
                 vertical = 8.dp
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Icon(
             painter = painterResource(R.drawable.stripe_ic_warning),
@@ -344,7 +350,7 @@ private fun InstitutionResultTile(
             .clickable { onInstitutionSelected(institution) }
             .padding(
                 vertical = 8.dp,
-                horizontal = 16.dp
+                horizontal = 24.dp
             )
     ) {
         val modifier = Modifier
@@ -385,8 +391,8 @@ private fun FeaturedInstitutionsGrid(
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(
             top = 16.dp,
-            start = 16.dp,
-            end = 16.dp
+            start = 24.dp,
+            end = 24.dp
         ),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -409,7 +415,7 @@ private fun FeaturedInstitutionsGrid(
                             .border(
                                 width = 1.dp,
                                 color = FinancialConnectionsTheme.colors.borderDefault,
-                                shape = RoundedCornerShape(4.dp)
+                                shape = RoundedCornerShape(6.dp)
                             )
                             .clickable { onInstitutionSelected(institution, true) }
                     ) {
@@ -451,11 +457,30 @@ private fun FeaturedInstitutionsGrid(
 }
 
 @Composable
+@Preview(group = "Institutions Pane", name = "initialLoading")
+internal fun InitialLoading(
+    state: InstitutionPickerState = InstitutionPickerStates.initialLoading()
+) {
+    FinancialConnectionsPreview {
+        InstitutionPickerContent(
+            payload = state.payload,
+            institutionsProvider = { state.searchInstitutions },
+            searchMode = state.searchMode,
+            onQueryChanged = {},
+            onInstitutionSelected = { _, _ -> },
+            onCancelSearchClick = {},
+            onCloseClick = {},
+            onSearchFocused = {}
+        ) {}
+    }
+}
+
+@Composable
 @Preview(group = "Institutions Pane", name = "searchModeSearchingInstitutions")
 internal fun SearchModeSearchingInstitutions(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeSearchingInstitutions()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
@@ -474,7 +499,7 @@ internal fun SearchModeSearchingInstitutions(
 internal fun SearchModeWithResults(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeWithResults()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
@@ -493,7 +518,7 @@ internal fun SearchModeWithResults(
 internal fun SearchModeNoResults(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeNoResults()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
@@ -512,7 +537,7 @@ internal fun SearchModeNoResults(
 internal fun SearchModeFailed(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeFailed()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
@@ -531,7 +556,7 @@ internal fun SearchModeFailed(
 internal fun SearchModeNoQuery(
     state: InstitutionPickerState = InstitutionPickerStates.searchModeNoQuery()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },
@@ -550,7 +575,7 @@ internal fun SearchModeNoQuery(
 internal fun NoSearchMode(
     state: InstitutionPickerState = InstitutionPickerStates.noSearchMode()
 ) {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         InstitutionPickerContent(
             payload = state.payload,
             institutionsProvider = { state.searchInstitutions },

@@ -19,9 +19,9 @@ import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun AttachPaymentScreen() {
@@ -110,7 +110,7 @@ private fun ErrorContent(
 @Composable
 @Preview
 internal fun AttachPaymentScreenPreview() {
-    FinancialConnectionsTheme {
+    FinancialConnectionsPreview {
         AttachPaymentContent(
             payload = Success(
                 AttachPaymentState.Payload(

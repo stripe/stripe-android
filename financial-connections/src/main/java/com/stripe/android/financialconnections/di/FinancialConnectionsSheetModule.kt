@@ -6,6 +6,7 @@ import com.stripe.android.financialconnections.network.FinancialConnectionsReque
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import dagger.Module
 import dagger.Provides
+import java.util.Locale
 import javax.inject.Singleton
 
 @Module
@@ -17,12 +18,14 @@ internal object FinancialConnectionsSheetModule {
         requestExecutor: FinancialConnectionsRequestExecutor,
         apiRequestFactory: ApiRequest.Factory,
         apiOptions: ApiRequest.Options,
+        locale: Locale?,
         logger: Logger
     ) = FinancialConnectionsManifestRepository(
         requestExecutor = requestExecutor,
         apiRequestFactory = apiRequestFactory,
         apiOptions = apiOptions,
         logger = logger,
+        locale = locale ?: Locale.getDefault(),
         initialSync = null
     )
 }
