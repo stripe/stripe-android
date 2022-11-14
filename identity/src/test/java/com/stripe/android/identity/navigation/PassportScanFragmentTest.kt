@@ -128,6 +128,13 @@ class PassportScanFragmentTest {
             runBlocking {
                 mockScreenTracker.screenTransitionFinish(eq(SCREEN_NAME_LIVE_CAPTURE_PASSPORT))
             }
+            val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
+            verify(mockIdentityViewModel).observeForVerificationPage(
+                any(),
+                successCaptor.capture(),
+                any()
+            )
+            successCaptor.lastValue.invoke(verificationPageRequireSelfie)
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
@@ -161,7 +168,7 @@ class PassportScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
 
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -195,7 +202,7 @@ class PassportScanFragmentTest {
                 )
 
                 // observeForVerificationPage - trigger onSuccess
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -241,7 +248,7 @@ class PassportScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
 
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -275,7 +282,7 @@ class PassportScanFragmentTest {
                 )
 
                 // observeForVerificationPage - trigger onSuccess
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()

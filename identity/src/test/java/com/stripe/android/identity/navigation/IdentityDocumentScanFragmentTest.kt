@@ -209,12 +209,12 @@ class IdentityDocumentScanFragmentTest {
             )
 
             val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
-            verify(mockIdentityViewModel).observeForVerificationPage(
+            verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
                 any(),
                 successCaptor.capture(),
                 any()
             )
-            successCaptor.firstValue(SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE)
+            successCaptor.lastValue(SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE)
 
             verify(mockScanFlow).resetFlow()
             assertThat(testFragment.cameraAdapter.isBoundToLifecycle()).isFalse()
@@ -255,12 +255,12 @@ class IdentityDocumentScanFragmentTest {
             )
 
             val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
-            verify(mockIdentityViewModel).observeForVerificationPage(
+            verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
                 any(),
                 successCaptor.capture(),
                 any()
             )
-            successCaptor.firstValue(SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE)
+            successCaptor.lastValue(SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE)
 
             verify(mockScanFlow).resetFlow()
             assertThat(testFragment.cameraAdapter.isBoundToLifecycle()).isFalse()

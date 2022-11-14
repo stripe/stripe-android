@@ -30,7 +30,6 @@ import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.SELECTION_NONE
 import com.stripe.android.identity.networking.Resource
-import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.CollectedDataParam.Type
 import com.stripe.android.identity.networking.models.VerificationPage
 
@@ -39,50 +38,54 @@ internal const val singleSelectionTag = "SingleSelection"
 
 @Composable
 internal fun DocSelectionScreen(
-    verificationPageState: Resource<VerificationPage>?,
+    verificationPageState: Resource<VerificationPage>,
+    onError: (Throwable) -> Unit,
+    onComposeFinish: (VerificationPage) -> Unit,
     onDocTypeSelected: (Type) -> Unit
 ) {
     MdcTheme {
-        require(verificationPageState != null && verificationPageState.status == Status.SUCCESS) {
-            "verificationPageState.status is not SUCCESS"
-        }
-        val documentSelect =
-            remember { requireNotNull(verificationPageState.data).documentSelect }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    horizontal = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    vertical = dimensionResource(id = R.dimen.page_vertical_margin)
-                )
+        CheckVerificationPageAndCompose(
+            verificationPageResource = verificationPageState,
+            onError = onError
         ) {
-            Text(
-                text = documentSelect.title,
+            val documentSelect = remember { it.documentSelect }
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxSize()
                     .padding(
-                        top = 58.dp,
-                        bottom = 32.dp
+                        horizontal = dimensionResource(id = R.dimen.page_horizontal_margin),
+                        vertical = dimensionResource(id = R.dimen.page_vertical_margin)
                     )
-                    .semantics {
-                        testTag = docSelectionTitleTag
-                    },
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
-            if (documentSelect.idDocumentTypeAllowlist.count() > 1) {
-                MultiSelection(
-                    documentSelect.idDocumentTypeAllowlist,
-                    onDocTypeSelected = onDocTypeSelected
+            ) {
+                Text(
+                    text = documentSelect.title,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            top = 58.dp,
+                            bottom = 32.dp
+                        )
+                        .semantics {
+                            testTag = docSelectionTitleTag
+                        },
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
                 )
-            } else {
-                SingleSelection(
-                    allowedType = documentSelect.idDocumentTypeAllowlist.entries.first().key,
-                    buttonText = documentSelect.buttonText,
-                    bodyText = documentSelect.body,
-                    onDocTypeSelected = onDocTypeSelected
-                )
+                if (documentSelect.idDocumentTypeAllowlist.count() > 1) {
+                    MultiSelection(
+                        documentSelect.idDocumentTypeAllowlist,
+                        onDocTypeSelected = onDocTypeSelected
+                    )
+                } else {
+                    SingleSelection(
+                        allowedType = documentSelect.idDocumentTypeAllowlist.entries.first().key,
+                        buttonText = documentSelect.buttonText,
+                        bodyText = documentSelect.body,
+                        onDocTypeSelected = onDocTypeSelected
+                    )
+                }
             }
+            onComposeFinish(it)
         }
     }
 }

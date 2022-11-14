@@ -687,7 +687,9 @@ internal class IdentityViewModel constructor(
     fun observeForVerificationPage(
         owner: LifecycleOwner,
         onSuccess: (VerificationPage) -> Unit,
-        onFailure: (Throwable) -> Unit
+        onFailure: (Throwable) -> Unit = {
+            Log.d(TAG, "Failed to get VerificationPage")
+        }
     ) {
         verificationPage.observe(owner) { resource ->
             when (resource.status) {
