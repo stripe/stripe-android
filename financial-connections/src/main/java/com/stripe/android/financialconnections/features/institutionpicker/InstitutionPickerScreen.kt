@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -417,7 +419,12 @@ private fun FeaturedInstitutionsGrid(
                                 color = FinancialConnectionsTheme.colors.borderDefault,
                                 shape = RoundedCornerShape(6.dp)
                             )
-                            .clickable { onInstitutionSelected(institution, true) }
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = rememberRipple(
+                                    color = FinancialConnectionsTheme.colors.textSecondary
+                                ),
+                            ) { onInstitutionSelected(institution, true) }
                     ) {
                         StripeImage(
                             modifier = Modifier
