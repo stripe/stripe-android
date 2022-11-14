@@ -186,7 +186,9 @@ internal abstract class IdentityUploadFragment(
                         this@IdentityUploadFragment,
                         onSuccess = {
                             lifecycleScope.launch(identityViewModel.workContext) {
-                                identityViewModel.screenTracker.screenTransitionFinish(fragmentId.fragmentIdToScreenName())
+                                identityViewModel.screenTracker.screenTransitionFinish(
+                                    fragmentId.fragmentIdToScreenName()
+                                )
                             }
                             identityViewModel.sendAnalyticsRequest(
                                 identityViewModel.identityAnalyticsRequestFactory.screenPresented(

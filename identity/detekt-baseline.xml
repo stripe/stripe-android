@@ -6,13 +6,14 @@
     <ID>ComplexMethod:IdentityCameraScanFragment.kt$IdentityCameraScanFragment$override fun onViewCreated(view: View, savedInstanceState: Bundle?)</ID>
     <ID>ComplexMethod:IdentityFragmentFactory.kt$IdentityFragmentFactory$override fun instantiate(classLoader: ClassLoader, className: String): Fragment</ID>
     <ID>ComplexMethod:NavigationUtils.kt$internal fun Int.fragmentIdToScreenName(): String</ID>
-    <ID>ComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( identityViewModel: IdentityViewModel, title: String, context: String, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, onContinueClicked: () -> Unit )</ID>
+    <ID>ComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( identityViewModel: IdentityViewModel, title: String, context: String, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, onComposeFinish: () -> Unit, onContinueClicked: () -> Unit )</ID>
     <ID>EmptyFunctionBlock:IdentityCameraScanFragmentTest.kt$IdentityCameraScanFragmentTest.TestFragment${ }</ID>
     <ID>EmptyFunctionBlock:IdentityCameraScanFragmentTest.kt$IdentityCameraScanFragmentTest.TestFragment${}</ID>
     <ID>FunctionOnlyReturningConstant:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$private fun isFaceFocused(): Boolean</ID>
     <ID>LargeClass:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest</ID>
+    <ID>LargeClass:IDScanFragmentTest.kt$IDScanFragmentTest</ID>
     <ID>LargeClass:IdentityViewModel.kt$IdentityViewModel : ViewModel</ID>
-    <ID>LongMethod:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( verificationPageState: Resource&lt;VerificationPage>?, onConfirmed: () -> Unit )</ID>
+    <ID>LongMethod:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( verificationPageState: Resource&lt;VerificationPage>, onError: (Throwable) -> Unit, onComposeFinish: (VerificationPage) -> Unit, onConfirmed: () -> Unit )</ID>
     <ID>LongMethod:ConsentScreen.kt$@Composable private fun SuccessUI( merchantLogoUri: Uri, verificationPage: VerificationPage, onConsentAgreed: () -> Unit, onConsentDeclined: () -> Unit )</ID>
     <ID>LongMethod:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - not require selfie - submit`()</ID>
     <ID>LongMethod:DriverLicenseScanFragmentTest.kt$DriverLicenseScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back UI is on - back scanned and uploaded - require selfie - to selfie`()</ID>
@@ -30,8 +31,7 @@
     <ID>LongMethod:PassportScanFragmentTest.kt$PassportScanFragmentTest$@Test fun `front scanned and uploaded - not require selfie - submit`()</ID>
     <ID>LongMethod:PassportScanFragmentTest.kt$PassportScanFragmentTest$@Test fun `front scanned and uploaded - require selfie - to selfie`()</ID>
     <ID>LongMethod:SelfieFragment.kt$SelfieFragment$private fun collectUploadedStateAndUploadForCollectedSelfies()</ID>
-    <ID>LongMethod:UploadScreen.kt$@Composable internal fun UploadImageDialog( uploadInfo: DocumentUploadSideInfo, onDismissRequest: () -> Unit, onUploadMethodSelected: () -> Unit )</ID>
-    <ID>LongMethod:UploadScreen.kt$@Composable internal fun UploadScreen( identityViewModel: IdentityViewModel, title: String, context: String, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, onContinueClicked: () -> Unit )</ID>
+    <ID>LongMethod:UploadScreen.kt$@Composable internal fun UploadScreen( identityViewModel: IdentityViewModel, title: String, context: String, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, onComposeFinish: () -> Unit, onContinueClicked: () -> Unit )</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$100</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$5</ID>
     <ID>MagicNumber:FaceDetectorAnalyzer.kt$FaceDetectorAnalyzer$3</ID>
