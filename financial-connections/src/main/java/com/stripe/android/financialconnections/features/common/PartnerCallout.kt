@@ -55,7 +55,7 @@ internal fun PartnerCallout(
                     color = FinancialConnectionsTheme.colors.textSecondary
                 ),
                 annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption
+                    StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
                         .toSpanStyle()
                         .copy(color = FinancialConnectionsTheme.colors.textBrand),
                     StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized

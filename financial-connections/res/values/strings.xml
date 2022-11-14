@@ -5,7 +5,7 @@
     <string name="consent_pane_manual_entry_microdeposits"><annotation clickable="manual_entry">Enter account details manually instead</annotation> (takes 1–2 business days)</string>
     <string name="stripe_ok">OK</string>
     <string name="stripe_prepane_title">Link with %1$s</string>
-    <string name="stripe_prepane_desc">A new window will open for you to log in and select the %1$s account(s) you want to link.\n\nThis page will update once you’re done.</string>
+    <string name="stripe_prepane_desc">A new window will open for you to log in and select the %1$s account(s) you want to link.</string>
     <string name="stripe_prepane_continue">Continue</string>
     <string name="stripe_institutionpicker_pane_select_bank">Select your bank</string>
     <string name="stripe_institutionpicker_footer_title">CAN\'T FIND YOUR BANK?</string>

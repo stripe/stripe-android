@@ -145,7 +145,7 @@ private fun SuccessContent(
                         color = FinancialConnectionsTheme.colors.textSecondary
                     ),
                     annotationStyles = mapOf(
-                        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption
+                        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
                             .toSpanStyle()
                             .copy(color = FinancialConnectionsTheme.colors.textBrand)
                     )

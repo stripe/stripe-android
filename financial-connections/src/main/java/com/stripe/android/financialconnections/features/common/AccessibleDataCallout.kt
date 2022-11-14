@@ -165,7 +165,7 @@ private fun AccessibleDataText(
             color = colors.textSecondary
         ),
         annotationStyles = mapOf(
-            StringAnnotation.CLICKABLE to typography.caption
+            StringAnnotation.CLICKABLE to typography.captionEmphasized
                 .toSpanStyle()
                 .copy(color = colors.textBrand),
             StringAnnotation.BOLD to typography.captionEmphasized
