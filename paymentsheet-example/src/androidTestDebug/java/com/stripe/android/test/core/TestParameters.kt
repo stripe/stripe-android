@@ -62,6 +62,7 @@ enum class Billing {
  */
 enum class Shipping {
     On,
+    OnWithDefaults,
     Off
 }
 
