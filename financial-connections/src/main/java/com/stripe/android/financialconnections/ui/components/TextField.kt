@@ -41,7 +41,7 @@ internal fun FinancialConnectionsOutlinedTextField(
         isError = isError,
         value = value,
         colors = outlinedTextFieldColors(
-            focusedBorderColor = FinancialConnectionsTheme.colors.borderFocus,
+            focusedBorderColor = FinancialConnectionsTheme.colors.textBrand,
             unfocusedBorderColor = FinancialConnectionsTheme.colors.borderDefault,
             disabledBorderColor = FinancialConnectionsTheme.colors.textDisabled,
             unfocusedLabelColor = FinancialConnectionsTheme.colors.textSecondary,

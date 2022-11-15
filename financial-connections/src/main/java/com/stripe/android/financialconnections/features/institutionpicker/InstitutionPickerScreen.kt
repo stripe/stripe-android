@@ -223,8 +223,14 @@ private fun FinancialConnectionsSearchRow(
             modifier = Modifier
                 .onFocusChanged { if (it.isFocused) onSearchFocused() }
                 .weight(1f),
+            placeholder = {
+                Text(
+                    text = stringResource(id = R.string.stripe_search),
+                    style = FinancialConnectionsTheme.typography.body,
+                    color = FinancialConnectionsTheme.colors.textDisabled
+                )
+            },
             value = if (searchMode) query else "",
-            label = { Text(text = stringResource(id = R.string.stripe_search)) },
             onValueChange = {
                 onQueryChanged(it)
             }
