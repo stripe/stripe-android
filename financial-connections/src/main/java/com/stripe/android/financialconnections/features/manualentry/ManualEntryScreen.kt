@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
@@ -42,8 +45,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.elevation
+import com.stripe.android.financialconnections.ui.components.filtered
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.financialconnections.ui.visualtransformation.NumbersOnlyTransformation
 
 @Composable
 internal fun ManualEntryScreen() {
@@ -202,7 +205,7 @@ private fun InputWithError(
     onFocusGained: () -> Unit,
     onInputChanged: (String) -> Unit
 ) {
-    var text by remember { mutableStateOf("") }
+    var textValue by remember { mutableStateOf(TextFieldValue()) }
     Text(
         text = stringResource(id = label),
         color = FinancialConnectionsTheme.colors.textSecondary,
@@ -210,7 +213,10 @@ private fun InputWithError(
     )
     Spacer(modifier = Modifier.size(4.dp))
     FinancialConnectionsOutlinedTextField(
-        value = text,
+        value = textValue,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+        ),
         placeholder = {
             Text(
                 text = hint,
@@ -218,9 +224,11 @@ private fun InputWithError(
                 color = FinancialConnectionsTheme.colors.textDisabled
             )
         },
-        visualTransformation = NumbersOnlyTransformation(),
         isError = inputWithError.second != null,
-        onValueChange = { text = it; onInputChanged(it) },
+        onValueChange = { text ->
+            textValue = text.filtered { it.isDigit() }
+            onInputChanged(textValue.text)
+        },
         modifier = Modifier.onFocusChanged { if (it.isFocused) onFocusGained() }
     )
     if (inputWithError.second != null) {

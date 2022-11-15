@@ -6,11 +6,14 @@ package com.stripe.android.financialconnections.ui.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuDefaults.outlinedTextFieldColors
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -19,11 +22,12 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 
 @Composable
 internal fun FinancialConnectionsOutlinedTextField(
-    value: String,
+    value: TextFieldValue,
     modifier: Modifier = Modifier,
-    onValueChange: (String) -> Unit,
+    onValueChange: (TextFieldValue) -> Unit,
     readOnly: Boolean = false,
     isError: Boolean = false,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     placeholder: @Composable (() -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -37,6 +41,7 @@ internal fun FinancialConnectionsOutlinedTextField(
         trailingIcon = trailingIcon,
         placeholder = placeholder,
         visualTransformation = visualTransformation,
+        keyboardOptions = keyboardOptions,
         readOnly = readOnly,
         isError = isError,
         value = value,
@@ -59,12 +64,26 @@ internal fun FinancialConnectionsOutlinedTextField(
     )
 }
 
+internal fun TextFieldValue.filtered(predicate: (Char) -> Boolean): TextFieldValue = copy(
+    text = text.filter(predicate),
+    selection = selection.adjustForFilter(text, predicate),
+    composition = composition?.adjustForFilter(text, predicate),
+)
+
+private fun TextRange.adjustForFilter(
+    text: String,
+    predicate: (Char) -> Boolean
+): TextRange = TextRange(
+    start = text.subSequence(0, start).count(predicate),
+    end = text.subSequence(0, end).count(predicate),
+)
+
 @Composable
 @Preview(group = "Components", name = "TextField - idle")
 internal fun FinancialConnectionsOutlinedTextFieldPreview() {
     FinancialConnectionsPreview {
         Column {
-            FinancialConnectionsOutlinedTextField(value = "test", onValueChange = {})
+            FinancialConnectionsOutlinedTextField(value = TextFieldValue("test"), onValueChange = {})
         }
     }
 }

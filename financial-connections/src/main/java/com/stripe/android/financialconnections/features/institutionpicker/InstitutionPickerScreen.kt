@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -45,6 +46,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -142,8 +146,8 @@ private fun LoadedContent(
     payload: Async<Payload>,
     onManualEntryClick: () -> Unit
 ) {
-    var input by remember { mutableStateOf("") }
-    LaunchedEffect(searchMode) { if (!searchMode) input = "" }
+    var input by remember { mutableStateOf(TextFieldValue()) }
+    LaunchedEffect(searchMode) { if (!searchMode) input = TextFieldValue() }
     Column {
         if (searchMode.not()) {
             Spacer(Modifier.size(16.dp))
@@ -162,17 +166,17 @@ private fun LoadedContent(
                 searchMode = searchMode,
                 onQueryChanged = {
                     input = it
-                    onQueryChanged(input)
+                    onQueryChanged(input.text)
                 },
                 onSearchFocused = onSearchFocused,
                 onCancelSearchClick = onCancelSearchClick
             )
         }
-        if (input.isNotEmpty()) {
+        if (input.text.isNotEmpty()) {
             SearchInstitutionsList(
                 institutionsProvider = institutionsProvider,
                 onInstitutionSelected = onInstitutionSelected,
-                query = input,
+                query = input.text,
                 onManualEntryClick = onManualEntryClick,
                 manualEntryEnabled = payload()?.allowManualEntry ?: false
             )
@@ -187,8 +191,8 @@ private fun LoadedContent(
 
 @Composable
 private fun FinancialConnectionsSearchRow(
-    query: String,
-    onQueryChanged: (String) -> Unit,
+    query: TextFieldValue,
+    onQueryChanged: (TextFieldValue) -> Unit,
     onCancelSearchClick: () -> Unit,
     onSearchFocused: () -> Unit,
     searchMode: Boolean
@@ -199,6 +203,10 @@ private fun FinancialConnectionsSearchRow(
         modifier = Modifier.padding(horizontal = 24.dp)
     ) {
         FinancialConnectionsOutlinedTextField(
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Done
+            ),
             leadingIcon = if (searchMode) {
                 {
                     Icon(
@@ -230,10 +238,8 @@ private fun FinancialConnectionsSearchRow(
                     color = FinancialConnectionsTheme.colors.textDisabled
                 )
             },
-            value = if (searchMode) query else "",
-            onValueChange = {
-                onQueryChanged(it)
-            }
+            value = query,
+            onValueChange = { onQueryChanged(it) }
         )
     }
 }
