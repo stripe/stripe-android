@@ -1,12 +1,8 @@
 package com.stripe.android.identity.navigation
 
-import android.os.Bundle
-import android.util.Log
-import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.ScanType.DL_BACK
 import com.stripe.android.identity.states.IdentityScanState.ScanType.DL_FRONT
 
@@ -20,69 +16,12 @@ internal class DriverLicenseScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
-    override val frontScanType: IdentityScanState.ScanType = DL_FRONT
-
+    override val frontScanType = DL_FRONT
+    override val backScanType = DL_BACK
     override val fragmentId = R.id.driverLicenseScanFragment
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        if (shouldStartFromBack()) {
-            headerTitle.text = requireContext().getText(R.string.back_of_dl)
-            messageView.text = requireContext().getText(R.string.position_dl_back)
-        } else {
-            headerTitle.text = requireContext().getText(R.string.front_of_dl)
-            messageView.text = requireContext().getText(R.string.position_dl_front)
-        }
-
-        continueButton.setOnClickListener {
-            when (identityScanViewModel.targetScanType) {
-                DL_FRONT -> {
-                    collectFrontUploadStateAndPost(CollectedDataParam.Type.DRIVINGLICENSE) {
-                        startScanning(DL_BACK)
-                    }
-                }
-                DL_BACK -> {
-                    collectBackUploadStateAndPost(CollectedDataParam.Type.DRIVINGLICENSE)
-                }
-                else -> {
-                    Log.e(
-                        TAG,
-                        "Incorrect target scan type: ${identityScanViewModel.targetScanType}"
-                    )
-                }
-            }
-        }
-    }
-
-    override fun onCameraReady() {
-        if (shouldStartFromBack()) {
-            startScanning(DL_BACK)
-        } else {
-            startScanning(DL_FRONT)
-        }
-    }
-
-    override fun resetUI() {
-        super.resetUI()
-        when (identityScanViewModel.targetScanType) {
-            DL_FRONT -> {
-                headerTitle.text = requireContext().getText(R.string.front_of_dl)
-                messageView.text = requireContext().getText(R.string.position_dl_front)
-            }
-            DL_BACK -> {
-                headerTitle.text = requireContext().getText(R.string.back_of_dl)
-                messageView.text = requireContext().getText(R.string.position_dl_back)
-            }
-            else -> {
-                Log.e(
-                    TAG,
-                    "Incorrect target scan type: ${identityScanViewModel.targetScanType}"
-                )
-            }
-        }
-    }
-
-    private companion object {
-        val TAG: String = DriverLicenseScanFragment::class.java.simpleName
-    }
+    override val frontTitleStringRes = R.string.front_of_dl
+    override val backTitleStringRes = R.string.back_of_dl
+    override val frontMessageStringRes = R.string.position_dl_front
+    override val backMessageStringRes = R.string.position_dl_back
+    override val collectedDataParamType = CollectedDataParam.Type.DRIVINGLICENSE
 }

@@ -6,6 +6,7 @@ import android.widget.Button
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.Navigation
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
@@ -64,6 +65,9 @@ internal class SelfieFragmentTest {
     var rule: TestRule = InstantTaskExecutorRule()
 
     private val finalResultLiveData = SingleLiveEvent<IdentityAggregator.FinalResult>()
+    private val interimResultLiveData = MutableLiveData<IdentityAggregator.InterimResult>()
+    private val displayStateChangedFlow =
+        MutableStateFlow<Pair<IdentityScanState, IdentityScanState?>?>(null)
     private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
     private val mockScanFlow = mock<IdentityScanFlow>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -71,8 +75,9 @@ internal class SelfieFragmentTest {
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel> {
         on { it.identityScanFlow } doReturn mockScanFlow
         on { it.finalResult } doReturn finalResultLiveData
-        on { it.interimResults } doReturn mock()
+        on { it.interimResults } doReturn interimResultLiveData
         on { it.displayStateChanged } doReturn displayStateChanged
+        on { it.displayStateChangedFlow } doReturn displayStateChangedFlow
     }
 
     private val mockPageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
@@ -207,6 +212,12 @@ internal class SelfieFragmentTest {
                 selfieUploadState.update {
                     successUploadState
                 }
+
+                interimResultLiveData.postValue(
+                    IdentityAggregator.InterimResult(
+                        FINISHED
+                    )
+                )
                 finalResultLiveData.postValue(
                     IdentityAggregator.FinalResult(
                         mock(),
