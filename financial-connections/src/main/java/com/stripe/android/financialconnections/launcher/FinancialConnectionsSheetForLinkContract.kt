@@ -38,8 +38,13 @@ class FinancialConnectionsSheetForLinkContract :
             is FinancialConnectionsSheetActivityResult.Failed -> FinancialConnectionsSheetLinkResult.Failed(
                 error
             )
-            is FinancialConnectionsSheetActivityResult.Completed -> FinancialConnectionsSheetLinkResult.Completed(
-                linkedAccountId = requireNotNull(linkedAccountId)
-            )
+
+            is FinancialConnectionsSheetActivityResult.Completed -> when (linkedAccountId) {
+                null -> FinancialConnectionsSheetLinkResult.Failed(
+                    IllegalArgumentException("linkedAccountId not set for this session")
+                )
+
+                else -> FinancialConnectionsSheetLinkResult.Completed(linkedAccountId)
+            }
         }
 }
