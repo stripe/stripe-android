@@ -182,6 +182,7 @@ private fun LoadedContent(
             )
         } else {
             FeaturedInstitutionsGrid(
+                modifier = Modifier.weight(1f),
                 payload = payload,
                 onInstitutionSelected = onInstitutionSelected
             )
@@ -398,10 +399,12 @@ private fun InstitutionResultTile(
 
 @Composable
 private fun FeaturedInstitutionsGrid(
+    modifier: Modifier,
     payload: Async<Payload>,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit
 ) {
     LazyVerticalGrid(
+        modifier = modifier,
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(
             top = 16.dp,
