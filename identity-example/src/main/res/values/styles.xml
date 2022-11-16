@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TextAppearance.IdentityExampleAppTheme1.Button" parent="TextAppearance.MaterialComponents.Button">
+        <item name="fontFamily">@font/aclonica_regular</item>
+    </style>
+
+    <style name="TextAppearance.IdentityExampleAppTheme1.Body1" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="fontFamily">@font/aclonica_regular</item>
+    </style>
+
+    <style name="TextAppearance.IdentityExampleAppTheme2.Button" parent="TextAppearance.MaterialComponents.Button">
+        <item name="fontFamily">"monospace"</item>
+    </style>
+</resources>
