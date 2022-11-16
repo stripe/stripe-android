@@ -100,7 +100,12 @@ private fun ManualEntryContent(
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(scrollState)
-                    .padding(24.dp)
+                    .padding(
+                        top = 16.dp,
+                        start = 24.dp,
+                        end = 24.dp,
+                        bottom = 24.dp
+                    )
             ) {
                 var currentCheck: Int? by remember { mutableStateOf(R.drawable.stripe_check_base) }
                 Text(

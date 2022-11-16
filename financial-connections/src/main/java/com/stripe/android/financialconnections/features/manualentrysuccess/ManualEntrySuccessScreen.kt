@@ -85,7 +85,7 @@ internal fun ManualEntrySuccessContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(
-                    top = 16.dp,
+                    top = 8.dp,
                     start = 24.dp,
                     end = 24.dp,
                     bottom = 24.dp
@@ -93,7 +93,7 @@ internal fun ManualEntrySuccessContent(
         ) {
             Icon(
                 modifier = Modifier.size(40.dp),
-                painter = painterResource(R.drawable.stripe_ic_check_circle_emtpy),
+                painter = painterResource(R.drawable.stripe_ic_check_circle),
                 contentDescription = null,
                 tint = FinancialConnectionsTheme.colors.textSuccess
             )
