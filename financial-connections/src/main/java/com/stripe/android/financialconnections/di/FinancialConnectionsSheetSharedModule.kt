@@ -11,13 +11,18 @@ import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.ContextUtils.packageInfo
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.DefaultFinancialConnectionsEventReporter
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTrackerImpl
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
 import dagger.Module
 import dagger.Provides
 import kotlinx.serialization.json.Json
+import java.util.Locale
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -68,6 +73,24 @@ internal object FinancialConnectionsSheetSharedModule {
     ): StripeNetworkClient = DefaultStripeNetworkClient(
         workContext = context,
         logger = logger
+    )
+
+    @Singleton
+    @Provides
+    fun providesAnalyticsTracker(
+        context: Application,
+        logger: Logger,
+        getManifest: GetManifest,
+        locale: Locale?,
+        configuration: FinancialConnectionsSheet.Configuration,
+        stripeNetworkClient: StripeNetworkClient
+    ): FinancialConnectionsAnalyticsTracker = FinancialConnectionsAnalyticsTrackerImpl(
+        context = context,
+        configuration = configuration,
+        getManifest = getManifest,
+        logger = logger,
+        locale = locale ?: Locale.getDefault(),
+        stripeNetworkClient = stripeNetworkClient
     )
 
     @Provides

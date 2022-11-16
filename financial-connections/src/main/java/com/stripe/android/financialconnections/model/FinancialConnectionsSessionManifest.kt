@@ -8,7 +8,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 /**
  *
@@ -133,12 +132,8 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName(value = "connected_account_name")
     val connectedAccountName: String? = null,
 
-    // @SerialName(value = "experiment_assignments")
-    @Transient
-    // TODO@carlosmuvi revert hardcoded assignments.
-    val experimentAssignments: Map<String, String>? = mapOf(
-        "native" to "true"
-    ),
+    @SerialName(value = "experiment_assignments")
+    val experimentAssignments: Map<String, String>? = null,
 
     @SerialName(value = "features")
     val features: Map<String, Boolean>? = null,
@@ -362,7 +357,3 @@ internal data class FinancialConnectionsSessionManifest(
             )
     }
 }
-
-// TODO@carlosmuvi use real assignments for native.
-internal val FinancialConnectionsSessionManifest.nativeAuthFlowEnabled: Boolean
-    get() = this.experimentAssignments?.any { it.key == "native" && it.value == "true" } ?: false
