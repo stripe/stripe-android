@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
 import com.stripe.android.financialconnections.ui.theme.Brand400
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
@@ -41,7 +42,7 @@ import com.stripe.android.financialconnections.ui.theme.Neutral50
 internal fun FinancialConnectionsButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    type: FinancialConnectionsButton.Type = FinancialConnectionsButton.Type.Primary,
+    type: Type = Type.Primary,
     size: FinancialConnectionsButton.Size = FinancialConnectionsButton.Size.Regular,
     enabled: Boolean = true,
     loading: Boolean = false,
@@ -83,9 +84,13 @@ internal fun FinancialConnectionsButton(
     }
 }
 
-private fun FinancialConnectionsButton.Type.rippleTheme() = object : RippleTheme {
+private fun Type.rippleTheme() = object : RippleTheme {
     @Composable
-    override fun defaultColor() = Color.White
+    override fun defaultColor() = when (this@rippleTheme) {
+        Type.Primary -> Color.White
+        Type.Secondary -> colors.textSecondary
+        Type.Critical -> Color.White
+    }
 
     @Composable
     override fun rippleAlpha(): RippleAlpha = RippleTheme.defaultRippleAlpha(
@@ -211,7 +216,7 @@ internal fun FinancialConnectionsButtonPreview() {
             }
             FinancialConnectionsButton(
                 modifier = Modifier.fillMaxWidth(),
-                type = FinancialConnectionsButton.Type.Secondary,
+                type = Type.Secondary,
                 loading = false,
                 onClick = { }
             ) {
@@ -219,7 +224,7 @@ internal fun FinancialConnectionsButtonPreview() {
             }
             FinancialConnectionsButton(
                 modifier = Modifier.fillMaxWidth(),
-                type = FinancialConnectionsButton.Type.Secondary,
+                type = Type.Secondary,
                 loading = false,
                 enabled = false,
                 onClick = { }
