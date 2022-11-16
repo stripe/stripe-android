@@ -86,7 +86,11 @@ internal fun InstitutionPickerScreen() {
     val state by viewModel.collectAsState()
 
     // when in search mode, back closes search.
-    BackHandler(state.searchMode, viewModel::onCancelSearchClick)
+    val focusManager = LocalFocusManager.current
+    BackHandler(state.searchMode) {
+        focusManager.clearFocus()
+        viewModel.onCancelSearchClick()
+    }
 
     InstitutionPickerContent(
         payload = state.payload,
