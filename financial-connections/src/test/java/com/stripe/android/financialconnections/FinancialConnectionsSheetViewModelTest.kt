@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections
 import android.content.Intent
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.airbnb.mvrx.test.MvRxTestRule
+import com.airbnb.mvrx.test.MavericksTestRule
 import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -41,7 +41,7 @@ import org.mockito.kotlin.whenever
 class FinancialConnectionsSheetViewModelTest {
 
     @get:Rule
-    val mvrxRule = MvRxTestRule(testDispatcher = UnconfinedTestDispatcher())
+    val mvrxRule = MavericksTestRule(testDispatcher = UnconfinedTestDispatcher())
 
     private val eventReporter = mock<FinancialConnectionsEventReporter>()
     private val configuration = FinancialConnectionsSheet.Configuration(
@@ -371,6 +371,7 @@ class FinancialConnectionsSheetViewModelTest {
             fetchFinancialConnectionsSession = fetchFinancialConnectionsSession,
             fetchFinancialConnectionsSessionForToken = fetchFinancialConnectionsSessionForToken,
             eventReporter = eventReporter,
+            nativeRouter = mock(),
             logger = Logger.noop()
         )
     }

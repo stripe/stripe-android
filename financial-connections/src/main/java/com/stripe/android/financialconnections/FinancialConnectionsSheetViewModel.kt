@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
+import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
@@ -27,7 +28,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
-import com.stripe.android.financialconnections.model.nativeAuthFlowEnabled
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
 import kotlinx.coroutines.launch
@@ -43,6 +43,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
     private val eventReporter: FinancialConnectionsEventReporter,
+    private val nativeRouter: NativeAuthFlowRouter,
     initialState: FinancialConnectionsSheetState
 ) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
 
@@ -89,11 +90,15 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun openAuthFlow(synchronizeSessionResponse: SynchronizeSessionResponse) {
         // stores manifest in state for future references.
         val manifest = synchronizeSessionResponse.manifest
+        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(synchronizeSessionResponse)
+        viewModelScope.launch {
+            nativeRouter.logExposure(synchronizeSessionResponse)
+        }
         setState {
             copy(
                 manifest = manifest,
-                webAuthFlowActive = manifest.nativeAuthFlowEnabled.not(),
-                viewEffect = if (manifest.nativeAuthFlowEnabled) {
+                webAuthFlowActive = nativeAuthFlowEnabled.not(),
+                viewEffect = if (nativeAuthFlowEnabled) {
                     OpenNativeAuthFlow(initialArgs.configuration, synchronizeSessionResponse)
                 } else {
                     OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
