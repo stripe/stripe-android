@@ -15,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -57,21 +58,16 @@ internal fun AnnotatedText(
     val pressIndicator = Modifier.pointerInput(onClickableTextClick) {
         detectTapGestures(
             onPress = { offset ->
-                layoutResult?.getOffsetForPosition(offset)?.let {
-                    resource.getStringAnnotations(
-                        tag = StringAnnotation.CLICKABLE.value,
-                        start = it,
-                        end = it
-                    )
-                        .firstOrNull()
-                        ?.let { annotatedString ->
-                            // mark the current clickable text portion as pressed
-                            pressedAnnotation = annotatedString.item
-                            onClickableTextClick(annotatedString.item)
-                        }
-                    tryAwaitRelease()
-                    // release the current pressed text portion.
-                    pressedAnnotation = null
+                val clickedAnnotation = layoutResult?.clickedAnnotation(offset, resource)
+                // mark the current clickable text portion as pressed
+                pressedAnnotation = clickedAnnotation?.item
+                // release the current pressed text portion.
+                tryAwaitRelease()
+                pressedAnnotation = null
+            },
+            onTap = { offset ->
+                layoutResult?.clickedAnnotation(offset, resource)?.let {
+                    onClickableTextClick(it.item)
                 }
             }
         )
@@ -87,6 +83,17 @@ internal fun AnnotatedText(
             layoutResult = it
         }
     )
+}
+
+private fun TextLayoutResult.clickedAnnotation(
+    offset: Offset,
+    resource: AnnotatedString,
+): AnnotatedString.Range<String>? = getOffsetForPosition(offset).let {
+    resource.getStringAnnotations(
+        tag = StringAnnotation.CLICKABLE.value,
+        start = it,
+        end = it
+    ).firstOrNull()
 }
 
 private fun Any.toAnnotation(): Annotation? = when (this) {
