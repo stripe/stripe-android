@@ -208,6 +208,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             navigationManager.commands.collect { command ->
                 if (command.destination.isNotEmpty()) {
                     navController.navigate(command.destination) {
+                        launchSingleTop = true
                         popUpIfNotBackwardsNavigable(navController)
                     }
                 }
