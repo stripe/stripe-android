@@ -285,9 +285,9 @@ private fun SearchInstitutionsList(
                                     R.string.stripe_picker_search_no_results,
                                     query
                                 ),
-                                style = FinancialConnectionsTheme.typography.caption,
+                                style = FinancialConnectionsTheme.typography.detailEmphasized,
                                 color = FinancialConnectionsTheme.colors.textSecondary,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Start
                             )
                         }
                     } else {

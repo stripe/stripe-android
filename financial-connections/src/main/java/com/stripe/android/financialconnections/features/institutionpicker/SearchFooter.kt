@@ -43,7 +43,7 @@ internal fun SearchFooter(
             val uriHandler = LocalUriHandler.current
             Text(
                 text = stringResource(id = R.string.stripe_institutionpicker_footer_title),
-                style = FinancialConnectionsTheme.typography.subheading.copy(
+                style = FinancialConnectionsTheme.typography.kicker.copy(
                     color = FinancialConnectionsTheme.colors.textSecondary
                 )
             )
@@ -109,7 +109,7 @@ private fun SearchFooterRow(
             Text(
                 text = title,
                 color = titleColor,
-                style = FinancialConnectionsTheme.typography.caption
+                style = FinancialConnectionsTheme.typography.captionTightEmphasized
             )
         }
     }
