@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
 import com.stripe.android.financialconnections.ui.theme.Brand400
@@ -65,7 +66,10 @@ internal fun FinancialConnectionsButton(
             colors = type.buttonColors(),
             content = {
                 ProvideTextStyle(
-                    value = FinancialConnectionsTheme.typography.bodyEmphasized
+                    value = FinancialConnectionsTheme.typography.bodyEmphasized.copy(
+                        // material button adds letter spacing internally, this removes it.
+                        letterSpacing = 0.sp
+                    )
                 ) {
                     Row {
                         if (loading) {
