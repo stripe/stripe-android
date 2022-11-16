@@ -11,9 +11,15 @@ internal data class ConsentState(
     val viewEffect: ViewEffect? = null
 ) : MavericksState {
 
-    sealed interface ViewEffect {
-        data class OpenUrl(val url: String) : ViewEffect
-        object OpenBottomSheet : ViewEffect
+    sealed class ViewEffect {
+        data class OpenUrl(
+            val url: String,
+            val id: Long
+        ) : ViewEffect()
+
+        data class OpenBottomSheet(
+            val id: Long
+        ) : ViewEffect()
     }
 }
 

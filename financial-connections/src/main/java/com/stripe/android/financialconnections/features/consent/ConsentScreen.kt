@@ -76,6 +76,7 @@ internal fun ConsentScreen() {
     val state = viewModel.collectAsState()
 
     // create bottom sheet state.
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(
         ModalBottomSheetValue.Hidden,
@@ -86,11 +87,20 @@ internal fun ConsentScreen() {
         scope.launch { bottomSheetState.hide() }
     }
 
-    ViewEffect(
-        viewModel = viewModel,
-        bottomSheetState = bottomSheetState,
-        viewEffect = state.value.viewEffect
-    )
+    state.value.viewEffect?.let { viewEffect ->
+        LaunchedEffect(viewEffect) {
+            when (viewEffect) {
+                is ViewEffect.OpenBottomSheet -> bottomSheetState.show()
+                is ViewEffect.OpenUrl -> context.startActivity(
+                    CreateBrowserIntentForUrl(
+                        context = context,
+                        uri = Uri.parse(viewEffect.url)
+                    )
+                )
+            }
+            viewModel.onViewEffectLaunched()
+        }
+    }
 
     ConsentContent(
         state = state.value,
@@ -99,30 +109,6 @@ internal fun ConsentScreen() {
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
     ) { parentViewModel.onCloseNoConfirmationClick(NextPane.CONSENT) }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun ViewEffect(
-    viewModel: ConsentViewModel,
-    viewEffect: ViewEffect?,
-    bottomSheetState: ModalBottomSheetState
-) {
-    val context = LocalContext.current
-    LaunchedEffect(viewEffect) {
-        when (viewEffect) {
-            is ViewEffect.OpenUrl -> context.startActivity(
-                CreateBrowserIntentForUrl(
-                    context = context,
-                    uri = Uri.parse(viewEffect.url)
-                )
-            )
-
-            is ViewEffect.OpenBottomSheet -> bottomSheetState.show()
-            null -> Unit
-        }
-        viewModel.onViewEffectLaunched()
-    }
 }
 
 @Composable
