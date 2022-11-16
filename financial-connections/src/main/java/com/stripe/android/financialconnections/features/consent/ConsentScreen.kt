@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
@@ -345,7 +346,7 @@ private fun ConsentPermissionsBottomSheetContent(
                 onClickableTextClick = onClickableTextClick
             )
             bullets.forEach { (iconUrl, title, description) ->
-                Spacer(modifier = Modifier.size(24.dp))
+                Spacer(modifier = Modifier.size(16.dp))
                 ConsentBottomSheetBullet(
                     iconUrl = iconUrl.default,
                     title = title,
@@ -410,20 +411,18 @@ private fun ConsentBottomSheetBullet(
     description: TextResource?,
     iconUrl: String
 ) {
-    Row {
-        val modifier = Modifier
-            .size(16.dp)
-            .offset(y = 2.dp)
-        StripeImage(
-            url = iconUrl,
-            colorFilter = ColorFilter.tint(colors.textSuccess),
-            errorContent = { InstitutionPlaceholder(modifier) },
-            imageLoader = LocalImageLoader.current,
-            contentDescription = null,
-            modifier = modifier
-        )
-        Spacer(modifier = Modifier.size(8.dp))
-        Column {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val modifier = Modifier.size(16.dp)
+            StripeImage(
+                url = iconUrl,
+                colorFilter = ColorFilter.tint(colors.textSuccess),
+                errorContent = { InstitutionPlaceholder(modifier) },
+                imageLoader = LocalImageLoader.current,
+                contentDescription = null,
+                modifier = modifier
+            )
+            Spacer(modifier = Modifier.size(8.dp))
             title?.let {
                 Text(
                     text = it.toText().toString(),
@@ -432,6 +431,10 @@ private fun ConsentBottomSheetBullet(
                     )
                 )
             }
+        }
+        Spacer(modifier = Modifier.size(2.dp))
+        Row {
+            Spacer(modifier = Modifier.size(24.dp))
             description?.let {
                 Text(
                     text = description.toText().toString(),
