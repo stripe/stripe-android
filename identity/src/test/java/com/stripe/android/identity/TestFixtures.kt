@@ -47,7 +47,8 @@ internal val VERIFICATION_PAGE_DATA_NOT_MISSING_BACK = VerificationPageData(
     id = "id",
     objectType = "type",
     requirements = VerificationPageDataRequirements(
-        errors = emptyList()
+        errors = emptyList(),
+        missings = emptyList()
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
     submitted = false
