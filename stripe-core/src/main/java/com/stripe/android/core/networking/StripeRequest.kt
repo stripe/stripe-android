@@ -41,7 +41,7 @@ abstract class StripeRequest {
     /**
      * Whether the response should be cached or not
      */
-    open var shouldCache = false
+    open val shouldCache = false
 
     /**
      * Writes the body of a POST request with [OutputStream], left empty for non-POST requests

@@ -89,6 +89,7 @@ ext {
     placesVersion = '2.6.0'
     playServicesVersion = '1.6.4'
     leakCanaryVersion = '2.9.1'
+    okhttpVersion = '4.10.0'
 
     androidTestVersion = '1.4.0'
     androidTestJunitVersion = '1.1.3'

@@ -28,7 +28,7 @@ data class ApiRequest internal constructor(
     private val appInfo: AppInfo? = null,
     private val apiVersion: String = ApiVersion.get().code,
     private val sdkVersion: String = StripeSdkVersion.VERSION,
-    override var shouldCache: Boolean = false
+    override val shouldCache: Boolean = false
 ) : StripeRequest() {
     private val query: String = QueryStringFactory.createFromParamsWithEmptyValues(params)
 
