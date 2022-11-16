@@ -49,43 +49,36 @@ private val Typography = FinancialConnectionsTypography(
     ),
     heading = TextStyle(
         fontSize = 18.sp,
-        letterSpacing = (-0.4).sp,
         lineHeight = 24.sp,
         fontWeight = FontWeight.W700
     ),
     subheading = TextStyle(
         fontSize = 18.sp,
-        letterSpacing = (-0.4).sp,
         lineHeight = 24.sp,
         fontWeight = FontWeight.W600
     ),
     kicker = TextStyle(
         fontSize = 12.sp,
-        letterSpacing = (-1.5).sp,
         lineHeight = 20.sp,
         fontWeight = FontWeight.W600
     ),
     body = TextStyle(
         fontSize = 16.sp,
-        letterSpacing = (-0.25).sp,
         lineHeight = 24.sp,
         fontWeight = FontWeight.W400
     ),
     bodyEmphasized = TextStyle(
         fontSize = 16.sp,
-        letterSpacing = (-0.25).sp,
         lineHeight = 24.sp,
         fontWeight = FontWeight.W600
     ),
     detail = TextStyle(
         fontSize = 14.sp,
-        letterSpacing = (-0.25).sp,
         lineHeight = 20.sp,
         fontWeight = FontWeight.W400
     ),
     detailEmphasized = TextStyle(
         fontSize = 14.sp,
-        letterSpacing = (-0.25).sp,
         lineHeight = 20.sp,
         fontWeight = FontWeight.W600
     ),
