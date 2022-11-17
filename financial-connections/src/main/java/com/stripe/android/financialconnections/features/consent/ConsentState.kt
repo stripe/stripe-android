@@ -7,7 +7,7 @@ import com.stripe.android.financialconnections.model.ConsentPane
 
 internal data class ConsentState(
     val consent: Async<ConsentPane> = Uninitialized,
-    val currentBottomSheet: BottomSheetContent? = null,
+    val currentBottomSheet: BottomSheetContent = BottomSheetContent.DATA,
     val acceptConsent: Async<Unit> = Uninitialized,
     val viewEffect: ViewEffect? = null
 ) : MavericksState {

@@ -62,7 +62,7 @@ internal data class Bullet(
     @SerialName("content")
     val content: String,
     @SerialName("icon")
-    val icon: Image,
+    val icon: Image? = null,
     @SerialName("title")
     val title: String? = null
 ) : Parcelable

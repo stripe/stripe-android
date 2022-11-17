@@ -98,6 +98,7 @@ internal fun ConsentScreen() {
                     uri = Uri.parse(viewEffect.url)
                 )
             )
+
             is ViewEffect.OpenBottomSheet -> bottomSheetState.show()
             null -> Unit
         }
@@ -188,7 +189,7 @@ private fun ConsentMainContent(
                 )
                 Spacer(modifier = Modifier.size(24.dp))
                 bullets.forEach { (iconUrl, text) ->
-                    ConsentBullet(iconUrl.default, text) { onClickableTextClick(it) }
+                    ConsentBullet(iconUrl?.default, text) { onClickableTextClick(it) }
                     Spacer(modifier = Modifier.size(16.dp))
                 }
 
@@ -227,11 +228,13 @@ private fun LoadedContent(
                     onConfirmModalClick = onConfirmModalClick,
                     onClickableTextClick = onClickableTextClick
                 )
+
                 ConsentState.BottomSheetContent.DATA -> DataAccessBottomSheetContent(
                     dataDialog = consent.dataAccessNotice,
                     onConfirmModalClick = onConfirmModalClick,
                     onClickableTextClick = onClickableTextClick
                 )
+
                 null -> {}
             }
         },
@@ -388,7 +391,7 @@ private fun DataAccessBottomSheetContent(
 private fun ConsentBottomSheetContent(
     title: TextResource.Text,
     onClickableTextClick: (String) -> Unit,
-    bullets: List<Triple<Image, TextResource?, TextResource>>,
+    bullets: List<Triple<Image?, TextResource?, TextResource>>,
     connectedAccountNotice: TextResource?,
     cta: String,
     learnMore: TextResource,
@@ -412,7 +415,7 @@ private fun ConsentBottomSheetContent(
             bullets.forEach { (iconUrl, title, description) ->
                 Spacer(modifier = Modifier.size(16.dp))
                 ConsentBottomSheetBullet(
-                    iconUrl = iconUrl.default,
+                    iconUrl = iconUrl?.default,
                     title = title,
                     description = description
                 )
@@ -473,13 +476,13 @@ private fun ConsentBottomSheetContent(
 private fun ConsentBottomSheetBullet(
     title: TextResource?,
     description: TextResource?,
-    iconUrl: String
+    iconUrl: String?
 ) {
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            val modifier = Modifier.size(16.dp)
+    val icon: @Composable () -> Unit = {
+        val modifier = Modifier.size(16.dp)
+        iconUrl?.let {
             StripeImage(
-                url = iconUrl,
+                url = it,
                 colorFilter = ColorFilter.tint(colors.textSuccess),
                 errorContent = { InstitutionPlaceholder(modifier) },
                 imageLoader = LocalImageLoader.current,
@@ -487,19 +490,32 @@ private fun ConsentBottomSheetBullet(
                 modifier = modifier
             )
             Spacer(modifier = Modifier.size(8.dp))
-            title?.let {
+        }
+    }
+    Column {
+        if (title != null) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                icon()
                 Text(
-                    text = it.toText().toString(),
+                    text = title.toText().toString(),
                     style = typography.bodyEmphasized.copy(
                         color = colors.textPrimary
                     )
                 )
             }
+            Spacer(modifier = Modifier.size(2.dp))
         }
-        Spacer(modifier = Modifier.size(2.dp))
-        Row {
-            Spacer(modifier = Modifier.size(24.dp))
-            description?.let {
+        if (description != null) {
+            Row {
+                if (iconUrl != null) {
+                    if (title == null) {
+                        // draw icon on the description row instead of the title row.
+                        icon()
+                    } else {
+                        // draw a space to match the space taken by the icon in the title row.
+                        Spacer(modifier = Modifier.size(24.dp))
+                    }
+                }
                 Text(
                     text = description.toText().toString(),
                     style = typography.caption.copy(
@@ -513,7 +529,7 @@ private fun ConsentBottomSheetBullet(
 
 @Composable
 private fun ConsentBullet(
-    iconUrl: String,
+    iconUrl: String?,
     text: TextResource,
     onClickableTextClick: ((String) -> Unit)? = null
 ) {
@@ -521,14 +537,16 @@ private fun ConsentBullet(
         val modifier = Modifier
             .size(16.dp)
             .offset(y = 2.dp)
-        StripeImage(
-            url = iconUrl,
-            colorFilter = ColorFilter.tint(colors.textSecondary),
-            imageLoader = LocalImageLoader.current,
-            contentDescription = null,
-            errorContent = { InstitutionPlaceholder(modifier) },
-            modifier = modifier
-        )
+        iconUrl?.let {
+            StripeImage(
+                url = iconUrl,
+                colorFilter = ColorFilter.tint(colors.textSecondary),
+                imageLoader = LocalImageLoader.current,
+                contentDescription = null,
+                errorContent = { InstitutionPlaceholder(modifier) },
+                modifier = modifier
+            )
+        }
         Spacer(modifier = Modifier.size(8.dp))
         AnnotatedText(
             text,
