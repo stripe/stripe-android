@@ -7,9 +7,15 @@ import com.stripe.android.financialconnections.model.ConsentPane
 
 internal data class ConsentState(
     val consent: Async<ConsentPane> = Uninitialized,
+    val currentBottomSheet: BottomSheetContent? = null,
     val acceptConsent: Async<Unit> = Uninitialized,
     val viewEffect: ViewEffect? = null
 ) : MavericksState {
+
+    enum class BottomSheetContent {
+        LEGAL,
+        DATA
+    }
 
     sealed class ViewEffect {
         data class OpenUrl(
@@ -25,5 +31,6 @@ internal data class ConsentState(
 
 internal enum class ConsentClickableText(val value: String) {
     DATA("stripe://data-access-notice"),
+    LEGAL_DETAILS("stripe://legal-details-notice"),
     MANUAL_ENTRY("stripe://manual-entry"),
 }

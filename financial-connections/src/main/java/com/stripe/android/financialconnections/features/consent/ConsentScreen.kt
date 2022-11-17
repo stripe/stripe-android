@@ -52,6 +52,8 @@ import com.stripe.android.financialconnections.features.consent.ConsentState.Vie
 import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.Image
+import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -77,7 +79,6 @@ internal fun ConsentScreen() {
     val state = viewModel.collectAsState()
 
     // create bottom sheet state.
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(
         ModalBottomSheetValue.Hidden,
@@ -88,19 +89,19 @@ internal fun ConsentScreen() {
         scope.launch { bottomSheetState.hide() }
     }
 
-    state.value.viewEffect?.let { viewEffect ->
-        LaunchedEffect(viewEffect) {
-            when (viewEffect) {
-                is ViewEffect.OpenBottomSheet -> bottomSheetState.show()
-                is ViewEffect.OpenUrl -> context.startActivity(
-                    CreateBrowserIntentForUrl(
-                        context = context,
-                        uri = Uri.parse(viewEffect.url)
-                    )
+    val context = LocalContext.current
+    LaunchedEffect(state.value.viewEffect) {
+        when (val viewEffect = state.value.viewEffect) {
+            is ViewEffect.OpenUrl -> context.startActivity(
+                CreateBrowserIntentForUrl(
+                    context = context,
+                    uri = Uri.parse(viewEffect.url)
                 )
-            }
-            viewModel.onViewEffectLaunched()
+            )
+            is ViewEffect.OpenBottomSheet -> bottomSheetState.show()
+            null -> Unit
         }
+        viewModel.onViewEffectLaunched()
     }
 
     ConsentContent(
@@ -125,6 +126,7 @@ private fun ConsentContent(
         Uninitialized, is Loading -> LoadingContent()
         is Success -> LoadedContent(
             consent = consent(),
+            bottomSheetMode = state.currentBottomSheet,
             acceptConsent = state.acceptConsent,
             bottomSheetState = bottomSheetState,
             onClickableTextClick = onClickableTextClick,
@@ -211,6 +213,7 @@ private fun LoadedContent(
     onCloseClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit,
+    bottomSheetMode: ConsentState.BottomSheetContent?,
 ) {
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
@@ -218,11 +221,19 @@ private fun LoadedContent(
         sheetShape = RoundedCornerShape(8.dp),
         scrimColor = colors.textSecondary.copy(alpha = 0.5f),
         sheetContent = {
-            ConsentPermissionsBottomSheetContent(
-                dataDialog = consent.dataAccessNotice,
-                onConfirmModalClick = onConfirmModalClick,
-                onClickableTextClick = onClickableTextClick
-            )
+            when (bottomSheetMode) {
+                ConsentState.BottomSheetContent.LEGAL -> LegalDetailsBottomSheetContent(
+                    legalDetails = consent.legalDetailsNotice,
+                    onConfirmModalClick = onConfirmModalClick,
+                    onClickableTextClick = onClickableTextClick
+                )
+                ConsentState.BottomSheetContent.DATA -> DataAccessBottomSheetContent(
+                    dataDialog = consent.dataAccessNotice,
+                    onConfirmModalClick = onConfirmModalClick,
+                    onClickableTextClick = onClickableTextClick
+                )
+                null -> {}
+            }
         },
         content = {
             ConsentMainContent(
@@ -307,7 +318,39 @@ private fun ConsentFooter(
 }
 
 @Composable
-private fun ConsentPermissionsBottomSheetContent(
+private fun LegalDetailsBottomSheetContent(
+    legalDetails: LegalDetailsNotice,
+    onClickableTextClick: (String) -> Unit,
+    onConfirmModalClick: () -> Unit
+) {
+    val title = remember(legalDetails.title) {
+        TextResource.Text(fromHtml(legalDetails.title))
+    }
+    val learnMore = remember(legalDetails.learnMore) {
+        TextResource.Text(fromHtml(legalDetails.learnMore))
+    }
+    val bullets = remember(legalDetails.body.bullets) {
+        legalDetails.body.bullets.map { body ->
+            Triple(
+                first = body.icon,
+                second = body.title?.let { TextResource.Text(fromHtml(body.title)) },
+                third = TextResource.Text(fromHtml(body.content))
+            )
+        }
+    }
+    ConsentBottomSheetContent(
+        title = title,
+        onClickableTextClick = onClickableTextClick,
+        bullets = bullets,
+        connectedAccountNotice = null,
+        cta = legalDetails.cta,
+        learnMore = learnMore,
+        onConfirmModalClick = onConfirmModalClick,
+    )
+}
+
+@Composable
+private fun DataAccessBottomSheetContent(
     dataDialog: DataAccessNotice,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit
@@ -330,6 +373,27 @@ private fun ConsentPermissionsBottomSheetContent(
             )
         }
     }
+    ConsentBottomSheetContent(
+        title = title,
+        onClickableTextClick = onClickableTextClick,
+        bullets = bullets,
+        connectedAccountNotice = connectedAccountNotice,
+        cta = dataDialog.cta,
+        learnMore = learnMore,
+        onConfirmModalClick = onConfirmModalClick,
+    )
+}
+
+@Composable
+private fun ConsentBottomSheetContent(
+    title: TextResource.Text,
+    onClickableTextClick: (String) -> Unit,
+    bullets: List<Triple<Image, TextResource?, TextResource>>,
+    connectedAccountNotice: TextResource?,
+    cta: String,
+    learnMore: TextResource,
+    onConfirmModalClick: () -> Unit,
+) {
     val scrollState = rememberScrollState()
     Column {
         Column(
@@ -399,7 +463,7 @@ private fun ConsentPermissionsBottomSheetContent(
                 onClick = { onConfirmModalClick() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = dataDialog.cta)
+                Text(text = cta)
             }
         }
     }
@@ -521,7 +585,7 @@ internal fun ContentRequestedDataPreview() {
         Box(
             Modifier.background(colors.backgroundSurface)
         ) {
-            ConsentPermissionsBottomSheetContent(
+            DataAccessBottomSheetContent(
                 dataDialog = ConsentStates.sampleConsent().dataAccessNotice,
                 onClickableTextClick = {},
                 onConfirmModalClick = {},

@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.features.MarkdownParser
+import com.stripe.android.financialconnections.features.consent.ConsentState.BottomSheetContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -73,23 +74,34 @@ internal class ConsentViewModel @Inject constructor(
                 eventTracker.track(Click(eventName, pane = NextPane.CONSENT))
             }
         }
-
+        val date = Date()
         if (URLUtil.isNetworkUrl(uri)) {
-            val date = Date()
             setState { copy(viewEffect = OpenUrl(uri, date.time)) }
         } else {
             val managedUri = ConsentClickableText.values()
                 .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
             when (managedUri) {
                 ConsentClickableText.DATA -> {
-                    val date = Date()
-                    setState { copy(viewEffect = ViewEffect.OpenBottomSheet(date.time)) }
+                    setState {
+                        copy(
+                            currentBottomSheet = BottomSheetContent.DATA,
+                            viewEffect = ViewEffect.OpenBottomSheet(date.time)
+                        )
+                    }
                 }
 
                 ConsentClickableText.MANUAL_ENTRY -> {
                     navigationManager.navigate(NavigationDirections.manualEntry)
                 }
 
+                ConsentClickableText.LEGAL_DETAILS -> {
+                    setState {
+                        copy(
+                            currentBottomSheet = BottomSheetContent.LEGAL,
+                            viewEffect = ViewEffect.OpenBottomSheet(date.time)
+                        )
+                    }
+                }
                 null -> logger.error("Unrecognized clickable text: $uri")
             }
         }

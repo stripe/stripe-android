@@ -8,6 +8,8 @@ import com.stripe.android.financialconnections.model.ConsentPaneBody
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.Image
+import com.stripe.android.financialconnections.model.LegalDetailsBody
+import com.stripe.android.financialconnections.model.LegalDetailsNotice
 
 internal class ConsentStates : PreviewParameterProvider<ConsentState> {
     override val values = sequenceOf(
@@ -66,7 +68,26 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
                 learnMore = "Learn more about data access",
                 connectedAccountNotice = "Connected account placeholder",
                 cta = "OK"
-            )
+            ),
+            legalDetailsNotice = LegalDetailsNotice(
+                title = "Goldilocks works with Stripe to link your accounts",
+                body = LegalDetailsBody(
+                    bullets = listOf(
+                        Bullet(
+                            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+                            title = "Account details",
+                            content = "Account number, routing number, account type, account nickname."
+                        ),
+                        Bullet(
+                            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+                            title = "Account details",
+                            content = "Account number, routing number, account type, account nickname."
+                        ),
+                    )
+                ),
+                learnMore = "Learn more about legal notice",
+                cta = "OK"
+            ),
         )
     }
 }
