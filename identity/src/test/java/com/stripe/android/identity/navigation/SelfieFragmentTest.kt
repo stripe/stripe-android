@@ -30,7 +30,6 @@ import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SelfieUploadState
 import com.stripe.android.identity.networking.UploadedResult
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
@@ -49,14 +48,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
-import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
@@ -113,7 +110,9 @@ internal class SelfieFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         on { fpsTracker } doReturn mockFPSTracker
         on { screenTracker } doReturn mockScreenTracker
         on { uiContext } doReturn testDispatcher
@@ -123,6 +122,23 @@ internal class SelfieFragmentTest {
     @Test
     fun `when initialized UI is reset and bound`() {
         launchSelfieFragment { binding, _, _ ->
+
+            val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
+
+            val mockSelfieCapture = mock<VerificationPageStaticContentSelfieCapturePage> {
+                on { consentText } doReturn CONSENT_TEXT
+            }
+            verify(mockIdentityViewModel).observeForVerificationPage(
+                any(),
+                successCaptor.capture(),
+                any()
+            )
+            successCaptor.lastValue(
+                mock {
+                    on { selfieCapture } doReturn mockSelfieCapture
+                }
+            )
+
             runBlocking {
                 verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME_SELFIE))
             }
@@ -130,24 +146,6 @@ internal class SelfieFragmentTest {
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
                         (params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SCREEN_NAME] == SCREEN_NAME_SELFIE
-                }
-            )
-
-            val successCaptor: KArgumentCaptor<(VerificationPage) -> Unit> = argumentCaptor()
-            verify(
-                mockIdentityViewModel,
-                times(1)
-            ).observeForVerificationPage(
-                any(),
-                successCaptor.capture(),
-                any()
-            )
-            val mockSelfieCapture = mock<VerificationPageStaticContentSelfieCapturePage> {
-                on { consentText } doReturn CONSENT_TEXT
-            }
-            successCaptor.lastValue(
-                mock {
-                    on { selfieCapture } doReturn mockSelfieCapture
                 }
             )
 
@@ -232,8 +230,7 @@ internal class SelfieFragmentTest {
                             faceScoreVariance = SCORE_VARIANCE,
                             numFrames = NUM_FRAMES
                         )
-                    ),
-                    eq(ClearDataParam.SELFIE_TO_CONFIRM)
+                    )
                 )
             }
         }

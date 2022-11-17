@@ -18,7 +18,6 @@ import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.camera.scanui.util.startAnimationIfNotRunning
 import com.stripe.android.identity.R
 import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBack
@@ -76,15 +75,19 @@ internal abstract class IdentityDocumentScanFragment(
             identityViewModel.resetDocumentUploadedState()
         }
         super.onViewCreated(view, savedInstanceState)
-
-        lifecycleScope.launch(identityViewModel.workContext) {
-            identityViewModel.screenTracker.screenTransitionFinish(fragmentId.fragmentIdToScreenName())
-        }
-        identityViewModel.sendAnalyticsRequest(
-            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                scanType = frontScanType,
-                screenName = fragmentId.fragmentIdToScreenName()
-            )
+        identityViewModel.observeForVerificationPage(
+            this,
+            onSuccess = {
+                lifecycleScope.launch(identityViewModel.workContext) {
+                    identityViewModel.screenTracker.screenTransitionFinish(fragmentId.fragmentIdToScreenName())
+                }
+                identityViewModel.sendAnalyticsRequest(
+                    identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                        scanType = frontScanType,
+                        screenName = fragmentId.fragmentIdToScreenName()
+                    )
+                )
+            }
         )
     }
 
@@ -179,7 +182,6 @@ internal abstract class IdentityDocumentScanFragment(
                                             frontHighResResult = requireNotNull(it.highResResult.data),
                                             frontLowResResult = requireNotNull(it.lowResResult.data)
                                         ),
-                                        clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_FRONT_SELFIE else ClearDataParam.UPLOAD_FRONT,
                                         fromFragment = fragmentId
                                     ) { verificationPageDataWithNoError ->
                                         if (type == CollectedDataParam.Type.PASSPORT) {
@@ -246,7 +248,6 @@ internal abstract class IdentityDocumentScanFragment(
                                             backHighResResult = requireNotNull(it.highResResult.data),
                                             backLowResResult = requireNotNull(it.lowResResult.data)
                                         ),
-                                        clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_TO_SELFIE else ClearDataParam.UPLOAD_TO_CONFIRM,
                                         fromFragment = fragmentId,
                                         notSubmitBlock =
                                         if (verificationPage.requireSelfie()) {

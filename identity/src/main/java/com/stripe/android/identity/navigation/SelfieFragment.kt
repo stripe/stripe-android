@@ -24,14 +24,12 @@ import com.stripe.android.camera.framework.image.mirrorHorizontally
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
 import com.stripe.android.identity.databinding.SelfieScanFragmentBinding
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.LoadingButton
 import com.stripe.android.identity.ui.SelfieResultAdapter
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
-import com.stripe.android.identity.utils.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.utils.setHtmlString
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -105,28 +103,22 @@ internal class SelfieFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         identityViewModel.resetSelfieUploadedState()
+
         identityViewModel.observeForVerificationPage(
             viewLifecycleOwner,
             onSuccess = {
                 binding.allowImageCollection.setHtmlString(
                     requireNotNull(it.selfieCapture) { "VerificationPage.selfieCapture is null" }.consentText
                 )
-            },
-            onFailure = {
-                Log.e(TAG, "Failed to get verificationPage: $it")
-                navigateToErrorFragmentWithFailedReason(
-                    it ?: IllegalStateException("Failed to get verificationPage")
+                lifecycleScope.launch(identityViewModel.workContext) {
+                    identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_SELFIE)
+                }
+                identityViewModel.sendAnalyticsRequest(
+                    identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                        screenName = SCREEN_NAME_SELFIE
+                    )
                 )
             }
-        )
-
-        lifecycleScope.launch(identityViewModel.workContext) {
-            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_SELFIE)
-        }
-        identityViewModel.sendAnalyticsRequest(
-            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                screenName = SCREEN_NAME_SELFIE
-            )
         )
     }
 
@@ -210,7 +202,9 @@ internal class SelfieFragment(
                             runCatching {
                                 val faceDetectorTransitioner =
                                     requireNotNull(
-                                        identityScanViewModel.finalResult.value?.identityState?.transitioner as? FaceDetectorTransitioner
+                                        identityScanViewModel.finalResult
+                                            .value?.identityState?.transitioner
+                                            as? FaceDetectorTransitioner
                                     ) {
                                         "Failed to retrieve final result for Selfie"
                                     }
@@ -228,8 +222,7 @@ internal class SelfieFragment(
                                         bestFaceScore = faceDetectorTransitioner.bestFaceScore,
                                         numFrames = faceDetectorTransitioner.numFrames
                                     ),
-                                    fromFragment = fragmentId,
-                                    clearDataParam = ClearDataParam.SELFIE_TO_CONFIRM
+                                    fromFragment = fragmentId
                                 )
                             }.onFailure { throwable ->
                                 Log.e(
@@ -240,7 +233,10 @@ internal class SelfieFragment(
                             }
                         }
                         else -> {
-                            "collectUploadedStateAndUploadForCollectedSelfies reaches unexpected upload state: $it".let { msg ->
+                            (
+                                "collectUploadedStateAndUploadForCollectedSelfies " +
+                                    "reaches unexpected upload state: $it"
+                                ).let { msg ->
                                 Log.e(TAG, msg)
                                 navigateToDefaultErrorFragment(msg)
                             }

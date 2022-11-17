@@ -29,7 +29,6 @@ import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBindi
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.UploadedResult
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -92,7 +91,9 @@ class PassportScanFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         on { fpsTracker } doReturn mock()
         on { screenTracker } doReturn mockScreenTracker
         on { uiContext } doReturn testDispatcher
@@ -127,6 +128,13 @@ class PassportScanFragmentTest {
             runBlocking {
                 mockScreenTracker.screenTransitionFinish(eq(SCREEN_NAME_LIVE_CAPTURE_PASSPORT))
             }
+            val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
+            verify(mockIdentityViewModel).observeForVerificationPage(
+                any(),
+                successCaptor.capture(),
+                any()
+            )
+            successCaptor.lastValue.invoke(verificationPageRequireSelfie)
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
@@ -160,7 +168,7 @@ class PassportScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
 
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -189,12 +197,12 @@ class PassportScanFragmentTest {
                 documentUploadState.update { frontUploadedState }
 
                 // post returns valid result
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
                 )
 
                 // observeForVerificationPage - trigger onSuccess
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -209,9 +217,6 @@ class PassportScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT
                     )
                 )
 
@@ -243,7 +248,7 @@ class PassportScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
 
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -272,12 +277,12 @@ class PassportScanFragmentTest {
                 documentUploadState.update { frontUploadedState }
 
                 // post returns valid result
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
                 )
 
                 // observeForVerificationPage - trigger onSuccess
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -292,9 +297,6 @@ class PassportScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT_SELFIE
                     )
                 )
 

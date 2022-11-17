@@ -355,6 +355,10 @@ class PlaygroundTestDriver(
 
         // Can't guarantee that google pay will be on the phone
         selectors.googlePayState.click()
+
+        testParameters.customPrimaryButtonLabel?.let { customLabel ->
+            selectors.enterCustomPrimaryButtonLabel(text = customLabel)
+        }
     }
 
     internal fun launchComplete() {

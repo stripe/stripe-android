@@ -92,7 +92,7 @@ dependencies {
 
     // compose
     // Integration with activities
-    implementation "androidx.activity:activity-compose:$androidxComposeVersion"
+    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
     // Integration with ViewModels
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$androidxLifecycleVersion"
     implementation("androidx.compose.ui:ui:$androidxComposeVersion")
@@ -103,6 +103,7 @@ dependencies {
     // MdcTheme
     implementation "com.google.android.material:compose-theme-adapter:1.1.18"
 
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
 }
 
 task ktlint(type: JavaExec, group: "verification") {
@@ -122,4 +123,3 @@ task ktlintFormat(type: JavaExec, group: "formatting") {
     classpath = configurations.ktlint
     args "-F", "src/**/*.kt"
 }
-

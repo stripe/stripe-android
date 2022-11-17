@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +57,7 @@ import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.ui.core.elements.TextFieldSection
 import com.stripe.android.ui.core.paymentsColors
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.launch
 
 /**
@@ -72,29 +72,19 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     private val paymentSheetViewModelFactory: ViewModelProvider.Factory by lazy {
-        PaymentSheetViewModel.Factory(
-            { requireActivity().application },
-            {
-                requireNotNull(
-                    requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
-                )
-            },
-            (activity as? AppCompatActivity) ?: this,
-            (activity as? AppCompatActivity)?.intent?.extras
-        )
+        PaymentSheetViewModel.Factory {
+            requireNotNull(
+                requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
+            )
+        }
     }
 
     private val paymentOptionsViewModelFactory: ViewModelProvider.Factory by lazy {
-        PaymentOptionsViewModel.Factory(
-            { requireActivity().application },
-            {
-                requireNotNull(
-                    requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
-                )
-            },
-            (activity as? AppCompatActivity) ?: this,
-            (activity as? AppCompatActivity)?.intent?.extras
-        )
+        PaymentOptionsViewModel.Factory {
+            requireNotNull(
+                requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
+            )
+        }
     }
 
     private val sheetViewModel: BaseSheetViewModel<*>? by lazy {
@@ -128,29 +118,25 @@ internal class USBankAccountFormFragment : Fragment() {
     }
 
     private val viewModel by activityViewModels<USBankAccountFormViewModel> {
-        USBankAccountFormViewModel.Factory(
-            applicationSupplier = { requireActivity().application },
-            argsSupplier = {
-                val savedPaymentMethod =
-                    sheetViewModel?.newPaymentSelection as? PaymentSelection.New.USBankAccount
+        USBankAccountFormViewModel.Factory {
+            val savedPaymentMethod =
+                sheetViewModel?.newPaymentSelection as? PaymentSelection.New.USBankAccount
 
-                USBankAccountFormViewModel.Args(
-                    formArgs = formArgs,
-                    isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
-                    clientSecret = clientSecret,
-                    savedPaymentMethod = savedPaymentMethod,
-                    shippingDetails = sheetViewModel?.config?.shippingDetails,
-                    onConfirmStripeIntent = { params ->
-                        (sheetViewModel as? PaymentSheetViewModel)?.confirmStripeIntent(params)
-                    },
-                    onUpdateSelectionAndFinish = { paymentSelection ->
-                        sheetViewModel?.updateSelection(paymentSelection)
-                        sheetViewModel?.onFinish()
-                    }
-                )
-            },
-            owner = this
-        )
+            USBankAccountFormViewModel.Args(
+                formArgs = formArgs,
+                isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
+                clientSecret = clientSecret,
+                savedPaymentMethod = savedPaymentMethod,
+                shippingDetails = sheetViewModel?.config?.shippingDetails,
+                onConfirmStripeIntent = { params ->
+                    (sheetViewModel as? PaymentSheetViewModel)?.confirmStripeIntent(params)
+                },
+                onUpdateSelectionAndFinish = { paymentSelection ->
+                    sheetViewModel?.updateSelection(paymentSelection)
+                    sheetViewModel?.onFinish()
+                }
+            )
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -191,20 +177,23 @@ internal class USBankAccountFormFragment : Fragment() {
                 }
             }
         }
+
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.saveForFutureUse.collect { saved ->
-                    updateMandateText(
-                        if (saved) {
-                            getString(
-                                R.string.stripe_paymentsheet_ach_save_mandate,
-                                viewModel.formattedMerchantName()
-                            )
-                        } else {
-                            ACHText.getContinueMandateText(requireContext())
-                        }
-                    )
-                }
+                viewModel.saveForFutureUse
+                    .filterNot { viewModel.currentScreenState.value is NameAndEmailCollection }
+                    .collect { saved ->
+                        updateMandateText(
+                            if (saved) {
+                                getString(
+                                    R.string.stripe_paymentsheet_ach_save_mandate,
+                                    viewModel.formattedMerchantName()
+                                )
+                            } else {
+                                ACHText.getContinueMandateText(requireContext())
+                            }
+                        )
+                    }
             }
         }
 
@@ -412,10 +401,11 @@ internal class USBankAccountFormFragment : Fragment() {
             }
             if (formArgs.showCheckbox) {
                 SaveForFutureUseElementUI(
-                    true,
-                    viewModel.saveForFutureUseElement.apply {
+                    enabled = true,
+                    element = viewModel.saveForFutureUseElement.apply {
                         this.controller.onValueChange(saveForFutureUsage)
-                    }
+                    },
+                    modifier = Modifier.padding(top = 8.dp)
                 )
             }
         }

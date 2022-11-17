@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'com.google.firebase.appdistribution'
+    id 'com.google.gms.google-services'
 }
 
 ext {
@@ -15,13 +17,17 @@ android {
         applicationId "com.stripe.android.financialconnections.example"
         minSdk 21
         targetSdk rootProject.ext.compileSdkVersion
-        versionCode 1
-        versionName "1.0"
+        version = rootProject.version_name
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
+        debug {
+            firebaseAppDistribution {
+                groups="financial-connections"
+            }
+        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -74,4 +80,6 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
     debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
+
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
 }

@@ -2,7 +2,6 @@ package com.stripe.android.identity.navigation
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -15,7 +14,9 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONFIRMATION
+import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.ui.ConfirmationScreen
+import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
 
@@ -38,27 +39,28 @@ internal class ConfirmationFragment(
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            val verificationPage by identityViewModel.verificationPage.observeAsState()
-            ConfirmationScreen(verificationPage) {
+            val verificationPage by identityViewModel.verificationPage.observeAsState(Resource.loading())
+            ConfirmationScreen(
+                verificationPageState = verificationPage,
+                onError = ::navigateToDefaultErrorFragment,
+                onComposeFinish = {
+                    lifecycleScope.launch(identityViewModel.workContext) {
+                        identityViewModel.screenTracker.screenTransitionFinish(
+                            SCREEN_NAME_CONFIRMATION
+                        )
+                    }
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                            screenName = SCREEN_NAME_CONFIRMATION
+                        )
+                    )
+                }
+            ) {
                 identityViewModel.sendSucceededAnalyticsRequestForNative()
                 verificationFlowFinishable.finishWithResult(
                     IdentityVerificationSheet.VerificationFlowResult.Completed
                 )
             }
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        lifecycleScope.launch(identityViewModel.workContext) {
-            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONFIRMATION)
-        }
-
-        identityViewModel.sendAnalyticsRequest(
-            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                screenName = SCREEN_NAME_CONFIRMATION
-            )
-        )
     }
 }

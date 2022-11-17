@@ -77,9 +77,6 @@ public final class com/stripe/android/ui/core/databinding/ActivityCardScanBindin
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/ui/core/databinding/ActivityCardScanBinding;
 }
 
-public final class com/stripe/android/ui/core/elements/AddressElement$Companion {
-}
-
 public final class com/stripe/android/ui/core/elements/AddressSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/AddressSpec$$serializer;
@@ -116,13 +113,15 @@ public final class com/stripe/android/ui/core/elements/AddressType$Normal : com/
 
 public final class com/stripe/android/ui/core/elements/AddressType$ShippingCondensed : com/stripe/android/ui/core/elements/AddressType {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
-	public final fun component3 ()Lkotlin/jvm/functions/Function0;
-	public final fun copy (Ljava/lang/String;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
-	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;Ljava/lang/String;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
+	public final fun component2 ()Ljava/util/Set;
+	public final fun component3 ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
+	public final fun component4 ()Lkotlin/jvm/functions/Function0;
+	public final fun copy (Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAutocompleteCountries ()Ljava/util/Set;
 	public final fun getGoogleApiKey ()Ljava/lang/String;
 	public final fun getOnNavigation ()Lkotlin/jvm/functions/Function0;
 	public fun getPhoneNumberState ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;

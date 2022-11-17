@@ -1,10 +1,13 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
+import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
+import android.view.WindowManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.annotation.VisibleForTesting
@@ -16,16 +19,21 @@ import androidx.lifecycle.lifecycleScope
 import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.idling.CountingIdlingResource
 import com.google.android.material.snackbar.Snackbar
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.databinding.ActivityPaymentSheetPlaygroundBinding
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCurrency
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.model.Shipping
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -105,8 +113,15 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val linkEnabled: Boolean
         get() = viewBinding.linkRadioGroup.checkedRadioButtonId == R.id.link_on_button
 
-    private val setShippingAddress: Boolean
-        get() = viewBinding.shippingRadioGroup.checkedRadioButtonId == R.id.shipping_on_button
+    private val shipping: Shipping
+        get() = when (viewBinding.shippingRadioGroup.checkedRadioButtonId) {
+            R.id.shipping_on_button -> Shipping.On
+            R.id.shipping_on_with_defaults_button -> Shipping.OnWithDefaults
+            else -> Shipping.Off
+        }
+
+    private val setDefaultShippingAddress: Boolean
+        get() = shipping == Shipping.OnWithDefaults
 
     private val setDefaultBillingAddress: Boolean
         get() = viewBinding.defaultBillingRadioGroup.checkedRadioButtonId == R.id.default_billing_on_button
@@ -117,8 +132,14 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private val setDelayedPaymentMethods: Boolean
         get() = viewBinding.allowsDelayedPaymentMethodsRadioGroup.checkedRadioButtonId == R.id.allowsDelayedPaymentMethods_on_button
 
+    private val settings by lazy {
+        Settings(this)
+    }
+
     private lateinit var paymentSheet: PaymentSheet
     private lateinit var flowController: PaymentSheet.FlowController
+    private lateinit var addressLauncher: AddressLauncher
+    private var shippingAddress: AddressDetails? = null
 
     private var multiStepUIReadyIdlingResource: CountingIdlingResource? = null
 
@@ -144,7 +165,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             ::onPaymentOption,
             ::onPaymentSheetResult
         )
-        val backendUrl = Settings(this).playgroundBackendUrl
+        addressLauncher = AddressLauncher(this, ::onAddressLauncherResult)
 
         viewBinding.currencySpinner.adapter =
             ArrayAdapter(
@@ -170,11 +191,13 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 currency = Toggle.Currency.default.toString(),
                 merchantCountryCode = Toggle.MerchantCountryCode.default.toString(),
                 mode = Toggle.Mode.default.toString(),
-                setShippingAddress = Toggle.SetShippingAddress.default as Boolean,
+                shippingAddress = Toggle.ShippingAddress.default.toString(),
                 setDefaultBillingAddress = Toggle.SetDefaultBillingAddress.default as Boolean,
                 setAutomaticPaymentMethods = Toggle.SetAutomaticPaymentMethods.default as Boolean,
                 setDelayedPaymentMethods = Toggle.SetDelayedPaymentMethods.default as Boolean,
             )
+
+            viewBinding.customLabelTextField.text.clear()
         }
 
         viewBinding.reloadButton.setOnClickListener {
@@ -185,7 +208,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 currency = currency.value,
                 merchantCountryCode = merchantCountryCode.value,
                 mode = mode.value,
-                setShippingAddress = setShippingAddress,
+                shipping = shipping.value,
                 setDefaultBillingAddress = setDefaultBillingAddress,
                 setAutomaticPaymentMethods = setAutomaticPaymentMethods,
                 setDelayedPaymentMethods = setDelayedPaymentMethods
@@ -198,9 +221,9 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     merchantCountryCode,
                     mode,
                     linkEnabled,
-                    setShippingAddress,
+                    setDefaultShippingAddress,
                     setAutomaticPaymentMethods,
-                    backendUrl,
+                    settings.playgroundBackendUrl,
                     intent.extras?.getStringArray(SUPPORTED_PAYMENT_METHODS_EXTRA)?.toList()
                 )
             }
@@ -211,10 +234,19 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         }
 
         viewBinding.customCheckoutButton.setOnClickListener {
+            flowController.shippingDetails = shippingAddress
             flowController.confirm()
         }
 
+        viewBinding.shippingAddressButton.setOnClickListener {
+            startShippingAddressCollection()
+        }
+
+        viewBinding.shippingAddressContainer.visibility = View.GONE
+
         viewBinding.paymentMethod.setOnClickListener {
+            viewBinding.customLabelTextField.clearFocus()
+            flowController.shippingDetails = shippingAddress
             flowController.presentPaymentOptions()
         }
 
@@ -240,6 +272,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         viewModel.readyToCheckout.observe(this) { isReady ->
             if (isReady) {
                 viewBinding.completeCheckoutButton.isEnabled = true
+                viewBinding.shippingAddressButton.isEnabled = true
                 configureCustomCheckout()
             } else {
                 disableViews()
@@ -283,7 +316,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             currency = savedToggles.currency,
             merchantCountryCode = savedToggles.merchantCountryCode,
             mode = savedToggles.mode,
-            setShippingAddress = savedToggles.setShippingAddress,
+            shippingAddress = savedToggles.shippingAddress,
             setAutomaticPaymentMethods = savedToggles.setAutomaticPaymentMethods,
             setDelayedPaymentMethods = savedToggles.setDelayedPaymentMethods,
             setDefaultBillingAddress = savedToggles.setDefaultBillingAddress
@@ -297,7 +330,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         currency: String?,
         merchantCountryCode: String,
         mode: String?,
-        setShippingAddress: Boolean,
+        shippingAddress: String,
         setDefaultBillingAddress: Boolean,
         setAutomaticPaymentMethods: Boolean,
         setDelayedPaymentMethods: Boolean
@@ -331,9 +364,10 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             else -> viewBinding.modeRadioGroup.check(R.id.mode_setup_button)
         }
 
-        when (setShippingAddress) {
-            true -> viewBinding.shippingRadioGroup.check(R.id.shipping_on_button)
-            false -> viewBinding.shippingRadioGroup.check(R.id.shipping_off_button)
+        when (shippingAddress) {
+            Shipping.On.value -> viewBinding.shippingRadioGroup.check(R.id.shipping_on_button)
+            Shipping.OnWithDefaults.value -> viewBinding.shippingRadioGroup.check(R.id.shipping_on_with_defaults_button)
+            Shipping.Off.value -> viewBinding.shippingRadioGroup.check(R.id.shipping_off_button)
         }
 
         when (setDefaultBillingAddress) {
@@ -360,6 +394,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
     private fun startCompleteCheckout() {
         val clientSecret = viewModel.clientSecret.value ?: return
+        viewBinding.customLabelTextField.clearFocus()
 
         if (viewModel.checkoutMode == CheckoutMode.Setup) {
             paymentSheet.presentWithSetupIntent(
@@ -372,6 +407,69 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 makeConfiguration()
             )
         }
+    }
+
+    private fun startShippingAddressCollection() {
+        val builder = AddressLauncher.Configuration.Builder()
+        builder.googlePlacesApiKey(settings.googlePlacesApiKey)
+        if (viewBinding.shippingAddressDefaultRadioGroup.checkedRadioButtonId ==
+            viewBinding.shippingAddressDefaultOnButton.id) {
+            builder.address(
+                AddressDetails(
+                    name = "Theo Parker",
+                    address = PaymentSheet.Address(
+                        city = "South San Francisco",
+                        country = "United States",
+                        line1 = "354 Oyster Point Blvd",
+                        state = "CA",
+                        postalCode = "94080",
+                    ),
+                    phoneNumber = "5555555555",
+                    isCheckboxSelected = true
+                )
+            )
+        }
+        if (viewBinding.shippingAddressCountriesGroup.checkedRadioButtonId ==
+            viewBinding.shippingAddressCountriesPartialButton.id) {
+            builder.allowedCountries(
+                setOf("US", "CA", "AU", "GB", "FR", "JP", "KR")
+            )
+        }
+        val phone = when (viewBinding.shippingAddressPhoneRadioGroup.checkedRadioButtonId) {
+            viewBinding.shippingAddressPhoneRequiredButton.id -> {
+                AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.REQUIRED
+            }
+            viewBinding.shippingAddressPhoneOptionalButton.id -> {
+                AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.OPTIONAL
+            }
+            viewBinding.shippingAddressPhoneHiddenButton.id -> {
+                AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN
+            }
+            else -> {
+                AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.OPTIONAL
+            }
+        }
+        val checkboxLabel = if (viewBinding.shippingAddressCheckboxLabel.text.isNotBlank()) {
+            viewBinding.shippingAddressCheckboxLabel.text.toString()
+        } else {
+            getString(R.string.stripe_paymentsheet_address_element_same_as_shipping)
+        }
+        builder.additionalFields(
+            AddressLauncher.AdditionalFieldsConfiguration(
+                phone = phone,
+                checkboxLabel = checkboxLabel
+            )
+        )
+        if (viewBinding.shippingAddressButtonTitle.text.isNotBlank()) {
+            builder.buttonTitle(viewBinding.shippingAddressButtonTitle.text.toString())
+        }
+        if (viewBinding.shippingAddressTitle.text.isNotBlank()) {
+            builder.title(viewBinding.shippingAddressTitle.text.toString())
+        }
+        addressLauncher.present(
+            publishableKey = PaymentConfiguration.getInstance(this).publishableKey,
+            configuration = builder.build()
+        )
     }
 
     private fun configureCustomCheckout() {
@@ -409,13 +507,20 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
         val appearance = intent.extras?.getParcelable(APPEARANCE_EXTRA) ?: AppearanceStore.state
 
+        val customPrimaryButtonLabel = viewBinding.customLabelTextField.text.toString().takeUnless {
+            it.isBlank()
+        }
+
         return PaymentSheet.Configuration(
             merchantDisplayName = merchantName,
             customer = viewModel.customerConfig.value,
             googlePay = googlePayConfig,
             defaultBillingDetails = defaultBilling,
+            shippingDetails = shippingAddress,
             allowsDelayedPaymentMethods = viewBinding.allowsDelayedPaymentMethodsOnButton.isChecked,
-            appearance = appearance
+            allowsPaymentMethodsRequiringShippingAddress = viewBinding.shippingOnButton.isChecked,
+            appearance = appearance,
+            primaryButtonLabel = customPrimaryButtonLabel,
         )
     }
 
@@ -458,6 +563,35 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private fun showAppearancePicker() {
         val bottomSheet = AppearanceBottomSheetDialogFragment.newInstance()
         bottomSheet.show(supportFragmentManager, bottomSheet.tag)
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun onAddressLauncherResult(addressLauncherResult: AddressLauncherResult) {
+        window.setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+        )
+        viewBinding.shippingAddressContainer.visibility = View.VISIBLE
+        when (addressLauncherResult) {
+            is AddressLauncherResult.Succeeded -> {
+                shippingAddress = addressLauncherResult.address
+                val address = addressLauncherResult.address.address
+                viewBinding.shippingAddressName.text = addressLauncherResult.address.name
+                viewBinding.shippingAddressDetails.text = address?.let {
+                    """
+                        ${address.line1}
+                        ${address.city},
+                        ${address.state}, ${address.country}, ${address.postalCode}
+                        ${shippingAddress?.phoneNumber}
+                    """.trimIndent()
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    viewBinding.playground.scrollToDescendant(viewBinding.shippingAddressDetails)
+                }
+            }
+            is AddressLauncherResult.Canceled -> {
+                viewBinding.shippingAddressContainer.visibility = View.GONE
+            }
+        }
     }
 
     /**

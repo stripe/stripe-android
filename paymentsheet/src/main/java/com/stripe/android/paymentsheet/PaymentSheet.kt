@@ -127,7 +127,6 @@ class PaymentSheet internal constructor(
         val defaultBillingDetails: BillingDetails? = null,
 
         /**
-         * 🏗 Under construction
          * The shipping information for the customer.
          * If set, PaymentSheet will pre-populate the form fields with the values provided.
          * This is used to display a "Billing address is same as shipping" checkbox if `defaultBillingDetails` is not provided.
@@ -150,9 +149,29 @@ class PaymentSheet internal constructor(
         val allowsDelayedPaymentMethods: Boolean = false,
 
         /**
+         * If `true`, allows payment methods that require a shipping address, like Afterpay and
+         * Affirm. Defaults to `false`.
+         *
+         * Set this to `true` if you collect shipping addresses via [shippingDetails] or
+         * [FlowController.shippingDetails].
+         *
+         * **Note**: PaymentSheet considers this property `true` if `shipping` details are present
+         * on the PaymentIntent when PaymentSheet loads.
+         */
+        val allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
+
+        /**
          * Describes the appearance of Payment Sheet.
          */
-        val appearance: Appearance = Appearance()
+        val appearance: Appearance = Appearance(),
+
+        /**
+         * The label to use for the primary button.
+         *
+         * If not set, Payment Sheet will display suitable default labels for payment and setup
+         * intents.
+         */
+        val primaryButtonLabel: String? = null,
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
@@ -166,6 +185,7 @@ class PaymentSheet internal constructor(
             private var defaultBillingDetails: BillingDetails? = null
             private var shippingDetails: AddressDetails? = null
             private var allowsDelayedPaymentMethods: Boolean = false
+            private var allowsPaymentMethodsRequiringShippingAddress: Boolean = false
             private var appearance: Appearance = Appearance()
 
             fun merchantDisplayName(merchantDisplayName: String) =
@@ -196,6 +216,13 @@ class PaymentSheet internal constructor(
             fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) =
                 apply { this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods }
 
+            fun allowsPaymentMethodsRequiringShippingAddress(
+                allowsPaymentMethodsRequiringShippingAddress: Boolean,
+            ) = apply {
+                this.allowsPaymentMethodsRequiringShippingAddress =
+                    allowsPaymentMethodsRequiringShippingAddress
+            }
+
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
 
@@ -207,6 +234,7 @@ class PaymentSheet internal constructor(
                 defaultBillingDetails,
                 shippingDetails,
                 allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress,
                 appearance
             )
         }
@@ -693,6 +721,8 @@ class PaymentSheet internal constructor(
      * A class that presents the individual steps of a payment sheet flow.
      */
     interface FlowController {
+
+        var shippingDetails: AddressDetails?
 
         /**
          * Configure the FlowController to process a [PaymentIntent].

@@ -34,7 +34,6 @@ import com.stripe.android.identity.navigation.IdentityDocumentScanFragment.Compa
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.UploadedResult
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -98,7 +97,9 @@ internal class IDScanFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = mock()
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         on { it.fpsTracker } doReturn mockFPSTracker
         on { it.screenTracker } doReturn mockScreenTracker
         on { uiContext } doReturn testDispatcher
@@ -140,6 +141,13 @@ internal class IDScanFragmentTest {
             runBlocking {
                 mockScreenTracker.screenTransitionFinish(eq(SCREEN_NAME_LIVE_CAPTURE_ID))
             }
+            val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
+            verify(mockIdentityViewModel).observeForVerificationPage(
+                any(),
+                successCaptor.capture(),
+                any()
+            )
+            successCaptor.lastValue.invoke(verificationPageNotRequireSelfie)
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
@@ -176,6 +184,7 @@ internal class IDScanFragmentTest {
                 whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.ID_FRONT
                 )
 
@@ -189,7 +198,7 @@ internal class IDScanFragmentTest {
 
                 documentFrontUploadState.update { frontUploadedState }
                 // post returns not missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_MISSING_BACK
                 )
 
@@ -199,7 +208,7 @@ internal class IDScanFragmentTest {
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -263,6 +272,7 @@ internal class IDScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.ID_FRONT
                 )
 
@@ -281,13 +291,13 @@ internal class IDScanFragmentTest {
                 documentFrontUploadState.update { frontUploadedState }
 
                 // post returns missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_MISSING_BACK
                 )
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -302,9 +312,6 @@ internal class IDScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT
                     )
                 )
 
@@ -325,7 +332,7 @@ internal class IDScanFragmentTest {
                 finalResultLiveData.postValue(mockBackFinalResult)
                 verifyUploadedWithFinalResult(
                     mockBackFinalResult,
-                    time = 3,
+                    time = 4,
                     targetType = IdentityScanState.ScanType.ID_BACK
                 )
 
@@ -333,7 +340,7 @@ internal class IDScanFragmentTest {
                 binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
                 documentBackUploadState.update { backUploadedState }
 
-                verify(mockIdentityViewModel, times(4)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(5)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -348,9 +355,6 @@ internal class IDScanFragmentTest {
                             backHighResResult = BACK_HIGH_RES_RESULT,
                             backLowResResult = BACK_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_TO_CONFIRM
                     )
                 )
 
@@ -385,6 +389,7 @@ internal class IDScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.ID_FRONT
                 )
 
@@ -403,13 +408,13 @@ internal class IDScanFragmentTest {
                 documentFrontUploadState.update { frontUploadedState }
 
                 // post returns missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_MISSING_BACK
                 )
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -424,9 +429,6 @@ internal class IDScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT
                     )
                 )
 
@@ -447,7 +449,7 @@ internal class IDScanFragmentTest {
                 finalResultLiveData.postValue(mockBackFinalResult)
                 verifyUploadedWithFinalResult(
                     mockBackFinalResult,
-                    time = 3,
+                    time = 4,
                     targetType = IdentityScanState.ScanType.ID_BACK
                 )
 
@@ -455,7 +457,7 @@ internal class IDScanFragmentTest {
                 binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
                 documentBackUploadState.update { backUploadedState }
 
-                verify(mockIdentityViewModel, times(4)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(5)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -470,9 +472,6 @@ internal class IDScanFragmentTest {
                             backHighResResult = BACK_HIGH_RES_RESULT,
                             backLowResResult = BACK_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_TO_SELFIE
                     )
                 )
 
@@ -507,6 +506,7 @@ internal class IDScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.ID_FRONT
                 )
 
@@ -525,13 +525,13 @@ internal class IDScanFragmentTest {
                 documentFrontUploadState.update { frontUploadedState }
 
                 // post returns not missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
                 )
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -546,9 +546,6 @@ internal class IDScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT
                     )
                 )
 
@@ -583,6 +580,7 @@ internal class IDScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.ID_FRONT
                 )
 
@@ -601,13 +599,13 @@ internal class IDScanFragmentTest {
                 documentFrontUploadState.update { frontUploadedState }
 
                 // post returns not missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any(), any())).thenReturn(
+                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
                     VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
                 )
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -622,9 +620,6 @@ internal class IDScanFragmentTest {
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    ),
-                    eq(
-                        ClearDataParam.UPLOAD_FRONT_SELFIE
                     )
                 )
 

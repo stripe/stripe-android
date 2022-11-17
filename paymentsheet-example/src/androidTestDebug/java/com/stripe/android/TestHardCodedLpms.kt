@@ -176,7 +176,7 @@ class TestHardCodedLpms {
                 authorizationAction = AuthorizeAction.Authorize,
                 merchantCountryCode = "US",
                 currency = Currency.USD,
-                shipping = Shipping.On
+                shipping = Shipping.OnWithDefaults
             )
         )
     }

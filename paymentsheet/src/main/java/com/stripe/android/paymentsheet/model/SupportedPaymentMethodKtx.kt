@@ -145,12 +145,13 @@ private fun SupportedPaymentMethod.supportsPaymentIntentSfuSettable(
 private fun checkSetupIntentRequirements(
     requirements: Set<SIRequirement>?,
     config: PaymentSheet.Configuration?
-) =
-    requirements?.map { requirement ->
+): Boolean {
+    return requirements?.map { requirement ->
         when (requirement) {
             Delayed -> config?.allowsDelayedPaymentMethods == true
         }
     }?.contains(false) == false
+}
 
 /**
  * Verifies that all Payment Intent [requirements] are met.
@@ -159,17 +160,25 @@ private fun checkPaymentIntentRequirements(
     requirements: Set<PIRequirement>?,
     paymentIntent: PaymentIntent,
     config: PaymentSheet.Configuration?
-) =
-    requirements?.map { requirement ->
+): Boolean {
+    return requirements?.map { requirement ->
         when (requirement) {
-            Delayed -> config?.allowsDelayedPaymentMethods == true
-            ShippingAddress ->
-                paymentIntent.shipping?.name != null &&
-                    paymentIntent.shipping?.address?.line1 != null &&
-                    paymentIntent.shipping?.address?.country != null &&
-                    paymentIntent.shipping?.address?.postalCode != null
+            Delayed -> {
+                config?.allowsDelayedPaymentMethods == true
+            }
+            ShippingAddress -> {
+                val forceAllow = config?.allowsPaymentMethodsRequiringShippingAddress == true
+                paymentIntent.containsValidShippingInfo || forceAllow
+            }
         }
     }?.contains(false) == false
+}
+
+private val PaymentIntent.containsValidShippingInfo: Boolean
+    get() = shipping?.name != null &&
+        shipping?.address?.line1 != null &&
+        shipping?.address?.country != null &&
+        shipping?.address?.postalCode != null
 
 /**
  * Get the LPMS that are supported when used as a Customer Saved LPM given

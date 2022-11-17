@@ -1,6 +1,7 @@
 package com.stripe.android.stripecardscan.framework.util
 
 import androidx.test.filters.SmallTest
+import com.stripe.android.core.utils.encodeToXWWWFormUrl
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.junit.Test

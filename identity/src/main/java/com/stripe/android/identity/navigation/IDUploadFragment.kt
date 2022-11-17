@@ -22,6 +22,5 @@ internal class IDUploadFragment(
     override val frontScanType = IdentityScanState.ScanType.ID_FRONT
     override var backScanType: IdentityScanState.ScanType? = IdentityScanState.ScanType.ID_BACK
     override val fragmentId = R.id.IDUploadFragment
-    override val presentedId = "ID_UPLOAD_PRESENTED"
     override val collectedDataParamType = CollectedDataParam.Type.IDCARD
 }

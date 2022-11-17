@@ -1,4 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.BaseIdentityTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+
+    </style>
+
     <!-- Base application theme. -->
     <style name="Theme.Theme1" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
@@ -11,7 +16,10 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+
+        <!-- Customize the font of button and body. -->
+        <item name="textAppearanceBody1">@style/TextAppearance.IdentityExampleAppTheme1.Body1</item>
+        <item name="textAppearanceButton">@style/TextAppearance.IdentityExampleAppTheme1.Button</item>
     </style>
 
     <!-- Base application theme. -->
@@ -26,6 +34,8 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
+
+        <!-- Customize the font. -->
+        <item name="textAppearanceButton">@style/TextAppearance.IdentityExampleAppTheme2.Button</item>
     </style>
 </resources>

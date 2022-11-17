@@ -31,5 +31,9 @@ internal data class Resource<out T>(
         fun <T> loading(data: T? = null): Resource<T> {
             return Resource(Status.LOADING, data)
         }
+
+        fun <T> idle(): Resource<T> {
+            return Resource(Status.IDLE, null)
+        }
     }
 }

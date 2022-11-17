@@ -26,6 +26,8 @@ class ConfirmationScreenTest {
     val composeTestRule = createComposeRule()
 
     private val onConfirmedMock = mock<() -> Unit>()
+    private val onError = mock<(Throwable) -> Unit>()
+    private val onComposeFinish = mock<(VerificationPage) -> Unit>()
 
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.success).thenReturn(
@@ -57,6 +59,8 @@ class ConfirmationScreenTest {
         composeTestRule.setContent {
             ConfirmationScreen(
                 verificationPageState = verificationState,
+                onError = onError,
+                onComposeFinish = onComposeFinish,
                 onConfirmed = onConfirmedMock
             )
         }

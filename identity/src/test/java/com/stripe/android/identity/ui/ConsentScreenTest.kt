@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
@@ -34,8 +35,8 @@ class ConsentScreenTest {
     private val onSuccessMock = mock<(VerificationPage) -> Unit>()
     private val onFallbackMock = mock<(String) -> Unit>()
     private val onErrorMock = mock<(Throwable) -> Unit>()
-    private val onConsentAgreedMock = mock<(Boolean) -> Unit>()
-    private val onConsentDeclinedMock = mock<(Boolean) -> Unit>()
+    private val onConsentAgreedMock = mock<() -> Unit>()
+    private val onConsentDeclinedMock = mock<() -> Unit>()
     private val merchantLogoUri: Uri = mock()
 
     private val verificationPageWithTimeAndPolicy = mock<VerificationPage>().also {
@@ -52,14 +53,9 @@ class ConsentScreenTest {
         )
         whenever(it.requirements).thenReturn(
             VerificationPageRequirements(
-                missing = listOf(
-                    VerificationPageRequirements.Missing.BIOMETRICCONSENT
-                )
+                missing = listOf(Requirement.BIOMETRICCONSENT)
             )
         )
-        if (CONSENT_REQUIRE_SELFIE) {
-            whenever(it.selfieCapture).thenReturn(mock())
-        }
     }
 
     private val verificationPageWithOutTimeAndPolicy = mock<VerificationPage>().also {
@@ -76,14 +72,9 @@ class ConsentScreenTest {
         )
         whenever(it.requirements).thenReturn(
             VerificationPageRequirements(
-                missing = listOf(
-                    VerificationPageRequirements.Missing.BIOMETRICCONSENT
-                )
+                missing = listOf(Requirement.BIOMETRICCONSENT)
             )
         )
-        if (CONSENT_REQUIRE_SELFIE) {
-            whenever(it.selfieCapture).thenReturn(mock())
-        }
     }
 
     private val verificationPageWithUnsupportedClient = mock<VerificationPage>().also {
@@ -139,7 +130,7 @@ class ConsentScreenTest {
     fun `when agreed button is clicked onConsentDeclined is called`() {
         setComposeTestRuleWith(Resource.success(verificationPageWithTimeAndPolicy)) {
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).performClick()
-            verify(onConsentDeclinedMock).invoke(CONSENT_REQUIRE_SELFIE)
+            verify(onConsentDeclinedMock).invoke()
 
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(1)
@@ -177,7 +168,7 @@ class ConsentScreenTest {
             ConsentScreen(
                 merchantLogoUri = merchantLogoUri,
                 verificationState = verificationState,
-                onSuccess = onSuccessMock,
+                onComposeFinish = onSuccessMock,
                 onFallbackUrl = onFallbackMock,
                 onError = onErrorMock,
                 onConsentAgreed = onConsentAgreedMock,
@@ -197,6 +188,5 @@ class ConsentScreenTest {
         const val CONSENT_DECLINE_TEXT = "no"
         const val SCROLL_TO_CONTINUE_TEXT = "scroll to continue"
         const val CONSENT_FALLBACK_URL = "path/to/fallback"
-        const val CONSENT_REQUIRE_SELFIE = true
     }
 }

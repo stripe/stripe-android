@@ -2,6 +2,42 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+### CardScan
+* [SECURITY][5798](https://github.com/stripe/stripe-android/pull/5798) URL-encode IDs used in URLs to prevent injection attacks.
+
+## 20.16.0 - 2022-11-14
+
+### Payments
+
+* [CHANGED][5789](https://github.com/stripe/stripe-android/pull/5789) We now disable the back button while confirming intents with `PaymentLauncher` to prevent them from incorrectly being displayed as failed.
+
+### PaymentSheet
+
+* [ADDED][5676](https://github.com/stripe/stripe-android/pull/5676) Added `AddressLauncher`, an [activity](https://stripe.com/docs/elements/address-element?platform=android) that collects local and international addresses for your customers.
+* [ADDED][5769](https://github.com/stripe/stripe-android/pull/5769) Added `PaymentSheet.Configuration.allowsPaymentMethodsRequiringShippingAddress`. Previously, to allow payment methods that require a shipping address (e.g. Afterpay and Affirm) in `PaymentSheet`, you attached a shipping address to the PaymentIntent before initializing `PaymentSheet`. Now, you can instead set this property to `true` and set `PaymentSheet.Configuration.shippingDetails` or `PaymentSheet.FlowController.shippingDetails` whenever your customer’s shipping address becomes available. The shipping address will be attached to the PaymentIntent when the customer completes the checkout.
+
+### Identity
+
+* [FIXED][5816](https://github.com/stripe/stripe-android/pull/5816) Fixed an issue where the SDK would crash when recovering from process death.
+
+## 20.15.4 - 2022-11-07
+
+### CardScan
+
+* [FIXED][5768](https://github.com/stripe/stripe-android/pull/5768) Fixed SDK version reporting in cardscan scan stats
+
+### Identity
+
+* [FIXED][5762](https://github.com/stripe/stripe-android/pull/5762) Use a custom implementation of FileProvider to avoid collision with client app.
+
+## 20.15.3 - 2022-10-31
+
+### PaymentSheet
+
+* [ADDED][5729](https://github.com/stripe/stripe-android/pull/5729) Added support for a custom primary button label via `PaymentSheet.Configuration.primaryButtonLabel`.
+
+### CardScan
+
 * [FIXED][5749](https://github.com/stripe/stripe-android/pull/5749) Prevent multiple invocations to `/verify_frames`
 
 ## 20.15.2 - 2022-10-25

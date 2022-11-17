@@ -3,7 +3,6 @@ package com.stripe.android.identity.navigation
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.IdRes
 import androidx.compose.runtime.getValue
@@ -19,8 +18,8 @@ import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_SELECT
+import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Type
 import com.stripe.android.identity.states.IdentityScanState
@@ -50,33 +49,35 @@ internal class DocSelectionFragment(
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            val verificationPage by identityViewModel.verificationPage.observeAsState()
-            DocSelectionScreen(verificationPage, ::postVerificationPageDataAndNavigate)
-        }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launch(identityViewModel.workContext) {
-            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_DOC_SELECT)
-        }
-        identityViewModel.sendAnalyticsRequest(
-            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                screenName = SCREEN_NAME_DOC_SELECT
+            val verificationPage by identityViewModel.verificationPage.observeAsState(Resource.loading())
+            DocSelectionScreen(
+                verificationPage,
+                onError = ::navigateToDefaultErrorFragment,
+                onComposeFinish = {
+                    lifecycleScope.launch(identityViewModel.workContext) {
+                        identityViewModel.screenTracker.screenTransitionFinish(
+                            SCREEN_NAME_DOC_SELECT
+                        )
+                    }
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                            screenName = SCREEN_NAME_DOC_SELECT
+                        )
+                    )
+                },
+                ::postVerificationPageDataAndNavigate
             )
-        )
+        }
     }
 
     /**
      * Post VerificationPageData with the type and navigate base on its result.
      */
-    private fun postVerificationPageDataAndNavigate(type: Type, requireSelfie: Boolean) {
+    private fun postVerificationPageDataAndNavigate(type: Type) {
         lifecycleScope.launch {
             postVerificationPageDataAndMaybeSubmit(
                 identityViewModel = identityViewModel,
                 collectedDataParam = CollectedDataParam(idDocumentType = type),
-                clearDataParam =
-                if (requireSelfie) ClearDataParam.DOC_SELECT_TO_UPLOAD_WITH_SELFIE else ClearDataParam.DOC_SELECT_TO_UPLOAD,
                 fromFragment = R.id.docSelectionFragment,
                 notSubmitBlock = {
                     cameraPermissionEnsureable.ensureCameraPermission(
@@ -97,6 +98,7 @@ internal class DocSelectionFragment(
                                         tryNavigateToUploadFragment(type)
                                     }
                                     Status.LOADING -> {} // no-op
+                                    Status.IDLE -> {} // no-op
                                 }
                             }
                         },

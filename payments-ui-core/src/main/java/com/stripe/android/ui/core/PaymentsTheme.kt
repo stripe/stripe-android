@@ -138,7 +138,7 @@ object PaymentsThemeDefaults {
         appBarIcon = Color.White,
         materialColors = darkColors(
             primary = Color(0xFF0074D4),
-            surface = Color(0xff2e2e2e),
+            surface = Color(0xFF2E2E2E),
             onSurface = Color.White,
             error = Color.Red
         )

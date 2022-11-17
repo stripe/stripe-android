@@ -5,6 +5,8 @@ package com.stripe.android.stripecardscan.framework.api
 
 import android.util.Log
 import androidx.annotation.CheckResult
+import com.stripe.android.core.utils.encodeToJson
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.stripecardscan.cardimageverification.SavedFrame
 import com.stripe.android.stripecardscan.framework.api.dto.AppInfo
 import com.stripe.android.stripecardscan.framework.api.dto.CardImageVerificationDetailsRequest
@@ -24,7 +26,6 @@ import com.stripe.android.stripecardscan.framework.api.dto.VerifyFramesResult
 import com.stripe.android.stripecardscan.framework.util.AppDetails
 import com.stripe.android.stripecardscan.framework.util.Device
 import com.stripe.android.stripecardscan.framework.util.ScanConfig
-import com.stripe.android.stripecardscan.framework.util.encodeToJson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -72,7 +73,7 @@ internal fun uploadScanStatsCIV(
     when (
         val result = network.postForResult(
             stripePublishableKey = stripePublishableKey,
-            path = "/card_image_verifications/$civId/scan_stats",
+            path = "/card_image_verifications/${urlEncode(civId)}/scan_stats",
             data = ScanStatsCIVRequest(
                 clientSecret = civSecret,
                 payload = statsPayload
@@ -152,7 +153,7 @@ internal suspend fun getCardImageVerificationIntentDetails(
 ) = withContext(Dispatchers.IO) {
     network.postForResult(
         stripePublishableKey = stripePublishableKey,
-        path = "/card_image_verifications/$civId/initialize_client",
+        path = "/card_image_verifications/${urlEncode(civId)}/initialize_client",
         data = CardImageVerificationDetailsRequest(civSecret),
         requestSerializer = CardImageVerificationDetailsRequest.serializer(),
         responseSerializer = CardImageVerificationDetailsResult.serializer(),
@@ -170,7 +171,7 @@ internal suspend fun uploadSavedFrames(
 ) = withContext(Dispatchers.IO) {
     network.postForResult(
         stripePublishableKey = stripePublishableKey,
-        path = "card_image_verifications/$civId/verify_frames",
+        path = "card_image_verifications/${urlEncode(civId)}/verify_frames",
         data = VerifyFramesRequest(
             clientSecret = civSecret,
             verificationFramesData = encodeToJson(

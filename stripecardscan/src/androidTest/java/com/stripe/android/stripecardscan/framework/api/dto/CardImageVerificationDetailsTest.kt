@@ -4,7 +4,7 @@ import android.util.Size
 import androidx.test.filters.SmallTest
 import com.stripe.android.stripecardscan.framework.util.AcceptedImageConfigs
 import com.stripe.android.stripecardscan.framework.util.ImageFormat
-import com.stripe.android.stripecardscan.framework.util.decodeFromJson
+import com.stripe.android.core.utils.decodeFromJson
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull

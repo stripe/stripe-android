@@ -88,6 +88,11 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
     }
 
     Scaffold(
+        topBar = {
+            AddressOptionsAppBar(false) {
+                viewModel.onBackPressed()
+            }
+        },
         bottomBar = {
             val background = if (isSystemInDarkTheme()) {
                 MaterialTheme.paymentsColors.component
@@ -108,7 +113,8 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                     viewModel.onEnterAddressManually()
                 }
             }
-        }
+        },
+        backgroundColor = MaterialTheme.colors.surface
     ) { paddingValues ->
         ScrollableColumn(
             modifier = Modifier
@@ -116,14 +122,10 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                 .fillMaxHeight()
                 .systemBarsPadding()
                 .padding(paddingValues)
-                .background(MaterialTheme.colors.surface)
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                AddressOptionsAppBar(false) {
-                    viewModel.onBackPressed()
-                }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
