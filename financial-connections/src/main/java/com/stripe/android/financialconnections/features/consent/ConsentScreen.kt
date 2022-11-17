@@ -474,23 +474,30 @@ private fun ConsentBottomSheetBullet(
         ConsentBulletIcon(iconUrl = iconUrl)
         Spacer(modifier = Modifier.size(8.dp))
         Column {
-            title?.let {
+            if (title != null && description != null) {
                 Text(
                     text = title.toText().toString(),
                     style = typography.bodyEmphasized.copy(
                         color = colors.textPrimary
                     )
                 )
-            }
-            if (title != null && description != null) Spacer(modifier = Modifier.size(2.dp))
-            description?.let {
+                Spacer(modifier = Modifier.size(2.dp))
                 Text(
                     text = description.toText().toString(),
                     style = typography.caption.copy(
                         color = colors.textSecondary
                     )
                 )
+            } else {
+                val text = title ?: description ?: TextResource.Text("")
+                Text(
+                    text = text.toText().toString(),
+                    style = typography.body.copy(
+                        color = colors.textPrimary
+                    )
+                )
             }
+
         }
     }
 }
@@ -528,9 +535,12 @@ private fun ConsentBulletIcon(iconUrl: String?) {
         .size(16.dp)
         .offset(y = 2.dp)
     if (iconUrl == null) {
-        val color = colors.textSecondary
+        val color = colors.textPrimary
         Canvas(
-            modifier = Modifier.size(16.dp).padding(6.dp),
+            modifier = Modifier
+                .size(16.dp)
+                .padding(6.dp)
+                .offset(y = 2.dp),
             onDraw = { drawCircle(color = color) }
         )
     } else {
