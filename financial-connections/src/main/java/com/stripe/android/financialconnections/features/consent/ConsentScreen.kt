@@ -7,6 +7,7 @@ import android.os.Build
 import android.text.Html
 import android.text.Spanned
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,7 +44,6 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
-import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenBottomSheet
@@ -182,7 +181,7 @@ private fun ConsentMainContent(
                 )
                 Spacer(modifier = Modifier.size(24.dp))
                 bullets.forEach { (iconUrl, text) ->
-                    ConsentBullet(iconUrl?.default, text) { onClickableTextClick(it) }
+                    ConsentBulletRow(iconUrl?.default, text) { onClickableTextClick(it) }
                     Spacer(modifier = Modifier.size(16.dp))
                 }
 
@@ -471,24 +470,11 @@ private fun ConsentBottomSheetBullet(
     description: TextResource?,
     iconUrl: String?
 ) {
-    val icon: @Composable () -> Unit = {
-        val modifier = Modifier.size(16.dp)
-        iconUrl?.let {
-            StripeImage(
-                url = it,
-                colorFilter = ColorFilter.tint(colors.textSuccess),
-                errorContent = { InstitutionPlaceholder(modifier) },
-                imageLoader = LocalImageLoader.current,
-                contentDescription = null,
-                modifier = modifier
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-        }
-    }
-    Column {
-        if (title != null) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                icon()
+    Row {
+        ConsentBulletIcon(iconUrl = iconUrl)
+        Spacer(modifier = Modifier.size(8.dp))
+        Column {
+            title?.let {
                 Text(
                     text = title.toText().toString(),
                     style = typography.bodyEmphasized.copy(
@@ -496,19 +482,8 @@ private fun ConsentBottomSheetBullet(
                     )
                 )
             }
-            Spacer(modifier = Modifier.size(2.dp))
-        }
-        if (description != null) {
-            Row {
-                if (iconUrl != null) {
-                    if (title == null) {
-                        // draw icon on the description row instead of the title row.
-                        icon()
-                    } else {
-                        // draw a space to match the space taken by the icon in the title row.
-                        Spacer(modifier = Modifier.size(24.dp))
-                    }
-                }
+            if (title != null && description != null) Spacer(modifier = Modifier.size(2.dp))
+            description?.let {
                 Text(
                     text = description.toText().toString(),
                     style = typography.caption.copy(
@@ -521,25 +496,13 @@ private fun ConsentBottomSheetBullet(
 }
 
 @Composable
-private fun ConsentBullet(
+private fun ConsentBulletRow(
     iconUrl: String?,
     text: TextResource,
     onClickableTextClick: ((String) -> Unit)? = null
 ) {
     Row {
-        val modifier = Modifier
-            .size(16.dp)
-            .offset(y = 2.dp)
-        iconUrl?.let {
-            StripeImage(
-                url = iconUrl,
-                colorFilter = ColorFilter.tint(colors.textSecondary),
-                imageLoader = LocalImageLoader.current,
-                contentDescription = null,
-                errorContent = { InstitutionPlaceholder(modifier) },
-                modifier = modifier
-            )
-        }
+        ConsentBulletIcon(iconUrl = iconUrl)
         Spacer(modifier = Modifier.size(8.dp))
         AnnotatedText(
             text,
@@ -555,6 +518,36 @@ private fun ConsentBullet(
                     .toSpanStyle()
                     .copy(color = colors.textSecondary)
             )
+        )
+    }
+}
+
+@Composable
+private fun ConsentBulletIcon(iconUrl: String?) {
+    val modifier = Modifier
+        .size(16.dp)
+        .offset(y = 2.dp)
+    if (iconUrl == null) {
+        val color = colors.textSecondary
+        Canvas(
+            modifier = Modifier.size(16.dp).padding(6.dp),
+            onDraw = { drawCircle(color = color) }
+        )
+    } else {
+        StripeImage(
+            url = iconUrl,
+            errorContent = {
+                val color = colors.textSecondary
+                Canvas(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .align(Alignment.Center),
+                    onDraw = { drawCircle(color = color) }
+                )
+            },
+            imageLoader = LocalImageLoader.current,
+            contentDescription = null,
+            modifier = modifier
         )
     }
 }
@@ -598,6 +591,24 @@ internal fun ContentRequestedDataPreview() {
         ) {
             DataAccessBottomSheetContent(
                 dataDialog = ConsentStates.sampleConsent().dataAccessNotice,
+                onClickableTextClick = {},
+                onConfirmModalClick = {},
+            )
+        }
+    }
+}
+
+@Composable
+@Preview(group = "Consent Pane", name = "requested data")
+// TODO@carlosmuvi add proper preview with expanded bottom sheet once related Compose bug gets fixed.
+// https://issuetracker.google.com/issues/241895902
+internal fun ContentLegalDetailsPreview() {
+    FinancialConnectionsPreview {
+        Box(
+            Modifier.background(colors.backgroundSurface)
+        ) {
+            LegalDetailsBottomSheetContent(
+                legalDetails = ConsentStates.sampleConsent().legalDetailsNotice,
                 onClickableTextClick = {},
                 onConfirmModalClick = {},
             )

@@ -71,22 +71,18 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
                 cta = "OK"
             ),
             legalDetailsNotice = LegalDetailsNotice(
-                title = "Goldilocks works with Stripe to link your accounts",
+                title = "Stripe uses your account data as described in the Terms, including:",
                 body = LegalDetailsBody(
                     bullets = listOf(
                         Bullet(
-                            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
-                            title = "Account details",
-                            content = "Account number, routing number, account type, account nickname."
+                            content = "To improve our services"
                         ),
                         Bullet(
-                            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
-                            title = "Account details",
-                            content = "Account number, routing number, account type, account nickname."
+                            content = "To manage fraud and loss risk of transactions"
                         ),
                     )
                 ),
-                learnMore = "Learn more about legal notice",
+                learnMore = "Learn more",
                 cta = "OK"
             ),
         )
