@@ -48,7 +48,8 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
+import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenBottomSheet
+import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
@@ -78,7 +79,7 @@ internal fun ConsentScreen() {
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
 
-    // create bottom sheet state.
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(
         ModalBottomSheetValue.Hidden,
@@ -89,20 +90,20 @@ internal fun ConsentScreen() {
         scope.launch { bottomSheetState.hide() }
     }
 
-    val context = LocalContext.current
-    LaunchedEffect(state.value.viewEffect) {
-        when (val viewEffect = state.value.viewEffect) {
-            is ViewEffect.OpenUrl -> context.startActivity(
-                CreateBrowserIntentForUrl(
-                    context = context,
-                    uri = Uri.parse(viewEffect.url)
+    state.value.viewEffect?.let { viewEffect ->
+        LaunchedEffect(viewEffect) {
+            when (viewEffect) {
+                is OpenUrl -> context.startActivity(
+                    CreateBrowserIntentForUrl(
+                        context = context,
+                        uri = Uri.parse(viewEffect.url)
+                    )
                 )
-            )
 
-            is ViewEffect.OpenBottomSheet -> bottomSheetState.show()
-            null -> Unit
+                is OpenBottomSheet -> bottomSheetState.show()
+            }
+            viewModel.onViewEffectLaunched()
         }
-        viewModel.onViewEffectLaunched()
     }
 
     ConsentContent(
