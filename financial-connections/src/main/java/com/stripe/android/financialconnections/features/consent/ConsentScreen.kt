@@ -3,7 +3,6 @@
 
 package com.stripe.android.financialconnections.features.consent
 
-import android.net.Uri
 import android.os.Build
 import android.text.Html
 import android.text.Spanned
@@ -34,7 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -55,7 +54,6 @@ import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
-import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
@@ -79,7 +77,7 @@ internal fun ConsentScreen() {
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
 
-    val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(
         ModalBottomSheetValue.Hidden,
@@ -93,13 +91,7 @@ internal fun ConsentScreen() {
     state.value.viewEffect?.let { viewEffect ->
         LaunchedEffect(viewEffect) {
             when (viewEffect) {
-                is OpenUrl -> context.startActivity(
-                    CreateBrowserIntentForUrl(
-                        context = context,
-                        uri = Uri.parse(viewEffect.url)
-                    )
-                )
-
+                is OpenUrl -> uriHandler.openUri(viewEffect.url)
                 is OpenBottomSheet -> bottomSheetState.show()
             }
             viewModel.onViewEffectLaunched()

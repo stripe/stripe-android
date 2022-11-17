@@ -24,6 +24,7 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
         fun canonical() = ConsentState(consent = Success(sampleConsent().copy(belowCta = null)))
         fun manualEntryPlusMicrodeposits() = ConsentState(consent = Success(sampleConsent()))
 
+        @Suppress("LongMethod")
         fun sampleConsent(): ConsentPane = ConsentPane(
             title = "Goldilocks works with Stripe to link your accounts",
             body = ConsentPaneBody(
