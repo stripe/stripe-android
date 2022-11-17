@@ -63,7 +63,8 @@ internal class PartnerAuthViewModel @Inject constructor(
             )
             Payload(
                 authSession = authSession,
-                institution = requireNotNull(manifest.activeInstitution)
+                institution = requireNotNull(manifest.activeInstitution),
+                isStripeDirect = manifest.isStripeDirect ?: false
             ).also {
                 // just send loaded event on OAuth flows (prepane). Non-OAuth handled by shim.
                 val loadedEvent: Loaded? = Loaded(Date()).takeIf { authSession.isOAuth }
@@ -247,6 +248,7 @@ internal data class PartnerAuthState(
     val authenticationStatus: Async<String> = Uninitialized
 ) : MavericksState {
     data class Payload(
+        val isStripeDirect: Boolean,
         val institution: FinancialConnectionsInstitution,
         val authSession: FinancialConnectionsAuthorizationSession
     )

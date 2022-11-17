@@ -23,6 +23,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
 
 internal class ConsentViewModel @Inject constructor(
@@ -74,13 +75,15 @@ internal class ConsentViewModel @Inject constructor(
         }
 
         if (URLUtil.isNetworkUrl(uri)) {
-            setState { copy(viewEffect = OpenUrl(uri)) }
+            val date = Date()
+            setState { copy(viewEffect = OpenUrl(uri, date.time)) }
         } else {
             val managedUri = ConsentClickableText.values()
                 .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
             when (managedUri) {
                 ConsentClickableText.DATA -> {
-                    setState { copy(viewEffect = ViewEffect.OpenBottomSheet) }
+                    val date = Date()
+                    setState { copy(viewEffect = ViewEffect.OpenBottomSheet(date.time)) }
                 }
 
                 ConsentClickableText.MANUAL_ENTRY -> {

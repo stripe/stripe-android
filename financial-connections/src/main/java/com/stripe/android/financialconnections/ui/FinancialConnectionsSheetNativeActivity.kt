@@ -16,6 +16,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
@@ -113,13 +115,16 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @Suppress("LongMethod")
     @Composable
     fun NavHost(initialPane: NextPane) {
+        val context = LocalContext.current
         val navController = rememberNavController()
+        val uriHandler = remember { CustomTabUriHandler(context) }
         val initialDestination =
             remember(initialPane) { initialPane.toNavigationCommand(logger, emptyMap()).destination }
         NavigationEffect(navController)
         CompositionLocalProvider(
             LocalNavHostController provides navController,
             LocalImageLoader provides imageLoader,
+            LocalUriHandler provides uriHandler
         ) {
             NavHost(navController, startDestination = initialDestination) {
                 composable(NavigationDirections.consent.destination) {
@@ -208,6 +213,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             navigationManager.commands.collect { command ->
                 if (command.destination.isNotEmpty()) {
                     navController.navigate(command.destination) {
+                        launchSingleTop = true
                         popUpIfNotBackwardsNavigable(navController)
                     }
                 }

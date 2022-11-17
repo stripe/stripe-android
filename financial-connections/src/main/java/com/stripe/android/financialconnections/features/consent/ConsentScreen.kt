@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
@@ -76,6 +77,7 @@ internal fun ConsentScreen() {
     val state = viewModel.collectAsState()
 
     // create bottom sheet state.
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(
         ModalBottomSheetValue.Hidden,
@@ -86,11 +88,20 @@ internal fun ConsentScreen() {
         scope.launch { bottomSheetState.hide() }
     }
 
-    ViewEffect(
-        viewModel = viewModel,
-        bottomSheetState = bottomSheetState,
-        viewEffect = state.value.viewEffect
-    )
+    state.value.viewEffect?.let { viewEffect ->
+        LaunchedEffect(viewEffect) {
+            when (viewEffect) {
+                is ViewEffect.OpenBottomSheet -> bottomSheetState.show()
+                is ViewEffect.OpenUrl -> context.startActivity(
+                    CreateBrowserIntentForUrl(
+                        context = context,
+                        uri = Uri.parse(viewEffect.url)
+                    )
+                )
+            }
+            viewModel.onViewEffectLaunched()
+        }
+    }
 
     ConsentContent(
         state = state.value,
@@ -99,30 +110,6 @@ internal fun ConsentScreen() {
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
     ) { parentViewModel.onCloseNoConfirmationClick(NextPane.CONSENT) }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Composable
-private fun ViewEffect(
-    viewModel: ConsentViewModel,
-    viewEffect: ViewEffect?,
-    bottomSheetState: ModalBottomSheetState
-) {
-    val context = LocalContext.current
-    LaunchedEffect(viewEffect) {
-        when (viewEffect) {
-            is ViewEffect.OpenUrl -> context.startActivity(
-                CreateBrowserIntentForUrl(
-                    context = context,
-                    uri = Uri.parse(viewEffect.url)
-                )
-            )
-
-            is ViewEffect.OpenBottomSheet -> bottomSheetState.show()
-            null -> Unit
-        }
-        viewModel.onViewEffectLaunched()
-    }
 }
 
 @Composable
@@ -359,7 +346,7 @@ private fun ConsentPermissionsBottomSheetContent(
                 onClickableTextClick = onClickableTextClick
             )
             bullets.forEach { (iconUrl, title, description) ->
-                Spacer(modifier = Modifier.size(24.dp))
+                Spacer(modifier = Modifier.size(16.dp))
                 ConsentBottomSheetBullet(
                     iconUrl = iconUrl.default,
                     title = title,
@@ -382,7 +369,7 @@ private fun ConsentPermissionsBottomSheetContent(
                         color = colors.textSecondary
                     ),
                     annotationStyles = mapOf(
-                        StringAnnotation.CLICKABLE to typography.caption
+                        StringAnnotation.CLICKABLE to typography.captionEmphasized
                             .toSpanStyle()
                             .copy(color = colors.textBrand),
                         StringAnnotation.BOLD to typography.captionEmphasized
@@ -399,7 +386,7 @@ private fun ConsentPermissionsBottomSheetContent(
                     color = colors.textSecondary
                 ),
                 annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to typography.caption
+                    StringAnnotation.CLICKABLE to typography.captionEmphasized
                         .toSpanStyle()
                         .copy(color = colors.textBrand),
                     StringAnnotation.BOLD to typography.captionEmphasized
@@ -424,20 +411,18 @@ private fun ConsentBottomSheetBullet(
     description: TextResource?,
     iconUrl: String
 ) {
-    Row {
-        val modifier = Modifier
-            .size(16.dp)
-            .offset(y = 2.dp)
-        StripeImage(
-            url = iconUrl,
-            colorFilter = ColorFilter.tint(colors.textSuccess),
-            errorContent = { InstitutionPlaceholder(modifier) },
-            imageLoader = LocalImageLoader.current,
-            contentDescription = null,
-            modifier = modifier
-        )
-        Spacer(modifier = Modifier.size(8.dp))
-        Column {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val modifier = Modifier.size(16.dp)
+            StripeImage(
+                url = iconUrl,
+                colorFilter = ColorFilter.tint(colors.textSuccess),
+                errorContent = { InstitutionPlaceholder(modifier) },
+                imageLoader = LocalImageLoader.current,
+                contentDescription = null,
+                modifier = modifier
+            )
+            Spacer(modifier = Modifier.size(8.dp))
             title?.let {
                 Text(
                     text = it.toText().toString(),
@@ -446,6 +431,10 @@ private fun ConsentBottomSheetBullet(
                     )
                 )
             }
+        }
+        Spacer(modifier = Modifier.size(2.dp))
+        Row {
+            Spacer(modifier = Modifier.size(24.dp))
             description?.let {
                 Text(
                     text = description.toText().toString(),

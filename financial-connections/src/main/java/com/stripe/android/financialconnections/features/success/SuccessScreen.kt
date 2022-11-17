@@ -59,8 +59,9 @@ internal fun SuccessScreen() {
             onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
             onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
             onDisconnectLinkClick = viewModel::onDisconnectLinkClick,
-            showLinkAnotherAccount = payload.showLinkAnotherAccount
-        ) { parentViewModel.onCloseWithConfirmationClick(NextPane.SUCCESS) }
+            showLinkAnotherAccount = payload.showLinkAnotherAccount,
+            onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.SUCCESS) }
+        )
     }
 }
 
@@ -107,7 +108,7 @@ private fun SuccessContent(
             ) {
                 Icon(
                     modifier = Modifier.size(40.dp),
-                    painter = painterResource(R.drawable.stripe_ic_check_circle_emtpy),
+                    painter = painterResource(R.drawable.stripe_ic_check_circle),
                     contentDescription = null,
                     tint = FinancialConnectionsTheme.colors.textSuccess
                 )
@@ -145,7 +146,7 @@ private fun SuccessContent(
                         color = FinancialConnectionsTheme.colors.textSecondary
                     ),
                     annotationStyles = mapOf(
-                        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption
+                        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
                             .toSpanStyle()
                             .copy(color = FinancialConnectionsTheme.colors.textBrand)
                     )

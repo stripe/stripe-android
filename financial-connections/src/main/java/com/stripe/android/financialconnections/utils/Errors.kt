@@ -14,13 +14,14 @@ import java.util.concurrent.TimeoutException
  */
 internal suspend fun <T> retryOnException(
     times: Int = Int.MAX_VALUE,
+    initialDelay: Long = 0,
     delayMilliseconds: Long = 100,
     retryCondition: suspend (Throwable) -> Boolean,
     block: suspend () -> T
 ): T = channelFlow {
     var remainingTimes = times - 1
     while (!isClosedForSend) {
-        delay(delayMilliseconds)
+        delay(if (remainingTimes == times - 1) initialDelay else delayMilliseconds)
         val either = runCatching { block() }
         either.fold(
             onFailure = { exception ->

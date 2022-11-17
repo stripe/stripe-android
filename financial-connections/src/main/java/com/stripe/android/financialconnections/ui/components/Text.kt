@@ -7,12 +7,21 @@ import android.text.Annotation
 import android.text.SpannedString
 import android.text.style.StyleSpan
 import android.text.style.URLSpan
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.text.getSpans
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
@@ -29,28 +38,62 @@ internal fun AnnotatedText(
             .copy(color = FinancialConnectionsTheme.colors.textBrand)
     )
 ) {
+    val pressedColor = FinancialConnectionsTheme.colors.textPrimary
+    var pressedAnnotation: String? by remember { mutableStateOf(null) }
     val resource = annotatedStringResource(
-        resource = text
-    ) { annotation ->
-        annotationStyles[
-            StringAnnotation.values()
+        resource = text,
+        spanStyleForAnnotation = { annotation ->
+            val matchingAnnotation = StringAnnotation
+                .values()
                 .firstOrNull { it.value == annotation.key }
-        ]
-    }
-    ClickableText(
-        text = resource,
-        style = defaultStyle,
-        modifier = modifier,
-        onClick = { offset ->
-            resource.getStringAnnotations(
-                tag = StringAnnotation.CLICKABLE.value,
-                start = offset,
-                end = offset
-            )
-                .firstOrNull()
-                ?.let { onClickableTextClick(it.item) }
+            val spanStyle = annotationStyles[matchingAnnotation]
+            if (pressedAnnotation == annotation.value) {
+                spanStyle?.copy(color = pressedColor)
+            } else {
+                spanStyle
+            }
         }
     )
+    var layoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+    val pressIndicator = Modifier.pointerInput(onClickableTextClick) {
+        detectTapGestures(
+            onPress = { offset ->
+                val clickedAnnotation = layoutResult?.clickedAnnotation(offset, resource)
+                // mark the current clickable text portion as pressed
+                pressedAnnotation = clickedAnnotation?.item
+                // release the current pressed text portion.
+                tryAwaitRelease()
+                pressedAnnotation = null
+            },
+            onTap = { offset ->
+                layoutResult?.clickedAnnotation(offset, resource)?.let {
+                    onClickableTextClick(it.item)
+                }
+            }
+        )
+    }
+    BasicText(
+        text = resource,
+        modifier = modifier.then(pressIndicator),
+        style = defaultStyle,
+        softWrap = true,
+        overflow = TextOverflow.Clip,
+        maxLines = Int.MAX_VALUE,
+        onTextLayout = {
+            layoutResult = it
+        }
+    )
+}
+
+private fun TextLayoutResult.clickedAnnotation(
+    offset: Offset,
+    resource: AnnotatedString,
+): AnnotatedString.Range<String>? = getOffsetForPosition(offset).let {
+    resource.getStringAnnotations(
+        tag = StringAnnotation.CLICKABLE.value,
+        start = it,
+        end = it
+    ).firstOrNull()
 }
 
 private fun Any.toAnnotation(): Annotation? = when (this) {
@@ -71,7 +114,7 @@ private fun Any.toAnnotation(): Annotation? = when (this) {
 @Composable
 private fun annotatedStringResource(
     resource: TextResource,
-    spanStyles: (Annotation) -> SpanStyle? = { null }
+    spanStyleForAnnotation: (Annotation) -> SpanStyle? = { null }
 ): AnnotatedString {
     val spannedString = SpannedString(resource.toText())
     val resultBuilder = AnnotatedString.Builder()
@@ -88,7 +131,7 @@ private fun annotatedStringResource(
                     start = spanStart,
                     end = spanEnd
                 )
-                spanStyles(it)?.let { resultBuilder.addStyle(it, spanStart, spanEnd) }
+                spanStyleForAnnotation(it)?.let { resultBuilder.addStyle(it, spanStart, spanEnd) }
             }
         }
     return resultBuilder.toAnnotatedString()

@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,11 +25,13 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,6 +46,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -80,7 +86,11 @@ internal fun InstitutionPickerScreen() {
     val state by viewModel.collectAsState()
 
     // when in search mode, back closes search.
-    BackHandler(state.searchMode, viewModel::onCancelSearchClick)
+    val focusManager = LocalFocusManager.current
+    BackHandler(state.searchMode) {
+        focusManager.clearFocus()
+        viewModel.onCancelSearchClick()
+    }
 
     InstitutionPickerContent(
         payload = state.payload,
@@ -140,8 +150,8 @@ private fun LoadedContent(
     payload: Async<Payload>,
     onManualEntryClick: () -> Unit
 ) {
-    var input by remember { mutableStateOf("") }
-    LaunchedEffect(searchMode) { if (!searchMode) input = "" }
+    var input by remember { mutableStateOf(TextFieldValue()) }
+    LaunchedEffect(searchMode) { if (!searchMode) input = TextFieldValue() }
     Column {
         if (searchMode.not()) {
             Spacer(Modifier.size(16.dp))
@@ -160,22 +170,23 @@ private fun LoadedContent(
                 searchMode = searchMode,
                 onQueryChanged = {
                     input = it
-                    onQueryChanged(input)
+                    onQueryChanged(input.text)
                 },
                 onSearchFocused = onSearchFocused,
                 onCancelSearchClick = onCancelSearchClick
             )
         }
-        if (input.isNotEmpty()) {
+        if (input.text.isNotEmpty()) {
             SearchInstitutionsList(
                 institutionsProvider = institutionsProvider,
                 onInstitutionSelected = onInstitutionSelected,
-                query = input,
+                query = input.text,
                 onManualEntryClick = onManualEntryClick,
                 manualEntryEnabled = payload()?.allowManualEntry ?: false
             )
         } else {
             FeaturedInstitutionsGrid(
+                modifier = Modifier.weight(1f),
                 payload = payload,
                 onInstitutionSelected = onInstitutionSelected
             )
@@ -185,8 +196,8 @@ private fun LoadedContent(
 
 @Composable
 private fun FinancialConnectionsSearchRow(
-    query: String,
-    onQueryChanged: (String) -> Unit,
+    query: TextFieldValue,
+    onQueryChanged: (TextFieldValue) -> Unit,
     onCancelSearchClick: () -> Unit,
     onSearchFocused: () -> Unit,
     searchMode: Boolean
@@ -197,6 +208,10 @@ private fun FinancialConnectionsSearchRow(
         modifier = Modifier.padding(horizontal = 24.dp)
     ) {
         FinancialConnectionsOutlinedTextField(
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Done
+            ),
             leadingIcon = if (searchMode) {
                 {
                     Icon(
@@ -221,11 +236,15 @@ private fun FinancialConnectionsSearchRow(
             modifier = Modifier
                 .onFocusChanged { if (it.isFocused) onSearchFocused() }
                 .weight(1f),
-            value = if (searchMode) query else "",
-            label = { Text(text = stringResource(id = R.string.stripe_search)) },
-            onValueChange = {
-                onQueryChanged(it)
-            }
+            placeholder = {
+                Text(
+                    text = stringResource(id = R.string.stripe_search),
+                    style = FinancialConnectionsTheme.typography.body,
+                    color = FinancialConnectionsTheme.colors.textDisabled
+                )
+            },
+            value = query,
+            onValueChange = { onQueryChanged(it) }
         )
     }
 }
@@ -266,9 +285,9 @@ private fun SearchInstitutionsList(
                                     R.string.stripe_picker_search_no_results,
                                     query
                                 ),
-                                style = FinancialConnectionsTheme.typography.caption,
+                                style = FinancialConnectionsTheme.typography.detailEmphasized,
                                 color = FinancialConnectionsTheme.colors.textSecondary,
-                                textAlign = TextAlign.Center
+                                textAlign = TextAlign.Start
                             )
                         }
                     } else {
@@ -384,10 +403,12 @@ private fun InstitutionResultTile(
 
 @Composable
 private fun FeaturedInstitutionsGrid(
+    modifier: Modifier,
     payload: Async<Payload>,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit
 ) {
     LazyVerticalGrid(
+        modifier = modifier,
         columns = GridCells.Fixed(2),
         contentPadding = PaddingValues(
             top = 16.dp,
@@ -417,7 +438,12 @@ private fun FeaturedInstitutionsGrid(
                                 color = FinancialConnectionsTheme.colors.borderDefault,
                                 shape = RoundedCornerShape(6.dp)
                             )
-                            .clickable { onInstitutionSelected(institution, true) }
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = rememberRipple(
+                                    color = FinancialConnectionsTheme.colors.textSecondary
+                                ),
+                            ) { onInstitutionSelected(institution, true) }
                     ) {
                         StripeImage(
                             modifier = Modifier

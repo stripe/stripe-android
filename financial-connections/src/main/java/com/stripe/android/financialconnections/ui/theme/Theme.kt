@@ -58,7 +58,6 @@ private val Typography = FinancialConnectionsTypography(
         fontWeight = FontWeight.W600
     ),
     kicker = TextStyle(
-        // TODO caps.
         fontSize = 12.sp,
         lineHeight = 20.sp,
         fontWeight = FontWeight.W600
