@@ -71,12 +71,6 @@ internal abstract class IdentityCameraScanFragment(
      */
     protected abstract val shouldObserveDisplayState: Boolean
 
-    override fun onResume() {
-        super.onResume()
-        // clean up displayStateChangedFlow, used when user reaches this Fragment by clicking back,
-        // in which case there might be some stale value.
-        identityScanViewModel.displayStateChangedFlow.update { null }
-    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         if (shouldObserveDisplayState) {
@@ -272,6 +266,12 @@ internal abstract class IdentityCameraScanFragment(
         super.onDestroy()
         Log.d(TAG, "Cancelling IdentityScanFlow")
         identityScanViewModel.identityScanFlow?.cancelFlow()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // When the fragment is navigated away from, clean up stale displayStateChangedFlow states.
+        identityScanViewModel.displayStateChangedFlow.update { null }
     }
 
     internal companion object {

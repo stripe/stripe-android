@@ -16,10 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
@@ -237,7 +235,6 @@ internal abstract class IdentityDocumentScanFragment(
         type: CollectedDataParam.Type,
         isFront: Boolean
     ) = lifecycleScope.launch {
-        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             if (isFront) {
                 identityViewModel.documentFrontUploadedState
             } else {
@@ -302,7 +299,6 @@ internal abstract class IdentityDocumentScanFragment(
                     )
                 }
             }
-        }
     }
 
     internal companion object {
