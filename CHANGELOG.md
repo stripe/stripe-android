@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+### CardScan
+* [SECURITY][5798](https://github.com/stripe/stripe-android/pull/5798) URL-encode IDs used in URLs to prevent injection attacks.
+
 ## 20.16.0 - 2022-11-14
 
 ### Payments
