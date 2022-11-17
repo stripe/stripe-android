@@ -138,6 +138,13 @@ internal class DriverLicenseScanFragmentTest {
             runBlocking {
                 mockScreenTracker.screenTransitionFinish(eq(SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE))
             }
+            val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
+            verify(mockIdentityViewModel).observeForVerificationPage(
+                any(),
+                successCaptor.capture(),
+                any()
+            )
+            successCaptor.lastValue.invoke(verificationPageNotRequireSelfie)
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
@@ -171,6 +178,7 @@ internal class DriverLicenseScanFragmentTest {
                 whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.DL_FRONT)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.DL_FRONT
                 )
 
@@ -194,7 +202,7 @@ internal class DriverLicenseScanFragmentTest {
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -257,6 +265,7 @@ internal class DriverLicenseScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.DL_FRONT
                 )
 
@@ -281,7 +290,7 @@ internal class DriverLicenseScanFragmentTest {
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -316,7 +325,7 @@ internal class DriverLicenseScanFragmentTest {
                 finalResultLiveData.postValue(mockBackFinalResult)
                 verifyUploadedWithFinalResult(
                     mockBackFinalResult,
-                    time = 3,
+                    time = 4,
                     targetType = IdentityScanState.ScanType.DL_BACK
                 )
 
@@ -324,7 +333,7 @@ internal class DriverLicenseScanFragmentTest {
                 binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
                 documentBackUploadState.update { backUploadedState }
 
-                verify(mockIdentityViewModel, times(4)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(5)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -373,6 +382,7 @@ internal class DriverLicenseScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.DL_FRONT
                 )
 
@@ -397,7 +407,7 @@ internal class DriverLicenseScanFragmentTest {
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -432,7 +442,7 @@ internal class DriverLicenseScanFragmentTest {
                 finalResultLiveData.postValue(mockBackFinalResult)
                 verifyUploadedWithFinalResult(
                     mockBackFinalResult,
-                    time = 3,
+                    time = 4,
                     targetType = IdentityScanState.ScanType.DL_BACK
                 )
 
@@ -440,7 +450,7 @@ internal class DriverLicenseScanFragmentTest {
                 binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
                 documentBackUploadState.update { backUploadedState }
 
-                verify(mockIdentityViewModel, times(4)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(5)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -489,6 +499,7 @@ internal class DriverLicenseScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.DL_FRONT
                 )
 
@@ -513,7 +524,7 @@ internal class DriverLicenseScanFragmentTest {
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -562,6 +573,7 @@ internal class DriverLicenseScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.DL_FRONT
                 )
 
@@ -586,7 +598,7 @@ internal class DriverLicenseScanFragmentTest {
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()

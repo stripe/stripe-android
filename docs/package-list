@@ -69,7 +69,6 @@ module:paymentsheet
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.addresselement
 com.stripe.android.paymentsheet.model
-com.stripe.android.paymentsheet.ui
 module:stripe-core
 com.stripe.android.core
 com.stripe.android.core.browser
@@ -83,6 +82,7 @@ com.stripe.android.core.storage
 com.stripe.android.core.utils
 com.stripe.android.core.version
 module:stripe-ui-core
+com.stripe.android.uicore.format
 com.stripe.android.uicore.image
 com.stripe.android.uicore.text
 module:stripecardscan

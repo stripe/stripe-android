@@ -141,6 +141,13 @@ internal class IDScanFragmentTest {
             runBlocking {
                 mockScreenTracker.screenTransitionFinish(eq(SCREEN_NAME_LIVE_CAPTURE_ID))
             }
+            val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
+            verify(mockIdentityViewModel).observeForVerificationPage(
+                any(),
+                successCaptor.capture(),
+                any()
+            )
+            successCaptor.lastValue.invoke(verificationPageNotRequireSelfie)
             verify(mockIdentityViewModel).sendAnalyticsRequest(
                 argThat {
                     eventName == EVENT_SCREEN_PRESENTED &&
@@ -177,6 +184,7 @@ internal class IDScanFragmentTest {
                 whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.ID_FRONT
                 )
 
@@ -200,7 +208,7 @@ internal class IDScanFragmentTest {
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -264,6 +272,7 @@ internal class IDScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.ID_FRONT
                 )
 
@@ -288,7 +297,7 @@ internal class IDScanFragmentTest {
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -323,7 +332,7 @@ internal class IDScanFragmentTest {
                 finalResultLiveData.postValue(mockBackFinalResult)
                 verifyUploadedWithFinalResult(
                     mockBackFinalResult,
-                    time = 3,
+                    time = 4,
                     targetType = IdentityScanState.ScanType.ID_BACK
                 )
 
@@ -331,7 +340,7 @@ internal class IDScanFragmentTest {
                 binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
                 documentBackUploadState.update { backUploadedState }
 
-                verify(mockIdentityViewModel, times(4)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(5)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -380,6 +389,7 @@ internal class IDScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.ID_FRONT
                 )
 
@@ -404,7 +414,7 @@ internal class IDScanFragmentTest {
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -439,7 +449,7 @@ internal class IDScanFragmentTest {
                 finalResultLiveData.postValue(mockBackFinalResult)
                 verifyUploadedWithFinalResult(
                     mockBackFinalResult,
-                    time = 3,
+                    time = 4,
                     targetType = IdentityScanState.ScanType.ID_BACK
                 )
 
@@ -447,7 +457,7 @@ internal class IDScanFragmentTest {
                 binding.kontinue.findViewById<Button>(R.id.button).callOnClick()
                 documentBackUploadState.update { backUploadedState }
 
-                verify(mockIdentityViewModel, times(4)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(5)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -496,6 +506,7 @@ internal class IDScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.ID_FRONT
                 )
 
@@ -520,7 +531,7 @@ internal class IDScanFragmentTest {
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()
@@ -569,6 +580,7 @@ internal class IDScanFragmentTest {
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
+                    time = 2,
                     targetType = IdentityScanState.ScanType.ID_FRONT
                 )
 
@@ -593,7 +605,7 @@ internal class IDScanFragmentTest {
 
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(2)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
                     any(),
                     successCaptor.capture(),
                     any()

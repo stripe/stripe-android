@@ -31,6 +31,8 @@ class DocSelectScreenTest {
     val composeTestRule = createComposeRule()
 
     private val onDocTypeSelectedMock = mock<(CollectedDataParam.Type) -> Unit>()
+    private val onError = mock<(Throwable) -> Unit>()
+    private val onComposeFinish = mock<(VerificationPage) -> Unit>()
 
     private val verificationPageWithMultiChoice = mock<VerificationPage> {
         on { it.documentSelect } doReturn DOC_SELECT_MULTI_CHOICE
@@ -86,6 +88,8 @@ class DocSelectScreenTest {
         composeTestRule.setContent {
             DocSelectionScreen(
                 verificationPageState = verificationState,
+                onError = onError,
+                onComposeFinish = onComposeFinish,
                 onDocTypeSelected = onDocTypeSelectedMock
             )
         }

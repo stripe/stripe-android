@@ -24,6 +24,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -66,6 +67,7 @@ internal fun UploadScreen(
     context: String,
     frontInfo: DocumentUploadSideInfo,
     backInfo: DocumentUploadSideInfo?,
+    onComposeFinish: () -> Unit,
     onContinueClicked: () -> Unit
 ) {
     val frontUploadState by identityViewModel.documentFrontUploadedState.collectAsState()
@@ -206,6 +208,9 @@ internal fun UploadScreen(
                 continueButtonState = LoadingButtonState.Loading
                 onContinueClicked()
             }
+        }
+        LaunchedEffect(Unit) {
+            onComposeFinish()
         }
     }
 }

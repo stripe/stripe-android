@@ -168,7 +168,7 @@ class ConsentScreenTest {
             ConsentScreen(
                 merchantLogoUri = merchantLogoUri,
                 verificationState = verificationState,
-                onSuccess = onSuccessMock,
+                onComposeFinish = onSuccessMock,
                 onFallbackUrl = onFallbackMock,
                 onError = onErrorMock,
                 onConsentAgreed = onConsentAgreedMock,
