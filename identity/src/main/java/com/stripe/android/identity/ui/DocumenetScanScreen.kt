@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -61,6 +62,15 @@ internal fun DocumentScanScreen(
                     horizontal = dimensionResource(id = R.dimen.page_horizontal_margin)
                 )
         ) {
+            var loadingButtonState by remember(newDisplayState) {
+                mutableStateOf(
+                    if (newDisplayState is IdentityScanState.Finished) {
+                        LoadingButtonState.Idle
+                    } else {
+                        LoadingButtonState.Disabled
+                    }
+                )
+            }
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -88,22 +98,12 @@ internal fun DocumentScanScreen(
                         .semantics {
                             testTag = SCAN_MESSAGE_TAG
                         },
-                    maxLines = 3
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 CameraViewFinder(onCameraViewCreated, newDisplayState)
             }
-
-            var loadingButtonState by remember(newDisplayState) {
-                mutableStateOf(
-                    if (newDisplayState is IdentityScanState.Finished) {
-                        LoadingButtonState.Idle
-                    } else {
-                        LoadingButtonState.Disabled
-                    }
-                )
-            }
-
             LoadingButton(
                 modifier = Modifier.testTag(CONTINUE_BUTTON_TAG),
                 text = stringResource(id = R.string.kontinue).uppercase(),
@@ -117,7 +117,7 @@ internal fun DocumentScanScreen(
 }
 
 @Composable
-internal fun CameraViewFinder(
+private fun CameraViewFinder(
     onCameraViewCreated: (CameraView) -> Unit,
     newScanState: IdentityScanState?
 ) {
