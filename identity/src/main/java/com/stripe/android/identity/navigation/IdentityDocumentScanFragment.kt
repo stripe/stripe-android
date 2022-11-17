@@ -235,70 +235,70 @@ internal abstract class IdentityDocumentScanFragment(
         type: CollectedDataParam.Type,
         isFront: Boolean
     ) = lifecycleScope.launch {
-            if (isFront) {
-                identityViewModel.documentFrontUploadedState
-            } else {
-                identityViewModel.documentBackUploadedState
-            }.collectLatest { uploadedState ->
-                if (uploadedState.hasError()) {
-                    navigateToDefaultErrorFragment(uploadedState.getError())
-                } else if (uploadedState.isUploaded()) {
-                    identityViewModel.observeForVerificationPage(
-                        viewLifecycleOwner,
-                        onSuccess = {
-                            lifecycleScope.launch {
-                                runCatching {
-                                    postVerificationPageData(
-                                        identityViewModel = identityViewModel,
-                                        collectedDataParam =
-                                        if (isFront) {
-                                            CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
-                                                type = type,
-                                                frontHighResResult = requireNotNull(uploadedState.highResResult.data),
-                                                frontLowResResult = requireNotNull(uploadedState.lowResResult.data)
-                                            )
-                                        } else {
-                                            CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
-                                                type = type,
-                                                backHighResResult = requireNotNull(uploadedState.highResResult.data),
-                                                backLowResResult = requireNotNull(uploadedState.lowResResult.data)
-                                            )
-                                        },
-                                        fromFragment = fragmentId
-                                    ) { verificationPageDataWithNoError ->
-                                        if (verificationPageDataWithNoError.isMissingBack()) {
-                                            startScanning(
-                                                requireNotNull(backScanType) {
-                                                    "backScanType is null while still missing back"
-                                                }
-                                            )
-                                        } else if (verificationPageDataWithNoError.isMissingSelfie()) {
-                                            findNavController().navigate(
-                                                R.id.action_global_selfieFragment
-                                            )
-                                        } else {
-                                            submitVerificationPageDataAndNavigate(
-                                                identityViewModel,
-                                                fragmentId
-                                            )
-                                        }
+        if (isFront) {
+            identityViewModel.documentFrontUploadedState
+        } else {
+            identityViewModel.documentBackUploadedState
+        }.collectLatest { uploadedState ->
+            if (uploadedState.hasError()) {
+                navigateToDefaultErrorFragment(uploadedState.getError())
+            } else if (uploadedState.isUploaded()) {
+                identityViewModel.observeForVerificationPage(
+                    viewLifecycleOwner,
+                    onSuccess = {
+                        lifecycleScope.launch {
+                            runCatching {
+                                postVerificationPageData(
+                                    identityViewModel = identityViewModel,
+                                    collectedDataParam =
+                                    if (isFront) {
+                                        CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
+                                            type = type,
+                                            frontHighResResult = requireNotNull(uploadedState.highResResult.data),
+                                            frontLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                                        )
+                                    } else {
+                                        CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
+                                            type = type,
+                                            backHighResResult = requireNotNull(uploadedState.highResResult.data),
+                                            backLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                                        )
+                                    },
+                                    fromFragment = fragmentId
+                                ) { verificationPageDataWithNoError ->
+                                    if (verificationPageDataWithNoError.isMissingBack()) {
+                                        startScanning(
+                                            requireNotNull(backScanType) {
+                                                "backScanType is null while still missing back"
+                                            }
+                                        )
+                                    } else if (verificationPageDataWithNoError.isMissingSelfie()) {
+                                        findNavController().navigate(
+                                            R.id.action_global_selfieFragment
+                                        )
+                                    } else {
+                                        submitVerificationPageDataAndNavigate(
+                                            identityViewModel,
+                                            fragmentId
+                                        )
                                     }
-                                }.onFailure { throwable ->
-                                    Log.e(
-                                        TAG,
-                                        "fail to submit uploaded files: $throwable"
-                                    )
-                                    navigateToDefaultErrorFragment(throwable)
                                 }
+                            }.onFailure { throwable ->
+                                Log.e(
+                                    TAG,
+                                    "fail to submit uploaded files: $throwable"
+                                )
+                                navigateToDefaultErrorFragment(throwable)
                             }
-                        },
-                        onFailure = { throwable ->
-                            Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
-                            navigateToDefaultErrorFragment(throwable)
                         }
-                    )
-                }
+                    },
+                    onFailure = { throwable ->
+                        Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
+                        navigateToDefaultErrorFragment(throwable)
+                    }
+                )
             }
+        }
     }
 
     internal companion object {
