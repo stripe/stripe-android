@@ -5,6 +5,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.text.TextUtils
@@ -81,17 +82,42 @@ fun Context.getDrawableFromUri(uri: Uri): Drawable? {
     return null
 }
 
-internal fun String.isSupportedImageUrl(): Boolean {
-    SupportedImageType.values().forEach {
-        if (endsWith(it.suffix, ignoreCase = true)) {
-            return true
+internal fun String.isSupportedImageUrl() =
+    ImageType.values().any { imageType ->
+        imageType.suffixes.any { suffix ->
+            endsWith(suffix, ignoreCase = true)
         }
     }
-    return false
-}
 
-internal enum class SupportedImageType(val suffix: String) {
-    PNG("png"), WEBP("webp"), JPEG("jpeg"), JPG("jpg")
+internal enum class ImageType(
+    val suffixes: List<String>,
+    val compressFormat: Bitmap.CompressFormat
+) {
+    PNG(
+        suffixes = listOf("png"),
+        compressFormat = Bitmap.CompressFormat.PNG
+    ),
+    WEBP(
+        suffixes = listOf("webp"),
+        compressFormat = Bitmap.CompressFormat.WEBP
+    ),
+    JPEG(
+        suffixes = listOf("jpeg", "jpg"),
+        compressFormat = Bitmap.CompressFormat.JPEG
+    );
+
+    companion object {
+        fun fromUrl(url: String): ImageType? =
+            values()
+                .firstOrNull {
+                    it.suffixes.any { suffix ->
+                        url.endsWith(
+                            suffix,
+                            ignoreCase = true
+                        )
+                    }
+                }
+    }
 }
 
 private const val TAG = "stripe_ui_core_utils"
