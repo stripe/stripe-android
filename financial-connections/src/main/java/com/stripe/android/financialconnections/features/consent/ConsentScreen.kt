@@ -510,7 +510,7 @@ private fun ConsentBottomSheetBullet(
                                 .toSpanStyle()
                                 .copy(color = colors.textPrimary),
                         ),
-                        onClickableTextClick = {}
+                        onClickableTextClick = onClickableTextClick
                     )
                 }
                 // only content
@@ -528,7 +528,7 @@ private fun ConsentBottomSheetBullet(
                                 .toSpanStyle()
                                 .copy(color = colors.textSecondary),
                         ),
-                        onClickableTextClick = {}
+                        onClickableTextClick = onClickableTextClick
                     )
                 }
             }
