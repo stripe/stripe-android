@@ -3,9 +3,6 @@
 
 package com.stripe.android.financialconnections.features.consent
 
-import android.os.Build
-import android.text.Html
-import android.text.Spanned
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -51,7 +48,6 @@ import com.stripe.android.financialconnections.features.consent.ConsentState.Vie
 import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
-import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -63,6 +59,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.components.elevation
+import com.stripe.android.financialconnections.ui.sdui.BulletUI
+import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.uicore.image.StripeImage
@@ -145,13 +143,7 @@ private fun ConsentMainContent(
         TextResource.Text(fromHtml(consent.title))
     }
     val bullets = remember(consent.body.bullets) {
-        consent.body.bullets.map { bullet ->
-            Triple(
-                first = bullet.icon,
-                second = bullet.title?.let { TextResource.Text(fromHtml(it)) },
-                third = bullet.content?.let { TextResource.Text(fromHtml(it)) },
-            )
-        }
+        consent.body.bullets.map { bullet -> BulletUI.from(bullet) }
     }
     FinancialConnectionsScaffold(
         topBar = {
@@ -186,12 +178,10 @@ private fun ConsentMainContent(
                     )
                 )
                 Spacer(modifier = Modifier.size(24.dp))
-                bullets.forEach { (iconUrl, title, description) ->
+                bullets.forEach { bullet ->
                     Spacer(modifier = Modifier.size(16.dp))
                     ConsentBottomSheetBullet(
-                        iconUrl = iconUrl?.default,
-                        title = title,
-                        description = description,
+                        bullet,
                         onClickableTextClick = onClickableTextClick
                     )
                 }
@@ -335,13 +325,7 @@ private fun LegalDetailsBottomSheetContent(
         TextResource.Text(fromHtml(legalDetails.learnMore))
     }
     val bullets = remember(legalDetails.body.bullets) {
-        legalDetails.body.bullets.map { body ->
-            Triple(
-                first = body.icon,
-                second = body.title?.let { TextResource.Text(fromHtml(body.title)) },
-                third = body.content?.let { TextResource.Text(fromHtml(body.content)) }
-            )
-        }
+        legalDetails.body.bullets.map { BulletUI.from(it) }
     }
     ConsentBottomSheetContent(
         title = title,
@@ -370,13 +354,7 @@ private fun DataAccessBottomSheetContent(
         dataDialog.connectedAccountNotice?.let { TextResource.Text(fromHtml(it)) }
     }
     val bullets = remember(dataDialog.body.bullets) {
-        dataDialog.body.bullets.map { bullet ->
-            Triple(
-                first = bullet.icon,
-                second = bullet.title?.let { TextResource.Text(fromHtml(it)) },
-                third = bullet.content?.let { TextResource.Text(fromHtml(it)) }
-            )
-        }
+        dataDialog.body.bullets.map { BulletUI.from(it) }
     }
     ConsentBottomSheetContent(
         title = title,
@@ -393,7 +371,7 @@ private fun DataAccessBottomSheetContent(
 private fun ConsentBottomSheetContent(
     title: TextResource.Text,
     onClickableTextClick: (String) -> Unit,
-    bullets: List<Triple<Image?, TextResource?, TextResource?>>,
+    bullets: List<BulletUI>,
     connectedAccountNotice: TextResource?,
     cta: String,
     learnMore: TextResource,
@@ -414,12 +392,10 @@ private fun ConsentBottomSheetContent(
                 annotationStyles = emptyMap(),
                 onClickableTextClick = onClickableTextClick
             )
-            bullets.forEach { (iconUrl, title, description) ->
+            bullets.forEach {
                 Spacer(modifier = Modifier.size(16.dp))
                 ConsentBottomSheetBullet(
-                    iconUrl = iconUrl?.default,
-                    title = title,
-                    description = description,
+                    bullet = it,
                     onClickableTextClick = onClickableTextClick
                 )
             }
@@ -477,20 +453,18 @@ private fun ConsentBottomSheetContent(
 
 @Composable
 private fun ConsentBottomSheetBullet(
-    title: TextResource?,
-    description: TextResource?,
-    iconUrl: String?,
+    bullet: BulletUI,
     onClickableTextClick: (String) -> Unit
 ) {
     Row {
-        ConsentBulletIcon(iconUrl = iconUrl)
+        ConsentBulletIcon(iconUrl = bullet.icon)
         Spacer(modifier = Modifier.size(8.dp))
         Column {
             when {
                 // title + content
-                title != null && description != null -> {
+                bullet.title != null && bullet.content != null -> {
                     AnnotatedText(
-                        text = title,
+                        text = bullet.title,
                         defaultStyle = typography.body.copy(
                             color = colors.textPrimary
                         ),
@@ -506,7 +480,7 @@ private fun ConsentBottomSheetBullet(
                     )
                     Spacer(modifier = Modifier.size(2.dp))
                     AnnotatedText(
-                        text = description,
+                        text = bullet.content,
                         defaultStyle = typography.detail.copy(
                             color = colors.textSecondary
                         ),
@@ -522,9 +496,9 @@ private fun ConsentBottomSheetBullet(
                     )
                 }
                 // only title
-                title != null -> {
+                bullet.title != null -> {
                     AnnotatedText(
-                        text = title,
+                        text = bullet.title,
                         defaultStyle = typography.body.copy(
                             color = colors.textPrimary
                         ),
@@ -540,9 +514,9 @@ private fun ConsentBottomSheetBullet(
                     )
                 }
                 // only content
-                description != null -> {
+                bullet.content != null -> {
                     AnnotatedText(
-                        text = description,
+                        text = bullet.content,
                         defaultStyle = typography.body.copy(
                             color = colors.textSecondary
                         ),
@@ -592,15 +566,6 @@ private fun ConsentBulletIcon(iconUrl: String?) {
             contentDescription = null,
             modifier = modifier
         )
-    }
-}
-
-@SuppressWarnings("deprecation")
-private fun fromHtml(source: String): Spanned {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        Html.fromHtml(source, Html.FROM_HTML_MODE_LEGACY)
-    } else {
-        Html.fromHtml(source)
     }
 }
 
