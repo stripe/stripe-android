@@ -81,4 +81,17 @@ fun Context.getDrawableFromUri(uri: Uri): Drawable? {
     return null
 }
 
+internal fun String.isSupportedImageUrl(): Boolean {
+    SupportedImageType.values().forEach {
+        if (endsWith(it.suffix, ignoreCase = true)) {
+            return true
+        }
+    }
+    return false
+}
+
+internal enum class SupportedImageType(val suffix: String) {
+    PNG("png"), WEBP("webp"), JPEG("jpeg"), JPG("jpg")
+}
+
 private const val TAG = "stripe_ui_core_utils"

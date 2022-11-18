@@ -82,10 +82,13 @@ class ImageLruDiskCache(
 
     private fun compressFormatFromUrl(url: String): CompressFormat {
         return when {
-            url.endsWith("png") -> CompressFormat.PNG
-            url.endsWith("webp") -> CompressFormat.WEBP
-            url.endsWith("jpg") ||
-                url.endsWith("jpeg") -> CompressFormat.JPEG
+            url.endsWith(SupportedImageType.PNG.suffix, ignoreCase = true) -> CompressFormat.PNG
+            url.endsWith(SupportedImageType.WEBP.suffix, ignoreCase = true) -> CompressFormat.WEBP
+            url.endsWith(SupportedImageType.JPG.suffix, ignoreCase = true) ||
+                url.endsWith(
+                    SupportedImageType.JPEG.suffix,
+                    ignoreCase = true
+                ) -> CompressFormat.JPEG
             else -> throw IllegalArgumentException("Unexpected image format: $url")
         }
     }
