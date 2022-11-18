@@ -186,12 +186,15 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (supportFragmentManager.backStackEntryCount > 0) {
-            clearErrorMessages()
-            super.onBackPressed()
-        } else {
-            viewModel.onUserCancel()
+        if (viewModel.processing.value == false) {
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                clearErrorMessages()
+                super.onBackPressed()
+            } else {
+                viewModel.onUserCancel()
+            }
         }
     }
 
