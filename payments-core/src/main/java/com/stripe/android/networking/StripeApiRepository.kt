@@ -162,7 +162,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     init {
         fireFraudDetectionDataRequest()
 
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(workContext).launch {
             val httpCacheDir = File(context.cacheDir, "stripe_api_repository_cache")
             val httpCacheSize = (10 * 1024 * 1024).toLong() // 10 MiB
             HttpResponseCache.install(httpCacheDir, httpCacheSize)
