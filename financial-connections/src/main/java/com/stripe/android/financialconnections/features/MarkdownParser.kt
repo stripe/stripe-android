@@ -32,7 +32,7 @@ internal object MarkdownParser {
             bullets = pane.body.bullets.map { bullet ->
                 Bullet(
                     icon = bullet.icon,
-                    content = toHtml(bullet.content),
+                    content = bullet.content?.let { toHtml(it) },
                     title = bullet.title?.let { toHtml(it) }
                 )
             }
@@ -46,7 +46,7 @@ internal object MarkdownParser {
                 bullets = pane.dataAccessNotice.body.bullets.map { bullet ->
                     Bullet(
                         icon = bullet.icon,
-                        content = toHtml(bullet.content),
+                        content = bullet.content?.let { toHtml(it) },
                         title = bullet.title?.let { toHtml(it) }
                     )
                 }
@@ -61,7 +61,7 @@ internal object MarkdownParser {
                 bullets = pane.legalDetailsNotice.body.bullets.map { bullet ->
                     Bullet(
                         icon = bullet.icon,
-                        content = toHtml(bullet.content),
+                        content = bullet.content?.let { toHtml(it) },
                         title = bullet.title?.let { toHtml(it) }
                     )
                 }

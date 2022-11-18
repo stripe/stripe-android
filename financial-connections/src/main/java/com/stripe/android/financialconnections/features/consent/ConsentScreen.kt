@@ -145,7 +145,13 @@ private fun ConsentMainContent(
         TextResource.Text(fromHtml(consent.title))
     }
     val bullets = remember(consent.body.bullets) {
-        consent.body.bullets.map { it.icon to TextResource.Text(fromHtml(it.content)) }
+        consent.body.bullets.map { bullet ->
+            Triple(
+                first = bullet.icon,
+                second = bullet.title?.let { TextResource.Text(fromHtml(it)) },
+                third = bullet.content?.let { TextResource.Text(fromHtml(it)) },
+            )
+        }
     }
     FinancialConnectionsScaffold(
         topBar = {
@@ -180,11 +186,15 @@ private fun ConsentMainContent(
                     )
                 )
                 Spacer(modifier = Modifier.size(24.dp))
-                bullets.forEach { (iconUrl, text) ->
-                    ConsentBulletRow(iconUrl?.default, text) { onClickableTextClick(it) }
+                bullets.forEach { (iconUrl, title, description) ->
                     Spacer(modifier = Modifier.size(16.dp))
+                    ConsentBottomSheetBullet(
+                        iconUrl = iconUrl?.default,
+                        title = title,
+                        description = description,
+                        onClickableTextClick = onClickableTextClick
+                    )
                 }
-
                 Spacer(modifier = Modifier.weight(1f))
             }
             ConsentFooter(
@@ -329,7 +339,7 @@ private fun LegalDetailsBottomSheetContent(
             Triple(
                 first = body.icon,
                 second = body.title?.let { TextResource.Text(fromHtml(body.title)) },
-                third = TextResource.Text(fromHtml(body.content))
+                third = body.content?.let { TextResource.Text(fromHtml(body.content)) }
             )
         }
     }
@@ -360,11 +370,11 @@ private fun DataAccessBottomSheetContent(
         dataDialog.connectedAccountNotice?.let { TextResource.Text(fromHtml(it)) }
     }
     val bullets = remember(dataDialog.body.bullets) {
-        dataDialog.body.bullets.map { body ->
+        dataDialog.body.bullets.map { bullet ->
             Triple(
-                first = body.icon,
-                second = body.title?.let { TextResource.Text(fromHtml(body.title)) },
-                third = TextResource.Text(fromHtml(body.content))
+                first = bullet.icon,
+                second = bullet.title?.let { TextResource.Text(fromHtml(it)) },
+                third = bullet.content?.let { TextResource.Text(fromHtml(it)) }
             )
         }
     }
@@ -383,7 +393,7 @@ private fun DataAccessBottomSheetContent(
 private fun ConsentBottomSheetContent(
     title: TextResource.Text,
     onClickableTextClick: (String) -> Unit,
-    bullets: List<Triple<Image?, TextResource?, TextResource>>,
+    bullets: List<Triple<Image?, TextResource?, TextResource?>>,
     connectedAccountNotice: TextResource?,
     cta: String,
     learnMore: TextResource,
@@ -409,7 +419,8 @@ private fun ConsentBottomSheetContent(
                 ConsentBottomSheetBullet(
                     iconUrl = iconUrl?.default,
                     title = title,
-                    description = description
+                    description = description,
+                    onClickableTextClick = onClickableTextClick
                 )
             }
         }
@@ -468,64 +479,86 @@ private fun ConsentBottomSheetContent(
 private fun ConsentBottomSheetBullet(
     title: TextResource?,
     description: TextResource?,
-    iconUrl: String?
+    iconUrl: String?,
+    onClickableTextClick: (String) -> Unit
 ) {
     Row {
         ConsentBulletIcon(iconUrl = iconUrl)
         Spacer(modifier = Modifier.size(8.dp))
         Column {
-            if (title != null && description != null) {
-                Text(
-                    text = title.toText().toString(),
-                    style = typography.bodyEmphasized.copy(
-                        color = colors.textPrimary
+            when {
+                // title + content
+                title != null && description != null -> {
+                    AnnotatedText(
+                        text = title,
+                        defaultStyle = typography.body.copy(
+                            color = colors.textPrimary
+                        ),
+                        annotationStyles = mapOf(
+                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
+                                .toSpanStyle()
+                                .copy(color = colors.textBrand),
+                            StringAnnotation.BOLD to typography.bodyEmphasized
+                                .toSpanStyle()
+                                .copy(color = colors.textPrimary),
+                        ),
+                        onClickableTextClick = onClickableTextClick
                     )
-                )
-                Spacer(modifier = Modifier.size(2.dp))
-                Text(
-                    text = description.toText().toString(),
-                    style = typography.caption.copy(
-                        color = colors.textSecondary
+                    Spacer(modifier = Modifier.size(2.dp))
+                    AnnotatedText(
+                        text = description,
+                        defaultStyle = typography.detail.copy(
+                            color = colors.textSecondary
+                        ),
+                        annotationStyles = mapOf(
+                            StringAnnotation.CLICKABLE to typography.detailEmphasized
+                                .toSpanStyle()
+                                .copy(color = colors.textBrand),
+                            StringAnnotation.BOLD to typography.detailEmphasized
+                                .toSpanStyle()
+                                .copy(color = colors.textSecondary),
+                        ),
+                        onClickableTextClick = onClickableTextClick
                     )
-                )
-            } else {
-                val text = title ?: description ?: TextResource.Text("")
-                Text(
-                    text = text.toText().toString(),
-                    style = typography.body.copy(
-                        color = colors.textPrimary
+                }
+                // only title
+                title != null -> {
+                    AnnotatedText(
+                        text = title,
+                        defaultStyle = typography.body.copy(
+                            color = colors.textPrimary
+                        ),
+                        annotationStyles = mapOf(
+                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
+                                .toSpanStyle()
+                                .copy(color = colors.textBrand),
+                            StringAnnotation.BOLD to typography.bodyEmphasized
+                                .toSpanStyle()
+                                .copy(color = colors.textPrimary),
+                        ),
+                        onClickableTextClick = {}
                     )
-                )
+                }
+                // only content
+                description != null -> {
+                    AnnotatedText(
+                        text = description,
+                        defaultStyle = typography.body.copy(
+                            color = colors.textSecondary
+                        ),
+                        annotationStyles = mapOf(
+                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
+                                .toSpanStyle()
+                                .copy(color = colors.textBrand),
+                            StringAnnotation.BOLD to typography.bodyEmphasized
+                                .toSpanStyle()
+                                .copy(color = colors.textSecondary),
+                        ),
+                        onClickableTextClick = {}
+                    )
+                }
             }
-
         }
-    }
-}
-
-@Composable
-private fun ConsentBulletRow(
-    iconUrl: String?,
-    text: TextResource,
-    onClickableTextClick: ((String) -> Unit)? = null
-) {
-    Row {
-        ConsentBulletIcon(iconUrl = iconUrl)
-        Spacer(modifier = Modifier.size(8.dp))
-        AnnotatedText(
-            text,
-            onClickableTextClick = { onClickableTextClick?.invoke(it) },
-            defaultStyle = typography.body.copy(
-                color = colors.textSecondary
-            ),
-            annotationStyles = mapOf(
-                StringAnnotation.CLICKABLE to typography.bodyEmphasized
-                    .toSpanStyle()
-                    .copy(color = colors.textBrand),
-                StringAnnotation.BOLD to typography.bodyEmphasized
-                    .toSpanStyle()
-                    .copy(color = colors.textSecondary)
-            )
-        )
     }
 }
 

@@ -60,7 +60,7 @@ internal data class DataAccessNoticeBody(
 @Parcelize
 internal data class Bullet(
     @SerialName("content")
-    val content: String,
+    val content: String? = null,
     @SerialName("icon")
     val icon: Image? = null,
     @SerialName("title")
