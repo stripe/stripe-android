@@ -10,12 +10,12 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 internal data class SelfieUploadState(
-    val firstHighResResult: Resource<UploadedResult> = Resource.loading(),
-    val firstLowResResult: Resource<UploadedResult> = Resource.loading(),
-    val lastHighResResult: Resource<UploadedResult> = Resource.loading(),
-    val lastLowResResult: Resource<UploadedResult> = Resource.loading(),
-    val bestHighResResult: Resource<UploadedResult> = Resource.loading(),
-    val bestLowResResult: Resource<UploadedResult> = Resource.loading()
+    val firstHighResResult: Resource<UploadedResult> = Resource.idle(),
+    val firstLowResResult: Resource<UploadedResult> = Resource.idle(),
+    val lastHighResResult: Resource<UploadedResult> = Resource.idle(),
+    val lastLowResResult: Resource<UploadedResult> = Resource.idle(),
+    val bestHighResResult: Resource<UploadedResult> = Resource.idle(),
+    val bestLowResResult: Resource<UploadedResult> = Resource.idle()
 ) : Parcelable {
 
     @IgnoredOnParcel
