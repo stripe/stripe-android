@@ -8,6 +8,8 @@ import com.stripe.android.financialconnections.model.ConsentPaneBody
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.Image
+import com.stripe.android.financialconnections.model.LegalDetailsBody
+import com.stripe.android.financialconnections.model.LegalDetailsNotice
 
 internal class ConsentStates : PreviewParameterProvider<ConsentState> {
     override val values = sequenceOf(
@@ -22,6 +24,7 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
         fun canonical() = ConsentState(consent = Success(sampleConsent().copy(belowCta = null)))
         fun manualEntryPlusMicrodeposits() = ConsentState(consent = Success(sampleConsent()))
 
+        @Suppress("LongMethod")
         fun sampleConsent(): ConsentPane = ConsentPane(
             title = "Goldilocks works with Stripe to link your accounts",
             body = ConsentPaneBody(
@@ -66,7 +69,22 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
                 learnMore = "Learn more about data access",
                 connectedAccountNotice = "Connected account placeholder",
                 cta = "OK"
-            )
+            ),
+            legalDetailsNotice = LegalDetailsNotice(
+                title = "Stripe uses your account data as described in the Terms, including:",
+                body = LegalDetailsBody(
+                    bullets = listOf(
+                        Bullet(
+                            content = "To improve our services"
+                        ),
+                        Bullet(
+                            content = "To manage fraud and loss risk of transactions"
+                        ),
+                    )
+                ),
+                learnMore = "Learn more",
+                cta = "OK"
+            ),
         )
     }
 }

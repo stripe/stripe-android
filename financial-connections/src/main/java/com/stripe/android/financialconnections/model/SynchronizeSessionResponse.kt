@@ -36,8 +36,17 @@ internal data class ConsentPane(
     val cta: String,
     @SerialName("data_access_notice")
     val dataAccessNotice: DataAccessNotice,
+    @SerialName("legal_details_notice")
+    val legalDetailsNotice: LegalDetailsNotice,
     @SerialName("title")
     val title: String
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class ConsentPaneBody(
+    @SerialName("bullets")
+    val bullets: List<Bullet>
 ) : Parcelable
 
 @Serializable
@@ -51,9 +60,9 @@ internal data class DataAccessNoticeBody(
 @Parcelize
 internal data class Bullet(
     @SerialName("content")
-    val content: String,
+    val content: String? = null,
     @SerialName("icon")
-    val icon: Image,
+    val icon: Image? = null,
     @SerialName("title")
     val title: String? = null
 ) : Parcelable
@@ -75,7 +84,21 @@ internal data class DataAccessNotice(
 
 @Serializable
 @Parcelize
-internal data class ConsentPaneBody(
+internal data class LegalDetailsNotice(
+    @SerialName("body")
+    val body: LegalDetailsBody,
+    @SerialName("title")
+    val title: String,
+    @SerialName("cta")
+    val cta: String,
+    @SerialName("learn_more")
+    val learnMore: String,
+
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class LegalDetailsBody(
     @SerialName("bullets")
     val bullets: List<Bullet>
 ) : Parcelable

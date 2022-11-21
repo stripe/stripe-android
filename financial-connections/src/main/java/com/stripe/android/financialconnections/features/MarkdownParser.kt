@@ -5,6 +5,8 @@ import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.ConsentPaneBody
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.DataAccessNoticeBody
+import com.stripe.android.financialconnections.model.LegalDetailsBody
+import com.stripe.android.financialconnections.model.LegalDetailsNotice
 
 internal object MarkdownParser {
     private val markDownToHtmlRegex = listOf(
@@ -30,7 +32,7 @@ internal object MarkdownParser {
             bullets = pane.body.bullets.map { bullet ->
                 Bullet(
                     icon = bullet.icon,
-                    content = toHtml(bullet.content),
+                    content = bullet.content?.let { toHtml(it) },
                     title = bullet.title?.let { toHtml(it) }
                 )
             }
@@ -44,7 +46,7 @@ internal object MarkdownParser {
                 bullets = pane.dataAccessNotice.body.bullets.map { bullet ->
                     Bullet(
                         icon = bullet.icon,
-                        content = toHtml(bullet.content),
+                        content = bullet.content?.let { toHtml(it) },
                         title = bullet.title?.let { toHtml(it) }
                     )
                 }
@@ -52,6 +54,20 @@ internal object MarkdownParser {
             learnMore = toHtml(pane.dataAccessNotice.learnMore),
             cta = toHtml(pane.dataAccessNotice.cta),
             connectedAccountNotice = pane.dataAccessNotice.connectedAccountNotice?.let { toHtml(it) }
+        ),
+        legalDetailsNotice = LegalDetailsNotice(
+            title = toHtml(pane.legalDetailsNotice.title),
+            body = LegalDetailsBody(
+                bullets = pane.legalDetailsNotice.body.bullets.map { bullet ->
+                    Bullet(
+                        icon = bullet.icon,
+                        content = bullet.content?.let { toHtml(it) },
+                        title = bullet.title?.let { toHtml(it) }
+                    )
+                }
+            ),
+            cta = toHtml(pane.legalDetailsNotice.cta),
+            learnMore = toHtml(pane.legalDetailsNotice.learnMore)
         )
     )
 }
