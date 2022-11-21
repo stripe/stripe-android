@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package com.stripe.android.financialconnections.ui.sdui
 
 import android.os.Build
