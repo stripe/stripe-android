@@ -453,18 +453,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 val linkConfig = createLinkConfiguration(stripeIntent).also {
                     _linkConfiguration.value = it
                 }
+
                 val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
+
                 when (accountStatus) {
                     AccountStatus.Verified -> launchLink(linkConfig, launchedDirectly = true)
                     AccountStatus.VerificationStarted,
-                    AccountStatus.NeedsVerification -> {
-                        val success = requestLinkVerification()
-                        if (success) {
-                            launchLink(linkConfig, launchedDirectly = true)
-                        }
-                    }
+                    AccountStatus.NeedsVerification -> setupLinkWithVerification(linkConfig)
                     AccountStatus.SignedOut,
                     AccountStatus.Error -> {
+                        // Nothing to do here
                     }
                 }
                 activeLinkSession.value = accountStatus == AccountStatus.Verified
@@ -472,6 +470,17 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         } else {
             _isLinkEnabled.value = false
+        }
+    }
+
+    private fun setupLinkWithVerification(
+        configuration: LinkPaymentLauncher.Configuration,
+    ) {
+        viewModelScope.launch {
+            val success = requestLinkVerification()
+            if (success) {
+                launchLink(configuration, launchedDirectly = true)
+            }
         }
     }
 
