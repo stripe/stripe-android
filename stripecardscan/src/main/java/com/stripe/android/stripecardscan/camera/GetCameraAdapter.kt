@@ -25,36 +25,14 @@ internal fun getCameraAdapter(
 ): CameraAdapter<CameraPreviewImage<Bitmap>> =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
         try {
-            getAlternateCamera(activity, previewView, minimumResolution, cameraErrorListener)
+            Camera1Adapter(activity, previewView, minimumResolution, cameraErrorListener)
         } catch (t: Throwable) {
-            Log.d(LOG_TAG, "No alternative camera implementations, falling back to default")
+            Log.w(LOG_TAG, "Unable to instantiate CameraX", t)
             Camera1Adapter(activity, previewView, minimumResolution, cameraErrorListener)
         }
     } else {
-        Log.d(LOG_TAG, "YUV_420_888 is not supported, falling back to default camera")
+        // older versions of android (API 20 and older) do not support YUV_420_888
         Camera1Adapter(activity, previewView, minimumResolution, cameraErrorListener)
     }.apply {
         Log.d(LOG_TAG, "Using camera implementation ${this.implementationName}")
     }
-
-@Suppress("UNCHECKED_CAST")
-@Throws(ClassNotFoundException::class, NoSuchMethodException::class, IllegalAccessException::class)
-private fun getAlternateCamera(
-    activity: Activity,
-    previewView: ViewGroup,
-    minimumResolution: Size,
-    cameraErrorListener: CameraErrorListener
-): CameraAdapter<CameraPreviewImage<Bitmap>> =
-    Class.forName("com.stripe.android.stripecardscan.camera.extension.CameraAdapterImpl")
-        .getConstructor(
-            Activity::class.java,
-            ViewGroup::class.java,
-            Size::class.java,
-            CameraErrorListener::class.java
-        )
-        .newInstance(
-            activity,
-            previewView,
-            minimumResolution,
-            cameraErrorListener
-        ) as CameraAdapter<CameraPreviewImage<Bitmap>>

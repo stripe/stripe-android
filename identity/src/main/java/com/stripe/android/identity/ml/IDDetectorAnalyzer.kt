@@ -107,9 +107,6 @@ internal class IDDetectorAnalyzer(
         )
     }
 
-    // TODO(ccen): check if we should enable this to track stats
-    override val statsName: String? = null
-
     internal class Factory(
         private val modelFile: File,
         private val idDetectorMinScore: Float,
