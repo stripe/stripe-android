@@ -22,6 +22,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -31,6 +33,8 @@ import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.getBorderStroke
 import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.image.StripeImage
+import com.stripe.android.uicore.image.StripeImageLoader
 
 private object Spacing {
     val cardLeadingInnerPadding = 12.dp
@@ -49,7 +53,9 @@ internal fun PaymentMethodsUI(
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current.applicationContext
     val state = rememberLazyListState()
+    val imageLoader = remember { StripeImageLoader(context) }
 
     LaunchedEffect(selectedIndex) {
         state.animateScrollToItem(selectedIndex)
@@ -77,6 +83,8 @@ internal fun PaymentMethodsUI(
                     ),
                     minViewWidth = viewWidth,
                     iconRes = item.iconResource,
+                    iconUrl = item.iconUrl,
+                    imageLoader = imageLoader,
                     title = stringResource(item.displayNameResource),
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
@@ -143,6 +151,8 @@ private fun computeItemWidthWhenExceedingMaxWidth(
 internal fun PaymentMethodUI(
     minViewWidth: Dp,
     iconRes: Int,
+    iconUrl: String?,
+    imageLoader: StripeImageLoader,
     title: String,
     isSelected: Boolean,
     isEnabled: Boolean,
@@ -180,15 +190,28 @@ internal fun PaymentMethodUI(
         ) {
             val colorFilter = if (tintOnSelected) ColorFilter.tint(color) else null
 
-            Image(
-                painter = painterResource(iconRes),
-                contentDescription = null,
-                colorFilter = colorFilter,
-                modifier = Modifier.padding(
-                    top = Spacing.cardLeadingInnerPadding,
-                    start = Spacing.cardLeadingInnerPadding,
+            if (iconUrl != null) {
+                StripeImage(
+                    url = iconUrl,
+                    imageLoader = imageLoader,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.padding(
+                        top = Spacing.cardLeadingInnerPadding / 2,
+                        start = Spacing.cardLeadingInnerPadding / 2,
+                    )
                 )
-            )
+            } else {
+                Image(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    colorFilter = colorFilter,
+                    modifier = Modifier.padding(
+                        top = Spacing.cardLeadingInnerPadding,
+                        start = Spacing.cardLeadingInnerPadding,
+                    )
+                )
+            }
 
             LpmSelectorText(
                 text = title,

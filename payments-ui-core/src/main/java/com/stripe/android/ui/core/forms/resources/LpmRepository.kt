@@ -224,6 +224,7 @@ class LpmRepository constructor(
                 false,
                 R.string.stripe_paymentsheet_payment_method_card,
                 R.drawable.stripe_ic_paymentsheet_pm_card,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 true,
                 CardRequirement,
                 if (sharedDataSpec.fields.isEmpty() || sharedDataSpec.fields == listOf(EmptyFormSpec)) {
@@ -237,6 +238,7 @@ class LpmRepository constructor(
                 true,
                 R.string.stripe_paymentsheet_payment_method_bancontact,
                 R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 false,
                 BancontactRequirement,
                 LayoutSpec(sharedDataSpec.fields)
@@ -246,6 +248,7 @@ class LpmRepository constructor(
                 true,
                 R.string.stripe_paymentsheet_payment_method_sofort,
                 R.drawable.stripe_ic_paymentsheet_pm_klarna,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 false,
                 SofortRequirement,
                 LayoutSpec(sharedDataSpec.fields)
@@ -255,6 +258,7 @@ class LpmRepository constructor(
                 true,
                 R.string.stripe_paymentsheet_payment_method_ideal,
                 R.drawable.stripe_ic_paymentsheet_pm_ideal,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 false,
                 IdealRequirement,
                 LayoutSpec(sharedDataSpec.fields)
@@ -264,6 +268,7 @@ class LpmRepository constructor(
                 true,
                 R.string.stripe_paymentsheet_payment_method_sepa_debit,
                 R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 false,
                 SepaDebitRequirement,
                 LayoutSpec(sharedDataSpec.fields)
@@ -273,6 +278,7 @@ class LpmRepository constructor(
                 true,
                 R.string.stripe_paymentsheet_payment_method_eps,
                 R.drawable.stripe_ic_paymentsheet_pm_eps,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 false,
                 EpsRequirement,
                 LayoutSpec(sharedDataSpec.fields)
@@ -282,6 +288,7 @@ class LpmRepository constructor(
                 false,
                 R.string.stripe_paymentsheet_payment_method_p24,
                 R.drawable.stripe_ic_paymentsheet_pm_p24,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 false,
                 P24Requirement,
                 LayoutSpec(sharedDataSpec.fields)
@@ -291,6 +298,7 @@ class LpmRepository constructor(
                 false,
                 R.string.stripe_paymentsheet_payment_method_giropay,
                 R.drawable.stripe_ic_paymentsheet_pm_giropay,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 false,
                 GiropayRequirement,
                 LayoutSpec(sharedDataSpec.fields)
@@ -304,6 +312,7 @@ class LpmRepository constructor(
                     R.string.stripe_paymentsheet_payment_method_afterpay
                 },
                 R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 false,
                 AfterpayClearpayRequirement,
                 LayoutSpec(sharedDataSpec.fields)
@@ -313,6 +322,7 @@ class LpmRepository constructor(
                 false,
                 R.string.stripe_paymentsheet_payment_method_klarna,
                 R.drawable.stripe_ic_paymentsheet_pm_klarna,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 false,
                 KlarnaRequirement,
                 LayoutSpec(sharedDataSpec.fields)
@@ -322,6 +332,7 @@ class LpmRepository constructor(
                 false,
                 R.string.stripe_paymentsheet_payment_method_paypal,
                 R.drawable.stripe_ic_paymentsheet_pm_paypal,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 false,
                 PaypalRequirement,
                 LayoutSpec(sharedDataSpec.fields)
@@ -331,6 +342,7 @@ class LpmRepository constructor(
                 false,
                 R.string.stripe_paymentsheet_payment_method_affirm,
                 R.drawable.stripe_ic_paymentsheet_pm_affirm,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 false,
                 AffirmRequirement,
                 LayoutSpec(sharedDataSpec.fields)
@@ -340,6 +352,7 @@ class LpmRepository constructor(
                 true,
                 R.string.stripe_paymentsheet_payment_method_au_becs_debit,
                 R.drawable.stripe_ic_paymentsheet_pm_bank,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 true,
                 AuBecsDebitRequirement,
                 LayoutSpec(sharedDataSpec.fields)
@@ -349,6 +362,7 @@ class LpmRepository constructor(
                 true,
                 R.string.stripe_paymentsheet_payment_method_us_bank_account,
                 R.drawable.stripe_ic_paymentsheet_pm_bank,
+                sharedDataSpec.selectorIcon?.lightThemePng,
                 true,
                 USBankAccountRequirement,
                 LayoutSpec(sharedDataSpec.fields)
@@ -358,6 +372,7 @@ class LpmRepository constructor(
                 requiresMandate = false,
                 displayNameResource = R.string.stripe_paymentsheet_payment_method_upi,
                 iconResource = R.drawable.stripe_ic_paymentsheet_pm_upi,
+                iconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
                 tintIconOnSelection = false,
                 requirement = UpiRequirement,
                 formSpec = LayoutSpec(sharedDataSpec.fields)
@@ -388,6 +403,8 @@ class LpmRepository constructor(
 
         /** This describes the image in the LPM selector.  These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */
         @DrawableRes val iconResource: Int,
+
+        val iconUrl: String?,
 
         /** Indicates if the lpm icon in the selector is a single color and should be tinted
          * on selection.
@@ -450,6 +467,7 @@ class LpmRepository constructor(
             false,
             R.string.stripe_paymentsheet_payment_method_card,
             R.drawable.stripe_ic_paymentsheet_pm_card,
+            null,
             true,
             CardRequirement,
             LayoutSpec(listOf(CardDetailsSectionSpec(), CardBillingSpec(), SaveForFutureUseSpec()))

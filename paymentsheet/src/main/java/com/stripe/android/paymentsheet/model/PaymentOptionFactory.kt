@@ -15,18 +15,21 @@ internal class PaymentOptionFactory(
             PaymentSelection.GooglePay -> {
                 PaymentOption(
                     drawableResourceId = R.drawable.stripe_google_pay_mark,
+                    iconUrl = null,
                     label = resources.getString(R.string.google_pay)
                 )
             }
             PaymentSelection.Link -> {
                 PaymentOption(
                     drawableResourceId = R.drawable.stripe_ic_paymentsheet_link,
+                    iconUrl = null,
                     label = resources.getString(R.string.link)
                 )
             }
             is PaymentSelection.Saved -> {
                 PaymentOption(
                     drawableResourceId = selection.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
+                    iconUrl = null,
                     label = selection.paymentMethod.getLabel(resources).orEmpty()
                 )
             }
@@ -34,6 +37,7 @@ internal class PaymentOptionFactory(
                 // TODO: Should use labelResource paymentMethodCreateParams or extension function
                 PaymentOption(
                     drawableResourceId = selection.brand.getCardBrandIcon(),
+                    iconUrl = null,
                     label = createCardLabel(
                         resources,
                         selection.last4
@@ -43,18 +47,21 @@ internal class PaymentOptionFactory(
             is PaymentSelection.New.LinkInline -> {
                 PaymentOption(
                     drawableResourceId = selection.iconResource,
+                    iconUrl = null,
                     label = selection.label
                 )
             }
             is PaymentSelection.New.GenericPaymentMethod -> {
                 PaymentOption(
                     drawableResourceId = selection.iconResource,
+                    iconUrl = selection.iconUrl,
                     label = selection.labelResource
                 )
             }
             is PaymentSelection.New.USBankAccount -> {
                 PaymentOption(
                     drawableResourceId = selection.iconResource,
+                    iconUrl = null,
                     label = selection.labelResource
                 )
             }

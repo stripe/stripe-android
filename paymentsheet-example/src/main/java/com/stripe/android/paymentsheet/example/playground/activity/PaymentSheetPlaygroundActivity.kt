@@ -538,6 +538,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private fun onPaymentOption(paymentOption: PaymentOption?) {
         if (paymentOption != null) {
             viewBinding.paymentMethod.text = paymentOption.label
+            // TODO(jaynewstrom): How to load the image here?
             viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
                 paymentOption.drawableResourceId,
                 0,

@@ -27,6 +27,7 @@ class PaymentOptionFactoryTest {
         ).isEqualTo(
             PaymentOption(
                 R.drawable.stripe_google_pay_mark,
+                null,
                 "Google Pay"
             )
         )
@@ -41,6 +42,7 @@ class PaymentOptionFactoryTest {
         ).isEqualTo(
             PaymentOption(
                 R.drawable.stripe_ic_paymentsheet_card_visa,
+                null,
                 "····4242"
             )
         )
@@ -59,6 +61,7 @@ class PaymentOptionFactoryTest {
         ).isEqualTo(
             PaymentOption(
                 R.drawable.stripe_ic_paymentsheet_card_visa,
+                null,
                 "····4242"
             )
         )

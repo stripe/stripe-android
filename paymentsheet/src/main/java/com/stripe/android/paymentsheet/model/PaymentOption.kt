@@ -12,6 +12,11 @@ data class PaymentOption(
     @DrawableRes val drawableResourceId: Int,
 
     /**
+     * TODO: Add docs, maybe use JVM overloads and default to null?
+     */
+    val iconUrl: String?,
+
+    /**
      * A label that describes the payment option.
      *
      * For example, "····4242" for a Visa ending in 4242.

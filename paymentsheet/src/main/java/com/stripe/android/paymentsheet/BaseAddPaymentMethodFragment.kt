@@ -353,6 +353,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 PaymentSelection.New.GenericPaymentMethod(
                     getString(selectedPaymentMethodResources.displayNameResource),
                     selectedPaymentMethodResources.iconResource,
+                    selectedPaymentMethodResources.iconUrl,
                     this,
                     customerRequestedSave = formFieldValues.userRequestedReuse
                 )
