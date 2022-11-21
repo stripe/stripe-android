@@ -5,7 +5,6 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.PointF
 import android.os.Bundle
-import android.util.Log
 import android.util.Size
 import android.view.LayoutInflater
 import android.view.View
