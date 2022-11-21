@@ -75,7 +75,7 @@ ext {
     androidxNavigationVersion = '2.5.3'
     androidxPreferenceVersion = '1.2.0'
     androidxRecyclerviewVersion = '1.2.1'
-    androidxSecurityVersion = '1.1.0-alpha03'
+    androidxSecurityVersion = '1.1.0-alpha04'
 
     kotlinCoroutinesVersion = '1.6.4'
     kotlinSerializationVersion = '1.4.1'
