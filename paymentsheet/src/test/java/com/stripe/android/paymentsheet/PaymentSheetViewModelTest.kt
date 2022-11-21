@@ -1145,7 +1145,8 @@ internal class PaymentSheetViewModelTest {
                 iconResource = 0,
                 labelResource = "",
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                iconUrl = null,
             )
         )
 
