@@ -80,8 +80,6 @@ internal class FaceDetectorAnalyzer(
         )
     }
 
-    override val statsName: String? = null
-
     internal class Factory(
         private val modelFile: File,
         private val modelPerformanceTracker: ModelPerformanceTracker

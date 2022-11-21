@@ -4,6 +4,7 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.PointF
+import android.graphics.Rect
 import android.os.Build
 import android.os.Handler
 import android.renderscript.RenderScript
@@ -28,15 +29,10 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.camera.framework.exception.ImageTypeNotSupportedException
 import com.stripe.android.camera.framework.image.NV21Image
 import com.stripe.android.camera.framework.image.getRenderScript
-import com.stripe.android.camera.framework.image.size
-import com.stripe.android.camera.framework.util.aspectRatio
-import com.stripe.android.camera.framework.util.centerOn
 import com.stripe.android.camera.framework.util.mapArray
 import com.stripe.android.camera.framework.util.mapToIntArray
-import com.stripe.android.camera.framework.util.minAspectRatioSurroundingSize
 import com.stripe.android.camera.framework.util.size
 import com.stripe.android.camera.framework.util.toByteArray
-import com.stripe.android.camera.framework.util.toRect
 import java.nio.ByteBuffer
 import java.nio.ReadOnlyBufferException
 import java.util.concurrent.Executor
@@ -315,7 +311,7 @@ class CameraXAdapter(
 
         preview = Preview.Builder()
             .setTargetRotation(displayRotation)
-            .setTargetResolution(minimumResolution.resolutionToSize(displaySize))
+            .setTargetResolution(previewView.size())
             .build()
 
         imageAnalyzer = ImageAnalysis.Builder()
@@ -334,10 +330,12 @@ class CameraXAdapter(
                     sendImageToStream(
                         CameraPreviewImage(
                             bitmap,
-                            minAspectRatioSurroundingSize(
-                                previewView.size(),
-                                bitmap.size().aspectRatio()
-                            ).centerOn(displaySize.toRect())
+                            Rect(
+                                previewView.left,
+                                previewView.top,
+                                previewView.width,
+                                previewView.height
+                            )
                         )
                     )
                 }

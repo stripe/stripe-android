@@ -302,7 +302,6 @@ class LoopTest {
             private val analyzerCounter = AtomicInteger(0)
         }
 
-        override val statsName: String? = null
         private val analyzerNumber = analyzerCounter.getAndIncrement()
         override suspend fun analyze(data: Int, state: Int): String =
             "Analyzer=$analyzerNumber, data=$data, state=$state"
