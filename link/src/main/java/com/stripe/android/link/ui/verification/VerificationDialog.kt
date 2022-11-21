@@ -28,6 +28,17 @@ import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.rememberLinkAppBarState
 
+/**
+ * Function called when the Link verification dialog has been dismissed. The boolean returned
+ * indicates whether the verification succeeded.
+ * When called, [LinkPaymentLauncher.accountStatus] will contain the up to date account status.
+ */
+@Deprecated(
+    level = DeprecationLevel.WARNING,
+    message = "This interface isn't meant for public consumption.",
+)
+typealias LinkVerificationCallback = (success: Boolean) -> Unit
+
 @Suppress("LongMethod")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
