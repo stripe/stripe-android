@@ -28,6 +28,7 @@ import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.rememberLinkAppBarState
 
+@Suppress("LongMethod")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LinkVerificationDialog(
