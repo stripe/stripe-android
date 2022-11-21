@@ -54,6 +54,17 @@ internal val VERIFICATION_PAGE_DATA_NOT_MISSING_BACK = VerificationPageData(
     submitted = false
 )
 
+internal val VERIFICATION_PAGE_DATA_MISSING_SELFIE = VerificationPageData(
+    id = "id",
+    objectType = "type",
+    requirements = VerificationPageDataRequirements(
+        errors = emptyList(),
+        missings = listOf(Requirement.FACE)
+    ),
+    status = VerificationPageData.Status.REQUIRESINPUT,
+    submitted = false
+)
+
 internal val json: Json = Json {
     ignoreUnknownKeys = true
     isLenient = true

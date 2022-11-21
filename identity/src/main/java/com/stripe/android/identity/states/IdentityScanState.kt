@@ -132,5 +132,7 @@ internal sealed class IdentityScanState(
 
         fun ScanType.isBack() =
             this == ScanType.ID_BACK || this == ScanType.DL_BACK
+
+        fun ScanType?.isNullOrFront() = this == null || this.isFront()
     }
 }
