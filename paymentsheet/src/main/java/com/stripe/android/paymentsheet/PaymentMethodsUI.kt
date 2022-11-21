@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -188,30 +189,13 @@ internal fun PaymentMethodUI(
                     }
                 )
         ) {
-            val colorFilter = if (tintOnSelected) ColorFilter.tint(color) else null
-
-            if (iconUrl != null) {
-                StripeImage(
-                    url = iconUrl,
-                    imageLoader = imageLoader,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.padding(
-                        top = Spacing.cardLeadingInnerPadding / 2,
-                        start = Spacing.cardLeadingInnerPadding / 2,
-                    )
-                )
-            } else {
-                Image(
-                    painter = painterResource(iconRes),
-                    contentDescription = null,
-                    colorFilter = colorFilter,
-                    modifier = Modifier.padding(
-                        top = Spacing.cardLeadingInnerPadding,
-                        start = Spacing.cardLeadingInnerPadding,
-                    )
-                )
-            }
+            PaymentMethodIconUi(
+                iconRes = iconRes,
+                iconUrl = iconUrl,
+                imageLoader = imageLoader,
+                color = color,
+                tintOnSelected = tintOnSelected
+            )
 
             LpmSelectorText(
                 text = title,
@@ -224,5 +208,39 @@ internal fun PaymentMethodUI(
                 )
             )
         }
+    }
+}
+
+@Composable
+private fun PaymentMethodIconUi(
+    iconRes: Int,
+    iconUrl: String?,
+    imageLoader: StripeImageLoader,
+    tintOnSelected: Boolean,
+    color: Color,
+) {
+    val colorFilter = if (tintOnSelected) ColorFilter.tint(color) else null
+
+    if (iconUrl != null) {
+        StripeImage(
+            url = iconUrl,
+            imageLoader = imageLoader,
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.padding(
+                top = Spacing.cardLeadingInnerPadding / 2,
+                start = Spacing.cardLeadingInnerPadding / 2,
+            )
+        )
+    } else {
+        Image(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            colorFilter = colorFilter,
+            modifier = Modifier.padding(
+                top = Spacing.cardLeadingInnerPadding,
+                start = Spacing.cardLeadingInnerPadding,
+            )
+        )
     }
 }
