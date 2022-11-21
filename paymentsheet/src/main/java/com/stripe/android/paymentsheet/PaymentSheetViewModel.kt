@@ -458,15 +458,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     AccountStatus.Verified -> launchLink(linkConfig, launchedDirectly = true)
                     AccountStatus.VerificationStarted,
                     AccountStatus.NeedsVerification -> {
-                        linkVerificationCallback = { success ->
-                            linkVerificationCallback = null
-                            _showLinkVerificationDialog.value = false
-
-                            if (success) {
-                                launchLink(linkConfig, launchedDirectly = true)
-                            }
+                        val success = requestLinkVerification()
+                        if (success) {
+                            launchLink(linkConfig, launchedDirectly = true)
                         }
-                        _showLinkVerificationDialog.value = true
                     }
                     AccountStatus.SignedOut,
                     AccountStatus.Error -> {
