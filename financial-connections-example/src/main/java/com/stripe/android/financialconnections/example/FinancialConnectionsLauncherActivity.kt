@@ -54,6 +54,11 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
                 activity.getString(R.string.collect_bank_account_for_data_compose),
                 FinancialConnectionsComposeExampleActivity::class.java
             ),
+//            // Internal use only.
+//            Item(
+//                "Playground",
+//                FinancialConnectionsPlaygroundActivity::class.java
+//            ),
         )
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ExamplesViewHolder {
