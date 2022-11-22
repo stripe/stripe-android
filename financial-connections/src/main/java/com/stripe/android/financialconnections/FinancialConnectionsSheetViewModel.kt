@@ -90,9 +90,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun openAuthFlow(synchronizeSessionResponse: SynchronizeSessionResponse) {
         // stores manifest in state for future references.
         val manifest = synchronizeSessionResponse.manifest
-        // TODO@carlosmuvi use native router.
-        // val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(synchronizeSessionResponse)
-        val nativeAuthFlowEnabled = true
+        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(synchronizeSessionResponse)
         viewModelScope.launch {
             nativeRouter.logExposure(synchronizeSessionResponse)
         }
