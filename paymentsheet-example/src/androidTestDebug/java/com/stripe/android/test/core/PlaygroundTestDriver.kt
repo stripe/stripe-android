@@ -177,7 +177,10 @@ class PlaygroundTestDriver(
     }
 
     private fun pressMultiStepSelect() {
-        selectors.multiStepSelect.click()
+        selectors.multiStepSelect.apply {
+            scrollTo()
+            click()
+        }
         waitForNotPlaygroundActivity()
     }
 
