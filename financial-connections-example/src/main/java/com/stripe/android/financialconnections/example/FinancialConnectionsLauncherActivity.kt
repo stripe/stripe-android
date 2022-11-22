@@ -41,7 +41,7 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
     private class ExamplesAdapter constructor(
         private val activity: Activity
     ) : RecyclerView.Adapter<ExamplesAdapter.ExamplesViewHolder>() {
-        private val items = listOf(
+        private val items = listOfNotNull(
             Item(
                 activity.getString(R.string.collect_bank_account_for_data),
                 FinancialConnectionsDataExampleActivity::class.java
@@ -54,11 +54,10 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
                 activity.getString(R.string.collect_bank_account_for_data_compose),
                 FinancialConnectionsComposeExampleActivity::class.java
             ),
-//            // Internal use only.
-//            Item(
-//                "Playground",
-//                FinancialConnectionsPlaygroundActivity::class.java
-//            ),
+            Item(
+                "Playground",
+                FinancialConnectionsPlaygroundActivity::class.java
+            ).takeIf { BuildConfig.PLAYGROUND },
         )
 
         override fun onCreateViewHolder(viewGroup: ViewGroup, i: Int): ExamplesViewHolder {
