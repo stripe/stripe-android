@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Button
-import androidx.compose.material.Divider
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,7 +58,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         LaunchedEffect(viewEffect) {
             viewEffect?.let {
                 when (it) {
-                    is OpenFinancialConnectionsSheetExample -> financialConnectionsSheet.present(it.configuration)
+                    is OpenFinancialConnectionsSheetExample ->
+                        financialConnectionsSheet.present(it.configuration)
                 }
             }
         }
@@ -74,22 +75,28 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         state: FinancialConnectionsExampleState,
         onButtonClick: () -> Unit
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            OverrideFlowSection()
-            if (state.loading) {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                )
+        Scaffold(
+            topBar = { TopAppBar(title = { Text("Connections Playground") }) },
+            content = {
+                Column(
+                    modifier = Modifier.padding(it).padding(16.dp)
+                ) {
+                    OverrideFlowSection()
+                    if (state.loading) {
+                        LinearProgressIndicator(
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    Button(
+                        onClick = { onButtonClick() },
+                    ) {
+                        Text("Connect Accounts!")
+                    }
+                    Text(text = state.status)
+                }
             }
-            Button(
-                onClick = { onButtonClick() },
-            ) {
-                Text("Connect Accounts!")
-            }
-            Text(text = state.status)
-        }
+        )
+
     }
 
     @Composable
