@@ -24,6 +24,7 @@ import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
@@ -445,6 +446,18 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         descriptorCode: String,
         requestOptions: ApiRequest.Options
     ): SetupIntent? {
+        return null
+    }
+
+    override suspend fun getPaymentMethodMessaging(
+        paymentMethods: List<String>,
+        amount: Int,
+        currency: String,
+        country: String,
+        locale: String,
+        logoColor: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentMethodMessage? {
         return null
     }
 }
