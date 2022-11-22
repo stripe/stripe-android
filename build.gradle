@@ -88,7 +88,7 @@ ext {
     playServicesWalletVersion = '19.1.0'
     placesVersion = '2.7.0'
     playServicesVersion = '1.6.4'
-    leakCanaryVersion = '2.9.1'
+    leakCanaryVersion = '2.10'
     okhttpVersion = '4.10.0'
 
     androidTestVersion = '1.4.0'
