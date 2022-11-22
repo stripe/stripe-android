@@ -4,18 +4,26 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.debug.DebugConfiguration
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.whenever
 
 internal class NativeAuthFlowRouterTest {
 
     private val eventTracker = mock<FinancialConnectionsAnalyticsTracker>()
+    private val debugConfiguration = mock<DebugConfiguration>()
     private val router = NativeAuthFlowRouter(
-        eventTracker
+        eventTracker,
+        debugConfiguration
     )
+
+    init {
+        whenever(debugConfiguration.overridenNative).thenReturn(null)
+    }
 
     @Test
     fun `nativeAuthFlowEnabled - true if experiment is treatment and no kill switch`() {
