@@ -110,6 +110,8 @@
   <string name="becs_widget_name_required">Nevének megadása kötelező.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Mégse</string>
+  <!-- Error when the card was declined by the credit card networks -->
+  <string name="card_declined">A kártyáját elutasítottuk</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s végződése %2$s</string>
   <!-- Text for close button -->
@@ -121,13 +123,19 @@
   <string name="done">Kész</string>
   <!-- Button title to enter editing mode -->
   <string name="edit">Szerkesztés</string>
+  <!-- Error when the card has already expired -->
+  <string name="expired_card">A kártyája lejárt</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">HH/ÉÉ</string>
   <string name="expiry_label_short">Lejárat</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="fpx_bank_offline">%s - offline</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="generic_decline">Fizetési módja elutasításra került.</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
   <string name="incomplete_expiry_date">A kártya lejárati dátuma hiányos.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="invalid_bank_account_iban">A beírt IBAN-szám érvénytelen.</string>
   <string name="invalid_card_number">Kártyaszáma érvénytelen.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">A kártya biztonsági kódja érvénytelen.</string>
@@ -135,6 +143,8 @@
   <string name="invalid_expiry_month">Kártyájának lejárati hónapja érvénytelen.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="invalid_expiry_year">Kártyájának lejárati éve érvénytelen.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="invalid_owner_name">Érvénytelen név.</string>
   <!-- Shipping form error message -->
   <string name="invalid_shipping_information">Érvénytelen szállítási cím</string>
   <!-- Error message for when postal code in form is incomplete -->
@@ -143,6 +153,8 @@
   <string name="payment_method_add_new_fpx">Bankszámlaválasztás (FPX)...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Ingyenes</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="processing_error">Hiba történt kártyája feldolgozása során, próbálja újra néhány másodperc múlva</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="remove">Eltávolítás</string>
