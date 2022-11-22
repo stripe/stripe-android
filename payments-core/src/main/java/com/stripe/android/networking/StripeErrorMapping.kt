@@ -4,6 +4,7 @@ import android.content.Context
 import com.stripe.android.R
 import com.stripe.android.core.StripeError
 
+@Suppress("ComplexMethod")
 internal fun StripeError.withLocalizedMessage(context: Context): StripeError {
     val messageResourceId = when (code) {
         "incorrect_number" -> R.string.invalid_card_number
