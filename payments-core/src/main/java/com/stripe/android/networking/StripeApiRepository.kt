@@ -109,7 +109,7 @@ import kotlin.coroutines.CoroutineContext
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class StripeApiRepository @JvmOverloads internal constructor(
-    context: Context,
+    private val context: Context,
     publishableKeyProvider: () -> String,
     private val appInfo: AppInfo? = Stripe.appInfo,
     private val logger: Logger = Logger.noop(),
@@ -1750,7 +1750,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private fun handleApiError(response: StripeResponse<String>) {
         val requestId = response.requestId?.value
         val responseCode = response.code
-        val stripeError = StripeErrorJsonParser().parse(response.responseJson())
+
+        val stripeError = StripeErrorJsonParser()
+            .parse(response.responseJson())
+            .withLocalizedMessage(context)
+
         when (responseCode) {
             HttpURLConnection.HTTP_BAD_REQUEST, HttpURLConnection.HTTP_NOT_FOUND -> {
                 throw InvalidRequestException(

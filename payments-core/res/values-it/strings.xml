@@ -110,6 +110,8 @@
   <string name="becs_widget_name_required">Il tuo nome è obbligatorio.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Annulla</string>
+  <!-- Error when the card was declined by the credit card networks -->
+  <string name="card_declined">La carta è stata rifiutata</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s che termina con %2$s</string>
   <!-- Text for close button -->
@@ -121,13 +123,19 @@
   <string name="done">Fine</string>
   <!-- Button title to enter editing mode -->
   <string name="edit">Modifica</string>
+  <!-- Error when the card has already expired -->
+  <string name="expired_card">La carta è scaduta</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">MM/AA</string>
   <string name="expiry_label_short">Scadenza</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="fpx_bank_offline">%s - Offline</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="generic_decline">La tua modalità di pagamento è stata rifiutata.</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
   <string name="incomplete_expiry_date">La data di scadenza della carta è incompleta.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="invalid_bank_account_iban">L\'IBAN inserito non è valido.</string>
   <string name="invalid_card_number">Il numero della carta non è valido.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Il codice di sicurezza della carta non è valido.</string>
@@ -135,6 +143,8 @@
   <string name="invalid_expiry_month">Il mese di scadenza della carta non è valido.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="invalid_expiry_year">L\'anno di scadenza della carta non è valido.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="invalid_owner_name">Nome non valido.</string>
   <!-- Shipping form error message -->
   <string name="invalid_shipping_information">Indirizzo di spedizione non valido</string>
   <!-- Error message for when postal code in form is incomplete -->
@@ -143,6 +153,8 @@
   <string name="payment_method_add_new_fpx">Seleziona conto bancario (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Gratuita</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="processing_error">Si è verificato un errore durante l\'elaborazione della carta. Riprova fra qualche secondo.</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="remove">Rimuovi</string>
