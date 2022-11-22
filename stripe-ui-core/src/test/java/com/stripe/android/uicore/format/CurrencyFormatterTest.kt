@@ -222,6 +222,13 @@ class CurrencyFormatterTest {
             .isEqualTo("US$ 1,234.12")
     }
 
+    @Test
+    fun `Treats MMK as a two-decimal currency`() {
+        val currency = Currency.getInstance("MMK")
+        val formattedAmount = CurrencyFormatter.format(5099L, currency)
+        assertThat(formattedAmount).isEqualTo("MMK50.99")
+    }
+
     companion object {
         val LOCALE_ICELAND_LANGUAGE_ONLY = Locale("IS")
         val LOCALE_AUSTRALIA_LANGUAGE_COUNTRY = Locale("en-AU", "AU")
