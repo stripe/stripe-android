@@ -11,10 +11,9 @@ import javax.inject.Inject
  * Additionally, handles logging exposures when needed.
  */
 internal class NativeAuthFlowRouter @Inject constructor(
-    val eventTracker: FinancialConnectionsAnalyticsTracker,
-    val debugConfiguration: DebugConfiguration
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val debugConfiguration: DebugConfiguration
 ) {
-
 
     fun nativeAuthFlowEnabled(sync: SynchronizeSessionResponse): Boolean {
         debugConfiguration.overridenNative?.let { return it }

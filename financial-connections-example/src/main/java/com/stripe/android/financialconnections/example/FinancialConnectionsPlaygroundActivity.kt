@@ -32,7 +32,7 @@ import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
 
 class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
-    private val viewModel by viewModels<FinancialConnectionsExampleViewModel>()
+    private val viewModel by viewModels<FinancialConnectionsPlaygroundViewModel>()
 
     private val sharedPreferences by lazy {
         getSharedPreferences("FINANCIAL_CONNECTIONS_DEBUG", Context.MODE_PRIVATE)
@@ -66,29 +66,34 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
         FinancialConnectionsContent(
             state = state,
-            onButtonClick = { viewModel.startFinancialConnectionsSessionForData() }
+            onButtonClick = { mode -> viewModel.startFinancialConnectionsSessionForData(mode) }
         )
     }
 
     @Composable
     private fun FinancialConnectionsContent(
         state: FinancialConnectionsExampleState,
-        onButtonClick: () -> Unit
+        onButtonClick: (Mode) -> Unit
     ) {
+        val modeOptions = listOf(Mode.Test, Mode.Live)
+        val (selectedMode, onModeSelected) = remember { mutableStateOf(modeOptions[0]) }
         Scaffold(
             topBar = { TopAppBar(title = { Text("Connections Playground") }) },
             content = {
                 Column(
-                    modifier = Modifier.padding(it).padding(16.dp)
+                    modifier = Modifier
+                        .padding(it)
+                        .padding(16.dp)
                 ) {
                     OverrideFlowSection()
+                    TestModeSection(modeOptions, selectedMode, onModeSelected)
                     if (state.loading) {
                         LinearProgressIndicator(
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
                     Button(
-                        onClick = { onButtonClick() },
+                        onClick = { onButtonClick(selectedMode) },
                     ) {
                         Text("Connect Accounts!")
                     }
@@ -132,11 +137,37 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         }
     }
 
+    @Composable
+    private fun TestModeSection(
+        radioOptions: List<Mode>,
+        selectedOption: Mode,
+        onOptionSelected: (Mode) -> Unit
+    ) {
+        Text(
+            text = "Mode",
+            style = MaterialTheme.typography.h6.merge(),
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            radioOptions.forEach { text ->
+                RadioButton(
+                    selected = (text == selectedOption),
+                    onClick = { onOptionSelected(text) }
+                )
+                Text(
+                    text = text.name,
+                    style = MaterialTheme.typography.body1.merge(),
+                )
+            }
+        }
+    }
+
     @Preview
     @Composable
     fun ContentPreview() {
         FinancialConnectionsContent(
-            state = FinancialConnectionsExampleState(false, "hola"),
+            state = FinancialConnectionsExampleState(false, "Result: Pending"),
             onButtonClick = {}
         )
     }
