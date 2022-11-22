@@ -13,7 +13,7 @@ object CurrencyFormatter {
     private const val MAJOR_UNIT_BASE = 10.0
     private val SERVER_DECIMAL_DIGITS =
         mapOf(
-            setOf("UGX", "AFN", "ALL", "AMD", "COP", "IDR", "ISK", "PKR", "LBP") to 2
+            setOf("UGX", "AFN", "ALL", "AMD", "COP", "IDR", "ISK", "PKR", "LBP", "MMK") to 2
         )
 
     fun format(
