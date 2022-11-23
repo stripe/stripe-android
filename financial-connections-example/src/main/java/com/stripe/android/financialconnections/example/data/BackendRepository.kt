@@ -5,10 +5,14 @@ class BackendRepository(
 ) {
     private val backendService: BackendApiService = BackendApiFactory(settings).create()
 
-    suspend fun createLinkAccountSession() =
-        backendService.createLinkAccountSession()
+    suspend fun createLinkAccountSession(flow: String? = null) =
+        backendService.createLinkAccountSession(
+            LinkAccountSessionBody(flow)
+        )
 
-    suspend fun createLinkAccountSessionForToken() =
-        backendService.createLinkAccountSessionForToken()
+    suspend fun createLinkAccountSessionForToken(flow: String? = null) =
+        backendService.createLinkAccountSessionForToken(
+            LinkAccountSessionBody(flow)
+        )
 
 }

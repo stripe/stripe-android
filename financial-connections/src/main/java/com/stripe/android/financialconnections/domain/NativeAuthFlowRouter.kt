@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.debug.DebugConfiguration
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import javax.inject.Inject
 
@@ -10,10 +11,12 @@ import javax.inject.Inject
  * Additionally, handles logging exposures when needed.
  */
 internal class NativeAuthFlowRouter @Inject constructor(
-    val eventTracker: FinancialConnectionsAnalyticsTracker
+    private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val debugConfiguration: DebugConfiguration
 ) {
 
     fun nativeAuthFlowEnabled(sync: SynchronizeSessionResponse): Boolean {
+        debugConfiguration.overridenNative?.let { return it }
         val killSwitchEnabled = nativeKillSwitchActive(sync)
         val nativeExperimentEnabled =
             sync.experimentAssignment(EXPERIMENT_KEY_NATIVE) == EXPERIMENT_VALUE_NATIVE_TREATMENT
@@ -22,11 +25,13 @@ internal class NativeAuthFlowRouter @Inject constructor(
 
     @Suppress("ComplexCondition")
     suspend fun logExposure(sync: SynchronizeSessionResponse) {
+        debugConfiguration.overridenNative?.let { return }
         val assignmentEventId = sync.manifest.assignmentEventId
         val accountHolderId = sync.manifest.accountholderToken
+        val shouldLogExposure = nativeKillSwitchActive(sync).not() &&
+            sync.experimentPresent(EXPERIMENT_KEY_NATIVE)
         if (
-            nativeKillSwitchActive(sync).not() &&
-            sync.experimentPresent(EXPERIMENT_KEY_NATIVE) &&
+            shouldLogExposure &&
             assignmentEventId != null &&
             accountHolderId != null
         ) {
