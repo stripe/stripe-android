@@ -83,7 +83,7 @@ ext {
     ktlintVersion = '0.47.1'
     // material 1.6 causes paymentsheet to not render correctly.
     // see here: https://github.com/material-components/material-components-android/issues/2702
-    materialVersion = '1.5.0'
+    materialVersion = '1.7.0'
     daggerVersion = '2.44.2'
     playServicesWalletVersion = '19.1.0'
     placesVersion = '2.7.0'
