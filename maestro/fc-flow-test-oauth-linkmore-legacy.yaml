@@ -2,6 +2,7 @@ appId: com.stripe.android.financialconnections.example
 ---
 - launchApp
 # Android specific: Navigate to example (1)
+- tapOn# Android specific: Navigate to example (1)
 - tapOn: "Collect account for data"
 
 # Android specific: Navigate to example (2)
@@ -28,16 +29,11 @@ appId: com.stripe.android.financialconnections.example
 - assertVisible: "Continue"
 - takeScreenshot: TestOAuth_Prepane
 - tapOn: "Continue"
-- takeScreenshot: TestOAuth_Loading_Accounts
 - assertVisible: "Select all accounts"
 - takeScreenshot: TestOAuth_AccountPicker
 - tapOn: "Select all accounts" # select all accounts
 - takeScreenshot: TestOAuth_AccountPicker_AllAccounts
-- scroll
-- tapOn:
-    text: ".*Select account.*"
-    index: 1
-- assertVisible: "Done"
+- tapOn: "Link accounts"
 # START LINK MORE ACCOUNTS FLOW
 - assertVisible: "Link another account"
 - takeScreenshot: TestOAuth_Success
@@ -49,10 +45,7 @@ appId: com.stripe.android.financialconnections.example
 - takeScreenshot: TestLegacy_AccountPicker
 - tapOn: "Select all accounts" # select all accounts
 - takeScreenshot: TestLegacy_AccountPicker_AllAccounts
-- scroll
-- tapOn:
-    text: ".*Select account.*"
-    index: 1
+- tapOn: "Link accounts"
 - assertVisible: "Done"
 - assertVisible: "Link another account"
 - tapOn: "Done"

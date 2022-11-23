@@ -14,14 +14,17 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Enter account details manually instead"
 - assertVisible: "Enter bank account details"
 - takeScreenshot: ManualEntry_Input
-- tapOn: "Routing number"
+- tapOn:
+    id: "RoutingInput"
 - inputText: "110000000"
 - takeScreenshot: ManualEntry_RoutingNumber
-- tapOn: "Account number"
+- tapOn:
+    id: "AccountInput"
 - inputText: "000123456789"
 - takeScreenshot: ManualEntry_AccountNumber
 - scroll
-- tapOn: "Confirm account number"
+- tapOn:
+    id: "ConfirmAccountInput"
 - inputText: "000123456789"
 - takeScreenshot: ManualEntry_ConfirmAccountNumber
 - tapOn: "Continue"

@@ -1,0 +1,69 @@
+name: financial-connections-example maestro
+on:
+  pull_request:
+    paths:
+      - 'financial-connections/**'
+      - 'financial-connections-example/**'
+      - 'stripe-core/**'
+      - 'payments-model/**'
+      - 'dependencies.gradle'
+jobs:
+  build:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        api-level: [ 29 ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.11
+
+      - name: AVD cache
+        uses: actions/cache@v3
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}
+
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          target: default
+          emulator-options: -skin 2400x1080 -memory 1024 -engine qemu2 -netfast -no-audio -no-snapshot -accel on
+          #          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Install Maestro CLI
+        run: curl -Ls "https://get.maestro.mobile.dev" | bash
+      - name: Run Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          target: default
+          emulator-options: -skin 2400x1080 -memory 1024 -engine qemu2 -netfast -no-audio -no-snapshot -accel on
+          #          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            ./gradlew :financial-connections-example:installDebug
+            ./maestro/bin/maestro --platform android test maestro/fc-flow-testmode.yaml
+      - name: Archive maestro screenshots
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: maestro-screenshots
+          path: |
+            *.png
