@@ -449,7 +449,7 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
         return null
     }
 
-    override suspend fun retrievePaymentMethodMessaging(
+    override suspend fun retrievePaymentMethodMessage(
         paymentMethods: List<String>,
         amount: Int,
         currency: String,

@@ -12,9 +12,9 @@ class PaymentMethodMessageJsonParserTest {
         val paymentMethodMessage = PaymentMethodMessageJsonParser().parse(
             JSONObject(PaymentMethodMessageFixtures.DEFAULT)
         )
-        assertThat(paymentMethodMessage.displayHtml)
+        assertThat(paymentMethodMessage?.displayHtml)
             .isEqualTo("<img src=\"https://b.stripecdn.com/payment-method-messaging-statics-srv/assets/klarna_logo_black.png\"><img src=\"https://b.stripecdn.com/payment-method-messaging-statics-srv/assets/afterpay_logo_black.png\"><br/>4 interest-free payments of \$6.25.")
-        assertThat(paymentMethodMessage.learnMoreUrl)
+        assertThat(paymentMethodMessage?.learnMoreUrl)
             .isEqualTo("js.stripe.com/v3/unified-message-redirect.html#componentName=unifiedMessage&controllerId=__privateStripeController12345&locale=en_US%2520%2528current%2529&publicOptions%5Bamount%5D=2499&publicOptions%5Bclient%5D=ios&publicOptions%5BcountryCode%5D=US&publicOptions%5Bcurrency%5D=USD&publicOptions%5BpaymentMethods%5D%5B0%5D=afterpay_clearpay&publicOptions%5BpaymentMethods%5D%5B1%5D=klarna")
     }
 
@@ -24,9 +24,7 @@ class PaymentMethodMessageJsonParserTest {
             JSONObject("{}")
         )
 
-        assertThat(paymentMethodMessage.displayHtml)
-            .isEqualTo("")
-        assertThat(paymentMethodMessage.learnMoreUrl)
-            .isEqualTo("")
+        assertThat(paymentMethodMessage)
+            .isEqualTo(null)
     }
 }

@@ -1701,7 +1701,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    override suspend fun retrievePaymentMethodMessaging(
+    override suspend fun retrievePaymentMethodMessage(
         paymentMethods: List<String>,
         amount: Int,
         currency: String,

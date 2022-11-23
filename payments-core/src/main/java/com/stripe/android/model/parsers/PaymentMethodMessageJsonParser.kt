@@ -6,11 +6,17 @@ import com.stripe.android.model.PaymentMethodMessage
 import org.json.JSONObject
 
 internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMessage> {
-    override fun parse(json: JSONObject): PaymentMethodMessage {
-        return PaymentMethodMessage(
-            displayHtml = StripeJsonUtils.optString(json, FIELD_L_HTML) ?: "",
-            learnMoreUrl = StripeJsonUtils.optString(json, FIELD_LEARN_MORE_MODAL_URL) ?: ""
-        )
+    override fun parse(json: JSONObject): PaymentMethodMessage? {
+        val displayHtml = StripeJsonUtils.optString(json, FIELD_L_HTML)
+        val learnMoreUrl = StripeJsonUtils.optString(json, FIELD_LEARN_MORE_MODAL_URL)
+        return if (displayHtml != null && learnMoreUrl != null) {
+            PaymentMethodMessage(
+                displayHtml = displayHtml,
+                learnMoreUrl = learnMoreUrl
+            )
+        } else {
+            null
+        }
     }
 
     private companion object {
