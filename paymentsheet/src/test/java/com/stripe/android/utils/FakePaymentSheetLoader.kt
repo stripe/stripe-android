@@ -7,7 +7,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSheetLoader
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSheetState
 import com.stripe.android.paymentsheet.model.ClientSecret
-import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
@@ -35,8 +34,8 @@ internal class FakePaymentSheetLoader(
         } else {
             PaymentSheetLoader.Result.Success(
                 state = PaymentSheetState.Full(
-                    config = null,
-                    clientSecret = PaymentIntentClientSecret("client-secret"),
+                    config = paymentSheetConfiguration,
+                    clientSecret = clientSecret,
                     stripeIntent = stripeIntent,
                     customerPaymentMethods = customerPaymentMethods,
                     savedSelection = savedSelection,
