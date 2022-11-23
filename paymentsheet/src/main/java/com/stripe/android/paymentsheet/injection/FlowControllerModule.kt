@@ -4,23 +4,18 @@ import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.injection.LINK_ENABLED
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.FlowController
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowControllerInitializer
-import com.stripe.android.paymentsheet.flowcontroller.FlowControllerInitializer
+import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSheetLoader
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
-import com.stripe.android.paymentsheet.model.ClientSecret
+import com.stripe.android.paymentsheet.flowcontroller.PaymentSheetLoader
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -32,23 +27,9 @@ import kotlin.coroutines.CoroutineContext
 )
 internal abstract class FlowControllerModule {
     @Binds
-    abstract fun bindsFlowControllerInitializer(
-        defaultFlowControllerInitializer: DefaultFlowControllerInitializer
-    ): FlowControllerInitializer
+    abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentSheetLoader): PaymentSheetLoader
 
     companion object {
-        /**
-         * [FlowController]'s clientSecret might be updated multiple times through
-         * [FlowController.configureWithSetupIntent] or [FlowController.configureWithPaymentIntent].
-         *
-         * Should always be injected with [Provider].
-         */
-        @Provides
-        fun provideClientSecret(
-            viewModel: FlowControllerViewModel
-        ): ClientSecret {
-            return viewModel.initData.clientSecret
-        }
 
         @Provides
         @Singleton
@@ -71,11 +52,6 @@ internal abstract class FlowControllerModule {
         @Singleton
         @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens() = setOf("PaymentSheet.FlowController")
-
-        @Provides
-        @Singleton
-        @Named(LINK_ENABLED)
-        fun provideLinkEnabled() = LinkPaymentLauncher.LINK_ENABLED
 
         @Provides
         @Singleton

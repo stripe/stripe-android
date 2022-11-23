@@ -9,11 +9,13 @@ internal class FlowControllerViewModel(
 ) : ViewModel() {
     var paymentSelection: PaymentSelection? = null
 
-    var initData: InitData
-        get() = requireNotNull(handle.get(INIT_DATA_KEY))
-        set(value) = handle.set(INIT_DATA_KEY, value)
+    var state: PaymentSheetState.Full?
+        get() = handle[STATE_KEY]
+        set(value) {
+            handle[STATE_KEY] = value
+        }
 
     private companion object {
-        private const val INIT_DATA_KEY = "init_data"
+        private const val STATE_KEY = "state"
     }
 }
