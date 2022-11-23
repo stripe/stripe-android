@@ -37,6 +37,7 @@ import com.stripe.android.paymentsheet.example.playground.model.Shipping
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -538,14 +539,18 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     private fun onPaymentOption(paymentOption: PaymentOption?) {
         if (paymentOption != null) {
             viewBinding.paymentMethod.text = paymentOption.label
-            // TODO(jaynewstrom): How to load the image here?
-            viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                paymentOption.drawableResourceId,
-                0,
-                0,
-                0
-            )
-            viewBinding.customCheckoutButton.isEnabled = true
+            lifecycleScope.launch {
+                val iconDrawable = paymentOption.iconDrawable()
+                launch(Dispatchers.Main) {
+                    viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                        iconDrawable,
+                        null,
+                        null,
+                        null
+                    )
+                    viewBinding.customCheckoutButton.isEnabled = true
+                }
+            }
         } else {
             viewBinding.paymentMethod.setText(R.string.select)
             viewBinding.paymentMethod.setCompoundDrawables(null, null, null, null)

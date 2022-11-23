@@ -240,7 +240,6 @@ internal class DefaultFlowControllerTest {
             .isEqualTo(
                 PaymentOption(
                     drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
-                    iconUrl = null,
                     label = "····$last4"
                 )
             )
@@ -270,7 +269,6 @@ internal class DefaultFlowControllerTest {
             .isEqualTo(
                 PaymentOption(
                     drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
-                    iconUrl = null,
                     label = "····$last4"
                 )
             )
@@ -470,7 +468,6 @@ internal class DefaultFlowControllerTest {
         verify(paymentOptionCallback).onPaymentOption(
             PaymentOption(
                 R.drawable.stripe_google_pay_mark,
-                iconUrl = null,
                 "Google Pay"
             )
         )
@@ -555,7 +552,7 @@ internal class DefaultFlowControllerTest {
         )
 
         verify(paymentOptionCallback).onPaymentOption(
-            PaymentOption(R.drawable.stripe_google_pay_mark, iconUrl = null, "Google Pay")
+            PaymentOption(R.drawable.stripe_google_pay_mark, "Google Pay")
         )
     }
 
@@ -1074,7 +1071,6 @@ internal class DefaultFlowControllerTest {
         )
         private val VISA_PAYMENT_OPTION = PaymentOption(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
-            iconUrl = null,
             label = "····4242"
         )
 

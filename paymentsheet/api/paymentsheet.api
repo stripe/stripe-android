@@ -1471,17 +1471,16 @@ public final class com/stripe/android/paymentsheet/model/PaymentIntentClientSecr
 
 public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public static final field $stable I
-	public fun <init> (ILjava/lang/String;Ljava/lang/String;)V
+	public fun <init> (ILjava/lang/String;)V
 	public final fun component1 ()I
 	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (ILjava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentOption;ILjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public final fun copy (ILjava/lang/String;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentOption;ILjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getDrawableResourceId ()I
-	public final fun getIconUrl ()Ljava/lang/String;
 	public final fun getLabel ()Ljava/lang/String;
 	public fun hashCode ()I
+	public final fun iconDrawable (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun toString ()Ljava/lang/String;
 }
 

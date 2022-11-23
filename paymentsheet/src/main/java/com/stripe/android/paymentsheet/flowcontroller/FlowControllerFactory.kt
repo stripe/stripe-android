@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
+import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.CoroutineScope
 
 internal class FlowControllerFactory(
@@ -35,7 +36,7 @@ internal class FlowControllerFactory(
         activity.applicationContext,
         activity,
         { activity.window.statusBarColor },
-        PaymentOptionFactory(activity.resources),
+        PaymentOptionFactory(activity.resources, StripeImageLoader(activity.applicationContext)),
         paymentOptionCallback,
         paymentResultCallback
     )
@@ -51,7 +52,7 @@ internal class FlowControllerFactory(
         fragment.requireContext(),
         fragment,
         { fragment.activity?.window?.statusBarColor },
-        PaymentOptionFactory(fragment.resources),
+        PaymentOptionFactory(fragment.resources, StripeImageLoader(fragment.requireContext().applicationContext)),
         paymentOptionCallback,
         paymentResultCallback
     )
