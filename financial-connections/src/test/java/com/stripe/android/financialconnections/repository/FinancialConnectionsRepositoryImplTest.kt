@@ -143,7 +143,7 @@ class FinancialConnectionsRepositoryImplTest {
 
     private suspend fun givenGetRequestReturns(successBody: String) {
         val mock = mock<ApiRequest>()
-        whenever(apiRequestFactory.createGet(any(), any(), any())).thenReturn(mock)
+        whenever(apiRequestFactory.createGet(any(), any(), any(), any())).thenReturn(mock)
         whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
             StripeResponse(
                 code = HttpURLConnection.HTTP_OK,

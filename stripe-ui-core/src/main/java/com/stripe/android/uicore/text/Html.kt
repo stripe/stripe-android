@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.text.HtmlCompat
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.image.isSupportedImageUrl
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -146,7 +147,11 @@ private fun rememberRemoteImages(
     val remoteUrls = annotatedText.getStringAnnotations(
         start = 0,
         end = annotatedText.length
-    ).filter { !imageLoader.keys.contains(it.item) }
+    ).filter {
+        it.item.let { url ->
+            url.isSupportedImageUrl() && !imageLoader.keys.contains(url)
+        }
+    }
 
     val remoteImages = remember { MutableStateFlow<Map<String, InlineTextContent>>(emptyMap()) }
     val localDensity = LocalDensity.current

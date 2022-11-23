@@ -2,6 +2,14 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+## 20.16.1 - 2022-11-21
+
+### PaymentSheet
+* [CHANGED][5848](https://github.com/stripe/stripe-android/pull/5848) We now disable the back button while processing intents in `PaymentSheet` to prevent them from incorrectly being displayed as canceled.
+
+### CardScan
+* [SECURITY][5798](https://github.com/stripe/stripe-android/pull/5798) URL-encode IDs used in URLs to prevent injection attacks.
+
 ## 20.16.0 - 2022-11-14
 
 ### Payments

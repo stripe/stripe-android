@@ -1,6 +1,7 @@
 package com.stripe.android.identity.navigation
 
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -15,6 +16,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.R
+import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.ID
@@ -55,9 +57,11 @@ import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
+@Config(application = TestApplication::class, sdk = [Build.VERSION_CODES.Q])
 class IdentityUploadFragmentTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()

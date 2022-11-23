@@ -110,6 +110,8 @@
   <string name="becs_widget_name_required">Nama anda diperlukan.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Batalkan</string>
+  <!-- Error when the card was declined by the credit card networks -->
+  <string name="card_declined">Kad anda telah ditolak</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s – berakhiran %2$s</string>
   <!-- Text for close button -->
@@ -121,13 +123,19 @@
   <string name="done">Selesai</string>
   <!-- Button title to enter editing mode -->
   <string name="edit">Edit</string>
+  <!-- Error when the card has already expired -->
+  <string name="expired_card">Kad anda telah tamat tempoh</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">BB/TT</string>
   <string name="expiry_label_short">Tamat Tempoh</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="fpx_bank_offline">%s – Luar Talian</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="generic_decline">Kaedah pembayaran anda ditolak.</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
   <string name="incomplete_expiry_date">Tarikh tamat tempoh kad anda tidak lengkap.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="invalid_bank_account_iban">IBAN yang anda masukkan tidak sah.</string>
   <string name="invalid_card_number">Nombor kad anda tidak sah.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Kod keselamatan kad anda tidak sah.</string>
@@ -135,6 +143,8 @@
   <string name="invalid_expiry_month">Bulan tamat tempoh kad anda tidak sah.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="invalid_expiry_year">Tahun tamat tempoh kad anda tidak sah.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="invalid_owner_name">Nama anda tidak sah.</string>
   <!-- Shipping form error message -->
   <string name="invalid_shipping_information">Alamat Pengiriman Tidak Sah</string>
   <!-- Error message for when postal code in form is incomplete -->
@@ -143,6 +153,8 @@
   <string name="payment_method_add_new_fpx">Pilih Akaun Bank (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Percuma</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="processing_error">Ada ralat semasa memproses kad anda -- cuba lagi dalam masa beberapa saat</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="remove">Alih Keluar</string>

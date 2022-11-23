@@ -1,11 +1,11 @@
 package com.stripe.android.identity.navigation
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
 import android.view.View
 import androidx.annotation.IdRes
-import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -13,7 +13,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.stripe.android.camera.Camera1Adapter
+import com.stripe.android.camera.CameraAdapter
+import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.core.exception.InvalidResponseException
@@ -32,6 +33,7 @@ import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.viewmodel.CameraViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
@@ -49,11 +51,10 @@ internal abstract class IdentityCameraScanFragment(
     @get:IdRes
     protected abstract val fragmentId: Int
 
-    @VisibleForTesting
-    internal lateinit var cameraAdapter: Camera1Adapter
+    internal lateinit var cameraAdapter: CameraAdapter<CameraPreviewImage<Bitmap>>
 
     /**
-     * [CameraView] to initialize [Camera1Adapter], subclasses needs to set its value in
+     * [CameraView] to initialize [CameraAdapter], subclasses needs to set its value in
      * [Fragment.onCreateView].
      */
     protected lateinit var cameraView: CameraView
@@ -63,14 +64,26 @@ internal abstract class IdentityCameraScanFragment(
      */
     protected abstract fun onCameraReady()
 
+    /**
+     * Determine if the Fragment should observe [IdentityScanViewModel.displayStateChanged].
+     * TODO(ccen) remove this and stop observing after [SelfieFragment] is also migrated to Jetpack
+     * Compose.
+     */
+    protected abstract val shouldObserveDisplayState: Boolean
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        identityScanViewModel.displayStateChanged.observe(viewLifecycleOwner) { (newState, _) ->
-            updateUI(newState)
+        if (shouldObserveDisplayState) {
+            identityScanViewModel.displayStateChanged.observe(viewLifecycleOwner) { (newState, _) ->
+                updateUI(newState)
+            }
         }
 
         identityScanViewModel.interimResults.observe(viewLifecycleOwner) {
             identityViewModel.fpsTracker.trackFrame()
+            if (it.identityState.isFinal) {
+                stopScanning()
+            }
         }
 
         identityScanViewModel.finalResult.observe(viewLifecycleOwner) { finalResult ->
@@ -142,9 +155,7 @@ internal abstract class IdentityCameraScanFragment(
                     navigateToDefaultErrorFragment(it)
                 }
             )
-            stopScanning()
         }
-        cameraAdapter = createCameraAdapter()
 
         identityViewModel.pageAndModelFiles.observe(viewLifecycleOwner) {
             when (it.status) {
@@ -172,14 +183,14 @@ internal abstract class IdentityCameraScanFragment(
         }
     }
 
-    protected abstract fun createCameraAdapter(): Camera1Adapter
-
     /**
      * Called back each time when [CameraViewModel.displayStateChanged] is changed.
+     * TODO(ccen) remove after SelfieFragment is also moved to jetpack compose
      */
-    protected abstract fun updateUI(identityScanState: IdentityScanState)
+    protected open fun updateUI(identityScanState: IdentityScanState) {}
 
-    protected abstract fun resetUI()
+    // TODO(ccen) remove this method after SelfieFragment is migrated to Jetpack compose
+    protected open fun resetUI() {}
 
     /**
      * Start scanning for the required scan type.
@@ -225,6 +236,7 @@ internal abstract class IdentityCameraScanFragment(
                 }
             }
         }
+        identityScanViewModel.targetScanTypeFlow.update { scanType }
         identityScanViewModel.targetScanType = scanType
         resetUI()
         cameraAdapter.bindToLifecycle(this)
@@ -245,7 +257,7 @@ internal abstract class IdentityCameraScanFragment(
     /**
      * Stop scanning, may start again later.
      */
-    protected fun stopScanning() {
+    private fun stopScanning() {
         identityScanViewModel.identityScanFlow?.resetFlow()
         cameraAdapter.unbindFromLifecycle(this)
     }
@@ -254,6 +266,12 @@ internal abstract class IdentityCameraScanFragment(
         super.onDestroy()
         Log.d(TAG, "Cancelling IdentityScanFlow")
         identityScanViewModel.identityScanFlow?.cancelFlow()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // When the fragment is navigated away from, clean up stale displayStateChangedFlow states.
+        identityScanViewModel.displayStateChangedFlow.update { null }
     }
 
     internal companion object {

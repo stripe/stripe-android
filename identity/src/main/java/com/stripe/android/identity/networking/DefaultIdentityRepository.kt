@@ -17,6 +17,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.responseJson
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -53,7 +54,7 @@ internal class DefaultIdentityRepository @Inject constructor(
         ephemeralKey: String
     ): VerificationPage = executeRequestWithKSerializer(
         apiRequestFactory.createGet(
-            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id",
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}",
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
             )
@@ -68,7 +69,7 @@ internal class DefaultIdentityRepository @Inject constructor(
         clearDataParam: ClearDataParam
     ): VerificationPageData = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
-            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id/$DATA",
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$DATA",
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
             ),
@@ -85,7 +86,7 @@ internal class DefaultIdentityRepository @Inject constructor(
         ephemeralKey: String
     ): VerificationPageData = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
-            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$id/$SUBMIT",
+            url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$SUBMIT",
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
             )

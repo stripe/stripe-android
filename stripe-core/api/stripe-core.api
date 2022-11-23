@@ -348,6 +348,9 @@ public final class com/stripe/android/core/networking/StripeRequest$MimeType : j
 	public static fun values ()[Lcom/stripe/android/core/networking/StripeRequest$MimeType;
 }
 
+public final class com/stripe/android/core/utils/EncodeKt {
+}
+
 public final class com/stripe/android/core/version/StripeSdkVersion {
 	public static final field INSTANCE Lcom/stripe/android/core/version/StripeSdkVersion;
 	public static final field VERSION Ljava/lang/String;

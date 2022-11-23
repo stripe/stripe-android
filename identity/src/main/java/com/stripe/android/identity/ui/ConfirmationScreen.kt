@@ -115,7 +115,7 @@ internal fun ConfirmationScreen(
                             testTag = confirmationConfirmButtonTag
                         }
                 ) {
-                    Text(text = successPage.buttonText)
+                    Text(text = successPage.buttonText.uppercase())
                 }
             }
             LaunchedEffect(Unit) {

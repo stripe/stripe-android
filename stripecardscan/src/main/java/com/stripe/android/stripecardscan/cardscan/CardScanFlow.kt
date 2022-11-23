@@ -79,16 +79,17 @@ internal abstract class CardScanFlow(
             mainLoop = ProcessBoundAnalyzerLoop(
                 analyzerPool = analyzerPool,
                 resultHandler = it,
-                analyzerLoopErrorListener = scanErrorListener
+                analyzerLoopErrorListener = scanErrorListener,
+                statsName = "main_loop_images_processed"
             ).apply {
                 mainLoopJob = subscribeTo(
-                    imageStream.map {
+                    imageStream.map { cameraImage ->
                         SSDOcr.cameraPreviewToInput(
-                            it.image,
+                            cameraImage.image,
                             minAspectRatioSurroundingSize(
-                                it.viewBounds.size(),
-                                it.image.width.toFloat() / it.image.height
-                            ).centerOn(it.viewBounds),
+                                cameraImage.viewBounds.size(),
+                                cameraImage.image.width.toFloat() / cameraImage.image.height
+                            ).centerOn(cameraImage.viewBounds),
                             viewFinder
                         )
                     },
@@ -98,8 +99,20 @@ internal abstract class CardScanFlow(
         }
     }.let { }
 
+    /**
+     * Reset the flow to the initial state, ready to be started again
+     */
+    internal fun resetFlow() {
+        canceled = false
+        cleanUp()
+    }
+
     override fun cancelFlow() {
         canceled = true
+        cleanUp()
+    }
+
+    private fun cleanUp() {
         mainLoopAggregator?.run { cancel() }
         mainLoopAggregator = null
 

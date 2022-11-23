@@ -110,6 +110,8 @@
   <string name="becs_widget_name_required">Необходимо указать ваше имя.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Отмена</string>
+  <!-- Error when the card was declined by the credit card networks -->
+  <string name="card_declined">Карта отклонена</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s, оканч. на %2$s</string>
   <!-- Text for close button -->
@@ -121,13 +123,19 @@
   <string name="done">Готово</string>
   <!-- Button title to enter editing mode -->
   <string name="edit">Редактировать</string>
+  <!-- Error when the card has already expired -->
+  <string name="expired_card">Срок действия карты истек</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">ММ/ГГ</string>
   <string name="expiry_label_short">Истечение срока действия</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="fpx_bank_offline">%s - не в сети</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="generic_decline">Не удалось выполнить оплату этим способом.</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
   <string name="incomplete_expiry_date">Дата истечения срока действия карты введена не полностью.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="invalid_bank_account_iban">Введенный код IBAN содержит ошибку.</string>
   <string name="invalid_card_number">Номер карты недействителен.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Код CVV/CVC карты недействителен.</string>
@@ -135,6 +143,8 @@
   <string name="invalid_expiry_month">Недопустимый месяц окончания действия карты.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="invalid_expiry_year">Недопустимый год окончания действия карты.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="invalid_owner_name">Недействительное имя.</string>
   <!-- Shipping form error message -->
   <string name="invalid_shipping_information">Ошибочный адрес доставки</string>
   <!-- Error message for when postal code in form is incomplete -->
@@ -143,6 +153,8 @@
   <string name="payment_method_add_new_fpx">Выберите банковский счет (FPX)…</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Бесплатно</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="processing_error">При обработке карты произошла ошибка. Подождите несколько секунд и повторите попытку</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="remove">Удалить</string>

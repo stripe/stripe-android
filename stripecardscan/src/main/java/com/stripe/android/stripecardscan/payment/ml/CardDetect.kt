@@ -105,8 +105,6 @@ internal class CardDetect private constructor(interpreter: Interpreter) :
         return mlOutput
     }
 
-    override val statsName: String? = null
-
     /**
      * A factory for creating instances of this analyzer.
      */

@@ -18,7 +18,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
-import com.stripe.android.camera.Camera1Adapter
+import com.stripe.android.camera.CameraXAdapter
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.framework.image.mirrorHorizontally
 import com.stripe.android.identity.R
@@ -44,6 +44,7 @@ internal class SelfieFragment(
     identityViewModelFactory: ViewModelProvider.Factory
 ) : IdentityCameraScanFragment(identityCameraScanViewModelFactory, identityViewModelFactory) {
     override val fragmentId = R.id.selfieFragment
+    override val shouldObserveDisplayState = true
 
     private lateinit var flashAnimatorSet: AnimatorSet
     private lateinit var binding: SelfieScanFragmentBinding
@@ -97,6 +98,7 @@ internal class SelfieFragment(
             continueButton.toggleToLoading()
             collectUploadedStateAndUploadForCollectedSelfies()
         }
+        cameraAdapter = createCameraAdapter()
         return binding.root
     }
 
@@ -122,23 +124,21 @@ internal class SelfieFragment(
         )
     }
 
-    override fun createCameraAdapter(): Camera1Adapter {
-        return Camera1Adapter(
-            requireNotNull(activity),
-            cameraView.previewFrame,
-            MINIMUM_RESOLUTION,
-            DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
-                Log.e(TAG, "scan fails with exception: $cause")
-                identityViewModel.sendAnalyticsRequest(
-                    identityViewModel.identityAnalyticsRequestFactory.cameraError(
-                        scanType = IdentityScanState.ScanType.SELFIE,
-                        throwable = IllegalStateException(cause)
-                    )
+    private fun createCameraAdapter() = CameraXAdapter(
+        requireNotNull(activity),
+        cameraView.previewFrame,
+        MINIMUM_RESOLUTION,
+        DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
+            Log.e(TAG, "scan fails with exception: $cause")
+            identityViewModel.sendAnalyticsRequest(
+                identityViewModel.identityAnalyticsRequestFactory.cameraError(
+                    scanType = IdentityScanState.ScanType.SELFIE,
+                    throwable = IllegalStateException(cause)
                 )
-            },
-            false
-        )
-    }
+            )
+        },
+        startWithBackCamera = false
+    )
 
     override fun onCameraReady() {
         startScanning(IdentityScanState.ScanType.SELFIE)

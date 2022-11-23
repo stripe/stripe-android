@@ -1,10 +1,9 @@
 package com.stripe.android.financialconnections.example.data
 
-private const val BASE_URL = "https://night-discreet-femur.glitch.me/"
-
 class BackendRepository(
-    private val backendService: BackendApiService = BackendApiFactory(BASE_URL).create()
+    settings: Settings
 ) {
+    private val backendService: BackendApiService = BackendApiFactory(settings).create()
 
     suspend fun createLinkAccountSession() =
         backendService.createLinkAccountSession()

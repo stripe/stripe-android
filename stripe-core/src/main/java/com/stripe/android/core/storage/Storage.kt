@@ -223,6 +223,6 @@ class SharedPreferencesStorage(
     }
 
     private companion object {
-        val logTag: String = SharedPreferencesStorage::class.java.simpleName
+        private val logTag: String = SharedPreferencesStorage::class.java.simpleName
     }
 }
