@@ -27,6 +27,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -163,7 +164,7 @@ internal class PaymentOptionsActivityTest {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(
-                PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
                     paymentMethods = PaymentMethodFixtures.createCards(5)
                 )
             )
@@ -179,14 +180,14 @@ internal class PaymentOptionsActivityTest {
     fun `ContinueButton should be visible when showing add payment method form`() {
         val scenario = activityScenario(
             createViewModel(
-                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
                 )
             )
         )
         scenario.launch(
             createIntent(
-                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
                 )
             )
@@ -203,7 +204,7 @@ internal class PaymentOptionsActivityTest {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(
-                PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
                     paymentMethods = PaymentMethodFixtures.createCards(5)
                 )
             )
@@ -258,16 +259,16 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `Verify if google pay is ready, stay on the select saved payment method`() {
-        val viewModel = createViewModel(
-            PAYMENT_OPTIONS_CONTRACT_ARGS.copy(isGooglePayReady = true)
-        )
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(isGooglePayReady = true)
+        val viewModel = createViewModel(args)
+
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
         viewModel.transition.observeForever {
             transitionTarget.add(it)
         }
         val scenario = activityScenario(viewModel)
         scenario.launch(
-            createIntent()
+            createIntent(args)
         ).use {
             idleLooper()
             assertThat(transitionTarget[1].peekContent())
@@ -277,7 +278,7 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `Verify if payment methods is not empty select, saved payment method`() {
-        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             isGooglePayReady = false,
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
@@ -444,14 +445,14 @@ internal class PaymentOptionsActivityTest {
     fun `primary button appearance is set`() {
         val scenario = activityScenario(
             createViewModel(
-                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
                 )
             )
         )
         scenario.launch(
             createIntent(
-                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
                         appearance = PaymentSheet.Appearance(

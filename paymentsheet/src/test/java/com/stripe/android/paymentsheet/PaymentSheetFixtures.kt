@@ -6,7 +6,10 @@ import androidx.core.graphics.toColorInt
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.flowcontroller.PaymentSheetState
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import org.mockito.kotlin.mock
@@ -81,16 +84,37 @@ internal object PaymentSheetFixtures {
         )
 
     internal val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
-        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        paymentMethods = emptyList(),
-        config = CONFIG_GOOGLEPAY,
-        isGooglePayReady = false,
-        newLpm = null,
+        state = PaymentSheetState.Full(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            clientSecret = PaymentIntentClientSecret("pssst… this is a secret"),
+            customerPaymentMethods = emptyList(),
+            config = CONFIG_GOOGLEPAY,
+            isGooglePayReady = false,
+            newPaymentSelection = null,
+        ),
         statusBarColor = STATUS_BAR_COLOR,
         injectorKey = DUMMY_INJECTOR_KEY,
         enableLogging = false,
         productUsage = mock()
     )
+
+    internal fun PaymentOptionContract.Args.updateState(
+        paymentMethods: List<PaymentMethod> = state.customerPaymentMethods,
+        isGooglePayReady: Boolean = state.isGooglePayReady,
+        stripeIntent: StripeIntent = state.stripeIntent,
+        config: PaymentSheet.Configuration? = state.config,
+        newPaymentSelection: PaymentSelection.New? = state.newPaymentSelection,
+    ): PaymentOptionContract.Args {
+        return copy(
+            state = state.copy(
+                customerPaymentMethods = paymentMethods,
+                isGooglePayReady = isGooglePayReady,
+                stripeIntent = stripeIntent,
+                config = config,
+                newPaymentSelection = newPaymentSelection,
+            ),
+        )
+    }
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         get() = PaymentSheetContract.Args(

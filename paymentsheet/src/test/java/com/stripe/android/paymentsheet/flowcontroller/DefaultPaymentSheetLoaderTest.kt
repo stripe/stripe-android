@@ -42,7 +42,7 @@ import kotlin.test.Test
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-internal class DefaultFlowControllerInitializerTest {
+internal class DefaultPaymentSheetLoaderTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val eventReporter = mock<EventReporter>()
 
@@ -58,7 +58,6 @@ internal class DefaultFlowControllerInitializerTest {
     )
 
     private val prefsRepository = FakePrefsRepository()
-    private val initializer = createInitializer()
 
     @Captor
     private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>
@@ -84,25 +83,30 @@ internal class DefaultFlowControllerInitializerTest {
     }
 
     @Test
-    fun `init without configuration should return expected result`() =
-        runTest {
-            assertThat(
-                initializer.init(
-                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET
-                )
-            ).isEqualTo(
-                FlowControllerInitializer.InitResult.Success(
-                    InitData(
-                        null,
-                        PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-                        PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        emptyList(),
-                        SavedSelection.None,
-                        isGooglePayReady = false
-                    )
+    fun `init without configuration should return expected result`() = runTest {
+        val expectedIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+
+        val loader = createPaymentSheetLoader()
+
+        assertThat(
+            loader.load(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                paymentSheetConfiguration = null,
+            )
+        ).isEqualTo(
+            PaymentSheetLoader.Result.Success(
+                PaymentSheetState.Full(
+                    config = null,
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                    stripeIntent = expectedIntent,
+                    customerPaymentMethods = emptyList(),
+                    savedSelection = SavedSelection.Link,
+                    isGooglePayReady = false,
+                    isLinkEnabled = true,
                 )
             )
-        }
+        )
+    }
 
     @Test
     fun `init with configuration should return expected result`() = runTest {
@@ -110,97 +114,101 @@ internal class DefaultFlowControllerInitializerTest {
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
 
+        val expectedIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+
+        val loader = createPaymentSheetLoader()
+
         assertThat(
-            initializer.init(
+            loader.load(
                 PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
         ).isEqualTo(
-            FlowControllerInitializer.InitResult.Success(
-                InitData(
-                    PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-                    PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    PAYMENT_METHODS,
-                    SavedSelection.PaymentMethod(
-                        id = "pm_123456789"
-                    ),
-                    isGooglePayReady = true
+            PaymentSheetLoader.Result.Success(
+                PaymentSheetState.Full(
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                    stripeIntent = expectedIntent,
+                    customerPaymentMethods = PAYMENT_METHODS,
+                    savedSelection = SavedSelection.PaymentMethod(id = "pm_123456789"),
+                    isGooglePayReady = true,
+                    isLinkEnabled = true,
                 )
             )
         )
     }
 
     @Test
-    fun `init() with no customer, and google pay ready should default saved selection to google pay`() =
-        runTest {
-            prefsRepository.savePaymentSelection(null)
+    fun `init() with no customer and google pay ready should default to Link`() = runTest {
+        prefsRepository.savePaymentSelection(null)
 
-            val initializer = createInitializer()
-            assertThat(
-                initializer.init(
-                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-                    PaymentSheetFixtures.CONFIG_GOOGLEPAY
-                )
-            ).isEqualTo(
-                FlowControllerInitializer.InitResult.Success(
-                    InitData(
-                        PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-                        PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-                        PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        emptyList(),
-                        SavedSelection.GooglePay,
-                        isGooglePayReady = true
-                    )
+        val loader = createPaymentSheetLoader()
+        assertThat(
+            loader.load(
+                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                PaymentSheetFixtures.CONFIG_GOOGLEPAY
+            )
+        ).isEqualTo(
+            PaymentSheetLoader.Result.Success(
+                PaymentSheetState.Full(
+                    config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    customerPaymentMethods = emptyList(),
+                    savedSelection = SavedSelection.Link,
+                    isGooglePayReady = true,
+                    isLinkEnabled = true,
                 )
             )
-        }
+        )
+    }
 
     @Test
-    fun `init() with no customer, and google pay not ready should default saved selection to none`() =
-        runTest {
-            prefsRepository.savePaymentSelection(null)
+    fun `init() with no customer and Google Pay not ready should default to Link`() = runTest {
+        prefsRepository.savePaymentSelection(null)
 
-            val initializer = createInitializer(isGooglePayReady = false)
-            assertThat(
-                initializer.init(
-                    PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-                    PaymentSheetFixtures.CONFIG_GOOGLEPAY
-                )
-            ).isEqualTo(
-                FlowControllerInitializer.InitResult.Success(
-                    InitData(
-                        PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-                        PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-                        PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        emptyList(),
-                        SavedSelection.None,
-                        isGooglePayReady = false
-                    )
+        val loader = createPaymentSheetLoader(isGooglePayReady = false)
+        assertThat(
+            loader.load(
+                PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                PaymentSheetFixtures.CONFIG_GOOGLEPAY
+            )
+        ).isEqualTo(
+            PaymentSheetLoader.Result.Success(
+                PaymentSheetState.Full(
+                    config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                    customerPaymentMethods = emptyList(),
+                    savedSelection = SavedSelection.Link,
+                    isGooglePayReady = false,
+                    isLinkEnabled = true,
                 )
             )
-        }
+        )
+    }
 
     @Test
     fun `init() with customer payment methods, and google pay ready should default saved selection to last payment method`() =
         runTest {
             prefsRepository.savePaymentSelection(null)
 
-            val initializer = createInitializer()
+            val loader = createPaymentSheetLoader()
             assertThat(
-                initializer.init(
+                loader.load(
                     PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
                 )
             ).isEqualTo(
-                FlowControllerInitializer.InitResult.Success(
-                    InitData(
-                        PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                        PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
-                        PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        PAYMENT_METHODS,
-                        SavedSelection.PaymentMethod("pm_123456789"),
-                        isGooglePayReady = true
+                PaymentSheetLoader.Result.Success(
+                    PaymentSheetState.Full(
+                        config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                        clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
+                        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                        customerPaymentMethods = PAYMENT_METHODS,
+                        savedSelection = SavedSelection.PaymentMethod("pm_123456789"),
+                        isGooglePayReady = true,
+                        isLinkEnabled = true,
                     )
                 )
             )
@@ -214,64 +222,66 @@ internal class DefaultFlowControllerInitializerTest {
         }
 
     @Test
-    fun `init() with customer, no methods, and google pay not ready, should set first payment method as google pay`() =
+    fun `init() with customer, no methods, and google pay not ready, should set first payment method as Link`() =
         runTest {
             prefsRepository.savePaymentSelection(null)
 
-            val initializer = createInitializer(
+            val loader = createPaymentSheetLoader(
                 isGooglePayReady = false,
                 customerRepo = FakeCustomerRepository(emptyList())
             )
             assertThat(
-                initializer.init(
+                loader.load(
                     PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
                 )
             ).isEqualTo(
-                FlowControllerInitializer.InitResult.Success(
-                    InitData(
+                PaymentSheetLoader.Result.Success(
+                    PaymentSheetState.Full(
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         emptyList(),
-                        SavedSelection.None,
-                        isGooglePayReady = false
+                        SavedSelection.Link,
+                        isGooglePayReady = false,
+                        isLinkEnabled = true,
                     )
                 )
             )
 
             assertThat(prefsRepository.getSavedSelection(true, true))
-                .isEqualTo(SavedSelection.None)
+                .isEqualTo(SavedSelection.Link)
         }
 
     @Test
-    fun `init() with customer, no methods, and google pay ready, should set first payment method as none`() =
+    fun `init() with customer, no methods, and google pay ready, should set first payment method as Link`() =
         runTest {
             prefsRepository.savePaymentSelection(null)
 
-            val initializer = createInitializer(
+            val loader = createPaymentSheetLoader(
                 customerRepo = FakeCustomerRepository(emptyList())
             )
             assertThat(
-                initializer.init(
+                loader.load(
                     PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
                 )
             ).isEqualTo(
-                FlowControllerInitializer.InitResult.Success(
-                    InitData(
+                PaymentSheetLoader.Result.Success(
+                    PaymentSheetState.Full(
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                         emptyList(),
-                        SavedSelection.GooglePay,
-                        isGooglePayReady = true
+                        SavedSelection.Link,
+                        isGooglePayReady = true,
+                        isLinkEnabled = true,
                     )
                 )
             )
 
             assertThat(prefsRepository.getSavedSelection(true, true))
-                .isEqualTo(SavedSelection.GooglePay)
+                .isEqualTo(SavedSelection.Link)
         }
 
     @Test
@@ -286,7 +296,7 @@ internal class DefaultFlowControllerInitializerTest {
                 "fpx", // valid but not supported
                 "invalid_type" // unknown type
             )
-            val initializer = createInitializer(
+            val loader = createPaymentSheetLoader(
                 stripeIntentRepo = StripeIntentRepository.Static(
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                         paymentMethodTypes = paymentMethodTypes
@@ -295,7 +305,7 @@ internal class DefaultFlowControllerInitializerTest {
                 customerRepo = customerRepository
             )
 
-            initializer.init(
+            loader.load(
                 PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
@@ -315,7 +325,7 @@ internal class DefaultFlowControllerInitializerTest {
                 whenever(it.getPaymentMethods(any(), any())).thenReturn(emptyList())
             }
 
-            val initializer = createInitializer(
+            val loader = createPaymentSheetLoader(
                 stripeIntentRepo = StripeIntentRepository.Static(
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                         paymentMethodTypes = listOf(
@@ -328,7 +338,7 @@ internal class DefaultFlowControllerInitializerTest {
                 customerRepo = customerRepository
             )
 
-            initializer.init(
+            loader.load(
                 PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
@@ -344,7 +354,7 @@ internal class DefaultFlowControllerInitializerTest {
     @Test
     fun `init() with customer should filter out invalid payment method types`() =
         runTest {
-            val initResult = createInitializer(
+            val result = createPaymentSheetLoader(
                 stripeIntentRepo = StripeIntentRepository.Static(
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
                 ),
@@ -354,87 +364,87 @@ internal class DefaultFlowControllerInitializerTest {
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     )
                 )
-            ).init(
+            ).load(
                 PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-            ) as FlowControllerInitializer.InitResult.Success
+            ) as PaymentSheetLoader.Result.Success
 
-            assertThat(initResult.initData.paymentMethods)
+            assertThat(result.state.customerPaymentMethods)
                 .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
     @Test
     fun `init() when PaymentIntent has invalid status should return null`() =
         runTest {
-            val result = createInitializer(
+            val result = createPaymentSheetLoader(
                 stripeIntentRepo = StripeIntentRepository.Static(
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                         status = StripeIntent.Status.Succeeded
                     )
                 )
-            ).init(
+            ).load(
                 PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
             assertThat(result)
-                .isInstanceOf(FlowControllerInitializer.InitResult::class.java)
+                .isInstanceOf(PaymentSheetLoader.Result::class.java)
         }
 
     @Test
     fun `init() when PaymentIntent has invalid confirmationMethod should return null`() =
         runTest {
-            val result = createInitializer(
+            val result = createPaymentSheetLoader(
                 stripeIntentRepo = StripeIntentRepository.Static(
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                         confirmationMethod = PaymentIntent.ConfirmationMethod.Manual
                     )
                 )
-            ).init(
+            ).load(
                 PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET
             )
             assertThat(result)
-                .isInstanceOf(FlowControllerInitializer.InitResult::class.java)
+                .isInstanceOf(PaymentSheetLoader.Result::class.java)
         }
 
     @Test
     fun `Defaults to Google Play for guests if Link is not enabled`() = runTest {
-        val result = createInitializer(
+        val result = createPaymentSheetLoader(
             stripeIntentRepo = StripeIntentRepository.Static(
-                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
             )
-        ).init(
+        ).load(
             clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
             paymentSheetConfiguration = mockConfiguration()
-        ) as FlowControllerInitializer.InitResult.Success
+        ) as PaymentSheetLoader.Result.Success
 
-        assertThat(result.initData.savedSelection).isEqualTo(SavedSelection.GooglePay)
+        assertThat(result.state.isLinkEnabled).isFalse()
+        assertThat(result.state.savedSelection).isEqualTo(SavedSelection.GooglePay)
     }
 
     @Test
     fun `Defaults to Link for guests if available`() = runTest {
-        val result = createInitializer(
+        val result = createPaymentSheetLoader(
             stripeIntentRepo = StripeIntentRepository.Static(
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
             ),
-            isLinkEnabled = true
-        ).init(
+        ).load(
             clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
             // The mock configuration is necessary to enable Google Pay. We want to do that,
             // so that we can check that Link is preferred.
             paymentSheetConfiguration = mockConfiguration()
-        ) as FlowControllerInitializer.InitResult.Success
+        ) as PaymentSheetLoader.Result.Success
 
-        assertThat(result.initData.savedSelection).isEqualTo(SavedSelection.Link)
+        assertThat(result.state.savedSelection).isEqualTo(SavedSelection.Link)
     }
 
     @Test
     fun `Defaults to first existing payment method for known customer`() = runTest {
-        val result = createInitializer(
+        val result = createPaymentSheetLoader(
             stripeIntentRepo = StripeIntentRepository.Static(
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
             ),
             customerRepo = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS)
-        ).init(
+        ).load(
             clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
             paymentSheetConfiguration = mockConfiguration(
                 customer = PaymentSheet.CustomerConfiguration(
@@ -442,19 +452,18 @@ internal class DefaultFlowControllerInitializerTest {
                     ephemeralKeySecret = "some_key"
                 )
             )
-        ) as FlowControllerInitializer.InitResult.Success
+        ) as PaymentSheetLoader.Result.Success
 
         val expectedPaymentMethodId = requireNotNull(PAYMENT_METHODS.first().id)
-        assertThat(result.initData.savedSelection).isEqualTo(SavedSelection.PaymentMethod(id = expectedPaymentMethodId))
+        assertThat(result.state.savedSelection).isEqualTo(SavedSelection.PaymentMethod(id = expectedPaymentMethodId))
     }
 
-    private fun createInitializer(
+    private fun createPaymentSheetLoader(
         isGooglePayReady: Boolean = true,
-        isLinkEnabled: Boolean = false,
         stripeIntentRepo: StripeIntentRepository = stripeIntentRepository,
         customerRepo: CustomerRepository = customerRepository
-    ): FlowControllerInitializer {
-        return DefaultFlowControllerInitializer(
+    ): PaymentSheetLoader {
+        return DefaultPaymentSheetLoader(
             { prefsRepository },
             { if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository },
             stripeIntentRepo,
@@ -464,7 +473,6 @@ internal class DefaultFlowControllerInitializerTest {
             Logger.noop(),
             eventReporter,
             testDispatcher,
-            isLinkEnabled
         )
     }
 
