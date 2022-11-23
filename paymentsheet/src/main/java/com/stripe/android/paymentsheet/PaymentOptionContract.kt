@@ -5,7 +5,7 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.paymentsheet.flowcontroller.PaymentSheetState
+import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 

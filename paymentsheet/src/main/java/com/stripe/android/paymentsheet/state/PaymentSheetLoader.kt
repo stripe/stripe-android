@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.flowcontroller
+package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext

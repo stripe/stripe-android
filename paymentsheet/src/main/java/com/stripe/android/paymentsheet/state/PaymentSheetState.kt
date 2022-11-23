@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.flowcontroller
+package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
 import com.stripe.android.model.PaymentMethod
