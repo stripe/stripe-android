@@ -48,6 +48,8 @@ jobs:
 
       - name: Install Maestro CLI
         run: curl -Ls "https://get.maestro.mobile.dev" | bash
+      - name: Add Maestro to path
+        run: echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
       - name: Run Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
