@@ -9,8 +9,8 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.state.DefaultPaymentSheetLoader
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
+import com.stripe.android.paymentsheet.state.DefaultPaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import dagger.Binds
 import dagger.Module
