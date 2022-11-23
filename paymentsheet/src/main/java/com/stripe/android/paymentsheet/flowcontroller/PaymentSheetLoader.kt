@@ -108,8 +108,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     ): PaymentSheetLoader.Result {
         val prefsRepository = prefsRepositoryFactory(customerConfig)
 
-        // TODO: Parallelize operations
-
         val paymentMethods = if (customerConfig != null) {
             retrieveCustomerPaymentMethods(
                 stripeIntent,

@@ -83,7 +83,7 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
-    fun `init without configuration should return expected result`() = runTest {
+    fun `load without configuration should return expected result`() = runTest {
         val expectedIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         val loader = createPaymentSheetLoader()
@@ -109,7 +109,7 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
-    fun `init with configuration should return expected result`() = runTest {
+    fun `load with configuration should return expected result`() = runTest {
         prefsRepository.savePaymentSelection(
             PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
@@ -139,7 +139,7 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
-    fun `init() with no customer and google pay ready should default to Link`() = runTest {
+    fun `load() with no customer and google pay ready should default to Link`() = runTest {
         prefsRepository.savePaymentSelection(null)
 
         val loader = createPaymentSheetLoader()
@@ -164,7 +164,7 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
-    fun `init() with no customer and Google Pay not ready should default to Link`() = runTest {
+    fun `load() with no customer and Google Pay not ready should default to Link`() = runTest {
         prefsRepository.savePaymentSelection(null)
 
         val loader = createPaymentSheetLoader(isGooglePayReady = false)
@@ -189,7 +189,7 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
-    fun `init() with customer payment methods, and google pay ready should default saved selection to last payment method`() =
+    fun `load() with payment methods, and google pay ready should default to last payment method`() =
         runTest {
             prefsRepository.savePaymentSelection(null)
 
@@ -222,7 +222,7 @@ internal class DefaultPaymentSheetLoaderTest {
         }
 
     @Test
-    fun `init() with customer, no methods, and google pay not ready, should set first payment method as Link`() =
+    fun `load() with customer, no methods, and google pay not ready, should set first payment method as Link`() =
         runTest {
             prefsRepository.savePaymentSelection(null)
 
@@ -254,7 +254,7 @@ internal class DefaultPaymentSheetLoaderTest {
         }
 
     @Test
-    fun `init() with customer, no methods, and google pay ready, should set first payment method as Link`() =
+    fun `load() with customer, no methods, and google pay ready, should set first payment method as Link`() =
         runTest {
             prefsRepository.savePaymentSelection(null)
 
@@ -285,7 +285,7 @@ internal class DefaultPaymentSheetLoaderTest {
         }
 
     @Test
-    fun `init() with customer should fetch only supported payment method types`() =
+    fun `load() with customer should fetch only supported payment method types`() =
         runTest {
             val customerRepository = mock<CustomerRepository> {
                 whenever(it.getPaymentMethods(any(), any())).thenReturn(emptyList())
@@ -352,7 +352,7 @@ internal class DefaultPaymentSheetLoaderTest {
         }
 
     @Test
-    fun `init() with customer should filter out invalid payment method types`() =
+    fun `load() with customer should filter out invalid payment method types`() =
         runTest {
             val result = createPaymentSheetLoader(
                 stripeIntentRepo = StripeIntentRepository.Static(
@@ -374,7 +374,7 @@ internal class DefaultPaymentSheetLoaderTest {
         }
 
     @Test
-    fun `init() when PaymentIntent has invalid status should return null`() =
+    fun `load() when PaymentIntent has invalid status should return null`() =
         runTest {
             val result = createPaymentSheetLoader(
                 stripeIntentRepo = StripeIntentRepository.Static(
@@ -391,7 +391,7 @@ internal class DefaultPaymentSheetLoaderTest {
         }
 
     @Test
-    fun `init() when PaymentIntent has invalid confirmationMethod should return null`() =
+    fun `load() when PaymentIntent has invalid confirmationMethod should return null`() =
         runTest {
             val result = createPaymentSheetLoader(
                 stripeIntentRepo = StripeIntentRepository.Static(
