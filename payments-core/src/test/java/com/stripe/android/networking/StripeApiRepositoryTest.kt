@@ -2446,7 +2446,7 @@ internal class StripeApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
-            create().getPaymentMethodMessaging(
+            create().retrievePaymentMethodMessaging(
                 paymentMethods = listOf("klarna", "afterpay"),
                 amount = 999,
                 currency = "usd",

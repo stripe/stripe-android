@@ -8,8 +8,8 @@ import org.json.JSONObject
 internal class PaymentMethodMessageJsonParser : ModelJsonParser<PaymentMethodMessage> {
     override fun parse(json: JSONObject): PaymentMethodMessage {
         return PaymentMethodMessage(
-            displayLHtml = StripeJsonUtils.optString(json, FIELD_L_HTML) ?: "",
-            learnMoreModalUrl = StripeJsonUtils.optString(json, FIELD_LEARN_MORE_MODAL_URL) ?: ""
+            displayHtml = StripeJsonUtils.optString(json, FIELD_L_HTML) ?: "",
+            learnMoreUrl = StripeJsonUtils.optString(json, FIELD_LEARN_MORE_MODAL_URL) ?: ""
         )
     }
 

@@ -7,6 +7,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PaymentMethodMessage internal constructor(
-    val displayLHtml: String,
-    val learnMoreModalUrl: String
+    val displayHtml: String,
+    val learnMoreUrl: String
 ) : StripeModel

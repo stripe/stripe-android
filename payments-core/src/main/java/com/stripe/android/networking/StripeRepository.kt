@@ -548,7 +548,7 @@ abstract class StripeRepository {
     ): SetupIntent?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    abstract suspend fun getPaymentMethodMessaging(
+    abstract suspend fun retrievePaymentMethodMessaging(
         paymentMethods: List<String>,
         amount: Int,
         currency: String,
