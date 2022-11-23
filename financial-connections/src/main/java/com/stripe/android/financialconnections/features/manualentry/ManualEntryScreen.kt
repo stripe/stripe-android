@@ -20,10 +20,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -150,6 +154,7 @@ private fun ManualEntryContent(
                     label = R.string.stripe_manualentry_routing,
                     hint = "123456789",
                     inputWithError = routing,
+                    testTag = "RoutingInput",
                     onInputChanged = onRoutingEntered,
                     onFocusGained = { currentCheck = R.drawable.stripe_check_routing }
                 )
@@ -158,6 +163,7 @@ private fun ManualEntryContent(
                     label = R.string.stripe_manualentry_account,
                     hint = "000123456789",
                     inputWithError = account,
+                    testTag = "AccountInput",
                     onInputChanged = onAccountEntered,
                     onFocusGained = { currentCheck = R.drawable.stripe_check_account }
                 )
@@ -172,6 +178,7 @@ private fun ManualEntryContent(
                     label = R.string.stripe_manualentry_accountconfirm,
                     hint = "000123456789",
                     inputWithError = accountConfirm,
+                    testTag = "ConfirmAccountInput",
                     onInputChanged = onAccountConfirmEntered,
                     onFocusGained = { currentCheck = R.drawable.stripe_check_account }
                 )
@@ -202,10 +209,12 @@ private fun ManualEntryFooter(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun InputWithError(
     inputWithError: Pair<String?, Int?>,
     label: Int,
+    testTag: String,
     hint: String,
     onFocusGained: () -> Unit,
     onInputChanged: (String) -> Unit
@@ -234,7 +243,10 @@ private fun InputWithError(
             textValue = text.filtered { it.isDigit() }
             onInputChanged(textValue.text)
         },
-        modifier = Modifier.onFocusChanged { if (it.isFocused) onFocusGained() }
+        modifier = Modifier
+            .semantics { testTagsAsResourceId = true }
+            .testTag(testTag)
+            .onFocusChanged { if (it.isFocused) onFocusGained() }
     )
     if (inputWithError.second != null) {
         Text(
