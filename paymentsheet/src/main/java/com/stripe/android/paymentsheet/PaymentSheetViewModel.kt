@@ -63,7 +63,8 @@ import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
-import com.stripe.android.paymentsheet.repositories.initializeRepositoryAndGetStripeIntent
+import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -71,7 +72,6 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -88,6 +88,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
+    private val paymentSheetLoader: PaymentSheetLoader,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
     lpmResourceRepository: ResourceRepository<LpmRepository>,
@@ -206,6 +207,36 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         if (googlePayLauncherConfig == null) {
             savedStateHandle[SAVE_GOOGLE_PAY_READY] = false
         }
+
+        viewModelScope.launch {
+            loadPaymentSheetState()
+        }
+    }
+
+    private suspend fun loadPaymentSheetState() {
+        val result = withContext(workContext) {
+            paymentSheetLoader.load(args.clientSecret, args.config)
+        }
+
+        when (result) {
+            is PaymentSheetLoader.Result.Success -> {
+                handlePaymentSheetStateLoaded(result.state)
+            }
+            is PaymentSheetLoader.Result.Failure -> {
+                setStripeIntent(null)
+                onFatal(result.throwable)
+            }
+        }
+    }
+
+    private fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
+        lpmServerSpec = lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
+
+        savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
+        setStripeIntent(state.stripeIntent)
+        setupLink(state.stripeIntent)
+
+        resetViewState()
     }
 
     fun setupGooglePay(
@@ -226,68 +257,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     /**
-     * Fetch the [StripeIntent] for the client secret received in the initialization arguments, if
-     * not fetched yet. If successful, continues through validation and fetching the saved payment
-     * methods for the customer.
-     */
-    internal fun maybeFetchStripeIntent() = if (stripeIntent.value == null) {
-        viewModelScope.launch {
-            // The co-routine scope is needed to do work off the UI thread
-            CoroutineScope(workContext).launch {
-                runCatching {
-                    val intent = initializeRepositoryAndGetStripeIntent(
-                        lpmResourceRepository,
-                        stripeIntentRepository,
-                        args.clientSecret,
-                        eventReporter
-                    )
-
-                    lpmServerSpec =
-                        lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
-
-                    // The lpm server specs need to be saved so that upon the
-                    // activity being killed the state can be restored.
-                    intent
-                }.fold(
-                    onSuccess = {
-                        withContext(Dispatchers.Main) {
-                            onStripeIntentFetchResponse(it)
-                        }
-                    },
-                    onFailure = {
-                        withContext(Dispatchers.Main) {
-                            setStripeIntent(null)
-                            onFatal(it)
-                        }
-                    }
-                )
-            }
-        }
-        true
-    } else {
-        false
-    }
-
-    private fun onStripeIntentFetchResponse(stripeIntent: StripeIntent) {
-        runCatching {
-            stripeIntentValidator.requireValid(stripeIntent)
-        }.fold(
-            onSuccess = {
-                savedStateHandle[SAVE_STRIPE_INTENT] = stripeIntent
-                updatePaymentMethods(stripeIntent)
-                setupLink(stripeIntent)
-                resetViewState()
-            },
-            onFailure = ::onFatal
-        )
-    }
-
-    /**
      * Fetch the saved payment methods for the customer, if a [PaymentSheet.CustomerConfiguration]
      * was provided.
      * It will fetch only the payment method types as defined in [SupportedPaymentMethod.getSupportedSavedCustomerPMs].
      */
     @VisibleForTesting
+    @Deprecated("Remove before merging")
     fun updatePaymentMethods(stripeIntent: StripeIntent) {
         viewModelScope.launch {
             runCatching {
