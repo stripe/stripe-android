@@ -59,7 +59,7 @@ jobs:
           disable-animations: true
           script: |
             ./gradlew :financial-connections-example:installDebug
-            ./maestro/bin/maestro --platform android test maestro/fc-flow-testmode.yaml
+            ./maestro test maestro/fc-flow-test-oauth.yaml
       - name: Archive maestro screenshots
         if: always()
         uses: actions/upload-artifact@v3
