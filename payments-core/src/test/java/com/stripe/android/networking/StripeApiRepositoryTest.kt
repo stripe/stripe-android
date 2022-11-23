@@ -42,6 +42,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodMessageFixtures
 import com.stripe.android.model.PaymentMethodPreferenceFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
@@ -2431,6 +2432,48 @@ internal class StripeApiRepositoryTest {
             with(params) {
                 assertEquals(clientSecret, this["client_secret"])
                 assertEquals("some_description", this["descriptor_code"])
+            }
+        }
+
+    @Test
+    fun `getPaymentMethodMessaging() returns PaymentMethodMessage`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                PaymentMethodMessageFixtures.DEFAULT,
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            create().retrievePaymentMethodMessage(
+                paymentMethods = listOf("klarna", "afterpay"),
+                amount = 999,
+                currency = "usd",
+                country = "us",
+                locale = Locale.getDefault().toLanguageTag(),
+                logoColor = "color",
+                requestOptions = DEFAULT_OPTIONS
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+            val request = apiRequestArgumentCaptor.firstValue
+            val params = requireNotNull(request.params)
+
+            assertEquals(
+                "https://ppm.stripe.com/content",
+                request.baseUrl
+            )
+
+            with(params) {
+                assertEquals("klarna", this["payment_methods[0]"])
+                assertEquals("afterpay", this["payment_methods[1]"])
+                assertEquals(999, this["amount"])
+                assertEquals("usd", this["currency"])
+                assertEquals("us", this["country"])
+                assertEquals("en-US", this["locale"])
+                assertEquals("color", this["logo_color"])
             }
         }
 
