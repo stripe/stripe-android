@@ -23,7 +23,7 @@ class EnterManuallyTextScreenshotTest(
     val paparazzi: Paparazzi = testConfig.createPaparazzi()
 
     @Test
-    fun testThings() {
+    fun testDefault() {
         paparazzi.snapshot {
             PaymentSheetTestTheme(testConfig) {
                 EnterManuallyText(onClick = {})

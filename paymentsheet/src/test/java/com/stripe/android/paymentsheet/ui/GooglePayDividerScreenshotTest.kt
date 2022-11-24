@@ -22,7 +22,7 @@ class GooglePayDividerScreenshotTest(
     val paparazzi: Paparazzi = testConfig.createPaparazzi()
 
     @Test
-    fun testThings() {
+    fun testDefault() {
         paparazzi.snapshot {
             PaymentSheetTestTheme(testConfig) {
                 GooglePayDividerUi()
