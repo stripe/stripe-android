@@ -31,6 +31,8 @@ import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.getBorderStroke
 import com.stripe.android.ui.core.paymentsColors
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 private object Spacing {
     val cardLeadingInnerPadding = 12.dp
@@ -52,7 +54,9 @@ internal fun PaymentMethodsUI(
     val state = rememberLazyListState()
 
     LaunchedEffect(selectedIndex) {
-        state.animateScrollToItem(selectedIndex)
+        withContext(Dispatchers.Default) {
+            state.animateScrollToItem(selectedIndex)
+        }
     }
 
     BoxWithConstraints(

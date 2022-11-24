@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.utils
+package com.stripe.android.utils
 
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.ui.core.R
