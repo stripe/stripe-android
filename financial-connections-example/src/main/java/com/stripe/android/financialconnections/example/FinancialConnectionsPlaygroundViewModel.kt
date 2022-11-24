@@ -1,11 +1,13 @@
 package com.stripe.android.financialconnections.example
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetExample
 import com.stripe.android.financialconnections.example.data.BackendRepository
+import com.stripe.android.financialconnections.example.data.Settings
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -13,9 +15,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class FinancialConnectionsPlaygroundViewModel : ViewModel() {
+class FinancialConnectionsPlaygroundViewModel(
+    application: Application
+) : AndroidViewModel(application) {
 
-    private val repository = BackendRepository()
+    private val repository = BackendRepository(Settings(application))
 
     private val _state = MutableStateFlow(FinancialConnectionsExampleState())
     val state: StateFlow<FinancialConnectionsExampleState> = _state
@@ -69,6 +73,7 @@ class FinancialConnectionsPlaygroundViewModel : ViewModel() {
             is FinancialConnectionsSheetResult.Completed -> {
                 "Completed!" + result.financialConnectionsSession.toString()
             }
+
             is FinancialConnectionsSheetResult.Failed -> "Failed! ${result.error}"
             is FinancialConnectionsSheetResult.Canceled -> "Cancelled!"
         }
