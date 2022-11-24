@@ -25,4 +25,3 @@ jobs:
             ${{ runner.os }}-gradle-
       - name: PaymentSheet screenshot tests
         run: ./gradlew :paymentsheet:verifyPaparazziDebug
-#        TODO: Can we collect the failed screenshots and post a comment with them?

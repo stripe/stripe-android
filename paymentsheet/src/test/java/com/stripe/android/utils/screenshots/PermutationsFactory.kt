@@ -13,12 +13,7 @@ object PermutationsFactory {
 
         val paramClasses = constructor.parameters.map { param ->
             val name = param.type.toString()
-
-            try {
-                Class.forName(name)
-            } catch (e: ClassNotFoundException) {
-                error("$className can only have enums as constructor arguments, not $name")
-            }
+            Class.forName(name)
         }
 
         require(paramClasses.all { it.isEnum }) {
