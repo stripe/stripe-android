@@ -1,8 +1,8 @@
 name: paymentsheet screenshot tests
 on:
-  push:
-    paths:
-      - 'paymentsheet/**'
+  pull_request:
+    branches:
+      - master
 jobs:
   paymentsheet-screenshot-tests:
     name: PaymentSheet screenshot tests
