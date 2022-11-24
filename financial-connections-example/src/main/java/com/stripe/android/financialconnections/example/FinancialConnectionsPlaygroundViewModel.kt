@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
-import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetExample
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,12 +24,21 @@ class FinancialConnectionsPlaygroundViewModel(
     private val _state = MutableStateFlow(FinancialConnectionsExampleState())
     val state: StateFlow<FinancialConnectionsExampleState> = _state
 
-    private val _viewEffect = MutableSharedFlow<FinancialConnectionsExampleViewEffect>()
-    val viewEffect: SharedFlow<FinancialConnectionsExampleViewEffect> = _viewEffect
+    private val _viewEffect = MutableSharedFlow<FinancialConnectionsPlaygroundViewEffect?>()
+    val viewEffect: SharedFlow<FinancialConnectionsPlaygroundViewEffect?> = _viewEffect
 
-    fun startFinancialConnectionsSessionForData(
-        mode: Mode
+    fun startFinancialConnectionsSession(
+        mode: Mode,
+        flow: Flow
     ) {
+        when (flow) {
+            Flow.Data -> startForData(mode)
+            Flow.Token -> startForToken(mode)
+        }
+
+    }
+
+    private fun startForData(mode: Mode) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching { repository.createLinkAccountSession(mode.flow) }
@@ -37,7 +46,28 @@ class FinancialConnectionsPlaygroundViewModel(
                 .onSuccess {
                     showLoadingWithMessage("Session created, opening FinancialConnectionsSheet.")
                     _viewEffect.emit(
-                        OpenFinancialConnectionsSheetExample(
+                        FinancialConnectionsPlaygroundViewEffect.OpenForData(
+                            configuration = FinancialConnectionsSheet.Configuration(
+                                it.clientSecret,
+                                it.publishableKey
+                            )
+                        )
+                    )
+                }
+                // Error retrieving session: display error.
+                .onFailure(::showError)
+        }
+    }
+
+    private fun startForToken(mode: Mode) {
+        viewModelScope.launch {
+            showLoadingWithMessage("Fetching link account session from example backend!")
+            kotlin.runCatching { repository.createLinkAccountSessionForToken(mode.flow) }
+                // Success creating session: open the financial connections sheet with received secret
+                .onSuccess {
+                    showLoadingWithMessage("Session created, opening FinancialConnectionsSheet.")
+                    _viewEffect.emit(
+                        FinancialConnectionsPlaygroundViewEffect.OpenForToken(
                             configuration = FinancialConnectionsSheet.Configuration(
                                 it.clientSecret,
                                 it.publishableKey
@@ -68,6 +98,20 @@ class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
+    fun onFinancialConnectionsSheetForTokenResult(result: FinancialConnectionsSheetForTokenResult) {
+        val statusText = when (result) {
+            is FinancialConnectionsSheetForTokenResult.Completed -> {
+                "Completed!\n" +
+                    "Session: ${result.financialConnectionsSession}\n" +
+                    "Token: ${result.token}\n"
+            }
+
+            is FinancialConnectionsSheetForTokenResult.Failed -> "Failed! ${result.error}"
+            is FinancialConnectionsSheetForTokenResult.Canceled -> "Cancelled!"
+        }
+        _state.update { it.copy(loading = false, status = statusText) }
+    }
+
     fun onFinancialConnectionsSheetResult(result: FinancialConnectionsSheetResult) {
         val statusText = when (result) {
             is FinancialConnectionsSheetResult.Completed -> {
@@ -83,4 +127,22 @@ class FinancialConnectionsPlaygroundViewModel(
 
 enum class Mode(val flow: String) {
     Test("testmode"), Live("mx")
+}
+
+enum class Flow {
+    Data, Token
+}
+
+enum class NativeOverride {
+    None, Native, Web
+}
+
+sealed class FinancialConnectionsPlaygroundViewEffect {
+    data class OpenForData(
+        val configuration: FinancialConnectionsSheet.Configuration
+    ) : FinancialConnectionsPlaygroundViewEffect()
+
+    data class OpenForToken(
+        val configuration: FinancialConnectionsSheet.Configuration
+    ) : FinancialConnectionsPlaygroundViewEffect()
 }

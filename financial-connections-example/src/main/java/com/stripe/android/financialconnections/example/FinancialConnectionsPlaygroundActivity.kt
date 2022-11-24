@@ -27,8 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
-import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetExample
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
+import com.stripe.android.financialconnections.rememberFinancialConnectionsSheetForToken
 
 class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
@@ -49,34 +49,45 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     @Composable
     private fun FinancialConnectionsScreen() {
         val state: FinancialConnectionsExampleState by viewModel.state.collectAsState()
-        val viewEffect: FinancialConnectionsExampleViewEffect? by viewModel.viewEffect.collectAsState(
+        val viewEffect: FinancialConnectionsPlaygroundViewEffect? by viewModel.viewEffect.collectAsState(
             null
         )
-        val financialConnectionsSheet =
-            rememberFinancialConnectionsSheet(viewModel::onFinancialConnectionsSheetResult)
+        val financialConnectionsSheetForData = rememberFinancialConnectionsSheet(
+            viewModel::onFinancialConnectionsSheetResult
+        )
+
+        val financialConnectionsSheetForToken = rememberFinancialConnectionsSheetForToken(
+                viewModel::onFinancialConnectionsSheetForTokenResult
+        )
 
         LaunchedEffect(viewEffect) {
             viewEffect?.let {
                 when (it) {
-                    is OpenFinancialConnectionsSheetExample ->
-                        financialConnectionsSheet.present(it.configuration)
+                    is FinancialConnectionsPlaygroundViewEffect.OpenForData -> {
+                        financialConnectionsSheetForData.present(it.configuration)
+                    }
+
+                    is FinancialConnectionsPlaygroundViewEffect.OpenForToken -> {
+                        financialConnectionsSheetForToken.present(it.configuration)
+                    }
                 }
             }
         }
 
         FinancialConnectionsContent(
             state = state,
-            onButtonClick = { mode -> viewModel.startFinancialConnectionsSessionForData(mode) }
+            onButtonClick = viewModel::startFinancialConnectionsSession
         )
     }
 
     @Composable
     private fun FinancialConnectionsContent(
         state: FinancialConnectionsExampleState,
-        onButtonClick: (Mode) -> Unit
+        onButtonClick: (Mode, Flow) -> Unit
     ) {
-        val modeOptions = listOf(Mode.Test, Mode.Live)
-        val (selectedMode, onModeSelected) = remember { mutableStateOf(modeOptions[0]) }
+        val (selectedMode, onModeSelected) = remember { mutableStateOf(Mode.values()[0]) }
+        val (selectedFlow, onFlowSelected) = remember { mutableStateOf(Flow.values()[0]) }
+
         Scaffold(
             topBar = { TopAppBar(title = { Text("Connections Playground") }) },
             content = {
@@ -85,15 +96,21 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                         .padding(it)
                         .padding(16.dp)
                 ) {
-                    OverrideFlowSection()
-                    TestModeSection(modeOptions, selectedMode, onModeSelected)
+                    NativeOverrideSection()
+                    TestModeSection(selectedMode, onModeSelected)
+                    FlowSection(selectedFlow, onFlowSelected)
                     if (state.loading) {
                         LinearProgressIndicator(
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
                     Button(
-                        onClick = { onButtonClick(selectedMode) },
+                        onClick = {
+                            onButtonClick(
+                                selectedMode,
+                                selectedFlow
+                            )
+                        },
                     ) {
                         Text("Connect Accounts!")
                     }
@@ -105,46 +122,20 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     }
 
     @Composable
-    private fun OverrideFlowSection() {
-        val radioOptions = listOf("none", "native", "web")
+    private fun NativeOverrideSection() {
+        val radioOptions = NativeOverride.values()
         val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[0]) }
         LaunchedEffect(selectedOption) {
             sharedPreferences.edit {
                 when (selectedOption) {
-                    "native" -> putBoolean("override_native", true)
-                    "web" -> putBoolean("override_native", false)
-                    else -> clear()
+                    NativeOverride.None -> clear()
+                    NativeOverride.Native -> putBoolean("override_native", true)
+                    NativeOverride.Web -> putBoolean("override_native", false)
                 }
             }
         }
         Text(
-            text = "Flow Override",
-            style = MaterialTheme.typography.h6.merge(),
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            radioOptions.forEach { text ->
-                RadioButton(
-                    selected = (text == selectedOption),
-                    onClick = { onOptionSelected(text) }
-                )
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.body1.merge(),
-                )
-            }
-        }
-    }
-
-    @Composable
-    private fun TestModeSection(
-        radioOptions: List<Mode>,
-        selectedOption: Mode,
-        onOptionSelected: (Mode) -> Unit
-    ) {
-        Text(
-            text = "Mode",
+            text = "Native Override",
             style = MaterialTheme.typography.h6.merge(),
         )
         Row(
@@ -163,12 +154,63 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         }
     }
 
+    @Composable
+    private fun TestModeSection(
+        selectedOption: Mode,
+        onOptionSelected: (Mode) -> Unit
+    ) {
+        Text(
+            text = "Mode",
+            style = MaterialTheme.typography.h6.merge(),
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Mode.values().forEach { text ->
+                RadioButton(
+                    selected = (text == selectedOption),
+                    onClick = { onOptionSelected(text) }
+                )
+                Text(
+                    text = text.name,
+                    style = MaterialTheme.typography.body1.merge(),
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun FlowSection(
+        selectedOption: Flow,
+        onOptionSelected: (Flow) -> Unit
+    ) {
+        Text(
+            text = "Flow",
+            style = MaterialTheme.typography.h6.merge(),
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Flow.values().forEach { text ->
+                RadioButton(
+                    selected = (text == selectedOption),
+                    onClick = { onOptionSelected(text) }
+                )
+                Text(
+                    text = text.name,
+                    style = MaterialTheme.typography.body1.merge(),
+                )
+            }
+        }
+    }
+
+
     @Preview
     @Composable
     fun ContentPreview() {
         FinancialConnectionsContent(
             state = FinancialConnectionsExampleState(false, "Result: Pending"),
-            onButtonClick = {}
+            onButtonClick = { _, _ -> }
         )
     }
 }
