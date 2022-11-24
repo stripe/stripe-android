@@ -59,6 +59,7 @@ import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.model.RadarSession
 import com.stripe.android.model.SetupIntent
@@ -80,6 +81,7 @@ import com.stripe.android.model.parsers.FpxBankStatusesJsonParser
 import com.stripe.android.model.parsers.IssuingCardPinJsonParser
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.model.parsers.PaymentMethodMessageJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceForPaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceForSetupIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodPreferenceJsonParser
@@ -1694,6 +1696,36 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 )
             ),
             SetupIntentJsonParser()
+        ) {
+            // no-op
+        }
+    }
+
+    override suspend fun retrievePaymentMethodMessage(
+        paymentMethods: List<String>,
+        amount: Int,
+        currency: String,
+        country: String,
+        locale: String,
+        logoColor: String,
+        requestOptions: ApiRequest.Options
+    ): PaymentMethodMessage? {
+        return fetchStripeModel(
+            apiRequestFactory.createGet(
+                url = "https://ppm.stripe.com/content",
+                options = requestOptions,
+                params = mapOf<String, Any>(
+                    "amount" to amount,
+                    "client" to "android",
+                    "country" to country,
+                    "currency" to currency,
+                    "locale" to locale,
+                    "logo_color" to logoColor,
+                ) + paymentMethods.mapIndexed { index, paymentMethod ->
+                    Pair("payment_methods[$index]", paymentMethod)
+                }
+            ),
+            PaymentMethodMessageJsonParser()
         ) {
             // no-op
         }
