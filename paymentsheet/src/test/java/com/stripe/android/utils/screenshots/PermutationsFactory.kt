@@ -1,4 +1,4 @@
-package com.stripe.android.utils
+package com.stripe.android.utils.screenshots
 
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor

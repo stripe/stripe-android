@@ -1,4 +1,4 @@
-package com.stripe.android.utils
+package com.stripe.android.utils.screenshots
 
 import android.os.Build
 import androidx.compose.material.MaterialTheme
