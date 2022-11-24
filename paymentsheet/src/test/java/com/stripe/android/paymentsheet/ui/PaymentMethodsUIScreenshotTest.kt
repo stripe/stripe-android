@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.foundation.lazy.LazyListState
 import app.cash.paparazzi.Paparazzi
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -50,6 +51,7 @@ class PaymentMethodsUIScreenshotTest(
                     paymentMethods = paymentMethods,
                     selectedIndex = 3,
                     isEnabled = true,
+                    state = LazyListState(firstVisibleItemIndex = 3),
                     onItemSelectedListener = {}
                 )
             }

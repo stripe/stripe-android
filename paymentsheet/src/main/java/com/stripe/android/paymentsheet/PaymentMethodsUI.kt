@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -31,8 +32,6 @@ import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.getBorderStroke
 import com.stripe.android.ui.core.paymentsColors
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 private object Spacing {
     val cardLeadingInnerPadding = 12.dp
@@ -49,14 +48,11 @@ internal fun PaymentMethodsUI(
     selectedIndex: Int,
     isEnabled: Boolean,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    state: LazyListState = rememberLazyListState(),
 ) {
-    val state = rememberLazyListState()
-
     LaunchedEffect(selectedIndex) {
-        withContext(Dispatchers.Default) {
-            state.animateScrollToItem(selectedIndex)
-        }
+        state.animateScrollToItem(selectedIndex)
     }
 
     BoxWithConstraints(
