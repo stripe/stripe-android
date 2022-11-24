@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.Paparazzi
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -27,7 +29,10 @@ class AddressElementPrimaryButtonScreenshotTest(
     @Test
     fun testEnabled() {
         paparazzi.snapshot {
-            PaymentSheetTestTheme(testConfig) {
+            PaymentSheetTestTheme(
+                config = testConfig,
+                padding = PaddingValues(horizontal = 16.dp),
+            ) {
                 AddressElementPrimaryButton(isEnabled = true, BUTTON_TEXT, onButtonClick = {})
             }
         }
@@ -36,7 +41,10 @@ class AddressElementPrimaryButtonScreenshotTest(
     @Test
     fun testDisabled() {
         paparazzi.snapshot {
-            PaymentSheetTestTheme(testConfig) {
+            PaymentSheetTestTheme(
+                config = testConfig,
+                padding = PaddingValues(horizontal = 16.dp),
+            ) {
                 AddressElementPrimaryButton(isEnabled = false, BUTTON_TEXT, onButtonClick = {})
             }
         }
