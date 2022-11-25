@@ -20,6 +20,7 @@ import com.stripe.android.identity.networking.models.VerificationPageDataRequire
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
 import com.stripe.android.identity.utils.clearDataAndNavigateUp
+import com.stripe.android.identity.utils.navigateOnResume
 
 /**
  * Fragment to show generic error.
@@ -63,7 +64,7 @@ internal class ErrorFragment(
                     } else {
                         val destination = args.getInt(ARG_GO_BACK_BUTTON_DESTINATION)
                         if (destination == UNEXPECTED_DESTINATION) {
-                            findNavController().navigate(DEFAULT_BACK_BUTTON_NAVIGATION)
+                            navigateOnResume(DEFAULT_BACK_BUTTON_NAVIGATION)
                         } else {
                             findNavController().let { navController ->
                                 var shouldContinueNavigateUp = true
