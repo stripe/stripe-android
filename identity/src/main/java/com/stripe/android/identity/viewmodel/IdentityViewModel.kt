@@ -656,6 +656,9 @@ internal class IdentityViewModel constructor(
         selfie: FaceDetectorTransitioner.Selfie,
         compressionQuality: Float
     ) {
+        _selfieUploadedState.updateStateAndSave { currentState ->
+            currentState.updateLoading(isHighRes, selfie)
+        }
         viewModelScope.launch {
             runCatching {
                 var uploadTime = 0L
