@@ -14,6 +14,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.KSerializer
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -76,7 +77,14 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         syncResponse: SynchronizeSessionResponse
     ) {
         val mock = mock<ApiRequest>()
-        whenever(apiRequestFactory.createPost(any(), any(), any())).thenReturn(mock)
+        whenever(
+            apiRequestFactory.createPost(
+                url = any(),
+                options = any(),
+                params = any(),
+                shouldCache = eq(false)
+            )
+        ).thenReturn(mock)
         given(mockRequestExecutor.execute(any(), any<KSerializer<*>>())).willSuspendableAnswer {
             delay(100)
             syncResponse
