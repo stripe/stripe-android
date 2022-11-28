@@ -115,20 +115,13 @@ class FinancialConnectionsPlaygroundViewModel(
     fun onFinancialConnectionsSheetResult(result: FinancialConnectionsSheetResult) {
         val statusText = when (result) {
             is FinancialConnectionsSheetResult.Completed -> {
-                "Completed!" + result.financialConnectionsSession.toPrettyString()
+                "Completed!" + result.financialConnectionsSession.toString()
             }
 
             is FinancialConnectionsSheetResult.Failed -> "Failed! ${result.error}"
             is FinancialConnectionsSheetResult.Canceled -> "Cancelled!"
         }
         _state.update { it.copy(loading = false, status = statusText) }
-    }
-
-    private fun Any.toPrettyString(indentSize: Int = 4) = " ".repeat(indentSize).let { indent ->
-        toString()
-            .replace(", ", ",\n$indent")
-            .replace("(", "(\n$indent")
-            .dropLast(1) + "\n)"
     }
 }
 
