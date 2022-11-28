@@ -21,94 +21,6 @@ import org.junit.runners.model.Statement
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 
-interface PaparazziConfigOption {
-
-    fun apply(deviceConfig: DeviceConfig): DeviceConfig = deviceConfig
-
-    fun initialize() {
-        // Nothing to do
-    }
-}
-
-enum class SystemAppearance2 : PaparazziConfigOption {
-    Light, Dark;
-}
-
-enum class FontSize2(val scaleFactor: Float) : PaparazziConfigOption {
-    DefaultFontSize(scaleFactor = 1f),
-    LargeFontSize(scaleFactor = 1.2f),
-    ExtraLargeFontSize(scaleFactor = 1.5f);
-
-    override fun apply(deviceConfig: DeviceConfig): DeviceConfig {
-        return deviceConfig.copy(
-            fontScale = scaleFactor,
-        )
-    }
-}
-
-enum class PaymentSheetAppearance2(val appearance: PaymentSheet.Appearance) : PaparazziConfigOption {
-
-    Default(appearance = PaymentSheet.Appearance()),
-
-    Custom(
-        appearance = PaymentSheet.Appearance(
-            colorsLight = PaymentSheet.Colors.defaultLight.copy(
-                primary = Color.RED,
-            ),
-            colorsDark = PaymentSheet.Colors.defaultDark.copy(
-                primary = Color.RED,
-            ),
-            shapes = PaymentSheet.Shapes.default.copy(
-                cornerRadiusDp = 8f,
-            ),
-        ),
-    ),
-
-    Crazy(
-        appearance = PaymentSheet.Appearance(
-            colorsLight = PaymentSheet.Colors(
-                primary = Color.MAGENTA,
-                surface = Color.CYAN,
-                component = Color.YELLOW,
-                componentBorder = Color.RED,
-                componentDivider = Color.BLACK,
-                onComponent = Color.BLUE,
-                onSurface = Color.GRAY,
-                subtitle = Color.WHITE,
-                placeholderText = Color.DKGRAY,
-                appBarIcon = Color.GREEN,
-                error = Color.GREEN,
-            ),
-            colorsDark = PaymentSheet.Colors(
-                primary = Color.MAGENTA,
-                surface = Color.CYAN,
-                component = Color.YELLOW,
-                componentBorder = Color.RED,
-                componentDivider = Color.BLACK,
-                onComponent = Color.BLUE,
-                onSurface = Color.GRAY,
-                subtitle = Color.WHITE,
-                placeholderText = Color.DKGRAY,
-                appBarIcon = Color.GREEN,
-                error = Color.GREEN,
-            ),
-            shapes = PaymentSheet.Shapes(
-                cornerRadiusDp = 0.0f,
-                borderStrokeWidthDp = 4.0f
-            ),
-            // TODO Move to stripe-test
-//            typography = PaymentSheet.Typography.default.copy(
-//                sizeScaleFactor = 1.1f,
-//                fontResId = R.font.cursive
-//            )
-        ),
-    );
-
-    override fun initialize() {
-        appearance.parseAppearance()
-    }
-}
-
 class PaparazziRule(
     private vararg val configOptions: Array<out PaparazziConfigOption>,
 ) : TestRule {
@@ -138,43 +50,45 @@ class PaparazziRule(
                 option.initialize()
             }
 
-//            val deviceConfig = testCase.fold(defaultDeviceConfig) { acc, option ->
-//                option.apply(acc)
-//            }
-//
-//            if (deviceConfig != defaultDeviceConfig) {
-//                paparazzi.unsafeUpdateConfig(deviceConfig)
-//            }
+            val deviceConfig = testCase.fold(defaultDeviceConfig) { acc, option ->
+                option.apply(acc)
+            }
 
             val name = generateName(testCase)
 
-            val isDark = testCase.firstOrNull { it is SystemAppearance2 } == SystemAppearance2.Dark
+            val isDark = testCase.firstOrNull { it is SystemAppearance } == SystemAppearance.Dark
 
             paparazzi.prepare(description!!)
+
+            if (deviceConfig != defaultDeviceConfig) {
+                paparazzi.unsafeUpdateConfig(deviceConfig)
+            }
+
             paparazzi.snapshot(name) {
-//                CompositionLocalProvider(values = providers) {
-                    // TODO: Make sure it's the right theme.
-                    PaymentsTheme(
-                        colors = PaymentsTheme.getColors(isDark),
-                    ) {
-                        Surface(color = MaterialTheme.colors.surface) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                content()
-                            }
+                PaymentsTheme(
+                    colors = PaymentsTheme.getColors(isDark),
+                ) {
+                    Surface(color = MaterialTheme.colors.surface) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            content()
                         }
                     }
-//                }
+                }
             }
+
             paparazzi.close()
         }
     }
 
-    private fun generateName(values: List<PaparazziConfigOption>): String? {
-        val suffix = values.joinToString(separator = "_") { it.toString() }
+    private fun generateName(options: List<PaparazziConfigOption>): String? {
+        val optionsSuffix = options.joinToString(separator = ", ") { option ->
+            "${option::class.java.simpleName}=$option"
+        }
+
         return description?.let {
-            "${it.className}_${it.methodName}_$suffix"
+            "${it.className}_${it.methodName}_[$optionsSuffix]"
         }
     }
 
