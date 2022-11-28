@@ -1,33 +1,26 @@
 package com.stripe.android.paymentsheet.ui
 
-import app.cash.paparazzi.Paparazzi
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.addresselement.EnterManuallyText
-import com.stripe.android.utils.screenshots.ComponentTestConfig
-import com.stripe.android.utils.screenshots.ComponentTestConfigProvider
-import com.stripe.android.utils.screenshots.PaymentSheetTestTheme
-import com.stripe.android.utils.screenshots.createPaparazzi
+import com.stripe.android.utils.screenshots.FontSize2
+import com.stripe.android.utils.screenshots.PaparazziRule
+import com.stripe.android.utils.screenshots.PaymentSheetAppearance2
+import com.stripe.android.utils.screenshots.SystemAppearance2
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(TestParameterInjector::class)
-class EnterManuallyTextScreenshotTest(
-    @TestParameter(
-        valuesProvider = ComponentTestConfigProvider::class,
-    ) private val testConfig: ComponentTestConfig,
-) {
+class EnterManuallyTextScreenshotTest {
 
     @get:Rule
-    val paparazzi: Paparazzi = testConfig.createPaparazzi()
+    val paparazziRule = PaparazziRule(
+        SystemAppearance2.values(),
+        PaymentSheetAppearance2.values(),
+        FontSize2.values(),
+    )
 
     @Test
     fun testDefault() {
-        paparazzi.snapshot {
-            PaymentSheetTestTheme(testConfig) {
-                EnterManuallyText(onClick = {})
-            }
+        paparazziRule.snapshot {
+            EnterManuallyText(onClick = {})
         }
     }
 }
