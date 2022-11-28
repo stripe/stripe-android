@@ -146,12 +146,10 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         viewModel.showLinkVerificationDialog.observe(this) { show ->
             linkAuthView.setContent {
                 if (show) {
-                    viewModel.linkVerificationCallback?.let { callback ->
-                        LinkVerificationDialog(
-                            linkLauncher = viewModel.linkLauncher,
-                            verificationCallback = callback
-                        )
-                    }
+                    LinkVerificationDialog(
+                        linkLauncher = viewModel.linkLauncher,
+                        onResult = viewModel::handleLinkVerificationResult,
+                    )
                 }
             }
         }

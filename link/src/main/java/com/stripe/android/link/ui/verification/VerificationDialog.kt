@@ -33,13 +33,18 @@ import com.stripe.android.link.ui.rememberLinkAppBarState
  * indicates whether the verification succeeded.
  * When called, [LinkPaymentLauncher.accountStatus] will contain the up to date account status.
  */
+@Deprecated(
+    level = DeprecationLevel.WARNING,
+    message = "This interface isn't meant for public consumption.",
+)
 typealias LinkVerificationCallback = (success: Boolean) -> Unit
 
+@Suppress("LongMethod")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LinkVerificationDialog(
     linkLauncher: LinkPaymentLauncher,
-    verificationCallback: LinkVerificationCallback
+    onResult: (Boolean) -> Unit,
 ) {
     // Must be inside a NavController so that the VerificationViewModel scope is destroyed when the
     // dialog is dismissed, and when called again a new scope is created.
@@ -59,7 +64,7 @@ fun LinkVerificationDialog(
             val onDismiss = {
                 openDialog = false
                 linkEventsReporter.on2FACancel()
-                verificationCallback(false)
+                onResult(false)
             }
 
             val backStackEntry by navController.currentBackStackEntryAsState()
@@ -104,7 +109,7 @@ fun LinkVerificationDialog(
                                         injector = component.injector,
                                         onVerificationCompleted = {
                                             openDialog = false
-                                            verificationCallback(true)
+                                            onResult(true)
                                         }
                                     )
                                 }

@@ -20,12 +20,16 @@ android {
         version = rootProject.version_name
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders = [
+            STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: getBackendUrl()
+        ]
     }
 
     buildTypes {
         debug {
             firebaseAppDistribution {
-                groups="financial-connections"
+                groups = "financial-connections"
             }
         }
         release {
@@ -51,6 +55,11 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+}
+
+// Read values from gradle.properties or system environment variable
+def getBackendUrl() {
+    return findProperty('STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL') ?: ""
 }
 
 dependencies {

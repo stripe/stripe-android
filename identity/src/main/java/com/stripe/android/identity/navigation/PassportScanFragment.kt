@@ -1,7 +1,5 @@
 package com.stripe.android.identity.navigation
 
-import android.os.Bundle
-import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -17,31 +15,16 @@ internal class PassportScanFragment(
     identityCameraScanViewModelFactory,
     identityViewModelFactory
 ) {
-    override val frontScanType: IdentityScanState.ScanType = IdentityScanState.ScanType.PASSPORT
-
+    override val frontScanType = IdentityScanState.ScanType.PASSPORT
+    override val backScanType: IdentityScanState.ScanType? = null
     override val fragmentId = R.id.passportScanFragment
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        headerTitle.text = requireContext().getText(R.string.passport)
-        messageView.text = requireContext().getText(R.string.position_passport)
-        continueButton.setOnClickListener {
-            continueButton.toggleToLoading()
-            collectFrontUploadStateAndPost(CollectedDataParam.Type.PASSPORT)
-        }
-    }
-
-    override fun onCameraReady() {
-        startScanning(IdentityScanState.ScanType.PASSPORT)
-    }
-
-    override fun resetUI() {
-        super.resetUI()
-        headerTitle.text = requireContext().getText(R.string.passport)
-        messageView.text = requireContext().getText(R.string.position_passport)
-    }
+    override val frontTitleStringRes = R.string.passport
+    override val backTitleStringRes = INVALID
+    override val frontMessageStringRes = R.string.position_passport
+    override val backMessageStringRes = INVALID
+    override val collectedDataParamType = CollectedDataParam.Type.PASSPORT
 
     internal companion object {
-        val TAG: String = PassportScanFragment::class.java.simpleName
+        const val INVALID = -1
     }
 }

@@ -18,6 +18,8 @@ import com.stripe.android.identity.ml.IDDetectorAnalyzer
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.SingleLiveEvent
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 import kotlin.coroutines.CoroutineContext
@@ -38,8 +40,13 @@ internal open class CameraViewModel(
     internal val interimResults = MutableLiveData<IdentityAggregator.InterimResult>()
     internal val finalResult = SingleLiveEvent<IdentityAggregator.FinalResult>()
     private val reset = MutableLiveData<Unit>()
+
+    // TODO(ccen): remove when SelfieFragment is also migrated to Jetpack Compose.
     internal val displayStateChanged =
         SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
+
+    internal val displayStateChangedFlow =
+        MutableStateFlow<Pair<IdentityScanState, IdentityScanState?>?>(null)
 
     internal var identityScanFlow: IdentityScanFlow? = null
 
@@ -66,6 +73,9 @@ internal open class CameraViewModel(
 
     override fun displayState(newState: IdentityScanState, previousState: IdentityScanState?) {
         displayStateChanged.postValue(newState to previousState)
+        displayStateChangedFlow.update {
+            (newState to previousState)
+        }
     }
 
     override suspend fun onResult(result: IdentityAggregator.FinalResult) {
@@ -95,6 +105,8 @@ internal open class CameraViewModel(
 
     override suspend fun onReset() {
         Log.d(TAG, "onReset is called, resetting status")
+        scanState = null
+        scanStatePrevious = null
         reset.postValue(Unit)
     }
 

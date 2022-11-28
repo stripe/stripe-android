@@ -47,5 +47,7 @@ internal data class VerificationPageData(
         fun VerificationPageData.hasError() = requirements.errors.isNotEmpty()
         fun VerificationPageData.isMissingBack() =
             requirements.missings?.contains(Requirement.IDDOCUMENTBACK) == true
+        fun VerificationPageData.isMissingSelfie() =
+            requirements.missings?.contains(Requirement.FACE) == true
     }
 }
