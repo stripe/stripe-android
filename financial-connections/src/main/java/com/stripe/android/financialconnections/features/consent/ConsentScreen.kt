@@ -47,7 +47,7 @@ import com.stripe.android.financialconnections.features.consent.ConsentState.Vie
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.DataAccessNotice
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -101,7 +101,7 @@ internal fun ConsentScreen() {
         onContinueClick = viewModel::onContinueClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-    ) { parentViewModel.onCloseNoConfirmationClick(ClientPane.CONSENT) }
+    ) { parentViewModel.onCloseNoConfirmationClick(Pane.CONSENT) }
 }
 
 @Composable

@@ -23,7 +23,7 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.ConsentTextBuilder
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
@@ -108,7 +108,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 businessName = manifest.businessName,
                 stripeDirect = manifest.isStripeDirect ?: false
             ).also {
-                eventTracker.track(PaneLoaded(ClientPane.ACCOUNT_PICKER))
+                eventTracker.track(PaneLoaded(Pane.ACCOUNT_PICKER))
             }
         }.execute { copy(payload = it) }
     }
@@ -138,14 +138,14 @@ internal class AccountPickerViewModel @Inject constructor(
         onAsync(
             AccountPickerState::payload,
             onFail = {
-                eventTracker.track(Error(ClientPane.ACCOUNT_PICKER, it))
+                eventTracker.track(Error(Pane.ACCOUNT_PICKER, it))
                 logger.error("Error retrieving accounts", it)
             },
         )
         onAsync(
             AccountPickerState::selectAccounts,
             onFail = {
-                eventTracker.track(Error(ClientPane.ACCOUNT_PICKER, it))
+                eventTracker.track(Error(Pane.ACCOUNT_PICKER, it))
                 logger.error("Error selecting accounts", it)
             }
         )
@@ -177,7 +177,7 @@ internal class AccountPickerViewModel @Inject constructor(
 
     fun onSubmit() {
         viewModelScope.launch {
-            eventTracker.track(ClickLinkAccounts(ClientPane.ACCOUNT_PICKER))
+            eventTracker.track(ClickLinkAccounts(Pane.ACCOUNT_PICKER))
         }
         withState { state ->
             state.payload()?.let {
@@ -235,7 +235,7 @@ internal class AccountPickerViewModel @Inject constructor(
     fun onLearnMoreAboutDataAccessClick() {
         viewModelScope.launch {
             eventTracker.track(
-                FinancialConnectionsEvent.ClickLearnMoreDataAccess(ClientPane.ACCOUNT_PICKER)
+                FinancialConnectionsEvent.ClickLearnMoreDataAccess(Pane.ACCOUNT_PICKER)
             )
         }
     }

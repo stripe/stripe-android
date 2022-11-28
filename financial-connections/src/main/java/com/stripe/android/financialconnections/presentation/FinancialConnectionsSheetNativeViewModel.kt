@@ -34,7 +34,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -167,20 +167,20 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    fun onCloseWithConfirmationClick(pane: ClientPane) {
+    fun onCloseWithConfirmationClick(pane: Pane) {
         viewModelScope.launch {
             eventTracker.track(ClickNavBarClose(pane))
             setState { copy(showCloseDialog = true) }
         }
     }
 
-    fun onBackClick(pane: ClientPane) {
+    fun onBackClick(pane: Pane) {
         viewModelScope.launch {
             eventTracker.track(ClickNavBarBack(pane))
         }
     }
 
-    fun onCloseNoConfirmationClick(pane: ClientPane) {
+    fun onCloseNoConfirmationClick(pane: Pane) {
         viewModelScope.launch {
             eventTracker.track(ClickNavBarClose(pane))
         }
@@ -260,7 +260,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun onPaneLaunched(pane: ClientPane) {
+    fun onPaneLaunched(pane: Pane) {
         viewModelScope.launch {
             eventTracker.track(
                 FinancialConnectionsEvent.PaneLaunched(pane)
@@ -307,7 +307,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val configuration: FinancialConnectionsSheet.Configuration,
     val showCloseDialog: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
-    val initialPane: ClientPane
+    val initialPane: Pane
 ) : MavericksState {
 
     /**

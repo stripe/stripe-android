@@ -26,7 +26,7 @@ internal data class FinancialConnectionsAuthorizationSession(
     val id: String,
 
     @SerialName(value = "next_pane")
-    val nextPane: FinancialConnectionsSessionManifest.ClientPane,
+    val nextPane: FinancialConnectionsSessionManifest.Pane,
 
     @SerialName(value = "flow")
     val flow: Flow? = null,

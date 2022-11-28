@@ -21,7 +21,7 @@ internal data class PartnerAccountsList(
 
     @SerialName(value = "has_more") @Required val hasMore: Boolean,
 
-    @SerialName(value = "next_pane") @Required val nextPane: FinancialConnectionsSessionManifest.ClientPane,
+    @SerialName(value = "next_pane") @Required val nextPane: FinancialConnectionsSessionManifest.Pane,
 
     @SerialName(value = "url") @Required val url: String,
 

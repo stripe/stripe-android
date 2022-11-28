@@ -66,7 +66,7 @@ import com.stripe.android.financialconnections.features.common.LoadingShimmerEff
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -99,7 +99,7 @@ internal fun InstitutionPickerScreen() {
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCancelSearchClick = viewModel::onCancelSearchClick,
-        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(ClientPane.INSTITUTION_PICKER) },
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.INSTITUTION_PICKER) },
         onSearchFocused = viewModel::onSearchFocused,
         onManualEntryClick = viewModel::onManualEntryClick,
     )

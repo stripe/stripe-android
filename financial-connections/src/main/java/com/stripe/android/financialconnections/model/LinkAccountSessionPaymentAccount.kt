@@ -22,7 +22,7 @@ internal data class LinkAccountSessionPaymentAccount(
     val networkingSuccessful: Boolean? = null,
 
     @SerialName(value = "next_pane")
-    val nextPane: FinancialConnectionsSessionManifest.ClientPane? = null
+    val nextPane: FinancialConnectionsSessionManifest.Pane? = null
 
 ) {
 

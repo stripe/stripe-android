@@ -38,7 +38,7 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -69,7 +69,7 @@ internal fun PartnerAuthScreen() {
         onContinueClick = viewModel::onLaunchAuthClick,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
         onEnterDetailsManually = viewModel::onEnterDetailsManuallyClick,
-        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(ClientPane.PARTNER_AUTH) },
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.PARTNER_AUTH) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
@@ -265,7 +265,7 @@ internal fun PrepaneContentPreview() {
                             flow = Flow.FINICITY_CONNECT_V2_OAUTH,
                             showPartnerDisclosure = true,
                             isOAuth = true,
-                            nextPane = ClientPane.PARTNER_AUTH,
+                            nextPane = Pane.PARTNER_AUTH,
                             id = "1234"
                         ),
                         isStripeDirect = false

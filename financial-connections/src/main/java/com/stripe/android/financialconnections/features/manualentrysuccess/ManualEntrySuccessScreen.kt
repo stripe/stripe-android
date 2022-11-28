@@ -36,7 +36,7 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
 import com.stripe.android.financialconnections.navigation.NavigationDirections.ManualEntrySuccess
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -59,7 +59,7 @@ internal fun ManualEntrySuccessScreen(
         microdepositVerificationMethod = ManualEntrySuccess.microdeposits(backStackEntry),
         last4 = ManualEntrySuccess.last4(backStackEntry),
         loading = completeAuthSessionAsync.value is Loading,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(ClientPane.MANUAL_ENTRY_SUCCESS) },
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.MANUAL_ENTRY_SUCCESS) },
         onDoneClick = viewModel::onSubmit
     )
 }

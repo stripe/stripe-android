@@ -28,7 +28,7 @@ import com.stripe.android.financialconnections.features.common.AccessibleDataCal
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutWithAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -60,7 +60,7 @@ internal fun SuccessScreen() {
             onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
             onDisconnectLinkClick = viewModel::onDisconnectLinkClick,
             showLinkAnotherAccount = payload.showLinkAnotherAccount,
-            onCloseClick = { parentViewModel.onCloseNoConfirmationClick(ClientPane.SUCCESS) }
+            onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.SUCCESS) }
         )
     }
 }

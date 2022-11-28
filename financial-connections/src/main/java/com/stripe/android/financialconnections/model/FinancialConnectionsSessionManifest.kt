@@ -82,7 +82,7 @@ internal data class FinancialConnectionsSessionManifest(
     val mobileHandoffEnabled: Boolean,
 
     @SerialName(value = "next_pane")
-    val nextPane: ClientPane,
+    val nextPane: Pane,
 
     @SerialName(value = "permissions")
     val permissions: List<FinancialConnectionsAccount.Permissions>,
@@ -179,8 +179,8 @@ internal data class FinancialConnectionsSessionManifest(
      * LINK_CONSENT,LINK_LOGIN,MANUAL_ENTRY,MANUAL_ENTRY_SUCCESS,NETWORKING_LINK_LOGIN_WARMUP,
      * NETWORKING_LINK_SIGNUP_PANE,NETWORKING_LINK_VERIFICATION,PARTNER_AUTH,SUCCESS,UNEXPECTED_ERROR
      */
-    @Serializable(with = ClientPane.Serializer::class)
-    enum class ClientPane(val value: String) {
+    @Serializable(with = Pane.Serializer::class)
+    enum class Pane(val value: String) {
         @SerialName(value = "account_picker")
         ACCOUNT_PICKER("account_picker"),
 
@@ -231,7 +231,7 @@ internal data class FinancialConnectionsSessionManifest(
         RESET("reset");
 
         internal object Serializer :
-            EnumIgnoreUnknownSerializer<ClientPane>(ClientPane.values(), UNEXPECTED_ERROR)
+            EnumIgnoreUnknownSerializer<Pane>(Pane.values(), UNEXPECTED_ERROR)
     }
 
     /**

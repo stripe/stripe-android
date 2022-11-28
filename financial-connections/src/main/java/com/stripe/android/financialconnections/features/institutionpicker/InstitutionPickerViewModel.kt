@@ -23,7 +23,7 @@ import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -71,17 +71,17 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private fun logErrors() {
         onAsync(
             InstitutionPickerState::payload,
-            onSuccess = { eventTracker.track(PaneLoaded(ClientPane.INSTITUTION_PICKER)) },
+            onSuccess = { eventTracker.track(PaneLoaded(Pane.INSTITUTION_PICKER)) },
             onFail = {
                 logger.error("Error fetching initial payload", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(ClientPane.INSTITUTION_PICKER, it))
+                eventTracker.track(FinancialConnectionsEvent.Error(Pane.INSTITUTION_PICKER, it))
             }
         )
         onAsync(
             InstitutionPickerState::searchInstitutions,
             onFail = {
                 logger.error("Error searching institutions", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(ClientPane.INSTITUTION_PICKER, it))
+                eventTracker.track(FinancialConnectionsEvent.Error(Pane.INSTITUTION_PICKER, it))
             }
         )
     }
@@ -98,7 +98,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
             if (query.isNotEmpty()) {
                 eventTracker.track(
                     SearchSucceeded(
-                        pane = ClientPane.INSTITUTION_PICKER,
+                        pane = Pane.INSTITUTION_PICKER,
                         query = query,
                         duration = millis,
                         resultCount = result.data.count()
@@ -127,7 +127,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
         suspend {
             eventTracker.track(
                 InstitutionSelected(
-                    pane = ClientPane.INSTITUTION_PICKER,
+                    pane = Pane.INSTITUTION_PICKER,
                     fromFeatured = fromFeatured,
                     institutionId = institution.id
                 )

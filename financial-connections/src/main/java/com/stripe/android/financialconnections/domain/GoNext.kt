@@ -1,14 +1,14 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationCommand
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import javax.inject.Inject
 
 /**
- * Navigates to the next screen given a [ClientPane].
+ * Navigates to the next screen given a [Pane].
  */
 internal class GoNext @Inject constructor(
     private val navigationManager: NavigationManager,
@@ -16,7 +16,7 @@ internal class GoNext @Inject constructor(
 ) {
 
     operator fun invoke(
-        nextPane: ClientPane,
+        nextPane: Pane,
         args: Map<String, Any?> = emptyMap()
     ): NavigationCommand {
         val nextPaneDirection = nextPane.toNavigationCommand(logger, args)
@@ -27,29 +27,29 @@ internal class GoNext @Inject constructor(
 }
 
 @Suppress("ComplexMethod")
-internal fun ClientPane.toNavigationCommand(
+internal fun Pane.toNavigationCommand(
     logger: Logger,
     args: Map<String, Any?>
 ): NavigationCommand = when (this) {
-    ClientPane.INSTITUTION_PICKER -> NavigationDirections.institutionPicker
-    ClientPane.PARTNER_AUTH -> NavigationDirections.partnerAuth
-    ClientPane.CONSENT -> NavigationDirections.consent
-    ClientPane.ACCOUNT_PICKER -> NavigationDirections.accountPicker
-    ClientPane.SUCCESS -> NavigationDirections.success
-    ClientPane.MANUAL_ENTRY -> NavigationDirections.manualEntry
-    ClientPane.MANUAL_ENTRY_SUCCESS -> NavigationDirections.ManualEntrySuccess(args)
-    ClientPane.ATTACH_LINKED_PAYMENT_ACCOUNT -> NavigationDirections.attachLinkedPaymentAccount
-    ClientPane.RESET -> NavigationDirections.reset
-    ClientPane.NETWORKING_LINK_SIGNUP_PANE -> {
+    Pane.INSTITUTION_PICKER -> NavigationDirections.institutionPicker
+    Pane.PARTNER_AUTH -> NavigationDirections.partnerAuth
+    Pane.CONSENT -> NavigationDirections.consent
+    Pane.ACCOUNT_PICKER -> NavigationDirections.accountPicker
+    Pane.SUCCESS -> NavigationDirections.success
+    Pane.MANUAL_ENTRY -> NavigationDirections.manualEntry
+    Pane.MANUAL_ENTRY_SUCCESS -> NavigationDirections.ManualEntrySuccess(args)
+    Pane.ATTACH_LINKED_PAYMENT_ACCOUNT -> NavigationDirections.attachLinkedPaymentAccount
+    Pane.RESET -> NavigationDirections.reset
+    Pane.NETWORKING_LINK_SIGNUP_PANE -> {
         logger.error("Link not supported on native flows yet. Navigating to Success.")
         NavigationDirections.success
     }
-    ClientPane.AUTH_OPTIONS,
-    ClientPane.LINK_CONSENT,
-    ClientPane.LINK_LOGIN,
-    ClientPane.NETWORKING_LINK_LOGIN_WARMUP,
-    ClientPane.NETWORKING_LINK_VERIFICATION,
-    ClientPane.UNEXPECTED_ERROR -> {
+    Pane.AUTH_OPTIONS,
+    Pane.LINK_CONSENT,
+    Pane.LINK_LOGIN,
+    Pane.NETWORKING_LINK_LOGIN_WARMUP,
+    Pane.NETWORKING_LINK_VERIFICATION,
+    Pane.UNEXPECTED_ERROR -> {
         TODO("Unimplemented navigation command: ${this.value}")
     }
 }

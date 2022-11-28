@@ -16,7 +16,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Finish
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,7 +33,7 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
     init {
         logErrors()
         viewModelScope.launch {
-            eventTracker.track(PaneLoaded(ClientPane.MANUAL_ENTRY_SUCCESS))
+            eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY_SUCCESS))
         }
     }
 
@@ -62,7 +62,7 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
 
     fun onSubmit() {
         viewModelScope.launch {
-            eventTracker.track(ClickDone(ClientPane.MANUAL_ENTRY_SUCCESS))
+            eventTracker.track(ClickDone(Pane.MANUAL_ENTRY_SUCCESS))
         }
         suspend {
             completeFinancialConnectionsSession().also {

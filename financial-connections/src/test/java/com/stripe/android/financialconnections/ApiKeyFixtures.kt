@@ -29,7 +29,7 @@ internal object ApiKeyFixtures {
         livemode = true,
         manualEntryUsesMicrodeposits = true,
         mobileHandoffEnabled = true,
-        nextPane = FinancialConnectionsSessionManifest.ClientPane.CONSENT,
+        nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
         permissions = emptyList(),
         product = FinancialConnectionsSessionManifest.Product.STRIPE_CARD,
         singleAccount = true,
@@ -41,7 +41,7 @@ internal object ApiKeyFixtures {
 
     fun authorizationSession() = FinancialConnectionsAuthorizationSession(
         id = "id",
-        nextPane = FinancialConnectionsSessionManifest.ClientPane.CONSENT,
+        nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
         flow = FinancialConnectionsAuthorizationSession.Flow.MX_OAUTH,
         institutionSkipAccountSelection = null,
         showPartnerDisclosure = null,
@@ -54,7 +54,7 @@ internal object ApiKeyFixtures {
     fun partnerAccountList() = PartnerAccountsList(
         data = emptyList(),
         hasMore = false,
-        nextPane = FinancialConnectionsSessionManifest.ClientPane.CONSENT,
+        nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
         url = ""
     )
 }
