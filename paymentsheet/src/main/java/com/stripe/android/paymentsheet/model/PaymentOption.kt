@@ -6,12 +6,15 @@ import androidx.annotation.DrawableRes
 /**
  * The customer's selected payment option.
  */
-data class PaymentOption @Deprecated("Not intended for public use.") constructor(
-    @Deprecated("Please use iconDrawable instead.")
+data class PaymentOption
+@Deprecated("Not intended for public use.")
+constructor(
     /**
      * The drawable resource id of the icon that represents the payment option.
      */
-    @DrawableRes val drawableResourceId: Int,
+    @Deprecated("Please use iconDrawable instead.")
+    @DrawableRes
+    val drawableResourceId: Int,
 
     /**
      * A label that describes the payment option.
