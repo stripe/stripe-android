@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.model
 
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -16,12 +17,22 @@ internal class PaymentOptionFactory(
     private val resources: Resources,
     private val imageLoader: StripeImageLoader,
 ) {
+    private fun isDarkTheme(): Boolean {
+        return resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
+            Configuration.UI_MODE_NIGHT_YES
+    }
+
     private suspend fun loadPaymentOption(paymentOption: PaymentOption): Drawable {
         // If the payment option has an icon URL, we prefer it.
         // Some payment options don't have an icon URL, and are loaded locally via resource.
-        paymentOption.iconUrl?.let { iconUrl ->
-            // TODO(jaynewstrom): Take into account light/dark theme.
-            imageLoader.load(iconUrl).getOrNull()?.let {
+        paymentOption.lightThemeIconUrl?.let { iconUrl ->
+            val darkThemeIconUrl = paymentOption.darkThemeIconUrl
+            val iconToLoad = if (isDarkTheme() && darkThemeIconUrl != null) {
+                darkThemeIconUrl
+            } else {
+                iconUrl
+            }
+            imageLoader.load(iconToLoad).getOrNull()?.let {
                 return BitmapDrawable(resources, it)
             }
         }
@@ -37,7 +48,8 @@ internal class PaymentOptionFactory(
             PaymentSelection.GooglePay -> {
                 PaymentOption(
                     drawableResourceId = R.drawable.stripe_google_pay_mark,
-                    iconUrl = null,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
                     label = resources.getString(R.string.google_pay),
                     imageLoader = ::loadPaymentOption,
                 )
@@ -45,7 +57,8 @@ internal class PaymentOptionFactory(
             PaymentSelection.Link -> {
                 PaymentOption(
                     drawableResourceId = R.drawable.stripe_ic_paymentsheet_link,
-                    iconUrl = null,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
                     label = resources.getString(R.string.link),
                     imageLoader = ::loadPaymentOption,
                 )
@@ -53,7 +66,8 @@ internal class PaymentOptionFactory(
             is PaymentSelection.Saved -> {
                 PaymentOption(
                     drawableResourceId = selection.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
-                    iconUrl = null,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
                     label = selection.paymentMethod.getLabel(resources).orEmpty(),
                     imageLoader = ::loadPaymentOption,
                 )
@@ -62,7 +76,8 @@ internal class PaymentOptionFactory(
                 // TODO: Should use labelResource paymentMethodCreateParams or extension function
                 PaymentOption(
                     drawableResourceId = selection.brand.getCardBrandIcon(),
-                    iconUrl = null,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
                     label = createCardLabel(
                         resources,
                         selection.last4
@@ -73,7 +88,8 @@ internal class PaymentOptionFactory(
             is PaymentSelection.New.LinkInline -> {
                 PaymentOption(
                     drawableResourceId = selection.iconResource,
-                    iconUrl = null,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
                     label = selection.label,
                     imageLoader = ::loadPaymentOption,
                 )
@@ -81,7 +97,8 @@ internal class PaymentOptionFactory(
             is PaymentSelection.New.GenericPaymentMethod -> {
                 PaymentOption(
                     drawableResourceId = selection.iconResource,
-                    iconUrl = selection.iconUrl,
+                    lightThemeIconUrl = selection.lightThemeIconUrl,
+                    darkThemeIconUrl = selection.darkThemeIconUrl,
                     label = selection.labelResource,
                     imageLoader = ::loadPaymentOption,
                 )
@@ -89,7 +106,8 @@ internal class PaymentOptionFactory(
             is PaymentSelection.New.USBankAccount -> {
                 PaymentOption(
                     drawableResourceId = selection.iconResource,
-                    iconUrl = null,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
                     label = selection.labelResource,
                     imageLoader = ::loadPaymentOption,
                 )

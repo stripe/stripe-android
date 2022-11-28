@@ -50,6 +50,7 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -987,7 +988,7 @@ internal class DefaultFlowControllerTest {
         testScope,
         lifeCycleOwner,
         { activity.window.statusBarColor },
-        PaymentOptionFactory(activity.resources),
+        PaymentOptionFactory(activity.resources, StripeImageLoader(activity)),
         paymentOptionCallback,
         paymentResultCallback,
         activityResultCaller,
@@ -1067,7 +1068,8 @@ internal class DefaultFlowControllerTest {
             labelResource = "Bancontact",
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-            iconUrl = null,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
         )
         private val VISA_PAYMENT_OPTION = PaymentOption(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,

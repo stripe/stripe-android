@@ -89,6 +89,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 context.getString(R.string.stripe_paymentsheet_payment_method_bancontact),
                 R.drawable.stripe_ic_paymentsheet_pm_bancontact,
                 null,
+                null,
                 paymentMethodCreateParams,
                 PaymentSelection.CustomerRequestedSave.NoRequest
             )

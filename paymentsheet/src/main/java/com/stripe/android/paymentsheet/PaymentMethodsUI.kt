@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -78,13 +79,18 @@ internal fun PaymentMethodsUI(
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
             itemsIndexed(items = paymentMethods) { index, item ->
+                val iconUrl = if (isSystemInDarkTheme() && item.darkThemeIconUrl != null) {
+                    item.darkThemeIconUrl
+                } else {
+                    item.lightThemeIconUrl
+                }
                 PaymentMethodUI(
                     modifier = Modifier.testTag(
                         TEST_TAG_LIST + stringResource(item.displayNameResource)
                     ),
                     minViewWidth = viewWidth,
                     iconRes = item.iconResource,
-                    iconUrl = item.iconUrl,
+                    iconUrl = iconUrl,
                     imageLoader = imageLoader,
                     title = stringResource(item.displayNameResource),
                     isSelected = index == selectedIndex,

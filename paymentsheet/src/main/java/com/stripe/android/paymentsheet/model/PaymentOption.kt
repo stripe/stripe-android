@@ -20,7 +20,11 @@ data class PaymentOption @Deprecated("Not intended for public use.") constructor
      */
     val label: String
 ) {
-    internal var iconUrl: String? = null
+    // These aren't part of the primary constructor in order to maintain binary compatibility.
+    internal var lightThemeIconUrl: String? = null
+        private set
+
+    internal var darkThemeIconUrl: String? = null
         private set
 
     private var imageLoader: suspend (PaymentOption) -> Drawable = {
@@ -30,10 +34,12 @@ data class PaymentOption @Deprecated("Not intended for public use.") constructor
     internal constructor(
         @DrawableRes drawableResourceId: Int,
         label: String,
-        iconUrl: String?,
+        lightThemeIconUrl: String?,
+        darkThemeIconUrl: String?,
         imageLoader: suspend (PaymentOption) -> Drawable
     ) : this(drawableResourceId, label) {
-        this.iconUrl = iconUrl
+        this.lightThemeIconUrl = lightThemeIconUrl
+        this.darkThemeIconUrl = darkThemeIconUrl
         this.imageLoader = imageLoader
     }
 
