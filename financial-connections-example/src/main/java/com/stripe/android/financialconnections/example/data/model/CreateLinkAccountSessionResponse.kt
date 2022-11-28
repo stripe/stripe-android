@@ -7,3 +7,9 @@ data class CreateLinkAccountSessionResponse(
     @SerializedName("las_id") val lasId: String,
     @SerializedName("publishable_key") val publishableKey: String
 )
+
+
+data class CreateIntentResponse(
+    @SerializedName("secret") val intentSecret: String,
+    @SerializedName("publishable_key") val publishableKey: String
+)
