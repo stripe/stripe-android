@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements.messaging
+package com.stripe.android.paymentmethodmessage.view
 
 import android.app.Application
 import androidx.lifecycle.ViewModel
@@ -8,7 +8,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.ui.core.elements.messaging.injection.DaggerPaymentMethodMessageComponent
+import com.stripe.android.paymentmethodmessage.view.injection.DaggerPaymentMethodMessageComponent
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.utils.requireApplication
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements.messaging
+package com.stripe.android.paymentmethodmessage.view
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -42,7 +42,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.model.PaymentMethodMessage
-import com.stripe.android.ui.core.elements.messaging.theme.Color as PaymentMethodMessageColor
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
@@ -55,6 +54,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.stripe.android.paymentmethodmessage.view.theme.Color as PaymentMethodMessageColor
 
 /**
  * A view that displays promotional text and images for payment methods like Afterpay and Klarna.

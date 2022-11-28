@@ -1,8 +1,10 @@
-package com.stripe.android.ui.core.elements.messaging
+package com.stripe.android.paymentmethodmessage
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.paymentmethodmessage.view.PaymentMethodMessageView
+import com.stripe.android.paymentmethodmessage.view.PaymentMethodMessageViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

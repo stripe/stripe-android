@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements.messaging
+package com.stripe.android.paymentmethodmessage.view
 
 import android.graphics.Bitmap
 import com.stripe.android.model.PaymentMethodMessage

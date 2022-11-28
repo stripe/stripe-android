@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements.messaging
+package com.stripe.android.paymentmethodmessage.view
 
 /**
  * Result of the Payment Method Messaging state transaction.
