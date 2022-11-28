@@ -7,7 +7,9 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.test.readResourceAsString
+import com.stripe.android.financialconnections.utils.testJson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -17,16 +19,18 @@ import org.mockito.kotlin.whenever
 import java.net.HttpURLConnection
 
 @ExperimentalCoroutinesApi
-class FinancialConnectionsApiRepositoryTest {
+class FinancialConnectionsRepositoryImplTest {
 
     private val mockStripeNetworkClient = mock<StripeNetworkClient>()
     private val apiRequestFactory = mock<ApiRequest.Factory>()
 
-    private val financialConnectionsApiRepository = FinancialConnectionsApiRepository(
-        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-        stripeNetworkClient = mockStripeNetworkClient,
+    private val financialConnectionsRepositoryImpl = FinancialConnectionsRepositoryImpl(
+        requestExecutor = FinancialConnectionsRequestExecutor(
+            json = testJson(),
+            stripeNetworkClient = mockStripeNetworkClient
+        ),
         apiRequestFactory = apiRequestFactory,
-        stripeAccountId = null
+        apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
     )
 
     @Test
@@ -39,7 +43,7 @@ class FinancialConnectionsApiRepositoryTest {
             )
 
             val result =
-                financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.accounts.data.size).isEqualTo(1)
         }
@@ -54,7 +58,7 @@ class FinancialConnectionsApiRepositoryTest {
             )
 
             val result =
-                financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.accounts.data.size).isEqualTo(1)
         }
@@ -69,7 +73,7 @@ class FinancialConnectionsApiRepositoryTest {
             )
 
             val result =
-                financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
         }
@@ -84,7 +88,7 @@ class FinancialConnectionsApiRepositoryTest {
             )
 
             val result =
-                financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
         }
@@ -99,7 +103,7 @@ class FinancialConnectionsApiRepositoryTest {
             )
 
             val result =
-                financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(FinancialConnectionsAccount::class.java)
         }
@@ -113,7 +117,7 @@ class FinancialConnectionsApiRepositoryTest {
                 )
             )
 
-            val result = financialConnectionsApiRepository
+            val result = financialConnectionsRepositoryImpl
                 .getFinancialConnectionsSession("client_secret")
             val financialConnectionsAccount = result.paymentAccount as FinancialConnectionsAccount
             assertThat(financialConnectionsAccount.permissions).containsExactly(
@@ -132,7 +136,7 @@ class FinancialConnectionsApiRepositoryTest {
             )
 
             val result =
-                financialConnectionsApiRepository.getFinancialConnectionsSession("client_secret")
+                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
 
             assertThat(result.paymentAccount).isInstanceOf(BankAccount::class.java)
         }
