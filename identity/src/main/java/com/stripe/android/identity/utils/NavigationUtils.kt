@@ -261,7 +261,7 @@ internal fun Fragment.navigateOnResume(destinationId: Int, args: Bundle? = null)
 }
 
 private fun Fragment.repeatOnResume(block: () -> Unit) {
-    lifecycleScope.launch {
+    viewLifecycleOwner.lifecycleScope.launch {
         viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             block()
         }
