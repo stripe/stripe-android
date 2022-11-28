@@ -47,9 +47,9 @@ internal data class FinancialConnectionsAuthorizationSession(
     val urlQrCode: String? = null,
 
     @SerialName(value = "is_oauth")
-    val isOAuth: Boolean? = false,
+    val isOAuth: Boolean? = false
 
-    ) : Parcelable {
+) : Parcelable {
 
     @Serializable(with = Flow.Serializer::class)
     enum class Flow(val value: String?) {

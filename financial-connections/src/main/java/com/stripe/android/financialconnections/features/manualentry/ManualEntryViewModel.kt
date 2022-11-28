@@ -44,24 +44,30 @@ internal class ManualEntryViewModel @Inject constructor(
 
     private fun observeInputs() {
         onEach(ManualEntryState::accountConfirm) { input ->
-            if (input != null) withState {
-                val error: Int? = ManualEntryInputValidator.getAccountConfirmIdOrNull(
-                    accountInput = it.account ?: "",
-                    accountConfirmInput = input
-                )
-                setState { copy(accountConfirmError = error) }
+            if (input != null) {
+                withState {
+                    val error: Int? = ManualEntryInputValidator.getAccountConfirmIdOrNull(
+                        accountInput = it.account ?: "",
+                        accountConfirmInput = input
+                    )
+                    setState { copy(accountConfirmError = error) }
+                }
             }
         }
         onEach(ManualEntryState::account) { input ->
-            if (input != null) setState {
-                val error = ManualEntryInputValidator.getAccountErrorIdOrNull(input)
-                copy(accountError = error)
+            if (input != null) {
+                setState {
+                    val error = ManualEntryInputValidator.getAccountErrorIdOrNull(input)
+                    copy(accountError = error)
+                }
             }
         }
         onEach(ManualEntryState::routing) { input ->
-            if (input != null) setState {
-                val error = ManualEntryInputValidator.getRoutingErrorIdOrNull(input)
-                copy(routingError = error)
+            if (input != null) {
+                setState {
+                    val error = ManualEntryInputValidator.getRoutingErrorIdOrNull(input)
+                    copy(routingError = error)
+                }
             }
         }
     }

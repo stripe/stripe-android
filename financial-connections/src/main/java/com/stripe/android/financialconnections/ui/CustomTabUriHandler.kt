@@ -11,7 +11,6 @@ import com.stripe.android.financialconnections.presentation.CreateBrowserIntentF
  */
 internal class CustomTabUriHandler(private val context: Context) : UriHandler {
     override fun openUri(uri: String) {
-
         context.startActivity(
             CreateBrowserIntentForUrl(
                 context = context,

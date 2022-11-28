@@ -95,14 +95,16 @@ internal class InstitutionPickerViewModel @Inject constructor(
                     query = query
                 )
             }
-            if (query.isNotEmpty()) eventTracker.track(
-                SearchSucceeded(
-                    pane = ClientPane.INSTITUTION_PICKER,
-                    query = query,
-                    duration = millis,
-                    resultCount = result.data.count()
+            if (query.isNotEmpty()) {
+                eventTracker.track(
+                    SearchSucceeded(
+                        pane = ClientPane.INSTITUTION_PICKER,
+                        query = query,
+                        duration = millis,
+                        resultCount = result.data.count()
+                    )
                 )
-            )
+            }
             result
         }.execute {
             copy(searchInstitutions = if (it.isCancellationError()) Loading() else it)

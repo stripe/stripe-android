@@ -87,7 +87,9 @@ internal class AccountPickerViewModel @Inject constructor(
                                 amountCurrencyCode = account.currency,
                                 targetLocale = locale ?: Locale.getDefault()
                             )
-                    } else null
+                    } else {
+                        null
+                    }
                 )
             }.sortedBy { it.account.allowSelection.not() }
 

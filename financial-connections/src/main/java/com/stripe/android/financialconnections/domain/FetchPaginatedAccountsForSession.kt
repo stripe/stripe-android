@@ -50,6 +50,8 @@ internal class FetchPaginatedAccountsForSession @Inject constructor(
                 bankAccountToken = null, // Token should not be exposed on regular sessions.
                 livemode = session.livemode
             )
-        } else session
+        } else {
+            session
+        }
     }
 }

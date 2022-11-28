@@ -14,8 +14,9 @@ internal class DebugConfiguration @Inject constructor(
     internal val overridenNative: Boolean?
         get() = if (sharedPreferences.contains(KEY_OVERRIDE_NATIVE)) {
             sharedPreferences.getBoolean(KEY_OVERRIDE_NATIVE, false)
-        } else null
+        } else {
+            null
+        }
 }
 
 private const val KEY_OVERRIDE_NATIVE = "override_native"
-

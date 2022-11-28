@@ -25,7 +25,6 @@ import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
-import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
@@ -51,7 +50,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      */
     val activityRetainedComponent: FinancialConnectionsSheetNativeComponent,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-    private val getManifest: GetManifest,
     private val uriUtils: UriUtils,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,

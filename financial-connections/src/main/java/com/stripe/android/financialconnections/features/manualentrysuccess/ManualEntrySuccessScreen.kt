@@ -176,7 +176,6 @@ internal fun TransactionHistoryTable(
             Modifier
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp)
         ) {
-
             val titleColor = FinancialConnectionsTheme.colors.textSecondary
             val tableData =
                 buildTableRows(microdepositVerificationMethod)
