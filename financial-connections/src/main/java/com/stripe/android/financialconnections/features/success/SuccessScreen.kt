@@ -28,7 +28,7 @@ import com.stripe.android.financialconnections.features.common.AccessibleDataCal
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutWithAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -60,7 +60,7 @@ internal fun SuccessScreen() {
             onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
             onDisconnectLinkClick = viewModel::onDisconnectLinkClick,
             showLinkAnotherAccount = payload.showLinkAnotherAccount,
-            onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.SUCCESS) }
+            onCloseClick = { parentViewModel.onCloseNoConfirmationClick(ClientPane.SUCCESS) }
         )
     }
 }
@@ -227,7 +227,7 @@ internal fun SuccessScreenPreview() {
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id2",
                     name = "Account 2 - no acct numbers",
-                    allowSelection = true,
+                    _allowSelection = true,
                     allowSelectionMessage = "",
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                     supportedPaymentMethodTypes = emptyList()
@@ -237,7 +237,7 @@ internal fun SuccessScreenPreview() {
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id3",
                     name = "Account 3",
-                    allowSelection = true,
+                    _allowSelection = true,
                     allowSelectionMessage = "",
                     displayableAccountNumbers = "1234",
                     subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
@@ -248,7 +248,7 @@ internal fun SuccessScreenPreview() {
                     category = FinancialConnectionsAccount.Category.CASH,
                     id = "id4",
                     name = "Account 4",
-                    allowSelection = true,
+                    _allowSelection = true,
                     allowSelectionMessage = "",
                     displayableAccountNumbers = "1234",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,

@@ -34,21 +34,6 @@ class FinancialConnectionsRepositoryImplTest {
     )
 
     @Test
-    fun `getFinancialConnectionsSession - accounts under linked_accounts json key`() =
-        runTest {
-            givenGetRequestReturns(
-                readResourceAsString(
-                    "json/linked_account_session_old_accounts_key.json"
-                )
-            )
-
-            val result =
-                financialConnectionsRepositoryImpl.getFinancialConnectionsSession("client_secret")
-
-            assertThat(result.accounts.data.size).isEqualTo(1)
-        }
-
-    @Test
     fun `getFinancialConnectionsSession - accounts under account json key`() =
         runTest {
             givenGetRequestReturns(

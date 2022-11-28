@@ -26,7 +26,7 @@ internal data class FinancialConnectionsAuthorizationSession(
     val id: String,
 
     @SerialName(value = "next_pane")
-    val nextPane: FinancialConnectionsSessionManifest.NextPane,
+    val nextPane: FinancialConnectionsSessionManifest.ClientPane,
 
     @SerialName(value = "flow")
     val flow: Flow? = null,
@@ -47,9 +47,9 @@ internal data class FinancialConnectionsAuthorizationSession(
     val urlQrCode: String? = null,
 
     @SerialName(value = "is_oauth")
-    val isOAuth: Boolean,
+    val isOAuth: Boolean? = false,
 
-) : Parcelable {
+    ) : Parcelable {
 
     @Serializable(with = Flow.Serializer::class)
     enum class Flow(val value: String?) {

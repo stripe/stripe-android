@@ -15,8 +15,7 @@ internal object ApiKeyFixtures {
 
     fun syncResponse() = SynchronizeSessionResponse(
         manifest = sessionManifest(),
-        text = null,
-        mobile = null
+        text = null
     )
 
     fun sessionManifest() = FinancialConnectionsSessionManifest(
@@ -30,7 +29,7 @@ internal object ApiKeyFixtures {
         livemode = true,
         manualEntryUsesMicrodeposits = true,
         mobileHandoffEnabled = true,
-        nextPane = FinancialConnectionsSessionManifest.NextPane.CONSENT,
+        nextPane = FinancialConnectionsSessionManifest.ClientPane.CONSENT,
         permissions = emptyList(),
         product = FinancialConnectionsSessionManifest.Product.STRIPE_CARD,
         singleAccount = true,
@@ -42,7 +41,7 @@ internal object ApiKeyFixtures {
 
     fun authorizationSession() = FinancialConnectionsAuthorizationSession(
         id = "id",
-        nextPane = FinancialConnectionsSessionManifest.NextPane.CONSENT,
+        nextPane = FinancialConnectionsSessionManifest.ClientPane.CONSENT,
         flow = FinancialConnectionsAuthorizationSession.Flow.MX_OAUTH,
         institutionSkipAccountSelection = null,
         showPartnerDisclosure = null,
@@ -55,7 +54,7 @@ internal object ApiKeyFixtures {
     fun partnerAccountList() = PartnerAccountsList(
         data = emptyList(),
         hasMore = false,
-        nextPane = FinancialConnectionsSessionManifest.NextPane.CONSENT,
+        nextPane = FinancialConnectionsSessionManifest.ClientPane.CONSENT,
         url = ""
     )
 }

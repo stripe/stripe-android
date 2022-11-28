@@ -24,7 +24,7 @@ import com.stripe.android.financialconnections.features.consent.FinancialConnect
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -68,7 +68,7 @@ internal class SuccessViewModel @Inject constructor(
         onAsync(
             SuccessState::payload,
             onFail = { logger.error("Error retrieving payload", it) },
-            onSuccess = { eventTracker.track(PaneLoaded(NextPane.SUCCESS)) }
+            onSuccess = { eventTracker.track(PaneLoaded(ClientPane.SUCCESS)) }
         )
         onAsync(SuccessState::completeSession, onSuccess = {
             eventTracker.track(
@@ -90,7 +90,7 @@ internal class SuccessViewModel @Inject constructor(
 
     fun onDoneClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickDone(NextPane.SUCCESS))
+            eventTracker.track(ClickDone(ClientPane.SUCCESS))
         }
         suspend {
             completeFinancialConnectionsSession().also {
@@ -105,20 +105,20 @@ internal class SuccessViewModel @Inject constructor(
 
     fun onLinkAnotherAccountClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickLinkAnotherAccount(NextPane.SUCCESS))
+            eventTracker.track(ClickLinkAnotherAccount(ClientPane.SUCCESS))
         }
         navigationManager.navigate(NavigationDirections.reset)
     }
 
     fun onLearnMoreAboutDataAccessClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickLearnMoreDataAccess(NextPane.SUCCESS))
+            eventTracker.track(ClickLearnMoreDataAccess(ClientPane.SUCCESS))
         }
     }
 
     fun onDisconnectLinkClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickDisconnectLink(NextPane.SUCCESS))
+            eventTracker.track(ClickDisconnectLink(ClientPane.SUCCESS))
         }
     }
 

@@ -38,7 +38,7 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -69,7 +69,7 @@ internal fun PartnerAuthScreen() {
         onContinueClick = viewModel::onLaunchAuthClick,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
         onEnterDetailsManually = viewModel::onEnterDetailsManuallyClick,
-        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(NextPane.PARTNER_AUTH) },
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(ClientPane.PARTNER_AUTH) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
@@ -163,7 +163,7 @@ private fun LoadedContent(
     onSelectAnotherBank: () -> Unit
 ) {
     when (authenticationStatus) {
-        is Uninitialized -> when (payload.authSession.isOAuth) {
+        is Uninitialized -> when (payload.authSession.isOAuth ?: false) {
             true -> PrePaneContent(
                 institution = payload.institution,
                 flow = payload.authSession.flow,
@@ -265,7 +265,7 @@ internal fun PrepaneContentPreview() {
                             flow = Flow.FINICITY_CONNECT_V2_OAUTH,
                             showPartnerDisclosure = true,
                             isOAuth = true,
-                            nextPane = NextPane.PARTNER_AUTH,
+                            nextPane = ClientPane.PARTNER_AUTH,
                             id = "1234"
                         ),
                         isStripeDirect = false

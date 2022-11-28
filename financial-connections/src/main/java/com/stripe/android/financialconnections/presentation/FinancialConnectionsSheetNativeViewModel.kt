@@ -35,7 +35,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -65,11 +65,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
                 when (message) {
-                    Message.OpenPartnerWebAuth -> {
-                        val manifest = getManifest()
-                        setState { copy(viewEffect = OpenUrl(manifest.hostedAuthUrl)) }
-                    }
-
                     is Message.Finish -> {
                         setState { copy(viewEffect = Finish(message.result)) }
                     }
@@ -174,20 +169,20 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    fun onCloseWithConfirmationClick(pane: NextPane) {
+    fun onCloseWithConfirmationClick(pane: ClientPane) {
         viewModelScope.launch {
             eventTracker.track(ClickNavBarClose(pane))
             setState { copy(showCloseDialog = true) }
         }
     }
 
-    fun onBackClick(pane: NextPane) {
+    fun onBackClick(pane: ClientPane) {
         viewModelScope.launch {
             eventTracker.track(ClickNavBarBack(pane))
         }
     }
 
-    fun onCloseNoConfirmationClick(pane: NextPane) {
+    fun onCloseNoConfirmationClick(pane: ClientPane) {
         viewModelScope.launch {
             eventTracker.track(ClickNavBarClose(pane))
         }
@@ -267,7 +262,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun onPaneLaunched(pane: NextPane) {
+    fun onPaneLaunched(pane: ClientPane) {
         viewModelScope.launch {
             eventTracker.track(
                 FinancialConnectionsEvent.PaneLaunched(pane)
@@ -314,7 +309,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val configuration: FinancialConnectionsSheet.Configuration,
     val showCloseDialog: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
-    val initialPane: NextPane
+    val initialPane: ClientPane
 ) : MavericksState {
 
     /**

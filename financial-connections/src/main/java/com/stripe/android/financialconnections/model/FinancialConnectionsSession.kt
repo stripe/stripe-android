@@ -17,7 +17,7 @@ import org.json.JSONObject
  *
  * @param clientSecret
  * @param id
- * @param accounts / linked_accounts (controlled by a beta flag)
+ * @param accounts
  * @param livemode
  * @param paymentAccount
  * @param returnUrl
@@ -31,11 +31,8 @@ data class FinancialConnectionsSession internal constructor(
     @SerialName("id")
     val id: String,
 
-    @SerialName("linked_accounts")
-    internal val accountsOld: FinancialConnectionsAccountList? = null,
-
     @SerialName("accounts")
-    internal val accountsNew: FinancialConnectionsAccountList? = null,
+    val accounts: FinancialConnectionsAccountList,
 
     @SerialName("livemode")
     val livemode: Boolean,
@@ -51,9 +48,6 @@ data class FinancialConnectionsSession internal constructor(
     @Serializable(with = JsonAsStringSerializer::class)
     internal val bankAccountToken: String? = null
 ) : StripeModel, Parcelable {
-
-    val accounts: FinancialConnectionsAccountList
-        get() = accountsNew ?: accountsOld!!
 
     internal val parsedToken: Token?
         get() = bankAccountToken?.let { TokenJsonParser().parse(JSONObject(it)) }

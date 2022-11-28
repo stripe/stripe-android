@@ -2,7 +2,7 @@
   "id": "las_dhgfsklhgfkdsjhgk",
   "object": "link_account_session",
   "client_secret": "las_client_secret_ldafjlfkjlsfadkjk",
-  "linked_accounts": {
+  "accounts": {
     "object": "list",
     "data": [
     ],

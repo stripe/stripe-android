@@ -18,7 +18,7 @@ import com.stripe.android.financialconnections.features.consent.ConsentState.Bot
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -49,11 +49,11 @@ internal class ConsentViewModel @Inject constructor(
     private fun logErrors() {
         onAsync(
             ConsentState::consent,
-            onSuccess = { eventTracker.track(FinancialConnectionsEvent.PaneLoaded(NextPane.CONSENT)) },
+            onSuccess = { eventTracker.track(FinancialConnectionsEvent.PaneLoaded(ClientPane.CONSENT)) },
             onFail = { logger.error("Error retrieving consent content", it) }
         )
         onAsync(ConsentState::acceptConsent, onFail = {
-            eventTracker.track(Error(NextPane.CONSENT, it))
+            eventTracker.track(Error(ClientPane.CONSENT, it))
             logger.error("Error accepting consent", it)
         })
     }
@@ -71,7 +71,7 @@ internal class ConsentViewModel @Inject constructor(
         // if clicked uri contains an eventName query param, track click event.
         viewModelScope.launch {
             uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
-                eventTracker.track(Click(eventName, pane = NextPane.CONSENT))
+                eventTracker.track(Click(eventName, pane = ClientPane.CONSENT))
             }
         }
         val date = Date()

@@ -39,7 +39,7 @@ import com.stripe.android.financialconnections.features.manualentrysuccess.Manua
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
@@ -114,7 +114,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @OptIn(ExperimentalMaterialApi::class)
     @Suppress("LongMethod")
     @Composable
-    fun NavHost(initialPane: NextPane) {
+    fun NavHost(initialPane: ClientPane) {
         val context = LocalContext.current
         val navController = rememberNavController()
         val uriHandler = remember { CustomTabUriHandler(context) }
@@ -128,51 +128,51 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         ) {
             NavHost(navController, startDestination = initialDestination) {
                 composable(NavigationDirections.consent.destination) {
-                    LaunchedPane(NextPane.CONSENT)
-                    BackHandler(navController, NextPane.CONSENT)
+                    LaunchedPane(ClientPane.CONSENT)
+                    BackHandler(navController, ClientPane.CONSENT)
                     ConsentScreen()
                 }
                 composable(NavigationDirections.manualEntry.destination) {
-                    LaunchedPane(NextPane.MANUAL_ENTRY)
-                    BackHandler(navController, NextPane.MANUAL_ENTRY)
+                    LaunchedPane(ClientPane.MANUAL_ENTRY)
+                    BackHandler(navController, ClientPane.MANUAL_ENTRY)
                     ManualEntryScreen()
                 }
                 composable(
                     route = NavigationDirections.ManualEntrySuccess.route,
                     arguments = NavigationDirections.ManualEntrySuccess.arguments
                 ) {
-                    LaunchedPane(NextPane.MANUAL_ENTRY_SUCCESS)
-                    BackHandler(navController, NextPane.MANUAL_ENTRY_SUCCESS)
+                    LaunchedPane(ClientPane.MANUAL_ENTRY_SUCCESS)
+                    BackHandler(navController, ClientPane.MANUAL_ENTRY_SUCCESS)
                     ManualEntrySuccessScreen(it)
                 }
                 composable(NavigationDirections.institutionPicker.destination) {
-                    LaunchedPane(NextPane.INSTITUTION_PICKER)
-                    BackHandler(navController, NextPane.INSTITUTION_PICKER)
+                    LaunchedPane(ClientPane.INSTITUTION_PICKER)
+                    BackHandler(navController, ClientPane.INSTITUTION_PICKER)
                     InstitutionPickerScreen()
                 }
                 composable(NavigationDirections.partnerAuth.destination) {
-                    LaunchedPane(NextPane.PARTNER_AUTH)
-                    BackHandler(navController, NextPane.PARTNER_AUTH)
+                    LaunchedPane(ClientPane.PARTNER_AUTH)
+                    BackHandler(navController, ClientPane.PARTNER_AUTH)
                     PartnerAuthScreen()
                 }
                 composable(NavigationDirections.accountPicker.destination) {
-                    LaunchedPane(NextPane.ACCOUNT_PICKER)
-                    BackHandler(navController, NextPane.ACCOUNT_PICKER)
+                    LaunchedPane(ClientPane.ACCOUNT_PICKER)
+                    BackHandler(navController, ClientPane.ACCOUNT_PICKER)
                     AccountPickerScreen()
                 }
                 composable(NavigationDirections.success.destination) {
-                    LaunchedPane(NextPane.SUCCESS)
-                    BackHandler(navController, NextPane.SUCCESS)
+                    LaunchedPane(ClientPane.SUCCESS)
+                    BackHandler(navController, ClientPane.SUCCESS)
                     SuccessScreen()
                 }
                 composable(NavigationDirections.reset.destination) {
-                    LaunchedPane(NextPane.RESET)
-                    BackHandler(navController, NextPane.RESET)
+                    LaunchedPane(ClientPane.RESET)
+                    BackHandler(navController, ClientPane.RESET)
                     ResetScreen()
                 }
                 composable(NavigationDirections.attachLinkedPaymentAccount.destination) {
-                    LaunchedPane(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT)
-                    BackHandler(navController, NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT)
+                    LaunchedPane(ClientPane.ATTACH_LINKED_PAYMENT_ACCOUNT)
+                    BackHandler(navController, ClientPane.ATTACH_LINKED_PAYMENT_ACCOUNT)
                     AttachPaymentScreen()
                 }
             }
@@ -180,7 +180,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     }
 
     @Composable
-    private fun BackHandler(navController: NavHostController, pane: NextPane) {
+    private fun BackHandler(navController: NavHostController, pane: ClientPane) {
         androidx.activity.compose.BackHandler(true) {
             viewModel.onBackClick(pane)
             if (navController.popBackStack().not()) onBackPressedDispatcher.onBackPressed()
@@ -189,7 +189,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     @Composable
     private fun LaunchedPane(
-        pane: NextPane
+        pane: ClientPane
     ) {
         LaunchedEffect(Unit) { viewModel.onPaneLaunched(pane) }
     }

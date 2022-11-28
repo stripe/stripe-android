@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.financialconnections.exception.FinancialConnectionsError
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 
 /**
@@ -16,7 +16,7 @@ internal sealed class FinancialConnectionsEvent(
     val eventName = if (includePrefix) "$EVENT_PREFIX.$name" else name
 
     class PaneLaunched(
-        pane: NextPane,
+        pane: ClientPane,
     ) : FinancialConnectionsEvent(
         "pane.launched",
         mapOf(
@@ -25,7 +25,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class PaneLoaded(
-        pane: NextPane,
+        pane: ClientPane,
     ) : FinancialConnectionsEvent(
         "pane.loaded",
         mapOf(
@@ -34,7 +34,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class ClickNavBarBack(
-        pane: NextPane,
+        pane: ClientPane,
     ) : FinancialConnectionsEvent(
         name = "click.nav_bar.back",
         mapOf(
@@ -43,7 +43,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class ClickNavBarClose(
-        pane: NextPane,
+        pane: ClientPane,
     ) : FinancialConnectionsEvent(
         name = "click.nav_bar.close",
         mapOf(
@@ -65,7 +65,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class ClickLearnMoreDataAccess(
-        pane: NextPane
+        pane: ClientPane
     ) : FinancialConnectionsEvent(
         name = "click.data_access.learn_more",
         mapOf(
@@ -74,7 +74,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class ClickDisconnectLink(
-        pane: NextPane
+        pane: ClientPane
     ) : FinancialConnectionsEvent(
         name = "click.disconnect_link",
         mapOf(
@@ -84,7 +84,7 @@ internal sealed class FinancialConnectionsEvent(
 
     class Click(
         eventName: String,
-        pane: NextPane
+        pane: ClientPane
     ) : FinancialConnectionsEvent(
         name = eventName,
         mapOf(
@@ -93,7 +93,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class InstitutionSelected(
-        pane: NextPane,
+        pane: ClientPane,
         fromFeatured: Boolean,
         institutionId: String
     ) : FinancialConnectionsEvent(
@@ -105,7 +105,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class SearchSucceeded(
-        pane: NextPane,
+        pane: ClientPane,
         query: String,
         duration: Long,
         resultCount: Int
@@ -142,7 +142,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class ClickLinkAccounts(
-        pane: NextPane,
+        pane: ClientPane,
     ) : FinancialConnectionsEvent(
         name = "click.link_accounts",
         mapOf(
@@ -151,7 +151,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class ClickLinkAnotherAccount(
-        pane: NextPane,
+        pane: ClientPane,
     ) : FinancialConnectionsEvent(
         name = "click.link_another_account",
         mapOf(
@@ -160,7 +160,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class ClickDone(
-        pane: NextPane,
+        pane: ClientPane,
     ) : FinancialConnectionsEvent(
         name = "click.done",
         mapOf(
@@ -169,7 +169,7 @@ internal sealed class FinancialConnectionsEvent(
     )
 
     class Error(
-        pane: NextPane,
+        pane: ClientPane,
         exception: Throwable
     ) : FinancialConnectionsEvent(
         name = if (exception is FinancialConnectionsError) "error.expected" else "error.unexpected",
@@ -196,7 +196,7 @@ internal sealed class FinancialConnectionsEvent(
 
     object ConsentAgree : FinancialConnectionsEvent(
         name = "click.agree",
-        mapOf("pane" to NextPane.CONSENT.value)
+        mapOf("pane" to ClientPane.CONSENT.value)
     )
 
     override fun toString(): String {

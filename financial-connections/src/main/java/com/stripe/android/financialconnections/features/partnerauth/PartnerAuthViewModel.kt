@@ -29,7 +29,7 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -67,7 +67,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 isStripeDirect = manifest.isStripeDirect ?: false
             ).also {
                 // just send loaded event on OAuth flows (prepane). Non-OAuth handled by shim.
-                val loadedEvent: Loaded? = Loaded(Date()).takeIf { authSession.isOAuth }
+                val loadedEvent: Loaded? = Loaded(Date()).takeIf { authSession.isOAuth ?: false }
                 postAuthSessionEvent(
                     authSession.id,
                     listOfNotNull(launchedEvent, loadedEvent)
@@ -83,7 +83,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             asyncProp = PartnerAuthState::payload,
             onSuccess = {
                 // launch auth for non-OAuth (skip pre-pane).
-                if (it.authSession.isOAuth.not()) launchAuthInBrowser()
+                if (it.authSession.isOAuth != true) launchAuthInBrowser()
             }
         )
     }
@@ -93,9 +93,9 @@ internal class PartnerAuthViewModel @Inject constructor(
             PartnerAuthState::payload,
             onFail = {
                 logger.error("Error fetching payload / posting AuthSession", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(NextPane.PARTNER_AUTH, it))
+                eventTracker.track(FinancialConnectionsEvent.Error(ClientPane.PARTNER_AUTH, it))
             },
-            onSuccess = { eventTracker.track(PaneLoaded(NextPane.PARTNER_AUTH)) }
+            onSuccess = { eventTracker.track(PaneLoaded(ClientPane.PARTNER_AUTH)) }
         )
     }
 
@@ -114,7 +114,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 it.url?.let { setState { copy(viewEffect = OpenPartnerAuth(it)) } }
             }
             .onFailure {
-                eventTracker.track(FinancialConnectionsEvent.Error(NextPane.PARTNER_AUTH, it))
+                eventTracker.track(FinancialConnectionsEvent.Error(ClientPane.PARTNER_AUTH, it))
                 logger.error("failed retrieving active session from cache", it)
                 setState { copy(authenticationStatus = Fail(it)) }
             }
@@ -155,6 +155,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                     postAuthSessionEvent(authSession.id, AuthSessionEvent.Failure(Date(), error))
                     cancelAuthorizationSession(authSession.id)
                 }
+
                 else -> logger.debug("Could not find AuthSession to cancel.")
             }
             setState { copy(authenticationStatus = Fail(error)) }
@@ -169,7 +170,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             setState { copy(authenticationStatus = Loading()) }
             val authSession = requireNotNull(getManifest().activeAuthSession)
             val result = cancelAuthorizationSession(authSession.id)
-            if (authSession.isOAuth) {
+            if (authSession.isOAuth == true) {
                 // For OAuth institutions, create a new session and navigate to its nextPane (prepane).
                 logger.debug("Creating a new session for this OAuth institution")
                 // Send retry event as we're presenting the prepane again.
@@ -196,7 +197,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             setState { copy(authenticationStatus = Loading()) }
             val authSession = requireNotNull(getManifest().activeAuthSession)
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-            if (authSession.isOAuth) {
+            if (authSession.isOAuth == true) {
                 logger.debug("Web AuthFlow completed! waiting for oauth results")
                 val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
                 logger.debug("OAuth results received! completing session")
@@ -207,7 +208,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 logger.debug("Session authorized!")
                 goNext(updatedSession.nextPane)
             } else {
-                goNext(NextPane.ACCOUNT_PICKER)
+                goNext(ClientPane.ACCOUNT_PICKER)
             }
         }.onFailure {
             logger.error("failed authorizing session", it)

@@ -10,8 +10,6 @@ import kotlinx.serialization.Serializable
 internal data class SynchronizeSessionResponse(
     @SerialName("manifest")
     val manifest: FinancialConnectionsSessionManifest,
-    @SerialName("mobile")
-    val mobile: String? = null,
     @SerialName("text")
     val text: TextUpdate? = null
 ) : Parcelable

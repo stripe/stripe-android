@@ -31,6 +31,7 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
 import kotlinx.coroutines.launch
+import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Named
@@ -94,16 +95,22 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             nativeRouter.logExposure(synchronizeSessionResponse)
         }
-        setState {
-            copy(
-                manifest = manifest,
-                webAuthFlowActive = nativeAuthFlowEnabled.not(),
-                viewEffect = if (nativeAuthFlowEnabled) {
-                    OpenNativeAuthFlow(initialArgs.configuration, synchronizeSessionResponse)
-                } else {
-                    OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
-                }
-            )
+        if (manifest.hostedAuthUrl == null) {
+            withState {
+                onFatal(it, IllegalArgumentException("hostedAuthUrl is required!"))
+            }
+        } else {
+            setState {
+                copy(
+                    manifest = manifest,
+                    webAuthFlowActive = nativeAuthFlowEnabled.not(),
+                    viewEffect = if (nativeAuthFlowEnabled) {
+                        OpenNativeAuthFlow(initialArgs.configuration, synchronizeSessionResponse)
+                    } else {
+                        OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
+                    }
+                )
+            }
         }
     }
 

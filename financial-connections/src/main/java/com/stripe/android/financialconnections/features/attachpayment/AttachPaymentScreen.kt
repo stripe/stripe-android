@@ -17,7 +17,7 @@ import com.stripe.android.financialconnections.exception.AccountNumberRetrievalE
 import com.stripe.android.financialconnections.features.common.AccountNumberRetrievalErrorContent
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane.ATTACH_LINKED_PAYMENT_ACCOUNT
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview

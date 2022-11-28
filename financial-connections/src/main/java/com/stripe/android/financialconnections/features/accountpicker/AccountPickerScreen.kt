@@ -54,7 +54,7 @@ import com.stripe.android.financialconnections.features.common.NoAccountsAvailab
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.ClientPane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -80,7 +80,7 @@ internal fun AccountPickerScreen() {
         onSelectAnotherBank = viewModel::selectAnotherBank,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(NextPane.ACCOUNT_PICKER) },
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(ClientPane.ACCOUNT_PICKER) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick
     )
@@ -318,7 +318,7 @@ private fun MultiSelectContent(
                 accountUI = PartnerAccountUI(
                     PartnerAccount(
                         id = "select_all_accounts",
-                        allowSelection = true,
+                        _allowSelection = true,
                         allowSelectionMessage = "",
                         authorization = "",
                         category = FinancialConnectionsAccount.Category.UNKNOWN,
