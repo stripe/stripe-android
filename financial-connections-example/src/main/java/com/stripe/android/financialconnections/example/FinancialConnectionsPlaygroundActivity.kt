@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheetForToken
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 
 class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
@@ -38,8 +40,13 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         getSharedPreferences("FINANCIAL_CONNECTIONS_DEBUG", Context.MODE_PRIVATE)
     }
 
+    private lateinit var collectBankAccountLauncher: CollectBankAccountLauncher
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        collectBankAccountLauncher = CollectBankAccountLauncher.create(
+            this, viewModel::onCollectBankAccountLauncherResult
+        )
         setContent {
             FinancialConnectionsScreen()
         }
@@ -48,7 +55,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     @Composable
     private fun FinancialConnectionsScreen() {
-        val state: FinancialConnectionsExampleState by viewModel.state.collectAsState()
+        val state: FinancialConnectionsPlaygroundState by viewModel.state.collectAsState()
         val viewEffect: FinancialConnectionsPlaygroundViewEffect? by viewModel.viewEffect.collectAsState(
             null
         )
@@ -57,8 +64,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         )
 
         val financialConnectionsSheetForToken = rememberFinancialConnectionsSheetForToken(
-                viewModel::onFinancialConnectionsSheetForTokenResult
+            viewModel::onFinancialConnectionsSheetForTokenResult
         )
+
 
         LaunchedEffect(viewEffect) {
             viewEffect?.let {
@@ -69,6 +77,18 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
                     is FinancialConnectionsPlaygroundViewEffect.OpenForToken -> {
                         financialConnectionsSheetForToken.present(it.configuration)
+                    }
+
+                    is FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent -> {
+                        collectBankAccountLauncher.presentWithPaymentIntent(
+                            publishableKey = it.publishableKey,
+                            stripeAccountId = null,
+                            clientSecret = it.paymentIntentSecret,
+                            configuration = CollectBankAccountConfiguration.USBankAccount(
+                                name = "Sample name",
+                                email = "sampleEmail@test.com"
+                            )
+                        )
                     }
                 }
             }
@@ -82,7 +102,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     @Composable
     private fun FinancialConnectionsContent(
-        state: FinancialConnectionsExampleState,
+        state: FinancialConnectionsPlaygroundState,
         onButtonClick: (Mode, Flow) -> Unit
     ) {
         val (selectedMode, onModeSelected) = remember { mutableStateOf(Mode.values()[0]) }
@@ -208,7 +228,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     @Composable
     fun ContentPreview() {
         FinancialConnectionsContent(
-            state = FinancialConnectionsExampleState(false, "Result: Pending"),
+            state = FinancialConnectionsPlaygroundState(false, "pk", "Result: Pending"),
             onButtonClick = { _, _ -> }
         )
     }
