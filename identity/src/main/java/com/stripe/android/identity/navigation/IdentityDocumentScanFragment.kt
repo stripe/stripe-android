@@ -53,7 +53,6 @@ internal abstract class IdentityDocumentScanFragment(
 ) {
     abstract val frontScanType: IdentityScanState.ScanType
     abstract val backScanType: IdentityScanState.ScanType?
-    override val shouldObserveDisplayState = false
 
     @get:StringRes
     abstract val frontTitleStringRes: Int
@@ -115,9 +114,15 @@ internal abstract class IdentityDocumentScanFragment(
                 },
                 newDisplayState = newDisplayState,
                 onCameraViewCreated = {
-                    cameraView = it
-                    cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
-                    cameraAdapter = createCameraAdapter()
+                    if (cameraView == null) {
+                        cameraView = it
+                        requireNotNull(cameraView)
+                            .viewFinderWindowView
+                            .setBackgroundResource(
+                                R.drawable.viewfinder_background
+                            )
+                        cameraAdapter = createCameraAdapter()
+                    }
                 },
                 onContinueClicked = {
                     collectDocumentUploadedStateAndPost(
@@ -131,16 +136,16 @@ internal abstract class IdentityDocumentScanFragment(
             LaunchedEffect(newDisplayState) {
                 when (newDisplayState) {
                     null -> {
-                        cameraView.toggleInitial()
+                        requireNotNull(cameraView).toggleInitial()
                     }
                     is IdentityScanState.Initial -> {
-                        cameraView.toggleInitial()
+                        requireNotNull(cameraView).toggleInitial()
                     }
                     is IdentityScanState.Found -> {
-                        cameraView.toggleFound()
+                        requireNotNull(cameraView).toggleFound()
                     }
                     is IdentityScanState.Finished -> {
-                        cameraView.toggleFinished()
+                        requireNotNull(cameraView).toggleFinished()
                     }
                     else -> {} // no-op
                 }
@@ -208,7 +213,7 @@ internal abstract class IdentityDocumentScanFragment(
     private fun createCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> {
         return CameraXAdapter(
             requireNotNull(activity),
-            cameraView.previewFrame,
+            requireNotNull(cameraView).previewFrame,
             MINIMUM_RESOLUTION,
             DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
                 Log.e(TAG, "scan fails with exception: $cause")
