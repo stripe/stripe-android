@@ -23,7 +23,7 @@ internal object ApiKeyFixtures {
     fun financialConnectionsSessionNoAccounts() = FinancialConnectionsSession(
         clientSecret = "las_1234567890",
         id = DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        accounts = FinancialConnectionsAccountList(
+        accountsNew = FinancialConnectionsAccountList(
             data = emptyList(),
             hasMore = false,
             url = "url",

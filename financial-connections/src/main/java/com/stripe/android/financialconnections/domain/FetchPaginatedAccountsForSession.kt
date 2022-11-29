@@ -40,7 +40,7 @@ internal class FetchPaginatedAccountsForSession @Inject constructor(
             FinancialConnectionsSession(
                 id = session.id,
                 clientSecret = session.clientSecret,
-                accounts = FinancialConnectionsAccountList(
+                accountsNew = FinancialConnectionsAccountList(
                     data = accounts,
                     hasMore = nextAccountList.hasMore,
                     url = nextAccountList.url,
