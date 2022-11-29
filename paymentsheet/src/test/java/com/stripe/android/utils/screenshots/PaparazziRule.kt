@@ -23,8 +23,10 @@ import java.lang.reflect.Field
 import java.lang.reflect.Modifier as ReflectionModifier
 
 class PaparazziRule(
-    private vararg val configOptions: Array<out PaparazziConfigOption>,
+    vararg configOptions: Array<out PaparazziConfigOption>,
 ) : TestRule {
+
+    private val testCases: List<TestCase> = configOptions.toTestCases()
 
     private val defaultDeviceConfig = DeviceConfig.PIXEL_6.copy(
         softButtons = false,
@@ -47,30 +49,21 @@ class PaparazziRule(
         // This is to close the prepare done as part of the apply.
         // We need symmetric calls to prepare/close.
         paparazzi.close()
-        val testCases = PermutationsFactory.create(*configOptions)
 
         for (testCase in testCases) {
-            for (option in testCase) {
-                option.initialize()
-            }
-
-            val deviceConfig = testCase.fold(defaultDeviceConfig) { acc, option ->
-                option.apply(acc)
-            }
-
-            val name = generateName(testCase)
-
-            val isDark = testCase.firstOrNull { it is SystemAppearance } == SystemAppearance.Dark
+            testCase.initialize()
 
             paparazzi.prepare(description!!)
 
+            val deviceConfig = testCase.apply(defaultDeviceConfig)
             if (deviceConfig != defaultDeviceConfig) {
                 paparazzi.unsafeUpdateConfig(deviceConfig)
             }
 
+            val name = testCase.name(description)
             paparazzi.snapshot(name) {
                 PaymentsTheme(
-                    colors = PaymentsTheme.getColors(isDark),
+                    colors = PaymentsTheme.getColors(testCase.isDark),
                 ) {
                     Surface(color = MaterialTheme.colors.surface) {
                         Box(
@@ -122,6 +115,47 @@ class PaparazziRule(
         field.apply {
             isAccessible = true
             set(null, newValue)
+        }
+    }
+
+    private fun Array<out Array<out PaparazziConfigOption>>.toTestCases(): List<TestCase> {
+        return createPermutations(this).map { TestCase(it) }
+    }
+
+    private fun createPermutations(
+        options: Array<out Array<out PaparazziConfigOption>>,
+    ): List<List<PaparazziConfigOption>> {
+        @Suppress("UNCHECKED_CAST")
+        return (options.toSet()).fold(listOf(listOf())) { acc, set ->
+            acc.flatMap { list -> set.map { element -> list + element } }
+        }
+    }
+}
+
+private data class TestCase(
+    val configOptions: List<PaparazziConfigOption>,
+) {
+
+    val isDark: Boolean
+        get() = configOptions.find { it is SystemAppearance } == SystemAppearance.Dark
+
+    fun initialize() {
+        configOptions.forEach { it.initialize() }
+    }
+
+    fun apply(deviceConfig: DeviceConfig): DeviceConfig {
+        return configOptions.fold(deviceConfig) { acc, option ->
+            option.apply(acc)
+        }
+    }
+
+    fun name(description: Description?): String? {
+        val optionsSuffix = configOptions.joinToString(separator = ", ") { option ->
+            "${option::class.java.simpleName}=$option"
+        }
+
+        return description?.let {
+            "${it.className}_${it.methodName}_[$optionsSuffix]"
         }
     }
 }
