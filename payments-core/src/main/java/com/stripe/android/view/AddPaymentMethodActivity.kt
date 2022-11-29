@@ -20,6 +20,7 @@ import com.stripe.android.Stripe
 import com.stripe.android.databinding.AddPaymentMethodActivityBinding
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.utils.argsAreInvalid
 
 /**
  * Activity used to display a [AddPaymentMethodView] and receive the resulting
@@ -89,6 +90,9 @@ class AddPaymentMethodActivity : StripeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (argsAreInvalid { args }) {
+            return
+        }
         configureView(args)
         setResult(
             Activity.RESULT_OK,

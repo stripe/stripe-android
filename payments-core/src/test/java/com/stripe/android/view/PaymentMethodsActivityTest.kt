@@ -3,7 +3,9 @@ package com.stripe.android.view
 import android.app.Activity.RESULT_CANCELED
 import android.content.Context
 import android.view.View
+import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
@@ -42,6 +44,13 @@ class PaymentMethodsActivityTest {
     fun setup() {
         CustomerSession.instance = customerSession
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+    }
+
+    @Test
+    fun onCreate_finishesActivityWhenArgsAreMissing() {
+        activityScenarioFactory.create<PaymentMethodsActivity>().use { activityScenario ->
+            assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        }
     }
 
     @Test
