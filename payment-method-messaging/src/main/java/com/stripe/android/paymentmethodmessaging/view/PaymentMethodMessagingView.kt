@@ -204,17 +204,17 @@ internal class PaymentMethodMessagingView @JvmOverloads constructor(
 }
 
 /**
- * Returns a stateful [PaymentMethodMessagingResult] used for displaying a [PaymentMethodMessaging]
+ * Returns a stateful [PaymentMethodMessagingState] used for displaying a [PaymentMethodMessaging]
  *
  * @param config The [PaymentMethodMessagingView.Configuration] for the view
  */
 @Composable
 internal fun rememberMessagingState(
     config: PaymentMethodMessagingView.Configuration
-): State<PaymentMethodMessagingResult> {
+): State<PaymentMethodMessagingState> {
     val context = LocalContext.current
     val composeState = remember {
-        mutableStateOf<PaymentMethodMessagingResult>(PaymentMethodMessagingResult.Loading)
+        mutableStateOf<PaymentMethodMessagingState>(PaymentMethodMessagingState.Loading)
     }
     val viewModel: PaymentMethodMessagingViewModel = viewModel(
         factory = PaymentMethodMessagingViewModel.Factory(
@@ -227,7 +227,7 @@ internal fun rememberMessagingState(
     LaunchedEffect(config) {
         viewModel.loadMessage().fold(
             onSuccess = {
-                composeState.value = PaymentMethodMessagingResult.Success(
+                composeState.value = PaymentMethodMessagingState.Success(
                     data = PaymentMethodMessagingData(
                         message = it,
                         images = it.displayHtml.getBitmaps(this, imageLoader),
@@ -236,7 +236,7 @@ internal fun rememberMessagingState(
                 )
             },
             onFailure = {
-                composeState.value = PaymentMethodMessagingResult.Failure(it)
+                composeState.value = PaymentMethodMessagingState.Failure(it)
             }
         )
     }

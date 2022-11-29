@@ -3,11 +3,11 @@ package com.stripe.android.paymentmethodmessaging.view
 /**
  * Result of the Payment Method Messaging state transaction.
  */
-internal sealed class PaymentMethodMessagingResult {
+internal sealed class PaymentMethodMessagingState {
     /**
      * Represents an ongoing transaction.
      */
-    object Loading : PaymentMethodMessagingResult()
+    object Loading : PaymentMethodMessagingState()
 
     /**
      * Represents a successful transaction of the Payment Method Messaging state.
@@ -17,7 +17,7 @@ internal sealed class PaymentMethodMessagingResult {
      */
     class Success(
         val data: PaymentMethodMessagingData
-    ) : PaymentMethodMessagingResult()
+    ) : PaymentMethodMessagingState()
 
     /**
      * Represents a failed transaction.
@@ -26,5 +26,5 @@ internal sealed class PaymentMethodMessagingResult {
      */
     class Failure(
         val error: Throwable
-    ) : PaymentMethodMessagingResult()
+    ) : PaymentMethodMessagingState()
 }
