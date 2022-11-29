@@ -35,12 +35,12 @@ class FinancialConnectionsPlaygroundViewModel(
         mode: Mode,
         flow: Flow
     ) {
+        _state.update { it.copy(status = emptyList()) }
         when (flow) {
             Flow.Data -> startForData(mode)
             Flow.Token -> startForToken(mode)
             Flow.PaymentIntent -> startWithPaymentIntent()
         }
-
     }
 
 
@@ -54,7 +54,7 @@ class FinancialConnectionsPlaygroundViewModel(
                         current.copy(
                             publishableKey = it.publishableKey,
                             loading = true,
-                            status = "Payment Intent created ${it.intentSecret}, opening FinancialConnectionsSheet."
+                            status = current.status + "Payment Intent created ${it.intentSecret}, opening FinancialConnectionsSheet."
                         )
                     }
                     _viewEffect.emit(
@@ -117,7 +117,7 @@ class FinancialConnectionsPlaygroundViewModel(
         _state.update {
             it.copy(
                 loading = false,
-                status = "Error starting linked account session: $error"
+                status = it.status + "Error starting linked account session: $error"
             )
         }
     }
@@ -126,7 +126,7 @@ class FinancialConnectionsPlaygroundViewModel(
         _state.update {
             it.copy(
                 loading = true,
-                status = message
+                status = it.status + message
             )
         }
     }
@@ -142,7 +142,7 @@ class FinancialConnectionsPlaygroundViewModel(
             is FinancialConnectionsSheetForTokenResult.Failed -> "Failed! ${result.error}"
             is FinancialConnectionsSheetForTokenResult.Canceled -> "Cancelled!"
         }
-        _state.update { it.copy(loading = false, status = statusText) }
+        _state.update { it.copy(loading = false, status = it.status + statusText) }
     }
 
     fun onFinancialConnectionsSheetResult(result: FinancialConnectionsSheetResult) {
@@ -154,11 +154,11 @@ class FinancialConnectionsPlaygroundViewModel(
             is FinancialConnectionsSheetResult.Failed -> "Failed! ${result.error}"
             is FinancialConnectionsSheetResult.Canceled -> "Cancelled!"
         }
-        _state.update { it.copy(loading = false, status = statusText) }
+        _state.update { it.copy(loading = false, status = it.status + statusText) }
     }
 
     fun onCollectBankAccountLauncherResult(result: CollectBankAccountResult) {
-        _state.update { it.copy(status = it.status + "\n" + "Session attached! Confirming Intent") }
+        _state.update { it.copy(status = it.status + "Session attached! Confirming Intent") }
         viewModelScope.launch {
             val statusText = when (result) {
                 is CollectBankAccountResult.Completed -> {
@@ -170,15 +170,14 @@ class FinancialConnectionsPlaygroundViewModel(
                             paymentMethodType = PaymentMethod.Type.USBankAccount
                         )
                     )
-                    _state.value.status + "\n" + "Completed! ${confirmedIntent.status}"
+                    "Intent Confirmed!: $confirmedIntent"
                 }
 
                 is CollectBankAccountResult.Failed -> "Failed! ${result.error}"
                 is CollectBankAccountResult.Cancelled -> "Cancelled!"
             }
-            _state.update { it.copy(loading = false, status = statusText) }
+            _state.update { it.copy(loading = false, status = it.status + statusText) }
         }
-
     }
 
     private fun stripe(publishableKey: String) = Stripe(
@@ -220,5 +219,5 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
 data class FinancialConnectionsPlaygroundState(
     val loading: Boolean = false,
     val publishableKey: String? = null,
-    val status: String = ""
+    val status: List<String> = emptyList()
 )
