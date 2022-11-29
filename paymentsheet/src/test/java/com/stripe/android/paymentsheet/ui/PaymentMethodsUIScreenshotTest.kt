@@ -4,6 +4,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import com.stripe.android.paymentsheet.PaymentMethodsUI
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.MockPaymentMethodsFactory
+import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import com.stripe.android.utils.screenshots.SystemAppearance
@@ -16,7 +17,7 @@ class PaymentMethodsUIScreenshotTest {
     val paparazziRule = PaparazziRule(
         SystemAppearance.values(),
         PaymentSheetAppearance.values(),
-//        FontSize.values(),
+        FontSize.values(),
     )
 
     private val paymentMethods: List<LpmRepository.SupportedPaymentMethod> by lazy {

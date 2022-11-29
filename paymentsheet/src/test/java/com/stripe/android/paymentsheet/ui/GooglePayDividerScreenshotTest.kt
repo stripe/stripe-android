@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import com.stripe.android.utils.screenshots.SystemAppearance
@@ -12,7 +13,7 @@ class GooglePayDividerScreenshotTest {
     val paparazziRule = PaparazziRule(
         SystemAppearance.values(),
         PaymentSheetAppearance.values(),
-//        FontSize.values(),
+        FontSize.values(),
     )
 
     @Test
