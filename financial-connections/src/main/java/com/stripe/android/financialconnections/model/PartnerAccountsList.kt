@@ -21,7 +21,7 @@ internal data class PartnerAccountsList(
 
     @SerialName(value = "has_more") @Required val hasMore: Boolean,
 
-    @SerialName(value = "next_pane") @Required val nextPane: FinancialConnectionsSessionManifest.NextPane,
+    @SerialName(value = "next_pane") @Required val nextPane: FinancialConnectionsSessionManifest.Pane,
 
     @SerialName(value = "url") @Required val url: String,
 
@@ -53,6 +53,7 @@ internal data class PartnerAccountsList(
  * @param status
  */
 @Serializable
+@Suppress("ConstructorParameterNaming")
 internal data class PartnerAccount(
 
     @SerialName(value = "authorization") @Required val authorization: String,
@@ -79,7 +80,7 @@ internal data class PartnerAccount(
 
     @SerialName(value = "institution_name") val institutionName: String? = null,
 
-    @SerialName(value = "allow_selection") val allowSelection: Boolean,
+    @SerialName(value = "allow_selection") private val _allowSelection: Boolean? = null,
 
     @SerialName(value = "allow_selection_message") val allowSelectionMessage: String? = null,
 
@@ -92,6 +93,10 @@ internal data class PartnerAccount(
     @SerialName(value = "status") val status: FinancialConnectionsAccount.Status? = null
 
 ) {
+
+    internal val allowSelection: Boolean
+        get() = _allowSelection ?: true
+
     internal val encryptedNumbers get() = displayableAccountNumbers?.let { "••••$it" } ?: ""
 
     internal val fullName get() = "${this.name} $encryptedNumbers"

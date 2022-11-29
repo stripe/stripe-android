@@ -90,7 +90,7 @@ internal class PartnerAuthViewModelTest {
         whenever(getManifest())
             .thenReturn(
                 sessionManifest().copy(
-                    activeAuthSession = activeAuthSession.copy(isOAuth = true)
+                    activeAuthSession = activeAuthSession.copy(_isOAuth = true)
                 )
             )
 
@@ -114,7 +114,7 @@ internal class PartnerAuthViewModelTest {
             whenever(getManifest())
                 .thenReturn(
                     sessionManifest().copy(
-                        activeAuthSession = activeAuthSession.copy(isOAuth = false)
+                        activeAuthSession = activeAuthSession.copy(_isOAuth = false)
                     )
                 )
 

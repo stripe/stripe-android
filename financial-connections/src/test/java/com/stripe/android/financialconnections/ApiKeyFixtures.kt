@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections
 
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
@@ -15,8 +17,19 @@ internal object ApiKeyFixtures {
 
     fun syncResponse() = SynchronizeSessionResponse(
         manifest = sessionManifest(),
-        text = null,
-        mobile = null
+        text = null
+    )
+
+    fun financialConnectionsSessionNoAccounts() = FinancialConnectionsSession(
+        clientSecret = "las_1234567890",
+        id = DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
+        accountsNew = FinancialConnectionsAccountList(
+            data = emptyList(),
+            hasMore = false,
+            url = "url",
+            count = 0
+        ),
+        livemode = true
     )
 
     fun sessionManifest() = FinancialConnectionsSessionManifest(
@@ -30,7 +43,7 @@ internal object ApiKeyFixtures {
         livemode = true,
         manualEntryUsesMicrodeposits = true,
         mobileHandoffEnabled = true,
-        nextPane = FinancialConnectionsSessionManifest.NextPane.CONSENT,
+        nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
         permissions = emptyList(),
         product = FinancialConnectionsSessionManifest.Product.STRIPE_CARD,
         singleAccount = true,
@@ -42,20 +55,20 @@ internal object ApiKeyFixtures {
 
     fun authorizationSession() = FinancialConnectionsAuthorizationSession(
         id = "id",
-        nextPane = FinancialConnectionsSessionManifest.NextPane.CONSENT,
+        nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
         flow = FinancialConnectionsAuthorizationSession.Flow.MX_OAUTH,
         institutionSkipAccountSelection = null,
         showPartnerDisclosure = null,
         skipAccountSelection = null,
         url = null,
         urlQrCode = null,
-        isOAuth = true
+        _isOAuth = true
     )
 
     fun partnerAccountList() = PartnerAccountsList(
         data = emptyList(),
         hasMore = false,
-        nextPane = FinancialConnectionsSessionManifest.NextPane.CONSENT,
+        nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
         url = ""
     )
 }

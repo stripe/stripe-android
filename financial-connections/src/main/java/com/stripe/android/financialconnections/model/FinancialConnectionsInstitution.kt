@@ -43,6 +43,6 @@ internal data class FinancialConnectionsInstitution(
 @Parcelize
 internal data class Image(
 
-    @SerialName(value = "default") val default: String
+    @SerialName(value = "default") val default: String?
 
 ) : Parcelable

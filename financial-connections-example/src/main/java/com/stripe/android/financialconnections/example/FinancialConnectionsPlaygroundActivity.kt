@@ -204,7 +204,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         }
     }
 
-
     @Preview
     @Composable
     fun ContentPreview() {

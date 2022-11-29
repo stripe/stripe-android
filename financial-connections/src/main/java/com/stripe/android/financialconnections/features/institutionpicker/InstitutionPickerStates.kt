@@ -26,6 +26,7 @@ internal class InstitutionPickerStates :
             searchMode = false,
             allowManualEntry = true,
         )
+
         // Search mode - searching institutions
         fun searchModeSearchingInstitutions() = InstitutionPickerState(
             payload = Success(payload()),

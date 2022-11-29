@@ -36,7 +36,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -65,7 +65,7 @@ internal fun ManualEntryScreen() {
         onAccountEntered = viewModel::onAccountEntered,
         onAccountConfirmEntered = viewModel::onAccountConfirmEntered,
         onSubmit = viewModel::onSubmit,
-    ) { parentViewModel.onCloseNoConfirmationClick(NextPane.MANUAL_ENTRY) }
+    ) { parentViewModel.onCloseNoConfirmationClick(Pane.MANUAL_ENTRY) }
 }
 
 @Suppress("LongMethod")

@@ -29,7 +29,7 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -83,7 +83,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             asyncProp = PartnerAuthState::payload,
             onSuccess = {
                 // launch auth for non-OAuth (skip pre-pane).
-                if (it.authSession.isOAuth.not()) launchAuthInBrowser()
+                if (!it.authSession.isOAuth) launchAuthInBrowser()
             }
         )
     }
@@ -93,9 +93,9 @@ internal class PartnerAuthViewModel @Inject constructor(
             PartnerAuthState::payload,
             onFail = {
                 logger.error("Error fetching payload / posting AuthSession", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(NextPane.PARTNER_AUTH, it))
+                eventTracker.track(FinancialConnectionsEvent.Error(Pane.PARTNER_AUTH, it))
             },
-            onSuccess = { eventTracker.track(PaneLoaded(NextPane.PARTNER_AUTH)) }
+            onSuccess = { eventTracker.track(PaneLoaded(Pane.PARTNER_AUTH)) }
         )
     }
 
@@ -114,7 +114,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 it.url?.let { setState { copy(viewEffect = OpenPartnerAuth(it)) } }
             }
             .onFailure {
-                eventTracker.track(FinancialConnectionsEvent.Error(NextPane.PARTNER_AUTH, it))
+                eventTracker.track(FinancialConnectionsEvent.Error(Pane.PARTNER_AUTH, it))
                 logger.error("failed retrieving active session from cache", it)
                 setState { copy(authenticationStatus = Fail(it)) }
             }
@@ -155,6 +155,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                     postAuthSessionEvent(authSession.id, AuthSessionEvent.Failure(Date(), error))
                     cancelAuthorizationSession(authSession.id)
                 }
+
                 else -> logger.debug("Could not find AuthSession to cancel.")
             }
             setState { copy(authenticationStatus = Fail(error)) }
@@ -207,7 +208,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 logger.debug("Session authorized!")
                 goNext(updatedSession.nextPane)
             } else {
-                goNext(NextPane.ACCOUNT_PICKER)
+                goNext(Pane.ACCOUNT_PICKER)
             }
         }.onFailure {
             logger.error("failed authorizing session", it)

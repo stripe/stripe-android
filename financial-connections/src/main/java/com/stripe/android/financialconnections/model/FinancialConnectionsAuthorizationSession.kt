@@ -20,13 +20,14 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Parcelize
+@Suppress("ConstructorParameterNaming")
 internal data class FinancialConnectionsAuthorizationSession(
 
     @SerialName(value = "id")
     val id: String,
 
     @SerialName(value = "next_pane")
-    val nextPane: FinancialConnectionsSessionManifest.NextPane,
+    val nextPane: FinancialConnectionsSessionManifest.Pane,
 
     @SerialName(value = "flow")
     val flow: Flow? = null,
@@ -47,9 +48,12 @@ internal data class FinancialConnectionsAuthorizationSession(
     val urlQrCode: String? = null,
 
     @SerialName(value = "is_oauth")
-    val isOAuth: Boolean,
+    private val _isOAuth: Boolean? = false
 
 ) : Parcelable {
+
+    val isOAuth: Boolean
+        get() = _isOAuth ?: false
 
     @Serializable(with = Flow.Serializer::class)
     enum class Flow(val value: String?) {

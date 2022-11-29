@@ -22,9 +22,10 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -45,8 +46,7 @@ internal class SuccessViewModel @Inject constructor(
 ) : MavericksViewModel<SuccessState>(initialState) {
 
     init {
-        logErrors()
-
+        observeAsyncs()
         suspend {
             val manifest = getManifest()
             SuccessState.Payload(
@@ -64,61 +64,74 @@ internal class SuccessViewModel @Inject constructor(
         }
     }
 
-    private fun logErrors() {
+    private fun observeAsyncs() {
         onAsync(
             SuccessState::payload,
             onFail = { logger.error("Error retrieving payload", it) },
-            onSuccess = { eventTracker.track(PaneLoaded(NextPane.SUCCESS)) }
+            onSuccess = { eventTracker.track(PaneLoaded(Pane.SUCCESS)) }
         )
-        onAsync(SuccessState::completeSession, onSuccess = {
-            eventTracker.track(
-                Complete(
-                    connectedAccounts = it.accounts.data.count(),
-                    exception = null
+        onAsync(
+            SuccessState::completeSession,
+            onSuccess = {
+                // Complete session succeeds, finish the AuthFlow with the received session.
+                eventTracker.track(
+                    Complete(
+                        connectedAccounts = it.accounts.data.count(),
+                        exception = null
+                    )
                 )
-            )
-        }, onFail = {
+                nativeAuthFlowCoordinator().emit(
+                    Message.Finish(
+                        Completed(
+                            financialConnectionsSession = it,
+                            token = it.parsedToken
+                        )
+                    )
+                )
+            },
+            // Complete session fails, finish the AuthFlow with the received error.
+            onFail = { error ->
                 eventTracker.track(
                     Complete(
                         connectedAccounts = null,
-                        exception = it
+                        exception = error
                     )
                 )
-                logger.error("Error completing session", it)
-            })
+                logger.error("Error completing session", error)
+                nativeAuthFlowCoordinator().emit(
+                    Message.Finish(
+                        Failed(error)
+                    )
+                )
+            }
+        )
     }
 
     fun onDoneClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickDone(NextPane.SUCCESS))
+            eventTracker.track(ClickDone(Pane.SUCCESS))
         }
         suspend {
-            completeFinancialConnectionsSession().also {
-                val result = Completed(
-                    financialConnectionsSession = it,
-                    token = it.parsedToken
-                )
-                nativeAuthFlowCoordinator().emit(Message.Finish(result))
-            }
+            completeFinancialConnectionsSession()
         }.execute { copy(completeSession = it) }
     }
 
     fun onLinkAnotherAccountClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickLinkAnotherAccount(NextPane.SUCCESS))
+            eventTracker.track(ClickLinkAnotherAccount(Pane.SUCCESS))
         }
         navigationManager.navigate(NavigationDirections.reset)
     }
 
     fun onLearnMoreAboutDataAccessClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickLearnMoreDataAccess(NextPane.SUCCESS))
+            eventTracker.track(ClickLearnMoreDataAccess(Pane.SUCCESS))
         }
     }
 
     fun onDisconnectLinkClick() {
         viewModelScope.launch {
-            eventTracker.track(ClickDisconnectLink(NextPane.SUCCESS))
+            eventTracker.track(ClickDisconnectLink(Pane.SUCCESS))
         }
     }
 

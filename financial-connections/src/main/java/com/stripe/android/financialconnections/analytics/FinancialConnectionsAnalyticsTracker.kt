@@ -33,7 +33,6 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
 
     override suspend fun track(event: FinancialConnectionsEvent): Result<Unit> {
         return runCatching {
-
             val eventParams: Map<out String, Any?> = event.params ?: emptyMap()
             val commonParams = commonParams()
             val request = requestFactory.createRequest(
