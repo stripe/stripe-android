@@ -264,7 +264,7 @@ internal fun PrepaneContentPreview() {
                         authSession = FinancialConnectionsAuthorizationSession(
                             flow = Flow.FINICITY_CONNECT_V2_OAUTH,
                             showPartnerDisclosure = true,
-                            isOAuth = true,
+                            _isOAuth = true,
                             nextPane = Pane.PARTNER_AUTH,
                             id = "1234"
                         ),

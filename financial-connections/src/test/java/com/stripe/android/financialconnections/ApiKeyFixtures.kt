@@ -62,7 +62,7 @@ internal object ApiKeyFixtures {
         skipAccountSelection = null,
         url = null,
         urlQrCode = null,
-        isOAuth = true
+        _isOAuth = true
     )
 
     fun partnerAccountList() = PartnerAccountsList(

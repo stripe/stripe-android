@@ -67,7 +67,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 isStripeDirect = manifest.isStripeDirect ?: false
             ).also {
                 // just send loaded event on OAuth flows (prepane). Non-OAuth handled by shim.
-                val loadedEvent: Loaded? = Loaded(Date()).takeIf { authSession.isOAuth ?: false }
+                val loadedEvent: Loaded? = Loaded(Date()).takeIf { authSession.isOAuth }
                 postAuthSessionEvent(
                     authSession.id,
                     listOfNotNull(launchedEvent, loadedEvent)
@@ -83,7 +83,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             asyncProp = PartnerAuthState::payload,
             onSuccess = {
                 // launch auth for non-OAuth (skip pre-pane).
-                if (it.authSession.isOAuth != true) launchAuthInBrowser()
+                if (!it.authSession.isOAuth) launchAuthInBrowser()
             }
         )
     }
@@ -170,7 +170,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             setState { copy(authenticationStatus = Loading()) }
             val authSession = requireNotNull(getManifest().activeAuthSession)
             val result = cancelAuthorizationSession(authSession.id)
-            if (authSession.isOAuth == true) {
+            if (authSession.isOAuth) {
                 // For OAuth institutions, create a new session and navigate to its nextPane (prepane).
                 logger.debug("Creating a new session for this OAuth institution")
                 // Send retry event as we're presenting the prepane again.
@@ -197,7 +197,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             setState { copy(authenticationStatus = Loading()) }
             val authSession = requireNotNull(getManifest().activeAuthSession)
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-            if (authSession.isOAuth == true) {
+            if (authSession.isOAuth) {
                 logger.debug("Web AuthFlow completed! waiting for oauth results")
                 val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
                 logger.debug("OAuth results received! completing session")
