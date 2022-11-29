@@ -28,14 +28,14 @@ class PaparazziRule(
 
     private val testCases: List<TestCase> = configOptions.toTestCases()
 
-    private val defaultDeviceConfig = DeviceConfig.PIXEL_6.copy(
-        softButtons = false,
-        screenHeight = 1,
-    )
-
+    private val defaultDeviceConfig = createPaparazziDeviceConfig()
     private val paparazzi = createPaparazzi(defaultDeviceConfig)
 
     private var description: Description? = null
+
+    init {
+        makePaparazziWorkForApi33()
+    }
 
     override fun apply(base: Statement, description: Description): Statement {
         this.description = description
@@ -57,7 +57,8 @@ class PaparazziRule(
         for (testCase in testCases) {
             testCase.initialize()
 
-            // TODO: Comment
+            // We need to update the entire Description to prevent Paparazzi from converting the
+            // name to lowercase.
             val newDescription = Description.createTestDescription(
                 description.className,
                 description.methodName + testCase.name,
@@ -87,12 +88,20 @@ class PaparazziRule(
         }
     }
 
-    private fun createPaparazzi(deviceConfig: DeviceConfig): Paparazzi {
-        makePaparazziWorkForApi33()
+    private fun createPaparazziDeviceConfig(): DeviceConfig {
+        return DeviceConfig.PIXEL_6.copy(
+            // Needed to shrink the screenshot to the height of the composable
+            screenHeight = 1,
+            softButtons = false,
+        )
+    }
 
+    private fun createPaparazzi(deviceConfig: DeviceConfig): Paparazzi {
         return Paparazzi(
             deviceConfig = deviceConfig,
+            // Needed to shrink the screenshot to the height of the composable
             renderingMode = SessionParams.RenderingMode.V_SCROLL,
+            // Needed to make Paparazzi work in our API 33 project for now
             environment = detectEnvironment().copy(
                 platformDir = "${androidHome()}/platforms/android-32",
                 compileSdkVersion = 32,
@@ -101,6 +110,8 @@ class PaparazziRule(
     }
 
     private fun makePaparazziWorkForApi33() {
+        // Temporary workaround to fix an issue with Paparazzi on API 33
+        // See: https://github.com/cashapp/paparazzi/issues/631#issuecomment-1326051546
         val field = Build.VERSION::class.java.getField("CODENAME")
         val newValue = "REL"
 
@@ -114,18 +125,18 @@ class PaparazziRule(
             set(null, newValue)
         }
     }
+}
 
-    private fun Array<out Array<out PaparazziConfigOption>>.toTestCases(): List<TestCase> {
-        return createPermutations(this).map { TestCase(it) }
-    }
+private fun Array<out Array<out PaparazziConfigOption>>.toTestCases(): List<TestCase> {
+    return createPermutations(this).map { TestCase(it) }
+}
 
-    private fun createPermutations(
-        options: Array<out Array<out PaparazziConfigOption>>,
-    ): List<List<PaparazziConfigOption>> {
-        @Suppress("UNCHECKED_CAST")
-        return (options.toSet()).fold(listOf(listOf())) { acc, set ->
-            acc.flatMap { list -> set.map { element -> list + element } }
-        }
+private fun createPermutations(
+    options: Array<out Array<out PaparazziConfigOption>>,
+): List<List<PaparazziConfigOption>> {
+    @Suppress("UNCHECKED_CAST")
+    return (options.toSet()).fold(listOf(listOf())) { acc, set ->
+        acc.flatMap { list -> set.map { element -> list + element } }
     }
 }
 
