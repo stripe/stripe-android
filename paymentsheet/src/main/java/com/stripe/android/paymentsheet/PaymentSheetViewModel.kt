@@ -59,7 +59,6 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -253,51 +252,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     },
                     activityResultLauncher = activityResultLauncher
                 )
-        }
-    }
-
-    /**
-     * Fetch the saved payment methods for the customer, if a [PaymentSheet.CustomerConfiguration]
-     * was provided.
-     * It will fetch only the payment method types as defined in [SupportedPaymentMethod.getSupportedSavedCustomerPMs].
-     */
-    @VisibleForTesting
-    @Deprecated("Remove before merging")
-    fun updatePaymentMethods(stripeIntent: StripeIntent) {
-        viewModelScope.launch {
-            runCatching {
-                customerConfig?.let { customerConfig ->
-                    getSupportedSavedCustomerPMs(
-                        stripeIntent,
-                        config,
-                        lpmResourceRepository.getRepository()
-                    ).mapNotNull {
-                        // The SDK is only able to parse customer LPMs
-                        // that are hard coded in the SDK.
-                        PaymentMethod.Type.fromCode(it.code)
-                    }.let {
-                        customerRepository.getPaymentMethods(
-                            customerConfig,
-                            it
-                        )
-                    }.filter { paymentMethod ->
-                        paymentMethod.hasExpectedDetails().also { valid ->
-                            if (!valid) {
-                                logger.error(
-                                    "Discarding invalid payment method ${paymentMethod.id}"
-                                )
-                            }
-                        }
-                    }
-                }.orEmpty()
-            }.fold(
-                onSuccess = {
-                    savedStateHandle[SAVE_PAYMENT_METHODS] = it
-                    setStripeIntent(stripeIntent)
-                    resetViewState()
-                },
-                onFailure = ::onFatal
-            )
         }
     }
 

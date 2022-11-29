@@ -304,7 +304,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                 injectorKey = starterArgs.injectorKey,
                 args = starterArgs
             ).apply {
-                updatePaymentMethods(fragmentConfig.stripeIntent)
                 setStripeIntent(fragmentConfig.stripeIntent)
                 idleLooper()
                 registerViewModel(starterArgs.injectorKey, this, lpmRepository, addressRepository)

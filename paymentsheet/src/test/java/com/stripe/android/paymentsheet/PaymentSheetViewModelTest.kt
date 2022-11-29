@@ -28,7 +28,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -39,7 +38,6 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
-import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -60,15 +58,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.anySet
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Captor
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
@@ -121,9 +113,6 @@ internal class PaymentSheetViewModelTest {
         visible = true
     )
 
-    @Captor
-    private lateinit var paymentMethodTypeCaptor: ArgumentCaptor<List<PaymentMethod.Type>>
-
     @BeforeTest
     fun setup() {
         MockitoAnnotations.openMocks(this)
@@ -141,74 +130,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `updatePaymentMethods() with customer config should fetch from API repository`() {
-        val viewModel = createViewModel()
-        var paymentMethods: List<PaymentMethod>? = null
-        viewModel.paymentMethods.observeForever {
-            paymentMethods = it
-        }
-        viewModel.updatePaymentMethods(PAYMENT_INTENT)
-        assertThat(paymentMethods)
-            .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-    }
-
-    @Test
-    fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
-        runTest {
-            val customerRepository = mock<CustomerRepository>()
-            val viewModel = createViewModel(
-                customerRepository = customerRepository
-            )
-            viewModel.updatePaymentMethods(
-                PAYMENT_INTENT.copy(
-                    paymentMethodTypes = listOf(
-                        PaymentMethod.Type.Card.code,
-                        PaymentMethod.Type.SepaDebit.code,
-                        PaymentMethod.Type.AuBecsDebit.code
-                    )
-                )
-            )
-            verify(customerRepository).getPaymentMethods(
-                any(),
-                capture(paymentMethodTypeCaptor)
-            )
-            assertThat(paymentMethodTypeCaptor.value)
-                .containsExactly(PaymentMethod.Type.Card)
-        }
-
-    @Test
-    fun `updatePaymentMethods() with customer config and failing request should emit empty list`() =
-        runTest {
-            val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-            val failingStripeRepository: StripeRepository = mock()
-            whenever(
-                failingStripeRepository.getPaymentMethods(
-                    any(),
-                    anyString(),
-                    anySet(),
-                    any()
-                )
-            ).doThrow(IllegalStateException("Request Failed"))
-
-            val viewModel = createViewModel(
-                customerRepository = CustomerApiRepository(
-                    stripeRepository = failingStripeRepository,
-                    lazyPaymentConfig = { paymentConfiguration },
-                    logger = Logger.getInstance(false),
-                    workContext = testDispatcher
-                )
-            )
-            var paymentMethods: List<PaymentMethod>? = null
-            viewModel.paymentMethods.observeForever {
-                paymentMethods = it
-            }
-            viewModel.updatePaymentMethods(PAYMENT_INTENT)
-            idleLooper()
-            assertThat(requireNotNull(paymentMethods))
-                .isEmpty()
-        }
-
-    @Test
     fun `removePaymentMethod triggers async removal`() = runTest {
         val customerRepository = spy(FakeCustomerRepository())
         val viewModel = createViewModel(
@@ -222,63 +143,6 @@ internal class PaymentSheetViewModelTest {
             any(),
             eq(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!)
         )
-    }
-
-    @Test
-    fun `updatePaymentMethods() without customer config should emit empty list`() {
-        val viewModelWithoutCustomer = createViewModel(ARGS_WITHOUT_CUSTOMER)
-        var paymentMethods: List<PaymentMethod>? = null
-        viewModelWithoutCustomer.paymentMethods.observeForever {
-            paymentMethods = it
-        }
-        viewModelWithoutCustomer.updatePaymentMethods(PAYMENT_INTENT)
-        assertThat(paymentMethods)
-            .isEmpty()
-    }
-
-    @Test
-    fun `updatePaymentMethods() should fetch only supported payment method types`() =
-        runTest {
-            val paymentMethodsRepository = mock<CustomerRepository>()
-            val viewModel = createViewModel(
-                customerRepository = paymentMethodsRepository
-            )
-            val stripeIntent = PAYMENT_INTENT.copy(
-                paymentMethodTypes = listOf(
-                    "card", // valid and supported
-                    "fpx", // valid but not supported
-                    "invalid_type" // unknown type
-                )
-            )
-
-            viewModel.updatePaymentMethods(stripeIntent)
-            verify(paymentMethodsRepository).getPaymentMethods(
-                any(),
-                capture(paymentMethodTypeCaptor)
-            )
-            assertThat(paymentMethodTypeCaptor.value)
-                .containsExactly(PaymentMethod.Type.Card)
-        }
-
-    @Test
-    fun `updatePaymentMethods() should filter out invalid payment method types`() {
-        val viewModel = createViewModel(
-            customerRepository = FakeCustomerRepository(
-                listOf(
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(card = null), // invalid
-                    PaymentMethodFixtures.CARD_PAYMENT_METHOD
-                )
-            )
-        )
-
-        var paymentMethods: List<PaymentMethod>? = null
-        viewModel.paymentMethods.observeForever {
-            paymentMethods = it
-        }
-
-        viewModel.updatePaymentMethods(PAYMENT_INTENT)
-        assertThat(paymentMethods)
-            .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }
 
     @Test
