@@ -9,6 +9,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
@@ -67,6 +68,13 @@ class AddPaymentMethodActivityTest {
             "acct_12345"
         )
         CustomerSession.instance = customerSession
+    }
+
+    @Test
+    fun testActivityIsFinishedWhenNoArgsPassed() {
+        activityScenarioFactory.create<AddPaymentMethodActivity>().use { activityScenario ->
+            assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        }
     }
 
     @Test
