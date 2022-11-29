@@ -1,4 +1,4 @@
-package com.stripe.android.paymentmethodmessage.view
+package com.stripe.android.paymentmethodmessaging.view
 
 import android.app.Application
 import androidx.lifecycle.ViewModel
@@ -8,14 +8,14 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.paymentmethodmessage.view.injection.DaggerPaymentMethodMessageComponent
+import com.stripe.android.paymentmethodmessaging.view.injection.DaggerPaymentMethodMessagingComponent
 import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.utils.requireApplication
 import javax.inject.Inject
 
-internal class PaymentMethodMessageViewModel @Inject constructor(
+internal class PaymentMethodMessagingViewModel @Inject constructor(
     private val application: Application,
-    private val configuration: PaymentMethodMessageView.Configuration,
+    private val configuration: PaymentMethodMessagingView.Configuration,
     private val stripeApiRepository: StripeApiRepository
 ) : ViewModel() {
     suspend fun loadMessage(): Result<PaymentMethodMessage> {
@@ -27,9 +27,9 @@ internal class PaymentMethodMessageViewModel @Inject constructor(
                 country = configuration.countryCode,
                 locale = configuration.locale.toLanguageTag(),
                 logoColor = configuration.imageColor?.value ?: if (application.isSystemDarkTheme()) {
-                    PaymentMethodMessageView.Configuration.ImageColor.Light.value
+                    PaymentMethodMessagingView.Configuration.ImageColor.Light.value
                 } else {
-                    PaymentMethodMessageView.Configuration.ImageColor.Dark.value
+                    PaymentMethodMessagingView.Configuration.ImageColor.Dark.value
                 },
                 requestOptions = ApiRequest.Options(configuration.publishableKey),
             )
@@ -48,12 +48,12 @@ internal class PaymentMethodMessageViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val configurationProvider: () -> PaymentMethodMessageView.Configuration
+        private val configurationProvider: () -> PaymentMethodMessagingView.Configuration
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val application = extras.requireApplication()
-            return DaggerPaymentMethodMessageComponent.builder()
+            return DaggerPaymentMethodMessagingComponent.builder()
                 .application(application)
                 .configuration(configurationProvider())
                 .build()

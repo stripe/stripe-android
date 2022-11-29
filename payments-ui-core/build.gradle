@@ -18,7 +18,6 @@ dependencies {
     implementation "com.google.android.material:material:$materialVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
     kapt "com.google.dagger:dagger-compiler:$daggerVersion"
-    implementation "androidx.browser:browser:$androidxBrowserVersion"
 
     implementation "androidx.compose.ui:ui:$androidxComposeVersion"
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
@@ -28,7 +27,6 @@ dependencies {
     // Material design icons
     implementation "androidx.compose.material:material-icons-core:$androidxComposeVersion"
     // Integration with activities
-    implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
     implementation "androidx.activity:activity-compose:$androidxActivityVersion"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"

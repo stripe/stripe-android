@@ -1,4 +1,4 @@
-package com.stripe.android.paymentmethodmessage.view
+package com.stripe.android.paymentmethodmessaging.view
 
 import android.graphics.Bitmap
 import com.stripe.android.model.PaymentMethodMessage
@@ -6,10 +6,10 @@ import com.stripe.android.model.PaymentMethodMessage
 /**
  * Contains the data needed to render the message view. It should not be constructed. When
  * initializing a compose view using [rememberMessagingState], pass this class to the
- * [PaymentMethodMessage] composable view.
+ * [PaymentMethodMessaging] composable view.
  */
-internal data class PaymentMethodMessageData internal constructor(
+internal data class PaymentMethodMessagingData internal constructor(
     val message: PaymentMethodMessage,
     val images: Map<String, Bitmap>,
-    val config: PaymentMethodMessageView.Configuration
+    val config: PaymentMethodMessagingView.Configuration
 )

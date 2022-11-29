@@ -1,4 +1,4 @@
-package com.stripe.android.paymentmethodmessage.view
+package com.stripe.android.paymentmethodmessaging.view
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -41,7 +41,6 @@ import androidx.core.text.HtmlCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
@@ -54,7 +53,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.stripe.android.paymentmethodmessage.view.theme.Color as PaymentMethodMessageColor
+import com.stripe.android.paymentmethodmessaging.view.theme.Color as PaymentMethodMessageColor
 
 /**
  * A view that displays promotional text and images for payment methods like Afterpay and Klarna.
@@ -65,7 +64,7 @@ import com.stripe.android.paymentmethodmessage.view.theme.Color as PaymentMethod
  * You can embed this into your checkout or product screens to promote payment method options to
  * your customer.
  *
- * Note: You must initialize this view with [PaymentMethodMessageView.load]. For example:
+ * Note: You must initialize this view with [PaymentMethodMessagingView.load]. For example:
  *
  * PaymentMethodMessagingView.load(
  *     config = config,
@@ -77,19 +76,19 @@ import com.stripe.android.paymentmethodmessage.view.theme.Color as PaymentMethod
  *     }
  * )
  */
-internal class PaymentMethodMessageView @JvmOverloads constructor(
+internal class PaymentMethodMessagingView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : AbstractComposeView(context, attrs, defStyleAttr) {
-    private val data = MutableStateFlow<PaymentMethodMessageData?>(null)
+    private val data = MutableStateFlow<PaymentMethodMessagingData?>(null)
     private var job: Job? = null
     private val stripeImageLoader = StripeImageLoader(context)
 
     @Composable
     override fun Content() {
         data.collectAsState().value?.let { data ->
-            PaymentMethodMessage(
+            PaymentMethodMessaging(
                 data = data
             )
         }
@@ -100,17 +99,17 @@ internal class PaymentMethodMessageView @JvmOverloads constructor(
         onSuccess: () -> Unit,
         onFailure: (Throwable) -> Unit
     ) {
-        val viewModel: PaymentMethodMessageViewModel = ViewModelProvider(
+        val viewModel: PaymentMethodMessagingViewModel = ViewModelProvider(
             context as ViewModelStoreOwner,
-            PaymentMethodMessageViewModel.Factory { config }
-        )[PaymentMethodMessageViewModel::class.java]
+            PaymentMethodMessagingViewModel.Factory { config }
+        )[PaymentMethodMessagingViewModel::class.java]
         job = CoroutineScope(Dispatchers.IO).launch {
             try {
                 val message = viewModel.loadMessage()
                 message.fold(
                     onSuccess = {
                         withContext(Dispatchers.Main) {
-                            data.value = PaymentMethodMessageData(
+                            data.value = PaymentMethodMessagingData(
                                 message = it,
                                 images = it.displayHtml.getBitmaps(this, stripeImageLoader),
                                 config = config
@@ -201,28 +200,28 @@ internal class PaymentMethodMessageView @JvmOverloads constructor(
 }
 
 /**
- * Returns a stateful [PaymentMethodMessageResult] used for displaying a [PaymentMethodMessage]
+ * Returns a stateful [PaymentMethodMessagingResult] used for displaying a [PaymentMethodMessaging]
  *
- * @param config The [PaymentMethodMessageView.Configuration] for the view
+ * @param config The [PaymentMethodMessagingView.Configuration] for the view
  */
 @Composable
 internal fun rememberMessagingState(
-    config: PaymentMethodMessageView.Configuration
-): State<PaymentMethodMessageResult> {
+    config: PaymentMethodMessagingView.Configuration
+): State<PaymentMethodMessagingResult> {
     val context = LocalContext.current
     val composeState = remember {
-        mutableStateOf<PaymentMethodMessageResult>(PaymentMethodMessageResult.Loading)
+        mutableStateOf<PaymentMethodMessagingResult>(PaymentMethodMessagingResult.Loading)
     }
-    val viewModel: PaymentMethodMessageViewModel = viewModel(
-        factory = PaymentMethodMessageViewModel.Factory { config }
+    val viewModel: PaymentMethodMessagingViewModel = viewModel(
+        factory = PaymentMethodMessagingViewModel.Factory { config }
     )
     val imageLoader = remember(context) { StripeImageLoader(context) }
 
     LaunchedEffect(config) {
         viewModel.loadMessage().fold(
             onSuccess = {
-                composeState.value = PaymentMethodMessageResult.Success(
-                    data = PaymentMethodMessageData(
+                composeState.value = PaymentMethodMessagingResult.Success(
+                    data = PaymentMethodMessagingData(
                         message = it,
                         images = it.displayHtml.getBitmaps(this, imageLoader),
                         config = config
@@ -230,7 +229,7 @@ internal fun rememberMessagingState(
                 )
             },
             onFailure = {
-                composeState.value = PaymentMethodMessageResult.Failure(it)
+                composeState.value = PaymentMethodMessagingResult.Failure(it)
             }
         )
     }
@@ -259,12 +258,12 @@ internal fun rememberMessagingState(
  * }
  *
  * @param modifier The [Modifier] for this Composable view
- * @param data The [PaymentMethodMessageData] required to render this Composable view
+ * @param data The [PaymentMethodMessagingData] required to render this Composable view
  */
 @Composable
-internal fun PaymentMethodMessage(
+internal fun PaymentMethodMessaging(
     modifier: Modifier = Modifier,
-    data: PaymentMethodMessageData
+    data: PaymentMethodMessagingData
 ) {
     val context = LocalContext.current
 

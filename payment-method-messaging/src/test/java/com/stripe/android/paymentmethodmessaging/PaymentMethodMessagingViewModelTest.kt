@@ -1,10 +1,10 @@
-package com.stripe.android.paymentmethodmessage
+package com.stripe.android.paymentmethodmessaging
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.paymentmethodmessage.view.PaymentMethodMessageView
-import com.stripe.android.paymentmethodmessage.view.PaymentMethodMessageViewModel
+import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingView
+import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -13,16 +13,16 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class PaymentMethodMessageViewModelTest {
+class PaymentMethodMessagingViewModelTest {
     private val stripeApiRepository = mock<StripeApiRepository>()
-    private val viewModel = PaymentMethodMessageViewModel(
+    private val viewModel = PaymentMethodMessagingViewModel(
         application = mock(),
-        configuration = PaymentMethodMessageView.Configuration(
+        configuration = PaymentMethodMessagingView.Configuration(
             publishableKey = "publishableKey",
             paymentMethods = setOf(),
             currency = "currency",
             amount = 999,
-            imageColor = PaymentMethodMessageView.Configuration.ImageColor.Color
+            imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
         ),
         stripeApiRepository = stripeApiRepository
     )

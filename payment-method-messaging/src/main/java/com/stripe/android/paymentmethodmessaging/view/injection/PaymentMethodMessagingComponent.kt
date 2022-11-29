@@ -1,10 +1,10 @@
-package com.stripe.android.paymentmethodmessage.view.injection
+package com.stripe.android.paymentmethodmessaging.view.injection
 
 import android.app.Application
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.paymentmethodmessage.view.PaymentMethodMessageView
-import com.stripe.android.paymentmethodmessage.view.PaymentMethodMessageViewModel
+import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingView
+import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingViewModel
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -14,15 +14,15 @@ import javax.inject.Singleton
 @Component(
     modules = [
         CoroutineContextModule::class,
-        PaymentMethodMessageModule::class,
+        PaymentMethodMessagingModule::class,
         StripeRepositoryModule::class,
         CoreCommonModule::class
     ]
 )
-internal interface PaymentMethodMessageComponent {
-    val viewModel: PaymentMethodMessageViewModel
+internal interface PaymentMethodMessagingComponent {
+    val viewModel: PaymentMethodMessagingViewModel
 
-    fun inject(factory: PaymentMethodMessageViewModel.Factory)
+    fun inject(factory: PaymentMethodMessagingViewModel.Factory)
 
     @Component.Builder
     interface Builder {
@@ -30,8 +30,8 @@ internal interface PaymentMethodMessageComponent {
         fun application(application: Application): Builder
 
         @BindsInstance
-        fun configuration(configuration: PaymentMethodMessageView.Configuration): Builder
+        fun configuration(configuration: PaymentMethodMessagingView.Configuration): Builder
 
-        fun build(): PaymentMethodMessageComponent
+        fun build(): PaymentMethodMessagingComponent
     }
 }

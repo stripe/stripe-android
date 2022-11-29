@@ -1,4 +1,4 @@
-package com.stripe.android.paymentmethodmessage.view.theme
+package com.stripe.android.paymentmethodmessaging.view.theme
 
 import androidx.compose.ui.graphics.Color
 
