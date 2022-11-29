@@ -35,7 +35,7 @@ internal class BackendApiFactory(private val settings: Settings) {
     }
 
     private companion object {
-        private const val TIMEOUT_SECONDS = 15L
+        private const val TIMEOUT_SECONDS = 30L
     }
 }
 

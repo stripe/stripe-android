@@ -23,13 +23,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.edit
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheetForToken
 
+@OptIn(ExperimentalComposeUiApi::class)
 class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<FinancialConnectionsPlaygroundViewModel>()
@@ -57,7 +62,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         )
 
         val financialConnectionsSheetForToken = rememberFinancialConnectionsSheetForToken(
-                viewModel::onFinancialConnectionsSheetForTokenResult
+            viewModel::onFinancialConnectionsSheetForTokenResult
         )
 
         LaunchedEffect(viewEffect) {
@@ -143,6 +148,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         ) {
             radioOptions.forEach { text ->
                 RadioButton(
+                    modifier = Modifier
+                        .semantics { testTagsAsResourceId = true }
+                        .testTag("${text.name}_checkbox"),
                     selected = (text == selectedOption),
                     onClick = { onOptionSelected(text) }
                 )
@@ -168,6 +176,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         ) {
             Mode.values().forEach { text ->
                 RadioButton(
+                    modifier = Modifier
+                        .semantics { testTagsAsResourceId = true }
+                        .testTag("${text.name}_checkbox"),
                     selected = (text == selectedOption),
                     onClick = { onOptionSelected(text) }
                 )
@@ -193,6 +204,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         ) {
             Flow.values().forEach { text ->
                 RadioButton(
+                    modifier = Modifier
+                        .semantics { testTagsAsResourceId = true }
+                        .testTag("${text.name}_checkbox"),
                     selected = (text == selectedOption),
                     onClick = { onOptionSelected(text) }
                 )

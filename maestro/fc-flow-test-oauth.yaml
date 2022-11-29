@@ -2,11 +2,17 @@ appId: com.stripe.android.financialconnections.example
 ---
 - launchApp
 # Android specific: Navigate to example (1)
-- tapOn: "Collect account for data"
+- tapOn: "Playground"
 
 # Android specific: Navigate to example (2)
 - takeScreenshot: TestOAuth_ExampleAppLauncher
-- tapOn: "CONNECT AN ACCOUNT"
+- tapOn:
+    id: "Native_checkbox"
+- tapOn:
+    id: "Test_checkbox"
+- tapOn:
+    id: "Data_checkbox"
+- tapOn: "Connect Accounts!"
 
 # Common: web AuthFlow - connect OAuth institution
 - assertVisible: "Agree"
@@ -36,4 +42,5 @@ appId: com.stripe.android.financialconnections.example
 - assertVisible: "Link another account"
 - takeScreenshot: TestOAuth_Success
 - tapOn: "Done"
-- assertVisible: ".*StripeBank - Success.*"
+- assertVisible: ".*Completed!.*"
+- assertVisible: ".*StripeBank.*"
