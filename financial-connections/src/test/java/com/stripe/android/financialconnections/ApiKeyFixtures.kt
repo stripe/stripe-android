@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections
 
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
@@ -16,6 +18,18 @@ internal object ApiKeyFixtures {
     fun syncResponse() = SynchronizeSessionResponse(
         manifest = sessionManifest(),
         text = null
+    )
+
+    fun financialConnectionsSessionNoAccounts() = FinancialConnectionsSession(
+        clientSecret = "las_1234567890",
+        id = DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
+        accounts = FinancialConnectionsAccountList(
+            data = emptyList(),
+            hasMore = false,
+            url = "url",
+            count = 0
+        ),
+        livemode = true
     )
 
     fun sessionManifest() = FinancialConnectionsSessionManifest(

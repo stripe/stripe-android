@@ -71,6 +71,7 @@ dependencies {
     testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
     testImplementation "org.robolectric:robolectric:$robolectricVersion"
     testImplementation testLibs.mavericks
+    testImplementation testLibs.turbine
 
     androidTestImplementation "com.airbnb.android:showkase-screenshot-testing-shot:$showkaseVersion"
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
