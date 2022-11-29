@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.addresselement.AddressElementPrimaryButton
 import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
@@ -20,14 +22,18 @@ class AddressElementPrimaryButtonScreenshotTest {
 
     @Test
     fun testEnabled() {
-        paparazziRule.snapshot {
+        paparazziRule.snapshot(
+            padding = PaddingValues(horizontal = 16.dp),
+        ) {
             AddressElementPrimaryButton(isEnabled = true, BUTTON_TEXT, onButtonClick = {})
         }
     }
 
     @Test
     fun testDisabled() {
-        paparazziRule.snapshot {
+        paparazziRule.snapshot(
+            padding = PaddingValues(horizontal = 16.dp),
+        ) {
             AddressElementPrimaryButton(isEnabled = false, BUTTON_TEXT, onButtonClick = {})
         }
     }

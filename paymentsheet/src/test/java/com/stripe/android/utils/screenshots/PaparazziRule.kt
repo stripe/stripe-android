@@ -1,25 +1,26 @@
 package com.stripe.android.utils.screenshots
 
-import android.graphics.Color
 import android.os.Build
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import app.cash.paparazzi.androidHome
 import app.cash.paparazzi.detectEnvironment
 import com.android.ide.common.rendering.api.SessionParams
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.ui.core.PaymentsTheme
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 import java.lang.reflect.Field
-import java.lang.reflect.Modifier
+import java.lang.reflect.Modifier as ReflectionModifier
 
 class PaparazziRule(
     private vararg val configOptions: Array<out PaparazziConfigOption>,
@@ -39,7 +40,10 @@ class PaparazziRule(
         return paparazzi.apply(base, description)
     }
 
-    fun snapshot(content: @Composable () -> Unit) {
+    fun snapshot(
+        padding: PaddingValues = PaddingValues(vertical = 16.dp),
+        content: @Composable () -> Unit,
+    ) {
         // This is to close the prepare done as part of the apply.
         // We need symmetric calls to prepare/close.
         paparazzi.close()
@@ -71,6 +75,7 @@ class PaparazziRule(
                     Surface(color = MaterialTheme.colors.surface) {
                         Box(
                             contentAlignment = Alignment.Center,
+                            modifier = Modifier.padding(padding),
                         ) {
                             content()
                         }
@@ -111,7 +116,7 @@ class PaparazziRule(
 
         Field::class.java.getDeclaredField("modifiers").apply {
             isAccessible = true
-            setInt(field, field.modifiers and Modifier.FINAL.inv())
+            setInt(field, field.modifiers and ReflectionModifier.FINAL.inv())
         }
 
         field.apply {
