@@ -46,7 +46,7 @@ constructor(
         this.imageLoader = imageLoader
     }
 
-    suspend fun iconDrawable(): Drawable {
+    suspend fun fetchIcon(): Drawable {
         return imageLoader(this)
     }
 }

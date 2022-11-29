@@ -37,7 +37,6 @@ import com.stripe.android.paymentsheet.example.playground.model.Shipping
 import com.stripe.android.paymentsheet.example.playground.model.Toggle
 import com.stripe.android.paymentsheet.example.playground.viewmodel.PaymentSheetPlaygroundViewModel
 import com.stripe.android.paymentsheet.model.PaymentOption
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -540,7 +539,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         if (paymentOption != null) {
             viewBinding.paymentMethod.text = paymentOption.label
             lifecycleScope.launch {
-                val iconDrawable = paymentOption.iconDrawable()
+                val iconDrawable = paymentOption.fetchIcon()
                 viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
                     iconDrawable,
                     null,
