@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -42,6 +44,7 @@ private object Spacing {
     val cardLeadingInnerPadding = 12.dp
     val carouselOuterPadding = 20.dp
     val carouselInnerPadding = 12.dp
+    val iconSize = 22.dp
 }
 
 @VisibleForTesting
@@ -225,7 +228,7 @@ private fun PaymentMethodIconUi(
     tintOnSelected: Boolean,
     color: Color,
 ) {
-    val colorFilter = if (tintOnSelected) ColorFilter.tint(color) else null
+    val colorFilter = remember { if (tintOnSelected) ColorFilter.tint(color) else null }
 
     if (iconUrl != null) {
         StripeImage(
@@ -236,7 +239,13 @@ private fun PaymentMethodIconUi(
             modifier = Modifier.padding(
                 top = Spacing.cardLeadingInnerPadding / 2,
                 start = Spacing.cardLeadingInnerPadding / 2,
-            )
+            ),
+            loadingContent = {
+                Spacer(Modifier.size(Spacing.iconSize))
+            },
+            errorContent = {
+                Spacer(Modifier.size(Spacing.iconSize))
+            },
         )
     } else {
         Image(

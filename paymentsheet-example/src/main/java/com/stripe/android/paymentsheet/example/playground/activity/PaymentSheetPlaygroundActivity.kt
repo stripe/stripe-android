@@ -541,15 +541,13 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             viewBinding.paymentMethod.text = paymentOption.label
             lifecycleScope.launch {
                 val iconDrawable = paymentOption.iconDrawable()
-                launch(Dispatchers.Main) {
-                    viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                        iconDrawable,
-                        null,
-                        null,
-                        null
-                    )
-                    viewBinding.customCheckoutButton.isEnabled = true
-                }
+                viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    iconDrawable,
+                    null,
+                    null,
+                    null
+                )
+                viewBinding.customCheckoutButton.isEnabled = true
             }
         } else {
             viewBinding.paymentMethod.setText(R.string.select)
