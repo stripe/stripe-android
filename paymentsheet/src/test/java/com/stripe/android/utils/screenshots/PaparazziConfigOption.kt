@@ -15,13 +15,12 @@ interface PaparazziConfigOption {
 }
 
 enum class SystemAppearance : PaparazziConfigOption {
-    Light, Dark;
+    LightTheme, DarkTheme;
 }
 
 enum class FontSize(val scaleFactor: Float) : PaparazziConfigOption {
-    Default(scaleFactor = 1f),
-    Large(scaleFactor = 1.2f),
-    ExtraLarge(scaleFactor = 1.5f);
+    DefaultFont(scaleFactor = 1f),
+    LargeFont(scaleFactor = 1.5f);
 
     override fun apply(deviceConfig: DeviceConfig): DeviceConfig {
         return deviceConfig.copy(
@@ -32,9 +31,9 @@ enum class FontSize(val scaleFactor: Float) : PaparazziConfigOption {
 
 enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : PaparazziConfigOption {
 
-    Default(appearance = PaymentSheet.Appearance()),
+    DefaultAppearance(appearance = PaymentSheet.Appearance()),
 
-    Custom(
+    CustomAppearance(
         appearance = PaymentSheet.Appearance(
             colorsLight = PaymentSheet.Colors.defaultLight.copy(
                 primary = Color.RED,
@@ -48,7 +47,7 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
         ),
     ),
 
-    Crazy(
+    CrazyAppearance(
         appearance = PaymentSheet.Appearance(
             colorsLight = PaymentSheet.Colors(
                 primary = Color.MAGENTA,

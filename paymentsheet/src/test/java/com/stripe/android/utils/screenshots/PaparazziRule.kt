@@ -50,21 +50,28 @@ class PaparazziRule(
         // We need symmetric calls to prepare/close.
         paparazzi.close()
 
+        val description = requireNotNull(description) {
+            "Description in PaparazziRule can't be null"
+        }
+
         for (testCase in testCases) {
             testCase.initialize()
 
-            paparazzi.prepare(description!!)
+            // TODO: Comment
+            val newDescription = Description.createTestDescription(
+                description.className,
+                description.methodName + testCase.name,
+            )
+
+            paparazzi.prepare(newDescription)
 
             val deviceConfig = testCase.apply(defaultDeviceConfig)
             if (deviceConfig != defaultDeviceConfig) {
                 paparazzi.unsafeUpdateConfig(deviceConfig)
             }
 
-            val name = testCase.name(description)
-            paparazzi.snapshot(name) {
-                PaymentsTheme(
-                    colors = PaymentsTheme.getColors(testCase.isDark),
-                ) {
+            paparazzi.snapshot {
+                PaymentsTheme(colors = PaymentsTheme.getColors(testCase.isDarkTheme)) {
                     Surface(color = MaterialTheme.colors.surface) {
                         Box(
                             contentAlignment = Alignment.Center,
@@ -77,16 +84,6 @@ class PaparazziRule(
             }
 
             paparazzi.close()
-        }
-    }
-
-    private fun generateName(options: List<PaparazziConfigOption>): String? {
-        val optionsSuffix = options.joinToString(separator = ", ") { option ->
-            "${option::class.java.simpleName}=$option"
-        }
-
-        return description?.let {
-            "${it.className}_${it.methodName}_[$optionsSuffix]"
         }
     }
 
@@ -136,8 +133,14 @@ private data class TestCase(
     val configOptions: List<PaparazziConfigOption>,
 ) {
 
-    val isDark: Boolean
-        get() = configOptions.find { it is SystemAppearance } == SystemAppearance.Dark
+    val isDarkTheme: Boolean
+        get() = configOptions.find { it is SystemAppearance } == SystemAppearance.DarkTheme
+
+    val name: String
+        get() {
+            val optionsSuffix = configOptions.joinToString(separator = ",") { it.toString() }
+            return "[$optionsSuffix]"
+        }
 
     fun initialize() {
         configOptions.forEach { it.initialize() }
@@ -146,16 +149,6 @@ private data class TestCase(
     fun apply(deviceConfig: DeviceConfig): DeviceConfig {
         return configOptions.fold(deviceConfig) { acc, option ->
             option.apply(acc)
-        }
-    }
-
-    fun name(description: Description?): String? {
-        val optionsSuffix = configOptions.joinToString(separator = ", ") { option ->
-            "${option::class.java.simpleName}=$option"
-        }
-
-        return description?.let {
-            "${it.className}_${it.methodName}_[$optionsSuffix]"
         }
     }
 }

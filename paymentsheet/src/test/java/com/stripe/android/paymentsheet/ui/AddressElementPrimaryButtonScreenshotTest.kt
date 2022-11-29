@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.addresselement.AddressElementPrimaryButton
+import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import com.stripe.android.utils.screenshots.SystemAppearance
@@ -17,7 +18,7 @@ class AddressElementPrimaryButtonScreenshotTest {
     val paparazziRule = PaparazziRule(
         SystemAppearance.values(),
         PaymentSheetAppearance.values(),
-//        FontSize.values(),
+        FontSize.values(),
     )
 
     @Test
