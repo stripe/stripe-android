@@ -15,20 +15,21 @@ import org.mockito.kotlin.whenever
 @OptIn(ExperimentalCoroutinesApi::class)
 class PaymentMethodMessagingViewModelTest {
     private val stripeApiRepository = mock<StripeApiRepository>()
-    private val viewModel = PaymentMethodMessagingViewModel(
-        application = mock(),
-        configuration = PaymentMethodMessagingView.Configuration(
-            publishableKey = "publishableKey",
-            paymentMethods = setOf(),
-            currency = "currency",
-            amount = 999,
-            imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
-        ),
-        stripeApiRepository = stripeApiRepository
-    )
 
     @Test
     fun `when valid message, loadMessage returns success`() = runTest {
+        val viewModel = PaymentMethodMessagingViewModel(
+            isSystemDarkTheme = false,
+            configuration = PaymentMethodMessagingView.Configuration(
+                publishableKey = "publishableKey",
+                paymentMethods = setOf(),
+                currency = "currency",
+                amount = 999,
+                imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
+            ),
+            stripeApiRepository = stripeApiRepository
+        )
+
         returnsPaymentMethodMessage(
             displayHtml = "some html",
             learnMoreUrl = "some url"
@@ -45,6 +46,18 @@ class PaymentMethodMessagingViewModelTest {
 
     @Test
     fun `when html is empty, loadMessage returns failure`() = runTest {
+        val viewModel = PaymentMethodMessagingViewModel(
+            isSystemDarkTheme = false,
+            configuration = PaymentMethodMessagingView.Configuration(
+                publishableKey = "publishableKey",
+                paymentMethods = setOf(),
+                currency = "currency",
+                amount = 999,
+                imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
+            ),
+            stripeApiRepository = stripeApiRepository
+        )
+
         returnsPaymentMethodMessage(
             displayHtml = "",
             learnMoreUrl = "a"
@@ -59,6 +72,18 @@ class PaymentMethodMessagingViewModelTest {
 
     @Test
     fun `when url is empty, loadMessage returns failure`() = runTest {
+        val viewModel = PaymentMethodMessagingViewModel(
+            isSystemDarkTheme = false,
+            configuration = PaymentMethodMessagingView.Configuration(
+                publishableKey = "publishableKey",
+                paymentMethods = setOf(),
+                currency = "currency",
+                amount = 999,
+                imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
+            ),
+            stripeApiRepository = stripeApiRepository
+        )
+
         returnsPaymentMethodMessage(
             displayHtml = "a",
             learnMoreUrl = ""

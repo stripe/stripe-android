@@ -41,6 +41,7 @@ import androidx.core.text.HtmlCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
@@ -64,7 +65,7 @@ import com.stripe.android.paymentmethodmessaging.view.theme.Color as PaymentMeth
  * You can embed this into your checkout or product screens to promote payment method options to
  * your customer.
  *
- * Note: You must initialize this view with [PaymentMethodMessagingView.load]. For example:
+ * **Note**: You must initialize this view with [PaymentMethodMessagingView.load]. For example:
  *
  * PaymentMethodMessagingView.load(
  *     config = config,
@@ -101,7 +102,10 @@ internal class PaymentMethodMessagingView @JvmOverloads constructor(
     ) {
         val viewModel: PaymentMethodMessagingViewModel = ViewModelProvider(
             context as ViewModelStoreOwner,
-            PaymentMethodMessagingViewModel.Factory { config }
+            PaymentMethodMessagingViewModel.Factory(
+                { config },
+                { context.isSystemDarkTheme() }
+            )
         )[PaymentMethodMessagingViewModel::class.java]
         job = CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -151,7 +155,7 @@ internal class PaymentMethodMessagingView @JvmOverloads constructor(
         internal val currency: String,
 
         /**
-         * The purchase amount, in the smallest currency unit. e.g. 100 for $1 USD.
+         * The purchase amount in the smallest currency unit, e.g. 100 for $1 USD.
          */
         internal val amount: Int,
 
@@ -213,7 +217,10 @@ internal fun rememberMessagingState(
         mutableStateOf<PaymentMethodMessagingResult>(PaymentMethodMessagingResult.Loading)
     }
     val viewModel: PaymentMethodMessagingViewModel = viewModel(
-        factory = PaymentMethodMessagingViewModel.Factory { config }
+        factory = PaymentMethodMessagingViewModel.Factory(
+            { config },
+            { context.isSystemDarkTheme() }
+        )
     )
     val imageLoader = remember(context) { StripeImageLoader(context) }
 
@@ -240,7 +247,7 @@ internal fun rememberMessagingState(
 /**
  * A Composable that displays promotional text and images for payment methods like Afterpay and Klarna.
  * For example, "As low as 4 interest-free-payments of $9.75". When tapped, this view presents a
- * full-screen Custom Chrome Tab to the customer with additional information ont he payment methods
+ * full-screen Chrome Custom Tab to the customer with additional information about the payment methods
  * being displayed.
  *
  * You can embed this into your checkout or product screens to promote payment method options to

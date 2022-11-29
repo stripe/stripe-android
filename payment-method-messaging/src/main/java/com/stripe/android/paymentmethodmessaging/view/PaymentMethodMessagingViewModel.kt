@@ -1,6 +1,5 @@
 package com.stripe.android.paymentmethodmessaging.view
 
-import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -9,12 +8,11 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.paymentmethodmessaging.view.injection.DaggerPaymentMethodMessagingComponent
-import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.utils.requireApplication
 import javax.inject.Inject
 
 internal class PaymentMethodMessagingViewModel @Inject constructor(
-    private val application: Application,
+    private val isSystemDarkTheme: Boolean,
     private val configuration: PaymentMethodMessagingView.Configuration,
     private val stripeApiRepository: StripeApiRepository
 ) : ViewModel() {
@@ -26,7 +24,7 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
                 currency = configuration.currency,
                 country = configuration.countryCode,
                 locale = configuration.locale.toLanguageTag(),
-                logoColor = configuration.imageColor?.value ?: if (application.isSystemDarkTheme()) {
+                logoColor = configuration.imageColor?.value ?: if (isSystemDarkTheme) {
                     PaymentMethodMessagingView.Configuration.ImageColor.Light.value
                 } else {
                     PaymentMethodMessagingView.Configuration.ImageColor.Dark.value
@@ -48,7 +46,8 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val configurationProvider: () -> PaymentMethodMessagingView.Configuration
+        private val configurationProvider: () -> PaymentMethodMessagingView.Configuration,
+        private val isSystemDarkThemeProvider: () -> Boolean
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -56,6 +55,7 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
             return DaggerPaymentMethodMessagingComponent.builder()
                 .application(application)
                 .configuration(configurationProvider())
+                .isSystemDarkTheme(isSystemDarkThemeProvider())
                 .build()
                 .viewModel as T
         }
