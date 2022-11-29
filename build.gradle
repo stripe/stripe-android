@@ -105,7 +105,6 @@ ext {
     jsonVersion = '20220924'
     uiautomator = '2.2.0'
     showkaseVersion = '1.0.0-beta14'
-    testParameterInjectorVersion = '1.8'
 
     group_name = GROUP
     version_name = VERSION_NAME
