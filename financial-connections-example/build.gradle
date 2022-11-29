@@ -17,7 +17,7 @@ android {
         applicationId "com.stripe.android.financialconnections.example"
         minSdk 21
         targetSdk rootProject.ext.compileSdkVersion
-        version = rootProject.version_name
+        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 

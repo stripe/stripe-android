@@ -6,6 +6,9 @@ import androidx.activity.result.contract.ActivityResultContract
 import com.airbnb.mvrx.Mavericks
 import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
+import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult.Canceled
+import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult.Completed
+import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Companion.EXTRA_RESULT
 
 internal class FinancialConnectionsSheetForTokenContract :
@@ -26,20 +29,31 @@ internal class FinancialConnectionsSheetForTokenContract :
         return intent
             ?.getParcelableExtra<FinancialConnectionsSheetActivityResult>(EXTRA_RESULT)
             ?.toExposedResult()
-            ?: FinancialConnectionsSheetForTokenResult.Failed(
+            ?: Failed(
                 IllegalArgumentException("Failed to retrieve a ConnectionsSheetResult.")
             )
     }
 
     private fun FinancialConnectionsSheetActivityResult.toExposedResult(): FinancialConnectionsSheetForTokenResult =
         when (this) {
-            is FinancialConnectionsSheetActivityResult.Canceled -> FinancialConnectionsSheetForTokenResult.Canceled
-            is FinancialConnectionsSheetActivityResult.Failed -> FinancialConnectionsSheetForTokenResult.Failed(
+            is FinancialConnectionsSheetActivityResult.Canceled -> Canceled
+            is FinancialConnectionsSheetActivityResult.Failed -> Failed(
                 error
             )
-            is FinancialConnectionsSheetActivityResult.Completed -> FinancialConnectionsSheetForTokenResult.Completed(
-                financialConnectionsSession = requireNotNull(financialConnectionsSession),
-                token = requireNotNull(token)
-            )
+
+            is FinancialConnectionsSheetActivityResult.Completed -> when {
+                financialConnectionsSession == null -> Failed(
+                    IllegalArgumentException("FinancialConnectionsSession is not set")
+                )
+
+                token == null -> Failed(
+                    IllegalArgumentException("PaymentAccount is not set on FinancialConnectionsSession")
+                )
+
+                else -> Completed(
+                    financialConnectionsSession = financialConnectionsSession,
+                    token = token
+                )
+            }
         }
 }

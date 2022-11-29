@@ -24,7 +24,6 @@ import kotlinx.serialization.Serializable
  * @param supportedPaymentMethodTypes
  * The [PaymentMethod type](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)(s)
  * that can be created from this FinancialConnectionsAccount.
- * @param accountholder
  * @param balance The most recent information about the account's balance.
  * @param balanceRefresh The state of the most recent attempt to refresh the account balance.
  * @param displayName A human-readable name that has been assigned to this account,

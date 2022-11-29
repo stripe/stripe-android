@@ -3,16 +3,18 @@ package com.stripe.android.financialconnections
 import android.content.Intent
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.airbnb.mvrx.test.MvRxTestRule
+import com.airbnb.mvrx.test.MavericksTestRule
 import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
-import com.stripe.android.financialconnections.domain.GenerateFinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
@@ -21,7 +23,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountFixtures
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -40,23 +41,21 @@ import org.mockito.kotlin.whenever
 class FinancialConnectionsSheetViewModelTest {
 
     @get:Rule
-    val mvrxRule = MvRxTestRule(testDispatcher = UnconfinedTestDispatcher())
+    val mvrxRule = MavericksTestRule(testDispatcher = UnconfinedTestDispatcher())
 
     private val eventReporter = mock<FinancialConnectionsEventReporter>()
     private val configuration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
-    private val manifest = FinancialConnectionsSessionManifest(
-        ApiKeyFixtures.HOSTED_AUTH_URL,
-        ApiKeyFixtures.SUCCESS_URL,
-        ApiKeyFixtures.CANCEL_URL
-    )
+
+    private val syncResponse = syncResponse()
+
     private val fetchFinancialConnectionsSession = mock<FetchFinancialConnectionsSession>()
     private val fetchFinancialConnectionsSessionForToken =
         mock<FetchFinancialConnectionsSessionForToken>()
-    private val generateFinancialConnectionsSessionManifest =
-        mock<GenerateFinancialConnectionsSessionManifest>()
+    private val synchronizeFinancialConnectionsSession =
+        mock<SynchronizeFinancialConnectionsSession>()
     private val defaultInitialState = FinancialConnectionsSheetState(
         FinancialConnectionsSheetActivityArgs.ForData(configuration)
     )
@@ -72,15 +71,15 @@ class FinancialConnectionsSheetViewModelTest {
         runTest {
             createViewModel(defaultInitialState)
 
-            verify(generateFinancialConnectionsSessionManifest).invoke(any(), any())
+            verify(synchronizeFinancialConnectionsSession).invoke(any(), any())
         }
 
     @Test
     fun `init - if manifest restored from SavedStateHandle, fetchManifest not triggered`() {
         runTest {
-            createViewModel(defaultInitialState.copy(manifest = manifest))
+            createViewModel(defaultInitialState.copy(manifest = sessionManifest()))
 
-            verifyNoInteractions(generateFinancialConnectionsSessionManifest)
+            verifyNoInteractions(synchronizeFinancialConnectionsSession)
         }
     }
 
@@ -104,7 +103,7 @@ class FinancialConnectionsSheetViewModelTest {
         runTest {
             // Given
             val linkedAccountId = "1234"
-            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
             val viewModel = createViewModel(
                 defaultInitialState.copy(initialArgs = ForLink(configuration))
             )
@@ -118,7 +117,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isFalse()
+                assertThat(it.webAuthFlowActive).isFalse()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(
                     Completed(linkedAccountId = linkedAccountId)
@@ -131,8 +130,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - on Link flows with invalid account, error is thrown`() {
         runTest {
             // Given
-            val linkedAccountId = "1234"
-            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
             val viewModel = createViewModel(
                 defaultInitialState.copy(initialArgs = ForLink(configuration))
             )
@@ -156,7 +154,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - intent with cancel url should fire analytics event and set cancel result`() {
         runTest {
             // Given
-            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
             val viewModel = createViewModel(defaultInitialState)
             val cancelIntent = cancelIntent()
 
@@ -174,7 +172,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - when intent with cancel URL received, then finish with Result#Cancel`() =
         runTest {
             // Given
-            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
             val viewModel = createViewModel(defaultInitialState)
 
             // When
@@ -183,7 +181,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isFalse()
+                assertThat(it.webAuthFlowActive).isFalse()
                 assertThat(it.viewEffect).isEqualTo(FinishWithResult(Canceled))
             }
         }
@@ -201,7 +199,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isFalse()
+                assertThat(it.webAuthFlowActive).isFalse()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isInstanceOf(Failed::class.java)
             }
@@ -212,7 +210,7 @@ class FinancialConnectionsSheetViewModelTest {
         runTest {
             // Given
             val expectedSession = financialConnectionsSession()
-            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
             whenever(fetchFinancialConnectionsSession(any())).thenReturn(expectedSession)
 
             val viewModel = createViewModel(defaultInitialState)
@@ -223,7 +221,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isFalse()
+                assertThat(it.webAuthFlowActive).isFalse()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(
                     Completed(financialConnectionsSession = expectedSession)
@@ -236,7 +234,7 @@ class FinancialConnectionsSheetViewModelTest {
         runTest {
             // Given
             val apiException = APIException()
-            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
             whenever(fetchFinancialConnectionsSession.invoke(any())).thenAnswer { throw apiException }
             val viewModel = createViewModel(defaultInitialState)
 
@@ -246,7 +244,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isFalse()
+                assertThat(it.webAuthFlowActive).isFalse()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Failed(apiException))
             }
@@ -256,7 +254,7 @@ class FinancialConnectionsSheetViewModelTest {
     fun `handleOnNewIntent - when error fetching account session, then finish with Result#Failed`() =
         runTest {
             // Given
-            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
             whenever(fetchFinancialConnectionsSession(any())).thenAnswer { throw APIException() }
             val viewModel = createViewModel(defaultInitialState)
             // When
@@ -266,7 +264,7 @@ class FinancialConnectionsSheetViewModelTest {
             // Then
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isFalse()
+                assertThat(it.webAuthFlowActive).isFalse()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Failed(APIException()))
             }
@@ -276,7 +274,14 @@ class FinancialConnectionsSheetViewModelTest {
     fun `onResume - when flow is still active and no config changes, finish with Result#Cancelled`() {
         runTest {
             // Given
-            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(synchronizeFinancialConnectionsSession(any(), any()))
+                .thenReturn(
+                    syncResponse.copy(
+                        manifest = sessionManifest().copy(
+                            experimentAssignments = mapOf("native" to "false")
+                        )
+                    )
+                )
             val viewModel = createViewModel(defaultInitialState)
 
             // When
@@ -285,7 +290,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isTrue()
+                assertThat(it.webAuthFlowActive).isTrue()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
             }
@@ -298,8 +303,8 @@ class FinancialConnectionsSheetViewModelTest {
             // Given
             val viewModel = createViewModel(
                 defaultInitialState.copy(
-                    manifest = manifest,
-                    authFlowActive = true
+                    manifest = sessionManifest(),
+                    webAuthFlowActive = true
                 )
             )
 
@@ -307,11 +312,11 @@ class FinancialConnectionsSheetViewModelTest {
             // simulate a config change
             viewModel.onActivityRecreated()
             // auth flow ends (activity received result without new intent received)
-            viewModel.onActivityResult()
+            viewModel.onBrowserActivityResult()
 
             // Then
             withState(viewModel) {
-                assertThat(it.authFlowActive).isTrue()
+                assertThat(it.webAuthFlowActive).isTrue()
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
             }
@@ -319,16 +324,16 @@ class FinancialConnectionsSheetViewModelTest {
     }
 
     @Test
-    fun `init - when repository returns manifest, manifest fetched and stored in state`() {
+    fun `init - when repository returns sync response, stores in state`() {
         runTest {
             // Given
-            whenever(generateFinancialConnectionsSessionManifest(any(), any())).thenReturn(manifest)
+            whenever(synchronizeFinancialConnectionsSession(any(), any())).thenReturn(syncResponse)
 
             // When
             val viewModel = createViewModel(defaultInitialState)
 
             // Then
-            withState(viewModel) { assertThat(it.manifest).isEqualTo(manifest) }
+            withState(viewModel) { assertThat(it.manifest).isEqualTo(syncResponse.manifest) }
         }
     }
 
@@ -362,10 +367,11 @@ class FinancialConnectionsSheetViewModelTest {
         return FinancialConnectionsSheetViewModel(
             applicationId = "com.example.app",
             initialState = initialState,
-            generateFinancialConnectionsSessionManifest = generateFinancialConnectionsSessionManifest,
+            synchronizeFinancialConnectionsSession = synchronizeFinancialConnectionsSession,
             fetchFinancialConnectionsSession = fetchFinancialConnectionsSession,
             fetchFinancialConnectionsSessionForToken = fetchFinancialConnectionsSessionForToken,
             eventReporter = eventReporter,
+            nativeRouter = mock(),
             logger = Logger.noop()
         )
     }

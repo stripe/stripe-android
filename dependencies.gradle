@@ -12,7 +12,8 @@ ext.configs = [
 ]
 
 ext.libs = [
-        mavericks: "com.airbnb.android:mavericks:$versions.mavericks"
+        mavericks: "com.airbnb.android:mavericks:$versions.mavericks",
+        mavericksCompose: "com.airbnb.android:mavericks-compose:$versions.mavericks"
 ]
 
 ext.testLibs = [

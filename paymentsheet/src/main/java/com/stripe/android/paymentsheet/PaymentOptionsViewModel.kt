@@ -61,8 +61,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkLauncher: LinkPaymentLauncher
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     application = application,
-    config = args.config,
-    prefsRepository = prefsRepositoryFactory(args.config?.customer),
+    config = args.state.config,
+    prefsRepository = prefsRepositoryFactory(args.state.config?.customer),
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     workContext = workContext,
@@ -83,10 +83,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
-    override var newPaymentSelection = args.newLpm
+    override var newPaymentSelection = args.state.newPaymentSelection
 
-    override var linkInlineSelection =
-        MutableLiveData<PaymentSelection.New.LinkInline?>(args.newLpm as? PaymentSelection.New.LinkInline)
+    override var linkInlineSelection = MutableLiveData<PaymentSelection.New.LinkInline?>(
+        args.state.newPaymentSelection as? PaymentSelection.New.LinkInline,
+    )
 
     // This is used in the case where the last card was new and not saved. In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
@@ -99,16 +100,16 @@ internal class PaymentOptionsViewModel @Inject constructor(
         get() = hasTransitionToUnsavedLpm != true && newPaymentSelection != null
 
     init {
-        savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
-        setupLink(args.stripeIntent)
+        savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.state.isGooglePayReady
+        setupLink(args.state.stripeIntent)
 
         // After recovering from don't keep activities the stripe intent will be saved,
         // calling setStripeIntent would require the repository be initialized, which
         // would not be the case.
         if (stripeIntent.value == null) {
-            setStripeIntent(args.stripeIntent)
+            setStripeIntent(args.state.stripeIntent)
         }
-        savedStateHandle[SAVE_PAYMENT_METHODS] = args.paymentMethods
+        savedStateHandle[SAVE_PAYMENT_METHODS] = args.state.customerPaymentMethods
         savedStateHandle[SAVE_PROCESSING] = false
 
         // If we are not recovering from don't keep activities than the resources
