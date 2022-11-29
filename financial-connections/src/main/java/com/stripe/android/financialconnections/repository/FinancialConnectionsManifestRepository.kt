@@ -182,18 +182,15 @@ private class FinancialConnectionsManifestRepositoryImpl(
     private fun synchronizeRequest(
         applicationId: String,
         clientSecret: String
-    ) = apiRequestFactory.createPost(
+    ): ApiRequest = apiRequestFactory.createPost(
         url = synchronizeSessionUrl,
         options = apiOptions,
         params = mapOf(
             "expand" to listOf("manifest.active_auth_session"),
             "locale" to locale.toLanguageTag(),
             "mobile" to mapOf(
-                "sdk_type" to "android",
-                // EXPAND!
                 PARAMS_FULLSCREEN to true,
                 PARAMS_HIDE_CLOSE_BUTTON to true,
-                "sdk_version" to 1,
                 NetworkConstants.PARAMS_APPLICATION_ID to applicationId
             ),
             NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
@@ -207,6 +204,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
             url = consentAcquiredUrl,
             options = apiOptions,
             params = mapOf(
+                "expand" to listOf("active_auth_session"),
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
             )
         )
@@ -313,6 +311,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
             url = linkMoreAccountsUrl,
             options = apiOptions,
             params = mapOf(
+                "expand" to listOf("active_auth_session"),
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
             )
         )
