@@ -71,8 +71,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             return
         }
         try {
-            starterArgs.config?.validate()
-            starterArgs.config?.appearance?.parseAppearance()
+            starterArgs.state.config?.validate()
+            starterArgs.state.config?.appearance?.parseAppearance()
         } catch (e: InvalidParameterException) {
             finish()
             return
@@ -122,16 +122,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                             // where we also jump to a new unsaved card. However this move require
                             // the transition target to specify when to and when not to add things to the
                             // backstack.
-                            if (
-                                starterArgs.paymentMethods.isEmpty() &&
-                                !config.isGooglePayReady &&
-                                viewModel.isLinkEnabled.value != true // WHy not use config.isLinkEnabled?
-                            ) {
-                                PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet(
+                            if (starterArgs.state.hasPaymentOptions) {
+                                PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod(
                                     config
                                 )
                             } else {
-                                PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod(
+                                PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet(
                                     config
                                 )
                             }
@@ -170,7 +166,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewBinding.continueButton.lockVisible = false
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
-        val customLabel = starterArgs?.config?.primaryButtonLabel
+        val customLabel = starterArgs?.state?.config?.primaryButtonLabel
         val label = customLabel ?: getString(R.string.stripe_continue_button_label)
 
         viewBinding.continueButton.setLabel(label)

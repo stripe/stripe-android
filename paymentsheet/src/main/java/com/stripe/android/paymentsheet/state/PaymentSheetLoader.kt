@@ -1,11 +1,11 @@
-package com.stripe.android.paymentsheet.flowcontroller
+package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
-import com.stripe.android.link.injection.LINK_ENABLED
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -23,27 +23,40 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * Loads the information necessary to display [PaymentSheet], either directly or via
+ * [PaymentSheet.FlowController].
+ */
+internal interface PaymentSheetLoader {
+
+    suspend fun load(
+        clientSecret: ClientSecret,
+        paymentSheetConfiguration: PaymentSheet.Configuration? = null
+    ): Result
+
+    sealed class Result {
+        data class Success(val state: PaymentSheetState.Full) : Result()
+        class Failure(val throwable: Throwable) : Result()
+    }
+}
+
 @Singleton
-internal class DefaultFlowControllerInitializer @Inject constructor(
-    private val prefsRepositoryFactory: @JvmSuppressWildcards
-    (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
-    private val googlePayRepositoryFactory: @JvmSuppressWildcards
-    (GooglePayEnvironment) -> GooglePayRepository,
+internal class DefaultPaymentSheetLoader @Inject constructor(
+    private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+    private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
     private val customerRepository: CustomerRepository,
     private val lpmResourceRepository: ResourceRepository<LpmRepository>,
     private val logger: Logger,
-    val eventReporter: EventReporter,
+    private val eventReporter: EventReporter,
     @IOContext private val workContext: CoroutineContext,
-    @Named(LINK_ENABLED) private val isLinkEnabled: Boolean
-) : FlowControllerInitializer {
+) : PaymentSheetLoader {
 
-    override suspend fun init(
+    override suspend fun load(
         clientSecret: ClientSecret,
         paymentSheetConfiguration: PaymentSheet.Configuration?
     ) = withContext(workContext) {
@@ -52,8 +65,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val isLinkReady = isLinkEnabled &&
-                    stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
+                val isLinkReady = stripeIntent.paymentMethodTypes.contains(Link.code)
 
                 create(
                     clientSecret = clientSecret,
@@ -66,7 +78,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             },
             onFailure = {
                 logger.error("Failure initializing FlowController", it)
-                FlowControllerInitializer.InitResult.Failure(it)
+                PaymentSheetLoader.Result.Failure(it)
             }
         )
     }
@@ -93,7 +105,7 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
         config: PaymentSheet.Configuration?,
         isGooglePayReady: Boolean,
         isLinkReady: Boolean
-    ): FlowControllerInitializer.InitResult {
+    ): PaymentSheetLoader.Result {
         val prefsRepository = prefsRepositoryFactory(customerConfig)
 
         val paymentMethods = if (customerConfig != null) {
@@ -113,14 +125,15 @@ internal class DefaultFlowControllerInitializer @Inject constructor(
             paymentMethods
         )
 
-        return FlowControllerInitializer.InitResult.Success(
-            InitData(
+        return PaymentSheetLoader.Result.Success(
+            PaymentSheetState.Full(
                 config = config,
                 clientSecret = clientSecret,
                 stripeIntent = stripeIntent,
-                paymentMethods = paymentMethods,
+                customerPaymentMethods = paymentMethods,
                 savedSelection = savedSelection,
-                isGooglePayReady = isGooglePayReady
+                isGooglePayReady = isGooglePayReady,
+                isLinkEnabled = isLinkReady,
             )
         )
     }
