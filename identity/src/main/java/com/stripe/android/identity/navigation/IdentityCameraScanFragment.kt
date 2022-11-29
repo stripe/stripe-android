@@ -12,7 +12,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.scanui.CameraView
@@ -29,6 +28,7 @@ import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.Companion.isBack
 import com.stripe.android.identity.states.IdentityScanState.Companion.isFront
+import com.stripe.android.identity.utils.navigateOnResume
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.viewmodel.CameraViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
@@ -135,7 +135,7 @@ internal abstract class IdentityCameraScanFragment(
                                 )
                             }
                         }
-                        findNavController().navigate(
+                        navigateOnResume(
                             R.id.action_global_couldNotCaptureFragment,
                             bundleOf(
                                 ARG_COULD_NOT_CAPTURE_SCAN_TYPE to identityScanViewModel.targetScanType

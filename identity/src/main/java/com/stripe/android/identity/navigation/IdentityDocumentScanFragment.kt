@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.CameraXAdapter
@@ -35,6 +34,7 @@ import com.stripe.android.identity.states.IdentityScanState.Companion.isFront
 import com.stripe.android.identity.states.IdentityScanState.Companion.isNullOrFront
 import com.stripe.android.identity.ui.DocumentScanScreen
 import com.stripe.android.identity.utils.fragmentIdToScreenName
+import com.stripe.android.identity.utils.navigateOnResume
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageData
 import com.stripe.android.identity.utils.submitVerificationPageDataAndNavigate
@@ -234,7 +234,7 @@ internal abstract class IdentityDocumentScanFragment(
     internal fun collectDocumentUploadedStateAndPost(
         type: CollectedDataParam.Type,
         isFront: Boolean
-    ) = lifecycleScope.launch {
+    ) = viewLifecycleOwner.lifecycleScope.launch {
         if (isFront) {
             identityViewModel.documentFrontUploadedState
         } else {
@@ -273,7 +273,7 @@ internal abstract class IdentityDocumentScanFragment(
                                             }
                                         )
                                     } else if (verificationPageDataWithNoError.isMissingSelfie()) {
-                                        findNavController().navigate(
+                                        navigateOnResume(
                                             R.id.action_global_selfieFragment
                                         )
                                     } else {
