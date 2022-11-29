@@ -29,16 +29,26 @@ appId: com.stripe.android.financialconnections.example
 - assertVisible: "Select another bank"
 - takeScreenshot: TestOAuth_ErrorDownBankUnscheduled
 - tapOn: "Select another bank"
-# OAUTH - SELECT ALL ACCOUNTS
+# SELECT OAUTH INSTITUTION
 - tapOn: "Test OAuth Institution"
 - assertVisible: "Continue"
 - takeScreenshot: TestOAuth_Prepane
 - tapOn: "Continue"
+####### Bypass Chrome on-boarding screen #######
+- tapOn:
+    text: ".*Accept.*"
+    optional: true
+- tapOn:
+    text: ".*No thanks.*"
+    optional: true
+###############################################
+# SELECT ALL ACCOUNTS
 - assertVisible: "Select all accounts"
 - takeScreenshot: TestOAuth_AccountPicker
 - tapOn: "Select all accounts" # select all accounts
 - takeScreenshot: TestOAuth_AccountPicker_AllAccounts
 - tapOn: "Link accounts"
+# CONFIRM AND COMPLETE
 - assertVisible: "Link another account"
 - takeScreenshot: TestOAuth_Success
 - tapOn: "Done"
