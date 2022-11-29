@@ -22,11 +22,6 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
 
     internal sealed interface Message {
         /**
-         * Opens partner auth in a web browser instance.
-         */
-        object OpenPartnerWebAuth : Message
-
-        /**
          * Ensures partner web auth status gets cleared after the current session is finished.
          */
         object ClearPartnerWebAuth : Message

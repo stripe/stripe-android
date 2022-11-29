@@ -13,7 +13,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.NavigationDirections
@@ -35,7 +35,7 @@ internal class ManualEntryViewModel @Inject constructor(
         observeInputs()
         suspend {
             getManifest().manualEntryUsesMicrodeposits.also {
-                eventTracker.track(PaneLoaded(NextPane.MANUAL_ENTRY))
+                eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY))
             }
         }.execute {
             copy(verifyWithMicrodeposits = it() ?: false)
@@ -44,24 +44,30 @@ internal class ManualEntryViewModel @Inject constructor(
 
     private fun observeInputs() {
         onEach(ManualEntryState::accountConfirm) { input ->
-            if (input != null) withState {
-                val error: Int? = ManualEntryInputValidator.getAccountConfirmIdOrNull(
-                    accountInput = it.account ?: "",
-                    accountConfirmInput = input
-                )
-                setState { copy(accountConfirmError = error) }
+            if (input != null) {
+                withState {
+                    val error: Int? = ManualEntryInputValidator.getAccountConfirmIdOrNull(
+                        accountInput = it.account ?: "",
+                        accountConfirmInput = input
+                    )
+                    setState { copy(accountConfirmError = error) }
+                }
             }
         }
         onEach(ManualEntryState::account) { input ->
-            if (input != null) setState {
-                val error = ManualEntryInputValidator.getAccountErrorIdOrNull(input)
-                copy(accountError = error)
+            if (input != null) {
+                setState {
+                    val error = ManualEntryInputValidator.getAccountErrorIdOrNull(input)
+                    copy(accountError = error)
+                }
             }
         }
         onEach(ManualEntryState::routing) { input ->
-            if (input != null) setState {
-                val error = ManualEntryInputValidator.getRoutingErrorIdOrNull(input)
-                copy(routingError = error)
+            if (input != null) {
+                setState {
+                    val error = ManualEntryInputValidator.getRoutingErrorIdOrNull(input)
+                    copy(routingError = error)
+                }
             }
         }
     }
@@ -71,7 +77,7 @@ internal class ManualEntryViewModel @Inject constructor(
             ManualEntryState::linkPaymentAccount,
             onFail = {
                 logger.error("Error linking payment account", it)
-                eventTracker.track(FinancialConnectionsEvent.Error(NextPane.MANUAL_ENTRY, it))
+                eventTracker.track(FinancialConnectionsEvent.Error(Pane.MANUAL_ENTRY, it))
             },
         )
     }
@@ -107,7 +113,7 @@ internal class ManualEntryViewModel @Inject constructor(
                 )
             ).also {
                 goNext(
-                    it.nextPane ?: NextPane.MANUAL_ENTRY_SUCCESS,
+                    it.nextPane ?: Pane.MANUAL_ENTRY_SUCCESS,
                     args = NavigationDirections.ManualEntrySuccess.argMap(
                         microdepositVerificationMethod = it.microdepositVerificationMethod,
                         last4 = state.account.takeLast(4)

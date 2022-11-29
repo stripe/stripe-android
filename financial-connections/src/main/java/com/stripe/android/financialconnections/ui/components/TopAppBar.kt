@@ -50,7 +50,9 @@ internal fun FinancialConnectionsTopAppBar(
                     )
                 }
             }
-        } else null,
+        } else {
+            null
+        },
         actions = {
             IconButton(onClick = onCloseClick) {
                 Icon(

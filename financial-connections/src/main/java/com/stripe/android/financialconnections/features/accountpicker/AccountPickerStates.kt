@@ -62,7 +62,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     balanceAmount = 1000,
                     displayableAccountNumbers = "1234",
                     currency = "$",
-                    allowSelection = true,
+                    _allowSelection = true,
                     allowSelectionMessage = "",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
@@ -77,7 +77,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     id = "id2",
                     name = "With balance disabled",
                     balanceAmount = 1000,
-                    allowSelection = true,
+                    _allowSelection = true,
                     allowSelectionMessage = "",
                     subcategory = FinancialConnectionsAccount.Subcategory.SAVINGS,
                     supportedPaymentMethodTypes = emptyList()
@@ -93,7 +93,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     name = "No balance",
                     displayableAccountNumbers = "1234",
                     subcategory = FinancialConnectionsAccount.Subcategory.CREDIT_CARD,
-                    allowSelection = false,
+                    _allowSelection = false,
                     allowSelectionMessage = "Cannot be selected",
                     supportedPaymentMethodTypes = emptyList()
                 ),
@@ -108,7 +108,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     name = "No balance disabled",
                     displayableAccountNumbers = "1234",
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
-                    allowSelection = false,
+                    _allowSelection = false,
                     allowSelectionMessage = "Cannot be selected",
                     supportedPaymentMethodTypes = emptyList()
                 ),
@@ -123,7 +123,7 @@ internal class AccountPickerStates : PreviewParameterProvider<AccountPickerState
                     name = "Very long institution that is already linked",
                     displayableAccountNumbers = "1234",
                     linkedAccountId = "linkedAccountId",
-                    allowSelection = true,
+                    _allowSelection = true,
                     subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
                     supportedPaymentMethodTypes = emptyList()
                 ),

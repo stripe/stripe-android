@@ -7,5 +7,8 @@ import android.os.Parcelable
 
 internal inline fun <reified T : Parcelable> Intent.parcelable(key: String): T? = when {
     SDK_INT >= TIRAMISU -> getParcelableExtra(key, T::class.java)
-    else -> @Suppress("DEPRECATION") getParcelableExtra(key) as? T
+    else -> {
+        @Suppress("DEPRECATION")
+        getParcelableExtra(key) as? T
+    }
 }

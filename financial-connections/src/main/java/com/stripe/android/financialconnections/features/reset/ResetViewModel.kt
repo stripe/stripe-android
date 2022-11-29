@@ -14,7 +14,7 @@ import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.LinkMoreAccounts
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.ClearPartnerWebAuth
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
@@ -32,7 +32,7 @@ internal class ResetViewModel @Inject constructor(
         suspend {
             val updatedManifest = linkMoreAccounts()
             nativeAuthFlowCoordinator().emit(ClearPartnerWebAuth)
-            eventTracker.track(PaneLoaded(NextPane.RESET))
+            eventTracker.track(PaneLoaded(Pane.RESET))
             goNext(updatedManifest.nextPane)
             Unit
         }.execute { copy(payload = it) }
@@ -43,7 +43,7 @@ internal class ResetViewModel @Inject constructor(
             ResetState::payload,
             onFail = { error ->
                 logger.error("Error linking more accounts", error)
-                eventTracker.track(Error(NextPane.RESET, error))
+                eventTracker.track(Error(Pane.RESET, error))
             },
         )
     }

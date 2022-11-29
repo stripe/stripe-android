@@ -59,7 +59,8 @@ internal fun CloseDialog(
 internal fun CloseDialogPreview() {
     FinancialConnectionsTheme {
         CloseDialog(
-            {}, {}
+            {},
+            {}
         )
     }
 }

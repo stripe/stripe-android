@@ -15,7 +15,7 @@ import com.stripe.android.financialconnections.domain.GetAuthorizationSessionAcc
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GoNext
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.NavigationDirections
@@ -58,7 +58,7 @@ internal class AttachPaymentViewModel @Inject constructor(
                     allowManualEntry = manifest.allowManualEntry,
                     activeInstitution = activeInstitution,
                     params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
-                ).also { goNext(it.nextPane ?: NextPane.SUCCESS) }
+                ).also { goNext(it.nextPane ?: Pane.SUCCESS) }
             }
             eventTracker.track(PollAttachPaymentsSucceeded(authSession.id, millis))
             result
@@ -70,16 +70,16 @@ internal class AttachPaymentViewModel @Inject constructor(
             AttachPaymentState::payload,
             onFail = {
                 logger.error("Error retrieving accounts to attach payment", it)
-                eventTracker.track(Error(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT, it))
+                eventTracker.track(Error(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT, it))
             },
             onSuccess = {
-                eventTracker.track(PaneLoaded(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT))
+                eventTracker.track(PaneLoaded(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT))
             }
         )
         onAsync(
             AttachPaymentState::linkPaymentAccount,
             onFail = {
-                eventTracker.track(Error(NextPane.ATTACH_LINKED_PAYMENT_ACCOUNT, it))
+                eventTracker.track(Error(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT, it))
                 logger.error("Error Attaching payment account", it)
             }
         )

@@ -8,6 +8,7 @@ internal object FinancialConnectionsUrls {
         const val supportEndUser = "https://support.stripe.com/user/how-do-i-disconnect-my-linked-financial-account"
         const val supportMerchantUser = "https://support.stripe.com/how-to-disconnect-a-linked-financial-account"
         const val dashboard = "https://dashboard.stripe.com/settings/linked-accounts"
+        const val link = "https://support.link.co/questions/connecting-your-bank-account#how-do-i-disconnect-my-connected-bank-account"
     }
 
     object FAQ {

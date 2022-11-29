@@ -123,7 +123,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         )
     ) = FinancialConnectionsSheetNativeViewModel(
         eventTracker = mock(),
-        getManifest = mock(),
         activityRetainedComponent = mock(),
         applicationId = applicationId,
         uriUtils = UriUtils(Logger.noop()),

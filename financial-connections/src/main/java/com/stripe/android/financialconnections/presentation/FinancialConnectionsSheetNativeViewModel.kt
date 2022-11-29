@@ -25,7 +25,6 @@ import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
-import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
@@ -35,7 +34,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.NextPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -51,7 +50,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      */
     val activityRetainedComponent: FinancialConnectionsSheetNativeComponent,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-    private val getManifest: GetManifest,
     private val uriUtils: UriUtils,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
@@ -65,11 +63,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
                 when (message) {
-                    Message.OpenPartnerWebAuth -> {
-                        val manifest = getManifest()
-                        setState { copy(viewEffect = OpenUrl(manifest.hostedAuthUrl)) }
-                    }
-
                     is Message.Finish -> {
                         setState { copy(viewEffect = Finish(message.result)) }
                     }
@@ -174,20 +167,20 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    fun onCloseWithConfirmationClick(pane: NextPane) {
+    fun onCloseWithConfirmationClick(pane: Pane) {
         viewModelScope.launch {
             eventTracker.track(ClickNavBarClose(pane))
             setState { copy(showCloseDialog = true) }
         }
     }
 
-    fun onBackClick(pane: NextPane) {
+    fun onBackClick(pane: Pane) {
         viewModelScope.launch {
             eventTracker.track(ClickNavBarBack(pane))
         }
     }
 
-    fun onCloseNoConfirmationClick(pane: NextPane) {
+    fun onCloseNoConfirmationClick(pane: Pane) {
         viewModelScope.launch {
             eventTracker.track(ClickNavBarClose(pane))
         }
@@ -267,7 +260,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun onPaneLaunched(pane: NextPane) {
+    fun onPaneLaunched(pane: Pane) {
         viewModelScope.launch {
             eventTracker.track(
                 FinancialConnectionsEvent.PaneLaunched(pane)
@@ -314,7 +307,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val configuration: FinancialConnectionsSheet.Configuration,
     val showCloseDialog: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
-    val initialPane: NextPane
+    val initialPane: Pane
 ) : MavericksState {
 
     /**
