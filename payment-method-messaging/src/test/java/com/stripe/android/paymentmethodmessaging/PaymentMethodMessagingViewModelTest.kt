@@ -47,10 +47,10 @@ class PaymentMethodMessagingViewModelTest {
         )
 
         val viewModel = PaymentMethodMessagingViewModel(
-            mapper = {
-                async {
+            mapper = { scope, message ->
+                scope.async {
                     PaymentMethodMessagingData(
-                        message = it,
+                        message = message,
                         images = mapOf(),
                         config = config
                     )
@@ -65,6 +65,8 @@ class PaymentMethodMessagingViewModelTest {
             displayHtml = "some html",
             learnMoreUrl = "some url"
         )
+
+        assertThat(viewModel.messageFlow.stateIn(viewModel.viewModelScope).value).isNull()
 
         viewModel.loadMessage()
 
@@ -88,7 +90,9 @@ class PaymentMethodMessagingViewModelTest {
         )
 
         val viewModel = PaymentMethodMessagingViewModel(
-            mapper = { mock() },
+            mapper = { scope, _ ->
+                scope.async { mock() }
+            },
             isSystemDarkTheme = false,
             config = config,
             stripeApiRepository = stripeApiRepository
@@ -98,6 +102,8 @@ class PaymentMethodMessagingViewModelTest {
             displayHtml = "",
             learnMoreUrl = "a"
         )
+
+        assertThat(viewModel.messageFlow.stateIn(viewModel.viewModelScope).value).isNull()
 
         viewModel.loadMessage()
 
@@ -119,7 +125,9 @@ class PaymentMethodMessagingViewModelTest {
         )
 
         val viewModel = PaymentMethodMessagingViewModel(
-            mapper = { mock() },
+            mapper = { scope, _ ->
+                scope.async { mock() }
+            },
             isSystemDarkTheme = false,
             config = config,
             stripeApiRepository = stripeApiRepository
@@ -129,6 +137,8 @@ class PaymentMethodMessagingViewModelTest {
             displayHtml = "a",
             learnMoreUrl = ""
         )
+
+        assertThat(viewModel.messageFlow.stateIn(viewModel.viewModelScope).value).isNull()
 
         viewModel.loadMessage()
 

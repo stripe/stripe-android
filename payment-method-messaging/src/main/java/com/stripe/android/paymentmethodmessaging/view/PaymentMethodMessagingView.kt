@@ -25,7 +25,6 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -96,9 +95,8 @@ internal class PaymentMethodMessagingView @JvmOverloads constructor(
             val viewModel: PaymentMethodMessagingViewModel = ViewModelProvider(
                 context as ViewModelStoreOwner,
                 PaymentMethodMessagingViewModel.Factory(
-                    { config },
-                    { context.isSystemDarkTheme() },
-                    { this }
+                    config,
+                    context.isSystemDarkTheme(),
                 )
             )[PaymentMethodMessagingViewModel::class.java]
 
@@ -122,7 +120,7 @@ internal class PaymentMethodMessagingView @JvmOverloads constructor(
         }
     }
 
-    data class Configuration @JvmOverloads constructor(
+    class Configuration @JvmOverloads constructor(
         /**
          * The publishable key used to make requests to Stripe.
          */
@@ -200,13 +198,10 @@ internal fun rememberMessagingState(
     val composeState = remember {
         mutableStateOf<PaymentMethodMessagingState>(PaymentMethodMessagingState.Loading)
     }
-    val coroutineScope = rememberCoroutineScope()
-
     val viewModel: PaymentMethodMessagingViewModel = viewModel(
         factory = PaymentMethodMessagingViewModel.Factory(
-            { config },
-            { context.isSystemDarkTheme() },
-            { coroutineScope }
+            config,
+            context.isSystemDarkTheme(),
         )
     )
 
