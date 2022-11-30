@@ -41,10 +41,10 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
                         currency = config.currency,
                         country = config.countryCode,
                         locale = config.locale.toLanguageTag(),
-                        logoColor = config.imageColor?.value ?: if (isSystemDarkTheme) {
-                            PaymentMethodMessagingView.Configuration.ImageColor.Light.value
+                        logoColor = config.imageTint?.value ?: if (isSystemDarkTheme) {
+                            PaymentMethodMessagingView.Configuration.ImageTint.White.value
                         } else {
-                            PaymentMethodMessagingView.Configuration.ImageColor.Dark.value
+                            PaymentMethodMessagingView.Configuration.ImageTint.Black.value
                         },
                         requestOptions = ApiRequest.Options(config.publishableKey),
                     )
