@@ -22,40 +22,16 @@ import kotlin.reflect.KClass
  * @see [com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel.Companion]
  * @see [com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel.Companion]
  */
+@OptIn(InternalMavericksApi::class)
 internal inline fun <reified VM : MavericksViewModel<S>, reified S : MavericksState> ComponentActivity.viewModelIfArgsValid(
     viewModelClass: KClass<VM> = VM::class,
-): Lazy<VM> {
-    return MavericksViewModelLazy(viewModelClass, S::class.java, this)
-}
-
-internal class MavericksViewModelLazy<VM : MavericksViewModel<S>, S : MavericksState>(
-    private val viewModelClass: KClass<VM>,
-    private val stateClass: Class<out S>,
-    private val activity: ComponentActivity,
-): Lazy<VM> {
-    private var cached: VM? = null
-
-    override val value: VM
-        @OptIn(InternalMavericksApi::class)
-        get() {
-            cached?.let {
-                return it
-            }
-
-            val viewModel = MavericksViewModelProvider.get(
-                viewModelClass = viewModelClass.java,
-                stateClass = stateClass,
-                viewModelContext = ActivityViewModelContext(activity, activity.intent.extras?.get(Mavericks.KEY_ARG)),
-                key = viewModelClass.java.name
-            )
-            cached = viewModel
-            return viewModel
-        }
-
-    override fun isInitialized(): Boolean {
-        return cached != null
-    }
-
+): Lazy<VM> = lazy {
+    MavericksViewModelProvider.get(
+        viewModelClass = viewModelClass.java,
+        stateClass = S::class.java,
+        viewModelContext = ActivityViewModelContext(this, intent.extras?.get(Mavericks.KEY_ARG)),
+        key = viewModelClass.java.name
+    )
 }
 
 internal fun Activity.providerIsInvalid(provider: () -> Unit): Boolean {
