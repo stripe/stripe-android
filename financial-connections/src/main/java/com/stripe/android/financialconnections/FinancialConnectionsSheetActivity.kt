@@ -15,37 +15,34 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.providerIsInvalid
 import com.stripe.android.financialconnections.utils.viewModelIfArgsValid
 
 internal class FinancialConnectionsSheetActivity :
     AppCompatActivity(R.layout.activity_financialconnections_sheet), MavericksView {
 
-    val viewModel: FinancialConnectionsSheetViewModel? by viewModelIfArgsValid(
-        viewModelClass = FinancialConnectionsSheetViewModel::class,
-        argsValidator = { it != null }
-    )
+    private val viewModel: FinancialConnectionsSheetViewModel by viewModelIfArgsValid()
 
     private val startBrowserForResult = registerForActivityResult(StartActivityForResult()) {
-        viewModel?.onBrowserActivityResult()
+        viewModel.onBrowserActivityResult()
     }
 
     private val startNativeAuthFlowForResult = registerForActivityResult(StartActivityForResult()) {
-        viewModel?.onNativeAuthFlowResult(it)
+        viewModel.onNativeAuthFlowResult(it)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (viewModel == null) {
-            finish()
-        } else {
-            viewModel?.onEach { postInvalidate() }
+        if (providerIsInvalid { viewModel }) {
+            return
         }
-        if (savedInstanceState != null) viewModel?.onActivityRecreated()
+        viewModel.onEach { postInvalidate() }
+        if (savedInstanceState != null) viewModel.onActivityRecreated()
     }
 
     override fun onResume() {
         super.onResume()
-        viewModel?.onResume()
+        viewModel.onResume()
     }
 
     override fun onBackPressed() {
@@ -58,45 +55,41 @@ internal class FinancialConnectionsSheetActivity :
      */
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        viewModel?.handleOnNewIntent(intent)
+        viewModel.handleOnNewIntent(intent)
     }
 
     /**
      * handle state changes here.
      */
     override fun invalidate() {
-        viewModel?.let {
-            withState(it) { state ->
-                state.viewEffect?.let { viewEffect ->
-                    when (viewEffect) {
-                        is OpenAuthFlowWithUrl -> startBrowserForResult.launch(
-                            CreateBrowserIntentForUrl(
-                                context = this,
-                                uri = Uri.parse(viewEffect.url)
-                            )
+        withState(viewModel) { state ->
+            state.viewEffect?.let { viewEffect ->
+                when (viewEffect) {
+                    is OpenAuthFlowWithUrl -> startBrowserForResult.launch(
+                        CreateBrowserIntentForUrl(
+                            context = this,
+                            uri = Uri.parse(viewEffect.url)
                         )
-
-                        is FinishWithResult -> finishWithResult(
-                            viewEffect.result
-                        )
-
-                        is OpenNativeAuthFlow -> startNativeAuthFlowForResult.launch(
-                            Intent(
-                                this,
-                                FinancialConnectionsSheetNativeActivity::class.java
-                            ).also {
-                                it.putExtra(
-                                    Mavericks.KEY_ARG,
-                                    FinancialConnectionsSheetNativeActivityArgs(
-                                        initialSyncResponse = viewEffect.initialSyncResponse,
-                                        configuration = viewEffect.configuration
-                                    )
+                    )
+                    is FinishWithResult -> finishWithResult(
+                        viewEffect.result
+                    )
+                    is OpenNativeAuthFlow -> startNativeAuthFlowForResult.launch(
+                        Intent(
+                            this,
+                            FinancialConnectionsSheetNativeActivity::class.java
+                        ).also {
+                            it.putExtra(
+                                Mavericks.KEY_ARG,
+                                FinancialConnectionsSheetNativeActivityArgs(
+                                    initialSyncResponse = viewEffect.initialSyncResponse,
+                                    configuration = viewEffect.configuration
                                 )
-                            }
-                        )
-                    }
-                    it.onViewEffectLaunched()
+                            )
+                        }
+                    )
                 }
+                viewModel.onViewEffectLaunched()
             }
         }
     }
