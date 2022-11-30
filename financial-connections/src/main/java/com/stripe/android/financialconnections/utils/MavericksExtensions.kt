@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
  * by [argsValidator].
  *
  * Some [MavericksViewModelFactory] implementations assume args are correct to instantiate
- * the viewModel, and the associated Dagger graph. This prevents
+ * the viewModel, and the associated Dagger graph.
  *
  * @see [com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel.Companion]
  * @see [com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel.Companion]
