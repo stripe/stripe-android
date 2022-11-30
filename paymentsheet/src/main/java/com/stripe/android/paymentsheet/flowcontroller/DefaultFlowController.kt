@@ -262,7 +262,9 @@ internal class DefaultFlowController @Inject internal constructor(
 
         paymentOptionActivityLauncher.launch(
             PaymentOptionContract.Args(
-                state = state,
+                state = state.copy(
+                    newPaymentSelection = viewModel.paymentSelection as? PaymentSelection.New,
+                ),
                 statusBarColor = statusBarColor(),
                 injectorKey = injectorKey,
                 enableLogging = enableLogging,
