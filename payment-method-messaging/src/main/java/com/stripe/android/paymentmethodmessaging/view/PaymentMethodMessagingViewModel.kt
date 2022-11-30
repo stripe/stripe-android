@@ -13,11 +13,13 @@ import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-private typealias Mapper = (PaymentMethodMessage) -> Deferred<PaymentMethodMessagingData>
+private typealias Mapper = (CoroutineScope, PaymentMethodMessage) ->
+Deferred<PaymentMethodMessagingData>
 
 internal class PaymentMethodMessagingViewModel @Inject constructor(
     private val isSystemDarkTheme: Boolean,
@@ -26,11 +28,12 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
     private val mapper: @JvmSuppressWildcards Mapper
 ) : ViewModel() {
 
-    val messageFlow = MutableStateFlow<Result<PaymentMethodMessagingData>?>(null)
+    private val _messageFlow = MutableStateFlow<Result<PaymentMethodMessagingData>?>(null)
+    val messageFlow: StateFlow<Result<PaymentMethodMessagingData>?> = _messageFlow
 
     fun loadMessage() {
         viewModelScope.launch {
-            messageFlow.update {
+            _messageFlow.update {
                 try {
                     val message = stripeApiRepository.retrievePaymentMethodMessage(
                         paymentMethods = config.paymentMethods.map { it.value },
@@ -52,7 +55,7 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
                     ) {
                         Result.failure(Exception("Could not retrieve message"))
                     } else {
-                        Result.success(mapper(message).await())
+                        Result.success(mapper(this, message).await())
                     }
                 } catch (e: StripeException) {
                     Result.failure(e)
@@ -62,9 +65,8 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val configurationProvider: () -> PaymentMethodMessagingView.Configuration,
-        private val isSystemDarkThemeProvider: () -> Boolean,
-        private val lifecycleScopeProvider: () -> CoroutineScope
+        private val configuration: PaymentMethodMessagingView.Configuration,
+        private val isSystemDarkTheme: Boolean
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -72,9 +74,8 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
 
             return DaggerPaymentMethodMessagingComponent.builder()
                 .application(application)
-                .configuration(configurationProvider())
-                .isSystemDarkTheme(isSystemDarkThemeProvider())
-                .lifecycleScope(lifecycleScopeProvider())
+                .configuration(configuration)
+                .isSystemDarkTheme(isSystemDarkTheme)
                 .build()
                 .viewModel as T
         }
