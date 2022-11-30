@@ -246,7 +246,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment {
             if (registerInjector) {
-                viewModel.updatePaymentMethods(stripeIntent)
                 viewModel.setStripeIntent(stripeIntent)
                 idleLooper()
                 registerViewModel(args.injectorKey, viewModel, lpmRepository, addressRepository)
@@ -255,7 +254,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                     stripeIntent.paymentMethodTypes,
                     null
                 )
-                it.sheetViewModel.updatePaymentMethods(stripeIntent)
                 it.sheetViewModel.setStripeIntent(stripeIntent)
                 idleLooper()
             }

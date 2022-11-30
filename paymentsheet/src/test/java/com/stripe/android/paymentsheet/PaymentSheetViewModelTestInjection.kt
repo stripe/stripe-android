@@ -33,6 +33,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakePaymentSheetLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -94,6 +95,10 @@ internal open class PaymentSheetViewModelTestInjection {
             { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
             StripeIntentRepository.Static(stripeIntent),
             StripeIntentValidator(),
+            FakePaymentSheetLoader(
+                stripeIntent = stripeIntent,
+                customerPaymentMethods = customerRepositoryPMs,
+            ),
             FakeCustomerRepository(customerRepositoryPMs),
             FakePrefsRepository(),
             lpmResourceRepository = StaticLpmResourceRepository(
