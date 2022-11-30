@@ -3,11 +3,16 @@ package com.stripe.android.financialconnections.example
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.Stripe
+import com.stripe.android.confirmPaymentIntent
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -20,9 +25,8 @@ class FinancialConnectionsPlaygroundViewModel(
 ) : AndroidViewModel(application) {
 
     private val repository = BackendRepository(Settings(application))
-
-    private val _state = MutableStateFlow(FinancialConnectionsExampleState())
-    val state: StateFlow<FinancialConnectionsExampleState> = _state
+    private val _state = MutableStateFlow(FinancialConnectionsPlaygroundState())
+    val state: StateFlow<FinancialConnectionsPlaygroundState> = _state
 
     private val _viewEffect = MutableSharedFlow<FinancialConnectionsPlaygroundViewEffect?>()
     val viewEffect: SharedFlow<FinancialConnectionsPlaygroundViewEffect?> = _viewEffect
@@ -31,11 +35,38 @@ class FinancialConnectionsPlaygroundViewModel(
         mode: Mode,
         flow: Flow
     ) {
+        _state.update { it.copy(status = emptyList()) }
         when (flow) {
             Flow.Data -> startForData(mode)
             Flow.Token -> startForToken(mode)
+            Flow.PaymentIntent -> startWithPaymentIntent()
         }
+    }
 
+
+    private fun startWithPaymentIntent() {
+        viewModelScope.launch {
+            showLoadingWithMessage("Fetching link account session from example backend!")
+            kotlin.runCatching { repository.createPaymentIntent("US") }
+                // Success creating session: open the financial connections sheet with received secret
+                .onSuccess {
+                    _state.update { current ->
+                        current.copy(
+                            publishableKey = it.publishableKey,
+                            loading = true,
+                            status = current.status + "Payment Intent created ${it.intentSecret}, opening FinancialConnectionsSheet."
+                        )
+                    }
+                    _viewEffect.emit(
+                        FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent(
+                            paymentIntentSecret = it.intentSecret,
+                            publishableKey = it.publishableKey
+                        )
+                    )
+                }
+                // Error retrieving session: display error.
+                .onFailure(::showError)
+        }
     }
 
     private fun startForData(mode: Mode) {
@@ -45,6 +76,7 @@ class FinancialConnectionsPlaygroundViewModel(
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
                     showLoadingWithMessage("Session created, opening FinancialConnectionsSheet.")
+                    _state.update { current -> current.copy(publishableKey = it.publishableKey) }
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForData(
                             configuration = FinancialConnectionsSheet.Configuration(
@@ -66,6 +98,7 @@ class FinancialConnectionsPlaygroundViewModel(
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
                     showLoadingWithMessage("Session created, opening FinancialConnectionsSheet.")
+                    _state.update { current -> current.copy(publishableKey = it.publishableKey) }
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForToken(
                             configuration = FinancialConnectionsSheet.Configuration(
@@ -84,7 +117,7 @@ class FinancialConnectionsPlaygroundViewModel(
         _state.update {
             it.copy(
                 loading = false,
-                status = "Error starting linked account session: $error"
+                status = it.status + "Error starting linked account session: $error"
             )
         }
     }
@@ -93,7 +126,7 @@ class FinancialConnectionsPlaygroundViewModel(
         _state.update {
             it.copy(
                 loading = true,
-                status = message
+                status = it.status + message
             )
         }
     }
@@ -109,7 +142,7 @@ class FinancialConnectionsPlaygroundViewModel(
             is FinancialConnectionsSheetForTokenResult.Failed -> "Failed! ${result.error}"
             is FinancialConnectionsSheetForTokenResult.Canceled -> "Cancelled!"
         }
-        _state.update { it.copy(loading = false, status = statusText) }
+        _state.update { it.copy(loading = false, status = it.status + statusText) }
     }
 
     fun onFinancialConnectionsSheetResult(result: FinancialConnectionsSheetResult) {
@@ -121,8 +154,39 @@ class FinancialConnectionsPlaygroundViewModel(
             is FinancialConnectionsSheetResult.Failed -> "Failed! ${result.error}"
             is FinancialConnectionsSheetResult.Canceled -> "Cancelled!"
         }
-        _state.update { it.copy(loading = false, status = statusText) }
+        _state.update { it.copy(loading = false, status = it.status + statusText) }
     }
+
+    fun onCollectBankAccountLauncherResult(result: CollectBankAccountResult) {
+        _state.update { it.copy(status = it.status + "Session attached! Confirming Intent") }
+        viewModelScope.launch {
+            val statusText = when (result) {
+                is CollectBankAccountResult.Completed -> {
+                    val confirmedIntent = stripe(
+                        _state.value.publishableKey!!
+                    ).confirmPaymentIntent(
+                        ConfirmPaymentIntentParams.create(
+                            clientSecret = requireNotNull(result.response.intent.clientSecret),
+                            paymentMethodType = PaymentMethod.Type.USBankAccount
+                        )
+                    )
+                    "Intent Confirmed!: $confirmedIntent"
+                }
+
+                is CollectBankAccountResult.Failed -> "Failed! ${result.error}"
+                is CollectBankAccountResult.Cancelled -> "Cancelled!"
+            }
+            _state.update { it.copy(loading = false, status = it.status + statusText) }
+        }
+    }
+
+    private fun stripe(publishableKey: String) = Stripe(
+        getApplication(),
+        publishableKey,
+        null,
+        true,
+        emptySet()
+    )
 }
 
 enum class Mode(val flow: String) {
@@ -130,7 +194,7 @@ enum class Mode(val flow: String) {
 }
 
 enum class Flow {
-    Data, Token
+    Data, Token, PaymentIntent
 }
 
 enum class NativeOverride {
@@ -145,4 +209,15 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
     data class OpenForToken(
         val configuration: FinancialConnectionsSheet.Configuration
     ) : FinancialConnectionsPlaygroundViewEffect()
+
+    data class OpenForPaymentIntent(
+        val paymentIntentSecret: String,
+        val publishableKey: String
+    ) : FinancialConnectionsPlaygroundViewEffect()
 }
+
+data class FinancialConnectionsPlaygroundState(
+    val loading: Boolean = false,
+    val publishableKey: String? = null,
+    val status: List<String> = emptyList()
+)

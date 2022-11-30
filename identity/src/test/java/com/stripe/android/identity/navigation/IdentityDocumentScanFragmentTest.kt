@@ -75,12 +75,14 @@ class IdentityDocumentScanFragmentTest {
         MutableStateFlow<Pair<IdentityScanState, IdentityScanState?>?>(null)
     private val targetScanTypeFlow = MutableStateFlow<IdentityScanState.ScanType?>(null)
     private val mockScanFlow = mock<IdentityScanFlow>()
+    private val cameraAdapterInitialized = MutableLiveData(false)
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>().also {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
         whenever(it.interimResults).thenReturn(interimResultsLiveData)
         whenever(it.displayStateChangedFlow).thenReturn(displayStateChangedFlow)
         whenever(it.targetScanTypeFlow).thenReturn(targetScanTypeFlow)
+        whenever(it.cameraAdapterInitialized).thenReturn(cameraAdapterInitialized)
     }
 
     private val mockPageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
@@ -126,7 +128,6 @@ class IdentityDocumentScanFragmentTest {
         identityScanViewModelFactory,
         identityViewModelFactory
     ) {
-        var currentState: IdentityScanState? = null
         var onCameraReadyIsCalled = false
         override val frontScanType = IdentityScanState.ScanType.ID_FRONT
         override val backScanType = IdentityScanState.ScanType.ID_BACK
@@ -140,10 +141,6 @@ class IdentityDocumentScanFragmentTest {
         override fun onCameraReady() {
             super.onCameraReady()
             onCameraReadyIsCalled = true
-        }
-
-        override fun updateUI(identityScanState: IdentityScanState) {
-            currentState = identityScanState
         }
     }
 
@@ -165,6 +162,7 @@ class IdentityDocumentScanFragmentTest {
 
     @Test
     fun `when page and model are ready onCameraReady is called`() {
+        cameraAdapterInitialized.postValue(true)
         launchTestFragment().onFragment {
             simulateModelDownloaded()
 
@@ -188,8 +186,7 @@ class IdentityDocumentScanFragmentTest {
                 navController
             )
 
-            whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
-
+            targetScanTypeFlow.update { IdentityScanState.ScanType.ID_FRONT }
             finalResultLiveData.postValue(
                 mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.TimeOut>())
@@ -212,7 +209,7 @@ class IdentityDocumentScanFragmentTest {
             successCaptor.lastValue(SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE)
 
             verify(mockScanFlow).resetFlow()
-            assertThat(testFragment.cameraAdapter.isBoundToLifecycle()).isFalse()
+            assertThat(testFragment.cameraAdapter?.isBoundToLifecycle()).isFalse()
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.couldNotCaptureFragment)
             assertThat(
@@ -246,8 +243,7 @@ class IdentityDocumentScanFragmentTest {
                 navController
             )
 
-            whenever(mockIdentityScanViewModel.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
-
+            targetScanTypeFlow.update { IdentityScanState.ScanType.ID_FRONT }
             finalResultLiveData.postValue(
                 mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.TimeOut>())
@@ -270,7 +266,7 @@ class IdentityDocumentScanFragmentTest {
             successCaptor.lastValue(SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE)
 
             verify(mockScanFlow).resetFlow()
-            assertThat(testFragment.cameraAdapter.isBoundToLifecycle()).isFalse()
+            assertThat(testFragment.cameraAdapter?.isBoundToLifecycle()).isFalse()
             assertThat(navController.currentDestination?.id)
                 .isEqualTo(R.id.couldNotCaptureFragment)
             assertThat(
@@ -302,7 +298,7 @@ class IdentityDocumentScanFragmentTest {
             verify(mockIdentityViewModel).resetDocumentUploadedState()
 
             // verify start to scan back
-            assertThat(fragment.cameraAdapter.isBoundToLifecycle()).isTrue()
+            assertThat(fragment.cameraAdapter?.isBoundToLifecycle()).isTrue()
             verify(mockScanFlow).startFlow(
                 same(fragment.requireContext()),
                 any(),
@@ -320,7 +316,7 @@ class IdentityDocumentScanFragmentTest {
             simulateModelDownloaded()
             verify(mockIdentityViewModel, times(0)).resetDocumentUploadedState()
             // verify start to scan back
-            assertThat(fragment.cameraAdapter.isBoundToLifecycle()).isTrue()
+            assertThat(fragment.cameraAdapter?.isBoundToLifecycle()).isTrue()
             verify(mockScanFlow).startFlow(
                 same(fragment.requireContext()),
                 any(),
@@ -386,9 +382,8 @@ class IdentityDocumentScanFragmentTest {
                 val mockFrontFinalResult = mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
                 }
-                // mock viewModel target change
-                whenever(mockIdentityScanViewModel.targetScanType)
-                    .thenReturn(IdentityScanState.ScanType.ID_FRONT)
+//                // mock viewModel target change
+                targetScanTypeFlow.update { IdentityScanState.ScanType.ID_FRONT }
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
@@ -441,9 +436,8 @@ class IdentityDocumentScanFragmentTest {
                 val mockBackFinalResult = mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
                 }
-                // mock viewModel target change
-                whenever(mockIdentityScanViewModel.targetScanType)
-                    .thenReturn(IdentityScanState.ScanType.ID_BACK)
+//                // mock viewModel target change
+                targetScanTypeFlow.update { IdentityScanState.ScanType.ID_BACK }
                 finalResultLiveData.postValue(mockBackFinalResult)
                 verifyUploadedWithFinalResult(
                     mockBackFinalResult,
@@ -518,9 +512,8 @@ class IdentityDocumentScanFragmentTest {
                 val mockFrontFinalResult = mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
                 }
-                // mock viewModel target change
-                whenever(mockIdentityScanViewModel.targetScanType)
-                    .thenReturn(IdentityScanState.ScanType.ID_FRONT)
+//                // mock viewModel target change
+                targetScanTypeFlow.update { IdentityScanState.ScanType.ID_FRONT }
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
@@ -573,9 +566,8 @@ class IdentityDocumentScanFragmentTest {
                 val mockBackFinalResult = mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
                 }
-                // mock viewModel target change
-                whenever(mockIdentityScanViewModel.targetScanType)
-                    .thenReturn(IdentityScanState.ScanType.ID_BACK)
+//                // mock viewModel target change
+                targetScanTypeFlow.update { IdentityScanState.ScanType.ID_BACK }
                 finalResultLiveData.postValue(mockBackFinalResult)
                 verifyUploadedWithFinalResult(
                     mockBackFinalResult,
@@ -650,9 +642,8 @@ class IdentityDocumentScanFragmentTest {
                 val mockFrontFinalResult = mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
                 }
-                // mock viewModel target change
-                whenever(mockIdentityScanViewModel.targetScanType)
-                    .thenReturn(IdentityScanState.ScanType.ID_FRONT)
+//                // mock viewModel target change
+                targetScanTypeFlow.update { IdentityScanState.ScanType.ID_FRONT }
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,
@@ -729,9 +720,8 @@ class IdentityDocumentScanFragmentTest {
                 val mockFrontFinalResult = mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
                 }
-                // mock viewModel target change
-                whenever(mockIdentityScanViewModel.targetScanType)
-                    .thenReturn(IdentityScanState.ScanType.ID_FRONT)
+//                // mock viewModel target change
+                targetScanTypeFlow.update { IdentityScanState.ScanType.ID_FRONT }
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
                     mockFrontFinalResult,

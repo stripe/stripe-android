@@ -35,6 +35,7 @@ import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.Resource.Companion.DUMMY_RESOURCE
 import com.stripe.android.identity.networking.SelfieUploadState
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.Status
@@ -154,7 +155,7 @@ internal class IdentityViewModel constructor(
      * StateFlow to track request status of postVerificationPageData
      */
     @VisibleForTesting
-    internal val verificationPageData = MutableStateFlow<Resource<Unit>>(
+    internal val verificationPageData = MutableStateFlow<Resource<Int>>(
         savedStateHandle[VERIFICATION_PAGE_DATA] ?: run {
             Resource.idle()
         }
@@ -164,7 +165,7 @@ internal class IdentityViewModel constructor(
      * StateFlow to track request status of postVerificationPageSubmit
      */
     @VisibleForTesting
-    internal val verificationPageSubmit = MutableStateFlow<Resource<Unit>>(
+    internal val verificationPageSubmit = MutableStateFlow<Resource<Int>>(
         savedStateHandle[VERIFICATION_PAGE_SUBMIT] ?: run {
             Resource.idle()
         }
@@ -655,6 +656,9 @@ internal class IdentityViewModel constructor(
         selfie: FaceDetectorTransitioner.Selfie,
         compressionQuality: Float
     ) {
+        _selfieUploadedState.updateStateAndSave { currentState ->
+            currentState.updateLoading(isHighRes, selfie)
+        }
         viewModelScope.launch {
             runCatching {
                 var uploadTime = 0L
@@ -822,7 +826,7 @@ internal class IdentityViewModel constructor(
             calculateClearDataParam(collectedDataParam)
         ).let { verificationPageData ->
             this.verificationPageData.updateStateAndSave {
-                Resource.success(Unit)
+                Resource.success(DUMMY_RESOURCE)
             }
             _collectedData.updateStateAndSave { oldValue ->
                 oldValue.mergeWith(collectedDataParam)
@@ -859,7 +863,7 @@ internal class IdentityViewModel constructor(
             verificationArgs.ephemeralKeySecret
         ).let {
             verificationPageSubmit.updateStateAndSave {
-                Resource.success(Unit)
+                Resource.success(DUMMY_RESOURCE)
             }
             return it
         }

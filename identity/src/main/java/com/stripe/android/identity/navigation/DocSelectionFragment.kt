@@ -14,7 +14,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_SELECT
@@ -24,6 +23,7 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Type
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.DocSelectionScreen
+import com.stripe.android.identity.utils.navigateOnResume
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.navigateToUploadFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
@@ -91,7 +91,7 @@ internal class DocSelectionFragment(
                                 when (modelResource.status) {
                                     // model ready, camera permission is granted -> navigate to scan
                                     Status.SUCCESS -> {
-                                        findNavController().navigate(type.toScanDestinationId())
+                                        navigateOnResume(type.toScanDestinationId())
                                     }
                                     // model not ready, camera permission is granted -> navigate to manual capture
                                     Status.ERROR -> {
@@ -151,7 +151,7 @@ internal class DocSelectionFragment(
         identityViewModel.observeForVerificationPage(
             viewLifecycleOwner,
             onSuccess = { verificationPage ->
-                findNavController().navigate(
+                navigateOnResume(
                     R.id.action_camera_permission_denied,
                     if (verificationPage.documentCapture.requireLiveCapture) {
                         null
