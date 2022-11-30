@@ -22,6 +22,7 @@ import androidx.compose.material.Checkbox
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.LocalContentColor
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
@@ -39,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -197,7 +197,8 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                             shouldUseNativeSdk = true
                         )
                     )
-                }
+                },
+                style = LocalTextStyle.current
             )
             Spacer(modifier = Modifier.width(40.dp))
 
@@ -219,7 +220,8 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                             shouldUseNativeSdk = false
                         )
                     )
-                }
+                },
+                style = LocalTextStyle.current
             )
             Spacer(modifier = Modifier.width(40.dp))
         }
@@ -235,67 +237,82 @@ abstract class ComposeExampleActivity : ComponentActivity() {
             fontSize = 16.sp,
             modifier = Modifier.padding(start = 10.dp, top = 16.dp)
         )
-        Row(
-            modifier = Modifier.padding(start = 20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = identitySubmissionState.allowDrivingLicense,
-                onCheckedChange = {
-                    onSubmissionStateChangedListener(
-                        identitySubmissionState.copy(
-                            allowDrivingLicense = it
+        Column {
+            Row(
+                modifier = Modifier.padding(horizontal = 40.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(
+                    checked = identitySubmissionState.allowDrivingLicense,
+                    onCheckedChange = {
+                        onSubmissionStateChangedListener(
+                            identitySubmissionState.copy(
+                                allowDrivingLicense = it
+                            )
                         )
-                    )
-                },
-                modifier = Modifier.padding(end = 0.dp)
-            )
-            ClickableText(
-                text = AnnotatedString(stringResource(id = R.string.driver_license)),
-                onClick = {
-                    onSubmissionStateChangedListener(
-                        identitySubmissionState.copy(
-                            allowDrivingLicense = !identitySubmissionState.allowDrivingLicense
-                        )
-                    )
-                }
-            )
-
-            Checkbox(checked = identitySubmissionState.allowPassport, onCheckedChange = {
-                onSubmissionStateChangedListener(
-                    identitySubmissionState.copy(
-                        allowPassport = it
-                    )
+                    },
+                    modifier = Modifier.padding(end = 0.dp)
                 )
-            })
-            ClickableText(
-                text = AnnotatedString(stringResource(id = R.string.passport)),
-                onClick = {
-                    onSubmissionStateChangedListener(
-                        identitySubmissionState.copy(
-                            allowPassport = !identitySubmissionState.allowPassport
+                ClickableText(
+                    text = AnnotatedString(stringResource(id = R.string.driver_license)),
+                    onClick = {
+                        onSubmissionStateChangedListener(
+                            identitySubmissionState.copy(
+                                allowDrivingLicense = !identitySubmissionState.allowDrivingLicense
+                            )
                         )
-                    )
-                }
-            )
-
-            Checkbox(checked = identitySubmissionState.allowId, onCheckedChange = {
-                onSubmissionStateChangedListener(
-                    identitySubmissionState.copy(
-                        allowId = it
-                    )
+                    },
+                    style = LocalTextStyle.current
                 )
-            })
-            ClickableText(
-                text = AnnotatedString(stringResource(id = R.string.id_card)),
-                onClick = {
+            }
+
+            Row(
+                modifier = Modifier.padding(horizontal = 40.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(checked = identitySubmissionState.allowPassport, onCheckedChange = {
                     onSubmissionStateChangedListener(
                         identitySubmissionState.copy(
-                            allowId = !identitySubmissionState.allowId
+                            allowPassport = it
                         )
                     )
-                }
-            )
+                })
+                ClickableText(
+                    text = AnnotatedString(stringResource(id = R.string.passport)),
+                    onClick = {
+                        onSubmissionStateChangedListener(
+                            identitySubmissionState.copy(
+                                allowPassport = !identitySubmissionState.allowPassport
+                            )
+                        )
+                    },
+                    style = LocalTextStyle.current
+                )
+            }
+
+            Row(
+                modifier = Modifier.padding(horizontal = 40.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Checkbox(checked = identitySubmissionState.allowId, onCheckedChange = {
+                    onSubmissionStateChangedListener(
+                        identitySubmissionState.copy(
+                            allowId = it
+                        )
+                    )
+                })
+                ClickableText(
+                    text = AnnotatedString(stringResource(id = R.string.id_card)),
+                    onClick = {
+                        onSubmissionStateChangedListener(
+                            identitySubmissionState.copy(
+                                allowId = !identitySubmissionState.allowId
+                            )
+                        )
+                    },
+                    style = LocalTextStyle.current
+                )
+            }
         }
     }
 
@@ -326,7 +343,8 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                             requireLiveCapture = !identitySubmissionState.requireLiveCapture
                         )
                     )
-                }
+                },
+                style = LocalTextStyle.current
             )
         }
 
@@ -349,7 +367,6 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                 )
                 Text(
                     text = stringResource(id = R.string.require_id_number),
-                    style = TextStyle.Default,
                     color = Color.Unspecified.copy(alpha = 0.5f)
                 )
             } else {
@@ -371,7 +388,8 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                                 requireId = !identitySubmissionState.requireId
                             )
                         )
-                    }
+                    },
+                    style = LocalTextStyle.current
                 )
             }
         }
@@ -398,7 +416,8 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                             requireSelfie = !identitySubmissionState.requireSelfie
                         )
                     )
-                }
+                },
+                style = LocalTextStyle.current
             )
         }
     }

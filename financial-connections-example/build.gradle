@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'com.google.firebase.appdistribution'
+    id 'com.google.gms.google-services'
 }
 
 ext {
@@ -15,13 +17,21 @@ android {
         applicationId "com.stripe.android.financialconnections.example"
         minSdk 21
         targetSdk rootProject.ext.compileSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders = [
+            STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: getBackendUrl()
+        ]
     }
 
     buildTypes {
+        debug {
+            firebaseAppDistribution {
+                groups = "financial-connections"
+            }
+        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -47,8 +57,14 @@ android {
     }
 }
 
+// Read values from gradle.properties or system environment variable
+def getBackendUrl() {
+    return findProperty('STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL') ?: ""
+}
+
 dependencies {
     implementation project(':financial-connections')
+    implementation project(':payments-core')
 
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"
@@ -74,4 +90,6 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
     debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$androidxComposeVersion"
+
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
 }

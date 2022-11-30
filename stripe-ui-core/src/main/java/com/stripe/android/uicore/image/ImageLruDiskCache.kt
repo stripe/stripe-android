@@ -26,8 +26,6 @@ import java.io.OutputStream
  * @param cacheFolder name of the folder that will store the images of this cache.
  *        It will create a cache if none exists there.
  * @param maxSizeBytes the maximum number of bytes this cache should use to store
- * @param compressFormat the format to be used when compressing to store the image in cache.
- * @param mCompressQuality the compress quality to be used when compressing to store the image in cache.
  * @throws IOException if reading or writing the cache directory fails
  **/
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -35,8 +33,6 @@ class ImageLruDiskCache(
     context: Context,
     cacheFolder: String,
     maxSizeBytes: Long = 10L * 1024 * 1024, // 10MB
-    private val compressFormat: CompressFormat = CompressFormat.JPEG,
-    private val mCompressQuality: Int = 70,
 ) {
     private lateinit var diskLruCache: DiskLruCache
 
@@ -62,7 +58,14 @@ class ImageLruDiskCache(
             try {
                 editor = diskLruCache.edit(hashedKey)
                 if (editor == null) return
-                if (writeBitmapToFile(data, editor)) {
+                val compressFormat = compressFormatFromUrl(key)
+                if (writeBitmapToFile(
+                        bitmap = data,
+                        editor = editor,
+                        compressFormat = compressFormat,
+                        compressQuality = compressFormat.quality()
+                    )
+                ) {
                     diskLruCache.flush()
                     editor.commit()
                     debug("image put on disk cache $hashedKey")
@@ -75,6 +78,17 @@ class ImageLruDiskCache(
                 kotlin.runCatching { editor?.abort() }
             }
         }
+    }
+
+    private fun compressFormatFromUrl(url: String) =
+        ImageType.fromUrl(url)?.compressFormat
+            ?: throw throw IllegalArgumentException("Unexpected image format: $url")
+
+    private fun CompressFormat.quality(): Int = when (this) {
+        CompressFormat.JPEG -> JPEG_COMPRESS_QUALITY
+        CompressFormat.PNG -> PNG_COMPRESS_QUALITY
+        CompressFormat.WEBP -> WEBP_COMPRESS_QUALITY
+        else -> throw IllegalArgumentException("Unexpected compress format: $this")
     }
 
     fun getBitmap(key: String): Bitmap? {
@@ -141,11 +155,16 @@ class ImageLruDiskCache(
     private fun String.toKey(): String = hashCode().toString()
 
     @Throws(IOException::class, FileNotFoundException::class)
-    private fun writeBitmapToFile(bitmap: Bitmap, editor: DiskLruCache.Editor): Boolean {
+    private fun writeBitmapToFile(
+        bitmap: Bitmap,
+        editor: DiskLruCache.Editor,
+        compressFormat: CompressFormat,
+        compressQuality: Int
+    ): Boolean {
         var out: OutputStream? = null
         return try {
             out = BufferedOutputStream(editor.newOutputStream(0), IO_BUFFER_SIZE)
-            bitmap.compress(compressFormat, mCompressQuality, out)
+            bitmap.compress(compressFormat, compressQuality, out)
         } finally {
             out?.close()
         }
@@ -161,5 +180,9 @@ class ImageLruDiskCache(
         private const val APP_VERSION = 1
         private const val VALUE_COUNT = 1
         private const val IO_BUFFER_SIZE = 8 * 1024
+
+        private const val PNG_COMPRESS_QUALITY = 100
+        private const val JPEG_COMPRESS_QUALITY = 80
+        private const val WEBP_COMPRESS_QUALITY = 80
     }
 }

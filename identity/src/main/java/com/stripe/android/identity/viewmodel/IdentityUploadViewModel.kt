@@ -4,10 +4,11 @@ import android.content.Context
 import android.net.Uri
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.ImageChooser
 import com.stripe.android.identity.utils.PhotoTaker
@@ -93,17 +94,15 @@ internal class IdentityUploadViewModel(
     }
 
     internal class FrontBackUploadViewModelFactory(
-        ownerProvider: () -> SavedStateRegistryOwner,
         private val identityIO: IdentityIO
-    ) : AbstractSavedStateViewModelFactory(ownerProvider(), null) {
+    ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(
-            key: String,
-            modelClass: Class<T>,
-            handle: SavedStateHandle
-        ): T {
-            return IdentityUploadViewModel(identityIO, handle) as T
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            return IdentityUploadViewModel(
+                identityIO = identityIO,
+                savedStateHandle = extras.createSavedStateHandle(),
+            ) as T
         }
     }
 }

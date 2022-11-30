@@ -34,14 +34,6 @@ public final class com/stripe/android/ui/core/FieldValuesToParamsMapConverter$Co
 	public final fun transformToPaymentMethodCreateParams (Ljava/util/Map;Ljava/lang/String;Z)Lcom/stripe/android/model/PaymentMethodCreateParams;
 }
 
-public final class com/stripe/android/ui/core/FormController_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/FormController_Factory;
-	public fun get ()Lcom/stripe/android/ui/core/FormController;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/ui/core/elements/LayoutSpec;Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Lcom/stripe/android/ui/core/forms/TransformSpecToElements;Lkotlinx/coroutines/CoroutineScope;)Lcom/stripe/android/ui/core/FormController;
-}
-
 public final class com/stripe/android/ui/core/FormUIKt {
 }
 
@@ -57,14 +49,6 @@ public final class com/stripe/android/ui/core/PaymentsThemeKt {
 public final class com/stripe/android/ui/core/address/AddressRepository$Companion {
 }
 
-public final class com/stripe/android/ui/core/address/AddressRepository_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/address/AddressRepository_Factory;
-	public fun get ()Lcom/stripe/android/ui/core/address/AddressRepository;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/address/AddressRepository;
-}
-
 public final class com/stripe/android/ui/core/address/AddressUtilKt {
 }
 
@@ -75,9 +59,6 @@ public final class com/stripe/android/ui/core/databinding/ActivityCardScanBindin
 	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
 	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/ui/core/databinding/ActivityCardScanBinding;
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/ui/core/databinding/ActivityCardScanBinding;
-}
-
-public final class com/stripe/android/ui/core/elements/AddressElement$Companion {
 }
 
 public final class com/stripe/android/ui/core/elements/AddressSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -116,13 +97,15 @@ public final class com/stripe/android/ui/core/elements/AddressType$Normal : com/
 
 public final class com/stripe/android/ui/core/elements/AddressType$ShippingCondensed : com/stripe/android/ui/core/elements/AddressType {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;)V
+	public fun <init> (Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
-	public final fun component3 ()Lkotlin/jvm/functions/Function0;
-	public final fun copy (Ljava/lang/String;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
-	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;Ljava/lang/String;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
+	public final fun component2 ()Ljava/util/Set;
+	public final fun component3 ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
+	public final fun component4 ()Lkotlin/jvm/functions/Function0;
+	public final fun copy (Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
+	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAutocompleteCountries ()Ljava/util/Set;
 	public final fun getGoogleApiKey ()Ljava/lang/String;
 	public final fun getOnNavigation ()Lkotlin/jvm/functions/Function0;
 	public fun getPhoneNumberState ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
@@ -997,22 +980,6 @@ public final class com/stripe/android/ui/core/forms/TransformSpecToElements {
 	public final fun transform (Ljava/util/List;)Ljava/util/List;
 }
 
-public final class com/stripe/android/ui/core/forms/resources/AsyncAddressResourceRepository_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/AsyncAddressResourceRepository_Factory;
-	public fun get ()Lcom/stripe/android/ui/core/forms/resources/AsyncAddressResourceRepository;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/content/res/Resources;Lkotlin/coroutines/CoroutineContext;Ljava/util/Locale;)Lcom/stripe/android/ui/core/forms/resources/AsyncAddressResourceRepository;
-}
-
-public final class com/stripe/android/ui/core/forms/resources/AsyncLpmResourceRepository_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/AsyncLpmResourceRepository_Factory;
-	public fun get ()Lcom/stripe/android/ui/core/forms/resources/AsyncLpmResourceRepository;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Landroid/content/res/Resources;)Lcom/stripe/android/ui/core/forms/resources/AsyncLpmResourceRepository;
-}
-
 public final class com/stripe/android/ui/core/forms/resources/LpmRepository$Companion {
 	public final fun getHardcodedCard ()Lcom/stripe/android/ui/core/forms/resources/LpmRepository$SupportedPaymentMethod;
 	public final fun getInstance (Lcom/stripe/android/ui/core/forms/resources/LpmRepository$LpmRepositoryArguments;)Lcom/stripe/android/ui/core/forms/resources/LpmRepository;
@@ -1059,24 +1026,8 @@ public final class com/stripe/android/ui/core/forms/resources/injection/Resource
 	public final fun provideResources (Landroid/content/Context;)Landroid/content/res/Resources;
 }
 
-public final class com/stripe/android/ui/core/forms/resources/injection/ResourceRepositoryModule_Companion_ProvideResourcesFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/forms/resources/injection/ResourceRepositoryModule_Companion_ProvideResourcesFactory;
-	public fun get ()Landroid/content/res/Resources;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideResources (Landroid/content/Context;)Landroid/content/res/Resources;
-}
-
 public final class com/stripe/android/ui/core/injection/FormControllerModule$Companion {
 	public final fun provideTransformSpecToElements (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Landroid/content/Context;Ljava/lang/String;Lcom/stripe/android/model/StripeIntent;Ljava/util/Map;Ljava/util/Map;Ljava/util/Set;)Lcom/stripe/android/ui/core/forms/TransformSpecToElements;
-}
-
-public final class com/stripe/android/ui/core/injection/FormControllerModule_Companion_ProvideTransformSpecToElementsFactory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/ui/core/injection/FormControllerModule_Companion_ProvideTransformSpecToElementsFactory;
-	public fun get ()Lcom/stripe/android/ui/core/forms/TransformSpecToElements;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideTransformSpecToElements (Lcom/stripe/android/ui/core/forms/resources/ResourceRepository;Landroid/content/Context;Ljava/lang/String;Lcom/stripe/android/model/StripeIntent;Ljava/util/Map;Ljava/util/Map;Ljava/util/Set;)Lcom/stripe/android/ui/core/forms/TransformSpecToElements;
 }
 
 public abstract interface class com/stripe/android/ui/core/injection/FormControllerSubcomponent$Builder {

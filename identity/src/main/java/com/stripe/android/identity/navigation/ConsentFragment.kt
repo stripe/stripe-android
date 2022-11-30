@@ -3,7 +3,6 @@ package com.stripe.android.identity.navigation
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -13,15 +12,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.networking.Resource
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.ui.ConsentScreen
+import com.stripe.android.identity.utils.navigateOnResume
 import com.stripe.android.identity.utils.navigateToErrorFragmentWithFailedReason
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -51,12 +49,21 @@ internal class ConsentFragment(
             ConsentScreen(
                 merchantLogoUri = identityViewModel.verificationArgs.brandLogo,
                 verificationState = verificationState,
-                onSuccess = { verificationPage ->
+                onComposeFinish = { verificationPage ->
                     identityViewModel.updateAnalyticsState { oldState ->
                         oldState.copy(
                             requireSelfie = verificationPage.requireSelfie()
                         )
                     }
+                    lifecycleScope.launch(identityViewModel.workContext) {
+                        identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONSENT)
+                    }
+
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                            screenName = SCREEN_NAME_CONSENT
+                        )
+                    )
                 },
                 onFallbackUrl = this@ConsentFragment::logErrorAndLaunchFallback,
                 onError = this@ConsentFragment::logErrorAndNavigateToError,
@@ -64,19 +71,6 @@ internal class ConsentFragment(
                 onConsentDeclined = this@ConsentFragment::declineConsentAndPost
             )
         }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launch(identityViewModel.workContext) {
-            identityViewModel.screenTracker.screenTransitionFinish(SCREEN_NAME_CONSENT)
-        }
-
-        identityViewModel.sendAnalyticsRequest(
-            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                screenName = SCREEN_NAME_CONSENT
-            )
-        )
     }
 
     private fun logErrorAndLaunchFallback(fallbackUrl: String) {
@@ -92,21 +86,19 @@ internal class ConsentFragment(
         navigateToErrorFragmentWithFailedReason(throwable)
     }
 
-    private fun agreeConsentAndPost(requireSelfie: Boolean) {
+    private fun agreeConsentAndPost() {
         postVerificationPageDataAndNavigate(
             CollectedDataParam(
                 biometricConsent = true
-            ),
-            requireSelfie
+            )
         )
     }
 
-    private fun declineConsentAndPost(requireSelfie: Boolean) {
+    private fun declineConsentAndPost() {
         postVerificationPageDataAndNavigate(
             CollectedDataParam(
                 false
-            ),
-            requireSelfie
+            )
         )
     }
 
@@ -114,21 +106,15 @@ internal class ConsentFragment(
      * Post VerificationPageData with the type and navigate base on its result.
      */
     private fun postVerificationPageDataAndNavigate(
-        collectedDataParam: CollectedDataParam,
-        requireSelfie: Boolean
+        collectedDataParam: CollectedDataParam
     ) {
         lifecycleScope.launch {
             postVerificationPageDataAndMaybeSubmit(
                 identityViewModel,
                 collectedDataParam,
-                if (requireSelfie) {
-                    ClearDataParam.CONSENT_TO_DOC_SELECT_WITH_SELFIE
-                } else {
-                    ClearDataParam.CONSENT_TO_DOC_SELECT
-                },
                 fromFragment = R.id.consentFragment,
                 notSubmitBlock = {
-                    findNavController().navigate(R.id.action_consentFragment_to_docSelectionFragment)
+                    navigateOnResume(R.id.action_consentFragment_to_docSelectionFragment)
                 }
             )
         }

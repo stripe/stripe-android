@@ -47,7 +47,7 @@ interface ConnectionFactory {
             return (URL(request.url).openConnection() as HttpURLConnection).apply {
                 connectTimeout = CONNECT_TIMEOUT
                 readTimeout = READ_TIMEOUT
-                useCaches = false
+                useCaches = request.shouldCache
                 requestMethod = request.method.code
 
                 request.headers.forEach { (key, value) ->

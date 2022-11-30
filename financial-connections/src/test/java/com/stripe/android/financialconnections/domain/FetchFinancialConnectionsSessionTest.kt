@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.domain
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.financialConnectionsSessionWithMoreAccounts
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
@@ -20,8 +19,11 @@ import kotlin.test.assertFailsWith
 @RunWith(AndroidJUnit4::class)
 class FetchFinancialConnectionsSessionTest {
 
-    private val repository = FakeFinancialConnectionsRepository(ApiKeyFixtures.MANIFEST)
-    private val getFinancialConnectionsSession = FetchFinancialConnectionsSession(repository)
+    private val repository = FakeFinancialConnectionsRepository()
+    private val getFinancialConnectionsSession = FetchFinancialConnectionsSession(
+        FetchPaginatedAccountsForSession(repository),
+        repository
+    )
 
     @Test
     fun `invoke - when session with no more accounts, should return unmodified session`() =

@@ -1,20 +1,20 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
-import android.os.Bundle
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
@@ -68,6 +68,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -452,23 +453,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 val linkConfig = createLinkConfiguration(stripeIntent).also {
                     _linkConfiguration.value = it
                 }
+
                 val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
+
                 when (accountStatus) {
                     AccountStatus.Verified -> launchLink(linkConfig, launchedDirectly = true)
                     AccountStatus.VerificationStarted,
-                    AccountStatus.NeedsVerification -> {
-                        linkVerificationCallback = { success ->
-                            linkVerificationCallback = null
-                            _showLinkVerificationDialog.value = false
-
-                            if (success) {
-                                launchLink(linkConfig, launchedDirectly = true)
-                            }
-                        }
-                        _showLinkVerificationDialog.value = true
-                    }
+                    AccountStatus.NeedsVerification -> setupLinkWithVerification(linkConfig)
                     AccountStatus.SignedOut,
                     AccountStatus.Error -> {
+                        // Nothing to do here
                     }
                 }
                 activeLinkSession.value = accountStatus == AccountStatus.Verified
@@ -476,6 +470,17 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         } else {
             _isLinkEnabled.value = false
+        }
+    }
+
+    private fun setupLinkWithVerification(
+        configuration: LinkPaymentLauncher.Configuration,
+    ) {
+        viewModelScope.launch {
+            val success = requestLinkVerification()
+            if (success) {
+                launchLink(configuration, launchedDirectly = true)
+            }
         }
     }
 
@@ -675,30 +680,25 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     internal class Factory(
-        private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentSheetContract.Args,
-        owner: SavedStateRegistryOwner,
-        defaultArgs: Bundle? = null
-    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
-        Injectable<Factory.FallbackInitializeParam> {
-        internal data class FallbackInitializeParam(
-            val application: Application
-        )
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+
+        internal data class FallbackInitializeParam(val application: Application)
 
         @Inject
-        lateinit var subComponentBuilderProvider:
-            Provider<PaymentSheetViewModelSubcomponent.Builder>
+        lateinit var subComponentBuilderProvider: Provider<PaymentSheetViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(
-            key: String,
-            modelClass: Class<T>,
-            savedStateHandle: SavedStateHandle
-        ): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val args = starterArgsSupplier()
 
-            val injector =
-                injectWithFallback(args.injectorKey, FallbackInitializeParam(applicationSupplier()))
+            val application = extras.requireApplication()
+            val savedStateHandle = extras.createSavedStateHandle()
+
+            val injector = injectWithFallback(
+                injectorKey = args.injectorKey,
+                fallbackInitializeParam = FallbackInitializeParam(application),
+            )
 
             val subcomponent = subComponentBuilderProvider.get()
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(args))

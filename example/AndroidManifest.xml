@@ -76,6 +76,7 @@
         <activity android:name=".activity.AlipayPaymentWebActivity"/>
         <activity android:name=".activity.ConnectUSBankAccountActivity"/>
         <activity android:name=".activity.ManualUSBankAccountPaymentMethodActivity"/>
+        <activity android:name=".activity.StripeImageActivity"/>
     </application>
 
 </manifest>

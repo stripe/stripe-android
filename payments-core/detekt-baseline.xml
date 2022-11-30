@@ -69,6 +69,8 @@
     <ID>MagicNumber:FraudDetectionDataRequestParamsFactory.kt$FraudDetectionDataRequestParamsFactory.Companion$60</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$5</ID>
     <ID>MagicNumber:PaymentAuthConfig.kt$PaymentAuthConfig.Stripe3ds2Config$99</ID>
+    <ID>MagicNumber:StripeApiRepository.kt$StripeApiRepository$10</ID>
+    <ID>MagicNumber:StripeApiRepository.kt$StripeApiRepository$1024</ID>
     <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$0.114</ID>
     <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$0.299</ID>
     <ID>MagicNumber:StripeColorUtils.kt$StripeColorUtils.Companion$0.5</ID>
@@ -151,6 +153,9 @@
     <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.SepaDebit$*</ID>
     <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.USBankAccount$*</ID>
     <ID>MaxLineLength:PaymentMethodCreateParams.kt$PaymentMethodCreateParams.BacsDebit$*</ID>
+    <ID>MaxLineLength:PaymentMethodMessageFixtures.kt$PaymentMethodMessageFixtures$display_l_html</ID>
+    <ID>MaxLineLength:PaymentMethodMessageFixtures.kt$PaymentMethodMessageFixtures$learn_more_modal_url</ID>
+    <ID>MaxLineLength:PaymentMethodMessageJsonParserTest.kt$PaymentMethodMessageJsonParserTest$.</ID>
     <ID>MaxLineLength:PaymentMethodsActivityStarter.kt$PaymentMethodsActivityStarter.Args.Builder$*</ID>
     <ID>MaxLineLength:PaymentMethodsActivityTest.kt$PaymentMethodsActivityTest$private val listenerArgumentCaptor: KArgumentCaptor&lt;CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()</ID>
     <ID>MaxLineLength:PaymentMethodsViewModelTest.kt$PaymentMethodsViewModelTest$private val listenerArgumentCaptor: KArgumentCaptor&lt;CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()</ID>
@@ -194,6 +199,7 @@
     <ID>ReturnCount:FraudDetectionDataJsonParser.kt$FraudDetectionDataJsonParser$override fun parse(json: JSONObject): FraudDetectionData?</ID>
     <ID>ReturnCount:PaymentAuthWebViewClient.kt$PaymentAuthWebViewClient$private fun isReturnUrl(uri: Uri): Boolean</ID>
     <ID>ReturnCount:WalletJsonParser.kt$WalletJsonParser$override fun parse(json: JSONObject): Wallet?</ID>
+    <ID>SwallowedException:ActivityUtils.kt$e: IllegalArgumentException</ID>
     <ID>SwallowedException:PaymentUtils.kt$PaymentUtils$e: ClassCastException</ID>
     <ID>SwallowedException:Stripe.kt$Stripe$exception: CardException</ID>
     <ID>ThrowsCount:StripeApiRepository.kt$StripeApiRepository$@Throws( InvalidRequestException::class, AuthenticationException::class, CardException::class, APIException::class ) private fun handleApiError(response: StripeResponse&lt;String>)</ID>
@@ -201,9 +207,7 @@
     <ID>TooGenericExceptionThrown:PaymentFlowViewModelTest.kt$PaymentFlowViewModelTest.ThrowingShippingMethodsFactory$throw RuntimeException("Always throws an exception")</ID>
     <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Company$Builder : ObjectBuilder</ID>
     <ID>TooManyFunctions:AccountParams.kt$AccountParams.BusinessTypeParams.Individual$Builder : ObjectBuilder</ID>
-    <ID>TooManyFunctions:AddPaymentMethodActivity.kt$AddPaymentMethodActivity : StripeActivity</ID>
     <ID>TooManyFunctions:AuthenticationComponent.kt$AuthenticationComponent$Builder</ID>
-    <ID>TooManyFunctions:CardFormView.kt$CardFormView : LinearLayout</ID>
     <ID>TooManyFunctions:CardInputWidget.kt$CardInputWidget : LinearLayoutCardWidget</ID>
     <ID>TooManyFunctions:CardMultilineWidget.kt$CardMultilineWidget : LinearLayoutCardWidget</ID>
     <ID>TooManyFunctions:CardWidget.kt$CardWidget</ID>
@@ -211,17 +215,12 @@
     <ID>TooManyFunctions:CustomerSession.kt$CustomerSession</ID>
     <ID>TooManyFunctions:PaymentAnalyticsRequestFactory.kt$PaymentAnalyticsRequestFactory : AnalyticsRequestFactory</ID>
     <ID>TooManyFunctions:PaymentController.kt$PaymentController</ID>
-    <ID>TooManyFunctions:PaymentFlowActivity.kt$PaymentFlowActivity : StripeActivity</ID>
-    <ID>TooManyFunctions:PaymentFlowResultProcessor.kt$PaymentFlowResultProcessor&lt;T : StripeIntent, out S : StripeIntentResult&lt;T>></ID>
     <ID>TooManyFunctions:PaymentMethod.kt$PaymentMethod$Builder : ObjectBuilder</ID>
     <ID>TooManyFunctions:PaymentMethodCreateParams.kt$PaymentMethodCreateParams$Companion</ID>
-    <ID>TooManyFunctions:PaymentMethodsActivity.kt$PaymentMethodsActivity : AppCompatActivity</ID>
     <ID>TooManyFunctions:PaymentMethodsActivityStarter.kt$PaymentMethodsActivityStarter.Args$Builder : ObjectBuilder</ID>
     <ID>TooManyFunctions:PaymentMethodsAdapter.kt$PaymentMethodsAdapter : Adapter</ID>
     <ID>TooManyFunctions:PaymentSessionConfig.kt$PaymentSessionConfig$Builder : ObjectBuilder</ID>
-    <ID>TooManyFunctions:PaymentSessionViewModel.kt$PaymentSessionViewModel : AndroidViewModel</ID>
     <ID>TooManyFunctions:PersonTokenParams.kt$PersonTokenParams$Builder : ObjectBuilder</ID>
-    <ID>TooManyFunctions:ShippingInfoWidget.kt$ShippingInfoWidget : LinearLayout</ID>
     <ID>TooManyFunctions:SourceParams.kt$SourceParams$Companion</ID>
     <ID>TooManyFunctions:Stripe.kt$Stripe</ID>
     <ID>TooManyFunctions:StripeApiRepository.kt$StripeApiRepository : StripeRepository</ID>

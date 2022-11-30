@@ -26,6 +26,8 @@ class ConfirmationScreenTest {
     val composeTestRule = createComposeRule()
 
     private val onConfirmedMock = mock<() -> Unit>()
+    private val onError = mock<(Throwable) -> Unit>()
+    private val onComposeFinish = mock<(VerificationPage) -> Unit>()
 
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.success).thenReturn(
@@ -44,7 +46,9 @@ class ConfirmationScreenTest {
         ) {
             onNodeWithTag(confirmationTitleTag).assertTextEquals(CONFIRMATION_TITLE)
             onNodeWithTag(BODY_TAG).assertTextEquals(CONFIRMATION_BODY)
-            onNodeWithTag(confirmationConfirmButtonTag).assertTextEquals(CONFIRMATION_BUTTON_TEXT)
+            onNodeWithTag(confirmationConfirmButtonTag).assertTextEquals(
+                CONFIRMATION_BUTTON_TEXT.uppercase()
+            )
             onNodeWithTag(confirmationConfirmButtonTag).performClick()
             verify(onConfirmedMock).invoke()
         }
@@ -57,6 +61,8 @@ class ConfirmationScreenTest {
         composeTestRule.setContent {
             ConfirmationScreen(
                 verificationPageState = verificationState,
+                onError = onError,
+                onComposeFinish = onComposeFinish,
                 onConfirmed = onConfirmedMock
             )
         }

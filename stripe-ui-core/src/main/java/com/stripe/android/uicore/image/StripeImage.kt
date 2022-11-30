@@ -10,6 +10,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
@@ -44,6 +45,7 @@ fun StripeImage(
     contentDescription: String?,
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
+    colorFilter: ColorFilter? = null,
     errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
     loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {}
 ) {
@@ -55,8 +57,10 @@ fun StripeImage(
             launch {
                 imageLoader
                     .load(url, width, height)
-                    .onSuccess { bitmap ->
-                        state.value = Success(BitmapPainter(bitmap.asImageBitmap()))
+                    .onSuccess {
+                        it?.let { bitmap ->
+                            state.value = Success(BitmapPainter(bitmap.asImageBitmap()))
+                        }
                     }
                     .onFailure {
                         state.value = Error
@@ -68,6 +72,7 @@ fun StripeImage(
             Loading -> loadingContent()
             is Success -> Image(
                 modifier = modifier,
+                colorFilter = colorFilter,
                 contentDescription = contentDescription,
                 contentScale = contentScale,
                 painter = result.painter

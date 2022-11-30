@@ -22,6 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
+            android:textAppearance="?attr/textAppearanceBody1"
             android:layout_marginEnd="40dp"
             android:text="@string/use_native" />
 
@@ -29,6 +30,7 @@
             android:id="@+id/use_web"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBody1"
             android:text="@string/use_web" />
     </RadioGroup>
 
@@ -49,6 +51,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/allowed_types"
+        android:textAppearance="?attr/textAppearanceBody1"
         android:layout_marginStart="10dp"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/allowed_types"
@@ -60,8 +63,8 @@
         android:id="@+id/allowed_types"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginStart="20dp"
+        android:orientation="vertical"
+        android:layout_marginStart="40dp"
         app:layout_constraintBottom_toTopOf="@+id/require_live_capture"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -72,6 +75,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
+            android:textAppearance="?attr/textAppearanceBody1"
             android:text="@string/driver_license" />
 
         <CheckBox
@@ -79,6 +83,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
+            android:textAppearance="?attr/textAppearanceBody1"
             android:text="@string/passport" />
 
         <CheckBox
@@ -86,6 +91,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checked="true"
+            android:textAppearance="?attr/textAppearanceBody1"
             android:text="@string/id_card" />
     </LinearLayout>
 
@@ -97,6 +103,7 @@
         android:layout_marginEnd="10dp"
         android:text="@string/require_live_capture"
         android:checked="true"
+        android:textAppearance="?attr/textAppearanceBody1"
         app:layout_constraintBottom_toTopOf="@+id/require_id_number"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -110,6 +117,7 @@
         android:enabled="false"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
+        android:textAppearance="?attr/textAppearanceBody1"
         app:layout_constraintBottom_toTopOf="@+id/require_matching_selfie"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -122,6 +130,7 @@
         android:text="@string/require_matching_selfie"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
+        android:textAppearance="?attr/textAppearanceBody1"
         app:layout_constraintBottom_toTopOf="@+id/separator2"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -147,6 +156,7 @@
         android:layout_marginBottom="10dp"
         android:textIsSelectable="true"
         android:textStyle="bold"
+        android:textAppearance="?attr/textAppearanceBody1"
         app:layout_constraintBottom_toTopOf="@+id/result_view"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -159,6 +169,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
+        android:textAppearance="?attr/textAppearanceBody1"
         app:layout_constraintBottom_toTopOf="@+id/progress_circular"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

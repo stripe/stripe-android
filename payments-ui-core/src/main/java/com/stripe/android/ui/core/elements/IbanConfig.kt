@@ -101,7 +101,7 @@ class IbanConfig : TextFieldConfig {
             }
         } else {
             TextFieldStateConstants.Error.Incomplete(
-                R.string.iban_invalid
+                R.string.invalid_bank_account_iban
             )
         }
     }

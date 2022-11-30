@@ -17,6 +17,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
@@ -58,9 +59,7 @@ internal class ConsentFragmentTest {
         )
         whenever(it.requirements).thenReturn(
             VerificationPageRequirements(
-                missing = listOf(
-                    VerificationPageRequirements.Missing.BIOMETRICCONSENT
-                )
+                missing = listOf(Requirement.BIOMETRICCONSENT)
             )
         )
     }
@@ -76,7 +75,9 @@ internal class ConsentFragmentTest {
             IdentityAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 args = ARGS
-            )
+            ).also {
+                it.verificationPage = mock()
+            }
         )
         on { screenTracker }.thenReturn(mockScreenTracker)
         on { uiContext } doReturn testDispatcher

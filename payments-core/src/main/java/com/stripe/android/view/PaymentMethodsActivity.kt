@@ -21,6 +21,7 @@ import com.stripe.android.R
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.databinding.PaymentMethodsActivityBinding
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.utils.argsAreInvalid
 import com.stripe.android.view.i18n.TranslatorManager
 
 /**
@@ -77,6 +78,8 @@ class PaymentMethodsActivity : AppCompatActivity() {
         )
     }
 
+    private var earlyExitDueToIllegalState: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (customerSession.isFailure) {
@@ -84,6 +87,10 @@ class PaymentMethodsActivity : AppCompatActivity() {
                 null,
                 Activity.RESULT_CANCELED
             )
+            return
+        }
+        if (argsAreInvalid { args }) {
+            earlyExitDueToIllegalState = true
             return
         }
 
@@ -283,7 +290,9 @@ class PaymentMethodsActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        viewModel.selectedPaymentMethodId = adapter.selectedPaymentMethod?.id
+        if (!earlyExitDueToIllegalState) {
+            viewModel.selectedPaymentMethodId = adapter.selectedPaymentMethod?.id
+        }
         super.onDestroy()
     }
 

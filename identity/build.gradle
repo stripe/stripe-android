@@ -40,8 +40,6 @@ dependencies {
     // Compose
     implementation "androidx.compose.runtime:runtime:$androidxComposeVersion"
     implementation "androidx.activity:activity-compose:$androidxActivityVersion"
-    // Integration with activities
-    implementation "androidx.activity:activity-compose:$androidxComposeVersion"
     // Integration with ViewModels
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$androidxLifecycleVersion"
     // Integration with Navigation
@@ -51,13 +49,13 @@ dependencies {
     // Material Design
     implementation "androidx.compose.material:material:$androidxComposeVersion"
     // MdcTheme
-    implementation "com.google.android.material:compose-theme-adapter:1.1.18"
+    implementation "com.google.android.material:compose-theme-adapter:1.2.0"
     // Test rules and transitive dependencies:
     testImplementation("androidx.compose.ui:ui-test-junit4:$androidxComposeVersion")
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation("androidx.compose.ui:ui-test-manifest:$androidxComposeVersion")
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
-    testImplementation "androidx.test.espresso:espresso-core:3.5.0-beta01"
+    testImplementation "androidx.test.espresso:espresso-core:3.5.0"
 
 
     testImplementation "junit:junit:$junitVersion"

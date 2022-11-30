@@ -5,6 +5,7 @@ import com.airbnb.mvrx.PersistState
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 
 /**
  *  Class containing all of the data needed to represent the screen.
@@ -13,7 +14,7 @@ internal data class FinancialConnectionsSheetState(
     val initialArgs: FinancialConnectionsSheetActivityArgs = emptyArgs(),
     val activityRecreated: Boolean = false,
     @PersistState val manifest: FinancialConnectionsSessionManifest? = null,
-    @PersistState val authFlowActive: Boolean = false,
+    @PersistState val webAuthFlowActive: Boolean = false,
     val viewEffect: FinancialConnectionsSheetViewEffect? = null
 ) : MavericksState {
 
@@ -45,6 +46,14 @@ internal data class FinancialConnectionsSheetState(
  *  Mostly one-off actions to be executed by the view will be instances of ViewEffect.
  */
 internal sealed class FinancialConnectionsSheetViewEffect {
+
+    /**
+     * Open the AuthFlow native activity.
+     */
+    data class OpenNativeAuthFlow(
+        val configuration: FinancialConnectionsSheet.Configuration,
+        val initialSyncResponse: SynchronizeSessionResponse
+    ) : FinancialConnectionsSheetViewEffect()
 
     /**
      * Open the AuthFlow.

@@ -1,35 +1,43 @@
 package com.stripe.android.identity.navigation
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.lifecycle.Lifecycle
+import androidx.annotation.StringRes
+import androidx.annotation.VisibleForTesting
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
-import com.stripe.android.camera.Camera1Adapter
+import com.stripe.android.camera.CameraAdapter
+import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.camera.CameraXAdapter
 import com.stripe.android.camera.DefaultCameraErrorListener
+import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.camera.scanui.util.startAnimationIfNotRunning
 import com.stripe.android.identity.R
-import com.stripe.android.identity.databinding.IdentityDocumentScanFragmentBinding
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBack
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingSelfie
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.ui.LoadingButton
+import com.stripe.android.identity.states.IdentityScanState.Companion.isFront
+import com.stripe.android.identity.states.IdentityScanState.Companion.isNullOrFront
+import com.stripe.android.identity.ui.DocumentScanScreen
 import com.stripe.android.identity.utils.fragmentIdToScreenName
+import com.stripe.android.identity.utils.navigateOnResume
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
-import com.stripe.android.identity.utils.navigateToSelfieOrSubmit
 import com.stripe.android.identity.utils.postVerificationPageData
-import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
-import com.stripe.android.identity.viewmodel.CameraViewModel
+import com.stripe.android.identity.utils.submitVerificationPageDataAndNavigate
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -44,31 +52,123 @@ internal abstract class IdentityDocumentScanFragment(
     identityViewModelFactory
 ) {
     abstract val frontScanType: IdentityScanState.ScanType
+    abstract val backScanType: IdentityScanState.ScanType?
 
-    protected lateinit var binding: IdentityDocumentScanFragmentBinding
-    protected lateinit var headerTitle: TextView
-    protected lateinit var messageView: TextView
-    protected lateinit var continueButton: LoadingButton
-    private lateinit var checkMarkView: ImageView
+    @get:StringRes
+    abstract val frontTitleStringRes: Int
+
+    @get:StringRes
+    abstract val backTitleStringRes: Int
+
+    @get:StringRes
+    abstract val frontMessageStringRes: Int
+
+    @get:StringRes
+    abstract val backMessageStringRes: Int
+
+    abstract val collectedDataParamType: CollectedDataParam.Type
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        binding = IdentityDocumentScanFragmentBinding.inflate(inflater, container, false)
-        cameraView = binding.cameraView
+    ) = ComposeView(requireContext()).apply {
+        setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+        setContent {
+            val changedDisplayState by identityScanViewModel.displayStateChangedFlow.collectAsState()
+            val newDisplayState by remember {
+                derivedStateOf {
+                    changedDisplayState?.first
+                }
+            }
+            val targetScanType by identityScanViewModel.targetScanTypeFlow.collectAsState()
 
-        cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
+            DocumentScanScreen(
+                title =
+                if (targetScanType.isNullOrFront()) {
+                    stringResource(id = frontTitleStringRes)
+                } else {
+                    stringResource(id = backTitleStringRes)
+                },
+                message = when (newDisplayState) {
+                    is IdentityScanState.Finished -> stringResource(id = R.string.scanned)
+                    is IdentityScanState.Found -> stringResource(id = R.string.hold_still)
+                    is IdentityScanState.Initial -> {
+                        if (targetScanType.isNullOrFront()) {
+                            stringResource(id = frontMessageStringRes)
+                        } else {
+                            stringResource(id = backMessageStringRes)
+                        }
+                    }
 
-        headerTitle = binding.headerTitle
-        messageView = binding.message
+                    is IdentityScanState.Satisfied -> stringResource(id = R.string.scanned)
+                    is IdentityScanState.TimeOut -> ""
+                    is IdentityScanState.Unsatisfied -> ""
+                    null -> {
+                        if (targetScanType.isNullOrFront()) {
+                            stringResource(id = frontMessageStringRes)
+                        } else {
+                            stringResource(id = backMessageStringRes)
+                        }
+                    }
+                },
+                newDisplayState = newDisplayState,
+                onCameraViewCreated = {
+                    if (cameraView == null) {
+                        cameraView = it
+                        requireNotNull(cameraView)
+                            .viewFinderWindowView
+                            .setBackgroundResource(
+                                R.drawable.viewfinder_background
+                            )
+                        cameraAdapter = createCameraAdapter()
+                    }
+                },
+                onContinueClicked = {
+                    collectDocumentUploadedStateAndPost(
+                        collectedDataParamType,
+                        requireNotNull(targetScanType) {
+                            "targetScanType is still null"
+                        }.isFront()
+                    )
+                }
+            )
+            LaunchedEffect(newDisplayState) {
+                when (newDisplayState) {
+                    null -> {
+                        requireNotNull(cameraView).toggleInitial()
+                    }
+                    is IdentityScanState.Initial -> {
+                        requireNotNull(cameraView).toggleInitial()
+                    }
+                    is IdentityScanState.Found -> {
+                        requireNotNull(cameraView).toggleFound()
+                    }
+                    is IdentityScanState.Finished -> {
+                        requireNotNull(cameraView).toggleFinished()
+                    }
+                    else -> {} // no-op
+                }
+            }
+        }
+    }
 
-        checkMarkView = binding.checkMarkView
-        continueButton = binding.kontinue
-        continueButton.setText(getString(R.string.kontinue))
-        continueButton.toggleToDisabled()
-        return binding.root
+    private fun CameraView.toggleInitial() {
+        viewFinderBackgroundView.visibility = View.VISIBLE
+        viewFinderWindowView.visibility = View.VISIBLE
+        viewFinderBorderView.visibility = View.VISIBLE
+        viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
+    }
+
+    private fun CameraView.toggleFound() {
+        viewFinderBorderView.startAnimationIfNotRunning(R.drawable.viewfinder_border_found)
+    }
+
+    private fun CameraView.toggleFinished() {
+        viewFinderBackgroundView.visibility = View.INVISIBLE
+        viewFinderWindowView.visibility = View.INVISIBLE
+        viewFinderBorderView.visibility = View.INVISIBLE
+        viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -76,200 +176,132 @@ internal abstract class IdentityDocumentScanFragment(
             identityViewModel.resetDocumentUploadedState()
         }
         super.onViewCreated(view, savedInstanceState)
-
-        lifecycleScope.launch(identityViewModel.workContext) {
-            identityViewModel.screenTracker.screenTransitionFinish(fragmentId.fragmentIdToScreenName())
-        }
-        identityViewModel.sendAnalyticsRequest(
-            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                scanType = frontScanType,
-                screenName = fragmentId.fragmentIdToScreenName()
-            )
+        identityViewModel.observeForVerificationPage(
+            this,
+            onSuccess = {
+                lifecycleScope.launch(identityViewModel.workContext) {
+                    identityViewModel.screenTracker.screenTransitionFinish(fragmentId.fragmentIdToScreenName())
+                }
+                identityViewModel.sendAnalyticsRequest(
+                    identityViewModel.identityAnalyticsRequestFactory.screenPresented(
+                        scanType = frontScanType,
+                        screenName = fragmentId.fragmentIdToScreenName()
+                    )
+                )
+            }
         )
     }
 
     /**
      * Check if should start scanning from back.
      */
-    protected fun shouldStartFromBack(): Boolean =
-        arguments?.get(ARG_SHOULD_START_FROM_BACK) as? Boolean == true
+    private fun shouldStartFromBack(): Boolean =
+        arguments?.getBoolean(ARG_SHOULD_START_FROM_BACK) == true
 
-    override fun resetUI() {
-        cameraView.viewFinderBackgroundView.visibility = View.VISIBLE
-        cameraView.viewFinderWindowView.visibility = View.VISIBLE
-        cameraView.viewFinderBorderView.visibility = View.VISIBLE
-        continueButton.toggleToDisabled()
-        checkMarkView.visibility = View.GONE
-        cameraView.viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
-    }
-
-    /**
-     * Called back each time when [CameraViewModel.displayStateChanged] is changed.
-     */
-    override fun updateUI(identityScanState: IdentityScanState) {
-        when (identityScanState) {
-            is IdentityScanState.Initial -> {
-                resetUI()
-            }
-            is IdentityScanState.Found -> {
-                messageView.text = requireContext().getText(R.string.hold_still)
-                cameraView.viewFinderBorderView.startAnimationIfNotRunning(R.drawable.viewfinder_border_found)
-            }
-            is IdentityScanState.Unsatisfied -> {} // no-op
-            is IdentityScanState.Satisfied -> {
-                messageView.text = requireContext().getText(R.string.scanned)
-            }
-            is IdentityScanState.Finished -> {
-                cameraView.viewFinderBackgroundView.visibility = View.INVISIBLE
-                cameraView.viewFinderWindowView.visibility = View.INVISIBLE
-                cameraView.viewFinderBorderView.visibility = View.INVISIBLE
-                checkMarkView.visibility = View.VISIBLE
-                continueButton.isEnabled = true
-                messageView.text = requireContext().getText(R.string.scanned)
-                cameraView.viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
-            }
-            is IdentityScanState.TimeOut -> {
-                // no-op, transitions to CouldNotCaptureFragment
-            }
-        }
-    }
-
-    override fun createCameraAdapter() = Camera1Adapter(
-        requireNotNull(activity),
-        cameraView.previewFrame,
-        MINIMUM_RESOLUTION,
-        DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
-            Log.e(TAG, "scan fails with exception: $cause")
-            identityViewModel.sendAnalyticsRequest(
-                identityViewModel.identityAnalyticsRequestFactory.cameraError(
-                    scanType = frontScanType,
-                    throwable = IllegalStateException(cause)
-                )
+    override fun onCameraReady() {
+        if (shouldStartFromBack()) {
+            startScanning(
+                requireNotNull(backScanType) {
+                    "$backScanType should not be null when trying to scan from back"
+                }
             )
+        } else {
+            startScanning(frontScanType)
         }
-    )
+    }
+
+    private fun createCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> {
+        return CameraXAdapter(
+            requireNotNull(activity),
+            requireNotNull(cameraView).previewFrame,
+            MINIMUM_RESOLUTION,
+            DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
+                Log.e(TAG, "scan fails with exception: $cause")
+                identityViewModel.sendAnalyticsRequest(
+                    identityViewModel.identityAnalyticsRequestFactory.cameraError(
+                        scanType = frontScanType,
+                        throwable = IllegalStateException(cause)
+                    )
+                )
+            }
+        )
+    }
 
     /**
-     * Check the upload status of the front of the document, post it with VerificationPageData.
+     * Check the upload status of the document, post it with VerificationPageData, and decide
+     * next step based on result.
      *
-     * If document is [CollectedDataParam.Type.PASSPORT], navigate to selfie or submit.
-     * Otherwise document is ID or Driver license, check the post result to determine if we should
-     * collect back of the document.
+     * If result is missing back, then start scanning back of the document,
+     * else if result is missing selfie, then start scanning selfie,
+     * Otherwise submit
      */
-    protected fun collectFrontUploadStateAndPost(
+    @VisibleForTesting
+    internal fun collectDocumentUploadedStateAndPost(
         type: CollectedDataParam.Type,
-        scanBackBlock: (() -> Unit)? = null
-    ) = lifecycleScope.launch {
-        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            continueButton.toggleToLoading()
-            identityViewModel.documentFrontUploadedState.collectLatest {
-                if (it.hasError()) {
-                    navigateToDefaultErrorFragment(it.getError())
-                } else if (it.isUploaded()) {
-                    identityViewModel.observeForVerificationPage(
-                        viewLifecycleOwner,
-                        onSuccess = { verificationPage ->
-                            lifecycleScope.launch {
-                                runCatching {
-                                    postVerificationPageData(
-                                        identityViewModel = identityViewModel,
-                                        collectedDataParam =
+        isFront: Boolean
+    ) = viewLifecycleOwner.lifecycleScope.launch {
+        if (isFront) {
+            identityViewModel.documentFrontUploadedState
+        } else {
+            identityViewModel.documentBackUploadedState
+        }.collectLatest { uploadedState ->
+            if (uploadedState.hasError()) {
+                navigateToDefaultErrorFragment(uploadedState.getError())
+            } else if (uploadedState.isUploaded()) {
+                identityViewModel.observeForVerificationPage(
+                    viewLifecycleOwner,
+                    onSuccess = {
+                        lifecycleScope.launch {
+                            runCatching {
+                                postVerificationPageData(
+                                    identityViewModel = identityViewModel,
+                                    collectedDataParam =
+                                    if (isFront) {
                                         CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
                                             type = type,
-                                            frontHighResResult = requireNotNull(it.highResResult.data),
-                                            frontLowResResult = requireNotNull(it.lowResResult.data)
-                                        ),
-                                        clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_FRONT_SELFIE else ClearDataParam.UPLOAD_FRONT,
-                                        fromFragment = fragmentId
-                                    ) { verificationPageDataWithNoError ->
-                                        if (type == CollectedDataParam.Type.PASSPORT) {
-                                            navigateToSelfieOrSubmit(
-                                                verificationPage,
-                                                identityViewModel,
-                                                fragmentId
-                                            )
-                                        } else {
-                                            if (verificationPageDataWithNoError.isMissingBack()) {
-                                                scanBackBlock?.invoke()
-                                            } else {
-                                                navigateToSelfieOrSubmit(
-                                                    verificationPage,
-                                                    identityViewModel,
-                                                    fragmentId
-                                                )
-                                            }
-                                        }
-                                    }
-                                }.onFailure { throwable ->
-                                    Log.e(
-                                        TAG,
-                                        "fail to submit uploaded files: $throwable"
-                                    )
-                                    navigateToDefaultErrorFragment(throwable)
-                                }
-                            }
-                        },
-                        onFailure = { throwable ->
-                            Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
-                            navigateToDefaultErrorFragment(throwable)
-                        }
-                    )
-                }
-            }
-        }
-    }
-
-    /**
-     * Check the upload status of the back of ID, post it with VerificationPageData.
-     *
-     * After post, submit VerificationPageData if no selfie is required, otherwise navigate to selfie.
-     */
-    protected fun collectBackUploadStateAndPost(
-        type: CollectedDataParam.Type
-    ) = lifecycleScope.launch {
-        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            continueButton.toggleToLoading()
-            identityViewModel.documentBackUploadedState.collectLatest {
-                if (it.hasError()) {
-                    navigateToDefaultErrorFragment(it.getError())
-                } else if (it.isUploaded()) {
-                    identityViewModel.observeForVerificationPage(
-                        viewLifecycleOwner,
-                        onSuccess = { verificationPage ->
-                            lifecycleScope.launch {
-                                runCatching {
-                                    postVerificationPageDataAndMaybeSubmit(
-                                        identityViewModel = identityViewModel,
-                                        collectedDataParam =
+                                            frontHighResResult = requireNotNull(uploadedState.highResResult.data),
+                                            frontLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                                        )
+                                    } else {
                                         CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
                                             type = type,
-                                            backHighResResult = requireNotNull(it.highResResult.data),
-                                            backLowResResult = requireNotNull(it.lowResResult.data)
-                                        ),
-                                        clearDataParam = if (verificationPage.requireSelfie()) ClearDataParam.UPLOAD_TO_SELFIE else ClearDataParam.UPLOAD_TO_CONFIRM,
-                                        fromFragment = fragmentId,
-                                        notSubmitBlock =
-                                        if (verificationPage.requireSelfie()) {
-                                            ({ findNavController().navigate(R.id.action_global_selfieFragment) })
-                                        } else {
-                                            null
-                                        }
-                                    )
-                                }.onFailure { throwable ->
-                                    Log.e(
-                                        TAG,
-                                        "fail to submit uploaded files: $throwable"
-                                    )
-                                    navigateToDefaultErrorFragment(throwable)
+                                            backHighResResult = requireNotNull(uploadedState.highResResult.data),
+                                            backLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                                        )
+                                    },
+                                    fromFragment = fragmentId
+                                ) { verificationPageDataWithNoError ->
+                                    if (verificationPageDataWithNoError.isMissingBack()) {
+                                        startScanning(
+                                            requireNotNull(backScanType) {
+                                                "backScanType is null while still missing back"
+                                            }
+                                        )
+                                    } else if (verificationPageDataWithNoError.isMissingSelfie()) {
+                                        navigateOnResume(
+                                            R.id.action_global_selfieFragment
+                                        )
+                                    } else {
+                                        submitVerificationPageDataAndNavigate(
+                                            identityViewModel,
+                                            fragmentId
+                                        )
+                                    }
                                 }
+                            }.onFailure { throwable ->
+                                Log.e(
+                                    TAG,
+                                    "fail to submit uploaded files: $throwable"
+                                )
+                                navigateToDefaultErrorFragment(throwable)
                             }
-                        },
-                        onFailure = { throwable ->
-                            Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
-                            navigateToDefaultErrorFragment(throwable)
                         }
-                    )
-                }
+                    },
+                    onFailure = { throwable ->
+                        Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
+                        navigateToDefaultErrorFragment(throwable)
+                    }
+                )
             }
         }
     }

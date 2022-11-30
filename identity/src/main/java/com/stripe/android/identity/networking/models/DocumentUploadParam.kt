@@ -1,9 +1,12 @@
 package com.stripe.android.identity.networking.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Parcelize
 internal data class DocumentUploadParam(
     @SerialName("back_score")
     val backScore: Float? = null,
@@ -19,7 +22,7 @@ internal data class DocumentUploadParam(
     val passportScore: Float? = null,
     @SerialName("upload_method")
     val uploadMethod: UploadMethod
-) {
+) : Parcelable {
     @Serializable
     internal enum class UploadMethod {
         @SerialName("auto_capture")

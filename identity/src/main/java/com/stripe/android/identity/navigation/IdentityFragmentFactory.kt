@@ -7,6 +7,7 @@ import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.injection.IdentityVerificationScope
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import javax.inject.Inject
@@ -14,6 +15,7 @@ import javax.inject.Inject
 /**
  * Factory for creating Identity fragments.
  */
+@IdentityVerificationScope
 internal class IdentityFragmentFactory @Inject constructor(
     private val cameraPermissionEnsureable: CameraPermissionEnsureable,
     private val appSettingsOpenable: AppSettingsOpenable,

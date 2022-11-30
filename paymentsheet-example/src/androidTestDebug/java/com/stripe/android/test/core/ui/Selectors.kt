@@ -82,6 +82,7 @@ class Selectors(
     val shipping = when (testParameters.shipping) {
         Shipping.Off -> EspressoIdButton(R.id.shipping_off_button)
         Shipping.On -> EspressoIdButton(R.id.shipping_on_button)
+        Shipping.OnWithDefaults -> EspressoIdButton(R.id.shipping_on_with_defaults_button)
     }
 
     val delayed = when (testParameters.delayed) {

@@ -30,11 +30,7 @@ import kotlinx.coroutines.launch
  */
 internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     private val viewModel: GooglePayPaymentMethodLauncherViewModel by viewModels {
-        GooglePayPaymentMethodLauncherViewModel.Factory(
-            application,
-            args,
-            this
-        )
+        GooglePayPaymentMethodLauncherViewModel.Factory(args)
     }
 
     private lateinit var args: GooglePayPaymentMethodLauncherContract.Args

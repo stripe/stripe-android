@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Factory to generate our Retrofit instance.
  */
-internal class BackendApiFactory(private val backendUrl: String) {
+internal class BackendApiFactory(private val settings: Settings) {
 
     fun create(): BackendApiService {
         val logging = HttpLoggingInterceptor()
@@ -28,7 +28,7 @@ internal class BackendApiFactory(private val backendUrl: String) {
 
         return Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create(gson))
-            .baseUrl(backendUrl)
+            .baseUrl(settings.backendUrl)
             .client(httpClient)
             .build()
             .create(BackendApiService::class.java)

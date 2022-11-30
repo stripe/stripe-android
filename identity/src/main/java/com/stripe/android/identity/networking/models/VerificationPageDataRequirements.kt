@@ -10,6 +10,6 @@ internal data class VerificationPageDataRequirements(
     val errors: List<VerificationPageDataRequirementError>,
 
     @SerialName("missing")
-    val missings: List<VerificationPageRequirements.Missing>? = null
+    val missings: List<Requirement>? = null
 
 )

@@ -10,6 +10,7 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.IdentityVerificationSheetContract
+import com.stripe.android.identity.VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.ml.AnalyzerInput
@@ -20,9 +21,13 @@ import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
+import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.UploadedResult
+import com.stripe.android.identity.networking.models.ClearDataParam
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCaptureModels
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
@@ -56,7 +61,9 @@ internal class IdentityViewModelTest {
     private val mockVerificationPage = mock<VerificationPage> {
         on { documentCapture }.thenReturn(DOCUMENT_CAPTURE)
         on { selfieCapture }.thenReturn(SELFIE_CAPTURE)
+        on { requirements }.thenReturn(REQUIREMENTS_NO_MISSING)
     }
+
     private val mockIdentityRepository = mock<IdentityRepository> {
         onBlocking {
             retrieveVerificationPage(any(), any())
@@ -120,8 +127,12 @@ internal class IdentityViewModelTest {
     @Test
     fun `resetDocumentUploadedState does reset _documentUploadedState`() {
         viewModel.resetDocumentUploadedState()
-        assertThat(viewModel.documentFrontUploadedState.value).isEqualTo(SingleSideDocumentUploadState())
-        assertThat(viewModel.documentBackUploadedState.value).isEqualTo(SingleSideDocumentUploadState())
+        assertThat(viewModel.documentFrontUploadedState.value).isEqualTo(
+            SingleSideDocumentUploadState()
+        )
+        assertThat(viewModel.documentBackUploadedState.value).isEqualTo(
+            SingleSideDocumentUploadState()
+        )
     }
 
     @Test
@@ -230,6 +241,10 @@ internal class IdentityViewModelTest {
                 Resource.success(mockVerificationPage)
             )
 
+            assertThat(viewModel.missingRequirements.value).isEqualTo(
+                REQUIREMENTS_NO_MISSING.missing
+            )
+
             verify(mockIdentityModelFetcher).fetchIdentityModel(
                 eq(ID_DETECTOR_URL)
             )
@@ -295,6 +310,59 @@ internal class IdentityViewModelTest {
         assertThat(viewModel.analyticsState.value.docFrontUploadType).isEqualTo(
             DocumentUploadParam.UploadMethod.MANUALCAPTURE
         )
+    }
+
+    @Test
+    fun verifyPostVerificationPageData(): Unit = runBlocking {
+        val collectedDataParamWithBiometricConsent = CollectedDataParam(biometricConsent = true)
+
+        assertThat(viewModel.verificationPageData.value.status).isEqualTo(Status.IDLE)
+
+        whenever(mockIdentityRepository.postVerificationPageData(any(), any(), any(), any()))
+            .then {
+                assertThat(viewModel.verificationPageData.value.status).isEqualTo(Status.LOADING)
+                VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
+            }
+
+        viewModel.postVerificationPageData(collectedDataParamWithBiometricConsent)
+
+        verify(mockIdentityRepository).postVerificationPageData(
+            eq(VERIFICATION_SESSION_ID),
+            eq(EPHEMERAL_KEY),
+            same(collectedDataParamWithBiometricConsent),
+            // clear everything but biometricConsent
+            eq(
+                ClearDataParam(
+                    biometricConsent = false,
+                    idDocumentType = true,
+                    idDocumentFront = true,
+                    idDocumentBack = true,
+                    face = true
+                )
+            )
+        )
+        assertThat(viewModel.verificationPageData.value.status).isEqualTo(Status.SUCCESS)
+        assertThat(viewModel.collectedData.value).isEqualTo(CollectedDataParam(biometricConsent = true))
+        assertThat(viewModel.missingRequirements.value).isEmpty()
+    }
+
+    @Test
+    fun verifyPostVerificationPageSubmit(): Unit = runBlocking {
+        assertThat(viewModel.verificationPageSubmit.value.status).isEqualTo(Status.IDLE)
+
+        whenever(mockIdentityRepository.postVerificationPageSubmit(any(), any()))
+            .then {
+                assertThat(viewModel.verificationPageSubmit.value.status).isEqualTo(Status.LOADING)
+                VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
+            }
+
+        viewModel.postVerificationPageSubmit()
+
+        verify(mockIdentityRepository).postVerificationPageSubmit(
+            eq(VERIFICATION_SESSION_ID),
+            eq(EPHEMERAL_KEY)
+        )
+        assertThat(viewModel.verificationPageSubmit.value.status).isEqualTo(Status.SUCCESS)
     }
 
     private fun testUploadManualSuccessResult(isFront: Boolean) {
@@ -579,6 +647,8 @@ internal class IdentityViewModelTest {
                 highResImageCropPadding = 0.5f,
                 consentText = "consent"
             )
+
+        val REQUIREMENTS_NO_MISSING = VerificationPageRequirements(missing = listOf())
 
         val UPLOADED_STRIPE_FILE = StripeFile()
         val UPLOADED_FAILURE_EXCEPTION = APIException()

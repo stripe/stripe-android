@@ -14,6 +14,7 @@ import com.stripe.android.R
 import com.stripe.android.databinding.PaymentFlowActivityBinding
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
+import com.stripe.android.utils.argsAreInvalid
 
 /**
  * Activity containing a two-part payment flow that allows users to provide a shipping address
@@ -60,6 +61,10 @@ class PaymentFlowActivity : StripeActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (argsAreInvalid { args }) {
+            return
+        }
 
         val args = PaymentFlowActivityStarter.Args.create(intent)
         args.windowFlags?.let { window.addFlags(it) }

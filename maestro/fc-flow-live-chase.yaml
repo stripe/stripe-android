@@ -1,0 +1,49 @@
+appId: com.stripe.android.financialconnections.example
+---
+- launchApp
+# Android specific: Navigate to example (1)
+- tapOn: "Collect account for data"
+
+# Android specific: Navigate to example (2)
+- takeScreenshot: LiveChase_ExampleAppLauncher
+- tapOn: "CONNECT AN ACCOUNT"
+
+# Common: web AuthFlow - connect OAuth institution
+- assertVisible: "Agree"
+- takeScreenshot: LiveChase_Consent
+- tapOn: "Agree"
+- assertVisible: "Chase"
+- takeScreenshot: LiveChase_BankPicker
+- tapOn: "Chase"
+- assertVisible: "Continue"
+- takeScreenshot: LiveChase_Prepane
+- tapOn: "Continue"
+- tapOn: "Password"
+- tapOn: ${USERNAME}
+- takeScreenshot: LiveChase_OAuth
+- tapOn: "Sign in"
+- tapOn: "Next"
+- tapOn: "Next"
+- tapOn: "Next"
+- tapOn: ".*Connect my account.*"
+- assertVisible: "Establishing connection"
+- takeScreenshot: LiveChase_Loading_PartnerAuth
+- assertVisible: "Retrieving accounts"
+- takeScreenshot: LiveChase_Loading_Accounts
+- assertVisible:
+    text: "Select all accounts"
+    optional: true # if skipAccountSelection, this won't show.
+- takeScreenshot: LiveChase_AccountPicker
+- tapOn:
+    text: "Select all accounts"
+    optional: true # if skipAccountSelection, this won't show.
+- takeScreenshot: LiveChase_AccountPicker_AllAccounts
+- scroll
+- tapOn:
+    text: ".*Select account.*"
+    index: 1
+    optional: true # if skipAccountSelection, this won't show.
+- assertVisible: "Done"
+- assertVisible: "Link another account"
+- takeScreenshot: LiveChase_Success
+- tapOn: "Done"

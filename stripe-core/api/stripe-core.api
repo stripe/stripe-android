@@ -55,6 +55,7 @@ public final class com/stripe/android/core/StripeError : com/stripe/android/core
 	public final fun component5 ()Ljava/lang/String;
 	public final fun component6 ()Ljava/lang/String;
 	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/util/Map;
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Lcom/stripe/android/core/StripeError;
 	public static synthetic fun copy$default (Lcom/stripe/android/core/StripeError;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/core/StripeError;
 	public fun describeContents ()I
@@ -126,38 +127,6 @@ public abstract class com/stripe/android/core/exception/StripeException : java/l
 	public final fun getStripeError ()Lcom/stripe/android/core/StripeError;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/core/injection/CoreCommonModule_ProvideLocaleFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/core/injection/CoreCommonModule;)V
-	public static fun create (Lcom/stripe/android/core/injection/CoreCommonModule;)Lcom/stripe/android/core/injection/CoreCommonModule_ProvideLocaleFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Ljava/util/Locale;
-	public static fun provideLocale (Lcom/stripe/android/core/injection/CoreCommonModule;)Ljava/util/Locale;
-}
-
-public final class com/stripe/android/core/injection/CoreCommonModule_ProvideLoggerFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/core/injection/CoreCommonModule;Ljavax/inject/Provider;)V
-	public static fun create (Lcom/stripe/android/core/injection/CoreCommonModule;Ljavax/inject/Provider;)Lcom/stripe/android/core/injection/CoreCommonModule_ProvideLoggerFactory;
-	public fun get ()Lcom/stripe/android/core/Logger;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun provideLogger (Lcom/stripe/android/core/injection/CoreCommonModule;Z)Lcom/stripe/android/core/Logger;
-}
-
-public final class com/stripe/android/core/injection/CoroutineContextModule_ProvideUIContextFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/core/injection/CoroutineContextModule;)V
-	public static fun create (Lcom/stripe/android/core/injection/CoroutineContextModule;)Lcom/stripe/android/core/injection/CoroutineContextModule_ProvideUIContextFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lkotlin/coroutines/CoroutineContext;
-	public static fun provideUIContext (Lcom/stripe/android/core/injection/CoroutineContextModule;)Lkotlin/coroutines/CoroutineContext;
-}
-
-public final class com/stripe/android/core/injection/CoroutineContextModule_ProvideWorkContextFactory : dagger/internal/Factory {
-	public fun <init> (Lcom/stripe/android/core/injection/CoroutineContextModule;)V
-	public static fun create (Lcom/stripe/android/core/injection/CoroutineContextModule;)Lcom/stripe/android/core/injection/CoroutineContextModule_ProvideWorkContextFactory;
-	public synthetic fun get ()Ljava/lang/Object;
-	public fun get ()Lkotlin/coroutines/CoroutineContext;
-	public static fun provideWorkContext (Lcom/stripe/android/core/injection/CoroutineContextModule;)Lkotlin/coroutines/CoroutineContext;
 }
 
 public final class com/stripe/android/core/injection/InjectWithFallbackKt {
@@ -279,26 +248,10 @@ public final class com/stripe/android/core/networking/ApiRequest$Options$Creator
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/core/networking/ApiRequest_Options_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/core/networking/ApiRequest_Options_Factory;
-	public fun get ()Lcom/stripe/android/core/networking/ApiRequest$Options;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/core/networking/ApiRequest$Options;
-}
-
 public final class com/stripe/android/core/networking/ConnectionFactory$Default : com/stripe/android/core/networking/ConnectionFactory {
 	public static final field INSTANCE Lcom/stripe/android/core/networking/ConnectionFactory$Default;
 	public synthetic fun create (Lcom/stripe/android/core/networking/StripeRequest;)Lcom/stripe/android/core/networking/StripeConnection;
 	public fun createForFile (Lcom/stripe/android/core/networking/StripeRequest;Ljava/io/File;)Lcom/stripe/android/core/networking/StripeConnection;
-}
-
-public final class com/stripe/android/core/networking/DefaultAnalyticsRequestExecutor_Factory : dagger/internal/Factory {
-	public fun <init> (Ljavax/inject/Provider;Ljavax/inject/Provider;)V
-	public static fun create (Ljavax/inject/Provider;Ljavax/inject/Provider;)Lcom/stripe/android/core/networking/DefaultAnalyticsRequestExecutor_Factory;
-	public fun get ()Lcom/stripe/android/core/networking/DefaultAnalyticsRequestExecutor;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance (Lcom/stripe/android/core/Logger;Lkotlin/coroutines/CoroutineContext;)Lcom/stripe/android/core/networking/DefaultAnalyticsRequestExecutor;
 }
 
 public final class com/stripe/android/core/networking/JsonUtilsKt {
@@ -308,14 +261,6 @@ public final class com/stripe/android/core/networking/NetworkConstantsKt {
 }
 
 public final class com/stripe/android/core/networking/ResponseJsonKt {
-}
-
-public final class com/stripe/android/core/networking/RetryDelaySupplier_Factory : dagger/internal/Factory {
-	public fun <init> ()V
-	public static fun create ()Lcom/stripe/android/core/networking/RetryDelaySupplier_Factory;
-	public fun get ()Lcom/stripe/android/core/networking/RetryDelaySupplier;
-	public synthetic fun get ()Ljava/lang/Object;
-	public static fun newInstance ()Lcom/stripe/android/core/networking/RetryDelaySupplier;
 }
 
 public final class com/stripe/android/core/networking/StripeConnection$Default : com/stripe/android/core/networking/StripeConnection$AbstractConnection {
@@ -345,6 +290,9 @@ public final class com/stripe/android/core/networking/StripeRequest$MimeType : j
 	public fun toString ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/networking/StripeRequest$MimeType;
 	public static fun values ()[Lcom/stripe/android/core/networking/StripeRequest$MimeType;
+}
+
+public final class com/stripe/android/core/utils/EncodeKt {
 }
 
 public final class com/stripe/android/core/version/StripeSdkVersion {

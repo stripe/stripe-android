@@ -2,22 +2,17 @@ package com.stripe.android.paymentsheet
 
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
 
 internal class PaymentOptionsListFragment() : BasePaymentMethodsListFragment(
     canClickSelectedItem = true
 ) {
     private val activityViewModel by activityViewModels<PaymentOptionsViewModel> {
-        PaymentOptionsViewModel.Factory(
-            { requireActivity().application },
-            {
-                requireNotNull(
-                    requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
-                )
-            },
-            (activity as? AppCompatActivity) ?: this
-        )
+        PaymentOptionsViewModel.Factory {
+            requireNotNull(
+                requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
+            )
+        }
     }
 
     override val sheetViewModel: PaymentOptionsViewModel by lazy { activityViewModel }

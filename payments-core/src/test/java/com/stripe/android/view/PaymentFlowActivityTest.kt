@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -47,6 +48,13 @@ class PaymentFlowActivityTest {
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
         CustomerSession.initCustomerSession(context, ephemeralKeyProvider)
+    }
+
+    @Test
+    fun launchPaymentFlowActivity_withInvalidArgs_finishesActivity() {
+        activityScenarioFactory.create<PaymentFlowActivity>().use { activityScenario ->
+            assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        }
     }
 
     @Test

@@ -21,7 +21,7 @@ class NetworkImageDecoder {
         url: String,
         width: Int,
         height: Int
-    ): Bitmap {
+    ): Bitmap? {
         return BitmapFactory.Options().run {
             // First decode with inJustDecodeBounds=true to check dimensions
             inJustDecodeBounds = true
@@ -31,7 +31,15 @@ class NetworkImageDecoder {
             // Decode bitmap with inSampleSize set
             inJustDecodeBounds = false
             decodeStream(url)
-        }!!
+        }
+    }
+
+    suspend fun decode(
+        url: String
+    ): Bitmap? {
+        return BitmapFactory.Options().run {
+            decodeStream(url)
+        }
     }
 
     private suspend fun BitmapFactory.Options.decodeStream(

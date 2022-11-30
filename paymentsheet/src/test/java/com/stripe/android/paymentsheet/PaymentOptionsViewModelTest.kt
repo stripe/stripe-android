@@ -15,10 +15,13 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
@@ -119,7 +122,7 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `resolveTransitionTarget no new card`() {
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(newLpm = null)
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(newPaymentSelection = null)
         )
 
         var transitionTarget: BaseSheetViewModel.Event<TransitionTarget?>? = null
@@ -137,10 +140,11 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `resolveTransitionTarget new card saved`() {
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-                newLpm = NEW_CARD_PAYMENT_SELECTION.copy(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                newPaymentSelection = NEW_CARD_PAYMENT_SELECTION.copy(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
-                )
+                ),
             )
         )
 
@@ -160,8 +164,9 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `resolveTransitionTarget new card NOT saved`() {
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-                newLpm = NEW_CARD_PAYMENT_SELECTION.copy(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                newPaymentSelection = NEW_CARD_PAYMENT_SELECTION.copy(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 )
             )
@@ -186,7 +191,7 @@ internal class PaymentOptionsViewModelTest {
     fun `removePaymentMethod removes it from payment methods list`() = runTest {
         val cards = PaymentMethodFixtures.createCards(3)
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(paymentMethods = cards)
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(paymentMethods = cards)
         )
 
         viewModel.removePaymentMethod(cards[1])
@@ -200,7 +205,7 @@ internal class PaymentOptionsViewModelTest {
     fun `Removing selected payment method clears selection`() = runTest {
         val cards = PaymentMethodFixtures.createCards(3)
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(paymentMethods = cards)
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(paymentMethods = cards)
         )
 
         val selection = PaymentSelection.Saved(cards[1])
@@ -217,7 +222,7 @@ internal class PaymentOptionsViewModelTest {
     fun `when paymentMethods is empty, primary button and text below button are gone`() = runTest {
         val paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                 paymentMethods = listOf(paymentMethod)
             )
         )
@@ -329,11 +334,14 @@ internal class PaymentOptionsViewModelTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
         private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentMethods = emptyList(),
-            config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            isGooglePayReady = true,
-            newLpm = null,
+            state = PaymentSheetState.Full(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                clientSecret = PaymentIntentClientSecret("very secret stuff"),
+                customerPaymentMethods = emptyList(),
+                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                isGooglePayReady = true,
+                newPaymentSelection = null,
+            ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             injectorKey = DUMMY_INJECTOR_KEY,
             enableLogging = false,

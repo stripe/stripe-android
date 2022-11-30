@@ -218,24 +218,26 @@
 
         <RadioGroup
             android:id="@+id/default_billing_radio_group"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/default_billing_address">
 
             <RadioButton
                 android:id="@+id/default_billing_on_button"
                 android:text="@string/on"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="false" />
 
             <RadioButton
                 android:id="@+id/default_billing_off_button"
                 android:text="@string/off"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true" />
         </RadioGroup>
@@ -245,32 +247,41 @@
             android:text="@string/shipping_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintTop_toBottomOf="@+id/google_pay_radio_group" />
+            app:layout_constraintTop_toBottomOf="@+id/default_billing_radio_group" />
 
         <RadioGroup
             android:id="@+id/shipping_radio_group"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/shipping_address">
 
             <RadioButton
                 android:id="@+id/shipping_on_button"
                 android:text="@string/on"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false" />
+
+            <RadioButton
+                android:id="@+id/shipping_on_with_defaults_button"
+                android:text="@string/on_with_defaults"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true" />
 
             <RadioButton
                 android:id="@+id/shipping_off_button"
                 android:text="@string/off"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="false" />
         </RadioGroup>
@@ -284,7 +295,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/default_billing_radio_group" />
+            app:layout_constraintTop_toBottomOf="@+id/shipping_radio_group" />
 
         <RadioGroup
             android:id="@+id/allowsDelayedPaymentMethods_radio_group"
@@ -363,9 +374,10 @@
         <Button
             android:id="@+id/reset_button"
             android:text="@string/reset"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/custom_label_text_field" />
@@ -373,8 +385,9 @@
         <Button
             android:id="@+id/reload_button"
             android:text="@string/reload_paymentsheet"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="48dp"
+            android:layout_marginHorizontal="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/reset_button" />
@@ -411,9 +424,10 @@
         <Button
             android:id="@+id/custom_checkout_button"
             android:text="@string/checkout_custom"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="16dp"
             android:enabled="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -432,15 +446,198 @@
         <Button
             android:id="@+id/complete_checkout_button"
             android:text="@string/checkout_complete"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="16dp"
             android:enabled="false"
             android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginHorizontal="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/divider2" />
+
+        <View
+            android:id="@+id/divider3"
+            android:layout_width="409dp"
+            android:layout_height="1dp"
+            android:background="?android:attr/listDivider"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/complete_checkout_button" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/divider3">
+
+            <TextView
+                android:text="@string/shipping_address"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:text="@string/default_shipping_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp" />
+
+            <RadioGroup
+                android:id="@+id/shipping_address_default_radio_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginEnd="16dp">
+
+                <RadioButton
+                    android:id="@+id/shipping_address_default_on_button"
+                    android:text="@string/on"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/shipping_address_default_off_button"
+                    android:text="@string/off"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="false" />
+            </RadioGroup>
+
+            <TextView
+                android:text="@string/shipping_address_countries"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp" />
+
+            <RadioGroup
+                android:id="@+id/shipping_address_countries_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginEnd="16dp">
+
+                <RadioButton
+                    android:id="@+id/shipping_address_countries_all_button"
+                    android:text="@string/shipping_address_all_countries"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/shipping_address_countries_partial_button"
+                    android:text="@string/shipping_address_partial_countries"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="false" />
+            </RadioGroup>
+
+
+            <TextView
+                android:text="@string/shipping_address_phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp" />
+
+            <RadioGroup
+                android:id="@+id/shipping_address_phone_radio_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginEnd="16dp">
+
+                <RadioButton
+                    android:id="@+id/shipping_address_phone_required_button"
+                    android:text="@string/shipping_address_required"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:id="@+id/shipping_address_phone_optional_button"
+                    android:text="@string/shipping_address_optional"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="false" />
+
+                <RadioButton
+                    android:id="@+id/shipping_address_phone_hidden_button"
+                    android:text="@string/shipping_address_hidden"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:checked="false" />
+            </RadioGroup>
+
+            <EditText
+                android:id="@+id/shipping_address_button_title"
+                android:hint="@string/shipping_address_button_title"
+                android:imeOptions="actionDone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:singleLine="true"
+                android:importantForAutofill="no" />
+
+            <EditText
+                android:id="@+id/shipping_address_checkbox_label"
+                android:hint="@string/shipping_address_checkbox_label"
+                android:imeOptions="actionDone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:singleLine="true"
+                android:importantForAutofill="no" />
+
+            <EditText
+                android:id="@+id/shipping_address_title"
+                android:hint="@string/shipping_address_title"
+                android:imeOptions="actionDone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:singleLine="true"
+                android:importantForAutofill="no" />
+
+            <Button
+                android:id="@+id/shipping_address_button"
+                android:text="@string/add_shipping_address"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:enabled="false"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
+                android:id="@+id/shipping_address_container"
+                android:visibility="gone"
+                android:orientation="vertical"
+                android:paddingBottom="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/shipping_address_name"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/shipping_address_details"
+                    android:focusable="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+        </LinearLayout>
 
         <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progress_bar"

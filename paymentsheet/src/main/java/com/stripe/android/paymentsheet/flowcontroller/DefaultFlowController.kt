@@ -54,9 +54,10 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
+import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.validate
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -89,7 +90,7 @@ internal class DefaultFlowController @Inject internal constructor(
     activityResultCaller: ActivityResultCaller,
     @InjectorKey private val injectorKey: String,
     // Properties provided through injection
-    private val flowControllerInitializer: FlowControllerInitializer,
+    private val paymentSheetLoader: PaymentSheetLoader,
     private val customerApiRepository: CustomerApiRepository,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
@@ -123,6 +124,16 @@ internal class DefaultFlowController @Inject internal constructor(
     private var paymentLauncher: StripePaymentLauncher? = null
 
     private val resourceRepositories = listOf(lpmResourceRepository, addressResourceRepository)
+
+    override var shippingDetails: AddressDetails?
+        get() = viewModel.state?.config?.shippingDetails
+        set(value) {
+            viewModel.state = viewModel.state?.copy(
+                config = viewModel.state?.config?.copy(
+                    shippingDetails = value
+                )
+            )
+        }
 
     override fun inject(injectable: Injectable<*>) {
         when (injectable) {
@@ -216,7 +227,7 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
         lifecycleScope.launch {
-            val result = flowControllerInitializer.init(
+            val result = paymentSheetLoader.load(
                 clientSecret,
                 configuration
             )
@@ -239,8 +250,8 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     override fun presentPaymentOptions() {
-        val initData = runCatching {
-            viewModel.initData
+        val state = runCatching {
+            requireNotNull(viewModel.state)
         }.getOrElse {
             error(
                 "FlowController must be successfully initialized using " +
@@ -251,22 +262,18 @@ internal class DefaultFlowController @Inject internal constructor(
 
         paymentOptionActivityLauncher.launch(
             PaymentOptionContract.Args(
-                stripeIntent = initData.stripeIntent,
-                paymentMethods = initData.paymentMethods,
-                config = initData.config,
-                isGooglePayReady = initData.isGooglePayReady,
-                newLpm = viewModel.paymentSelection as? PaymentSelection.New,
+                state = state,
                 statusBarColor = statusBarColor(),
                 injectorKey = injectorKey,
                 enableLogging = enableLogging,
-                productUsage = productUsage
+                productUsage = productUsage,
             )
         )
     }
 
     override fun confirm() {
-        val initData = runCatching {
-            viewModel.initData
+        val state = runCatching {
+            requireNotNull(viewModel.state)
         }.getOrElse {
             error(
                 "FlowController must be successfully initialized using " +
@@ -276,22 +283,22 @@ internal class DefaultFlowController @Inject internal constructor(
         }
 
         when (val paymentSelection = viewModel.paymentSelection) {
-            PaymentSelection.GooglePay -> launchGooglePay(initData)
+            PaymentSelection.GooglePay -> launchGooglePay(state)
             PaymentSelection.Link,
-            is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, initData)
-            else -> confirmPaymentSelection(paymentSelection, initData)
+            is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
+            else -> confirmPaymentSelection(paymentSelection, state)
         }
     }
 
     @VisibleForTesting
     fun confirmPaymentSelection(
         paymentSelection: PaymentSelection?,
-        initData: InitData
+        state: PaymentSheetState.Full,
     ) {
         val confirmParamsFactory =
             ConfirmStripeIntentParamsFactory.createFactory(
-                initData.clientSecret,
-                initData.config?.shippingDetails?.toConfirmPaymentIntentShipping()
+                state.clientSecret,
+                state.config?.shippingDetails?.toConfirmPaymentIntentShipping()
             )
 
         when (paymentSelection) {
@@ -322,9 +329,9 @@ internal class DefaultFlowController @Inject internal constructor(
         when (googlePayResult) {
             is GooglePayPaymentMethodLauncher.Result.Completed -> {
                 runCatching {
-                    viewModel.initData
+                    requireNotNull(viewModel.state)
                 }.fold(
-                    onSuccess = { initData ->
+                    onSuccess = { state ->
                         val paymentSelection = PaymentSelection.Saved(
                             googlePayResult.paymentMethod,
                             isGooglePay = true
@@ -332,7 +339,7 @@ internal class DefaultFlowController @Inject internal constructor(
                         viewModel.paymentSelection = paymentSelection
                         confirmPaymentSelection(
                             paymentSelection,
-                            initData
+                            state
                         )
                     },
                     onFailure = {
@@ -364,40 +371,28 @@ internal class DefaultFlowController @Inject internal constructor(
         onPaymentResult(result.convertToPaymentResult())
 
     private suspend fun dispatchResult(
-        result: FlowControllerInitializer.InitResult,
+        result: PaymentSheetLoader.Result,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) = withContext(uiContext) {
         when (result) {
-            is FlowControllerInitializer.InitResult.Success -> {
-                onInitSuccess(result.initData, callback)
+            is PaymentSheetLoader.Result.Success -> {
+                onInitSuccess(result.state, callback)
             }
-            is FlowControllerInitializer.InitResult.Failure -> {
+            is PaymentSheetLoader.Result.Failure -> {
                 callback.onConfigured(false, result.throwable)
             }
         }
     }
 
     private fun onInitSuccess(
-        initData: InitData,
+        state: PaymentSheetState.Full,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
-        eventReporter.onInit(initData.config)
+        eventReporter.onInit(state.config)
 
-        when (val savedString = initData.savedSelection) {
-            SavedSelection.GooglePay -> PaymentSelection.GooglePay
-            SavedSelection.Link -> PaymentSelection.Link
-            is SavedSelection.PaymentMethod ->
-                initData.paymentMethods.firstOrNull {
-                    it.id == savedString.id
-                }?.let {
-                    PaymentSelection.Saved(it)
-                }
-            else -> null
-        }.let {
-            viewModel.paymentSelection = it
-        }
+        viewModel.paymentSelection = state.initialPaymentSelection
+        viewModel.state = state
 
-        viewModel.initData = initData
         callback.onConfigured(true, null)
     }
 
@@ -406,7 +401,7 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentOptionResult: PaymentOptionResult?
     ) {
         paymentOptionResult?.paymentMethods?.let {
-            viewModel.initData = viewModel.initData.copy(paymentMethods = it)
+            viewModel.state = viewModel.state?.copy(customerPaymentMethods = it)
         }
         when (paymentOptionResult) {
             is PaymentOptionResult.Succeeded -> {
@@ -458,9 +453,9 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun confirmLink(
         paymentSelection: PaymentSelection,
-        initData: InitData
+        state: PaymentSheetState.Full
     ) {
-        val config = requireNotNull(initData.config)
+        val config = requireNotNull(state.config)
 
         lifecycleScope.launch {
             val shippingDetails: AddressDetails? = config.shippingDetails
@@ -481,7 +476,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 )?.email
             }
             val linkConfig = LinkPaymentLauncher.Configuration(
-                stripeIntent = initData.stripeIntent,
+                stripeIntent = state.stripeIntent,
                 merchantName = config.merchantDisplayName,
                 customerEmail = customerEmail,
                 customerPhone = customerPhone,
@@ -501,15 +496,15 @@ internal class DefaultFlowController @Inject internal constructor(
                     linkLauncher.present(linkConfig, linkActivityResultLauncher)
                 } else {
                     // New user paying inline, complete without launching Link
-                    confirmPaymentSelection(paymentSelection, initData)
+                    confirmPaymentSelection(paymentSelection, state)
                 }
             }
         }
     }
 
-    private fun launchGooglePay(initData: InitData) {
-        // initData.config.googlePay is guaranteed not to be null or GooglePay would be disabled
-        val config = requireNotNull(initData.config)
+    private fun launchGooglePay(state: PaymentSheetState.Full) {
+        // state.config.googlePay is guaranteed not to be null or GooglePay would be disabled
+        val config = requireNotNull(state.config)
         val googlePayConfig = requireNotNull(config.googlePay)
         val googlePayPaymentLauncherConfig = GooglePayPaymentMethodLauncher.Config(
             environment = when (googlePayConfig.environment) {
@@ -529,10 +524,10 @@ internal class DefaultFlowController @Inject internal constructor(
             activityResultLauncher = googlePayActivityLauncher,
             skipReadyCheck = true
         ).present(
-            currencyCode = (initData.stripeIntent as? PaymentIntent)?.currency
+            currencyCode = (state.stripeIntent as? PaymentIntent)?.currency
                 ?: googlePayConfig.currencyCode.orEmpty(),
-            amount = (initData.stripeIntent as? PaymentIntent)?.amount?.toInt() ?: 0,
-            transactionId = initData.stripeIntent.id
+            amount = (state.stripeIntent as? PaymentIntent)?.amount?.toInt() ?: 0,
+            transactionId = state.stripeIntent.id
         )
     }
 

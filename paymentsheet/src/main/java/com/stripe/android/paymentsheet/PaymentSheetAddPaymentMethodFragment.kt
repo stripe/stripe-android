@@ -2,24 +2,16 @@ package com.stripe.android.paymentsheet
 
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
+import kotlinx.coroutines.FlowPreview
 
+@OptIn(FlowPreview::class)
 internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFragment() {
-    override val viewModelFactory: ViewModelProvider.Factory = PaymentSheetViewModel.Factory(
-        { requireActivity().application },
-        {
-            requireNotNull(
-                requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
-            )
-        },
-        (activity as? AppCompatActivity) ?: this,
-        (activity as? AppCompatActivity)?.intent?.extras
-    )
 
     override val sheetViewModel by activityViewModels<PaymentSheetViewModel> {
-        viewModelFactory
+        PaymentSheetViewModel.Factory {
+            requireNotNull(requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS))
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

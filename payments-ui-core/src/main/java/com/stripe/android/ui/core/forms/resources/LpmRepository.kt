@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.paymentsheet.forms.UpiRequirement
-import com.stripe.android.ui.core.BuildConfig
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
@@ -63,7 +62,7 @@ class LpmRepository constructor(
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
 
     val supportedPaymentMethods: List<String> by lazy {
-        listOfNotNull(
+        listOf(
             PaymentMethod.Type.Card.code,
             PaymentMethod.Type.Bancontact.code,
             PaymentMethod.Type.Sofort.code,
@@ -78,8 +77,7 @@ class LpmRepository constructor(
             PaymentMethod.Type.USBankAccount.code,
             PaymentMethod.Type.Affirm.code,
             PaymentMethod.Type.AuBecsDebit.code,
-            // TODO: Unconditionally enable this when we release UPI
-            PaymentMethod.Type.Upi.code.takeIf { arguments.isUpiEnabled }
+            PaymentMethod.Type.Upi.code,
         )
     }
 
@@ -471,7 +469,5 @@ class LpmRepository constructor(
         val resources: Resources?,
         val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
             DefaultIsFinancialConnectionsAvailable(),
-        // TODO Remove this when releasing UPI
-        val isUpiEnabled: Boolean = BuildConfig.DEBUG
     )
 }

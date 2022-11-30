@@ -1,16 +1,16 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
-import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.savedstate.SavedStateRegistryOwner
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
@@ -37,6 +37,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -60,8 +61,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkLauncher: LinkPaymentLauncher
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     application = application,
-    config = args.config,
-    prefsRepository = prefsRepositoryFactory(args.config?.customer),
+    config = args.state.config,
+    prefsRepository = prefsRepositoryFactory(args.state.config?.customer),
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     workContext = workContext,
@@ -82,10 +83,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
-    override var newPaymentSelection = args.newLpm
+    override var newPaymentSelection = args.state.newPaymentSelection
 
-    override var linkInlineSelection =
-        MutableLiveData<PaymentSelection.New.LinkInline?>(args.newLpm as? PaymentSelection.New.LinkInline)
+    override var linkInlineSelection = MutableLiveData<PaymentSelection.New.LinkInline?>(
+        args.state.newPaymentSelection as? PaymentSelection.New.LinkInline,
+    )
 
     // This is used in the case where the last card was new and not saved. In this scenario
     // when the payment options is opened it should jump to the add card, but if the user
@@ -98,16 +100,16 @@ internal class PaymentOptionsViewModel @Inject constructor(
         get() = hasTransitionToUnsavedLpm != true && newPaymentSelection != null
 
     init {
-        savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.isGooglePayReady
-        setupLink(args.stripeIntent)
+        savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.state.isGooglePayReady
+        setupLink(args.state.stripeIntent)
 
         // After recovering from don't keep activities the stripe intent will be saved,
         // calling setStripeIntent would require the repository be initialized, which
         // would not be the case.
         if (stripeIntent.value == null) {
-            setStripeIntent(args.stripeIntent)
+            setStripeIntent(args.state.stripeIntent)
         }
-        savedStateHandle[SAVE_PAYMENT_METHODS] = args.paymentMethods
+        savedStateHandle[SAVE_PAYMENT_METHODS] = args.state.customerPaymentMethods
         savedStateHandle[SAVE_PROCESSING] = false
 
         // If we are not recovering from don't keep activities than the resources
@@ -309,12 +311,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> PaymentOptionContract.Args,
-        owner: SavedStateRegistryOwner,
-        defaultArgs: Bundle? = null
-    ) : AbstractSavedStateViewModelFactory(owner, defaultArgs),
-        Injectable<Factory.FallbackInitializeParam> {
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
         internal data class FallbackInitializeParam(
             val application: Application,
             val productUsage: Set<String>
@@ -325,12 +323,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
             Provider<PaymentOptionsViewModelSubcomponent.Builder>
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(
-            key: String,
-            modelClass: Class<T>,
-            savedStateHandle: SavedStateHandle
-        ): T {
-            val application = applicationSupplier()
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            val application = extras.requireApplication()
+            val savedStateHandle = extras.createSavedStateHandle()
             val starterArgs = starterArgsSupplier()
 
             val injector = injectWithFallback(
@@ -343,6 +338,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 .args(starterArgs)
                 .savedStateHandle(savedStateHandle)
                 .build()
+
             val viewModel = subcomponent.viewModel
             viewModel.injector = requireNotNull(injector as NonFallbackInjector)
             return viewModel as T

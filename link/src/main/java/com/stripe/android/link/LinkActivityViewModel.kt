@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
@@ -16,6 +17,7 @@ import com.stripe.android.link.injection.DaggerLinkViewModelFactoryComponent
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.utils.requireApplication
 import javax.inject.Inject
 
 /**
@@ -74,38 +76,38 @@ internal class LinkActivityViewModel @Inject internal constructor(
     }
 
     internal class Factory(
-        private val applicationSupplier: () -> Application,
         private val starterArgsSupplier: () -> LinkActivityContract.Args
-    ) : ViewModelProvider.Factory,
-        Injectable<Factory.FallbackInitializeParam> {
+    ) : ViewModelProvider.Factory, Injectable<Factory.FallbackInitializeParam> {
+
         internal data class FallbackInitializeParam(
             val application: Application,
             val starterArgs: LinkActivityContract.Args,
             val enableLogging: Boolean,
             val publishableKey: String,
             val stripeAccountId: String?,
-            val productUsage: Set<String>
+            val productUsage: Set<String>,
         )
 
         @Inject
         lateinit var viewModel: LinkActivityViewModel
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val starterArgs = starterArgsSupplier()
+            val application = extras.requireApplication()
 
             val injector = injectWithFallback(
                 starterArgs.injectionParams?.injectorKey,
                 FallbackInitializeParam(
-                    applicationSupplier(),
+                    application,
                     starterArgs,
                     starterArgs.injectionParams?.enableLogging ?: false,
                     starterArgs.injectionParams?.publishableKey
-                        ?: PaymentConfiguration.getInstance(applicationSupplier()).publishableKey,
+                        ?: PaymentConfiguration.getInstance(application).publishableKey,
                     if (starterArgs.injectionParams != null) {
                         starterArgs.injectionParams.stripeAccountId
                     } else {
-                        PaymentConfiguration.getInstance(applicationSupplier()).stripeAccountId
+                        PaymentConfiguration.getInstance(application).stripeAccountId
                     },
                     starterArgs.injectionParams?.productUsage ?: emptySet()
                 )

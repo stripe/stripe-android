@@ -8,7 +8,6 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.annotation.IdRes
-import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.os.bundleOf
@@ -30,7 +29,6 @@ import java.security.InvalidParameterException
 /**
  * An `Activity` for selecting a payment option.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>() {
     @VisibleForTesting
     internal val viewBinding by lazy {
@@ -38,13 +36,9 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     @VisibleForTesting
-    internal var viewModelFactory: ViewModelProvider.Factory =
-        PaymentOptionsViewModel.Factory(
-            { application },
-            { requireNotNull(starterArgs) },
-            this,
-            intent?.extras
-        )
+    internal var viewModelFactory: ViewModelProvider.Factory = PaymentOptionsViewModel.Factory {
+        requireNotNull(starterArgs)
+    }
 
     override val viewModel: PaymentOptionsViewModel by viewModels { viewModelFactory }
 
@@ -77,8 +71,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             return
         }
         try {
-            starterArgs.config?.validate()
-            starterArgs.config?.appearance?.parseAppearance()
+            starterArgs.state.config?.validate()
+            starterArgs.state.config?.appearance?.parseAppearance()
         } catch (e: InvalidParameterException) {
             finish()
             return
@@ -128,16 +122,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                             // where we also jump to a new unsaved card. However this move require
                             // the transition target to specify when to and when not to add things to the
                             // backstack.
-                            if (
-                                starterArgs.paymentMethods.isEmpty() &&
-                                !config.isGooglePayReady &&
-                                viewModel.isLinkEnabled.value != true // WHy not use config.isLinkEnabled?
-                            ) {
-                                PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet(
+                            if (starterArgs.state.hasPaymentOptions) {
+                                PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod(
                                     config
                                 )
                             } else {
-                                PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod(
+                                PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet(
                                     config
                                 )
                             }
@@ -176,7 +166,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewBinding.continueButton.lockVisible = false
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
 
-        val customLabel = starterArgs?.config?.primaryButtonLabel
+        val customLabel = starterArgs?.state?.config?.primaryButtonLabel
         val label = customLabel ?: getString(R.string.stripe_continue_button_label)
 
         viewBinding.continueButton.setLabel(label)

@@ -15,11 +15,12 @@ import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
+import com.stripe.android.identity.networking.models.Requirement.Companion.matchesFromFragment
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
-import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError.Requirement.Companion.matchesFromFragment
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
-import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
+import com.stripe.android.identity.utils.clearDataAndNavigateUp
+import com.stripe.android.identity.utils.navigateOnResume
 
 /**
  * Fragment to show generic error.
@@ -63,7 +64,7 @@ internal class ErrorFragment(
                     } else {
                         val destination = args.getInt(ARG_GO_BACK_BUTTON_DESTINATION)
                         if (destination == UNEXPECTED_DESTINATION) {
-                            findNavController().navigate(DEFAULT_BACK_BUTTON_NAVIGATION)
+                            navigateOnResume(DEFAULT_BACK_BUTTON_NAVIGATION)
                         } else {
                             findNavController().let { navController ->
                                 var shouldContinueNavigateUp = true
@@ -72,7 +73,7 @@ internal class ErrorFragment(
                                     navController.currentDestination?.id != destination
                                 ) {
                                     shouldContinueNavigateUp =
-                                        navController.navigateUpAndSetArgForUploadFragment()
+                                        navController.clearDataAndNavigateUp(identityViewModel)
                                 }
                             }
                         }

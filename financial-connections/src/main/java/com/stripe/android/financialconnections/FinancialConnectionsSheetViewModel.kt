@@ -1,28 +1,37 @@
 package com.stripe.android.financialconnections
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.result.ActivityResult
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
-import com.stripe.android.financialconnections.domain.GenerateFinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
+import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForToken
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.parcelable
 import kotlinx.coroutines.launch
+import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Named
@@ -30,11 +39,12 @@ import javax.inject.Named
 @Suppress("LongParameterList", "TooManyFunctions")
 internal class FinancialConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
-    private val generateFinancialConnectionsSessionManifest: GenerateFinancialConnectionsSessionManifest,
+    private val synchronizeFinancialConnectionsSession: SynchronizeFinancialConnectionsSession,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
     private val eventReporter: FinancialConnectionsEventReporter,
+    private val nativeRouter: NativeAuthFlowRouter,
     initialState: FinancialConnectionsSheetState
 ) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
 
@@ -44,7 +54,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             // avoid re-fetching manifest if already exists (this will happen on process recreations)
             if (initialState.manifest == null) fetchManifest()
         } else {
-            val result = FinancialConnectionsSheetActivityResult.Failed(
+            val result = Failed(
                 IllegalStateException("Invalid configuration provided when instantiating activity")
             )
             setState { copy(viewEffect = FinishWithResult(result)) }
@@ -59,7 +69,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         withState { state ->
             viewModelScope.launch {
                 kotlin.runCatching {
-                    generateFinancialConnectionsSessionManifest(
+                    synchronizeFinancialConnectionsSession(
                         clientSecret = state.sessionSecret,
                         applicationId = applicationId
                     )
@@ -75,17 +85,32 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     /**
      * Builds the ChromeCustomTab intent to launch the hosted auth flow and launches it.
      *
-     * @param manifest the manifest containing the hosted auth flow URL to launch
+     * @param synchronizeSessionResponse with manifest containing the hosted auth flow URL to launch
      *
      */
-    private fun openAuthFlow(manifest: FinancialConnectionsSessionManifest) {
+    private fun openAuthFlow(synchronizeSessionResponse: SynchronizeSessionResponse) {
         // stores manifest in state for future references.
-        setState {
-            copy(
-                manifest = manifest,
-                authFlowActive = true,
-                viewEffect = OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
-            )
+        val manifest = synchronizeSessionResponse.manifest
+        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(synchronizeSessionResponse)
+        viewModelScope.launch {
+            nativeRouter.logExposure(synchronizeSessionResponse)
+        }
+        if (manifest.hostedAuthUrl == null) {
+            withState {
+                onFatal(it, IllegalArgumentException("hostedAuthUrl is required!"))
+            }
+        } else {
+            setState {
+                copy(
+                    manifest = manifest,
+                    webAuthFlowActive = nativeAuthFlowEnabled.not(),
+                    viewEffect = if (nativeAuthFlowEnabled) {
+                        OpenNativeAuthFlow(initialArgs.configuration, synchronizeSessionResponse)
+                    } else {
+                        OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
+                    }
+                )
+            }
         }
     }
 
@@ -105,9 +130,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * figure which lifecycle callback happens after onNewIntent.
      *
      * @see onResume (we rely on this on regular flows)
-     * @see onActivityResult (we rely on this on config changes)
+     * @see onBrowserActivityResult (we rely on this on config changes)
      */
-    fun onActivityRecreated() {
+    internal fun onActivityRecreated() {
         setState {
             copy(
                 activityRecreated = true
@@ -122,7 +147,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      */
     internal fun onResume() {
         setState {
-            if (authFlowActive && activityRecreated.not()) {
+            if (webAuthFlowActive && activityRecreated.not()) {
                 copy(viewEffect = FinishWithResult(Canceled))
             } else {
                 this
@@ -135,13 +160,27 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * if activity got recreated and the auth flow is still active then the user hit
      * the back button or closed the custom tabs UI, so return result as canceled.
      */
-    internal fun onActivityResult() {
+    internal fun onBrowserActivityResult() {
         setState {
-            if (authFlowActive && activityRecreated) {
+            if (webAuthFlowActive && activityRecreated) {
                 copy(viewEffect = FinishWithResult(Canceled))
             } else {
                 this
             }
+        }
+    }
+
+    internal fun onNativeAuthFlowResult(activityResult: ActivityResult) {
+        val result: FinancialConnectionsSheetActivityResult? = activityResult.data
+            ?.parcelable(FinancialConnectionsSheetNativeActivity.EXTRA_RESULT)
+        if (activityResult.resultCode == Activity.RESULT_OK && result != null) {
+            setState {
+                copy(
+                    viewEffect = FinishWithResult(result)
+                )
+            }
+        } else {
+            setState { copy(viewEffect = FinishWithResult(Canceled)) }
         }
     }
 
@@ -194,7 +233,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @param throwable the error encountered during the [FinancialConnectionsSheet] auth flow
      */
     private fun onFatal(state: FinancialConnectionsSheetState, throwable: Throwable) {
-        val result = FinancialConnectionsSheetActivityResult.Failed(throwable)
+        val result = Failed(throwable)
         eventReporter.onResult(state.initialArgs.configuration, result)
         setState { copy(viewEffect = FinishWithResult(result)) }
     }
@@ -219,7 +258,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * @param intent the new intent with the redirect URL in the intent data
      */
     internal fun handleOnNewIntent(intent: Intent?) {
-        setState { copy(authFlowActive = false) }
+        setState { copy(webAuthFlowActive = false) }
         withState { state ->
             val receivedUrl: Uri? = intent?.data?.toString()?.toUriOrNull()
             if (receivedUrl == null) {
@@ -242,6 +281,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
     }
 
+    internal fun onViewEffectLaunched() {
+        setState { copy(viewEffect = null) }
+    }
+
     /**
      * Link flows do not need to fetch the FC session, since the linked account id is
      * appended to the web success url.
@@ -255,10 +298,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             logger.error("Could not retrieve linked account from success url", error)
             withState { state -> onFatal(state, error) }
         }
-    }
-
-    fun onViewEffectLaunched() {
-        setState { copy(viewEffect = null) }
     }
 
     private fun String.toUriOrNull(): Uri? {
@@ -281,7 +320,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 .builder()
                 .application(viewModelContext.app())
                 .initialState(state)
-                .internalArgs(state.initialArgs)
+                .configuration(state.initialArgs.configuration)
                 .build().viewModel
         }
 

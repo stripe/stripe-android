@@ -31,8 +31,10 @@ import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.injection.DaggerIdentityActivityFallbackComponent
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
 import com.stripe.android.identity.navigation.ErrorFragment
+import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
-import com.stripe.android.identity.utils.navigateUpAndSetArgForUploadFragment
+import com.stripe.android.identity.utils.clearDataAndNavigateUp
+import com.stripe.android.identity.utils.serializable
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
 import javax.inject.Provider
@@ -52,7 +54,6 @@ internal class IdentityActivity :
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         IdentityViewModel.IdentityViewModelFactory(
-            this,
             { uiContext },
             { workContext },
             { subcomponent }
@@ -124,10 +125,10 @@ internal class IdentityActivity :
         supportFragmentManager.fragmentFactory = subcomponent.identityFragmentFactory
 
         super.onCreate(savedInstanceState)
+        identityViewModel.retrieveAndBufferVerificationPage()
         fallbackUrlLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {
-            identityViewModel.retrieveAndBufferVerificationPage()
             identityViewModel.observeForVerificationPage(
                 this,
                 onSuccess = {
@@ -161,11 +162,19 @@ internal class IdentityActivity :
             )
         }
 
-        if (savedInstanceState?.getBoolean(KEY_PRESENTED, false) != true) {
-            identityViewModel.sendAnalyticsRequest(
-                identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
-            )
-        }
+        identityViewModel.observeForVerificationPage(
+            this,
+            onSuccess = {
+                if (savedInstanceState?.getBoolean(KEY_PRESENTED, false) != true) {
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
+                    )
+                }
+            },
+            onFailure = {
+                navController.navigateToErrorFragmentWithDefaultValues(this, it)
+            }
+        )
 
         identityViewModel.screenTracker.screenTransitionStart(
             startedAt = starterArgs.presentTime.asEpochMillisecondsClockMark()
@@ -179,7 +188,6 @@ internal class IdentityActivity :
             // The Activity is newly created, set up navigation flow normally
             setContentView(binding.root)
             setUpNavigationController()
-            identityViewModel.retrieveAndBufferVerificationPage()
         } else {
             // The Activity is being recreated after being destroyed by OS.
             // This happens when a fallback URL Activity is in front and IdentityActivity is destroyed.
@@ -250,6 +258,16 @@ internal class IdentityActivity :
      * Handles Toolbar's navigation button behavior based on current navigation status.
      */
     private fun MaterialToolbar.updateState(destination: NavDestination, args: Bundle?) {
+        this.setNavigationOnClickListener {
+            navigateOnDestination(
+                navController,
+                identityViewModel,
+                this@IdentityActivity,
+                destination,
+                args
+            )
+        }
+        // Toggle the navigation button UI
         when {
             // Display cross icon on consent fragment, clicking it finishes the flow with Canceled
             isConsentFragment(destination) -> {
@@ -258,18 +276,13 @@ internal class IdentityActivity :
                         this@IdentityActivity,
                         R.drawable.ic_baseline_close_24
                     )
-                this.setNavigationOnClickListener {
-                    identityViewModel.sendAnalyticsRequest(
-                        identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
-                            isFromFallbackUrl = false,
-                            lastScreenName = SCREEN_NAME_CONSENT,
-                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
-                        )
+            }
+            isConfirmationFragment(destination) -> {
+                this.navigationIcon =
+                    AppCompatResources.getDrawable(
+                        this@IdentityActivity,
+                        R.drawable.ic_baseline_close_24
                     )
-                    finishWithResult(
-                        VerificationFlowResult.Canceled
-                    )
-                }
             }
             // Display cross icon on error fragment that should fail, clicking it finishes the flow with Failed
             isErrorFragmentThatShouldFail(destination, args) -> {
@@ -277,26 +290,6 @@ internal class IdentityActivity :
                     this@IdentityActivity,
                     R.drawable.ic_baseline_close_24
                 )
-                this.setNavigationOnClickListener {
-                    val failedReason = requireNotNull(
-                        args?.getSerializable(
-                            ErrorFragment.ARG_CAUSE
-                        ) as? Throwable
-                    ) {
-                        "Failed to get failedReason from $args"
-                    }
-
-                    identityViewModel.sendAnalyticsRequest(
-                        identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
-                            isFromFallbackUrl = false,
-                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
-                            throwable = failedReason
-                        )
-                    )
-                    finishWithResult(
-                        VerificationFlowResult.Failed(failedReason)
-                    )
-                }
             }
             // Otherwise display back arrow icon, clicking it navigates up
             else -> {
@@ -305,9 +298,6 @@ internal class IdentityActivity :
                         this@IdentityActivity,
                         R.drawable.ic_baseline_arrow_back_24
                     )
-                this.setNavigationOnClickListener {
-                    navController.navigateUpAndSetArgForUploadFragment()
-                }
             }
         }
     }
@@ -329,45 +319,13 @@ internal class IdentityActivity :
         }
 
         override fun handleOnBackPressed() {
-            when {
-                // On consent fragment, clicking back finishes the flow with Canceled
-                isConsentFragment(destination) -> {
-                    identityViewModel.sendAnalyticsRequest(
-                        identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
-                            isFromFallbackUrl = false,
-                            lastScreenName = SCREEN_NAME_CONSENT,
-                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
-                        )
-                    )
-                    verificationFlowFinishable.finishWithResult(
-                        VerificationFlowResult.Canceled
-                    )
-                }
-                // On error fragment that should fail, clicking back finishes the flow with Failed
-                isErrorFragmentThatShouldFail(destination, args) -> {
-                    val failedReason = requireNotNull(
-                        args?.getSerializable(
-                            ErrorFragment.ARG_CAUSE
-                        ) as? Throwable
-                    ) {
-                        "Failed to get failedReason from $args"
-                    }
-                    identityViewModel.sendAnalyticsRequest(
-                        identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
-                            isFromFallbackUrl = false,
-                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
-                            throwable = failedReason
-                        )
-                    )
-                    verificationFlowFinishable.finishWithResult(
-                        VerificationFlowResult.Failed(failedReason)
-                    )
-                }
-                // On other fragments, clicking back navigates up
-                else -> {
-                    navController.navigateUpAndSetArgForUploadFragment()
-                }
-            }
+            navigateOnDestination(
+                navController,
+                identityViewModel,
+                verificationFlowFinishable,
+                destination,
+                args
+            )
         }
     }
 
@@ -390,6 +348,9 @@ internal class IdentityActivity :
         private fun isConsentFragment(destination: NavDestination?) =
             destination?.id == R.id.consentFragment
 
+        private fun isConfirmationFragment(destination: NavDestination?) =
+            destination?.id == R.id.confirmationFragment
+
         /**
          * Check if this is the final error fragment, which would fail the verification flow when
          * back button is clicked.
@@ -399,5 +360,61 @@ internal class IdentityActivity :
             args: Bundle?
         ) = destination?.id == R.id.errorFragment &&
             args?.getBoolean(ErrorFragment.ARG_SHOULD_FAIL, false) == true
+
+        private fun navigateOnDestination(
+            navController: NavController,
+            identityViewModel: IdentityViewModel,
+            verificationFlowFinishable: VerificationFlowFinishable,
+            destination: NavDestination?,
+            args: Bundle?
+        ) {
+            // Don't navigate if there is a outstanding API request.
+            if (identityViewModel.isSubmitting()) {
+                return
+            }
+            when {
+                isConsentFragment(destination) -> {
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
+                            isFromFallbackUrl = false,
+                            lastScreenName = SCREEN_NAME_CONSENT,
+                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
+                        )
+                    )
+                    verificationFlowFinishable.finishWithResult(
+                        VerificationFlowResult.Canceled
+                    )
+                }
+                isConfirmationFragment(destination) -> {
+                    identityViewModel.sendSucceededAnalyticsRequestForNative()
+                    verificationFlowFinishable.finishWithResult(
+                        VerificationFlowResult.Completed
+                    )
+                }
+                isErrorFragmentThatShouldFail(destination, args) -> {
+                    val failedReason = requireNotNull(
+                        args?.serializable(
+                            ErrorFragment.ARG_CAUSE
+                        ) as? Throwable
+                    ) {
+                        "Failed to get failedReason from $args"
+                    }
+
+                    identityViewModel.sendAnalyticsRequest(
+                        identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
+                            isFromFallbackUrl = false,
+                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                            throwable = failedReason
+                        )
+                    )
+                    verificationFlowFinishable.finishWithResult(
+                        VerificationFlowResult.Failed(failedReason)
+                    )
+                }
+                else -> {
+                    navController.clearDataAndNavigateUp(identityViewModel)
+                }
+            }
+        }
     }
 }
