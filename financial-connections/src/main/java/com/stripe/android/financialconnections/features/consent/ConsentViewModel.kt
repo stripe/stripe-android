@@ -118,7 +118,7 @@ internal class ConsentViewModel @Inject constructor(
             state: ConsentState
         ): ConsentViewModel {
             return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+                .viewModel!!
                 .activityRetainedComponent
                 .consentBuilder
                 .initialState(state)

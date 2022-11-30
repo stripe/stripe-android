@@ -142,7 +142,7 @@ internal class SuccessViewModel @Inject constructor(
             state: SuccessState
         ): SuccessViewModel {
             return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+                .viewModel!!
                 .activityRetainedComponent
                 .successSubcomponent
                 .initialState(state)

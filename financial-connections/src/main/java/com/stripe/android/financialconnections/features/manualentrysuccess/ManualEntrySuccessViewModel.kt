@@ -83,7 +83,7 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
             state: ManualEntrySuccessState
         ): ManualEntrySuccessViewModel {
             return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+                .viewModel!!
                 .activityRetainedComponent
                 .manualEntrySuccessBuilder
                 .initialState(state)

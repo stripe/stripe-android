@@ -11,7 +11,7 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
  *  Class containing all of the data needed to represent the screen.
  */
 internal data class FinancialConnectionsSheetState(
-    val initialArgs: FinancialConnectionsSheetActivityArgs = emptyArgs(),
+    val initialArgs: FinancialConnectionsSheetActivityArgs,
     val activityRecreated: Boolean = false,
     @PersistState val manifest: FinancialConnectionsSessionManifest? = null,
     @PersistState val webAuthFlowActive: Boolean = false,
@@ -27,17 +27,6 @@ internal data class FinancialConnectionsSheetState(
     constructor(args: FinancialConnectionsSheetActivityArgs) : this(
         initialArgs = args
     )
-
-    private companion object {
-        fun emptyArgs(): FinancialConnectionsSheetActivityArgs {
-            return FinancialConnectionsSheetActivityArgs.ForData(
-                FinancialConnectionsSheet.Configuration(
-                    financialConnectionsSessionClientSecret = "",
-                    publishableKey = ""
-                )
-            )
-        }
-    }
 }
 
 /**

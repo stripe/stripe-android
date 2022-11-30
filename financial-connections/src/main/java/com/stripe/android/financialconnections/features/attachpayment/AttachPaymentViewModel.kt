@@ -96,7 +96,7 @@ internal class AttachPaymentViewModel @Inject constructor(
             state: AttachPaymentState
         ): AttachPaymentViewModel {
             return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+                .viewModel!!
                 .activityRetainedComponent
                 .attachPaymentSubcomponent
                 .initialState(state)

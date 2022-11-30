@@ -131,7 +131,7 @@ internal class ManualEntryViewModel @Inject constructor(
             state: ManualEntryState
         ): ManualEntryViewModel {
             return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+                .viewModel!!
                 .activityRetainedComponent
                 .manualEntryBuilder
                 .initialState(state)

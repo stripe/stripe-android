@@ -25,7 +25,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.viewModel
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.domain.toNavigationCommand
@@ -47,12 +46,16 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.utils.viewModelIfArgsValid
 import com.stripe.android.uicore.image.StripeImageLoader
 import javax.inject.Inject
 
 internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), MavericksView {
 
-    val viewModel: FinancialConnectionsSheetNativeViewModel by viewModel()
+    val viewModel: FinancialConnectionsSheetNativeViewModel? by viewModelIfArgsValid(
+        viewModelClass = FinancialConnectionsSheetNativeViewModel::class,
+        argsValidator = { it != null }
+    )
 
     @Inject
     lateinit var navigationManager: NavigationManager
@@ -65,52 +68,60 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.activityRetainedComponent.inject(this)
-        viewModel.onEach { postInvalidate() }
-        onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
-        setContent {
-            FinancialConnectionsTheme {
-                Column {
-                    Box(modifier = Modifier.weight(1f)) {
-                        val showCloseDialog = viewModel.collectAsState { it.showCloseDialog }
-                        val firstPane = viewModel.collectAsState(mapper = { it.initialPane })
-                        if (showCloseDialog.value) {
-                            CloseDialog(
-                                viewModel::onCloseConfirm,
-                                viewModel::onCloseDismiss
-                            )
+        viewModel?.let { vm ->
+            vm.activityRetainedComponent.inject(this)
+            vm.onEach { postInvalidate() }
+            onBackPressedDispatcher.addCallback { vm.onBackPressed() }
+            setContent {
+                FinancialConnectionsTheme {
+                    Column {
+                        Box(modifier = Modifier.weight(1f)) {
+                            val showCloseDialog = vm.collectAsState { it.showCloseDialog }
+                            val firstPane = vm.collectAsState(mapper = { it.initialPane })
+                            if (showCloseDialog.value) {
+                                CloseDialog(
+                                    vm::onCloseConfirm,
+                                    vm::onCloseDismiss
+                                )
+                            }
+                            NavHost(firstPane.value)
                         }
-                        NavHost(firstPane.value)
                     }
                 }
             }
+        } ?: kotlin.run {
+            finish()
         }
+
     }
 
     /**
      * handle state changes here.
      */
     override fun invalidate() {
-        withState(viewModel) { state ->
-            state.viewEffect?.let { viewEffect ->
-                when (viewEffect) {
-                    is OpenUrl -> startActivity(
-                        CreateBrowserIntentForUrl(
-                            context = this,
-                            uri = Uri.parse(viewEffect.url)
+        viewModel?.let { vm ->
+            withState(vm) { state ->
+                state.viewEffect?.let { viewEffect ->
+                    when (viewEffect) {
+                        is OpenUrl -> startActivity(
+                            CreateBrowserIntentForUrl(
+                                context = this,
+                                uri = Uri.parse(viewEffect.url)
+                            )
                         )
-                    )
-                    is Finish -> {
-                        setResult(
-                            Activity.RESULT_OK,
-                            Intent().putExtra(EXTRA_RESULT, viewEffect.result)
-                        )
-                        finish()
+                        is Finish -> {
+                            setResult(
+                                Activity.RESULT_OK,
+                                Intent().putExtra(EXTRA_RESULT, viewEffect.result)
+                            )
+                            finish()
+                        }
                     }
+                    vm.onViewEffectLaunched()
                 }
-                viewModel.onViewEffectLaunched()
             }
         }
+
     }
 
     @OptIn(ExperimentalMaterialApi::class)
@@ -184,7 +195,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @Composable
     private fun BackHandler(navController: NavHostController, pane: Pane) {
         androidx.activity.compose.BackHandler(true) {
-            viewModel.onBackClick(pane)
+            viewModel?.onBackClick(pane)
             if (navController.popBackStack().not()) onBackPressedDispatcher.onBackPressed()
         }
     }
@@ -193,7 +204,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     private fun LaunchedPane(
         pane: Pane
     ) {
-        LaunchedEffect(Unit) { viewModel.onPaneLaunched(pane) }
+        LaunchedEffect(Unit) { viewModel?.onPaneLaunched(pane) }
     }
 
     /**
@@ -201,12 +212,12 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
      */
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        viewModel.handleOnNewIntent(intent)
+        viewModel?.handleOnNewIntent(intent)
     }
 
     override fun onResume() {
         super.onResume()
-        viewModel.onResume()
+        viewModel?.onResume()
     }
 
     @Composable
