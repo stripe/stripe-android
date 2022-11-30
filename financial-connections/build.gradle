@@ -18,11 +18,6 @@ android {
     }
 }
 
-shot {
-    applicationId = "com.stripe.android.financialconnections.test"
-    tolerance = 1 // 1% tolerance because screenshots look slightly different on arm64-v8a vs x86_64 vs m1 emulators
-}
-
 dependencies {
     api project(":stripe-core")
     api project(":stripe-ui-core")
@@ -74,7 +69,6 @@ dependencies {
     testImplementation testLibs.mavericks
     testImplementation testLibs.turbine
 
-    androidTestImplementation "com.airbnb.android:showkase-screenshot-testing-shot:$showkaseVersion"
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
