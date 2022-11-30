@@ -606,6 +606,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
 
     abstract fun onUserCancel()
 
+    fun onUserBack() {
+        // Reset the selection to the one from before opening the add payment method screen
+        val paymentOptionsState = paymentOptionsState.value
+        updateSelection(paymentOptionsState.selectedItem?.toPaymentSelection())
+    }
+
     abstract fun onPaymentResult(paymentResult: PaymentResult)
 
     abstract fun onFinish()

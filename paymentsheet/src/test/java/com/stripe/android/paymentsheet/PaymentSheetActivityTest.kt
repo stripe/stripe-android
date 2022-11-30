@@ -1021,6 +1021,30 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `Enables primary button again when returning from add payment method screen`() {
+        val addPaymentMethodTarget = PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
+            FragmentConfigFixtures.DEFAULT
+        )
+
+        val viewModel = createViewModel()
+
+        activityScenario(viewModel).launch(intent).use { injectableScenario ->
+            injectableScenario.onActivity { activity ->
+                idleLooper()
+                assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+
+                viewModel.transitionTo(addPaymentMethodTarget)
+                idleLooper()
+                assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+
+                viewModel.onUserBack()
+                idleLooper()
+                assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
+            }
+        }
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
