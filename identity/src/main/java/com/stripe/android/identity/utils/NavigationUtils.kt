@@ -1,9 +1,13 @@
 package com.stripe.android.identity.utils
 
+import android.os.Bundle
 import android.util.Log
 import androidx.annotation.IdRes
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
@@ -30,6 +34,7 @@ import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.hasError
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.launch
 
 /**
  * A util method for a [Fragment] to post [CollectedDataParam] and resolve its [VerificationPageData].
@@ -76,7 +81,7 @@ internal suspend fun Fragment.navigateToSelfieOrSubmit(
     @IdRes fromFragment: Int
 ) {
     if (verificationPage.requireSelfie()) {
-        findNavController().navigate(R.id.action_global_selfieFragment)
+        navigateOnResume(R.id.action_global_selfieFragment)
     } else {
         submitVerificationPageDataAndNavigate(
             identityViewModel,
@@ -106,8 +111,7 @@ internal suspend fun Fragment.submitVerificationPageDataAndNavigate(
                     )
                 }
                 submittedVerificationPageData.submitted -> {
-                    findNavController()
-                        .navigate(R.id.action_global_confirmationFragment)
+                    navigateOnResume(R.id.action_global_confirmationFragment)
                 }
                 else -> {
                     "VerificationPage submit failed".let { msg ->
@@ -164,35 +168,43 @@ private fun Fragment.navigateToRequirementErrorFragment(
     @IdRes fromFragment: Int,
     requirementError: VerificationPageDataRequirementError
 ) {
-    findNavController()
-        .navigateToErrorFragmentWithRequirementError(
-            fromFragment,
-            requirementError
-        )
+    repeatOnResume {
+        findNavController()
+            .navigateToErrorFragmentWithRequirementError(
+                fromFragment,
+                requirementError
+            )
+    }
 }
 
 /**
  * Navigate to [ErrorFragment] with default values and a cause.
  */
 internal fun Fragment.navigateToDefaultErrorFragment(cause: Throwable) {
-    findNavController().navigateToErrorFragmentWithDefaultValues(requireContext(), cause)
+    repeatOnResume {
+        findNavController().navigateToErrorFragmentWithDefaultValues(requireContext(), cause)
+    }
 }
 
 /**
  * Navigate to [ErrorFragment] with default values and a message.
  */
 internal fun Fragment.navigateToDefaultErrorFragment(message: String) {
-    findNavController().navigateToErrorFragmentWithDefaultValues(
-        requireContext(),
-        IllegalStateException(message)
-    )
+    repeatOnResume {
+        findNavController().navigateToErrorFragmentWithDefaultValues(
+            requireContext(),
+            IllegalStateException(message)
+        )
+    }
 }
 
 /**
  * Navigate to [ErrorFragment] as final destination.
  */
 internal fun Fragment.navigateToErrorFragmentWithFailedReason(failedReason: Throwable) {
-    findNavController().navigateToErrorFragmentWithFailedReason(requireContext(), failedReason)
+    repeatOnResume {
+        findNavController().navigateToErrorFragmentWithFailedReason(requireContext(), failedReason)
+    }
 }
 
 /**
@@ -203,13 +215,15 @@ internal fun Fragment.navigateToUploadFragment(
     shouldShowTakePhoto: Boolean,
     shouldShowChoosePhoto: Boolean
 ) {
-    findNavController().navigate(
-        destinationId,
-        bundleOf(
-            ARG_SHOULD_SHOW_TAKE_PHOTO to shouldShowTakePhoto,
-            ARG_SHOULD_SHOW_CHOOSE_PHOTO to shouldShowChoosePhoto
+    repeatOnResume {
+        findNavController().navigate(
+            destinationId,
+            bundleOf(
+                ARG_SHOULD_SHOW_TAKE_PHOTO to shouldShowTakePhoto,
+                ARG_SHOULD_SHOW_CHOOSE_PHOTO to shouldShowChoosePhoto
+            )
         )
-    )
+    }
 }
 
 /**
@@ -234,6 +248,24 @@ internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityVie
     }
 
     return navigateUp()
+}
+
+/**
+ * Try navigate to a destination when the fragment is in resume state.
+ * If app is backgrounded, navigate when it's brought to foreground.
+ */
+internal fun Fragment.navigateOnResume(destinationId: Int, args: Bundle? = null) {
+    repeatOnResume {
+        findNavController().navigate(destinationId, args)
+    }
+}
+
+private fun Fragment.repeatOnResume(block: () -> Unit) {
+    viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            block()
+        }
+    }
 }
 
 internal fun Int.fragmentIdToRequirement(): List<Requirement> = when (this) {

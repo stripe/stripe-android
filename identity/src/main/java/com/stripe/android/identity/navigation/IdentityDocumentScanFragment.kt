@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.CameraXAdapter
@@ -35,6 +34,7 @@ import com.stripe.android.identity.states.IdentityScanState.Companion.isFront
 import com.stripe.android.identity.states.IdentityScanState.Companion.isNullOrFront
 import com.stripe.android.identity.ui.DocumentScanScreen
 import com.stripe.android.identity.utils.fragmentIdToScreenName
+import com.stripe.android.identity.utils.navigateOnResume
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.utils.postVerificationPageData
 import com.stripe.android.identity.utils.submitVerificationPageDataAndNavigate
@@ -53,7 +53,6 @@ internal abstract class IdentityDocumentScanFragment(
 ) {
     abstract val frontScanType: IdentityScanState.ScanType
     abstract val backScanType: IdentityScanState.ScanType?
-    override val shouldObserveDisplayState = false
 
     @get:StringRes
     abstract val frontTitleStringRes: Int
@@ -115,9 +114,15 @@ internal abstract class IdentityDocumentScanFragment(
                 },
                 newDisplayState = newDisplayState,
                 onCameraViewCreated = {
-                    cameraView = it
-                    cameraView.viewFinderWindowView.setBackgroundResource(R.drawable.viewfinder_background)
-                    cameraAdapter = createCameraAdapter()
+                    if (cameraView == null) {
+                        cameraView = it
+                        requireNotNull(cameraView)
+                            .viewFinderWindowView
+                            .setBackgroundResource(
+                                R.drawable.viewfinder_background
+                            )
+                        cameraAdapter = createCameraAdapter()
+                    }
                 },
                 onContinueClicked = {
                     collectDocumentUploadedStateAndPost(
@@ -131,16 +136,16 @@ internal abstract class IdentityDocumentScanFragment(
             LaunchedEffect(newDisplayState) {
                 when (newDisplayState) {
                     null -> {
-                        cameraView.toggleInitial()
+                        requireNotNull(cameraView).toggleInitial()
                     }
                     is IdentityScanState.Initial -> {
-                        cameraView.toggleInitial()
+                        requireNotNull(cameraView).toggleInitial()
                     }
                     is IdentityScanState.Found -> {
-                        cameraView.toggleFound()
+                        requireNotNull(cameraView).toggleFound()
                     }
                     is IdentityScanState.Finished -> {
-                        cameraView.toggleFinished()
+                        requireNotNull(cameraView).toggleFinished()
                     }
                     else -> {} // no-op
                 }
@@ -208,7 +213,7 @@ internal abstract class IdentityDocumentScanFragment(
     private fun createCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> {
         return CameraXAdapter(
             requireNotNull(activity),
-            cameraView.previewFrame,
+            requireNotNull(cameraView).previewFrame,
             MINIMUM_RESOLUTION,
             DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
                 Log.e(TAG, "scan fails with exception: $cause")
@@ -234,7 +239,7 @@ internal abstract class IdentityDocumentScanFragment(
     internal fun collectDocumentUploadedStateAndPost(
         type: CollectedDataParam.Type,
         isFront: Boolean
-    ) = lifecycleScope.launch {
+    ) = viewLifecycleOwner.lifecycleScope.launch {
         if (isFront) {
             identityViewModel.documentFrontUploadedState
         } else {
@@ -273,7 +278,7 @@ internal abstract class IdentityDocumentScanFragment(
                                             }
                                         )
                                     } else if (verificationPageDataWithNoError.isMissingSelfie()) {
-                                        findNavController().navigate(
+                                        navigateOnResume(
                                             R.id.action_global_selfieFragment
                                         )
                                     } else {

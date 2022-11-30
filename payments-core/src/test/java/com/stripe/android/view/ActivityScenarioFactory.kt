@@ -22,6 +22,12 @@ internal class ActivityScenarioFactory(
         )
     }
 
+    internal inline fun <reified T : Activity> create(): ActivityScenario<T> {
+        return ActivityScenario.launch(
+            Intent(context, T::class.java)
+        )
+    }
+
     fun createAddPaymentMethodActivity() = create<AddPaymentMethodActivity>(
         AddPaymentMethodActivityStarter.Args.Builder()
             .setPaymentMethodType(PaymentMethod.Type.Card)

@@ -8,7 +8,6 @@
     <ID>ComplexMethod:IdentityFragmentFactory.kt$IdentityFragmentFactory$override fun instantiate(classLoader: ClassLoader, className: String): Fragment</ID>
     <ID>ComplexMethod:NavigationUtils.kt$internal fun Int.fragmentIdToScreenName(): String</ID>
     <ID>ComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( identityViewModel: IdentityViewModel, title: String, context: String, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, onComposeFinish: () -> Unit, onContinueClicked: () -> Unit )</ID>
-    <ID>EmptyFunctionBlock:IdentityCameraScanFragmentTest.kt$IdentityCameraScanFragmentTest.TestFragment${ }</ID>
     <ID>EmptyFunctionBlock:IdentityCameraScanFragmentTest.kt$IdentityCameraScanFragmentTest.TestFragment${}</ID>
     <ID>FunctionOnlyReturningConstant:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$private fun isFaceFocused(): Boolean</ID>
     <ID>LargeClass:IdentityDocumentScanFragmentTest.kt$IdentityDocumentScanFragmentTest</ID>
@@ -31,7 +30,7 @@
     <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$private fun uploadDocumentImagesAndNotify( imageFile: File, filePurpose: StripeFilePurpose, uploadMethod: UploadMethod, scores: List&lt;Float>? = null, isHighRes: Boolean, isFront: Boolean, scanType: IdentityScanState.ScanType, compressionQuality: Float )</ID>
     <ID>LongMethod:IdentityViewModelTest.kt$IdentityViewModelTest$private fun testUploadDocumentScanSuccessResult(isFront: Boolean)</ID>
     <ID>LongMethod:IdentityViewModelTest.kt$IdentityViewModelTest$private fun testUploadSelfieScanSuccessResult( selfie: FaceDetectorTransitioner.Selfie, isHighRes: Boolean )</ID>
-    <ID>LongMethod:SelfieFragment.kt$SelfieFragment$private fun collectUploadedStateAndUploadForCollectedSelfies()</ID>
+    <ID>LongMethod:SelfieScreen.kt$@Composable internal fun SelfieScanScreen( title: String, message: String, verificationPageState: Resource&lt;VerificationPage>, onError: (Throwable) -> Unit, newDisplayState: IdentityScanState?, onCameraViewCreated: (CameraView) -> Unit, onContinueClicked: (Boolean) -> Unit )</ID>
     <ID>LongMethod:UploadScreen.kt$@Composable internal fun UploadScreen( identityViewModel: IdentityViewModel, title: String, context: String, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, onComposeFinish: () -> Unit, onContinueClicked: () -> Unit )</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$100</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$5</ID>
@@ -53,9 +52,11 @@
     <ID>MaxLineLength:IdentityDocumentScanFragmentTest.kt$IdentityDocumentScanFragmentTest$(params[IdentityAnalyticsRequestFactory.PARAM_EVENT_META_DATA] as Map&lt;*, *>)[IdentityAnalyticsRequestFactory.PARAM_SCREEN_NAME] == IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_ID</ID>
     <ID>MaxLineLength:IdentityDocumentScanFragmentTest.kt$IdentityDocumentScanFragmentTest$fun</ID>
     <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$body</ID>
+    <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$face_detector_url</ID>
     <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$fallback_url</ID>
     <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$id_detector_url</ID>
     <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$privacy_policy</ID>
+    <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$training_consent_text</ID>
     <ID>MaxLineLength:IdentityScanFlow.kt$IdentityScanFlow$private val aggregateResultListener: AggregateResultListener&lt;IdentityAggregator.InterimResult, IdentityAggregator.FinalResult></ID>
     <ID>MaxLineLength:IdentityUploadFragmentTest.kt$IdentityUploadFragmentTest$(params[PARAM_EVENT_META_DATA] as Map&lt;*, *>)[PARAM_SCAN_TYPE] == ID</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$?:</ID>

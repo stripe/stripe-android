@@ -5,10 +5,14 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
@@ -25,14 +29,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.edit
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheetForToken
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 
 @OptIn(ExperimentalComposeUiApi::class)
 class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
@@ -43,8 +51,13 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         getSharedPreferences("FINANCIAL_CONNECTIONS_DEBUG", Context.MODE_PRIVATE)
     }
 
+    private lateinit var collectBankAccountLauncher: CollectBankAccountLauncher
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        collectBankAccountLauncher = CollectBankAccountLauncher.create(
+            this, viewModel::onCollectBankAccountLauncherResult
+        )
         setContent {
             FinancialConnectionsScreen()
         }
@@ -53,7 +66,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     @Composable
     private fun FinancialConnectionsScreen() {
-        val state: FinancialConnectionsExampleState by viewModel.state.collectAsState()
+        val state: FinancialConnectionsPlaygroundState by viewModel.state.collectAsState()
         val viewEffect: FinancialConnectionsPlaygroundViewEffect? by viewModel.viewEffect.collectAsState(
             null
         )
@@ -65,6 +78,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             viewModel::onFinancialConnectionsSheetForTokenResult
         )
 
+
         LaunchedEffect(viewEffect) {
             viewEffect?.let {
                 when (it) {
@@ -74,6 +88,18 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
                     is FinancialConnectionsPlaygroundViewEffect.OpenForToken -> {
                         financialConnectionsSheetForToken.present(it.configuration)
+                    }
+
+                    is FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent -> {
+                        collectBankAccountLauncher.presentWithPaymentIntent(
+                            publishableKey = it.publishableKey,
+                            stripeAccountId = null,
+                            clientSecret = it.paymentIntentSecret,
+                            configuration = CollectBankAccountConfiguration.USBankAccount(
+                                name = "Sample name",
+                                email = "sampleEmail@test.com"
+                            )
+                        )
                     }
                 }
             }
@@ -87,7 +113,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     @Composable
     private fun FinancialConnectionsContent(
-        state: FinancialConnectionsExampleState,
+        state: FinancialConnectionsPlaygroundState,
         onButtonClick: (Mode, Flow) -> Unit
     ) {
         val (selectedMode, onModeSelected) = remember { mutableStateOf(Mode.values()[0]) }
@@ -119,7 +145,21 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     ) {
                         Text("Connect Accounts!")
                     }
-                    Text(text = state.status)
+                    LazyColumn {
+                        items(state.status) { item ->
+                            Row(Modifier.padding(8.dp), verticalAlignment = Alignment.Top) {
+                                Canvas(
+                                    modifier = Modifier
+                                        .padding(end = 8.dp, top = 6.dp)
+                                        .size(6.dp)
+                                ) {
+                                    drawCircle(Color.Black)
+                                }
+                                Text(text = item, fontSize = 12.sp)
+                            }
+                        }
+                    }
+
                 }
             }
         )
@@ -222,7 +262,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     @Composable
     fun ContentPreview() {
         FinancialConnectionsContent(
-            state = FinancialConnectionsExampleState(false, "Result: Pending"),
+            state = FinancialConnectionsPlaygroundState(false, "pk", listOf("Result: Pending")),
             onButtonClick = { _, _ -> }
         )
     }

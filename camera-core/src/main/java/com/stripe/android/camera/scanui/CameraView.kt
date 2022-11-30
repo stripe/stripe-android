@@ -76,7 +76,7 @@ class CameraView : ConstraintLayout {
     constructor(
         context: Context,
         argViewFinderType: ViewFinderType,
-        @DrawableRes argBorderDrawable: Int
+        @DrawableRes argBorderDrawable: Int = NO_BORDER
     ) : super(context) {
         viewFinderType = argViewFinderType
         borderDrawable = argBorderDrawable

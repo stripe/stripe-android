@@ -113,6 +113,45 @@ internal data class SelfieUploadState(
         }
     }
 
+    fun updateLoading(
+        isHighRes: Boolean,
+        selfie: FaceDetectorTransitioner.Selfie
+    ) = when (selfie) {
+        FaceDetectorTransitioner.Selfie.FIRST -> {
+            if (isHighRes) {
+                this.copy(
+                    firstHighResResult = Resource.loading()
+                )
+            } else {
+                this.copy(
+                    firstLowResResult = Resource.loading()
+                )
+            }
+        }
+        FaceDetectorTransitioner.Selfie.BEST -> {
+            if (isHighRes) {
+                this.copy(
+                    bestHighResResult = Resource.loading()
+                )
+            } else {
+                this.copy(
+                    bestLowResResult = Resource.loading()
+                )
+            }
+        }
+        FaceDetectorTransitioner.Selfie.LAST -> {
+            if (isHighRes) {
+                this.copy(
+                    lastHighResResult = Resource.loading()
+                )
+            } else {
+                this.copy(
+                    lastLowResResult = Resource.loading()
+                )
+            }
+        }
+    }
+
     fun hasError(): Boolean {
         allResults.forEach { result ->
             if (result.status == Status.ERROR) {
@@ -150,4 +189,6 @@ internal data class SelfieUploadState(
         }
         return true
     }
+
+    fun isIdle() = allResults.all { it.status == Status.IDLE }
 }

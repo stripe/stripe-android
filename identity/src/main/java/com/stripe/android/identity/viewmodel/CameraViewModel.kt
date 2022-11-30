@@ -41,10 +41,6 @@ internal open class CameraViewModel(
     internal val finalResult = SingleLiveEvent<IdentityAggregator.FinalResult>()
     private val reset = MutableLiveData<Unit>()
 
-    // TODO(ccen): remove when SelfieFragment is also migrated to Jetpack Compose.
-    internal val displayStateChanged =
-        SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
-
     internal val displayStateChangedFlow =
         MutableStateFlow<Pair<IdentityScanState, IdentityScanState?>?>(null)
 
@@ -72,7 +68,6 @@ internal open class CameraViewModel(
     override val scanErrorListener = ScanErrorListener()
 
     override fun displayState(newState: IdentityScanState, previousState: IdentityScanState?) {
-        displayStateChanged.postValue(newState to previousState)
         displayStateChangedFlow.update {
             (newState to previousState)
         }

@@ -101,7 +101,6 @@ internal fun DocumentScanScreen(
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
-
                 CameraViewFinder(onCameraViewCreated, newDisplayState)
             }
             LoadingButton(
