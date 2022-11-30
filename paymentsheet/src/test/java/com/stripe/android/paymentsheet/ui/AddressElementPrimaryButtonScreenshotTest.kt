@@ -19,22 +19,19 @@ class AddressElementPrimaryButtonScreenshotTest {
         SystemAppearance.values(),
         PaymentSheetAppearance.values(),
         FontSize.values(),
+        padding = PaddingValues(horizontal = 16.dp),
     )
 
     @Test
     fun testEnabled() {
-        paparazziRule.snapshot(
-            padding = PaddingValues(horizontal = 16.dp),
-        ) {
+        paparazziRule.snapshot {
             AddressElementPrimaryButton(isEnabled = true, BUTTON_TEXT, onButtonClick = {})
         }
     }
 
     @Test
     fun testDisabled() {
-        paparazziRule.snapshot(
-            padding = PaddingValues(horizontal = 16.dp),
-        ) {
+        paparazziRule.snapshot {
             AddressElementPrimaryButton(isEnabled = false, BUTTON_TEXT, onButtonClick = {})
         }
     }

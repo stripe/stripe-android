@@ -27,12 +27,12 @@ class MyNewScreenshotTest {
 
 ## Recording screenshots
 
-To record screenshots, run `recordPaparazziDebug`. This will record all screenshots of the specified module. New or updated screenshots will be added to your Git staging area.
+To record screenshots, run `./gradlew <module-name>:recordPaparazziDebug`. This will record all screenshots of the specified module. New or updated screenshots will be added to your Git staging area.
 
 If you only want to run a specific test class, add `--tests com.stripe.android.paymentsheet.ui.MyNewScreenshotTest`.
 
 ## Verifying screenshots
 
-To verify screenshots, run `verifyPaparazziDebug`. This is the command we use on CI.
+To verify screenshots, run `./gradlew <module-name>:verifyPaparazziDebug`. This is the command we use on CI.
 
 In case of failures, this command will generate failure images that show the diff in `<module-name>/out/failures`. However, we exclude these from Git. 

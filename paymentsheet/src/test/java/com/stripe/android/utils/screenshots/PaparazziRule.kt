@@ -24,6 +24,7 @@ import java.lang.reflect.Modifier as ReflectionModifier
 
 class PaparazziRule(
     vararg configOptions: Array<out PaparazziConfigOption>,
+    private val padding: PaddingValues = PaddingValues(vertical = 16.dp),
 ) : TestRule {
 
     private val testCases: List<TestCase> = configOptions.toTestCases()
@@ -33,23 +34,18 @@ class PaparazziRule(
 
     private var description: Description? = null
 
-    init {
-        makePaparazziWorkForApi33()
-    }
-
     override fun apply(base: Statement, description: Description): Statement {
         this.description = description
-        return paparazzi.apply(base, description)
+        return object : Statement() {
+            override fun evaluate() {
+                base.evaluate()
+            }
+        }
     }
 
     fun snapshot(
-        padding: PaddingValues = PaddingValues(vertical = 16.dp),
         content: @Composable () -> Unit,
     ) {
-        // This is to close the prepare done as part of the apply.
-        // We need symmetric calls to prepare/close.
-        paparazzi.close()
-
         val description = requireNotNull(description) {
             "Description in PaparazziRule can't be null"
         }
@@ -66,25 +62,27 @@ class PaparazziRule(
 
             paparazzi.prepare(newDescription)
 
-            val deviceConfig = testCase.apply(defaultDeviceConfig)
-            if (deviceConfig != defaultDeviceConfig) {
-                paparazzi.unsafeUpdateConfig(deviceConfig)
-            }
+            try {
+                val deviceConfig = testCase.apply(defaultDeviceConfig)
+                if (deviceConfig != defaultDeviceConfig) {
+                    paparazzi.unsafeUpdateConfig(deviceConfig)
+                }
 
-            paparazzi.snapshot {
-                PaymentsTheme(colors = PaymentsTheme.getColors(testCase.isDarkTheme)) {
-                    Surface(color = MaterialTheme.colors.surface) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.padding(padding),
-                        ) {
-                            content()
+                paparazzi.snapshot {
+                    PaymentsTheme(colors = PaymentsTheme.getColors(testCase.isDarkTheme)) {
+                        Surface(color = MaterialTheme.colors.surface) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.padding(padding),
+                            ) {
+                                content()
+                            }
                         }
                     }
                 }
+            } finally {
+                paparazzi.close()
             }
-
-            paparazzi.close()
         }
     }
 
@@ -109,21 +107,27 @@ class PaparazziRule(
         )
     }
 
-    private fun makePaparazziWorkForApi33() {
-        // Temporary workaround to fix an issue with Paparazzi on API 33
-        // See: https://github.com/cashapp/paparazzi/issues/631#issuecomment-1326051546
-        val field = Build.VERSION::class.java.getField("CODENAME")
-        val newValue = "REL"
-
-        Field::class.java.getDeclaredField("modifiers").apply {
-            isAccessible = true
-            setInt(field, field.modifiers and ReflectionModifier.FINAL.inv())
+    companion object {
+        init {
+            makePaparazziWorkForApi33()
         }
+    }
+}
 
-        field.apply {
-            isAccessible = true
-            set(null, newValue)
-        }
+private fun makePaparazziWorkForApi33() {
+    // Temporary workaround to fix an issue with Paparazzi on API 33
+    // See: https://github.com/cashapp/paparazzi/issues/631#issuecomment-1326051546
+    val field = Build.VERSION::class.java.getField("CODENAME")
+    val newValue = "REL"
+
+    Field::class.java.getDeclaredField("modifiers").apply {
+        isAccessible = true
+        setInt(field, field.modifiers and ReflectionModifier.FINAL.inv())
+    }
+
+    field.apply {
+        isAccessible = true
+        set(null, newValue)
     }
 }
 

@@ -79,10 +79,6 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
                 cornerRadiusDp = 0.0f,
                 borderStrokeWidthDp = 4.0f
             ),
-//            typography = PaymentSheet.Typography.default.copy(
-//                sizeScaleFactor = 1.1f,
-//                fontResId = R.font.cursive
-//            )
         ),
     );
 
