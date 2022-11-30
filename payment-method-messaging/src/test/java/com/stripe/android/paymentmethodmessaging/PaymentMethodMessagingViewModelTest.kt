@@ -56,7 +56,7 @@ class PaymentMethodMessagingViewModelTest {
                     )
                 }
             },
-            isSystemDarkTheme = false,
+            isSystemDarkThemeProvider = { false },
             config = config,
             stripeApiRepository = stripeApiRepository
         )
@@ -93,7 +93,7 @@ class PaymentMethodMessagingViewModelTest {
             mapper = { scope, _ ->
                 scope.async { mock() }
             },
-            isSystemDarkTheme = false,
+            isSystemDarkThemeProvider = { false },
             config = config,
             stripeApiRepository = stripeApiRepository
         )
@@ -128,7 +128,7 @@ class PaymentMethodMessagingViewModelTest {
             mapper = { scope, _ ->
                 scope.async { mock() }
             },
-            isSystemDarkTheme = false,
+            isSystemDarkThemeProvider = { false },
             config = config,
             stripeApiRepository = stripeApiRepository
         )
