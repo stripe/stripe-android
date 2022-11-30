@@ -8,7 +8,7 @@ import com.stripe.android.model.PaymentMethodMessage
  * initializing a compose view using [rememberMessagingState], pass this class to the
  * [PaymentMethodMessaging] composable view.
  */
-internal data class PaymentMethodMessagingData internal constructor(
+data class PaymentMethodMessagingData internal constructor(
     val message: PaymentMethodMessage,
     val images: Map<String, Bitmap>,
     val config: PaymentMethodMessagingView.Configuration

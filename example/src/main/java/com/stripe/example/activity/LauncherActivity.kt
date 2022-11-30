@@ -169,6 +169,10 @@ class LauncherActivity : AppCompatActivity() {
             Item(
                 "StripeImage Example",
                 StripeImageActivity::class.java
+            ),
+            Item(
+                activity.getString(R.string.messaging_element_example),
+                PaymentMethodMessagingExampleActivity::class.java
             )
         )
 

@@ -141,4 +141,9 @@
     <string name="confirm_with_us_bank_account">Confirm with Bank Account</string>
     <string name="setup_us_bank_account">Setup Bank Account</string>
     <string name="confirm_with_us_bank_account_intro">Click below to create payment intent and attach a bank account to payment method. Once a payment intent is created you will be redirected to enter your bank details.</string>
+
+    <!-- Payment method message -->
+    <string name="messaging_element_example">Payment Method Messaging Element Example</string>
+    <string name="messaging_element_example_view">Payment Method Messaging Element View Example</string>
+    <string name="messaging_element_example_compose">Payment Method Messaging Element Compose Example</string>
 </resources>

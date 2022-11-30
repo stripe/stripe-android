@@ -3,7 +3,7 @@ package com.stripe.android.paymentmethodmessaging.view
 /**
  * Result of the Payment Method Messaging state transaction.
  */
-internal sealed class PaymentMethodMessagingState {
+sealed class PaymentMethodMessagingState {
     /**
      * Represents an ongoing transaction.
      */

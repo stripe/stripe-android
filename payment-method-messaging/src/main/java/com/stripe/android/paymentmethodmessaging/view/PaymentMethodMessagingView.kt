@@ -69,7 +69,7 @@ import com.stripe.android.paymentmethodmessaging.view.theme.Color as PaymentMeth
  *     }
  * )
  */
-internal class PaymentMethodMessagingView @JvmOverloads constructor(
+class PaymentMethodMessagingView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
@@ -187,7 +187,7 @@ internal class PaymentMethodMessagingView @JvmOverloads constructor(
  * @param config The [PaymentMethodMessagingView.Configuration] for the view
  */
 @Composable
-internal fun rememberMessagingState(
+fun rememberMessagingState(
     config: PaymentMethodMessagingView.Configuration
 ): State<PaymentMethodMessagingState> {
     val composeState = remember {
@@ -241,7 +241,7 @@ internal fun rememberMessagingState(
  * @param data The [PaymentMethodMessagingData] required to render this Composable view
  */
 @Composable
-internal fun PaymentMethodMessaging(
+fun PaymentMethodMessaging(
     modifier: Modifier = Modifier,
     data: PaymentMethodMessagingData
 ) {

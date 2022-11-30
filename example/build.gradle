@@ -31,6 +31,7 @@ def getAccountId() {
 
 dependencies {
     implementation project(':payments')
+    implementation project(':payment-method-messaging')
     implementation project(':financial-connections')
     implementation project(':stripe-ui-core')
 
@@ -56,6 +57,7 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 
     implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
+    implementation project(path: ':payment-method-messaging')
 
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
 
