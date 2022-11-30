@@ -1,9 +1,7 @@
 package com.stripe.android.paymentmethodmessaging.view
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.net.Uri
-import android.text.style.ImageSpan
 import android.util.AttributeSet
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
@@ -27,6 +25,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -37,20 +36,15 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
-import androidx.core.text.HtmlCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.ui.core.isSystemDarkTheme
-import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -83,8 +77,6 @@ internal class PaymentMethodMessagingView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : AbstractComposeView(context, attrs, defStyleAttr) {
     private val data = MutableStateFlow<PaymentMethodMessagingData?>(null)
-    private var job: Job? = null
-    private val stripeImageLoader = StripeImageLoader(context)
 
     @Composable
     override fun Content() {
@@ -100,24 +92,23 @@ internal class PaymentMethodMessagingView @JvmOverloads constructor(
         onSuccess: () -> Unit,
         onFailure: (Throwable) -> Unit
     ) {
-        val viewModel: PaymentMethodMessagingViewModel = ViewModelProvider(
-            context as ViewModelStoreOwner,
-            PaymentMethodMessagingViewModel.Factory(
-                { config },
-                { context.isSystemDarkTheme() }
-            )
-        )[PaymentMethodMessagingViewModel::class.java]
-        job = CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val message = viewModel.loadMessage()
-                message.fold(
+        findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+            val viewModel: PaymentMethodMessagingViewModel = ViewModelProvider(
+                context as ViewModelStoreOwner,
+                PaymentMethodMessagingViewModel.Factory(
+                    { config },
+                    { context.isSystemDarkTheme() },
+                    { this }
+                )
+            )[PaymentMethodMessagingViewModel::class.java]
+
+            viewModel.loadMessage()
+
+            viewModel.messageFlow.collect { message ->
+                message?.fold(
                     onSuccess = {
                         withContext(Dispatchers.Main) {
-                            data.value = PaymentMethodMessagingData(
-                                message = it,
-                                images = it.displayHtml.getBitmaps(this, stripeImageLoader),
-                                config = config
-                            )
+                            data.value = it
                             onSuccess()
                         }
                     },
@@ -127,15 +118,8 @@ internal class PaymentMethodMessagingView @JvmOverloads constructor(
                         }
                     }
                 )
-            } catch (e: CancellationException) {
-                onFailure(e)
             }
         }
-    }
-
-    override fun onDetachedFromWindow() {
-        job?.cancel()
-        super.onDetachedFromWindow()
     }
 
     data class Configuration @JvmOverloads constructor(
@@ -216,29 +200,30 @@ internal fun rememberMessagingState(
     val composeState = remember {
         mutableStateOf<PaymentMethodMessagingState>(PaymentMethodMessagingState.Loading)
     }
+    val coroutineScope = rememberCoroutineScope()
+
     val viewModel: PaymentMethodMessagingViewModel = viewModel(
         factory = PaymentMethodMessagingViewModel.Factory(
             { config },
-            { context.isSystemDarkTheme() }
+            { context.isSystemDarkTheme() },
+            { coroutineScope }
         )
     )
-    val imageLoader = remember(context) { StripeImageLoader(context) }
 
     LaunchedEffect(config) {
-        viewModel.loadMessage().fold(
-            onSuccess = {
-                composeState.value = PaymentMethodMessagingState.Success(
-                    data = PaymentMethodMessagingData(
-                        message = it,
-                        images = it.displayHtml.getBitmaps(this, imageLoader),
-                        config = config
+        viewModel.loadMessage()
+        viewModel.messageFlow.collect { result ->
+            result?.fold(
+                onSuccess = { data ->
+                    composeState.value = PaymentMethodMessagingState.Success(
+                        data = data
                     )
-                )
-            },
-            onFailure = {
-                composeState.value = PaymentMethodMessagingState.Failure(it)
-            }
-        )
+                },
+                onFailure = {
+                    composeState.value = PaymentMethodMessagingState.Failure(it)
+                }
+            )
+        }
     }
 
     return composeState
@@ -335,29 +320,4 @@ private fun PaymentMethodMessagingTheme(
             }
         }
     )
-}
-
-private suspend fun String.getBitmaps(
-    scope: CoroutineScope,
-    imageLoader: StripeImageLoader
-): Map<String, Bitmap> = withContext(scope.coroutineContext) {
-    val spanned = HtmlCompat.fromHtml(this@getBitmaps, HtmlCompat.FROM_HTML_MODE_LEGACY)
-    val images = spanned
-        .getSpans(0, spanned.length, Any::class.java)
-        .filterIsInstance<ImageSpan>()
-        .map { it.source!! }
-
-    val deferred = images.map { url ->
-        async {
-            Pair(url, imageLoader.load(url).getOrNull())
-        }
-    }
-
-    val bitmaps = deferred.awaitAll()
-
-    bitmaps.mapNotNull { pair ->
-        pair.second?.let { bitmap ->
-            Pair(pair.first, bitmap)
-        }
-    }.toMap()
 }

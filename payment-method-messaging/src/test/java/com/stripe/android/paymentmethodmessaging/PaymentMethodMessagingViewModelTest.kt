@@ -1,32 +1,63 @@
 package com.stripe.android.paymentmethodmessaging
 
+import androidx.lifecycle.viewModelScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingData
 import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingView
 import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Test
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PaymentMethodMessagingViewModelTest {
     private val stripeApiRepository = mock<StripeApiRepository>()
 
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+    }
+
+    @AfterTest
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
     @Test
-    fun `when valid message, loadMessage returns success`() = runTest {
+    fun `when valid message, loadMessage returns success`() = runTest(UnconfinedTestDispatcher()) {
+        val config = PaymentMethodMessagingView.Configuration(
+            publishableKey = "publishableKey",
+            paymentMethods = setOf(),
+            currency = "currency",
+            amount = 999,
+            imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
+        )
+
         val viewModel = PaymentMethodMessagingViewModel(
+            mapper = {
+                async {
+                    PaymentMethodMessagingData(
+                        message = it,
+                        images = mapOf(),
+                        config = config
+                    )
+                }
+            },
             isSystemDarkTheme = false,
-            configuration = PaymentMethodMessagingView.Configuration(
-                publishableKey = "publishableKey",
-                paymentMethods = setOf(),
-                currency = "currency",
-                amount = 999,
-                imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
-            ),
+            config = config,
             stripeApiRepository = stripeApiRepository
         )
 
@@ -35,26 +66,31 @@ class PaymentMethodMessagingViewModelTest {
             learnMoreUrl = "some url"
         )
 
-        val message = viewModel.loadMessage()
+        viewModel.loadMessage()
 
-        assertThat(message.isSuccess).isTrue()
-        assertThat(message.getOrNull()?.displayHtml)
+        val result = viewModel.messageFlow.stateIn(viewModel.viewModelScope).value!!
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()?.message?.displayHtml)
             .isEqualTo("some html")
-        assertThat(message.getOrNull()?.learnMoreUrl)
+        assertThat(result.getOrNull()?.message?.learnMoreUrl)
             .isEqualTo("some url")
     }
 
     @Test
     fun `when html is empty, loadMessage returns failure`() = runTest {
+        val config = PaymentMethodMessagingView.Configuration(
+            publishableKey = "publishableKey",
+            paymentMethods = setOf(),
+            currency = "currency",
+            amount = 999,
+            imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
+        )
+
         val viewModel = PaymentMethodMessagingViewModel(
+            mapper = { mock() },
             isSystemDarkTheme = false,
-            configuration = PaymentMethodMessagingView.Configuration(
-                publishableKey = "publishableKey",
-                paymentMethods = setOf(),
-                currency = "currency",
-                amount = 999,
-                imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
-            ),
+            config = config,
             stripeApiRepository = stripeApiRepository
         )
 
@@ -63,24 +99,29 @@ class PaymentMethodMessagingViewModelTest {
             learnMoreUrl = "a"
         )
 
-        val message = viewModel.loadMessage()
+        viewModel.loadMessage()
 
-        assertThat(message.isFailure).isTrue()
-        assertThat(message.exceptionOrNull()?.message)
+        val result = viewModel.messageFlow.stateIn(viewModel.viewModelScope).value!!
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message)
             .isEqualTo("Could not retrieve message")
     }
 
     @Test
     fun `when url is empty, loadMessage returns failure`() = runTest {
+        val config = PaymentMethodMessagingView.Configuration(
+            publishableKey = "publishableKey",
+            paymentMethods = setOf(),
+            currency = "currency",
+            amount = 999,
+            imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
+        )
+
         val viewModel = PaymentMethodMessagingViewModel(
+            mapper = { mock() },
             isSystemDarkTheme = false,
-            configuration = PaymentMethodMessagingView.Configuration(
-                publishableKey = "publishableKey",
-                paymentMethods = setOf(),
-                currency = "currency",
-                amount = 999,
-                imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
-            ),
+            config = config,
             stripeApiRepository = stripeApiRepository
         )
 
@@ -89,10 +130,12 @@ class PaymentMethodMessagingViewModelTest {
             learnMoreUrl = ""
         )
 
-        val message = viewModel.loadMessage()
+        viewModel.loadMessage()
 
-        assertThat(message.isFailure).isTrue()
-        assertThat(message.exceptionOrNull()?.message)
+        val result = viewModel.messageFlow.stateIn(viewModel.viewModelScope).value!!
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()?.message)
             .isEqualTo("Could not retrieve message")
     }
 

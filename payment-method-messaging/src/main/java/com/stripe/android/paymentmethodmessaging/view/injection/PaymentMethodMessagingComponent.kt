@@ -8,6 +8,7 @@ import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingView
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
 @Singleton
@@ -34,6 +35,9 @@ internal interface PaymentMethodMessagingComponent {
 
         @BindsInstance
         fun isSystemDarkTheme(isSystemDarkTheme: Boolean): Builder
+
+        @BindsInstance
+        fun lifecycleScope(lifecycleScope: CoroutineScope): Builder
 
         fun build(): PaymentMethodMessagingComponent
     }
