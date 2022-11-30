@@ -40,7 +40,6 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.Dispatchers
@@ -94,10 +93,7 @@ internal class PaymentMethodMessagingView @JvmOverloads constructor(
         findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
             val viewModel: PaymentMethodMessagingViewModel = ViewModelProvider(
                 context as ViewModelStoreOwner,
-                PaymentMethodMessagingViewModel.Factory(
-                    config,
-                    context.isSystemDarkTheme()
-                )
+                PaymentMethodMessagingViewModel.Factory(config)
             )[PaymentMethodMessagingViewModel::class.java]
 
             viewModel.loadMessage()
@@ -194,16 +190,12 @@ internal class PaymentMethodMessagingView @JvmOverloads constructor(
 internal fun rememberMessagingState(
     config: PaymentMethodMessagingView.Configuration
 ): State<PaymentMethodMessagingState> {
-    val context = LocalContext.current
     val composeState = remember {
         mutableStateOf<PaymentMethodMessagingState>(PaymentMethodMessagingState.Loading)
     }
 
     val viewModel: PaymentMethodMessagingViewModel = viewModel(
-        factory = PaymentMethodMessagingViewModel.Factory(
-            config,
-            context.isSystemDarkTheme()
-        )
+        factory = PaymentMethodMessagingViewModel.Factory(config)
     )
 
     LaunchedEffect(config) {

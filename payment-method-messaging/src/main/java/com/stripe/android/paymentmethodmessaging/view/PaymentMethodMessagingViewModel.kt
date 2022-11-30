@@ -22,7 +22,7 @@ private typealias Mapper = (CoroutineScope, PaymentMethodMessage) ->
 Deferred<PaymentMethodMessagingData>
 
 internal class PaymentMethodMessagingViewModel @Inject constructor(
-    private val isSystemDarkTheme: Boolean,
+    private val isSystemDarkThemeProvider: () -> Boolean,
     private val config: PaymentMethodMessagingView.Configuration,
     private val stripeApiRepository: StripeApiRepository,
     private val mapper: @JvmSuppressWildcards Mapper
@@ -41,7 +41,7 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
                         currency = config.currency,
                         country = config.countryCode,
                         locale = config.locale.toLanguageTag(),
-                        logoColor = config.imageTint?.value ?: if (isSystemDarkTheme) {
+                        logoColor = config.imageTint?.value ?: if (isSystemDarkThemeProvider()) {
                             PaymentMethodMessagingView.Configuration.ImageTint.White.value
                         } else {
                             PaymentMethodMessagingView.Configuration.ImageTint.Black.value
@@ -65,8 +65,7 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val configuration: PaymentMethodMessagingView.Configuration,
-        private val isSystemDarkTheme: Boolean
+        private val configuration: PaymentMethodMessagingView.Configuration
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -75,7 +74,6 @@ internal class PaymentMethodMessagingViewModel @Inject constructor(
             return DaggerPaymentMethodMessagingComponent.builder()
                 .application(application)
                 .configuration(configuration)
-                .isSystemDarkTheme(isSystemDarkTheme)
                 .build()
                 .viewModel as T
         }

@@ -32,9 +32,6 @@ internal interface PaymentMethodMessagingComponent {
         @BindsInstance
         fun configuration(configuration: PaymentMethodMessagingView.Configuration): Builder
 
-        @BindsInstance
-        fun isSystemDarkTheme(isSystemDarkTheme: Boolean): Builder
-
         fun build(): PaymentMethodMessagingComponent
     }
 }

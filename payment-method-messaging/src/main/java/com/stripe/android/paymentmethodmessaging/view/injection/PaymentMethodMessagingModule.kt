@@ -10,6 +10,7 @@ import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessageMapper
 import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingData
 import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingView
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.ui.core.isSystemDarkTheme
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Module
 import dagger.Provides
@@ -40,6 +41,13 @@ internal object PaymentMethodMessagingModule {
     fun providesStripeImageLoader(
         application: Application
     ): StripeImageLoader = StripeImageLoader(application)
+
+    @Provides
+    fun providesIsDarkTheme(
+        application: Application
+    ): () -> Boolean {
+        return application::isSystemDarkTheme
+    }
 
     @Provides
     fun providesMapper(
