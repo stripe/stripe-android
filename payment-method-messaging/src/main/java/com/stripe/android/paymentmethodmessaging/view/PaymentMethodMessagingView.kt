@@ -158,9 +158,9 @@ internal class PaymentMethodMessagingView @JvmOverloads constructor(
         @ColorInt internal val textColor: Int? = null,
 
         /**
-         * The tinting color of the images displayed in the view.
+         * The color of the images displayed in the view.
          */
-        internal val imageTint: ImageTint? = null
+        internal val imageColor: ImageColor? = null
     ) {
         /**
          * Payment methods that can be displayed by `PaymentMethodMessagingView`
@@ -171,12 +171,12 @@ internal class PaymentMethodMessagingView @JvmOverloads constructor(
         }
 
         /**
-         * The tinting colors of the payment method images
+         * The colors of the payment method images
          */
-        enum class ImageTint(internal val value: String) {
-            White("white"),
-            Black("black"),
-            Original("color")
+        enum class ImageColor(internal val value: String) {
+            Light("white"),
+            Dark("black"),
+            Color("color")
         }
     }
 }

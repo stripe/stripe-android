@@ -43,7 +43,7 @@ class PaymentMethodMessagingViewModelTest {
             paymentMethods = setOf(),
             currency = "currency",
             amount = 999,
-            imageTint = PaymentMethodMessagingView.Configuration.ImageTint.Original
+            imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
         )
 
         val viewModel = PaymentMethodMessagingViewModel(
@@ -86,7 +86,7 @@ class PaymentMethodMessagingViewModelTest {
             paymentMethods = setOf(),
             currency = "currency",
             amount = 999,
-            imageTint = PaymentMethodMessagingView.Configuration.ImageTint.Original
+            imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
         )
 
         val viewModel = PaymentMethodMessagingViewModel(
@@ -121,7 +121,7 @@ class PaymentMethodMessagingViewModelTest {
             paymentMethods = setOf(),
             currency = "currency",
             amount = 999,
-            imageTint = PaymentMethodMessagingView.Configuration.ImageTint.Original
+            imageColor = PaymentMethodMessagingView.Configuration.ImageColor.Color
         )
 
         val viewModel = PaymentMethodMessagingViewModel(
