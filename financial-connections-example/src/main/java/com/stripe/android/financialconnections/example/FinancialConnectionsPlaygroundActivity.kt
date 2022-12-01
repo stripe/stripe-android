@@ -42,7 +42,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<FinancialConnectionsPlaygroundViewModel>()
 
-    private val sharedPreferences by lazy {
+    private val connectionsDebugSharedPrefs by lazy {
         getSharedPreferences("FINANCIAL_CONNECTIONS_DEBUG", Context.MODE_PRIVATE)
     }
 
@@ -58,6 +58,11 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        // prevent playground configuration from leaking to example apps.
+        connectionsDebugSharedPrefs.edit { clear() }
+    }
 
     @Composable
     private fun FinancialConnectionsScreen() {
@@ -166,7 +171,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         val radioOptions = NativeOverride.values()
         val (selectedOption, onOptionSelected) = remember { mutableStateOf(radioOptions[0]) }
         LaunchedEffect(selectedOption) {
-            sharedPreferences.edit {
+            connectionsDebugSharedPrefs.edit {
                 when (selectedOption) {
                     NativeOverride.None -> clear()
                     NativeOverride.Native -> putBoolean("override_native", true)
