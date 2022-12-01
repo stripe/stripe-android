@@ -35,12 +35,6 @@ jobs:
             ~/.android/adb*
           key: avd-${{ matrix.api-level }}
 
-      - name: Install Maestro CLI
-        run: curl -Ls "https://get.maestro.mobile.dev" | bash
-
-      - name: Add Maestro to path
-        run: echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
-
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
@@ -51,6 +45,11 @@ jobs:
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
 
+      - name: Install Maestro CLI
+        run: curl -Ls "https://get.maestro.mobile.dev" | bash
+
+      - name: Add Maestro to path
+        run: echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
 
       - name: Run Tests
         uses: reactivecircus/android-emulator-runner@v2
