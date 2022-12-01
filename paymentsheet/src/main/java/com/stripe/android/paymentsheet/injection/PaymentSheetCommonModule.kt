@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet.injection
 
+import android.app.Application
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -15,7 +17,9 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentSheetLoader
+import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import dagger.Binds
 import dagger.Lazy
@@ -42,6 +46,11 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentSheetLoader): PaymentSheetLoader
+
+    @Binds
+    abstract fun bindsLinkAccountStatusProvider(
+        impl: DefaultLinkAccountStatusProvider,
+    ): LinkAccountStatusProvider
 
     companion object {
         /**
@@ -85,6 +94,16 @@ internal abstract class PaymentSheetCommonModule {
                 customerConfig?.id,
                 workContext
             )
+        }
+
+        @Provides
+        @Singleton
+        @Named(APP_NAME)
+        fun provideAppName(
+            appContext: Context,
+        ): String {
+            val application = appContext as Application
+            return application.applicationInfo.loadLabel(application.packageManager).toString()
         }
     }
 }
