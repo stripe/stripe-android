@@ -221,6 +221,8 @@ class DateConfigTest {
     }
 
     private fun produceInput(month: Int, year: Int): String {
-        return String.format("%s%d", month.toString().padStart(length = 2, padChar = '0'), year)
+        val formattedMonth = month.toString().padStart(length = 2, padChar = '0')
+        val formattedYear = year.toString().padStart(length = 2, padChar = '0')
+        return formattedMonth + formattedYear
     }
 }
