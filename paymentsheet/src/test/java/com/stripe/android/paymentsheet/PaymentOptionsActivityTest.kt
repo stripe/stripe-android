@@ -163,14 +163,15 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `ContinueButton should be hidden when showing payment options`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent(
-                PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-                    paymentMethods = PaymentMethodFixtures.createCards(5)
-                )
-            )
-        ).use {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = PaymentMethodFixtures.createCards(5)
+        )
+
+        val scenario = activityScenario(
+            viewModel = createViewModel(args)
+        )
+
+        scenario.launch(createIntent(args)).use {
             it.onActivity { activity ->
                 assertThat(activity.viewBinding.continueButton.isVisible)
                     .isFalse()
@@ -203,14 +204,15 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `ContinueButton should be hidden when returning to payment options`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent(
-                PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-                    paymentMethods = PaymentMethodFixtures.createCards(5)
-                )
-            )
-        ).use {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = PaymentMethodFixtures.createCards(5)
+        )
+
+        val scenario = activityScenario(
+            viewModel = createViewModel(args),
+        )
+
+        scenario.launch(createIntent(args)).use {
             it.onActivity { activity ->
                 assertThat(activity.viewBinding.continueButton.isVisible)
                     .isFalse()

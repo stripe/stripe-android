@@ -36,7 +36,6 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
@@ -290,7 +289,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    val fragmentConfigEvent = MediatorLiveData<FragmentConfig?>().apply {
+    protected val isReadyEvents = MediatorLiveData<Boolean>().apply {
         listOf(
             savedSelection,
             stripeIntent,
@@ -300,19 +299,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             isLinkEnabled
         ).forEach { source ->
             addSource(source) {
-                value = createFragmentConfig()
+                value = determineIfReady()
             }
         }
     }.distinctUntilChanged().map {
         Event(it)
     }
 
-    val isReady: LiveData<Event<Boolean>> = fragmentConfigEvent.map {
-        val config = it.getContentIfNotHandled()
-        Event(config != null)
-    }
-
-    private fun createFragmentConfig(): FragmentConfig? {
+    private fun determineIfReady(): Boolean {
         val stripeIntentValue = stripeIntent.value
         val isGooglePayReadyValue = isGooglePayReady.value
         val isResourceRepositoryReadyValue = isResourceRepositoryReady.value
@@ -322,22 +316,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         // before adding the Fragment.
         val paymentMethodsValue = paymentMethods.value
 
-        return if (
+        return (
             stripeIntentValue != null &&
             paymentMethodsValue != null &&
             isGooglePayReadyValue != null &&
             isResourceRepositoryReadyValue != null &&
             isLinkReadyValue != null &&
             savedSelectionValue != null
-        ) {
-            FragmentConfig(
-                stripeIntent = stripeIntentValue,
-                isGooglePayReady = isGooglePayReadyValue,
-                savedSelection = savedSelectionValue
-            )
-        } else {
-            null
-        }
+        )
     }
 
     abstract fun transitionToFirstScreen()

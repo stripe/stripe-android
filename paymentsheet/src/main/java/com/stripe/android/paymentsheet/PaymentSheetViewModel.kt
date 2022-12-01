@@ -181,13 +181,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         listOf(
             isLinkEnabled,
             isGooglePayReady,
-            fragmentConfigEvent
+            isReadyEvents
         ).forEach {
             addSource(it) {
                 value = (
                     isLinkEnabled.value == true ||
                         isGooglePayReady.value == true
-                    ) && fragmentConfigEvent.value?.peekContent() != null
+                    ) && isReadyEvents.value?.peekContent() == true
             }
         }
     }
@@ -576,7 +576,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     fun transitionToFirstScreenWhenReady() {
         viewModelScope.launch {
-            isReady.asFlow().filter { it.peekContent() }.first()
+            isReadyEvents.asFlow().filter { it.peekContent() }.first()
             transitionToFirstScreen()
         }
     }

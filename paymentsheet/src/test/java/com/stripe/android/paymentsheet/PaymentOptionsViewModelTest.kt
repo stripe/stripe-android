@@ -16,7 +16,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -128,8 +127,7 @@ internal class PaymentOptionsViewModelTest {
         }
 
         // no customer, no new card, no paymentMethods
-        val fragmentConfig = FragmentConfigFixtures.DEFAULT
-        viewModel.resolveTransitionTarget(fragmentConfig)
+        viewModel.resolveTransitionTarget()
 
         assertThat(transitionTarget!!.peekContent()).isNull()
     }
@@ -150,8 +148,7 @@ internal class PaymentOptionsViewModelTest {
             transitionTarget.add(it)
         }
 
-        val fragmentConfig = FragmentConfigFixtures.DEFAULT
-        viewModel.resolveTransitionTarget(fragmentConfig)
+        viewModel.resolveTransitionTarget()
 
         assertThat(transitionTarget).hasSize(2)
         assertThat(transitionTarget[0].peekContent()).isNull()
@@ -174,13 +171,12 @@ internal class PaymentOptionsViewModelTest {
             transitionTarget.add(it)
         }
 
-        val fragmentConfig = FragmentConfigFixtures.DEFAULT
-        viewModel.resolveTransitionTarget(fragmentConfig)
+        viewModel.resolveTransitionTarget()
         assertThat(transitionTarget).hasSize(2)
         assertThat(transitionTarget[1].peekContent())
             .isInstanceOf(TransitionTarget.AddPaymentMethodFull::class.java)
 
-        viewModel.resolveTransitionTarget(fragmentConfig)
+        viewModel.resolveTransitionTarget()
         assertThat(transitionTarget).hasSize(2)
     }
 

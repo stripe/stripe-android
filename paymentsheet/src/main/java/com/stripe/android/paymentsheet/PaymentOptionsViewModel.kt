@@ -281,14 +281,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     fun transitionToFirstScreenWhenReady() {
         viewModelScope.launch {
-            isReady.asFlow().filter { it.peekContent() }.first()
+            isReadyEvents.asFlow().filter { it.peekContent() }.first()
             isResourceRepositoryReady.asFlow().filterNotNull().filter { it }.first()
             transitionToFirstScreen()
         }
     }
 
     override fun transitionToFirstScreen() {
-
         val target = if (args.state.hasPaymentOptions) {
             TransitionTarget.SelectSavedPaymentMethod
         } else {

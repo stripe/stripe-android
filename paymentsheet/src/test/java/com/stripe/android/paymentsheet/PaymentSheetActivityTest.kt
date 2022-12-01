@@ -42,7 +42,6 @@ import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
-import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -258,11 +257,7 @@ internal class PaymentSheetActivityTest {
             )
             viewModel.updateSelection(initialSelection)
 
-            viewModel.transitionTo(
-                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                    FragmentConfigFixtures.DEFAULT
-                )
-            )
+            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
 
             assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
 
@@ -290,11 +285,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
-            viewModel.transitionTo(
-                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                    FragmentConfigFixtures.DEFAULT
-                )
-            )
+            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
             idleLooper()
             assertThat(currentFragment(activity))
                 .isInstanceOf(PaymentSheetAddPaymentMethodFragment::class.java)
@@ -335,11 +326,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.toolbar.navigationContentDescription)
                 .isEqualTo(context.getString(R.string.stripe_paymentsheet_close))
 
-            viewModel.transitionTo(
-                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                    FragmentConfigFixtures.DEFAULT
-                )
-            )
+            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
             idleLooper()
 
             assertThat(activity.toolbar.navigationContentDescription)
@@ -720,16 +707,8 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
-            viewModel.transitionTo(
-                PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(
-                    FragmentConfigFixtures.DEFAULT
-                )
-            )
-            viewModel.transitionTo(
-                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                    FragmentConfigFixtures.DEFAULT
-                )
-            )
+            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod)
+            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
 
             idleLooper()
 
