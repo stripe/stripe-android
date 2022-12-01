@@ -7,20 +7,24 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.appcompat.app.AppCompatActivity
 import com.airbnb.mvrx.Mavericks
 import com.airbnb.mvrx.MavericksView
-import com.airbnb.mvrx.viewModel
 import com.airbnb.mvrx.withState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.argsOrNull
+import com.stripe.android.financialconnections.utils.viewModelLazy
 
 internal class FinancialConnectionsSheetActivity :
     AppCompatActivity(R.layout.activity_financialconnections_sheet), MavericksView {
 
-    val viewModel: FinancialConnectionsSheetViewModel by viewModel()
+    val viewModel: FinancialConnectionsSheetViewModel by viewModelLazy()
+
+    val args by argsOrNull<FinancialConnectionsSheetActivityArgs>()
 
     private val startBrowserForResult = registerForActivityResult(StartActivityForResult()) {
         viewModel.onBrowserActivityResult()
@@ -32,8 +36,12 @@ internal class FinancialConnectionsSheetActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.onEach { postInvalidate() }
-        if (savedInstanceState != null) viewModel.onActivityRecreated()
+        if (args == null) {
+            finish()
+        } else {
+            viewModel.onEach { postInvalidate() }
+            if (savedInstanceState != null) viewModel.onActivityRecreated()
+        }
     }
 
     override fun onResume() {

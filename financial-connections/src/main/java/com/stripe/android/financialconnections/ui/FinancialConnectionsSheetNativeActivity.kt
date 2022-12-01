@@ -25,7 +25,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.viewModel
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.domain.toNavigationCommand
@@ -39,6 +38,7 @@ import com.stripe.android.financialconnections.features.manualentrysuccess.Manua
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -47,12 +47,16 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.utils.argsOrNull
+import com.stripe.android.financialconnections.utils.viewModelLazy
 import com.stripe.android.uicore.image.StripeImageLoader
 import javax.inject.Inject
 
 internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), MavericksView {
 
-    val viewModel: FinancialConnectionsSheetNativeViewModel by viewModel()
+    val args by argsOrNull<FinancialConnectionsSheetNativeActivityArgs>()
+
+    val viewModel: FinancialConnectionsSheetNativeViewModel by viewModelLazy()
 
     @Inject
     lateinit var navigationManager: NavigationManager
@@ -65,22 +69,26 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.activityRetainedComponent.inject(this)
-        viewModel.onEach { postInvalidate() }
-        onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
-        setContent {
-            FinancialConnectionsTheme {
-                Column {
-                    Box(modifier = Modifier.weight(1f)) {
-                        val showCloseDialog = viewModel.collectAsState { it.showCloseDialog }
-                        val firstPane = viewModel.collectAsState(mapper = { it.initialPane })
-                        if (showCloseDialog.value) {
-                            CloseDialog(
-                                viewModel::onCloseConfirm,
-                                viewModel::onCloseDismiss
-                            )
+        if (args == null) {
+            finish()
+        } else {
+            viewModel.activityRetainedComponent.inject(this)
+            viewModel.onEach { postInvalidate() }
+            onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
+            setContent {
+                FinancialConnectionsTheme {
+                    Column {
+                        Box(modifier = Modifier.weight(1f)) {
+                            val showCloseDialog = viewModel.collectAsState { it.showCloseDialog }
+                            val firstPane = viewModel.collectAsState(mapper = { it.initialPane })
+                            if (showCloseDialog.value) {
+                                CloseDialog(
+                                    viewModel::onCloseConfirm,
+                                    viewModel::onCloseDismiss
+                                )
+                            }
+                            NavHost(firstPane.value)
                         }
-                        NavHost(firstPane.value)
                     }
                 }
             }
@@ -100,6 +108,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                             uri = Uri.parse(viewEffect.url)
                         )
                     )
+
                     is Finish -> {
                         setResult(
                             Activity.RESULT_OK,
@@ -121,7 +130,12 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         val navController = rememberNavController()
         val uriHandler = remember { CustomTabUriHandler(context) }
         val initialDestination =
-            remember(initialPane) { initialPane.toNavigationCommand(logger, emptyMap()).destination }
+            remember(initialPane) {
+                initialPane.toNavigationCommand(
+                    logger,
+                    emptyMap()
+                ).destination
+            }
         NavigationEffect(navController)
         CompositionLocalProvider(
             LocalNavHostController provides navController,
