@@ -6,7 +6,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.camera.framework.util.FrameRateTracker
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -187,11 +186,11 @@ abstract class ResultAggregator<
 
                 aggregatorExecutionStats?.trackResult("frame_processed")
 
-                launch { listener.onInterimResult(interimResult) }
+                listener.onInterimResult(interimResult)
 
                 if (!isFinished && finalResult != null) {
                     isFinished = true
-                    launch { listener.onResult(finalResult) }
+                    listener.onResult(finalResult)
                 }
                 isFinished
             }
