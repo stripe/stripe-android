@@ -55,7 +55,7 @@ internal class ResetViewModel @Inject constructor(
             state: ResetState
         ): ResetViewModel {
             return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel!!
+                .viewModel
                 .activityRetainedComponent
                 .resetSubcomponent
                 .initialState(state)

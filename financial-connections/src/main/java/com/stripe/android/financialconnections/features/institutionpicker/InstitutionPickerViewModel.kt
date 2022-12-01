@@ -176,7 +176,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
             state: InstitutionPickerState
         ): InstitutionPickerViewModel {
             return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel!!
+                .viewModel
                 .activityRetainedComponent
                 .institutionPickerBuilder
                 .initialState(state)

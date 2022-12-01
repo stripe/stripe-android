@@ -248,7 +248,7 @@ internal class AccountPickerViewModel @Inject constructor(
             state: AccountPickerState
         ): AccountPickerViewModel {
             return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel!!
+                .viewModel
                 .activityRetainedComponent
                 .accountPickerBuilder
                 .initialState(state)

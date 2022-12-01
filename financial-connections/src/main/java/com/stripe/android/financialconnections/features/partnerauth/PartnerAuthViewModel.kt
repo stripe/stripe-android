@@ -233,7 +233,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             state: PartnerAuthState
         ): PartnerAuthViewModel {
             return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel!!
+                .viewModel
                 .activityRetainedComponent
                 .partnerAuthSubcomponent
                 .initialState(state)
