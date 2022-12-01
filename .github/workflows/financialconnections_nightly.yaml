@@ -12,7 +12,8 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        api-level: [ 29 ]
+        api-level: [21, 23, 29]
+        target: [default,google_apis]
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -40,39 +41,26 @@ jobs:
       - name: Add Maestro to path
         run: echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
 
-#      - name: create AVD and generate snapshot for caching
-#        if: steps.avd-cache.outputs.cache-hit != 'true'
-#        uses: reactivecircus/android-emulator-runner@v2
-#        with:
-#          api-level: ${{ matrix.api-level }}
-#          force-avd-creation: false
-#          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-#          disable-animations: false
-#          script: echo "Generated AVD snapshot for caching."
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
 
-
-#      - name: Run Tests
-#        uses: reactivecircus/android-emulator-runner@v2
-#        with:
-#          api-level: ${{ matrix.api-level }}
-#          force-avd-creation: false
-#          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-#          disable-animations: true
-#          script: |
-#            ./gradlew :financial-connections-example:installDebug
-#            maestro test maestro/fc-flow-test-oauth.yaml
 
       - name: Run Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30
-          target: google_apis
-          arch: x86_64
-          profile: Galaxy Nexus
+          api-level: ${{ matrix.api-level }}
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
           script: |
-            # Install debug apk
             ./gradlew :financial-connections-example:installDebug
-            # Run maestro tests
             maestro test maestro/fc-flow-test-oauth.yaml
 
       - name: Archive maestro screenshots
