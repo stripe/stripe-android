@@ -84,14 +84,18 @@ class DateConfigTest {
     }
 
     @Test
-    fun `current month + 1 and year`() {
-        val state = dateConfig.determineState(
-            String.format(
-                "%d%d",
-                get1BasedCurrentMonth() + 1 % 12,
-                Calendar.getInstance().get(Calendar.YEAR) % 100
-            )
-        )
+    fun `next month`() {
+        var month = get1BasedCurrentMonth()
+        var year = Calendar.getInstance().get(Calendar.YEAR) % 100
+
+        if (month == 12) {
+            month = 1
+            year += 1
+        }
+
+        val input = String.format("%s%d", month.toString().padStart(length = 2, padChar = '0'), year)
+        val state = dateConfig.determineState(input)
+
         Truth.assertThat(state)
             .isInstanceOf(TextFieldStateConstants.Valid.Full::class.java)
     }
@@ -112,16 +116,16 @@ class DateConfigTest {
     @Test
     fun `current month - 1 and year`() {
         var previousMonth = get1BasedCurrentMonth() - 1
+        var year = Calendar.getInstance().get(Calendar.YEAR) % 100
+
         if (previousMonth == 0) {
             previousMonth = 12
+            year -= 1
         }
-        val state = dateConfig.determineState(
-            String.format(
-                "%d%d",
-                previousMonth,
-                Calendar.getInstance().get(Calendar.YEAR) % 100
-            )
-        )
+
+        val input = String.format("%d%d", previousMonth, year)
+        val state = dateConfig.determineState(input)
+
         Truth.assertThat(state)
             .isInstanceOf(TextFieldStateConstants.Error.Invalid::class.java)
         Truth.assertThat(
