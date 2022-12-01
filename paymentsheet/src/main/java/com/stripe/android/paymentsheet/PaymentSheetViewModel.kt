@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
@@ -51,7 +52,6 @@ import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherCompo
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
-import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -69,6 +69,8 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -572,23 +574,33 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is LinkActivityResult.Failed -> PaymentResult.Failed(error)
         }
 
+    fun transitionToFirstScreenWhenReady() {
+        viewModelScope.launch {
+            isReady.asFlow().filter { it.peekContent() }.first()
+            transitionToFirstScreen()
+        }
+    }
+
+    override fun transitionToFirstScreen() {
+        val target = if (paymentMethods.value.isNullOrEmpty()) {
+            updateSelection(null)
+            TransitionTarget.AddPaymentMethodSheet
+        } else {
+            TransitionTarget.SelectSavedPaymentMethod
+        }
+        transitionTo(target)
+    }
+
     internal sealed class TransitionTarget {
-        abstract val fragmentConfig: FragmentConfig
 
         // User has saved PM's and is selected
-        data class SelectSavedPaymentMethod(
-            override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget()
+        object SelectSavedPaymentMethod : TransitionTarget()
 
         // User has saved PM's and is adding a new one
-        data class AddPaymentMethodFull(
-            override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget()
+        object AddPaymentMethodFull : TransitionTarget()
 
         // User has no saved PM's
-        data class AddPaymentMethodSheet(
-            override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget()
+        object AddPaymentMethodSheet : TransitionTarget()
     }
 
     internal class Factory(

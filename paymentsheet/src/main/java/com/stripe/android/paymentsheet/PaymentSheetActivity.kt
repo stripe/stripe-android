@@ -126,37 +126,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             transitionEvent?.let {
                 clearErrorMessages()
                 it.getContentIfNotHandled()?.let { transitionTarget ->
-                    onTransitionTarget(
-                        transitionTarget,
-                        bundleOf(
-                            EXTRA_STARTER_ARGS to starterArgs,
-                            EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
-                        )
-                    )
+                    onTransitionTarget(transitionTarget)
                 }
             }
         }
 
-        viewModel.fragmentConfigEvent.observe(this) { event ->
-            val config = event.getContentIfNotHandled()
-            if (config != null) {
-                // We only want to do this if the loading fragment is shown.  Otherwise this causes
-                // a new fragment to be created if the activity was destroyed and recreated.
-                // If hyperion is an added dependency it is loaded on top of the
-                // PaymentSheetLoadingFragment
-                if (supportFragmentManager.fragments
-                    .filterIsInstance<PaymentSheetLoadingFragment>()
-                    .isNotEmpty()
-                ) {
-                    val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
-                        viewModel.updateSelection(null)
-                        PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
-                    } else {
-                        PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
-                    }
-                    viewModel.transitionTo(target)
-                }
-            }
+        if (savedInstanceState == null) {
+            viewModel.transitionToFirstScreenWhenReady()
         }
 
         viewModel.startConfirm.observe(this) { event ->
@@ -210,8 +186,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private fun onTransitionTarget(
         transitionTarget: PaymentSheetViewModel.TransitionTarget,
-        fragmentArgs: Bundle
     ) {
+        val fragmentArgs = bundleOf(EXTRA_STARTER_ARGS to starterArgs)
+
         supportFragmentManager.commit {
             when (transitionTarget) {
                 is PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {

@@ -14,8 +14,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
-import com.stripe.android.paymentsheet.model.FragmentConfig
-import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
@@ -31,7 +29,6 @@ internal abstract class BasePaymentMethodsListFragment(
 
     @VisibleForTesting
     lateinit var adapter: PaymentOptionsAdapter
-    protected lateinit var config: FragmentConfig
     private var editMenuItem: MenuItem? = null
 
     @VisibleForTesting
@@ -45,17 +42,6 @@ internal abstract class BasePaymentMethodsListFragment(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val nullableConfig = arguments?.getParcelable<FragmentConfig>(
-            BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
-        )
-        if (nullableConfig == null) {
-            sheetViewModel.onFatal(
-                IllegalArgumentException("Failed to start existing payment options fragment.")
-            )
-            return
-        }
-        this.config = nullableConfig
 
         setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
         sheetViewModel.eventReporter.onShowExistingPaymentOptions(

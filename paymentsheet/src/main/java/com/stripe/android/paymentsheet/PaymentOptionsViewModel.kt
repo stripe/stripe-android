@@ -8,7 +8,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
@@ -24,7 +26,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
-import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -35,15 +36,18 @@ import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @JvmSuppressWildcards
 internal class PaymentOptionsViewModel @Inject constructor(
-    args: PaymentOptionContract.Args,
-    prefsRepositoryFactory:
-        (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+    private val args: PaymentOptionContract.Args,
+    prefsRepositoryFactory: (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
     @IOContext workContext: CoroutineContext,
@@ -264,34 +268,45 @@ internal class PaymentOptionsViewModel @Inject constructor(
             )
     }
 
-    fun resolveTransitionTarget(config: FragmentConfig) {
+    fun resolveTransitionTarget() {
         if (shouldTransitionToUnsavedCard) {
             hasTransitionToUnsavedLpm = true
             transitionTo(
                 // Until we add a flag to the transitionTarget to specify if we want to add the item
                 // to the backstack, we need to use the full sheet.
-                TransitionTarget.AddPaymentMethodFull(config)
+                TransitionTarget.AddPaymentMethodFull
             )
         }
     }
 
+    fun transitionToFirstScreenWhenReady() {
+        viewModelScope.launch {
+            isReady.asFlow().filter { it.peekContent() }.first()
+            isResourceRepositoryReady.asFlow().filterNotNull().filter { it }.first()
+            transitionToFirstScreen()
+        }
+    }
+
+    override fun transitionToFirstScreen() {
+
+        val target = if (args.state.hasPaymentOptions) {
+            TransitionTarget.SelectSavedPaymentMethod
+        } else {
+            TransitionTarget.AddPaymentMethodSheet
+        }
+        transitionTo(target)
+    }
+
     internal sealed class TransitionTarget {
-        abstract val fragmentConfig: FragmentConfig
 
         // User has saved PM's and is selected
-        data class SelectSavedPaymentMethod(
-            override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget()
+        object SelectSavedPaymentMethod : TransitionTarget()
 
         // User has saved PM's and is adding a new one
-        data class AddPaymentMethodFull(
-            override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget()
+        object AddPaymentMethodFull : TransitionTarget()
 
         // User has no saved PM's
-        data class AddPaymentMethodSheet(
-            override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget()
+        object AddPaymentMethodSheet : TransitionTarget()
     }
 
     internal class Factory(

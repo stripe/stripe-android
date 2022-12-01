@@ -91,42 +91,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewModel.transition.observe(this) { event ->
             clearErrorMessages()
             event?.getContentIfNotHandled()?.let { transitionTarget ->
-                onTransitionTarget(
-                    transitionTarget,
-                    bundleOf(
-                        PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs,
-                        PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to
-                            transitionTarget.fragmentConfig
-                    )
-                )
+                onTransitionTarget(transitionTarget)
             }
         }
 
-        // if we are recovering from process kill or activity died, we should leave the fragment
-        // in it's current state.
-        if (!isSelectOrAddFragment()) {
-            viewModel.fragmentConfigEvent.observe(this) { event ->
-                val config = event.getContentIfNotHandled()
-                if (config != null) {
-                    if (viewModel.isResourceRepositoryReady.value == true) {
-                        viewModel.transitionTo(
-                            // It would be nice to see this condition move into the PaymentOptionsListFragment
-                            // where we also jump to a new unsaved card. However this move require
-                            // the transition target to specify when to and when not to add things to the
-                            // backstack.
-                            if (starterArgs.state.hasPaymentOptions) {
-                                PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod(
-                                    config
-                                )
-                            } else {
-                                PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet(
-                                    config
-                                )
-                            }
-                        )
-                    }
-                }
-            }
+        if (savedInstanceState == null) {
+            viewModel.transitionToFirstScreenWhenReady()
         }
 
         viewModel.selection.observe(this) {
@@ -177,8 +147,9 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
     private fun onTransitionTarget(
         transitionTarget: PaymentOptionsViewModel.TransitionTarget,
-        fragmentArgs: Bundle
     ) {
+        val fragmentArgs = bundleOf(PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs)
+
         supportFragmentManager.commit {
             when (transitionTarget) {
                 is PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull -> {
