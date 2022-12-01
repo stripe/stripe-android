@@ -38,7 +38,7 @@ internal inline fun <T, reified VM : MavericksViewModel<S>, reified S : Maverick
 /**
  * Replicates [com.airbnb.mvrx.argsOrNull] for [ComponentActivity].
  */
-fun <V> argsOrNull() = object : ReadOnlyProperty<ComponentActivity, V?> {
+internal fun <V> argsOrNull() = object : ReadOnlyProperty<ComponentActivity, V?> {
     var value: V? = null
     var read: Boolean = false
 
