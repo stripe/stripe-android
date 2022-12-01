@@ -146,13 +146,13 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     private fun onTransitionTarget(
-        transitionTarget: PaymentOptionsViewModel.TransitionTarget,
+        transitionTarget: BaseSheetViewModel.TransitionTarget,
     ) {
         val fragmentArgs = bundleOf(PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs)
 
         supportFragmentManager.commit {
             when (transitionTarget) {
-                is PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull -> {
+                is BaseSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
                     // Once the add fragment has been opened there is never a scenario that
                     // we should back to the add fragment from the select list view.
                     viewModel.hasTransitionToUnsavedLpm = true
@@ -171,7 +171,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                         ADD_FULL_FRAGMENT_TAG
                     )
                 }
-                is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
+                is BaseSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
                     replace(
                         fragmentContainerId,
                         PaymentOptionsListFragment::class.java,
@@ -179,7 +179,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                         SELECT_SAVED_PAYMENT_METHOD_TAG
                     )
                 }
-                is PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet -> {
+                is BaseSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
                     // Once the add fragment has been opened there is never a scenario that
                     // we should back to the add fragment from the select list view.
                     viewModel.hasTransitionToUnsavedLpm = true

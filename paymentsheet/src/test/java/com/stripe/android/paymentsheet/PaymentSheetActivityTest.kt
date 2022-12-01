@@ -257,7 +257,7 @@ internal class PaymentSheetActivityTest {
             )
             viewModel.updateSelection(initialSelection)
 
-            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
+            viewModel.transitionToAddPaymentScreen()
 
             assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
 
@@ -285,7 +285,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
-            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
+            viewModel.transitionToAddPaymentScreen()
             idleLooper()
             assertThat(currentFragment(activity))
                 .isInstanceOf(PaymentSheetAddPaymentMethodFragment::class.java)
@@ -326,7 +326,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.toolbar.navigationContentDescription)
                 .isEqualTo(context.getString(R.string.stripe_paymentsheet_close))
 
-            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
+            viewModel.transitionToAddPaymentScreen()
             idleLooper()
 
             assertThat(activity.toolbar.navigationContentDescription)
@@ -707,8 +707,8 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
-            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod)
-            viewModel.transitionTo(PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull)
+            viewModel.transitionToSavedPaymentMethods()
+            viewModel.transitionToAddPaymentScreen()
 
             idleLooper()
 

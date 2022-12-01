@@ -13,7 +13,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -22,6 +21,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.TestUtils.idleLooper

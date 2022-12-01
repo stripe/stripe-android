@@ -15,12 +15,6 @@ internal class PaymentSheetListFragment : BasePaymentMethodsListFragment(
 
     override val sheetViewModel: PaymentSheetViewModel by lazy { activityViewModel }
 
-    override fun transitionToAddPaymentMethod() {
-        activityViewModel.transitionTo(
-            PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull
-        )
-    }
-
     override fun onResume() {
         super.onResume()
 

@@ -32,17 +32,6 @@ internal class PaymentOptionsListFragment : BasePaymentMethodsListFragment(
             getString(R.string.stripe_paymentsheet_select_payment_method)
     }
 
-    override fun transitionToAddPaymentMethod() {
-        /**
-         * Only the [PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull] will add
-         * the previous fragment to the back stack creating the needed back button after jumping
-         * through the the last unsaved card.
-         */
-        activityViewModel.transitionTo(
-            PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull
-        )
-    }
-
     override fun onPaymentOptionsItemSelected(item: PaymentOptionsItem) {
         super.onPaymentOptionsItemSelected(item)
         sheetViewModel.onUserSelection()

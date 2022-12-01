@@ -58,7 +58,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     addressResourceRepository: ResourceRepository<AddressRepository>,
     savedStateHandle: SavedStateHandle,
     linkLauncher: LinkPaymentLauncher
-) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
+) : BaseSheetViewModel(
     application = application,
     config = args.state.config,
     prefsRepository = prefsRepositoryFactory(args.state.config?.customer),
@@ -294,18 +294,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             TransitionTarget.AddPaymentMethodSheet
         }
         transitionTo(target)
-    }
-
-    internal sealed class TransitionTarget {
-
-        // User has saved PM's and is selected
-        object SelectSavedPaymentMethod : TransitionTarget()
-
-        // User has saved PM's and is adding a new one
-        object AddPaymentMethodFull : TransitionTarget()
-
-        // User has no saved PM's
-        object AddPaymentMethodSheet : TransitionTarget()
     }
 
     internal class Factory(

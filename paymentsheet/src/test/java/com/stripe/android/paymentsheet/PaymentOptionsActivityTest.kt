@@ -27,7 +27,6 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -39,6 +38,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -208,9 +208,8 @@ internal class PaymentOptionsActivityTest {
             paymentMethods = PaymentMethodFixtures.createCards(5)
         )
 
-        val scenario = activityScenario(
-            viewModel = createViewModel(args),
-        )
+        val viewModel = createViewModel(args)
+        val scenario = activityScenario(viewModel)
 
         scenario.launch(createIntent(args)).use {
             it.onActivity { activity ->
@@ -218,12 +217,7 @@ internal class PaymentOptionsActivityTest {
                     .isFalse()
 
                 // Navigate to "Add Payment Method" fragment
-                with(
-                    activity.supportFragmentManager.findFragmentById(R.id.fragment_container)
-                        as PaymentOptionsListFragment
-                ) {
-                    transitionToAddPaymentMethod()
-                }
+                viewModel.transitionToAddPaymentScreen()
                 idleLooper()
 
                 assertThat(activity.viewBinding.continueButton.isVisible)

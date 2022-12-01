@@ -25,7 +25,7 @@ internal abstract class BasePaymentMethodsListFragment(
 ) : Fragment(
     R.layout.fragment_paymentsheet_payment_methods_list
 ) {
-    abstract val sheetViewModel: BaseSheetViewModel<*>
+    abstract val sheetViewModel: BaseSheetViewModel
 
     @VisibleForTesting
     lateinit var adapter: PaymentOptionsAdapter
@@ -147,7 +147,9 @@ internal abstract class BasePaymentMethodsListFragment(
         }
     }
 
-    abstract fun transitionToAddPaymentMethod()
+    private fun transitionToAddPaymentMethod() {
+        sheetViewModel.transitionToAddPaymentScreen()
+    }
 
     open fun onPaymentOptionsItemSelected(item: PaymentOptionsItem) {
         val paymentSelection = item.toPaymentSelection()
