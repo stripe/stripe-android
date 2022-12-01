@@ -12,7 +12,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        api-level: [21, 23, 29]
+        api-level: [29, 30]
         target: [default,google_apis]
     steps:
       - name: Checkout
