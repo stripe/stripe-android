@@ -10,6 +10,9 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    env:
+      AVD_API_LEVEL: 30
+      AVD_ARCH: x86_64
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -29,13 +32,14 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd
+          key: avd-${{ env.AVD_API_LEVEL }}-${{ env.AVD_ARCH }}
 
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 29
+          api-level: ${{ env.AVD_API_LEVEL }}
+          arch: ${{ env.AVD_ARCH }}
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
@@ -50,14 +54,15 @@ jobs:
       - name: Run Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 29
+          api-level: ${{ env.AVD_API_LEVEL }}
+          arch: ${{ env.AVD_ARCH }}
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
-            ./gradlew :financial-connections-example:installDebug
             adb root
             mkdir -p financial-connections-example/build/reports
+            ./gradlew :financial-connections-example:installDebug
             adb shell screenrecord /storage/emulated/0/capture.mpg &
             maestro test maestro/fc-flow-test-oauth.yaml || true
             adb shell pkill -INT screenrecord
