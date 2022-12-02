@@ -41,7 +41,7 @@ class StripeGooglePayActivityTest {
 
     @Test
     fun `start without args should finish with Error result`() {
-        ActivityScenario.launch<StripeGooglePayActivity>(
+        ActivityScenario.launchActivityForResult<StripeGooglePayActivity>(
             Intent(context, StripeGooglePayActivity::class.java)
         ).use { activityScenario ->
             assertThat(activityScenario.state)
@@ -81,7 +81,7 @@ class StripeGooglePayActivityTest {
         args: StripeGooglePayContract.Args,
         onActivityScenario: (ActivityScenario<StripeGooglePayActivity>) -> Unit
     ) {
-        ActivityScenario.launch<StripeGooglePayActivity>(
+        ActivityScenario.launchActivityForResult<StripeGooglePayActivity>(
             contract.createIntent(
                 context,
                 args

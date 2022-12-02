@@ -131,7 +131,7 @@ class PaymentFlowActivityTest {
 
     @Test
     fun onShippingInfoSaved_whenOnlyShippingInfo_finishWithSuccess() {
-        activityScenarioFactory.create<PaymentFlowActivity>(
+        activityScenarioFactory.createForResult<PaymentFlowActivity>(
             createStarterArgs(
                 PaymentSessionConfig.Builder()
                     .setPrepopulatedShippingInfo(SHIPPING_INFO)
