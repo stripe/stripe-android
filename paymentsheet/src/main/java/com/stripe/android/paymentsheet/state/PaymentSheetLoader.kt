@@ -26,7 +26,6 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -113,48 +112,42 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         customerConfig: PaymentSheet.CustomerConfiguration?,
         config: PaymentSheet.Configuration?,
         isGooglePayReady: Boolean,
-    ): PaymentSheetLoader.Result {
+    ): PaymentSheetLoader.Result = coroutineScope {
         val prefsRepository = prefsRepositoryFactory(customerConfig)
 
         val isLinkAvailable = stripeIntent.paymentMethodTypes.contains(Link.code) &&
             stripeIntent.linkFundingSources.intersect(supportedFundingSources).isNotEmpty()
 
-        val paymentMethods: Deferred<List<PaymentMethod>>
-        val savedSelection: Deferred<SavedSelection>
-        val linkState: Deferred<LinkState?>
-
-        coroutineScope {
-            paymentMethods = async {
-                if (customerConfig != null) {
-                    retrieveCustomerPaymentMethods(
-                        stripeIntent,
-                        config,
-                        customerConfig
-                    )
-                } else {
-                    emptyList()
-                }
-            }
-
-            savedSelection = async {
-                retrieveSavedPaymentSelection(
-                    prefsRepository,
-                    isGooglePayReady,
-                    isLinkAvailable,
-                    paymentMethods.await()
+        val paymentMethods = async {
+            if (customerConfig != null) {
+                retrieveCustomerPaymentMethods(
+                    stripeIntent,
+                    config,
+                    customerConfig
                 )
-            }
-
-            linkState = async {
-                if (isLinkAvailable) {
-                    loadLinkState(config, stripeIntent)
-                } else {
-                    null
-                }
+            } else {
+                emptyList()
             }
         }
 
-        return PaymentSheetLoader.Result.Success(
+        val savedSelection = async {
+            retrieveSavedPaymentSelection(
+                prefsRepository,
+                isGooglePayReady,
+                isLinkAvailable,
+                paymentMethods.await()
+            )
+        }
+
+        val linkState = async {
+            if (isLinkAvailable) {
+                loadLinkState(config, stripeIntent)
+            } else {
+                null
+            }
+        }
+
+        return@coroutineScope PaymentSheetLoader.Result.Success(
             PaymentSheetState.Full(
                 config = config,
                 clientSecret = clientSecret,
