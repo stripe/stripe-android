@@ -214,7 +214,6 @@ internal fun PaymentMethodUI(
                 )
             }
 
-
             LpmSelectorText(
                 text = title,
                 isEnabled = isEnabled,

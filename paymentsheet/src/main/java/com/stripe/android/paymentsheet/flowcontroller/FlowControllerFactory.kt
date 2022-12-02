@@ -36,7 +36,10 @@ internal class FlowControllerFactory(
         appContext = activity.applicationContext,
         activityResultCaller = activity,
         statusBarColor = { activity.window.statusBarColor },
-        paymentOptionFactory = PaymentOptionFactory(activity.resources, StripeImageLoader(activity.applicationContext)),
+        paymentOptionFactory = PaymentOptionFactory(
+            activity.resources,
+            StripeImageLoader(activity.applicationContext)
+        ),
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
     )
@@ -52,7 +55,10 @@ internal class FlowControllerFactory(
         appContext = fragment.requireContext().applicationContext,
         activityResultCaller = fragment,
         statusBarColor = { fragment.activity?.window?.statusBarColor },
-        paymentOptionFactory = PaymentOptionFactory(fragment.resources, StripeImageLoader(fragment.requireContext().applicationContext)),
+        paymentOptionFactory = PaymentOptionFactory(
+            fragment.resources,
+            StripeImageLoader(fragment.requireContext().applicationContext)
+        ),
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
     )
