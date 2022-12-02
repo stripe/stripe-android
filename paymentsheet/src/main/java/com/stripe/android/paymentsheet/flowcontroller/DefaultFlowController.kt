@@ -41,7 +41,6 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
-import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.extensions.registerPollingAuthenticator
 import com.stripe.android.paymentsheet.extensions.unregisterPollingAuthenticator
@@ -55,7 +54,6 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.validate
@@ -91,7 +89,6 @@ internal class DefaultFlowController @Inject internal constructor(
     @InjectorKey private val injectorKey: String,
     // Properties provided through injection
     private val paymentSheetLoader: PaymentSheetLoader,
-    private val customerApiRepository: CustomerApiRepository,
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
@@ -457,49 +454,28 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentSelection: PaymentSelection,
         state: PaymentSheetState.Full
     ) {
-        val config = requireNotNull(state.config)
+        val linkConfig = requireNotNull(state.linkState).configuration
 
         lifecycleScope.launch {
-            val shippingDetails: AddressDetails? = config.shippingDetails
-            val customerPhone = if (shippingDetails?.isCheckboxSelected == true) {
-                shippingDetails.phoneNumber
-            } else {
-                config.defaultBillingDetails?.phone
-            }
-            val shippingAddress = if (shippingDetails?.isCheckboxSelected == true) {
-                shippingDetails.toIdentifierMap(config.defaultBillingDetails)
-            } else {
-                null
-            }
-            val customerEmail = config.defaultBillingDetails?.email ?: config.customer?.let {
-                customerApiRepository.retrieveCustomer(
-                    it.id,
-                    it.ephemeralKeySecret
-                )?.email
-            }
-            val linkConfig = LinkPaymentLauncher.Configuration(
-                stripeIntent = state.stripeIntent,
-                merchantName = config.merchantDisplayName,
-                customerEmail = customerEmail,
-                customerPhone = customerPhone,
-                customerName = config.defaultBillingDetails?.name,
-                customerBillingCountryCode = config.defaultBillingDetails?.address?.country,
-                shippingValues = shippingAddress
-            )
             val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
-            // If a returning user is paying with a new card inline, launch Link to complete payment
-            (paymentSelection as? PaymentSelection.New.LinkInline)?.takeIf {
+
+            val linkInline = (paymentSelection as? PaymentSelection.New.LinkInline)?.takeIf {
                 accountStatus == AccountStatus.Verified
-            }?.linkPaymentDetails?.originalParams?.let {
-                linkLauncher.present(linkConfig, linkActivityResultLauncher, it)
-            } ?: run {
-                if (paymentSelection is PaymentSelection.Link) {
-                    // User selected Link as the payment method, not inline
-                    linkLauncher.present(linkConfig, linkActivityResultLauncher)
-                } else {
-                    // New user paying inline, complete without launching Link
-                    confirmPaymentSelection(paymentSelection, state)
-                }
+            }
+
+            if (linkInline != null) {
+                // If a returning user is paying with a new card inline, launch Link
+                linkLauncher.present(
+                    configuration = linkConfig,
+                    activityResultLauncher = linkActivityResultLauncher,
+                    prefilledNewCardParams = linkInline.linkPaymentDetails.originalParams,
+                )
+            } else if (paymentSelection is PaymentSelection.Link) {
+                // User selected Link as the payment method, not inline
+                linkLauncher.present(linkConfig, linkActivityResultLauncher)
+            } else {
+                // New user paying inline, complete without launching Link
+                confirmPaymentSelection(paymentSelection, state)
             }
         }
     }

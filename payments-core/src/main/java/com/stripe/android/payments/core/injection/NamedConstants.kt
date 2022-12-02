@@ -1,5 +1,6 @@
 package com.stripe.android.payments.core.injection
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -18,3 +19,6 @@ const val IS_PAYMENT_INTENT = "isPaymentIntent"
  * Name to indicate whether the current app is an instant app.
  */
 const val IS_INSTANT_APP = "isInstantApp"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val APP_NAME = "appName"

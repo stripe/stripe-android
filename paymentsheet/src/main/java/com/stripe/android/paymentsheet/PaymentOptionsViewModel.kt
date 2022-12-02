@@ -9,7 +9,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
@@ -20,10 +19,7 @@ import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
@@ -32,14 +28,13 @@ import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -101,7 +96,15 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.state.isGooglePayReady
-        setupLink(args.state.stripeIntent)
+
+        val linkState = args.state.linkState
+
+        _isLinkEnabled.value = linkState != null
+        activeLinkSession.value = linkState?.loginState == LinkState.LoginState.LoggedIn
+
+        if (linkState != null) {
+            setupLink(linkState)
+        }
 
         // After recovering from don't keep activities the stripe intent will be saved,
         // calling setStripeIntent would require the repository be initialized, which
@@ -172,31 +175,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
-    override fun setupLink(stripeIntent: StripeIntent) {
-        if (LINK_ENABLED &&
-            stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code)
-        ) {
-            viewModelScope.launch {
-                val configuration = createLinkConfiguration(stripeIntent).also {
-                    _linkConfiguration.value = it
-                }
-                val accountStatus = linkLauncher.getAccountStatusFlow(configuration).first()
-                when (accountStatus) {
-                    AccountStatus.Verified,
-                    AccountStatus.VerificationStarted,
-                    AccountStatus.NeedsVerification -> {
-                        // If account exists, select link by default
-                        savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
-                    }
-                    AccountStatus.SignedOut,
-                    AccountStatus.Error -> {
-                    }
-                }
-                activeLinkSession.value = accountStatus == AccountStatus.Verified
-                _isLinkEnabled.value = accountStatus != AccountStatus.Error
-            }
-        } else {
-            _isLinkEnabled.value = false
+    private fun setupLink(linkState: LinkState) {
+        _linkConfiguration.value = linkState.configuration
+
+        if (linkState.isReadyForUse) {
+            // If account exists, select Link by default
+            savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
         }
     }
 
