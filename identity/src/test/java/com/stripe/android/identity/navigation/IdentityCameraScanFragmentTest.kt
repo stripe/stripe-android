@@ -32,7 +32,9 @@ import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
@@ -57,7 +59,6 @@ class IdentityCameraScanFragmentTest {
 
     private val finalResultLiveData = SingleLiveEvent<IdentityAggregator.FinalResult>()
     private val interimResultsLiveData = MutableLiveData<IdentityAggregator.InterimResult>()
-    private val displayStateChanged = SingleLiveEvent<Pair<IdentityScanState, IdentityScanState?>>()
     private val displayStateChangedFlow =
         MutableStateFlow<Pair<IdentityScanState, IdentityScanState?>?>(null)
     private val targetScanTypeFlow = MutableStateFlow<IdentityScanState.ScanType?>(null)
@@ -68,10 +69,9 @@ class IdentityCameraScanFragmentTest {
         whenever(it.identityScanFlow).thenReturn(mockScanFlow)
         whenever(it.finalResult).thenReturn(finalResultLiveData)
         whenever(it.interimResults).thenReturn(interimResultsLiveData)
-        whenever(it.displayStateChanged).thenReturn(displayStateChanged)
-        whenever(it.targetScanType).thenReturn(IdentityScanState.ScanType.ID_FRONT)
         whenever(it.displayStateChangedFlow).thenReturn(displayStateChangedFlow)
         whenever(it.targetScanTypeFlow).thenReturn(targetScanTypeFlow)
+        whenever(it.cameraAdapterInitialized).thenReturn(mock())
     }
 
     private val mockPageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
@@ -80,6 +80,11 @@ class IdentityCameraScanFragmentTest {
         whenever(it.pageAndModelFiles).thenReturn(mockPageAndModel)
         whenever(it.identityAnalyticsRequestFactory).thenReturn(mockIdentityAnalyticsRequestFactory)
         whenever(it.fpsTracker).thenReturn(mockFPSTracker)
+    }
+
+    @Before
+    fun mockTargetScanTypeFlow() {
+        targetScanTypeFlow.update { IdentityScanState.ScanType.ID_FRONT }
     }
 
     @Test
@@ -241,7 +246,7 @@ class IdentityCameraScanFragmentTest {
             )
 
             verify(mockScanFlow).resetFlow()
-            assertThat(testFragment.cameraAdapter.isBoundToLifecycle()).isFalse()
+            assertThat(testFragment.cameraAdapter?.isBoundToLifecycle()).isFalse()
         }
     }
 
@@ -305,9 +310,6 @@ class IdentityCameraScanFragmentTest {
         override val fragmentId = 0
 
         override fun onCameraReady() {}
-        override val shouldObserveDisplayState = false
-
-        override fun updateUI(identityScanState: IdentityScanState) {}
 
         override fun onCreateView(
             inflater: LayoutInflater,
@@ -319,9 +321,6 @@ class IdentityCameraScanFragmentTest {
             }
             cameraAdapter = mock()
             return View(ApplicationProvider.getApplicationContext())
-        }
-
-        override fun resetUI() {
         }
     }
 

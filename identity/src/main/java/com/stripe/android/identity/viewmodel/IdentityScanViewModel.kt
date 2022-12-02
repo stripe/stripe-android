@@ -1,5 +1,6 @@
 package com.stripe.android.identity.viewmodel
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.core.injection.UIContext
@@ -16,15 +17,11 @@ internal class IdentityScanViewModel(
     CameraViewModel(modelPerformanceTracker, uiContext) {
 
     /**
-     * The target ScanType of current scan.
-     * TODO(ccen) remove after SelfieFragment is migrated to JetpackCompose.
-     */
-    internal var targetScanType: IdentityScanState.ScanType? = null
-
-    /**
      * StateFlow to keep track of current target scan type.
      */
     internal val targetScanTypeFlow = MutableStateFlow<IdentityScanState.ScanType?>(null)
+
+    internal val cameraAdapterInitialized = MutableLiveData(false)
 
     internal class IdentityScanViewModelFactory @Inject constructor(
         private val modelPerformanceTracker: ModelPerformanceTracker,

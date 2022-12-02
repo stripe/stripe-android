@@ -60,6 +60,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.getOrAwaitValue
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -1055,6 +1056,10 @@ internal class PaymentSheetActivityTest {
             { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
             StripeIntentRepository.Static(paymentIntent),
             StripeIntentValidator(),
+            FakePaymentSheetLoader(
+                stripeIntent = paymentIntent,
+                customerPaymentMethods = paymentMethods,
+            ),
             FakeCustomerRepository(paymentMethods),
             FakePrefsRepository(),
             StaticLpmResourceRepository(lpmRepository),
