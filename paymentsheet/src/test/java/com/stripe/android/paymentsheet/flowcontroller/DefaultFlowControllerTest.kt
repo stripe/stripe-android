@@ -969,6 +969,30 @@ internal class DefaultFlowControllerTest {
             )
         }
 
+    @Test
+    fun `Remembers previous new payment selection when presenting payment options again`() = runTest {
+        val flowController = createFlowController()
+
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+            callback = { _, _ -> },
+        )
+
+        val previousPaymentSelection = NEW_CARD_PAYMENT_SELECTION
+
+        flowController.onPaymentOptionResult(
+            paymentOptionResult = PaymentOptionResult.Succeeded(previousPaymentSelection),
+        )
+
+        flowController.presentPaymentOptions()
+
+        verify(paymentOptionActivityLauncher).launch(
+            argWhere {
+                it.state.newPaymentSelection == previousPaymentSelection
+            }
+        )
+    }
+
     private fun createFlowController(
         paymentMethods: List<PaymentMethod> = emptyList(),
         savedSelection: SavedSelection = SavedSelection.None,

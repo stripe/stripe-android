@@ -227,6 +227,7 @@ fun Html(
     enabled: Boolean = true,
     urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline),
     imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline,
+    onClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val annotatedText = annotatedStringResource(html, imageLoader, urlSpanStyle)
@@ -275,6 +276,7 @@ fun Html(
             style = style,
             onClick = {
                 if (enabled) {
+                    onClick()
                     // Position is the position of the tag in the string
                     annotatedText
                         .getStringAnnotations(LINK_TAG, it, it)

@@ -114,12 +114,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
         )
 
-        if (!viewModel.maybeFetchStripeIntent()) {
-            // The buy button needs to be made visible since it is gone in the xml
-            buttonContainer.isVisible = true
-            viewBinding.buyButton.isVisible = true
-        }
-
         starterArgs.statusBarColor?.let {
             window.statusBarColor = it
         }

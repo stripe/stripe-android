@@ -188,6 +188,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     override fun onBackPressed() {
         if (viewModel.processing.value == false) {
             if (supportFragmentManager.backStackEntryCount > 0) {
+                viewModel.onUserBack()
                 clearErrorMessages()
                 super.onBackPressed()
             } else {

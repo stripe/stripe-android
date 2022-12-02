@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+### PaymentSheet
+* [FIXED][5888](https://github.com/stripe/stripe-android/pull/5888) The primary button no longer stays disabled when returning from the `Add payment method` to the `Saved payment methods` screen.
+
 ## 20.16.1 - 2022-11-21
 
 ### PaymentSheet

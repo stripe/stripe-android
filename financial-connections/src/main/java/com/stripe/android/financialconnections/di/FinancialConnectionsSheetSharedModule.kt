@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
+import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -95,7 +96,11 @@ internal object FinancialConnectionsSheetSharedModule {
 
     @Provides
     @Singleton
-    fun providesApiRequestFactory(): ApiRequest.Factory = ApiRequest.Factory()
+    fun providesApiRequestFactory(): ApiRequest.Factory = ApiRequest.Factory(
+        apiVersion = ApiVersion(
+            betas = setOf("financial_connections_client_api_beta=v1")
+        ).code
+    )
 
     @Provides
     @Singleton

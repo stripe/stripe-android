@@ -17,8 +17,8 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
-import com.stripe.android.paymentsheet.repositories.initializeRepositoryAndGetStripeIntent
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -200,12 +200,19 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun retrieveStripeIntent(
         clientSecret: ClientSecret
-    ) = stripeIntentValidator.requireValid(
-        initializeRepositoryAndGetStripeIntent(
-            lpmResourceRepository,
-            stripeIntentRepository,
-            clientSecret,
-            eventReporter
+    ): StripeIntent {
+        val paymentMethodPreference = stripeIntentRepository.get(clientSecret)
+        val lpmRepository = lpmResourceRepository.getRepository()
+
+        lpmRepository.update(
+            expectedLpms = paymentMethodPreference.intent.paymentMethodTypes,
+            serverLpmSpecs = paymentMethodPreference.formUI,
         )
-    )
+
+        if (lpmRepository.serverSpecLoadingState is ServerSpecState.ServerNotParsed) {
+            eventReporter.onLpmSpecFailure()
+        }
+
+        return stripeIntentValidator.requireValid(paymentMethodPreference.intent)
+    }
 }
