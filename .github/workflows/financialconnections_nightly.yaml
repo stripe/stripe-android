@@ -60,7 +60,7 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
-            adb root
+            adb root || true
             adb uninstall com.stripe.android.financialconnections.example || true
             mkdir -p financial-connections-example/build/reports
             ./gradlew :financial-connections-example:installDebug
