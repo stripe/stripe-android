@@ -4,7 +4,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'kotlinx-serialization'
-apply plugin: 'shot'
+apply plugin: 'dev.chrisbanes.paparazzi'
 
 android {
     defaultConfig {
@@ -16,11 +16,6 @@ android {
             includeAndroidResources = true
         }
     }
-}
-
-shot {
-    applicationId = "com.stripe.android.financialconnections.test"
-    tolerance = 1 // 1% tolerance because screenshots look slightly different on arm64-v8a vs x86_64 vs m1 emulators
 }
 
 dependencies {
@@ -61,6 +56,7 @@ dependencies {
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
     testImplementation "androidx.test:core:$androidTestVersion"
     testImplementation "com.google.truth:truth:$truthVersion"
+    testImplementation 'com.google.testparameterinjector:test-parameter-injector:1.10'
     testImplementation "junit:junit:$junitVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
     testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
@@ -73,7 +69,6 @@ dependencies {
     testImplementation testLibs.mavericks
     testImplementation testLibs.turbine
 
-    androidTestImplementation "com.airbnb.android:showkase-screenshot-testing-shot:$showkaseVersion"
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
