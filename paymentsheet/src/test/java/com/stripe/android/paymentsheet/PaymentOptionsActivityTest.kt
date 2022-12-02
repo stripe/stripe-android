@@ -122,7 +122,7 @@ internal class PaymentOptionsActivityTest {
     @Test
     fun `click outside of bottom sheet should return cancel result`() {
         val scenario = activityScenario()
-        scenario.launch(
+        scenario.launchForResult(
             createIntent()
         ).use {
             it.onActivity { activity ->
@@ -141,7 +141,7 @@ internal class PaymentOptionsActivityTest {
     @Test
     fun `click outside of bottom sheet should return cancel result even if there is a selection`() {
         val scenario = activityScenario()
-        scenario.launch(
+        scenario.launchForResult(
             createIntent()
         ).use {
             it.onActivity { activity ->

@@ -157,7 +157,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `bottom sheet expands on start and handles click outside`() {
         val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launchForResult(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
             assertThat(activity.bottomSheetBehavior.state)
@@ -280,7 +280,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `handles fragment transitions`() {
         val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launchForResult(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
 
@@ -631,7 +631,7 @@ internal class PaymentSheetActivityTest {
                 paymentMethods = emptyList()
             )
         )
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launchForResult(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
 
@@ -748,7 +748,7 @@ internal class PaymentSheetActivityTest {
                 paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED
             )
         )
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launchForResult(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             activity.finish()
         }
