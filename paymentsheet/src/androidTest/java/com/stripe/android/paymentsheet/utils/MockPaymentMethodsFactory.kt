@@ -44,6 +44,8 @@ object MockPaymentMethodsFactory {
             requiresMandate = false,
             displayNameResource = displayNameResource,
             iconResource = iconResource,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
             tintIconOnSelection = tintIconOnSelection,
             requirement = PaymentMethodRequirements(
                 piRequirements = emptySet(),
