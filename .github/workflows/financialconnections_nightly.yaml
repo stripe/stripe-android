@@ -65,8 +65,11 @@ jobs:
             mkdir -p financial-connections-example/build/reports
             ./gradlew :financial-connections-example:installDebug
             adb shell screenrecord --verbose /storage/emulated/0/capture.mp4 &
+            adb shell screenrecord /sdcard/"$fileName" &
+            childpid=$!
             maestro test maestro/fc-flow-test-oauth.yaml || true
-            adb shell pkill -1 screenrecord
+            kill "$childpid"
+            wait "$childpid"
             cd financial-connections-example/build/reports/ && adb pull /storage/emulated/0/capture.mp4
 
       - name: Archive screen record
