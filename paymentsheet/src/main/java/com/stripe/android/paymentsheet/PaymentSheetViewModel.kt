@@ -380,8 +380,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun setupLink(state: LinkState) {
         _linkConfiguration.value = state.configuration
-        _isLinkEnabled.value = true
-        activeLinkSession.value = state.loginState == LinkState.LoginState.LoggedIn
 
         when (state.loginState) {
             LinkState.LoginState.LoggedIn -> {
