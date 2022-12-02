@@ -15,7 +15,9 @@ appId: com.stripe.android.financialconnections.example
 - tapOn: "Connect Accounts!"
 
 # Common: web AuthFlow - connect OAuth institution
-- assertVisible: "Agree"
+- extendedWaitUntil:
+    visible: "Agree"
+    timeout: 30000
 - takeScreenshot: TestOAuth_Consent
 - tapOn: "Agree"
 - assertVisible: "Test OAuth Institution"
