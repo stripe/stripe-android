@@ -65,7 +65,7 @@ jobs:
             ./gradlew :financial-connections-example:installDebug
             adb shell screenrecord --verbose /storage/emulated/0/capture.mp4 &
             maestro test maestro/fc-flow-test-oauth.yaml || true
-            adb shell pkill -INT screenrecord
+            adb shell pkill -1 screenrecord
             cd financial-connections-example/build/reports/ && adb pull /storage/emulated/0/capture.mp4
 
       - name: Archive screen record
