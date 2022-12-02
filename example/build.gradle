@@ -104,7 +104,7 @@ dependencies {
     // classpath.
     androidTestImplementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
 
-    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
+    androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
 }
 
 android {

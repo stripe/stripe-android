@@ -251,7 +251,7 @@ internal abstract class IdentityDocumentScanFragment(
                 identityViewModel.observeForVerificationPage(
                     viewLifecycleOwner,
                     onSuccess = {
-                        lifecycleScope.launch {
+                        viewLifecycleOwner.lifecycleScope.launch {
                             runCatching {
                                 postVerificationPageData(
                                     identityViewModel = identityViewModel,

@@ -126,7 +126,7 @@ class AddPaymentMethodActivityTest {
 
     @Test
     fun addCardData_whenDataIsValidAndServerReturnsSuccess_finishesWithIntent() {
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
+        activityScenarioFactory.createForResult<AddPaymentMethodActivity>(
             BASE_CARD_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
@@ -147,7 +147,7 @@ class AddPaymentMethodActivityTest {
 
     @Test
     fun addFpx_whenServerReturnsSuccessAndUpdatesCustomer_finishesWithIntent() {
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
+        activityScenarioFactory.createForResult<AddPaymentMethodActivity>(
             createArgs(PaymentMethod.Type.Fpx)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
@@ -237,7 +237,7 @@ class AddPaymentMethodActivityTest {
 
     @Test
     fun addCardData_whenServerReturnsSuccessAndUpdatesCustomer_finishesWithIntent() {
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
+        activityScenarioFactory.createForResult<AddPaymentMethodActivity>(
             createArgs(PaymentMethod.Type.Card)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
@@ -281,7 +281,7 @@ class AddPaymentMethodActivityTest {
 
     @Test
     fun addCardData_whenDataIsValidButServerReturnsError_doesNotFinish() {
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
+        activityScenarioFactory.createForResult<AddPaymentMethodActivity>(
             BASE_CARD_ARGS
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
@@ -317,7 +317,7 @@ class AddPaymentMethodActivityTest {
 
     @Test
     fun addCardData_whenPaymentMethodCreateWorksButAddToCustomerFails_showErrorNotFinish() {
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
+        activityScenarioFactory.createForResult<AddPaymentMethodActivity>(
             createArgs(PaymentMethod.Type.Card)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
@@ -381,7 +381,7 @@ class AddPaymentMethodActivityTest {
         whenever(viewModel.createPaymentMethod(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
             .thenReturn(createSuccessLiveData(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
-        activityScenarioFactory.create<AddPaymentMethodActivity>(
+        activityScenarioFactory.createForResult<AddPaymentMethodActivity>(
             createArgs(PaymentMethod.Type.Card)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
