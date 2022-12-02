@@ -61,6 +61,7 @@ jobs:
           disable-animations: true
           script: |
             adb root
+            adb uninstall com.stripe.android.financialconnections.example || true
             mkdir -p financial-connections-example/build/reports
             ./gradlew :financial-connections-example:installDebug
             adb shell screenrecord --verbose /storage/emulated/0/capture.mp4 &
