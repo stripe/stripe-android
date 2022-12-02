@@ -59,11 +59,11 @@ jobs:
             adb root
             mkdir -p financial-connections-example/build/reports
             adb shell screenrecord /storage/emulated/0/capture.mpg &
-            maestro test maestro/fc-flow-test-oauth.yaml
+            maestro test maestro/fc-flow-test-oauth.yaml || true
             adb shell pkill -INT screenrecord
             cd financial-connections-example/build/reports/ && adb pull /storage/emulated/0/capture.mpg
 
-      - name: Archive screen record.
+      - name: Archive screen record
         if: always()
         uses: actions/upload-artifact@v3
         with:
