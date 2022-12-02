@@ -63,10 +63,10 @@ jobs:
             adb root
             mkdir -p financial-connections-example/build/reports
             ./gradlew :financial-connections-example:installDebug
-            adb shell screenrecord /storage/emulated/0/capture.mpg &
+            adb shell screenrecord --verbose /storage/emulated/0/capture.mp4 &
             maestro test maestro/fc-flow-test-oauth.yaml || true
             adb shell pkill -INT screenrecord
-            cd financial-connections-example/build/reports/ && adb pull /storage/emulated/0/capture.mpg
+            cd financial-connections-example/build/reports/ && adb pull /storage/emulated/0/capture.mp4
 
       - name: Archive screen record
         if: always()
