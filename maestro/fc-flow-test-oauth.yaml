@@ -23,14 +23,14 @@ appId: com.stripe.android.financialconnections.example
 - assertVisible: "Test OAuth Institution"
 - takeScreenshot: TestOAuth_BankPicker
 # ERRORS
-- tapOn: ".*unknown error.*"
-- assertVisible: "Something went wrong"
-- takeScreenshot: TestOAuth_ErrorDownBankUnknown
-- back
-- tapOn: ".*unscheduled.*"
-- assertVisible: "Select another bank"
-- takeScreenshot: TestOAuth_ErrorDownBankUnscheduled
-- tapOn: "Select another bank"
+#- tapOn: ".*unknown error.*"
+#- assertVisible: "Something went wrong"
+#- takeScreenshot: TestOAuth_ErrorDownBankUnknown
+#- back
+#- tapOn: ".*unscheduled.*"
+#- assertVisible: "Select another bank"
+#- takeScreenshot: TestOAuth_ErrorDownBankUnscheduled
+#- tapOn: "Select another bank"
 # SELECT OAUTH INSTITUTION
 - tapOn: "Test OAuth Institution"
 - assertVisible: "Continue"
