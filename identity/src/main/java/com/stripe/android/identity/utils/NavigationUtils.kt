@@ -260,12 +260,6 @@ internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityVie
  * Try navigate to a destination when the fragment is in resume state.
  * If app is backgrounded, navigate when it's brought to foreground.
  */
-internal fun Fragment.navigateOnResume(destinationId: Int, args: Bundle? = null) {
-    repeatOnResume {
-        findNavController().navigate(destinationId, args)
-    }
-}
-
 internal fun Fragment.navigateOnResume(destination: IdentityTopLevelDestination) {
     repeatOnResume {
         findNavController().navigateTo(destination)
