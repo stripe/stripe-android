@@ -60,23 +60,9 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
-            adb root || true
             adb uninstall com.stripe.android.financialconnections.example || true
-            mkdir -p financial-connections-example/build/reports
             ./gradlew :financial-connections-example:installDebug
-            adb shell screenrecord --verbose /storage/emulated/0/capture.mp4 &
-            childpid=$!
-            maestro test maestro/fc-flow-test-oauth.yaml || true
-            kill "$childpid"
-            wait "$childpid"
-            cd financial-connections-example/build/reports/ && adb pull /storage/emulated/0/capture.mp4
-
-      - name: Archive screen record
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: screenrecord
-          path: financial-connections-example/build/reports/
+            maestro record maestro/fc-flow-test-oauth.yaml || true
 
       - name: Archive maestro screenshots
         if: always()
