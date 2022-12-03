@@ -61,7 +61,7 @@ jobs:
           disable-animations: true
           script: |
             adb uninstall com.stripe.android.financialconnections.example || true
-            ./gradlew :financial-connections-example:installDebug
+            ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
             maestro record maestro/fc-flow-test-oauth.yaml || true
         env:
           STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }}
