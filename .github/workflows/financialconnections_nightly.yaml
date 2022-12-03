@@ -13,7 +13,6 @@ jobs:
     env:
       AVD_API_LEVEL: 30
       AVD_ARCH: x86_64
-      STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -26,14 +25,14 @@ jobs:
         with:
           java-version: 1.11
 
-      - name: AVD cache
-        uses: actions/cache@v3
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-${{ env.AVD_API_LEVEL }}-${{ env.AVD_ARCH }}
+#      - name: AVD cache
+#        uses: actions/cache@v3
+#        id: avd-cache
+#        with:
+#          path: |
+#            ~/.android/avd/*
+#            ~/.android/adb*
+#          key: avd-${{ env.AVD_API_LEVEL }}-${{ env.AVD_ARCH }}
 
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -64,6 +63,8 @@ jobs:
             adb uninstall com.stripe.android.financialconnections.example || true
             ./gradlew :financial-connections-example:installDebug
             maestro record maestro/fc-flow-test-oauth.yaml || true
+        env:
+          STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }}
 
       - name: Archive maestro screenshots
         if: always()
