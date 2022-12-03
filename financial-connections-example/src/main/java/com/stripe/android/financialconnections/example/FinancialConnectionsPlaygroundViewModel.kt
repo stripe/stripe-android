@@ -33,8 +33,7 @@ class FinancialConnectionsPlaygroundViewModel(
     val viewEffect: SharedFlow<FinancialConnectionsPlaygroundViewEffect?> = _viewEffect
 
     init {
-        _state.update { it.copy(backendUrl = settings.backendUrl)
-        }
+        _state.update { it.copy(backendUrl = settings.backendUrl) }
     }
 
     fun startFinancialConnectionsSession(
