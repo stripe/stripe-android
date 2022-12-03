@@ -2,7 +2,6 @@ package com.stripe.android.identity.navigation
 
 import android.os.Bundle
 import androidx.annotation.IdRes
-import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
@@ -56,7 +55,6 @@ internal abstract class IdentityTopLevelDestination {
 
 private fun String.withBracket() = "{$this}"
 
-@VisibleForTesting
 internal fun IdentityTopLevelDestination.DestinationRoute.withParams(
     vararg params: Pair<String, Any?>
 ): String {
@@ -180,9 +178,6 @@ internal class ErrorDestination(
         // If this happens, set the back button destination to [DEFAULT_BACK_BUTTON_DESTINATION]
         const val UNEXPECTED_DESTINATION = -1
 
-        val DEFAULT_BACK_BUTTON_NAVIGATION =
-            R.id.action_errorFragment_to_consentFragment
-
         val Route = object : DestinationRoute() {
             override val routeBase = ERROR
             override val arguments = listOf(
@@ -215,11 +210,20 @@ internal object ConfirmationDestination : IdentityTopLevelDestination() {
     override val routeWithArgs = destinationRoute.route
 }
 
-internal object SelfieDestination : IdentityTopLevelDestination() {
-    private const val SELFIE = "Selfie"
-    override val destination = R.id.action_global_selfieFragment
+internal object DocSelectionDestination : IdentityTopLevelDestination() {
+    private const val DOC_SELECTION = "DocSelection"
+    override val destination = R.id.action_global_docSelectionFragment
     override val destinationRoute = object : DestinationRoute() {
-        override val routeBase = SELFIE
+        override val routeBase = DOC_SELECTION
+    }
+    override val routeWithArgs = destinationRoute.route
+}
+
+internal object ConsentDestination : IdentityTopLevelDestination() {
+    private const val CONSENT = "Consent"
+    override val destination = R.id.action_global_consentFragment
+    override val destinationRoute = object : DestinationRoute() {
+        override val routeBase = CONSENT
     }
     override val routeWithArgs = destinationRoute.route
 }

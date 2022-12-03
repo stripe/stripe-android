@@ -24,8 +24,6 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.DocumentUploadSideInfo
 import com.stripe.android.identity.ui.UploadMethod
 import com.stripe.android.identity.ui.UploadScreen
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.fragmentIdToScreenName
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment

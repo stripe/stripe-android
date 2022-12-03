@@ -22,6 +22,8 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE_ID
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE_PASSPORT
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
+import com.stripe.android.identity.navigation.ARG_SHOULD_SHOW_CHOOSE_PHOTO
+import com.stripe.android.identity.navigation.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
@@ -76,7 +78,7 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
 }
 
 /**
- * Check if selfie is required from [VerificationPage], navigate to selfie fragment if so, otherwise
+ * Check if selfie is required from [VerificationPage], navigate to Ω fragment if so, otherwise
  * submit the verification.
  */
 internal suspend fun Fragment.navigateToSelfieOrSubmit(
@@ -367,15 +369,5 @@ private val DOCUMENT_UPLOAD_SCREENS = setOf(
     R.id.passportScanFragment,
     R.id.driverLicenseScanFragment
 )
-
-/**
- * Argument to indicate if take photo option should be shown when picking an image.
- */
-internal const val ARG_SHOULD_SHOW_TAKE_PHOTO = "shouldShowTakePhoto"
-
-/**
- * Argument to indicate if choose photo option should be shown when picking an image.
- */
-internal const val ARG_SHOULD_SHOW_CHOOSE_PHOTO = "shouldShowChoosePhoto"
 
 private const val TAG = "NAVIGATION_UTIL"

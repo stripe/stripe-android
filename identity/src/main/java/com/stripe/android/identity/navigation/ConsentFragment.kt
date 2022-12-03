@@ -114,7 +114,7 @@ internal class ConsentFragment(
                 collectedDataParam,
                 fromFragment = R.id.consentFragment,
                 notSubmitBlock = {
-                    navigateOnResume(R.id.action_consentFragment_to_docSelectionFragment)
+                    navigateOnResume(DocSelectionDestination)
                 }
             )
         }
