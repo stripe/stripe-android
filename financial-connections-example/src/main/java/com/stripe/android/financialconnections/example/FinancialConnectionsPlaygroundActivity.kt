@@ -135,6 +135,10 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
+                    Text(
+                        text = "Backend url: ${state.backendUrl}",
+                        color = Color.Gray
+                    )
                     Button(
                         onClick = {
                             onButtonClick(
@@ -159,7 +163,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                             }
                         }
                     }
-
                 }
             }
         )
@@ -262,7 +265,12 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     @Composable
     fun ContentPreview() {
         FinancialConnectionsContent(
-            state = FinancialConnectionsPlaygroundState(false, "pk", listOf("Result: Pending")),
+            state = FinancialConnectionsPlaygroundState(
+                backendUrl = "http://backend.url",
+                loading = false,
+                publishableKey = "pk",
+                status = listOf("Result: Pending")
+            ),
             onButtonClick = { _, _ -> }
         )
     }
