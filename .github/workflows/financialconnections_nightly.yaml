@@ -13,6 +13,7 @@ jobs:
     env:
       AVD_API_LEVEL: 30
       AVD_ARCH: x86_64
+      STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -53,8 +54,6 @@ jobs:
 
       - name: Run Tests
         uses: reactivecircus/android-emulator-runner@v2
-        env:
-          STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }}
         with:
           api-level: ${{ env.AVD_API_LEVEL }}
           arch: ${{ env.AVD_ARCH }}
