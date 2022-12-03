@@ -11,7 +11,7 @@ jobs:
   build:
     runs-on: macos-latest
     env:
-      AVD_API_LEVEL: 30
+      AVD_API_LEVEL: [23, 30]
       AVD_ARCH: x86_64
     steps:
       - name: Checkout
