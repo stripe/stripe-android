@@ -11,6 +11,8 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
+import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
+import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Companion.ARG_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.navigation.IdentityDocumentScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.ErrorScreen
@@ -82,8 +84,6 @@ internal class CouldNotCaptureFragment(
     }
 
     internal companion object {
-        const val ARG_COULD_NOT_CAPTURE_SCAN_TYPE = "scanType"
-        const val ARG_REQUIRE_LIVE_CAPTURE = "requireLiveCapture"
 
         @IdRes
         private fun IdentityScanState.ScanType.toUploadDestinationId() =

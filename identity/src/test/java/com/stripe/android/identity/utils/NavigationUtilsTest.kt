@@ -19,7 +19,11 @@ import com.stripe.android.identity.ERROR_BUTTON_TEXT
 import com.stripe.android.identity.ERROR_TITLE
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.ScreenTracker
-import com.stripe.android.identity.navigation.ErrorFragment
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_ERROR_CONTENT
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_ERROR_TITLE
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_GO_BACK_BUTTON_DESTINATION
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_GO_BACK_BUTTON_TEXT
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_DESTINATION
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
@@ -162,23 +166,23 @@ internal class NavigationUtilsTest {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
             R.id.consentFragment,
-            ErrorFragment.UNEXPECTED_DESTINATION
+            UNEXPECTED_DESTINATION
         )
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
             R.id.consentFragment,
-            ErrorFragment.UNEXPECTED_DESTINATION,
+            UNEXPECTED_DESTINATION,
             2
         )
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
             R.id.docSelectionFragment,
-            ErrorFragment.UNEXPECTED_DESTINATION
+            UNEXPECTED_DESTINATION
         )
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
             R.id.docSelectionFragment,
-            ErrorFragment.UNEXPECTED_DESTINATION,
+            UNEXPECTED_DESTINATION,
             2
         )
     }
@@ -210,13 +214,13 @@ internal class NavigationUtilsTest {
             ).screenTransitionStart(eq(fromFragment.fragmentIdToScreenName()), any())
 
             requireNotNull(navController.backStack.last().arguments).let { arguments ->
-                assertThat(arguments[ErrorFragment.ARG_ERROR_TITLE])
+                assertThat(arguments[ARG_ERROR_TITLE])
                     .isEqualTo(ERROR_TITLE)
-                assertThat(arguments[ErrorFragment.ARG_ERROR_CONTENT])
+                assertThat(arguments[ARG_ERROR_CONTENT])
                     .isEqualTo(ERROR_BODY)
-                assertThat(arguments[ErrorFragment.ARG_GO_BACK_BUTTON_DESTINATION])
+                assertThat(arguments[ARG_GO_BACK_BUTTON_DESTINATION])
                     .isEqualTo(backButtonDestination)
-                assertThat(arguments[ErrorFragment.ARG_GO_BACK_BUTTON_TEXT])
+                assertThat(arguments[ARG_GO_BACK_BUTTON_TEXT])
                     .isEqualTo(ERROR_BUTTON_TEXT)
             }
             assertThat(navController.currentDestination?.id)
@@ -319,13 +323,13 @@ internal class NavigationUtilsTest {
                 )
 
                 requireNotNull(navController.backStack.last().arguments).let { arguments ->
-                    assertThat(arguments[ErrorFragment.ARG_ERROR_TITLE])
+                    assertThat(arguments[ARG_ERROR_TITLE])
                         .isEqualTo(ERROR_TITLE)
-                    assertThat(arguments[ErrorFragment.ARG_ERROR_CONTENT])
+                    assertThat(arguments[ARG_ERROR_CONTENT])
                         .isEqualTo(ERROR_BODY)
-                    assertThat(arguments[ErrorFragment.ARG_GO_BACK_BUTTON_DESTINATION])
+                    assertThat(arguments[ARG_GO_BACK_BUTTON_DESTINATION])
                         .isEqualTo(R.id.consentFragment)
-                    assertThat(arguments[ErrorFragment.ARG_GO_BACK_BUTTON_TEXT])
+                    assertThat(arguments[ARG_GO_BACK_BUTTON_TEXT])
                         .isEqualTo(ERROR_BUTTON_TEXT)
                 }
                 assertThat(navController.currentDestination?.id)

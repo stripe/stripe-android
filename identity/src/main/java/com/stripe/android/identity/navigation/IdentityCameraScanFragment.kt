@@ -6,7 +6,6 @@ import android.util.Log
 import android.util.Size
 import android.view.View
 import androidx.annotation.IdRes
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -17,13 +16,10 @@ import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.core.exception.InvalidResponseException
-import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.TYPE_DOCUMENT
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.TYPE_SELFIE
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
-import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
-import com.stripe.android.identity.navigation.CouldNotCaptureFragment.Companion.ARG_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.Companion.isBack
@@ -128,20 +124,19 @@ internal abstract class IdentityCameraScanFragment(
                                 )
                             }
                         }
+
                         navigateOnResume(
-                            R.id.action_global_couldNotCaptureFragment,
-                            bundleOf(
-                                ARG_COULD_NOT_CAPTURE_SCAN_TYPE to identityScanViewModel.targetScanTypeFlow.value
-                            ).also {
+                            CouldNotCaptureDestination(
+                                scanType = identityScanViewModel.targetScanTypeFlow.value,
+                                requireLiveCapture =
                                 if (identityScanViewModel.targetScanTypeFlow.value
                                     != IdentityScanState.ScanType.SELFIE
                                 ) {
-                                    it.putBoolean(
-                                        ARG_REQUIRE_LIVE_CAPTURE,
-                                        verificationPage.documentCapture.requireLiveCapture
-                                    )
+                                    verificationPage.documentCapture.requireLiveCapture
+                                } else {
+                                    null
                                 }
-                            }
+                            )
                         )
                     }
                 },

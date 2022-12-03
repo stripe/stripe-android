@@ -18,6 +18,13 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_STACKTRACE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.analytics.ScreenTracker
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_CAUSE
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_ERROR_CONTENT
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_ERROR_TITLE
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_GO_BACK_BUTTON_DESTINATION
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_GO_BACK_BUTTON_TEXT
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_DESTINATION
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -81,7 +88,7 @@ class ErrorFragmentTest {
 
     @Test
     fun `bottom button is set correctly when set`() {
-        launchErrorFragment(ErrorFragment.UNEXPECTED_DESTINATION).onFragment {
+        launchErrorFragment(UNEXPECTED_DESTINATION).onFragment {
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
             )
@@ -210,13 +217,13 @@ class ErrorFragmentTest {
         navigationDestination: Int? = null
     ) = launchFragmentInContainer(
         bundleOf(
-            ErrorFragment.ARG_ERROR_TITLE to TEST_ERROR_TITLE,
-            ErrorFragment.ARG_ERROR_CONTENT to TEST_ERROR_CONTENT,
-            ErrorFragment.ARG_CAUSE to TEST_CAUSE,
-            ErrorFragment.ARG_GO_BACK_BUTTON_TEXT to TEST_GO_BACK_BUTTON_TEXT
+            ARG_ERROR_TITLE to TEST_ERROR_TITLE,
+            ARG_ERROR_CONTENT to TEST_ERROR_CONTENT,
+            ARG_CAUSE to TEST_CAUSE,
+            ARG_GO_BACK_BUTTON_TEXT to TEST_GO_BACK_BUTTON_TEXT
         ).also { bundle ->
             navigationDestination?.let {
-                bundle.putInt(ErrorFragment.ARG_GO_BACK_BUTTON_DESTINATION, navigationDestination)
+                bundle.putInt(ARG_GO_BACK_BUTTON_DESTINATION, navigationDestination)
             }
         },
         themeResId = R.style.Theme_MaterialComponents
@@ -236,11 +243,11 @@ class ErrorFragmentTest {
         throwable: Throwable
     ) = launchFragmentInContainer(
         bundleOf(
-            ErrorFragment.ARG_ERROR_TITLE to TEST_ERROR_TITLE,
-            ErrorFragment.ARG_ERROR_CONTENT to TEST_ERROR_CONTENT,
-            ErrorFragment.ARG_GO_BACK_BUTTON_TEXT to TEST_GO_BACK_BUTTON_TEXT,
-            ErrorFragment.ARG_SHOULD_FAIL to true,
-            ErrorFragment.ARG_CAUSE to throwable
+            ARG_ERROR_TITLE to TEST_ERROR_TITLE,
+            ARG_ERROR_CONTENT to TEST_ERROR_CONTENT,
+            ARG_GO_BACK_BUTTON_TEXT to TEST_GO_BACK_BUTTON_TEXT,
+            ARG_SHOULD_FAIL to true,
+            ARG_CAUSE to throwable
         ),
         themeResId = R.style.Theme_MaterialComponents
     ) {
