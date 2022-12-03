@@ -1,9 +1,7 @@
 package com.stripe.android.identity.utils
 
-import android.os.Bundle
 import android.util.Log
 import androidx.annotation.IdRes
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -22,8 +20,6 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE_ID
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE_PASSPORT
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
-import com.stripe.android.identity.navigation.ARG_SHOULD_SHOW_CHOOSE_PHOTO
-import com.stripe.android.identity.navigation.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ErrorFragment
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
@@ -210,25 +206,6 @@ internal fun Fragment.navigateToDefaultErrorFragment(message: String) {
 internal fun Fragment.navigateToErrorFragmentWithFailedReason(failedReason: Throwable) {
     repeatOnResume {
         findNavController().navigateToErrorScreenWithFailedReason(requireContext(), failedReason)
-    }
-}
-
-/**
- * Navigate to upload fragment with shouldShowTakePhoto argument.
- */
-internal fun Fragment.navigateToUploadFragment(
-    @IdRes destinationId: Int,
-    shouldShowTakePhoto: Boolean,
-    shouldShowChoosePhoto: Boolean
-) {
-    repeatOnResume {
-        findNavController().navigate(
-            destinationId,
-            bundleOf(
-                ARG_SHOULD_SHOW_TAKE_PHOTO to shouldShowTakePhoto,
-                ARG_SHOULD_SHOW_CHOOSE_PHOTO to shouldShowChoosePhoto
-            )
-        )
     }
 }
 
