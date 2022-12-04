@@ -58,7 +58,7 @@ jobs:
           script: |
             adb uninstall com.stripe.android.financialconnections.example || true
             ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
-            maestro test maestro/fc-flow-test-oauth.yaml
+            maestro test maestro/financial-connections
 
       - name: Archive maestro screenshots
         if: always()

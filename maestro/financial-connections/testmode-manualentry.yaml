@@ -16,6 +16,9 @@ appId: com.stripe.android.financialconnections.example
 
 
 # Common: web AuthFlow - connect OAuth institution
+- extendedWaitUntil:
+    visible: "Agree"
+    timeout: 30000
 - assertVisible: "Enter account details manually instead"
 - takeScreenshot: ManualEntry_Consent
 - tapOn: "Enter account details manually instead"
@@ -35,6 +38,7 @@ appId: com.stripe.android.financialconnections.example
 - inputText: "000123456789"
 - takeScreenshot: ManualEntry_ConfirmAccountNumber
 - tapOn: "Continue"
-- assertVisible: "Micro-deposit initiated"
+- assertVisible: ".*deposit initiated.*"
 - takeScreenshot: ManualEntry_Success
 - tapOn: "Done"
+- assertVisible: ".*Completed!.*"
