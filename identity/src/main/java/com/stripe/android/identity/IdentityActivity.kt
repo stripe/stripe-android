@@ -30,12 +30,10 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.injection.DaggerIdentityActivityFallbackComponent
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
-import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_CAUSE
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.utils.clearDataAndNavigateUp
-import com.stripe.android.identity.utils.serializable
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
 import javax.inject.Provider
@@ -173,7 +171,7 @@ internal class IdentityActivity :
                 }
             },
             onFailure = {
-                navController.navigateToErrorScreenWithDefaultValues(this, it)
+                navController.navigateToErrorScreenWithDefaultValues(this, it, identityViewModel)
             }
         )
 
@@ -394,11 +392,9 @@ internal class IdentityActivity :
                 }
                 isErrorFragmentThatShouldFail(destination, args) -> {
                     val failedReason = requireNotNull(
-                        args?.serializable(
-                            ARG_CAUSE
-                        ) as? Throwable
+                        identityViewModel.errorCause.value
                     ) {
-                        "Failed to get failedReason from $args"
+                        "Failed to get failedReason"
                     }
 
                     identityViewModel.sendAnalyticsRequest(

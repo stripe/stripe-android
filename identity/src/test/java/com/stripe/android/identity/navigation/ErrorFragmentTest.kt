@@ -18,7 +18,6 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_STACKTRACE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.analytics.ScreenTracker
-import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_CAUSE
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_ERROR_CONTENT
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_ERROR_TITLE
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_GO_BACK_BUTTON_DESTINATION
@@ -117,8 +116,7 @@ class ErrorFragmentTest {
 
     @Test
     fun `clicking bottom button finishes the flow when failed reason is set`() {
-        val mockFailedReason = mock<Throwable>()
-        launchErrorFragmentWithFailedReason(mockFailedReason).onFragment {
+        launchErrorFragmentWithFailedReason().onFragment {
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
             )
@@ -219,7 +217,6 @@ class ErrorFragmentTest {
         bundleOf(
             ARG_ERROR_TITLE to TEST_ERROR_TITLE,
             ARG_ERROR_CONTENT to TEST_ERROR_CONTENT,
-            ARG_CAUSE to TEST_CAUSE,
             ARG_GO_BACK_BUTTON_TEXT to TEST_GO_BACK_BUTTON_TEXT
         ).also { bundle ->
             navigationDestination?.let {
@@ -239,15 +236,12 @@ class ErrorFragmentTest {
         )
     }
 
-    private fun launchErrorFragmentWithFailedReason(
-        throwable: Throwable
-    ) = launchFragmentInContainer(
+    private fun launchErrorFragmentWithFailedReason() = launchFragmentInContainer(
         bundleOf(
             ARG_ERROR_TITLE to TEST_ERROR_TITLE,
             ARG_ERROR_CONTENT to TEST_ERROR_CONTENT,
             ARG_GO_BACK_BUTTON_TEXT to TEST_GO_BACK_BUTTON_TEXT,
-            ARG_SHOULD_FAIL to true,
-            ARG_CAUSE to throwable
+            ARG_SHOULD_FAIL to true
         ),
         themeResId = R.style.Theme_MaterialComponents
     ) {

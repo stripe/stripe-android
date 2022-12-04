@@ -110,6 +110,7 @@ class IdentityUploadFragmentTest {
         whenever(it.backCollectedInfo).thenReturn(backCollectedInfo)
         whenever(it.collectedData).thenReturn(collectedData)
         whenever(it.missingRequirements).thenReturn(missings)
+        whenever(it.errorCause).thenReturn(mock())
     }
 
     private val mockFrontBackUploadViewModel = mock<IdentityUploadViewModel>()

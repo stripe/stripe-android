@@ -1,6 +1,7 @@
 package com.stripe.android.identity.navigation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
@@ -10,7 +11,6 @@ import androidx.navigation.findNavController
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
-import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_CAUSE
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_ERROR_CONTENT
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_ERROR_TITLE
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_GO_BACK_BUTTON_DESTINATION
@@ -36,9 +36,15 @@ internal class ErrorFragment(
         savedInstanceState: Bundle?
     ) = ComposeView(requireContext()).apply {
         val args = requireNotNull(arguments)
-        val cause = requireNotNull(args.getSerializable(ARG_CAUSE) as? Throwable) {
+//        val cause = requireNotNull(args.getSerializable(ARG_CAUSE) as? Throwable) {
+//            "cause of error is null"
+//        }
+
+        val cause = requireNotNull(identityViewModel.errorCause.value) {
             "cause of error is null"
         }
+
+        Log.d("BGLM", "error with cause: $cause")
 
         identityViewModel.sendAnalyticsRequest(
             identityViewModel.identityAnalyticsRequestFactory.genericError(

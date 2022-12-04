@@ -49,7 +49,7 @@ internal class DocSelectionFragment(
             val verificationPage by identityViewModel.verificationPage.observeAsState(Resource.loading())
             DocSelectionScreen(
                 verificationPage,
-                onError = ::navigateToDefaultErrorFragment,
+                onError = { navigateToDefaultErrorFragment(it, identityViewModel) },
                 onComposeFinish = {
                     lifecycleScope.launch(identityViewModel.workContext) {
                         identityViewModel.screenTracker.screenTransitionFinish(
@@ -124,7 +124,7 @@ internal class DocSelectionFragment(
                 if (verificationPage.documentCapture.requireLiveCapture) {
                     "Can't access camera and client has required live capture.".let { msg ->
                         Log.e(TAG, msg)
-                        navigateToDefaultErrorFragment(msg)
+                        navigateToDefaultErrorFragment(msg, identityViewModel)
                     }
                 } else {
                     navigateOnResume(
@@ -136,7 +136,7 @@ internal class DocSelectionFragment(
                 }
             },
             onFailure = {
-                navigateToDefaultErrorFragment(it)
+                navigateToDefaultErrorFragment(it, identityViewModel)
             }
         )
     }
@@ -161,7 +161,7 @@ internal class DocSelectionFragment(
             },
             onFailure = {
                 Log.e(TAG, "failed to observeForVerificationPage: $it")
-                navigateToDefaultErrorFragment(it)
+                navigateToDefaultErrorFragment(it, identityViewModel)
             }
         )
     }

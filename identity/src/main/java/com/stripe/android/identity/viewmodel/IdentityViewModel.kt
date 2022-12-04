@@ -296,6 +296,11 @@ internal class IdentityViewModel constructor(
     }
 
     /**
+     * LiveData for the cause of ErrorScreen.
+     */
+    val errorCause = MutableLiveData<Throwable>()
+
+    /**
      * Reset document uploaded state to loading state.
      */
     internal fun resetDocumentUploadedState() {

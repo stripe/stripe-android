@@ -42,7 +42,7 @@ internal class ConfirmationFragment(
             val verificationPage by identityViewModel.verificationPage.observeAsState(Resource.loading())
             ConfirmationScreen(
                 verificationPageState = verificationPage,
-                onError = ::navigateToDefaultErrorFragment,
+                onError = { navigateToDefaultErrorFragment(it, identityViewModel) },
                 onComposeFinish = {
                     lifecycleScope.launch(identityViewModel.workContext) {
                         identityViewModel.screenTracker.screenTransitionFinish(
