@@ -67,3 +67,14 @@ jobs:
           name: maestro-screenshots
           path: |
             *.png
+
+      - name: Send Maestro test results to Slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "result": "Maestro android test result: ${{ job.status }}",
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_FINANCIAL_CONNECTIONS_ANDROID_MAESTRO_WEBHOOK_URL }}
