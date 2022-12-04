@@ -1,7 +1,6 @@
 package com.stripe.android.identity.navigation
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
@@ -36,15 +35,10 @@ internal class ErrorFragment(
         savedInstanceState: Bundle?
     ) = ComposeView(requireContext()).apply {
         val args = requireNotNull(arguments)
-//        val cause = requireNotNull(args.getSerializable(ARG_CAUSE) as? Throwable) {
-//            "cause of error is null"
-//        }
 
         val cause = requireNotNull(identityViewModel.errorCause.value) {
             "cause of error is null"
         }
-
-        Log.d("BGLM", "error with cause: $cause")
 
         identityViewModel.sendAnalyticsRequest(
             identityViewModel.identityAnalyticsRequestFactory.genericError(
