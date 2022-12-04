@@ -74,7 +74,7 @@ jobs:
         with:
           payload: |
             {
-              "result": "Maestro android test result: ${{ job.status }}",
+              "status": "${{ job.status }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_FINANCIAL_CONNECTIONS_ANDROID_MAESTRO_WEBHOOK_URL }}
