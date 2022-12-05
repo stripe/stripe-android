@@ -1,7 +1,6 @@
 package com.stripe.android.identity.utils
 
 import android.util.Log
-import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -28,6 +27,7 @@ import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithFailedReason
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithRequirementError
+import com.stripe.android.identity.navigation.routeToScreenName
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -59,16 +59,16 @@ import kotlinx.coroutines.launch
 internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
     identityViewModel: IdentityViewModel,
     collectedDataParam: CollectedDataParam,
-    @IdRes fromFragment: Int,
+    fromRoute: String,
     notSubmitBlock: ((verificationPageData: VerificationPageData) -> Unit)? = null
 ) {
     postVerificationPageData(
         identityViewModel,
         collectedDataParam,
-        fromFragment
+        fromRoute
     ) { postedVerificationPageData ->
         notSubmitBlock?.invoke(postedVerificationPageData) ?: run {
-            submitVerificationPageDataAndNavigate(identityViewModel, fromFragment)
+            submitVerificationPageDataAndNavigate(identityViewModel, fromRoute)
         }
     }
 }
@@ -80,14 +80,14 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
 internal suspend fun Fragment.navigateToSelfieOrSubmit(
     verificationPage: VerificationPage,
     identityViewModel: IdentityViewModel,
-    @IdRes fromFragment: Int
+    fromRoute: String
 ) {
     if (verificationPage.requireSelfie()) {
         navigateOnResume(SelfieDestination)
     } else {
         submitVerificationPageDataAndNavigate(
             identityViewModel,
-            fromFragment
+            fromRoute
         )
     }
 }
@@ -99,7 +99,7 @@ internal suspend fun Fragment.navigateToSelfieOrSubmit(
  */
 internal suspend fun Fragment.submitVerificationPageDataAndNavigate(
     identityViewModel: IdentityViewModel,
-    @IdRes fromFragment: Int
+    fromRoute: String
 ) {
     runCatching {
         identityViewModel.postVerificationPageSubmit()
@@ -108,7 +108,7 @@ internal suspend fun Fragment.submitVerificationPageDataAndNavigate(
             when {
                 submittedVerificationPageData.hasError() -> {
                     navigateToRequirementErrorFragment(
-                        fromFragment,
+                        fromRoute,
                         submittedVerificationPageData.requirements.errors[0],
                         identityViewModel
                     )
@@ -138,11 +138,11 @@ internal suspend fun Fragment.submitVerificationPageDataAndNavigate(
 internal suspend fun Fragment.postVerificationPageData(
     identityViewModel: IdentityViewModel,
     collectedDataParam: CollectedDataParam,
-    @IdRes fromFragment: Int,
+    fromRoute: String,
     onCorrectResponse: suspend ((verificationPageDataWithNoError: VerificationPageData) -> Unit) = {}
 ) {
     identityViewModel.screenTracker.screenTransitionStart(
-        fromFragment.fragmentIdToScreenName()
+        fromRoute.routeToScreenName()
     )
     runCatching {
         identityViewModel.postVerificationPageData(collectedDataParam)
@@ -150,7 +150,7 @@ internal suspend fun Fragment.postVerificationPageData(
         onSuccess = { postedVerificationPageData ->
             if (postedVerificationPageData.hasError()) {
                 navigateToRequirementErrorFragment(
-                    fromFragment,
+                    fromRoute,
                     postedVerificationPageData.requirements.errors[0],
                     identityViewModel
                 )
@@ -169,14 +169,14 @@ internal suspend fun Fragment.postVerificationPageData(
  * Navigate to [ErrorFragment] with [VerificationPageDataRequirementError].
  */
 private fun Fragment.navigateToRequirementErrorFragment(
-    @IdRes fromFragment: Int,
+    fromRoute: String,
     requirementError: VerificationPageDataRequirementError,
     identityViewModel: IdentityViewModel
 ) {
     repeatOnResume {
         findNavController()
             .navigateToErrorScreenWithRequirementError(
-                fromFragment,
+                fromRoute,
                 requirementError,
                 identityViewModel
             )

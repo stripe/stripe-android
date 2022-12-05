@@ -213,6 +213,7 @@ class IdentityUploadFragmentTest {
         override var backScanType: IdentityScanState.ScanType? = IdentityScanState.ScanType.ID_BACK
         override val collectedDataParamType = CollectedDataParam.Type.IDCARD
         override val fragmentId = R.id.IDUploadFragment
+        override val route = IDUploadDestination.ROUTE.route
 
         override fun onCreateView(
             inflater: LayoutInflater,

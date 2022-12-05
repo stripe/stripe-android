@@ -46,6 +46,8 @@ internal abstract class IdentityCameraScanFragment(
     @get:IdRes
     protected abstract val fragmentId: Int
 
+    protected abstract val route: String
+
     internal var cameraAdapter: CameraAdapter<CameraPreviewImage<Bitmap>>? = null
         set(value) {
             field = value

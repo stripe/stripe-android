@@ -111,6 +111,7 @@ class IdentityDocumentScanFragmentTest {
         on { workContext } doReturn testDispatcher
         on { it.screenTracker } doReturn mockScreenTracker
         on { it.fpsTracker } doReturn mockFPSTracker
+        on { it.errorCause } doReturn mock()
     }
 
     private val frontUploadedState = SingleSideDocumentUploadState(
@@ -134,6 +135,7 @@ class IdentityDocumentScanFragmentTest {
         override val frontScanType = IdentityScanState.ScanType.ID_FRONT
         override val backScanType = IdentityScanState.ScanType.ID_BACK
         override val fragmentId = TEST_FRAGMENT_ID
+        override val route = IDScanDestination.ROUTE.route
         override val frontTitleStringRes = R.string.front_of_id
         override val backTitleStringRes = R.string.back_of_id
         override val frontMessageStringRes = R.string.position_id_front
@@ -380,7 +382,7 @@ class IdentityDocumentScanFragmentTest {
                 val mockFrontFinalResult = mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
                 }
-//                // mock viewModel target change
+                // mock viewModel target change
                 targetScanTypeFlow.update { IdentityScanState.ScanType.ID_FRONT }
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
@@ -434,7 +436,7 @@ class IdentityDocumentScanFragmentTest {
                 val mockBackFinalResult = mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
                 }
-//                // mock viewModel target change
+                // mock viewModel target change
                 targetScanTypeFlow.update { IdentityScanState.ScanType.ID_BACK }
                 finalResultLiveData.postValue(mockBackFinalResult)
                 verifyUploadedWithFinalResult(
@@ -510,7 +512,7 @@ class IdentityDocumentScanFragmentTest {
                 val mockFrontFinalResult = mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
                 }
-//                // mock viewModel target change
+                // mock viewModel target change
                 targetScanTypeFlow.update { IdentityScanState.ScanType.ID_FRONT }
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
@@ -564,7 +566,7 @@ class IdentityDocumentScanFragmentTest {
                 val mockBackFinalResult = mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
                 }
-//                // mock viewModel target change
+                // mock viewModel target change
                 targetScanTypeFlow.update { IdentityScanState.ScanType.ID_BACK }
                 finalResultLiveData.postValue(mockBackFinalResult)
                 verifyUploadedWithFinalResult(
@@ -640,7 +642,7 @@ class IdentityDocumentScanFragmentTest {
                 val mockFrontFinalResult = mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
                 }
-//                // mock viewModel target change
+                // mock viewModel target change
                 targetScanTypeFlow.update { IdentityScanState.ScanType.ID_FRONT }
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(
@@ -718,7 +720,7 @@ class IdentityDocumentScanFragmentTest {
                 val mockFrontFinalResult = mock<IdentityAggregator.FinalResult>().also {
                     whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
                 }
-//                // mock viewModel target change
+                // mock viewModel target change
                 targetScanTypeFlow.update { IdentityScanState.ScanType.ID_FRONT }
                 finalResultLiveData.postValue(mockFrontFinalResult)
                 verifyUploadedWithFinalResult(

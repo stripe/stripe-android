@@ -64,6 +64,8 @@ internal abstract class IdentityUploadFragment(
     @get:IdRes
     abstract val fragmentId: Int
 
+    abstract val route: String
+
     abstract val frontScanType: IdentityScanState.ScanType
 
     open var backScanType: IdentityScanState.ScanType? = null
@@ -205,7 +207,7 @@ internal abstract class IdentityUploadFragment(
                             navigateToSelfieOrSubmit(
                                 verificationPage,
                                 identityViewModel,
-                                fragmentId
+                                route
                             )
                         }
                     },
@@ -291,7 +293,7 @@ internal abstract class IdentityUploadFragment(
                         identityViewModel = identityViewModel,
                         collectedDataParam =
                         collectedDataParam,
-                        fromFragment = fragmentId
+                        fromRoute = route
                     )
                 }.onFailure {
                     Log.e(TAG, "Fail to observeForVerificationPage: $it")

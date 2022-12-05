@@ -20,6 +20,7 @@ internal open class PassportUploadFragment(
     override val frontScanType = IdentityScanState.ScanType.PASSPORT
     override val collectedDataParamType = CollectedDataParam.Type.PASSPORT
     override val fragmentId = R.id.passportUploadFragment
+    override val route = PassportUploadDestination.ROUTE.route
 
     companion object {
         val TAG: String = PassportUploadFragment::class.java.simpleName

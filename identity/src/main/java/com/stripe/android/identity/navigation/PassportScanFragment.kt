@@ -23,6 +23,7 @@ internal class PassportScanFragment(
     override val frontMessageStringRes = R.string.position_passport
     override val backMessageStringRes = INVALID
     override val collectedDataParamType = CollectedDataParam.Type.PASSPORT
+    override val route = PassportScanDestination.ROUTE.route
 
     internal companion object {
         const val INVALID = -1

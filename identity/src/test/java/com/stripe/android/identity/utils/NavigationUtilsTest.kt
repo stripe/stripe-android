@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
@@ -19,11 +18,20 @@ import com.stripe.android.identity.ERROR_BUTTON_TEXT
 import com.stripe.android.identity.ERROR_TITLE
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.ScreenTracker
+import com.stripe.android.identity.navigation.ConsentDestination
+import com.stripe.android.identity.navigation.DocSelectionDestination
+import com.stripe.android.identity.navigation.DriverLicenseScanDestination
+import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_ERROR_CONTENT
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_ERROR_TITLE
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_GO_BACK_BUTTON_DESTINATION
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_GO_BACK_BUTTON_TEXT
-import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_DESTINATION
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_ROUTE
+import com.stripe.android.identity.navigation.IDScanDestination
+import com.stripe.android.identity.navigation.IDUploadDestination
+import com.stripe.android.identity.navigation.PassportScanDestination
+import com.stripe.android.identity.navigation.PassportUploadDestination
+import com.stripe.android.identity.navigation.routeToScreenName
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
@@ -48,8 +56,8 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit from consent navigates to error fragment when has BIOMETRICCONSENT error `() {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_BIOMETRICCONSENT,
-            R.id.consentFragment,
-            R.id.consentFragment
+            ConsentDestination.ROUTE.route,
+            ConsentDestination.ROUTE.route
         )
     }
 
@@ -57,14 +65,14 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit from passportUpload navigates to error fragment when has IDDOCUMENT error`() {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
-            R.id.passportUploadFragment,
-            R.id.passportUploadFragment
+            PassportUploadDestination.ROUTE.route,
+            PassportUploadDestination.ROUTE.route
         )
 
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
-            R.id.passportUploadFragment,
-            R.id.passportUploadFragment,
+            PassportUploadDestination.ROUTE.route,
+            PassportUploadDestination.ROUTE.route,
             2
         )
     }
@@ -73,14 +81,14 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit from idUpload navigates to error fragment when has IDDOCUMENT error`() {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
-            R.id.IDUploadFragment,
-            R.id.IDUploadFragment
+            IDUploadDestination.ROUTE.route,
+            IDUploadDestination.ROUTE.route
         )
 
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
-            R.id.IDUploadFragment,
-            R.id.IDUploadFragment,
+            IDUploadDestination.ROUTE.route,
+            IDUploadDestination.ROUTE.route,
             2
         )
     }
@@ -89,14 +97,14 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit from driverLicenseUpload navigates to error fragment when has IDDOCUMENT error`() {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
-            R.id.driverLicenseUploadFragment,
-            R.id.driverLicenseUploadFragment
+            DriverLicenseUploadDestination.ROUTE.route,
+            DriverLicenseUploadDestination.ROUTE.route
         )
 
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
-            R.id.driverLicenseUploadFragment,
-            R.id.driverLicenseUploadFragment,
+            DriverLicenseUploadDestination.ROUTE.route,
+            DriverLicenseUploadDestination.ROUTE.route,
             2
         )
     }
@@ -105,14 +113,14 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit from passportScan navigates to error fragment when has IDDOCUMENT error`() {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
-            R.id.passportScanFragment,
-            R.id.passportScanFragment
+            PassportScanDestination.ROUTE.route,
+            PassportScanDestination.ROUTE.route
         )
 
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
-            R.id.passportScanFragment,
-            R.id.passportScanFragment,
+            PassportScanDestination.ROUTE.route,
+            PassportScanDestination.ROUTE.route,
             2
         )
     }
@@ -121,14 +129,14 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit from idScan navigates to error fragment when has IDDOCUMENT error`() {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
-            R.id.IDScanFragment,
-            R.id.IDScanFragment
+            IDScanDestination.ROUTE.route,
+            IDScanDestination.ROUTE.route
         )
 
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
-            R.id.IDScanFragment,
-            R.id.IDScanFragment,
+            IDScanDestination.ROUTE.route,
+            IDScanDestination.ROUTE.route,
             2
         )
     }
@@ -137,14 +145,14 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit from driverLicenseScan navigates to error fragment when has IDDOCUMENT error`() {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
-            R.id.driverLicenseScanFragment,
-            R.id.driverLicenseScanFragment
+            DriverLicenseScanDestination.ROUTE.route,
+            DriverLicenseScanDestination.ROUTE.route
         )
 
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
-            R.id.driverLicenseScanFragment,
-            R.id.driverLicenseScanFragment,
+            DriverLicenseScanDestination.ROUTE.route,
+            DriverLicenseScanDestination.ROUTE.route,
             2
         )
     }
@@ -153,8 +161,8 @@ internal class NavigationUtilsTest {
     fun `postVerificationPageDataAndMaybeSubmit from docSelection navigates to error fragment when has IDDOCUMENTTYPE error`() {
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTTYPE,
-            R.id.docSelectionFragment,
-            R.id.docSelectionFragment
+            DocSelectionDestination.ROUTE.route,
+            DocSelectionDestination.ROUTE.route
         )
     }
 
@@ -165,32 +173,32 @@ internal class NavigationUtilsTest {
 
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
-            R.id.consentFragment,
-            UNEXPECTED_DESTINATION
+            ConsentDestination.ROUTE.route,
+            UNEXPECTED_ROUTE
         )
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
-            R.id.consentFragment,
-            UNEXPECTED_DESTINATION,
+            ConsentDestination.ROUTE.route,
+            UNEXPECTED_ROUTE,
             2
         )
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTFRONT,
-            R.id.docSelectionFragment,
-            UNEXPECTED_DESTINATION
+            DocSelectionDestination.ROUTE.route,
+            UNEXPECTED_ROUTE
         )
         testPostVerificationPageDataAndMaybeSubmitWithError(
             ERROR_VERIFICATION_PAGE_DATA_IDDOCUMENTBACK,
-            R.id.docSelectionFragment,
-            UNEXPECTED_DESTINATION,
+            DocSelectionDestination.ROUTE.route,
+            UNEXPECTED_ROUTE,
             2
         )
     }
 
     private fun testPostVerificationPageDataAndMaybeSubmitWithError(
         errorResponse: VerificationPageData,
-        @IdRes fromFragment: Int,
-        @IdRes backButtonDestination: Int,
+        fromRoute: String,
+        backButtonDestination: String,
         times: Int = 1
     ) = runBlocking {
         val mockIdentityViewModel = mock<IdentityViewModel>().also {
@@ -206,22 +214,22 @@ internal class NavigationUtilsTest {
             fragment.postVerificationPageDataAndMaybeSubmit(
                 mockIdentityViewModel,
                 mock(),
-                fromFragment
+                fromRoute
             )
 
             verify(
                 mockScreenTracker,
                 times(times)
-            ).screenTransitionStart(eq(fromFragment.fragmentIdToScreenName()), any())
+            ).screenTransitionStart(eq(fromRoute.routeToScreenName()), any())
 
             requireNotNull(navController.backStack.last().arguments).let { arguments ->
-                assertThat(arguments[ARG_ERROR_TITLE])
+                assertThat(arguments.getString(ARG_ERROR_TITLE))
                     .isEqualTo(ERROR_TITLE)
-                assertThat(arguments[ARG_ERROR_CONTENT])
+                assertThat(arguments.getString(ARG_ERROR_CONTENT))
                     .isEqualTo(ERROR_BODY)
-                assertThat(arguments[ARG_GO_BACK_BUTTON_DESTINATION])
+                assertThat(arguments.getString(ARG_GO_BACK_BUTTON_DESTINATION))
                     .isEqualTo(backButtonDestination)
-                assertThat(arguments[ARG_GO_BACK_BUTTON_TEXT])
+                assertThat(arguments.getString(ARG_GO_BACK_BUTTON_TEXT))
                     .isEqualTo(ERROR_BUTTON_TEXT)
             }
             assertThat(navController.currentDestination?.id)
@@ -244,7 +252,7 @@ internal class NavigationUtilsTest {
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
                     mock(),
-                    R.id.consentFragment
+                    ConsentDestination.ROUTE.route
                 )
 
                 assertThat(navController.currentDestination?.id)
@@ -268,7 +276,7 @@ internal class NavigationUtilsTest {
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
                     mock(),
-                    R.id.consentFragment
+                    ConsentDestination.ROUTE.route
                 ) {
                     blockExecuted = true
                 }
@@ -295,7 +303,7 @@ internal class NavigationUtilsTest {
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
                     mock(),
-                    R.id.consentFragment
+                    ConsentDestination.ROUTE.route
                 )
 
                 verify(mockIdentityViewModel).postVerificationPageSubmit()
@@ -322,17 +330,17 @@ internal class NavigationUtilsTest {
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
                     mock(),
-                    R.id.consentFragment
+                    ConsentDestination.ROUTE.route
                 )
 
                 requireNotNull(navController.backStack.last().arguments).let { arguments ->
-                    assertThat(arguments[ARG_ERROR_TITLE])
+                    assertThat(arguments.getString(ARG_ERROR_TITLE))
                         .isEqualTo(ERROR_TITLE)
-                    assertThat(arguments[ARG_ERROR_CONTENT])
+                    assertThat(arguments.getString(ARG_ERROR_CONTENT))
                         .isEqualTo(ERROR_BODY)
-                    assertThat(arguments[ARG_GO_BACK_BUTTON_DESTINATION])
-                        .isEqualTo(R.id.consentFragment)
-                    assertThat(arguments[ARG_GO_BACK_BUTTON_TEXT])
+                    assertThat(arguments.getString(ARG_GO_BACK_BUTTON_DESTINATION))
+                        .isEqualTo(ConsentDestination.ROUTE.route)
+                    assertThat(arguments.getString(ARG_GO_BACK_BUTTON_TEXT))
                         .isEqualTo(ERROR_BUTTON_TEXT)
                 }
                 assertThat(navController.currentDestination?.id)
@@ -359,7 +367,7 @@ internal class NavigationUtilsTest {
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
                     mock(),
-                    R.id.consentFragment
+                    ConsentDestination.ROUTE.route
                 )
 
                 assertThat(navController.currentDestination?.id)
@@ -387,7 +395,7 @@ internal class NavigationUtilsTest {
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
                     mock(),
-                    R.id.consentFragment
+                    ConsentDestination.ROUTE.route
                 )
 
                 assertThat(navController.currentDestination?.id)
@@ -415,7 +423,7 @@ internal class NavigationUtilsTest {
                 fragment.postVerificationPageDataAndMaybeSubmit(
                     mockIdentityViewModel,
                     mock(),
-                    R.id.consentFragment
+                    ConsentDestination.ROUTE.route
                 )
 
                 assertThat(navController.currentDestination?.id)

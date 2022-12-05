@@ -40,6 +40,8 @@ internal class SelfieFragment(
 ) : IdentityCameraScanFragment(identityCameraScanViewModelFactory, identityViewModelFactory) {
     override val fragmentId = R.id.selfieFragment
 
+    override val route = SelfieDestination.ROUTE.route
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -169,7 +171,7 @@ internal class SelfieFragment(
                                     bestFaceScore = faceDetectorTransitioner.bestFaceScore,
                                     numFrames = faceDetectorTransitioner.numFrames
                                 ),
-                                fromFragment = fragmentId
+                                fromRoute = route
                             )
                         }.onFailure { throwable ->
                             Log.e(

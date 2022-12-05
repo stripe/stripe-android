@@ -2,10 +2,12 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>ComplexMethod:ErrorFragment.kt$ErrorFragment$private fun String.toFragmentId(): Int</ID>
     <ID>ComplexMethod:IdentityCameraScanFragment.kt$IdentityCameraScanFragment$internal fun startScanning(scanType: IdentityScanState.ScanType)</ID>
     <ID>ComplexMethod:IdentityCameraScanFragment.kt$IdentityCameraScanFragment$override fun onViewCreated(view: View, savedInstanceState: Bundle?)</ID>
     <ID>ComplexMethod:IdentityDocumentScanFragment.kt$IdentityDocumentScanFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? )</ID>
     <ID>ComplexMethod:IdentityFragmentFactory.kt$IdentityFragmentFactory$override fun instantiate(classLoader: ClassLoader, className: String): Fragment</ID>
+    <ID>ComplexMethod:NavigationDestinations.kt$internal fun String.routeToScreenName(): String</ID>
     <ID>ComplexMethod:NavigationUtils.kt$internal fun Int.fragmentIdToScreenName(): String</ID>
     <ID>ComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( identityViewModel: IdentityViewModel, title: String, context: String, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, onComposeFinish: () -> Unit, onContinueClicked: () -> Unit )</ID>
     <ID>EmptyFunctionBlock:IdentityCameraScanFragmentTest.kt$IdentityCameraScanFragmentTest.TestFragment${}</ID>
