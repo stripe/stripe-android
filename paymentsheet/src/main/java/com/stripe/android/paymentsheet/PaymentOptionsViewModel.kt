@@ -42,8 +42,7 @@ import kotlin.coroutines.CoroutineContext
 @JvmSuppressWildcards
 internal class PaymentOptionsViewModel @Inject constructor(
     args: PaymentOptionContract.Args,
-    prefsRepositoryFactory:
-        (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+    prefsRepositoryFactory: (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
     @IOContext workContext: CoroutineContext,
@@ -56,6 +55,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkLauncher: LinkPaymentLauncher
 ) : BaseSheetViewModel<PaymentOptionsViewModel.TransitionTarget>(
     application = application,
+    initialState = args.state,
     config = args.state.config,
     prefsRepository = prefsRepositoryFactory(args.state.config?.customer),
     eventReporter = eventReporter,
@@ -95,25 +95,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
         get() = hasTransitionToUnsavedLpm != true && newPaymentSelection != null
 
     init {
-        savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.state.isGooglePayReady
-
         val linkState = args.state.linkState
-
-        _isLinkEnabled.value = linkState != null
-        activeLinkSession.value = linkState?.loginState == LinkState.LoginState.LoggedIn
 
         if (linkState != null) {
             setupLink(linkState)
         }
-
-        // After recovering from don't keep activities the stripe intent will be saved,
-        // calling setStripeIntent would require the repository be initialized, which
-        // would not be the case.
-        if (stripeIntent.value == null) {
-            setStripeIntent(args.state.stripeIntent)
-        }
-        savedStateHandle[SAVE_PAYMENT_METHODS] = args.state.customerPaymentMethods
-        savedStateHandle[SAVE_PROCESSING] = false
 
         // If we are not recovering from don't keep activities than the resources
         // repository is loaded, and we should save off the LPM repository server specs so
@@ -125,19 +111,19 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onFatal(throwable: Throwable) {
-        _fatal.value = throwable
+        mostRecentError = throwable
         _paymentOptionResult.value =
             PaymentOptionResult.Failed(
                 error = throwable,
-                paymentMethods = _paymentMethods.value
+                paymentMethods = fullState?.customerPaymentMethods,
             )
     }
 
     override fun onUserCancel() {
         _paymentOptionResult.value =
             PaymentOptionResult.Canceled(
-                mostRecentError = _fatal.value,
-                paymentMethods = _paymentMethods.value
+                mostRecentError = mostRecentError,
+                paymentMethods = fullState?.customerPaymentMethods,
             )
     }
 
@@ -176,11 +162,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private fun setupLink(linkState: LinkState) {
-        _linkConfiguration.value = linkState.configuration
-
+        // TODO In PSL!
         if (linkState.isReadyForUse) {
             // If account exists, select Link by default
-            savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
+            updateFullState { it.copy(selection = PaymentSelection.Link) }
         }
     }
 
@@ -197,7 +182,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onPaymentResult(paymentResult: PaymentResult) {
-        savedStateHandle[SAVE_PROCESSING] = false
+        updateFullState { it.copy(isProcessing = false) }
     }
 
     override fun updateSelection(selection: PaymentSelection?) {
@@ -251,7 +236,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.value =
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
-                paymentMethods = _paymentMethods.value
+                paymentMethods = fullState?.customerPaymentMethods,
             )
     }
 
@@ -260,7 +245,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.value =
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
-                paymentMethods = _paymentMethods.value
+                paymentMethods = fullState?.customerPaymentMethods,
             )
     }
 

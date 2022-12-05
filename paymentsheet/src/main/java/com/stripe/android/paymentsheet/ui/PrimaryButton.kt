@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
@@ -27,6 +28,7 @@ import com.stripe.android.ui.core.convertDpToPx
 import com.stripe.android.ui.core.getBorderStrokeColor
 import com.stripe.android.ui.core.getComposeTextStyle
 import com.stripe.android.ui.core.getOnBackgroundColor
+import kotlinx.parcelize.Parcelize
 
 /**
  * The primary call-to-action for a payment sheet screen.
@@ -219,12 +221,13 @@ internal class PrimaryButton @JvmOverloads constructor(
     /**
      * Used to override the current UI state of the Primary Button
      */
+    @Parcelize
     internal data class UIState(
         val label: String?,
-        val onClick: (() -> Unit)?,
+        val onClick: (() -> Unit)?, // TODO Determine in sheet view model based on state
         val enabled: Boolean,
-        val visible: Boolean
-    )
+        val visible: Boolean,
+    ) : Parcelable
 }
 
 @Composable

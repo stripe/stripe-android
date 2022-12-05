@@ -240,10 +240,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         sheetViewModel.headerText.value =
             getString(R.string.stripe_paymentsheet_add_payment_method_title)
 
-        sheetViewModel.eventReporter.onShowNewPaymentOptionForm(
-            linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
-            activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
-        )
+        sheetViewModel.reportShowNewPaymentOptionForm()
     }
 
     private fun getInitiallySelectedPaymentMethodType() =
@@ -319,7 +316,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         stripeIntent = requireNotNull(sheetViewModel.stripeIntent.value),
         config = sheetViewModel.config,
         merchantName = sheetViewModel.merchantName,
-        amount = sheetViewModel.amount.value,
+        amount = sheetViewModel.amount,
         newLpm = sheetViewModel.newPaymentSelection,
         isShowingLinkInlineSignup = showLinkInlineSignup
     )

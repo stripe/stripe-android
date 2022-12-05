@@ -98,6 +98,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkLauncher: LinkPaymentLauncher
 ) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
     application = application,
+    initialState = PaymentSheetState.Loading,
     config = args.config,
     eventReporter = eventReporter,
     customerRepository = customerRepository,
@@ -194,9 +195,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     init {
         eventReporter.onInit(config)
-        if (googlePayLauncherConfig == null) {
-            savedStateHandle[SAVE_GOOGLE_PAY_READY] = false
-        }
 
         viewModelScope.launch {
             loadPaymentSheetState()
@@ -213,7 +211,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 handlePaymentSheetStateLoaded(result.state)
             }
             is PaymentSheetLoader.Result.Failure -> {
-                setStripeIntent(null)
                 onFatal(result.throwable)
             }
         }
@@ -222,13 +219,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
         lpmServerSpec = lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
 
-        savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
-        setStripeIntent(state.stripeIntent)
+        val updatedState = if (googlePayLauncherConfig == null) {
+            state.copy(isGooglePayReady = false)
+        } else {
+            state
+        }
 
-        val linkState = state.linkState
+        setFullState(updatedState)
 
-        _isLinkEnabled.value = linkState != null
-        activeLinkSession.value = linkState?.loginState == LinkState.LoginState.LoggedIn
+        val linkState = updatedState.linkState
 
         if (linkState != null) {
             setupLink(linkState)
@@ -247,7 +246,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     lifecycleScope = lifecycleScope,
                     config = config,
                     readyCallback = { isReady ->
-                        savedStateHandle[SAVE_GOOGLE_PAY_READY] = isReady
+                        updateFullState {
+                            it.copy(isGooglePayReady = isReady)
+                        }
                     },
                     activityResultLauncher = activityResultLauncher
                 )
@@ -255,9 +256,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun resetViewState(userErrorMessage: String? = null) {
-        _viewState.value =
-            PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
-        savedStateHandle[SAVE_PROCESSING] = false
+        _viewState.value = PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
+        updateFullState { it.copy(isProcessing = false) }
     }
 
     private fun startProcessing(checkoutIdentifier: CheckoutIdentifier) {
@@ -267,7 +267,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         this.checkoutIdentifier = checkoutIdentifier
-        savedStateHandle[SAVE_PROCESSING] = true
+        updateFullState { it.copy(isProcessing = true) }
         _viewState.value = PaymentSheetViewState.StartProcessing
     }
 
@@ -371,8 +371,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun setupLink(state: LinkState) {
-        _linkConfiguration.value = state.configuration
-
         when (state.loginState) {
             LinkState.LoginState.LoggedIn -> {
                 launchLink(state.configuration, launchedDirectly = true)
@@ -548,7 +546,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onFatal(throwable: Throwable) {
         logger.error("Payment Sheet error", throwable)
-        _fatal.value = throwable
+        mostRecentError = throwable
         _paymentSheetResult.value = PaymentSheetResult.Failed(throwable)
     }
 

@@ -268,7 +268,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         val label = if (customLabel != null) {
             starterArgs?.config?.primaryButtonLabel
         } else if (viewModel.isProcessingPaymentIntent) {
-            viewModel.amount.value?.buildPayButtonLabel(resources)
+            viewModel.amount?.buildPayButtonLabel(resources)
         } else {
             getString(R.string.stripe_setup_button_label)
         }

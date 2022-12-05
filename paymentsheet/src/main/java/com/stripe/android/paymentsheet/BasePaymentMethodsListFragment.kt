@@ -58,10 +58,7 @@ internal abstract class BasePaymentMethodsListFragment(
         this.config = nullableConfig
 
         setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
-        sheetViewModel.eventReporter.onShowExistingPaymentOptions(
-            linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
-            activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
-        )
+        sheetViewModel.reportShowExistingPaymentOptions()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
