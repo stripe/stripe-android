@@ -28,6 +28,7 @@ appId: com.stripe.android.financialconnections.example
     id: "RoutingInput"
 - inputText: "110000000"
 - takeScreenshot: ManualEntry_RoutingNumber
+- scroll
 - tapOn:
     id: "AccountInput"
 - inputText: "000123456789"
