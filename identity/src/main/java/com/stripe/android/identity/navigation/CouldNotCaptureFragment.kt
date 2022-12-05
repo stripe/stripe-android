@@ -112,12 +112,12 @@ internal class CouldNotCaptureFragment(
                         shouldPopUpToDocSelection = true
                     )
                 IdentityScanState.ScanType.DL_FRONT ->
-                    DriveLicenseScanDestination(
+                    DriverLicenseScanDestination(
                         shouldStartFromBack = false,
                         shouldPopUpToDocSelection = true
                     )
                 IdentityScanState.ScanType.DL_BACK ->
-                    DriveLicenseScanDestination(
+                    DriverLicenseScanDestination(
                         shouldStartFromBack = true,
                         shouldPopUpToDocSelection = true
                     )

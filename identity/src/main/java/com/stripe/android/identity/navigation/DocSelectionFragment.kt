@@ -177,7 +177,7 @@ internal class DocSelectionFragment(
             when (this) {
                 Type.IDCARD -> IDScanDestination()
                 Type.PASSPORT -> PassportScanDestination()
-                Type.DRIVINGLICENSE -> DriveLicenseScanDestination()
+                Type.DRIVINGLICENSE -> DriverLicenseScanDestination()
             }
 
         private fun Type.toUploadDestination(

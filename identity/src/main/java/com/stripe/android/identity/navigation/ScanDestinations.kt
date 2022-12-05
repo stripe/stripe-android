@@ -58,7 +58,7 @@ internal class IDScanDestination(
     }
 }
 
-internal class DriveLicenseScanDestination(
+internal class DriverLicenseScanDestination(
     shouldStartFromBack: Boolean = false,
     shouldPopUpToDocSelection: Boolean = false
 ) : IdentityTopLevelDestination() {
