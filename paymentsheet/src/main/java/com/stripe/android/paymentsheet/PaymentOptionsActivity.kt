@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.AnimationConstants
-import java.security.InvalidParameterException
 
 /**
  * An `Activity` for selecting a payment option.
@@ -65,20 +64,13 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val starterArgs = this.starterArgs
+        val starterArgs = initializeStarterArgs()
+        super.onCreate(savedInstanceState)
+
         if (starterArgs == null) {
             finish()
             return
         }
-        try {
-            starterArgs.state.config?.validate()
-            starterArgs.state.config?.appearance?.parseAppearance()
-        } catch (e: InvalidParameterException) {
-            finish()
-            return
-        }
-
-        super.onCreate(savedInstanceState)
 
         starterArgs.statusBarColor?.let {
             window.statusBarColor = it
@@ -154,6 +146,12 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             },
             false
         )
+    }
+
+    private fun initializeStarterArgs(): PaymentOptionContract.Args? {
+        starterArgs?.state?.config?.appearance?.parseAppearance()
+        earlyExitDueToIllegalState = starterArgs == null
+        return starterArgs
     }
 
     private fun isSelectOrAddFragment() = supportFragmentManager.fragments.firstOrNull()?.let {

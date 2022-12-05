@@ -7,6 +7,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
@@ -1020,6 +1021,67 @@ internal class PaymentSheetActivityTest {
                     )
             ).isTrue()
         }
+    }
+
+    @Test
+    fun `Handles missing arguments correctly`() {
+        val scenario = ActivityScenario.launchActivityForResult(PaymentSheetActivity::class.java)
+
+        val result = contract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        )
+
+        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+    }
+
+    @Test
+    fun `Handles invalid arguments correctly`() {
+        val invalidCustomerConfig = PaymentSheet.CustomerConfiguration(
+            id = "",
+            ephemeralKeySecret = "",
+        )
+
+        val args = PaymentSheetContract.Args(
+            clientSecret = PaymentIntentClientSecret("abc"),
+            config = PaymentSheet.Configuration(
+                merchantDisplayName = "Some name",
+                customer = invalidCustomerConfig,
+            ),
+        )
+
+        val intent = contract.createIntent(context, args)
+
+        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
+
+        val result = contract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        )
+
+        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+    }
+
+    @Test
+    fun `Handles invalid client secret correctly`() {
+        val args = PaymentSheetContract.Args(
+            clientSecret = PaymentIntentClientSecret(""),
+            config = null,
+        )
+
+        val intent = contract.createIntent(context, args)
+
+        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
+
+        val result = contract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        )
+
+        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
     }
 
     private fun currentFragment(activity: PaymentSheetActivity) =
