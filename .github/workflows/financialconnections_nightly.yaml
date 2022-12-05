@@ -53,7 +53,7 @@ jobs:
         with:
           api-level: ${{ matrix.api-level }}
           arch: ${{ matrix.arch }}
-          profile: Nexus 6
+          profile: Pixel C
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
