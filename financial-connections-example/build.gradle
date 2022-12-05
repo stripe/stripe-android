@@ -63,8 +63,8 @@ def getBackendUrl() {
 }
 
 dependencies {
-    implementation project(':financial-connections')
-    implementation project(':payments-core')
+    implementation 'com.stripe:financial-connections:20.16.2'
+    implementation 'com.stripe:payments-core:20.16.2'
 
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"

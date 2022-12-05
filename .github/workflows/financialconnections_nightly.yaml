@@ -9,6 +9,7 @@ jobs:
       matrix:
         api-level: [ 30 ]
         arch: [x86_64]
+        profile: [Nexus 6]
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -28,7 +29,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ matrix.api-level }}-${{ matrix.arch }}
+          key: avd-${{ matrix.profile }}-${{ matrix.api-level }}-${{ matrix.arch }}
 
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -36,6 +37,7 @@ jobs:
         with:
           api-level: ${{ matrix.api-level }}
           arch: ${{ matrix.arch }}
+          profile: ${{ matrix.profile }}
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
@@ -57,6 +59,7 @@ jobs:
         with:
           api-level: ${{ matrix.api-level }}
           arch: ${{ matrix.arch }}
+          profile: ${{ matrix.profile }}
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
