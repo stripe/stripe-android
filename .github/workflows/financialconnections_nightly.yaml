@@ -57,8 +57,10 @@ jobs:
           disable-animations: true
           script: |
             adb uninstall com.stripe.android.financialconnections.example || true
+            mkdir -p financial-connections-example/build/reports
             ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
             maestro record maestro/financial-connections/testmode-manualentry.yaml
+            cd financial-connections-example/build/reports/ && adb pull /sdcard/maestro-screenrecording.mp4
 
       - name: Archive maestro screenshots
         if: always()
@@ -66,7 +68,14 @@ jobs:
         with:
           name: maestro-screenshots
           path: |
-            *.png
+            *.png    
+
+      - name: Archive screen record
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: maestro-screen-record
+          path: financial-connections-example/build/reports/
 
       - name: Send Maestro test results to Slack
         if: always()
