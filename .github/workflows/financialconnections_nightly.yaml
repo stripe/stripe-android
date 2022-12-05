@@ -69,6 +69,7 @@ jobs:
             *.png
 
       - name: Send Maestro test results to Slack
+        if: always()
         id: slack
         uses: slackapi/slack-github-action@v1.23.0
         with:
