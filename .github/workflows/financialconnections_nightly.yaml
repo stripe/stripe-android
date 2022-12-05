@@ -58,11 +58,15 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
+            status=0
+            # Uninstall existing app on cached AVD.
             adb uninstall com.stripe.android.financialconnections.example || true
-            mkdir -p financial-connections-example/build/reports
             ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
-            maestro record maestro/financial-connections/testmode-manualentry.yaml || true
-            cd financial-connections-example/build/reports/ && adb pull /sdcard/maestro-screenrecording.mp4
+            maestro record maestro/financial-connections/testmode-manualentry.yaml || status=1
+            # Pull recording from Device sdcard.
+            mkdir -p financial-connections-example/build/reports 
+            cd financial-connections-example/build/reports/ && adb pull /sdcard/maestro-screenrecording.mp4 || true
+            exit $status
 
       - name: Archive maestro screenshots
         if: always()
