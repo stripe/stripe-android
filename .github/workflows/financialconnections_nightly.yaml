@@ -90,7 +90,7 @@ jobs:
           payload: |
             {
               "status": "${{ job.status }}",
-              "run-id": "${{ github.run_id }}"
+              "artifacts": "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}#artifacts"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_FINANCIAL_CONNECTIONS_ANDROID_MAESTRO_WEBHOOK_URL }}
