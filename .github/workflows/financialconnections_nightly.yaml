@@ -42,11 +42,6 @@ jobs:
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
 
-      - name: Load gradle config from properties
-        env:
-          URL: ${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }}
-        run: echo STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=\"$URL\" > ./local.properties
-
       - name: Install Maestro CLI
         run: curl -Ls "https://get.maestro.mobile.dev" | bash
 
@@ -65,7 +60,7 @@ jobs:
           script: |
             adb uninstall com.stripe.android.financialconnections.example || true
             mkdir -p financial-connections-example/build/reports
-            ./gradlew :financial-connections-example:installDebug
+            ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
             maestro record maestro/financial-connections/testmode-manualentry.yaml || true
             cd financial-connections-example/build/reports/ && adb pull /sdcard/maestro-screenrecording.mp4
 
