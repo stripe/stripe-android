@@ -58,7 +58,7 @@ jobs:
           script: |
             adb uninstall com.stripe.android.financialconnections.example || true
             ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
-            maestro test maestro/financial-connections
+            maestro test maestro/financial-connections/testmode-oauth.yaml
 
       - name: Archive maestro screenshots
         if: always()
@@ -75,7 +75,8 @@ jobs:
         with:
           payload: |
             {
-              "status": "${{ job.status }}"
+              "status": "${{ job.status }}",
+              "run-id": "${{ github.run_id }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_FINANCIAL_CONNECTIONS_ANDROID_MAESTRO_WEBHOOK_URL }}
