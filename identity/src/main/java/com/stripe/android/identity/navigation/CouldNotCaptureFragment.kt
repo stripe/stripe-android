@@ -89,9 +89,9 @@ internal class CouldNotCaptureFragment(
                 IdentityScanState.ScanType.ID_BACK ->
                     IDUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
                 IdentityScanState.ScanType.DL_FRONT ->
-                    DriveLicenseUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
+                    DriverLicenseUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
                 IdentityScanState.ScanType.DL_BACK ->
-                    DriveLicenseUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
+                    DriverLicenseUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
                 IdentityScanState.ScanType.PASSPORT ->
                     PassportUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
                 IdentityScanState.ScanType.SELFIE -> {

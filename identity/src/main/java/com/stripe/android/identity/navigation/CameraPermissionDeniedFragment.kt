@@ -86,7 +86,7 @@ internal class CameraPermissionDeniedFragment(
                 shouldShowTakePhoto,
                 shouldShowChoosePhoto
             )
-            CollectedDataParam.Type.DRIVINGLICENSE -> DriveLicenseUploadDestination(
+            CollectedDataParam.Type.DRIVINGLICENSE -> DriverLicenseUploadDestination(
                 shouldShowTakePhoto,
                 shouldShowChoosePhoto
             )

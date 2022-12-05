@@ -63,7 +63,7 @@ internal class IDUploadDestination(
     }
 }
 
-internal class DriveLicenseUploadDestination(
+internal class DriverLicenseUploadDestination(
     shouldShowTakePhoto: Boolean,
     shouldShowChoosePhoto: Boolean,
     shouldPopUpToDocSelection: Boolean = false

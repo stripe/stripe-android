@@ -203,28 +203,31 @@ internal class ErrorDestination(
 
 internal object ConfirmationDestination : IdentityTopLevelDestination() {
     private const val CONFIRMATION = "Confirmation"
-    override val destination = R.id.action_global_confirmationFragment
-    override val destinationRoute = object : DestinationRoute() {
+    private val ROUTE = object : DestinationRoute() {
         override val routeBase = CONFIRMATION
     }
+    override val destination = R.id.action_global_confirmationFragment
+    override val destinationRoute = ROUTE
     override val routeWithArgs = destinationRoute.route
 }
 
 internal object DocSelectionDestination : IdentityTopLevelDestination() {
     private const val DOC_SELECTION = "DocSelection"
-    override val destination = R.id.action_global_docSelectionFragment
-    override val destinationRoute = object : DestinationRoute() {
+    private val ROUTE = object : DestinationRoute() {
         override val routeBase = DOC_SELECTION
     }
+    override val destination = R.id.action_global_docSelectionFragment
+    override val destinationRoute = ROUTE
     override val routeWithArgs = destinationRoute.route
 }
 
 internal object ConsentDestination : IdentityTopLevelDestination() {
     private const val CONSENT = "Consent"
-    override val destination = R.id.action_global_consentFragment
-    override val destinationRoute = object : DestinationRoute() {
+    private val ROUTE = object : DestinationRoute() {
         override val routeBase = CONSENT
     }
+    override val destination = R.id.action_global_consentFragment
+    override val destinationRoute = ROUTE
     override val routeWithArgs = destinationRoute.route
 }
 

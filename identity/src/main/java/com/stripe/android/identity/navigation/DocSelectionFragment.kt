@@ -196,7 +196,7 @@ internal class DocSelectionFragment(
                         shouldShowChoosePhoto
                     )
                 Type.DRIVINGLICENSE ->
-                    DriveLicenseUploadDestination(
+                    DriverLicenseUploadDestination(
                         shouldShowTakePhoto,
                         shouldShowChoosePhoto
                     )
