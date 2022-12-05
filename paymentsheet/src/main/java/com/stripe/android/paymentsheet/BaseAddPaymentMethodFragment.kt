@@ -186,9 +186,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         Column(modifier = Modifier.fillMaxWidth()) {
             if (supportedPaymentMethods.size > 1) {
                 PaymentMethodsUI(
-                    selectedIndex = supportedPaymentMethods.indexOf(
-                        selectedItem
-                    ),
+                    selectedIndex = supportedPaymentMethods.indexOf(selectedItem),
                     isEnabled = enabled,
                     paymentMethods = supportedPaymentMethods,
                     onItemSelectedListener = onItemSelectedListener,
