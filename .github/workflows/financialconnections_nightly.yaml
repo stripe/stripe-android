@@ -1,0 +1,120 @@
+name: financial-connections-nightly
+on:
+  # Can be executed manually.
+  workflow_dispatch:
+  # PRs (delete)
+  pull_request:
+  # Execute hourly.
+  schedule:
+    - cron: '0 * * * *'
+jobs:
+  maestro:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        api-level: [ 30 ]
+        arch: [x86_64]
+        profile: [Nexus 6]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
+      - name: AVD cache
+        uses: actions/cache@v3
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}-${{ matrix.arch }}-${{ matrix.profile }}
+
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: ${{ matrix.arch }}
+          profile: ${{ matrix.profile }}
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Install Maestro CLI
+        run: curl -Ls "https://get.maestro.mobile.dev" | bash
+
+      - name: Add Maestro to path
+        run: echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Run Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: ${{ matrix.arch }}
+          profile: ${{ matrix.profile }}
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            # Uninstall existing app on cached AVD.
+            adb uninstall com.stripe.android.financialconnections.example || true
+            
+            # Compile and install APK.
+            ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
+            
+            # Run Maestro test suite.
+            maestro test --format junit maestro/financial-connections/
+            
+            # Pull recording from Device sdcard. (uncomment when `maestro record` gets fixed).
+            # mkdir -p financial-connections-example/build/reports 
+            # cd financial-connections-example/build/reports/ && adb pull /sdcard/maestro-screenrecording.mp4 || true
+
+      - name: Publish Test Report
+        id: publish_test_report
+        uses: mikepenz/action-junit-report@v3
+        if: always()
+        with:
+          report_paths: 'report.xml'
+
+      - name: Archive maestro screenshots
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: maestro-screenshots
+          path: |
+            *.png    
+
+#      `maestro record` now fails when videos are over 60 seconds. Using `maestro test` to
+#      just get the report for now.
+#
+#      - name: Archive screen record
+#        if: always()
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: maestro-screen-record
+#          path: financial-connections-example/build/reports/
+
+      - name: Send Maestro test results to Slack
+        if: failure()
+        id: slack
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "status": "${{ job.status }}",
+              "tests_total": "${{steps.publish_test_report.outputs.total}}", 
+              "tests_passed": "${{steps.publish_test_report.outputs.passed}}", 
+              "tests_failed": "${{steps.publish_test_report.outputs.failed}}", 
+              "artifacts": "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}#artifacts"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_FINANCIAL_CONNECTIONS_ANDROID_MAESTRO_WEBHOOK_URL }}

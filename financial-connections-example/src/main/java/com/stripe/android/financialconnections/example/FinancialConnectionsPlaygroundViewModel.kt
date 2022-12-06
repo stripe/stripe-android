@@ -24,12 +24,17 @@ class FinancialConnectionsPlaygroundViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
-    private val repository = BackendRepository(Settings(application))
+    private val settings = Settings(application)
+    private val repository = BackendRepository(settings)
     private val _state = MutableStateFlow(FinancialConnectionsPlaygroundState())
     val state: StateFlow<FinancialConnectionsPlaygroundState> = _state
 
     private val _viewEffect = MutableSharedFlow<FinancialConnectionsPlaygroundViewEffect?>()
     val viewEffect: SharedFlow<FinancialConnectionsPlaygroundViewEffect?> = _viewEffect
+
+    init {
+        _state.update { it.copy(backendUrl = settings.backendUrl) }
+    }
 
     fun startFinancialConnectionsSession(
         mode: Mode,
@@ -217,6 +222,7 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
 }
 
 data class FinancialConnectionsPlaygroundState(
+    val backendUrl: String = "",
     val loading: Boolean = false,
     val publishableKey: String? = null,
     val status: List<String> = emptyList()

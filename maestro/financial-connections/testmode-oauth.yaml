@@ -2,14 +2,22 @@ appId: com.stripe.android.financialconnections.example
 ---
 - launchApp
 # Android specific: Navigate to example (1)
-- tapOn: "Collect account for data"
+- tapOn: "Playground"
 
 # Android specific: Navigate to example (2)
 - takeScreenshot: TestOAuth_ExampleAppLauncher
-- tapOn: "CONNECT AN ACCOUNT"
+- tapOn:
+    id: "Native_checkbox"
+- tapOn:
+    id: "Test_checkbox"
+- tapOn:
+    id: "Data_checkbox"
+- tapOn: "Connect Accounts!"
 
 # Common: web AuthFlow - connect OAuth institution
-- assertVisible: "Agree"
+- extendedWaitUntil:
+    visible: "Agree"
+    timeout: 30000
 - takeScreenshot: TestOAuth_Consent
 - tapOn: "Agree"
 - assertVisible: "Test OAuth Institution"
@@ -23,25 +31,28 @@ appId: com.stripe.android.financialconnections.example
 - assertVisible: "Select another bank"
 - takeScreenshot: TestOAuth_ErrorDownBankUnscheduled
 - tapOn: "Select another bank"
-# OAUTH - SELECT ALL ACCOUNTS
+# SELECT OAUTH INSTITUTION
 - tapOn: "Test OAuth Institution"
 - assertVisible: "Continue"
 - takeScreenshot: TestOAuth_Prepane
 - tapOn: "Continue"
-- assertVisible: "Establishing connection"
-- takeScreenshot: TestOAuth_Loading_PartnerAuth
-- assertVisible: "Retrieving accounts"
-- takeScreenshot: TestOAuth_Loading_Accounts
+####### Bypass Chrome on-boarding screen #######
+- tapOn:
+    text: ".*Accept.*"
+    optional: true
+- tapOn:
+    text: ".*No thanks.*"
+    optional: true
+###############################################
+# SELECT ALL ACCOUNTS
 - assertVisible: "Select all accounts"
 - takeScreenshot: TestOAuth_AccountPicker
 - tapOn: "Select all accounts" # select all accounts
 - takeScreenshot: TestOAuth_AccountPicker_AllAccounts
-- scroll
-- tapOn:
-    text: ".*Select account.*"
-    index: 1
-- assertVisible: "Done"
+- tapOn: "Link accounts"
+# CONFIRM AND COMPLETE
 - assertVisible: "Link another account"
 - takeScreenshot: TestOAuth_Success
 - tapOn: "Done"
-- assertVisible: ".*StripeBank - Success.*"
+- assertVisible: ".*Completed!.*"
+- assertVisible: ".*StripeBank.*"
