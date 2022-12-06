@@ -97,9 +97,9 @@ jobs:
           payload: |
             {
               "status": "${{ job.status }}",
-              "test_total": "{{steps.publish_test_report.outputs.total}}", 
-              "test_passed": "{{steps.publish_test_report.outputs.passed}}", 
-              "test_failed": "{{steps.publish_test_report.outputs.failed}}", 
+              "tests_total": "{{steps.publish_test_report.outputs.total}}", 
+              "tests_passed": "{{steps.publish_test_report.outputs.passed}}", 
+              "tests_failed": "{{steps.publish_test_report.outputs.failed}}", 
               "artifacts": "https://github.com/stripe/stripe-android/actions/runs/${{ github.run_id }}#artifacts"
             }
         env:
