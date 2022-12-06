@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+### PaymentSheet
+* [FIXED][5910](https://github.com/stripe/stripe-android/pull/5910) PaymentSheet now fails gracefully when launched with invalid arguments.
+
 ## 20.16.2 - 2022-12-05
 
 ### PaymentSheet
