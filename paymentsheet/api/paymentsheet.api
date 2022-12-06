@@ -1118,6 +1118,7 @@ public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/model/PaymentOption;ILjava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/model/PaymentOption;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun fetchIcon (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun fetchIcon (Lkotlin/jvm/functions/Function1;)V
 	public final fun getDrawableResourceId ()I
 	public final fun getLabel ()Ljava/lang/String;
 	public fun hashCode ()I
