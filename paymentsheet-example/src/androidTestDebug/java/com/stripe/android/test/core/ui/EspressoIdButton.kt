@@ -2,18 +2,22 @@ package com.stripe.android.test.core.ui
 
 import androidx.annotation.IntegerRes
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.ViewInteraction
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.matcher.ViewMatchers
 import java.security.InvalidParameterException
 
 open class EspressoIdButton(@IntegerRes val id: Int) {
-    fun click() {
-        Espresso.onView(ViewMatchers.withId(id)).perform(ViewActions.click())
-    }
 
-    fun scrollTo() {
-        Espresso.onView(ViewMatchers.withId(id)).perform(ViewActions.scrollTo())
+    fun click() {
+        val interaction = Espresso.onView(ViewMatchers.withId(id))
+
+        if (interaction.isNotVisible) {
+            interaction.perform(ViewActions.scrollTo())
+        }
+
+        interaction.perform(ViewActions.click())
     }
 
     fun isEnabled() {
@@ -39,3 +43,6 @@ open class EspressoIdButton(@IntegerRes val id: Int) {
             .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
     }
 }
+
+private val ViewInteraction.isNotVisible: Boolean
+    get() = runCatching { check(ViewAssertions.matches(ViewMatchers.isDisplayed())) }.isFailure
