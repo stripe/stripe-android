@@ -1,0 +1,66 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'kotlin-kapt'
+apply plugin: 'checkstyle'
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'kotlinx-serialization'
+
+android {
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
+    buildFeatures {
+        compose true
+        buildConfig false
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion "$androidxComposeCompilerVersion"
+    }
+}
+
+dependencies {
+    implementation project(":stripe-core")
+    implementation project(":payments-core")
+    implementation project(":payments-ui-core")
+    implementation project(":stripe-ui-core")
+
+    implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
+    implementation "androidx.browser:browser:$androidxBrowserVersion"
+    implementation "androidx.compose.ui:ui:$androidxComposeVersion"
+    implementation "com.google.dagger:dagger:$daggerVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
+    implementation "androidx.compose.foundation:foundation:$androidxComposeVersion"
+    implementation "androidx.compose.material:material:$androidxComposeVersion"
+    implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
+
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+
+    testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
+    testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
+    testImplementation "androidx.test:core:$androidTestVersion"
+    testImplementation "com.google.truth:truth:$truthVersion"
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
+    testImplementation "org.mockito:mockito-inline:$mockitoCoreVersion"
+
+    androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
+
+    ktlint "com.pinterest:ktlint:$ktlintVersion"
+}
+
+ext {
+    artifactId = "payment-method-messaging"
+    artifactName = "payment-method-messaging"
+    artifactDescrption = "The Payment Method Messaging module of Stripe Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

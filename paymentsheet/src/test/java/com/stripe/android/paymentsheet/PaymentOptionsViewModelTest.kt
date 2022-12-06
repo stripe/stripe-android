@@ -8,31 +8,31 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
@@ -119,7 +119,7 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `resolveTransitionTarget no new card`() {
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(newLpm = null)
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(newPaymentSelection = null)
         )
 
         var transitionTarget: BaseSheetViewModel.Event<TransitionTarget?>? = null
@@ -137,10 +137,11 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `resolveTransitionTarget new card saved`() {
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-                newLpm = NEW_CARD_PAYMENT_SELECTION.copy(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                newPaymentSelection = NEW_CARD_PAYMENT_SELECTION.copy(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
-                )
+                ),
             )
         )
 
@@ -160,8 +161,9 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `resolveTransitionTarget new card NOT saved`() {
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-                newLpm = NEW_CARD_PAYMENT_SELECTION.copy(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                newPaymentSelection = NEW_CARD_PAYMENT_SELECTION.copy(
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 )
             )
@@ -186,7 +188,7 @@ internal class PaymentOptionsViewModelTest {
     fun `removePaymentMethod removes it from payment methods list`() = runTest {
         val cards = PaymentMethodFixtures.createCards(3)
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(paymentMethods = cards)
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(paymentMethods = cards)
         )
 
         viewModel.removePaymentMethod(cards[1])
@@ -200,7 +202,7 @@ internal class PaymentOptionsViewModelTest {
     fun `Removing selected payment method clears selection`() = runTest {
         val cards = PaymentMethodFixtures.createCards(3)
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(paymentMethods = cards)
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(paymentMethods = cards)
         )
 
         val selection = PaymentSelection.Saved(cards[1])
@@ -217,7 +219,7 @@ internal class PaymentOptionsViewModelTest {
     fun `when paymentMethods is empty, primary button and text below button are gone`() = runTest {
         val paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                 paymentMethods = listOf(paymentMethod)
             )
         )
@@ -232,11 +234,13 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `setupLink() selects Link when account status is Verified`() = runTest {
-        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
-        val viewModel = createViewModel()
-
-        viewModel.setupLink(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+    fun `Selects Link when user is logged in to their Link account`() = runTest {
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.LoggedIn,
+            ),
+        )
 
         assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
         assertThat(viewModel.activeLinkSession.value).isTrue()
@@ -244,23 +248,13 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `setupLink() selects Link when account status is VerificationStarted`() = runTest {
-        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.VerificationStarted))
-        val viewModel = createViewModel()
-
-        viewModel.setupLink(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-
-        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
-        assertThat(viewModel.activeLinkSession.value).isFalse()
-        assertThat(viewModel.isLinkEnabled.value).isTrue()
-    }
-
-    @Test
-    fun `setupLink() selects Link when account status is NeedsVerification`() = runTest {
-        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.NeedsVerification))
-        val viewModel = createViewModel()
-
-        viewModel.setupLink(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+    fun `Selects Link when user needs to verify their Link account`() = runTest {
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.NeedsVerification,
+            ),
+        )
 
         assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
         assertThat(viewModel.activeLinkSession.value).isFalse()
@@ -268,31 +262,35 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `setupLink() enables Link when account status is SignedOut`() = runTest {
-        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
-        val viewModel = createViewModel()
+    fun `Does not select Link when user is logged out of their Link account`() = runTest {
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
+        )
 
-        viewModel.setupLink(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-
+        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link)
         assertThat(viewModel.activeLinkSession.value).isFalse()
         assertThat(viewModel.isLinkEnabled.value).isTrue()
     }
 
     @Test
-    fun `setupLink() disables Link when account status is Error`() = runTest {
-        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Error))
-        val viewModel = createViewModel()
+    fun `Does not select Link when the Link state can't be determined`() = runTest {
+        val viewModel = createViewModel(
+            linkState = null,
+        )
 
-        viewModel.setupLink(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-
+        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link)
         assertThat(viewModel.activeLinkSession.value).isFalse()
         assertThat(viewModel.isLinkEnabled.value).isFalse()
     }
 
     private fun createViewModel(
-        args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS
+        args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
+        linkState: LinkState? = args.state.linkState,
     ) = PaymentOptionsViewModel(
-        args = args,
+        args = args.copy(state = args.state.copy(linkState = linkState)),
         prefsRepositoryFactory = { prefsRepository },
         eventReporter = eventReporter,
         customerRepository = customerRepository,
@@ -329,11 +327,16 @@ internal class PaymentOptionsViewModelTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
         private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentMethods = emptyList(),
-            config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            isGooglePayReady = true,
-            newLpm = null,
+            state = PaymentSheetState.Full(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                clientSecret = PaymentIntentClientSecret("very secret stuff"),
+                customerPaymentMethods = emptyList(),
+                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                isGooglePayReady = true,
+                newPaymentSelection = null,
+                linkState = null,
+                savedSelection = SavedSelection.None,
+            ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             injectorKey = DUMMY_INJECTOR_KEY,
             enableLogging = false,

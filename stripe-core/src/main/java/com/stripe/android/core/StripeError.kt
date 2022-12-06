@@ -86,5 +86,5 @@ constructor(
      * Internal list of extra fields related to the error.
      * Note - value type is ignored and always parsed as string (true -> "true")
      */
-    internal val extraFields: Map<String, String>? = null
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val extraFields: Map<String, String>? = null
 ) : StripeModel, Serializable

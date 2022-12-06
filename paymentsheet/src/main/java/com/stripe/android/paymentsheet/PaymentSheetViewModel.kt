@@ -33,8 +33,6 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -59,11 +57,12 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
-import com.stripe.android.paymentsheet.repositories.initializeRepositoryAndGetStripeIntent
+import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -71,8 +70,6 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -88,6 +85,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val lazyPaymentConfig: Lazy<PaymentConfiguration>,
     private val stripeIntentRepository: StripeIntentRepository,
     private val stripeIntentValidator: StripeIntentValidator,
+    private val paymentSheetLoader: PaymentSheetLoader,
     customerRepository: CustomerRepository,
     prefsRepository: PrefsRepository,
     lpmResourceRepository: ResourceRepository<LpmRepository>,
@@ -206,6 +204,44 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         if (googlePayLauncherConfig == null) {
             savedStateHandle[SAVE_GOOGLE_PAY_READY] = false
         }
+
+        viewModelScope.launch {
+            loadPaymentSheetState()
+        }
+    }
+
+    private suspend fun loadPaymentSheetState() {
+        val result = withContext(workContext) {
+            paymentSheetLoader.load(args.clientSecret, args.config)
+        }
+
+        when (result) {
+            is PaymentSheetLoader.Result.Success -> {
+                handlePaymentSheetStateLoaded(result.state)
+            }
+            is PaymentSheetLoader.Result.Failure -> {
+                setStripeIntent(null)
+                onFatal(result.throwable)
+            }
+        }
+    }
+
+    private fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
+        lpmServerSpec = lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
+
+        savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
+        setStripeIntent(state.stripeIntent)
+
+        val linkState = state.linkState
+
+        _isLinkEnabled.value = linkState != null
+        activeLinkSession.value = linkState?.loginState == LinkState.LoginState.LoggedIn
+
+        if (linkState != null) {
+            setupLink(linkState)
+        }
+
+        resetViewState()
     }
 
     fun setupGooglePay(
@@ -222,107 +258,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     },
                     activityResultLauncher = activityResultLauncher
                 )
-        }
-    }
-
-    /**
-     * Fetch the [StripeIntent] for the client secret received in the initialization arguments, if
-     * not fetched yet. If successful, continues through validation and fetching the saved payment
-     * methods for the customer.
-     */
-    internal fun maybeFetchStripeIntent() = if (stripeIntent.value == null) {
-        viewModelScope.launch {
-            // The co-routine scope is needed to do work off the UI thread
-            CoroutineScope(workContext).launch {
-                runCatching {
-                    val intent = initializeRepositoryAndGetStripeIntent(
-                        lpmResourceRepository,
-                        stripeIntentRepository,
-                        args.clientSecret,
-                        eventReporter
-                    )
-
-                    lpmServerSpec =
-                        lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
-
-                    // The lpm server specs need to be saved so that upon the
-                    // activity being killed the state can be restored.
-                    intent
-                }.fold(
-                    onSuccess = {
-                        withContext(Dispatchers.Main) {
-                            onStripeIntentFetchResponse(it)
-                        }
-                    },
-                    onFailure = {
-                        withContext(Dispatchers.Main) {
-                            setStripeIntent(null)
-                            onFatal(it)
-                        }
-                    }
-                )
-            }
-        }
-        true
-    } else {
-        false
-    }
-
-    private fun onStripeIntentFetchResponse(stripeIntent: StripeIntent) {
-        runCatching {
-            stripeIntentValidator.requireValid(stripeIntent)
-        }.fold(
-            onSuccess = {
-                savedStateHandle[SAVE_STRIPE_INTENT] = stripeIntent
-                updatePaymentMethods(stripeIntent)
-                setupLink(stripeIntent)
-                resetViewState()
-            },
-            onFailure = ::onFatal
-        )
-    }
-
-    /**
-     * Fetch the saved payment methods for the customer, if a [PaymentSheet.CustomerConfiguration]
-     * was provided.
-     * It will fetch only the payment method types as defined in [SupportedPaymentMethod.getSupportedSavedCustomerPMs].
-     */
-    @VisibleForTesting
-    fun updatePaymentMethods(stripeIntent: StripeIntent) {
-        viewModelScope.launch {
-            runCatching {
-                customerConfig?.let { customerConfig ->
-                    getSupportedSavedCustomerPMs(
-                        stripeIntent,
-                        config,
-                        lpmResourceRepository.getRepository()
-                    ).mapNotNull {
-                        // The SDK is only able to parse customer LPMs
-                        // that are hard coded in the SDK.
-                        PaymentMethod.Type.fromCode(it.code)
-                    }.let {
-                        customerRepository.getPaymentMethods(
-                            customerConfig,
-                            it
-                        )
-                    }.filter { paymentMethod ->
-                        paymentMethod.hasExpectedDetails().also { valid ->
-                            if (!valid) {
-                                logger.error(
-                                    "Discarding invalid payment method ${paymentMethod.id}"
-                                )
-                            }
-                        }
-                    }
-                }.orEmpty()
-            }.fold(
-                onSuccess = {
-                    savedStateHandle[SAVE_PAYMENT_METHODS] = it
-                    setStripeIntent(stripeIntent)
-                    resetViewState()
-                },
-                onFailure = ::onFatal
-            )
         }
     }
 
@@ -443,40 +378,30 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override fun setupLink(stripeIntent: StripeIntent) {
-        if (LINK_ENABLED &&
-            stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code) &&
-            stripeIntent.linkFundingSources.intersect(LinkPaymentLauncher.supportedFundingSources)
-                .isNotEmpty()
-        ) {
-            viewModelScope.launch {
-                val linkConfig = createLinkConfiguration(stripeIntent).also {
-                    _linkConfiguration.value = it
-                }
-                val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
-                when (accountStatus) {
-                    AccountStatus.Verified -> launchLink(linkConfig, launchedDirectly = true)
-                    AccountStatus.VerificationStarted,
-                    AccountStatus.NeedsVerification -> {
-                        linkVerificationCallback = { success ->
-                            linkVerificationCallback = null
-                            _showLinkVerificationDialog.value = false
+    private fun setupLink(state: LinkState) {
+        _linkConfiguration.value = state.configuration
 
-                            if (success) {
-                                launchLink(linkConfig, launchedDirectly = true)
-                            }
-                        }
-                        _showLinkVerificationDialog.value = true
-                    }
-                    AccountStatus.SignedOut,
-                    AccountStatus.Error -> {
-                    }
-                }
-                activeLinkSession.value = accountStatus == AccountStatus.Verified
-                _isLinkEnabled.value = accountStatus != AccountStatus.Error
+        when (state.loginState) {
+            LinkState.LoginState.LoggedIn -> {
+                launchLink(state.configuration, launchedDirectly = true)
             }
-        } else {
-            _isLinkEnabled.value = false
+            LinkState.LoginState.NeedsVerification -> {
+                setupLinkWithVerification(state.configuration)
+            }
+            LinkState.LoginState.LoggedOut -> {
+                // Nothing to do here
+            }
+        }
+    }
+
+    private fun setupLinkWithVerification(
+        configuration: LinkPaymentLauncher.Configuration,
+    ) {
+        viewModelScope.launch {
+            val success = requestLinkVerification()
+            if (success) {
+                launchLink(configuration, launchedDirectly = true)
+            }
         }
     }
 

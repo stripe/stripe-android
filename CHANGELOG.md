@@ -2,6 +2,23 @@
 
 ## XX.XX.XX - 2022-XX-XX
 
+### PaymentSheet
+* [FIXED][5910](https://github.com/stripe/stripe-android/pull/5910) PaymentSheet now fails gracefully when launched with invalid arguments.
+
+## 20.16.2 - 2022-12-05
+
+### PaymentSheet
+* [FIXED][5888](https://github.com/stripe/stripe-android/pull/5888) The primary button no longer stays disabled when returning from the `Add payment method` to the `Saved payment methods` screen.
+* [CHANGED][5883](https://github.com/stripe/stripe-android/pull/5883) Fixed a few crashes when activities were launched on rooted devices.
+
+### Financial Connections
+* [CHANGED][5891](https://github.com/stripe/stripe-android/pull/5891) Fixed a few crashes when activities were launched on rooted devices.
+
+## 20.16.1 - 2022-11-21
+
+### PaymentSheet
+* [CHANGED][5848](https://github.com/stripe/stripe-android/pull/5848) We now disable the back button while processing intents in `PaymentSheet` to prevent them from incorrectly being displayed as canceled.
+
 ### CardScan
 * [SECURITY][5798](https://github.com/stripe/stripe-android/pull/5798) URL-encode IDs used in URLs to prevent injection attacks.
 

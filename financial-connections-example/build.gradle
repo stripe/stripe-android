@@ -17,15 +17,19 @@ android {
         applicationId "com.stripe.android.financialconnections.example"
         minSdk 21
         targetSdk rootProject.ext.compileSdkVersion
-        version = rootProject.version_name
+        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders = [
+            STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: getBackendUrl()
+        ]
     }
 
     buildTypes {
         debug {
             firebaseAppDistribution {
-                groups="financial-connections"
+                groups = "financial-connections"
             }
         }
         release {
@@ -53,8 +57,14 @@ android {
     }
 }
 
+// Read values from gradle.properties or system environment variable
+def getBackendUrl() {
+    return findProperty('STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL') ?: ""
+}
+
 dependencies {
     implementation project(':financial-connections')
+    implementation project(':payments-core')
 
     implementation "androidx.activity:activity-ktx:$androidxActivityVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppcompatVersion"

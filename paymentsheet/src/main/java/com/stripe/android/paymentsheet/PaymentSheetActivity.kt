@@ -83,27 +83,16 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val starterArgs = this.starterArgs
-        if (starterArgs == null) {
-            setActivityResult(
-                PaymentSheetResult.Failed(
-                    IllegalArgumentException("PaymentSheet started without arguments.")
-                )
-            )
+        val validatedArgs = initializeArgs()
+        super.onCreate(savedInstanceState)
+
+        val error = validatedArgs.exceptionOrNull()
+        if (error != null) {
+            setActivityResult(PaymentSheetResult.Failed(error))
             finish()
             return
-        } else {
-            try {
-                starterArgs.config?.validate()
-                starterArgs.clientSecret.validate()
-                starterArgs.config?.appearance?.parseAppearance()
-            } catch (e: InvalidParameterException) {
-                setActivityResult(PaymentSheetResult.Failed(e))
-                finish()
-                return
-            }
         }
-        super.onCreate(savedInstanceState)
+
         viewModel.registerFromActivity(this)
 
         viewModel.setupGooglePay(
@@ -114,13 +103,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
         )
 
-        if (!viewModel.maybeFetchStripeIntent()) {
-            // The buy button needs to be made visible since it is gone in the xml
-            buttonContainer.isVisible = true
-            viewBinding.buyButton.isVisible = true
-        }
-
-        starterArgs.statusBarColor?.let {
+        starterArgs?.statusBarColor?.let {
             window.statusBarColor = it
         }
         setContentView(viewBinding.root)
@@ -202,6 +185,27 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
             .observe(this, buyButtonStateObserver)
+    }
+
+    private fun initializeArgs(): Result<PaymentSheetContract.Args?> {
+        val starterArgs = this.starterArgs
+
+        val result = if (starterArgs == null) {
+            val error = IllegalArgumentException("PaymentSheet started without arguments.")
+            Result.failure(error)
+        } else {
+            try {
+                starterArgs.config?.validate()
+                starterArgs.clientSecret.validate()
+                starterArgs.config?.appearance?.parseAppearance()
+                Result.success(starterArgs)
+            } catch (e: InvalidParameterException) {
+                Result.failure(e)
+            }
+        }
+
+        earlyExitDueToIllegalState = result.isFailure
+        return result
     }
 
     private fun onTransitionTarget(
@@ -351,8 +355,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     override fun onDestroy() {
+        if (!earlyExitDueToIllegalState) {
+            viewModel.unregisterFromActivity()
+        }
         super.onDestroy()
-        viewModel.unregisterFromActivity()
     }
 
     /**

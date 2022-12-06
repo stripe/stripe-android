@@ -9,13 +9,15 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
+import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
+import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Companion.ARG_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.navigation.IdentityDocumentScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
+import com.stripe.android.identity.utils.navigateOnResume
 import com.stripe.android.identity.utils.navigateToUploadFragment
 
 /**
@@ -70,7 +72,7 @@ internal class CouldNotCaptureFragment(
                     identityViewModel.screenTracker.screenTransitionStart(
                         SCREEN_NAME_ERROR
                     )
-                    findNavController().navigate(
+                    navigateOnResume(
                         scanType.toScanDestinationId(),
                         bundleOf(
                             ARG_SHOULD_START_FROM_BACK to scanType.toShouldStartFromBack()
@@ -82,8 +84,6 @@ internal class CouldNotCaptureFragment(
     }
 
     internal companion object {
-        const val ARG_COULD_NOT_CAPTURE_SCAN_TYPE = "scanType"
-        const val ARG_REQUIRE_LIVE_CAPTURE = "requireLiveCapture"
 
         @IdRes
         private fun IdentityScanState.ScanType.toUploadDestinationId() =

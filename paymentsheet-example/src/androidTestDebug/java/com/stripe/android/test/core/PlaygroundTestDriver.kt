@@ -15,6 +15,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.runner.screenshot.Screenshot
@@ -103,7 +104,7 @@ class PlaygroundTestDriver(
             performTextInput("email@email.com")
         }
 
-        Espresso.closeSoftKeyboard()
+        closeSoftKeyboard()
 
         composeTestRule.waitUntil(timeoutMillis = 5000L) {
             selectors.continueButton.checkEnabled()
@@ -111,10 +112,7 @@ class PlaygroundTestDriver(
 
         composeTestRule.waitForIdle()
 
-        selectors.continueButton.apply {
-            scrollTo()
-            click()
-        }
+        selectors.continueButton.click()
 
         composeTestRule.waitUntil(timeoutMillis = 5000L) {
             composeTestRule.onAllNodesWithTag("OTP-0").fetchSemanticsNodes().isNotEmpty()
@@ -182,11 +180,7 @@ class PlaygroundTestDriver(
     }
 
     private fun pressContinue() {
-        selectors.continueButton.apply {
-            scrollTo()
-            click()
-        }
-
+        selectors.continueButton.click()
         waitForPlaygroundActivity()
     }
 
@@ -266,10 +260,7 @@ class PlaygroundTestDriver(
     }
 
     private fun pressBuy() {
-        selectors.buyButton.apply {
-            scrollTo()
-            click()
-        }
+        selectors.buyButton.click()
     }
 
     internal fun pressEdit() {
@@ -500,9 +491,9 @@ class PlaygroundTestDriver(
             PaymentSheetPlaygroundActivity.SUPPORTED_PAYMENT_METHODS_EXTRA,
             testParameters.supportedPaymentMethods.toTypedArray()
         )
+
         val scenario = ActivityScenario.launch<PaymentSheetPlaygroundActivity>(intent)
         scenario.onActivity { activity ->
-
             monitorCurrentActivity(activity.application)
 
             IdlingPolicies.setIdlingResourceTimeout(45, TimeUnit.SECONDS)
@@ -527,6 +518,8 @@ class PlaygroundTestDriver(
 
         launchPlayground.acquire()
         launchPlayground.release()
+
+        closeSoftKeyboard()
 
         setConfiguration(selectors)
     }

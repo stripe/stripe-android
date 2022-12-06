@@ -7,6 +7,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
@@ -60,6 +61,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.getOrAwaitValue
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -156,7 +158,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `bottom sheet expands on start and handles click outside`() {
         val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launchForResult(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
             assertThat(activity.bottomSheetBehavior.state)
@@ -279,7 +281,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `handles fragment transitions`() {
         val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launchForResult(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
 
@@ -630,7 +632,7 @@ internal class PaymentSheetActivityTest {
                 paymentMethods = emptyList()
             )
         )
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launchForResult(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
 
@@ -747,7 +749,7 @@ internal class PaymentSheetActivityTest {
                 paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED
             )
         )
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launchForResult(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             activity.finish()
         }
@@ -1021,6 +1023,67 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `Handles missing arguments correctly`() {
+        val scenario = ActivityScenario.launchActivityForResult(PaymentSheetActivity::class.java)
+
+        val result = contract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        )
+
+        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+    }
+
+    @Test
+    fun `Handles invalid arguments correctly`() {
+        val invalidCustomerConfig = PaymentSheet.CustomerConfiguration(
+            id = "",
+            ephemeralKeySecret = "",
+        )
+
+        val args = PaymentSheetContract.Args(
+            clientSecret = PaymentIntentClientSecret("abc"),
+            config = PaymentSheet.Configuration(
+                merchantDisplayName = "Some name",
+                customer = invalidCustomerConfig,
+            ),
+        )
+
+        val intent = contract.createIntent(context, args)
+
+        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
+
+        val result = contract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        )
+
+        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+    }
+
+    @Test
+    fun `Handles invalid client secret correctly`() {
+        val args = PaymentSheetContract.Args(
+            clientSecret = PaymentIntentClientSecret(""),
+            config = null,
+        )
+
+        val intent = contract.createIntent(context, args)
+
+        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
+
+        val result = contract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        )
+
+        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
@@ -1055,6 +1118,10 @@ internal class PaymentSheetActivityTest {
             { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
             StripeIntentRepository.Static(paymentIntent),
             StripeIntentValidator(),
+            FakePaymentSheetLoader(
+                stripeIntent = paymentIntent,
+                customerPaymentMethods = paymentMethods,
+            ),
             FakeCustomerRepository(paymentMethods),
             FakePrefsRepository(),
             StaticLpmResourceRepository(lpmRepository),

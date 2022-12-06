@@ -110,6 +110,8 @@
   <string name="becs_widget_name_required">Tên của bạn là bắt buộc.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Hủy</string>
+  <!-- Error when the card was declined by the credit card networks -->
+  <string name="card_declined">Thẻ bị từ chối</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s kết thúc bằng %2$s</string>
   <!-- Text for close button -->
@@ -121,13 +123,19 @@
   <string name="done">Xong</string>
   <!-- Button title to enter editing mode -->
   <string name="edit">Sửa</string>
+  <!-- Error when the card has already expired -->
+  <string name="expired_card">Thẻ đã hết hạn</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">Tháng/Năm</string>
   <string name="expiry_label_short">Hết hạn</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="fpx_bank_offline">%s - Ngoại tuyến</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="generic_decline">Phương thức thanh toán của quý vị đã bị từ chối.</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
   <string name="incomplete_expiry_date">Ngày hết hạn trên thẻ không hợp lệ.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="invalid_bank_account_iban">IBAN quý vị đã nhập không hợp lệ.</string>
   <string name="invalid_card_number">Số thẻ của bạn không hợp lệ.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Mã bảo mật trên thẻ không hợp lệ.</string>
@@ -135,6 +143,8 @@
   <string name="invalid_expiry_month">Tháng hết hạn trên thẻ của bạn không hợp lệ.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="invalid_expiry_year">Năm hết hạn trên thẻ của bạn không hợp lệ.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="invalid_owner_name">Tên của quý vị không hợp lệ.</string>
   <!-- Shipping form error message -->
   <string name="invalid_shipping_information">Địa chỉ vận chuyển không hợp lệ</string>
   <!-- Error message for when postal code in form is incomplete -->
@@ -143,6 +153,8 @@
   <string name="payment_method_add_new_fpx">Chọn Tài khoản Ngân hàng (FPX)...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Miễn phí</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="processing_error">Có lỗi bất ngờ khi xử lý thẻ -- hãy thử lại sau vài giây</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="remove">Xóa</string>

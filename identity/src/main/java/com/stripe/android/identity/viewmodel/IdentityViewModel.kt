@@ -35,6 +35,7 @@ import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.Resource.Companion.DUMMY_RESOURCE
 import com.stripe.android.identity.networking.SelfieUploadState
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.Status
@@ -149,6 +150,26 @@ internal class IdentityViewModel constructor(
         }
     )
     val collectedData: StateFlow<CollectedDataParam> = _collectedData
+
+    /**
+     * StateFlow to track request status of postVerificationPageData
+     */
+    @VisibleForTesting
+    internal val verificationPageData = MutableStateFlow<Resource<Int>>(
+        savedStateHandle[VERIFICATION_PAGE_DATA] ?: run {
+            Resource.idle()
+        }
+    )
+
+    /**
+     * StateFlow to track request status of postVerificationPageSubmit
+     */
+    @VisibleForTesting
+    internal val verificationPageSubmit = MutableStateFlow<Resource<Int>>(
+        savedStateHandle[VERIFICATION_PAGE_SUBMIT] ?: run {
+            Resource.idle()
+        }
+    )
 
     /**
      * StateFlow to track missing requirements.
@@ -635,6 +656,9 @@ internal class IdentityViewModel constructor(
         selfie: FaceDetectorTransitioner.Selfie,
         compressionQuality: Float
     ) {
+        _selfieUploadedState.updateStateAndSave { currentState ->
+            currentState.updateLoading(isHighRes, selfie)
+        }
         viewModelScope.launch {
             runCatching {
                 var uploadTime = 0L
@@ -792,12 +816,18 @@ internal class IdentityViewModel constructor(
     suspend fun postVerificationPageData(
         collectedDataParam: CollectedDataParam
     ): VerificationPageData {
+        verificationPageData.updateStateAndSave {
+            Resource.loading()
+        }
         identityRepository.postVerificationPageData(
             verificationArgs.verificationSessionId,
             verificationArgs.ephemeralKeySecret,
             collectedDataParam,
             calculateClearDataParam(collectedDataParam)
         ).let { verificationPageData ->
+            this.verificationPageData.updateStateAndSave {
+                Resource.success(DUMMY_RESOURCE)
+            }
             _collectedData.updateStateAndSave { oldValue ->
                 oldValue.mergeWith(collectedDataParam)
             }
@@ -824,11 +854,20 @@ internal class IdentityViewModel constructor(
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun postVerificationPageSubmit() =
+    suspend fun postVerificationPageSubmit(): VerificationPageData {
+        verificationPageSubmit.updateStateAndSave {
+            Resource.loading()
+        }
         identityRepository.postVerificationPageSubmit(
             verificationArgs.verificationSessionId,
             verificationArgs.ephemeralKeySecret
-        )
+        ).let {
+            verificationPageSubmit.updateStateAndSave {
+                Resource.success(DUMMY_RESOURCE)
+            }
+            return it
+        }
+    }
 
     fun sendAnalyticsRequest(request: AnalyticsRequestV2) {
         viewModelScope.launch {
@@ -878,6 +917,17 @@ internal class IdentityViewModel constructor(
         }
     }
 
+    /**
+     * Check if there is a outstanding API request being submitted.
+     */
+    fun isSubmitting(): Boolean {
+        return documentFrontUploadedState.value.isLoading() ||
+            documentBackUploadedState.value.isLoading() ||
+            selfieUploadState.value.isAnyLoading() ||
+            verificationPageData.value.status == Status.LOADING ||
+            verificationPageSubmit.value.status == Status.LOADING
+    }
+
     private fun <State> MutableStateFlow<State>.updateStateAndSave(function: (State) -> State) {
         this.update(function)
         savedStateHandle[
@@ -888,6 +938,8 @@ internal class IdentityViewModel constructor(
                 _documentBackUploadedState -> DOCUMENT_BACK_UPLOAD_STATE
                 _collectedData -> COLLECTED_DATA
                 _missingRequirements -> MISSING_REQUIREMENTS
+                verificationPageData -> VERIFICATION_PAGE_DATA
+                verificationPageSubmit -> VERIFICATION_PAGE_SUBMIT
                 else -> {
                     throw IllegalStateException("Unexpected state flow: $this")
                 }
@@ -932,5 +984,7 @@ internal class IdentityViewModel constructor(
         private const val ANALYTICS_STATE = "analytics_upload_state"
         private const val COLLECTED_DATA = "collected_data"
         private const val MISSING_REQUIREMENTS = "missing_requirements"
+        private const val VERIFICATION_PAGE_DATA = "verification_page_data"
+        private const val VERIFICATION_PAGE_SUBMIT = "verification_page_submit"
     }
 }

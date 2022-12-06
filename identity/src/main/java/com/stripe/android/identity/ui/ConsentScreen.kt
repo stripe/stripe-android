@@ -237,6 +237,7 @@ private fun SuccessUI(
                     .semantics {
                         testTag = BODY_TAG
                     },
+                color = MaterialTheme.colors.onBackground,
                 urlSpanStyle = SpanStyle(
                     textDecoration = TextDecoration.Underline,
                     color = MaterialTheme.colors.secondary

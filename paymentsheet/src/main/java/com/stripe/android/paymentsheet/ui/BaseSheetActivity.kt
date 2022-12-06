@@ -81,6 +81,8 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val primaryButton: PrimaryButton
     abstract val bottomSpacer: View
 
+    protected var earlyExitDueToIllegalState: Boolean = false
+
     abstract fun setActivityResult(result: ResultType)
 
     private val keyboardController: KeyboardController by lazy {
@@ -89,6 +91,10 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (earlyExitDueToIllegalState) {
+            return
+        }
 
         if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
             // In Oreo, Activities where `android:windowIsTranslucent=true` can't request
@@ -146,12 +152,10 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         viewModel.showLinkVerificationDialog.observe(this) { show ->
             linkAuthView.setContent {
                 if (show) {
-                    viewModel.linkVerificationCallback?.let { callback ->
-                        LinkVerificationDialog(
-                            linkLauncher = viewModel.linkLauncher,
-                            verificationCallback = callback
-                        )
-                    }
+                    LinkVerificationDialog(
+                        linkLauncher = viewModel.linkLauncher,
+                        onResult = viewModel::handleLinkVerificationResult,
+                    )
                 }
             }
         }
@@ -186,12 +190,16 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (supportFragmentManager.backStackEntryCount > 0) {
-            clearErrorMessages()
-            super.onBackPressed()
-        } else {
-            viewModel.onUserCancel()
+        if (viewModel.processing.value == false) {
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                viewModel.onUserBack()
+                clearErrorMessages()
+                super.onBackPressed()
+            } else {
+                viewModel.onUserCancel()
+            }
         }
     }
 

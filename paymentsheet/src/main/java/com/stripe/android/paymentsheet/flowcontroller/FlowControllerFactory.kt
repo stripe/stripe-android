@@ -29,15 +29,15 @@ internal class FlowControllerFactory(
         paymentOptionCallback: PaymentOptionCallback,
         paymentResultCallback: PaymentSheetResultCallback
     ) : this(
-        activity,
-        activity.lifecycleScope,
-        activity,
-        activity.applicationContext,
-        activity,
-        { activity.window.statusBarColor },
-        PaymentOptionFactory(activity.resources),
-        paymentOptionCallback,
-        paymentResultCallback
+        viewModelStoreOwner = activity,
+        lifecycleScope = activity.lifecycleScope,
+        lifecycleOwner = activity,
+        appContext = activity.applicationContext,
+        activityResultCaller = activity,
+        statusBarColor = { activity.window.statusBarColor },
+        paymentOptionFactory = PaymentOptionFactory(activity.resources),
+        paymentOptionCallback = paymentOptionCallback,
+        paymentResultCallback = paymentResultCallback,
     )
 
     constructor(
@@ -45,15 +45,15 @@ internal class FlowControllerFactory(
         paymentOptionCallback: PaymentOptionCallback,
         paymentResultCallback: PaymentSheetResultCallback
     ) : this(
-        fragment,
-        fragment.lifecycleScope,
-        fragment,
-        fragment.requireContext(),
-        fragment,
-        { fragment.activity?.window?.statusBarColor },
-        PaymentOptionFactory(fragment.resources),
-        paymentOptionCallback,
-        paymentResultCallback
+        viewModelStoreOwner = fragment,
+        lifecycleScope = fragment.lifecycleScope,
+        lifecycleOwner = fragment,
+        appContext = fragment.requireContext().applicationContext,
+        activityResultCaller = fragment,
+        statusBarColor = { fragment.activity?.window?.statusBarColor },
+        paymentOptionFactory = PaymentOptionFactory(fragment.resources),
+        paymentOptionCallback = paymentOptionCallback,
+        paymentResultCallback = paymentResultCallback,
     )
 
     fun create(): PaymentSheet.FlowController =

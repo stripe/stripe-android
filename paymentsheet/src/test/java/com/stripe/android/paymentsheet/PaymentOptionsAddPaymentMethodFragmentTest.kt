@@ -14,6 +14,9 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
+import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
+import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeAndroidKeyStore
 import com.stripe.android.utils.TestUtils
@@ -65,11 +68,16 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
 
     private fun createFragment(
         args: PaymentOptionContract.Args = PaymentOptionContract.Args(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentMethods = emptyList(),
-            config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
-            isGooglePayReady = false,
-            newLpm = null,
+            state = PaymentSheetState.Full(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                clientSecret = PaymentIntentClientSecret("secret"),
+                customerPaymentMethods = emptyList(),
+                savedSelection = SavedSelection.None,
+                config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
+                isGooglePayReady = false,
+                newPaymentSelection = null,
+                linkState = null,
+            ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             injectorKey = DUMMY_INJECTOR_KEY,
             enableLogging = false,
@@ -84,11 +92,11 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
     ): FragmentScenario<PaymentOptionsAddPaymentMethodFragment> {
         assertThat(WeakMapInjectorRegistry.staticCacheMap.size).isEqualTo(0)
         val viewModel = createViewModel(
-            paymentMethods = args.paymentMethods,
+            paymentMethods = args.state.customerPaymentMethods,
             injectorKey = args.injectorKey,
             args = args
         )
-        viewModel.setStripeIntent(args.stripeIntent)
+        viewModel.setStripeIntent(args.state.stripeIntent)
         TestUtils.idleLooper()
 
         if (registerInjector) {

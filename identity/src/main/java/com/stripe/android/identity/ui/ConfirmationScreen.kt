@@ -101,6 +101,7 @@ internal fun ConfirmationScreen(
                             .semantics {
                                 testTag = BODY_TAG
                             },
+                        color = MaterialTheme.colors.onBackground,
                         urlSpanStyle = SpanStyle(
                             textDecoration = TextDecoration.Underline,
                             color = MaterialTheme.colors.secondary
@@ -115,7 +116,7 @@ internal fun ConfirmationScreen(
                             testTag = confirmationConfirmButtonTag
                         }
                 ) {
-                    Text(text = successPage.buttonText)
+                    Text(text = successPage.buttonText.uppercase())
                 }
             }
             LaunchedEffect(Unit) {

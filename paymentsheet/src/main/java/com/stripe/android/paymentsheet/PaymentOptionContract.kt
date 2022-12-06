@@ -5,9 +5,7 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import com.stripe.android.core.injection.InjectorKey
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -30,11 +28,7 @@ internal class PaymentOptionContract :
 
     @Parcelize
     internal data class Args(
-        val stripeIntent: StripeIntent,
-        val paymentMethods: List<PaymentMethod>,
-        val config: PaymentSheet.Configuration?,
-        val isGooglePayReady: Boolean,
-        val newLpm: PaymentSelection.New?,
+        val state: PaymentSheetState.Full,
         @ColorInt val statusBarColor: Int?,
         @InjectorKey val injectorKey: String,
         val enableLogging: Boolean,

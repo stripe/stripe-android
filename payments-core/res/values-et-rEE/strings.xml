@@ -110,6 +110,8 @@
   <string name="becs_widget_name_required">Nime esitamine on kohustuslik.</string>
   <!-- Button title to cancel action in an alert -->
   <string name="cancel">Tühista</string>
+  <!-- Error when the card was declined by the credit card networks -->
+  <string name="card_declined">Kaart lükati tagasi</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="card_ending_in">%1$s, lõpeb nr-ga %2$s</string>
   <!-- Text for close button -->
@@ -121,13 +123,19 @@
   <string name="done">Valmis</string>
   <!-- Button title to enter editing mode -->
   <string name="edit">Muutmine</string>
+  <!-- Error when the card has already expired -->
+  <string name="expired_card">Kaart on aegunud</string>
   <!-- label for text field to enter card expiry -->
   <string name="expiry_date_hint">KK/AA</string>
   <string name="expiry_label_short">Aegumine</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="fpx_bank_offline">%s - võrguühenduseta</string>
+  <!-- Error message when a payment method gets declined. -->
+  <string name="generic_decline">Teie makseviis lükati tagasi.</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
   <string name="incomplete_expiry_date">Kaardi aegumiskuupäev on puudulik.</string>
+  <!-- An error message displayed when the customer's iban is invalid. -->
+  <string name="invalid_bank_account_iban">Sisestatud IBAN on kehtetu.</string>
   <string name="invalid_card_number">Kaardi number on kehtetu.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="invalid_cvc">Kaardi turvakood on kehtetu.</string>
@@ -135,6 +143,8 @@
   <string name="invalid_expiry_month">Kaardi aegumiskuu on kehtetu.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="invalid_expiry_year">Kaardi aegumisaasta on kehtetu.</string>
+  <!-- Error when customer's name is invalid -->
+  <string name="invalid_owner_name">Teie nimi on kehtetu.</string>
   <!-- Shipping form error message -->
   <string name="invalid_shipping_information">Kehtetu tarneaadress</string>
   <!-- Error message for when postal code in form is incomplete -->
@@ -143,6 +153,8 @@
   <string name="payment_method_add_new_fpx">Valige pangakonto (FPX) ...</string>
   <!-- Label for free shipping method -->
   <string name="price_free">Tasuta</string>
+  <!-- Error when there is a problem processing the credit card -->
+  <string name="processing_error">Kaardi töötlemisel esines tõrge – proovige mõne sekundi pärast uuesti</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="remove">Eemalda</string>

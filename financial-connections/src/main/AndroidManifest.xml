@@ -6,7 +6,7 @@
 
     <application>
         <activity
-            android:name="com.stripe.android.financialconnections.FinancialConnectionsSheetRedirectActivity"
+            android:name=".FinancialConnectionsSheetRedirectActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -35,11 +35,22 @@
                     android:host="native-redirect"
                     android:pathPrefix="/"
                     android:scheme="stripe-auth" />
+                <!-- Accepts success/cancel/fail URIs that begin with "stripe://auth-redirect” -->
+                <data
+                    android:host="auth-redirect"
+                    android:scheme="stripe"
+                    android:pathPrefix="/${applicationId}" />
             </intent-filter>
         </activity>
         <activity
-            android:name="com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
+            android:name=".FinancialConnectionsSheetActivity"
             android:exported="false"
+            android:theme="@style/StripeDefaultTheme" />
+
+        <activity
+            android:name="com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/StripeDefaultTheme" />
 
         <provider

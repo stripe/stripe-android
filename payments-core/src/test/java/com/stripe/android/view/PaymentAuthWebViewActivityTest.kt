@@ -77,7 +77,7 @@ internal class PaymentAuthWebViewActivityTest {
     private fun runOnActivityScenario(
         onActivityScenario: (ActivityScenario<PaymentAuthWebViewActivity>) -> Unit
     ) {
-        ActivityScenario.launch<PaymentAuthWebViewActivity>(
+        ActivityScenario.launchActivityForResult<PaymentAuthWebViewActivity>(
             contract.createIntent(
                 context,
                 ARGS

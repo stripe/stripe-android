@@ -5,9 +5,12 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.financialconnections.model.serializer.JsonAsStringSerializer
 import com.stripe.android.financialconnections.model.serializer.PaymentAccountSerializer
+import com.stripe.android.model.Token
+import com.stripe.android.model.parsers.TokenJsonParser
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.json.JSONObject
 
 /**
  *
@@ -51,6 +54,9 @@ data class FinancialConnectionsSession internal constructor(
 
     val accounts: FinancialConnectionsAccountList
         get() = accountsNew ?: accountsOld!!
+
+    internal val parsedToken: Token?
+        get() = bankAccountToken?.let { TokenJsonParser().parse(JSONObject(it)) }
 }
 
 @Serializable(with = PaymentAccountSerializer::class)

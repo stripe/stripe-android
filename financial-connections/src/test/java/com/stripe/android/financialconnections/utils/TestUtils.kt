@@ -6,6 +6,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import kotlinx.serialization.json.Json
 
 @Suppress("UNCHECKED_CAST")
 internal object TestUtils {
@@ -15,6 +16,13 @@ internal object TestUtils {
             return viewModel as T
         }
     }
+}
+
+internal fun testJson() = Json {
+    coerceInputValues = true
+    ignoreUnknownKeys = true
+    isLenient = true
+    encodeDefaults = true
 }
 
 internal class FakeActivityResultRegistry<T>(

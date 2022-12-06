@@ -103,7 +103,8 @@ internal abstract class CardImageVerificationFlow(
             mainLoop = ProcessBoundAnalyzerLoop(
                 analyzerPool = analyzerPool,
                 resultHandler = mainLoopOcrAggregator,
-                analyzerLoopErrorListener = scanErrorListener
+                analyzerLoopErrorListener = scanErrorListener,
+                statsName = "main_loop_images_processed"
             ).apply {
                 mainLoopJob = subscribeTo(
                     imageStream.map {

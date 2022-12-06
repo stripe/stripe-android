@@ -8,7 +8,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
@@ -27,6 +29,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -121,7 +124,7 @@ internal class PaymentOptionsActivityTest {
     @Test
     fun `click outside of bottom sheet should return cancel result`() {
         val scenario = activityScenario()
-        scenario.launch(
+        scenario.launchForResult(
             createIntent()
         ).use {
             it.onActivity { activity ->
@@ -140,7 +143,7 @@ internal class PaymentOptionsActivityTest {
     @Test
     fun `click outside of bottom sheet should return cancel result even if there is a selection`() {
         val scenario = activityScenario()
-        scenario.launch(
+        scenario.launchForResult(
             createIntent()
         ).use {
             it.onActivity { activity ->
@@ -163,7 +166,7 @@ internal class PaymentOptionsActivityTest {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(
-                PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
                     paymentMethods = PaymentMethodFixtures.createCards(5)
                 )
             )
@@ -179,14 +182,14 @@ internal class PaymentOptionsActivityTest {
     fun `ContinueButton should be visible when showing add payment method form`() {
         val scenario = activityScenario(
             createViewModel(
-                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
                 )
             )
         )
         scenario.launch(
             createIntent(
-                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
                 )
             )
@@ -203,7 +206,7 @@ internal class PaymentOptionsActivityTest {
         val scenario = activityScenario()
         scenario.launch(
             createIntent(
-                PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
                     paymentMethods = PaymentMethodFixtures.createCards(5)
                 )
             )
@@ -258,16 +261,16 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `Verify if google pay is ready, stay on the select saved payment method`() {
-        val viewModel = createViewModel(
-            PAYMENT_OPTIONS_CONTRACT_ARGS.copy(isGooglePayReady = true)
-        )
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(isGooglePayReady = true)
+        val viewModel = createViewModel(args)
+
         val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
         viewModel.transition.observeForever {
             transitionTarget.add(it)
         }
         val scenario = activityScenario(viewModel)
         scenario.launch(
-            createIntent()
+            createIntent(args)
         ).use {
             idleLooper()
             assertThat(transitionTarget[1].peekContent())
@@ -277,7 +280,7 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `Verify if payment methods is not empty select, saved payment method`() {
-        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             isGooglePayReady = false,
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
@@ -444,14 +447,14 @@ internal class PaymentOptionsActivityTest {
     fun `primary button appearance is set`() {
         val scenario = activityScenario(
             createViewModel(
-                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK
                 )
             )
         )
         scenario.launch(
             createIntent(
-                args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
+                args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
                         appearance = PaymentSheet.Appearance(
@@ -477,6 +480,13 @@ internal class PaymentOptionsActivityTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun `Handles missing args correctly`() {
+        val emptyIntent = Intent(context, PaymentOptionsActivity::class.java)
+        val scenario = ActivityScenario.launchActivityForResult<PaymentOptionsActivity>(emptyIntent)
+        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
     }
 
     private fun createIntent(

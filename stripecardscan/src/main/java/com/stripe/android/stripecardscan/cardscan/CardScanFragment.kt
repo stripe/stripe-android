@@ -334,6 +334,7 @@ class CardScanFragment : ScanFragment(), SimpleScanStateful<CardScanState> {
             scanStatistics = ScanStatistics.fromStats(),
             scanConfig = ScanConfig(0)
         )
+        scanFlow.resetFlow()
         super.closeScanner()
     }
 }

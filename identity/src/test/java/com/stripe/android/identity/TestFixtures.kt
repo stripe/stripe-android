@@ -2,6 +2,7 @@ package com.stripe.android.identity
 
 import com.stripe.android.identity.networking.VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING
 import com.stripe.android.identity.networking.VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING
+import com.stripe.android.identity.networking.VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -47,7 +48,19 @@ internal val VERIFICATION_PAGE_DATA_NOT_MISSING_BACK = VerificationPageData(
     id = "id",
     objectType = "type",
     requirements = VerificationPageDataRequirements(
-        errors = emptyList()
+        errors = emptyList(),
+        missings = emptyList()
+    ),
+    status = VerificationPageData.Status.REQUIRESINPUT,
+    submitted = false
+)
+
+internal val VERIFICATION_PAGE_DATA_MISSING_SELFIE = VerificationPageData(
+    id = "id",
+    objectType = "type",
+    requirements = VerificationPageDataRequirements(
+        errors = emptyList(),
+        missings = listOf(Requirement.FACE)
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
     submitted = false
@@ -69,4 +82,10 @@ internal val SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE: VerificationPage =
     json.decodeFromString(
         VerificationPage.serializer(),
         VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING
+    )
+
+internal val SUCCESS_VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE: VerificationPage =
+    json.decodeFromString(
+        VerificationPage.serializer(),
+        VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING
     )

@@ -19,7 +19,6 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.link.ui.verification.LinkVerificationCallback
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -51,6 +50,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
@@ -195,10 +195,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     protected val _showLinkVerificationDialog = MutableLiveData(false)
     val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog
 
-    /**
-     * Function called when the Link verification dialog is dismissed.
-     */
-    var linkVerificationCallback: LinkVerificationCallback? = null
+    protected val linkVerificationChannel = Channel<Boolean>(capacity = 1)
 
     /**
      * This should be initialized from the starter args, and then from that point forward it will be
@@ -485,11 +482,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    /**
-     * Function called during initialization to setup Link.
-     */
-    abstract fun setupLink(stripeIntent: StripeIntent)
-
     protected suspend fun createLinkConfiguration(
         stripeIntent: StripeIntent
     ): LinkPaymentLauncher.Configuration {
@@ -521,6 +513,17 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         )
     }
 
+    protected suspend fun requestLinkVerification(): Boolean {
+        _showLinkVerificationDialog.value = true
+        return linkVerificationChannel.receive()
+    }
+
+    fun handleLinkVerificationResult(success: Boolean) {
+        _showLinkVerificationDialog.value = false
+        activeLinkSession.value = success
+        linkVerificationChannel.trySend(success)
+    }
+
     fun payWithLinkInline(configuration: LinkPaymentLauncher.Configuration, userInput: UserInput?) {
         (selection.value as? PaymentSelection.New.Card)?.paymentMethodCreateParams?.let { params ->
             savedStateHandle[SAVE_PROCESSING] = true
@@ -538,23 +541,18 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
                     }
                     AccountStatus.VerificationStarted,
                     AccountStatus.NeedsVerification -> {
-                        linkVerificationCallback = { success ->
-                            activeLinkSession.value = success
-                            linkVerificationCallback = null
-                            _showLinkVerificationDialog.value = false
+                        val success = requestLinkVerification()
 
-                            if (success) {
-                                completeLinkInlinePayment(
-                                    configuration,
-                                    params,
-                                    userInput is UserInput.SignIn
-                                )
-                            } else {
-                                savedStateHandle[SAVE_PROCESSING] = false
-                                updatePrimaryButtonState(PrimaryButton.State.Ready)
-                            }
+                        if (success) {
+                            completeLinkInlinePayment(
+                                configuration,
+                                params,
+                                userInput is UserInput.SignIn
+                            )
+                        } else {
+                            savedStateHandle[SAVE_PROCESSING] = false
+                            updatePrimaryButtonState(PrimaryButton.State.Ready)
                         }
-                        _showLinkVerificationDialog.value = true
                     }
                     AccountStatus.SignedOut,
                     AccountStatus.Error -> {
@@ -602,6 +600,12 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     abstract fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?)
 
     abstract fun onUserCancel()
+
+    fun onUserBack() {
+        // Reset the selection to the one from before opening the add payment method screen
+        val paymentOptionsState = paymentOptionsState.value
+        updateSelection(paymentOptionsState.selectedItem?.toPaymentSelection())
+    }
 
     abstract fun onPaymentResult(paymentResult: PaymentResult)
 
