@@ -18,7 +18,7 @@
                 <data
                     android:host="link-accounts"
                     android:scheme="stripe-auth"
-                    android:pathPrefix="/login" />
+                    android:pathPrefix="/${applicationId}/authentication_return" />
 
                 <!-- End of web AuthFlow success and cancel URIs that begin with "stripe-auth://link-accounts” -->
                 <data

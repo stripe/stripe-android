@@ -248,13 +248,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 withState { state ->
                     when {
                         // stripe-auth://native-redirect
-                        // TODO@carlosmuvi include applicationId!
                         receivedUrl?.host == "native-redirect" ->
-                            onStartApp2App(receivedUrl)
+                            onStartApp2App(receivedUrl.toString()
+                                .replaceFirst("stripe-auth://native-redirect/$applicationId/", ""))
                         // stripe-auth://link-accounts/login
-                        // TODO@carlosmuvi example return_url subject to change.
-                        // TODO@carlosmuvi include applicationId!
-                        receivedUrl?.host == "link-accounts" && receivedUrl.path == "/login" ->
+                        receivedUrl?.host == "link-accounts" && receivedUrl?.buildUpon()?.clearQuery()?.build()?.path == "/$applicationId/authentication_return" ->
                             onReturnUrlReceived(receivedUrl)
                         // stripe-auth://link-accounts/{applicationId/success
                         receivedUrl?.buildUpon()?.clearQuery()
@@ -278,14 +276,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
     }
 
-    private fun onStartApp2App(receivedUrl: Uri) {
+    private fun onStartApp2App(unwrappedUriString: String) {
         setState {
             copy(
                 authFlowStatus = AuthFlowStatus.APP2APP,
-                viewEffect = OpenAuthFlowWithUrl(
-                    receivedUrl.toString()
-                        .replaceFirst("stripe-auth://native-redirect/", "")
-                )
+                viewEffect = OpenAuthFlowWithUrl(unwrappedUriString)
             )
         }
     }
