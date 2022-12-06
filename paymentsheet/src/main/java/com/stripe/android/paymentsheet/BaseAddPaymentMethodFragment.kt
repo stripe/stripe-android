@@ -46,6 +46,7 @@ import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,6 +54,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @FlowPreview
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     abstract val sheetViewModel: BaseSheetViewModel<*>
+
+    private lateinit var imageLoader: StripeImageLoader
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        imageLoader = StripeImageLoader(requireContext().applicationContext)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -190,6 +198,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     isEnabled = enabled,
                     paymentMethods = supportedPaymentMethods,
                     onItemSelectedListener = onItemSelectedListener,
+                    imageLoader = imageLoader,
                     modifier = Modifier.padding(top = 26.dp, bottom = 12.dp),
                 )
             }

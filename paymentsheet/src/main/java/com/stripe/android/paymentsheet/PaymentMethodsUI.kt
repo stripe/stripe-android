@@ -56,13 +56,10 @@ internal fun PaymentMethodsUI(
     selectedIndex: Int,
     isEnabled: Boolean,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
+    imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
 ) {
-    val context = LocalContext.current.applicationContext
-    val state = rememberLazyListState()
-    val imageLoader = remember { StripeImageLoader(context) }
-
     LaunchedEffect(selectedIndex) {
         state.animateScrollToItem(selectedIndex)
     }
