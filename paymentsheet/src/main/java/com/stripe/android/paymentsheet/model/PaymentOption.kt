@@ -2,6 +2,12 @@ package com.stripe.android.paymentsheet.model
 
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * The customer's selected payment option.
@@ -12,7 +18,7 @@ constructor(
     /**
      * The drawable resource id of the icon that represents the payment option.
      */
-    @Deprecated("Please use iconDrawable instead.")
+    @Deprecated("Please use fetchIcon instead.")
     @DrawableRes
     val drawableResourceId: Int,
 
@@ -46,7 +52,22 @@ constructor(
         this.imageLoader = imageLoader
     }
 
+    /**
+     * Fetches the icon associated with this [PaymentOption].
+     */
     suspend fun fetchIcon(): Drawable {
         return imageLoader(this)
+    }
+
+    /**
+     * Fetches the icon associated with this [PaymentOption].
+     *
+     * Prefer the suspending variant.
+     */
+    @OptIn(DelicateCoroutinesApi::class)
+    fun fetchIcon(onComplete: (Drawable) -> Unit) {
+        GlobalScope.launch {
+            onComplete(fetchIcon())
+        }
     }
 }
