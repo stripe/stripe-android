@@ -3,11 +3,8 @@ package com.stripe.android.paymentsheet.model
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * The customer's selected payment option.
