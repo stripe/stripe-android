@@ -9,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -152,14 +151,13 @@ internal class DocSelectionFragment(
             viewLifecycleOwner,
             onSuccess = { verificationPage ->
                 navigateOnResume(
-                    R.id.action_camera_permission_denied,
-                    if (verificationPage.documentCapture.requireLiveCapture) {
-                        null
-                    } else {
-                        bundleOf(
-                            CameraPermissionDeniedFragment.ARG_SCAN_TYPE to type
-                        )
-                    }
+                    CameraPermissionDeniedDestination(
+                        if (verificationPage.documentCapture.requireLiveCapture) {
+                            null
+                        } else {
+                            type
+                        }
+                    )
                 )
             },
             onFailure = {

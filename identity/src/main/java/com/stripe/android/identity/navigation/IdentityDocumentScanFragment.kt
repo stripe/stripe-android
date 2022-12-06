@@ -278,9 +278,7 @@ internal abstract class IdentityDocumentScanFragment(
                                             }
                                         )
                                     } else if (verificationPageDataWithNoError.isMissingSelfie()) {
-                                        navigateOnResume(
-                                            R.id.action_global_selfieFragment
-                                        )
+                                        navigateOnResume(SelfieDestination)
                                     } else {
                                         submitVerificationPageDataAndNavigate(
                                             identityViewModel,
