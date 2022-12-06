@@ -20,7 +20,7 @@
                     android:scheme="stripe-auth"
                     android:pathPrefix="/${applicationId}/authentication_return" />
 
-                <!-- End of web AuthFlow success and cancel URIs that begin with "stripe-auth://link-accounts” -->
+                <!-- End of web AuthFlow success and cancel URIs that begin with "stripe-auth://link-accounts/{app-id}/...” -->
                 <data
                     android:host="link-accounts"
                     android:scheme="stripe-auth"
@@ -30,11 +30,12 @@
                     android:scheme="stripe-auth"
                     android:path="/${applicationId}/cancel" />
 
-                <!-- Opening app2app: Web flow triggers stripe-auth://native-redirect/http://web-that-redirects-to-native -->
+                <!-- Opening app2app: Web flow triggers stripe-auth://native-redirect/{app-id}/http://web-that-redirects-to-native -->
                 <data
                     android:host="native-redirect"
-                    android:pathPrefix="/"
+                    android:pathPrefix="/${applicationId}"
                     android:scheme="stripe-auth" />
+
                 <!-- Accepts success/cancel/fail URIs that begin with "stripe://auth-redirect” -->
                 <data
                     android:host="auth-redirect"

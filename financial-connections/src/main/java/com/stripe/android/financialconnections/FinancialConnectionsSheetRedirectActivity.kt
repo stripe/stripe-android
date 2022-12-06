@@ -39,8 +39,11 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
                     this@FinancialConnectionsSheetRedirectActivity,
                     FinancialConnectionsSheetNativeActivity::class.java
                 )
-            // link-accounts hosts: redirections embedded web AuthFlow back to non-native SDK.
-            host == "link-accounts" -> Intent(
+            // link-accounts hosts:
+            // - redirections from embedded web AuthFlow back to SDK (app2app return and AuthFlow end)
+            // native-redirect hosts:
+            // - redirections from embedded web AuthFlow back SDK (app2app start)
+            host == "link-accounts" || host == "native-redirect" -> Intent(
                 this@FinancialConnectionsSheetRedirectActivity,
                 FinancialConnectionsSheetActivity::class.java
             )
