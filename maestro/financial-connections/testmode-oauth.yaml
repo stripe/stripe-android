@@ -19,7 +19,7 @@ appId: com.stripe.android.financialconnections.example
     visible: "Agree"
     timeout: 30000
 - takeScreenshot: TestOAuth_Consent
-- tapOn: "AgreeO"
+- tapOn: "Agree"
 - assertVisible: "Test OAuth Institution"
 - takeScreenshot: TestOAuth_BankPicker
 # ERRORS
