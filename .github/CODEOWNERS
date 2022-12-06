@@ -8,6 +8,7 @@
 /wechatpay/ @jaynewstrom-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
 /stripe-test-e2e/ @jaynewstrom-stripe @tillh-stripe @jameswoo-stripe
 /link/ @jaynewstrom-stripe @tillh-stripe @jameswoo-stripe
+/payment-method-messaging/ @jaynewstrom-stripe @tillh-stripe @jameswoo-stripe
 
 # CardScan SDK
 /stripecardscan/ @awush-stripe @ccen-stripe

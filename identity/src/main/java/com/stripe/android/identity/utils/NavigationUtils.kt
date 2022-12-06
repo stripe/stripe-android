@@ -22,10 +22,14 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE_ID
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE_PASSPORT
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
+import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ErrorFragment
-import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
-import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithFailedReason
-import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithRequirementError
+import com.stripe.android.identity.navigation.IdentityTopLevelDestination
+import com.stripe.android.identity.navigation.SelfieDestination
+import com.stripe.android.identity.navigation.navigateTo
+import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
+import com.stripe.android.identity.navigation.navigateToErrorScreenWithFailedReason
+import com.stripe.android.identity.navigation.navigateToErrorScreenWithRequirementError
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -81,7 +85,7 @@ internal suspend fun Fragment.navigateToSelfieOrSubmit(
     @IdRes fromFragment: Int
 ) {
     if (verificationPage.requireSelfie()) {
-        navigateOnResume(R.id.action_global_selfieFragment)
+        navigateOnResume(SelfieDestination)
     } else {
         submitVerificationPageDataAndNavigate(
             identityViewModel,
@@ -111,7 +115,7 @@ internal suspend fun Fragment.submitVerificationPageDataAndNavigate(
                     )
                 }
                 submittedVerificationPageData.submitted -> {
-                    navigateOnResume(R.id.action_global_confirmationFragment)
+                    navigateOnResume(ConfirmationDestination)
                 }
                 else -> {
                     "VerificationPage submit failed".let { msg ->
@@ -170,7 +174,7 @@ private fun Fragment.navigateToRequirementErrorFragment(
 ) {
     repeatOnResume {
         findNavController()
-            .navigateToErrorFragmentWithRequirementError(
+            .navigateToErrorScreenWithRequirementError(
                 fromFragment,
                 requirementError
             )
@@ -182,7 +186,7 @@ private fun Fragment.navigateToRequirementErrorFragment(
  */
 internal fun Fragment.navigateToDefaultErrorFragment(cause: Throwable) {
     repeatOnResume {
-        findNavController().navigateToErrorFragmentWithDefaultValues(requireContext(), cause)
+        findNavController().navigateToErrorScreenWithDefaultValues(requireContext(), cause)
     }
 }
 
@@ -191,7 +195,7 @@ internal fun Fragment.navigateToDefaultErrorFragment(cause: Throwable) {
  */
 internal fun Fragment.navigateToDefaultErrorFragment(message: String) {
     repeatOnResume {
-        findNavController().navigateToErrorFragmentWithDefaultValues(
+        findNavController().navigateToErrorScreenWithDefaultValues(
             requireContext(),
             IllegalStateException(message)
         )
@@ -203,7 +207,7 @@ internal fun Fragment.navigateToDefaultErrorFragment(message: String) {
  */
 internal fun Fragment.navigateToErrorFragmentWithFailedReason(failedReason: Throwable) {
     repeatOnResume {
-        findNavController().navigateToErrorFragmentWithFailedReason(requireContext(), failedReason)
+        findNavController().navigateToErrorScreenWithFailedReason(requireContext(), failedReason)
     }
 }
 
@@ -257,6 +261,12 @@ internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityVie
 internal fun Fragment.navigateOnResume(destinationId: Int, args: Bundle? = null) {
     repeatOnResume {
         findNavController().navigate(destinationId, args)
+    }
+}
+
+internal fun Fragment.navigateOnResume(destination: IdentityTopLevelDestination) {
+    repeatOnResume {
+        findNavController().navigateTo(destination)
     }
 }
 

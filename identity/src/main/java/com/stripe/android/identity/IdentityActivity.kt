@@ -30,8 +30,9 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.injection.DaggerIdentityActivityFallbackComponent
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
-import com.stripe.android.identity.navigation.ErrorFragment
-import com.stripe.android.identity.navigation.ErrorFragment.Companion.navigateToErrorFragmentWithDefaultValues
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_CAUSE
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
+import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.utils.clearDataAndNavigateUp
 import com.stripe.android.identity.utils.serializable
@@ -172,7 +173,7 @@ internal class IdentityActivity :
                 }
             },
             onFailure = {
-                navController.navigateToErrorFragmentWithDefaultValues(this, it)
+                navController.navigateToErrorScreenWithDefaultValues(this, it)
             }
         )
 
@@ -359,7 +360,7 @@ internal class IdentityActivity :
             destination: NavDestination?,
             args: Bundle?
         ) = destination?.id == R.id.errorFragment &&
-            args?.getBoolean(ErrorFragment.ARG_SHOULD_FAIL, false) == true
+            args?.getBoolean(ARG_SHOULD_FAIL, false) == true
 
         private fun navigateOnDestination(
             navController: NavController,
@@ -394,7 +395,7 @@ internal class IdentityActivity :
                 isErrorFragmentThatShouldFail(destination, args) -> {
                     val failedReason = requireNotNull(
                         args?.serializable(
-                            ErrorFragment.ARG_CAUSE
+                            ARG_CAUSE
                         ) as? Throwable
                     ) {
                         "Failed to get failedReason from $args"

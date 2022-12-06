@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
@@ -65,7 +66,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -298,11 +298,13 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `setupLink() launches Link when account status is Verified`() = runTest {
-        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
-        val viewModel = createViewModel()
-
-        viewModel.setupLink(PAYMENT_INTENT)
+    fun `Launches Link when user is logged in to their Link account`() = runTest {
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.LoggedIn,
+            ),
+        )
 
         assertThat(viewModel.showLinkVerificationDialog.value).isFalse()
         assertThat(viewModel.activeLinkSession.value).isTrue()
@@ -311,23 +313,13 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `setupLink() starts verification when account status is NeedsVerification`() = runTest {
-        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.NeedsVerification))
-        val viewModel = createViewModel()
-
-        viewModel.setupLink(PAYMENT_INTENT)
-
-        assertThat(viewModel.showLinkVerificationDialog.value).isTrue()
-        assertThat(viewModel.activeLinkSession.value).isFalse()
-        assertThat(viewModel.isLinkEnabled.value).isTrue()
-    }
-
-    @Test
-    fun `setupLink() starts verification when account status is VerificationStarted`() = runTest {
-        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.VerificationStarted))
-        val viewModel = createViewModel()
-
-        viewModel.setupLink(PAYMENT_INTENT)
+    fun `Launches Link verification when user needs to verify their Link account`() = runTest {
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.NeedsVerification,
+            ),
+        )
 
         assertThat(viewModel.showLinkVerificationDialog.value).isTrue()
         assertThat(viewModel.activeLinkSession.value).isFalse()
@@ -335,22 +327,23 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `setupLink() enables Link when account status is SignedOut`() = runTest {
-        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.SignedOut))
-        val viewModel = createViewModel()
-
-        viewModel.setupLink(PAYMENT_INTENT)
+    fun `Enables Link when user is logged out of their Link account`() = runTest {
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
+        )
 
         assertThat(viewModel.activeLinkSession.value).isFalse()
         assertThat(viewModel.isLinkEnabled.value).isTrue()
     }
 
     @Test
-    fun `setupLink() disables Link when account status is Error`() = runTest {
-        whenever(linkLauncher.getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Error))
-        val viewModel = createViewModel()
-
-        viewModel.setupLink(PAYMENT_INTENT)
+    fun `Does not enable Link when the Link state can't be determined`() = runTest {
+        val viewModel = createViewModel(
+            linkState = null,
+        )
 
         assertThat(viewModel.activeLinkSession.value).isFalse()
         assertThat(viewModel.isLinkEnabled.value).isFalse()
@@ -954,6 +947,7 @@ internal class PaymentSheetViewModelTest {
         stripeIntent: StripeIntent = PAYMENT_INTENT,
         customerRepository: CustomerRepository = FakeCustomerRepository(PAYMENT_METHODS),
         shouldFailLoad: Boolean = false,
+        linkState: LinkState? = null,
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return PaymentSheetViewModel(
@@ -963,7 +957,11 @@ internal class PaymentSheetViewModelTest {
             { paymentConfiguration },
             StripeIntentRepository.Static(stripeIntent),
             StripeIntentValidator(),
-            FakePaymentSheetLoader(stripeIntent = stripeIntent, shouldFail = shouldFailLoad),
+            FakePaymentSheetLoader(
+                stripeIntent = stripeIntent,
+                shouldFail = shouldFailLoad,
+                linkState = linkState,
+            ),
             customerRepository,
             prefsRepository,
             lpmResourceRepository,

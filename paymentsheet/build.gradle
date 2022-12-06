@@ -4,6 +4,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'shot'
+apply plugin: 'app.cash.paparazzi'
 
 dependencies {
     implementation project(":link")
@@ -81,7 +82,7 @@ dependencies {
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
     // Test rules and transitive dependencies:
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
-    androidTestUtil "androidx.test:orchestrator:$androidTestVersion"
+    androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
     androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
     androidTestImplementation "com.google.truth:truth:$truthVersion"
 

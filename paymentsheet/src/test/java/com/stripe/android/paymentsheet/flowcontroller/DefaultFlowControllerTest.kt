@@ -49,6 +49,7 @@ import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -396,7 +397,9 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `presentPaymentOptions() after successful init should launch with expected args`() {
+        val flowController = createFlowController(linkState = null)
         var isReadyState = false
+
         flowController.configureWithPaymentIntent(
             PaymentSheetFixtures.CLIENT_SECRET
         ) { isReady, _ ->
@@ -406,27 +409,27 @@ internal class DefaultFlowControllerTest {
             .isTrue()
         flowController.presentPaymentOptions()
 
-        verify(paymentOptionActivityLauncher).launch(
-            argWhere {
-                it == PaymentOptionContract.Args(
-                    state = PaymentSheetState.Full(
-                        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                        clientSecret = PaymentIntentClientSecret("client_secret"),
-                        customerPaymentMethods = emptyList(),
-                        config = null,
-                        isGooglePayReady = false,
-                        newPaymentSelection = null,
-                    ),
-                    statusBarColor = ContextCompat.getColor(
-                        activity,
-                        R.color.stripe_toolbar_color_default_dark
-                    ),
-                    injectorKey = INJECTOR_KEY,
-                    enableLogging = ENABLE_LOGGING,
-                    productUsage = PRODUCT_USAGE
-                )
-            }
+        val expectedArgs = PaymentOptionContract.Args(
+            state = PaymentSheetState.Full(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                clientSecret = PaymentIntentClientSecret("client_secret"),
+                customerPaymentMethods = emptyList(),
+                config = null,
+                isGooglePayReady = false,
+                newPaymentSelection = null,
+                linkState = null,
+                savedSelection = SavedSelection.None,
+            ),
+            statusBarColor = ContextCompat.getColor(
+                activity,
+                R.color.stripe_toolbar_color_default_dark
+            ),
+            injectorKey = INJECTOR_KEY,
+            enableLogging = ENABLE_LOGGING,
+            productUsage = PRODUCT_USAGE
         )
+
+        verify(paymentOptionActivityLauncher).launch(eq(expectedArgs))
     }
 
     @Test
@@ -582,11 +585,13 @@ internal class DefaultFlowControllerTest {
                     PaymentSheetFixtures.CONFIG_CUSTOMER,
                     PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                    PAYMENT_METHODS,
-                    SavedSelection.PaymentMethod(
+                    customerPaymentMethods = PAYMENT_METHODS,
+                    savedSelection = SavedSelection.PaymentMethod(
                         id = "pm_123456789"
                     ),
-                    isGooglePayReady = false
+                    isGooglePayReady = false,
+                    linkState = null,
+                    newPaymentSelection = null,
                 )
             )
 
@@ -605,11 +610,13 @@ internal class DefaultFlowControllerTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
                 PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                PAYMENT_METHODS,
-                SavedSelection.PaymentMethod(
+                customerPaymentMethods = PAYMENT_METHODS,
+                savedSelection = SavedSelection.PaymentMethod(
                     id = "pm_123456789"
                 ),
                 isGooglePayReady = false,
+                linkState = null,
+                newPaymentSelection = null,
             )
         )
 
@@ -631,11 +638,13 @@ internal class DefaultFlowControllerTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
                 PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                 PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                PAYMENT_METHODS,
-                SavedSelection.PaymentMethod(
+                customerPaymentMethods = PAYMENT_METHODS,
+                savedSelection = SavedSelection.PaymentMethod(
                     id = "pm_123456789"
                 ),
                 isGooglePayReady = false,
+                linkState = null,
+                newPaymentSelection = null,
             )
         )
 
@@ -997,13 +1006,18 @@ internal class DefaultFlowControllerTest {
         paymentMethods: List<PaymentMethod> = emptyList(),
         savedSelection: SavedSelection = SavedSelection.None,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        viewModel: FlowControllerViewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
+        linkState: LinkState? = LinkState(
+            configuration = mock(),
+            loginState = LinkState.LoginState.LoggedIn,
+        ),
+        viewModel: FlowControllerViewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java],
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentSheetLoader(
                 customerPaymentMethods = paymentMethods,
                 stripeIntent = stripeIntent,
                 savedSelection = savedSelection,
+                linkState = linkState,
             ),
             viewModel
         )
@@ -1022,7 +1036,6 @@ internal class DefaultFlowControllerTest {
         activityResultCaller,
         INJECTOR_KEY,
         paymentSheetLoader,
-        mock(),
         eventReporter,
         viewModel,
         paymentLauncherAssistedFactory,

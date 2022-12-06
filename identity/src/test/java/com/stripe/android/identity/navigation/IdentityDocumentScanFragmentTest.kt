@@ -25,6 +25,8 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
+import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
+import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Companion.ARG_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.UploadedResult
@@ -215,14 +217,12 @@ class IdentityDocumentScanFragmentTest {
             assertThat(
                 IdentityScanState.ScanType.values()[
                     requireNotNull(navController.backStack.last().arguments)
-                        .getInt(
-                            CouldNotCaptureFragment.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
-                        )
+                        .getInt(ARG_COULD_NOT_CAPTURE_SCAN_TYPE)
                 ]
             ).isEqualTo(IdentityScanState.ScanType.ID_FRONT)
             assertThat(
                 requireNotNull(navController.backStack.last().arguments).getBoolean(
-                    CouldNotCaptureFragment.ARG_REQUIRE_LIVE_CAPTURE
+                    ARG_REQUIRE_LIVE_CAPTURE
                 )
             ).isEqualTo(false)
         }
@@ -272,14 +272,12 @@ class IdentityDocumentScanFragmentTest {
             assertThat(
                 IdentityScanState.ScanType.values()[
                     requireNotNull(navController.backStack.last().arguments)
-                        .getInt(
-                            CouldNotCaptureFragment.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
-                        )
+                        .getInt(ARG_COULD_NOT_CAPTURE_SCAN_TYPE)
                 ]
             ).isEqualTo(IdentityScanState.ScanType.ID_FRONT)
             assertThat(
                 requireNotNull(navController.backStack.last().arguments).getBoolean(
-                    CouldNotCaptureFragment.ARG_REQUIRE_LIVE_CAPTURE
+                    ARG_REQUIRE_LIVE_CAPTURE
                 )
             ).isEqualTo(true)
         }

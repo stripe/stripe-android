@@ -6,6 +6,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import kotlinx.coroutines.delay
@@ -18,6 +19,7 @@ internal class FakePaymentSheetLoader(
     private val savedSelection: SavedSelection = SavedSelection.None,
     private val isGooglePayAvailable: Boolean = false,
     private val delay: Duration = Duration.ZERO,
+    private val linkState: LinkState? = null,
 ) : PaymentSheetLoader {
 
     fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
@@ -40,6 +42,8 @@ internal class FakePaymentSheetLoader(
                     customerPaymentMethods = customerPaymentMethods,
                     savedSelection = savedSelection,
                     isGooglePayReady = isGooglePayAvailable,
+                    linkState = linkState,
+                    newPaymentSelection = null,
                 )
             )
         }

@@ -156,7 +156,7 @@ class PaymentLauncherConfirmationActivityTest {
 
     @Test
     fun `start without args should finish with Error result`() {
-        mockViewModelActivityScenario().launch(
+        mockViewModelActivityScenario().launchForResult(
             Intent(
                 ApplicationProvider.getApplicationContext(),
                 PaymentLauncherConfirmationActivity::class.java

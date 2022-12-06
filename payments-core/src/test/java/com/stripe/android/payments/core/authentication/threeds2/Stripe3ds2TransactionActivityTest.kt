@@ -36,7 +36,7 @@ class Stripe3ds2TransactionActivityTest {
 
     @Test
     fun `start without args should finish with Error result`() {
-        ActivityScenario.launch(
+        ActivityScenario.launchActivityForResult(
             Stripe3ds2TransactionActivity::class.java,
             Bundle()
         ).use { activityScenario ->

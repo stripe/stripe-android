@@ -33,8 +33,6 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.LinkPaymentLauncher.Companion.LINK_ENABLED
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -62,6 +60,7 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -71,7 +70,6 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -233,7 +231,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
         setStripeIntent(state.stripeIntent)
-        setupLink(state.stripeIntent)
+
+        val linkState = state.linkState
+
+        _isLinkEnabled.value = linkState != null
+        activeLinkSession.value = linkState?.loginState == LinkState.LoginState.LoggedIn
+
+        if (linkState != null) {
+            setupLink(linkState)
+        }
 
         resetViewState()
     }
@@ -372,33 +378,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    override fun setupLink(stripeIntent: StripeIntent) {
-        if (LINK_ENABLED &&
-            stripeIntent.paymentMethodTypes.contains(PaymentMethod.Type.Link.code) &&
-            stripeIntent.linkFundingSources.intersect(LinkPaymentLauncher.supportedFundingSources)
-                .isNotEmpty()
-        ) {
-            viewModelScope.launch {
-                val linkConfig = createLinkConfiguration(stripeIntent).also {
-                    _linkConfiguration.value = it
-                }
+    private fun setupLink(state: LinkState) {
+        _linkConfiguration.value = state.configuration
 
-                val accountStatus = linkLauncher.getAccountStatusFlow(linkConfig).first()
-
-                when (accountStatus) {
-                    AccountStatus.Verified -> launchLink(linkConfig, launchedDirectly = true)
-                    AccountStatus.VerificationStarted,
-                    AccountStatus.NeedsVerification -> setupLinkWithVerification(linkConfig)
-                    AccountStatus.SignedOut,
-                    AccountStatus.Error -> {
-                        // Nothing to do here
-                    }
-                }
-                activeLinkSession.value = accountStatus == AccountStatus.Verified
-                _isLinkEnabled.value = accountStatus != AccountStatus.Error
+        when (state.loginState) {
+            LinkState.LoginState.LoggedIn -> {
+                launchLink(state.configuration, launchedDirectly = true)
             }
-        } else {
-            _isLinkEnabled.value = false
+            LinkState.LoginState.NeedsVerification -> {
+                setupLinkWithVerification(state.configuration)
+            }
+            LinkState.LoginState.LoggedOut -> {
+                // Nothing to do here
+            }
         }
     }
 

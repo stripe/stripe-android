@@ -209,7 +209,7 @@ class PaymentMethodsActivityTest {
 
     @Test
     fun setSelectionAndFinish_finishedWithExpectedResult() {
-        activityScenarioFactory.create<PaymentMethodsActivity>(
+        activityScenarioFactory.createForResult<PaymentMethodsActivity>(
             PaymentMethodsActivityStarter.Args.Builder()
                 .setPaymentConfiguration(PaymentConfiguration.getInstance(context))
                 .build()
