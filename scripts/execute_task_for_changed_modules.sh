@@ -33,15 +33,15 @@ projectContainsTask() {
   [[ result -ge 1 ]]
 }
 
-task_to_run=$1
+tasks_to_run=$@
 
 # find all dirs changed through git diff
 changed_dirs=""
 while read line; do
   if isCriticalDeps $line; then
-    echo "critical dep $line is changed, running task (${task_to_run}) for all modules."
-    echo "./gradlew ${task_to_run}"
-    eval "./gradlew ${task_to_run}"
+    echo "critical dep $line is changed, running task (${tasks_to_run}) for all modules."
+    echo "./gradlew ${tasks_to_run}"
+    eval "./gradlew ${tasks_to_run}"
     exit
   fi
 
@@ -67,10 +67,6 @@ for testable_module in $TESTABLE_MODULES
 do
   # this testable_module is directly changed by the PR, will execute its test, look at next one
   if listContainsElement "${changed_modules[@]}" $testable_module; then
-    continue
-  fi
-
-  if ! projectContainsTask $testable_module $task_to_run; then
     continue
   fi
 
@@ -105,22 +101,18 @@ do
   affected_modules="$affected_modules $changed_module"
 done
 
-modules_which_contain_task=""
-
-for module in $affected_modules
-do
-  modules_which_contain_task="$modules_which_contain_task ${module}"
-done
-
 echo -------------------------------------------
 
 test_command="./gradlew"
 
-for module in $modules_which_contain_task
+for module in $affected_modules
 do
-  if projectContainsTask $module $task_to_run; then
-    test_command="$test_command :${module}:${task_to_run}"
-  fi
+  for task_to_run in $tasks_to_run
+  do
+    if projectContainsTask $module $task_to_run; then
+      test_command="$test_command :${module}:${task_to_run}"
+    fi
+  done
 done
 
 echo "${test_command}"
