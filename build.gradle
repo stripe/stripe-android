@@ -20,7 +20,9 @@ buildscript {
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
         classpath "org.jetbrains.kotlinx:binary-compatibility-validator:0.12.1"
         classpath 'com.karumi:shot:5.14.1'
-        classpath 'com.google.gms:google-services:4.3.10'
+        classpath 'dev.chrisbanes.paparazzi:paparazzi-gradle-plugin:1.1.0-sdk33-alpha02'
+        classpath 'app.cash.paparazzi:paparazzi-gradle-plugin:1.1.0'
+        classpath 'com.google.gms:google-services:4.3.14'
         classpath 'com.google.firebase:firebase-appdistribution-gradle:3.0.1'
         classpath buildLibs.detektGradlePlugin
     }

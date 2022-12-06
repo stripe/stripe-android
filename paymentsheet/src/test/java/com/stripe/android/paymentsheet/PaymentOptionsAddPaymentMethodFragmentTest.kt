@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeAndroidKeyStore
@@ -71,9 +72,11 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 clientSecret = PaymentIntentClientSecret("secret"),
                 customerPaymentMethods = emptyList(),
+                savedSelection = SavedSelection.None,
                 config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
                 isGooglePayReady = false,
                 newPaymentSelection = null,
+                linkState = null,
             ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             injectorKey = DUMMY_INJECTOR_KEY,

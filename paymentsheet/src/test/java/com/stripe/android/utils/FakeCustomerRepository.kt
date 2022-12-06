@@ -6,7 +6,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 
 internal class FakeCustomerRepository(
-    private val paymentMethods: List<PaymentMethod> = emptyList()
+    private val paymentMethods: List<PaymentMethod> = emptyList(),
+    private val customer: Customer? = null,
 ) : CustomerRepository {
     lateinit var savedPaymentMethod: PaymentMethod
     var error: Throwable? = null
@@ -14,7 +15,7 @@ internal class FakeCustomerRepository(
     override suspend fun retrieveCustomer(
         customerId: String,
         ephemeralKeySecret: String
-    ): Customer? = null
+    ): Customer? = customer
 
     override suspend fun getPaymentMethods(
         customerConfig: PaymentSheet.CustomerConfiguration,

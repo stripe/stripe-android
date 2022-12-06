@@ -4,11 +4,17 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkPaymentLauncher.Companion.supportedFundingSources
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.injection.APP_NAME
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -20,9 +26,12 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository.ServerSpecState
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -45,6 +54,7 @@ internal interface PaymentSheetLoader {
 
 @Singleton
 internal class DefaultPaymentSheetLoader @Inject constructor(
+    @Named(APP_NAME) private val appName: String,
     private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val stripeIntentRepository: StripeIntentRepository,
@@ -54,6 +64,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val logger: Logger,
     private val eventReporter: EventReporter,
     @IOContext private val workContext: CoroutineContext,
+    private val accountStatusProvider: LinkAccountStatusProvider,
 ) : PaymentSheetLoader {
 
     override suspend fun load(
@@ -65,15 +76,12 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             retrieveStripeIntent(clientSecret)
         }.fold(
             onSuccess = { stripeIntent ->
-                val isLinkReady = stripeIntent.paymentMethodTypes.contains(Link.code)
-
                 create(
                     clientSecret = clientSecret,
                     stripeIntent = stripeIntent,
                     customerConfig = paymentSheetConfiguration?.customer,
                     config = paymentSheetConfiguration,
                     isGooglePayReady = isGooglePayReady,
-                    isLinkReady = isLinkReady
                 )
             },
             onFailure = {
@@ -104,36 +112,51 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         customerConfig: PaymentSheet.CustomerConfiguration?,
         config: PaymentSheet.Configuration?,
         isGooglePayReady: Boolean,
-        isLinkReady: Boolean
-    ): PaymentSheetLoader.Result {
+    ): PaymentSheetLoader.Result = coroutineScope {
         val prefsRepository = prefsRepositoryFactory(customerConfig)
 
-        val paymentMethods = if (customerConfig != null) {
-            retrieveCustomerPaymentMethods(
-                stripeIntent,
-                config,
-                customerConfig
-            )
-        } else {
-            emptyList()
+        val isLinkAvailable = stripeIntent.paymentMethodTypes.contains(Link.code) &&
+            stripeIntent.linkFundingSources.intersect(supportedFundingSources).isNotEmpty()
+
+        val paymentMethods = async {
+            if (customerConfig != null) {
+                retrieveCustomerPaymentMethods(
+                    stripeIntent,
+                    config,
+                    customerConfig
+                )
+            } else {
+                emptyList()
+            }
         }
 
-        val savedSelection = retrieveSavedPaymentSelection(
-            prefsRepository,
-            isGooglePayReady,
-            isLinkReady,
-            paymentMethods
-        )
+        val savedSelection = async {
+            retrieveSavedPaymentSelection(
+                prefsRepository,
+                isGooglePayReady,
+                isLinkAvailable,
+                paymentMethods.await()
+            )
+        }
 
-        return PaymentSheetLoader.Result.Success(
+        val linkState = async {
+            if (isLinkAvailable) {
+                loadLinkState(config, stripeIntent)
+            } else {
+                null
+            }
+        }
+
+        return@coroutineScope PaymentSheetLoader.Result.Success(
             PaymentSheetState.Full(
                 config = config,
                 clientSecret = clientSecret,
                 stripeIntent = stripeIntent,
-                customerPaymentMethods = paymentMethods,
-                savedSelection = savedSelection,
+                customerPaymentMethods = paymentMethods.await(),
+                savedSelection = savedSelection.await(),
                 isGooglePayReady = isGooglePayReady,
-                isLinkEnabled = isLinkReady,
+                linkState = linkState.await(),
+                newPaymentSelection = null,
             )
         )
     }
@@ -214,5 +237,63 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
 
         return stripeIntentValidator.requireValid(paymentMethodPreference.intent)
+    }
+
+    private suspend fun loadLinkState(
+        config: PaymentSheet.Configuration?,
+        stripeIntent: StripeIntent,
+    ): LinkState {
+        val linkConfig = createLinkConfiguration(config, stripeIntent)
+
+        val loginState = when (accountStatusProvider(linkConfig)) {
+            AccountStatus.Verified -> LinkState.LoginState.LoggedIn
+            AccountStatus.NeedsVerification,
+            AccountStatus.VerificationStarted -> LinkState.LoginState.NeedsVerification
+            AccountStatus.SignedOut,
+            AccountStatus.Error -> LinkState.LoginState.LoggedOut
+        }
+
+        return LinkState(
+            configuration = linkConfig,
+            loginState = loginState,
+        )
+    }
+
+    private suspend fun createLinkConfiguration(
+        config: PaymentSheet.Configuration?,
+        stripeIntent: StripeIntent,
+    ): LinkPaymentLauncher.Configuration {
+        val shippingDetails: AddressDetails? = config?.shippingDetails
+
+        val customerPhone = if (shippingDetails?.isCheckboxSelected == true) {
+            shippingDetails.phoneNumber
+        } else {
+            config?.defaultBillingDetails?.phone
+        }
+
+        val shippingAddress = if (shippingDetails?.isCheckboxSelected == true) {
+            shippingDetails.toIdentifierMap(config.defaultBillingDetails)
+        } else {
+            null
+        }
+
+        val customerEmail = config?.defaultBillingDetails?.email ?: config?.customer?.let {
+            customerRepository.retrieveCustomer(
+                it.id,
+                it.ephemeralKeySecret
+            )
+        }?.email
+
+        val merchantName = config?.merchantDisplayName ?: appName
+
+        return LinkPaymentLauncher.Configuration(
+            stripeIntent = stripeIntent,
+            merchantName = merchantName,
+            customerEmail = customerEmail,
+            customerPhone = customerPhone,
+            customerName = config?.defaultBillingDetails?.name,
+            customerBillingCountryCode = config?.defaultBillingDetails?.address?.country,
+            shippingValues = shippingAddress
+        )
     }
 }

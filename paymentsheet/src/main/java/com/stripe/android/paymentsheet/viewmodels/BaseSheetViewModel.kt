@@ -482,11 +482,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    /**
-     * Function called during initialization to setup Link.
-     */
-    abstract fun setupLink(stripeIntent: StripeIntent)
-
     protected suspend fun createLinkConfiguration(
         stripeIntent: StripeIntent
     ): LinkPaymentLauncher.Configuration {

@@ -36,11 +36,13 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
  * Launcher for an Activity that will confirm a payment using Link.
  */
+@Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LinkPaymentLauncher @Inject internal constructor(
     context: Context,
