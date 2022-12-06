@@ -281,10 +281,18 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     fun transitionToFirstScreenWhenReady() {
         viewModelScope.launch {
-            isReadyEvents.asFlow().filter { it.peekContent() }.first()
-            isResourceRepositoryReady.asFlow().filterNotNull().filter { it }.first()
+            awaitReady()
+            awaitRepositoriesReady()
             transitionToFirstScreen()
         }
+    }
+
+    private suspend fun awaitReady() {
+        isReadyEvents.asFlow().filter { it.peekContent() }.first()
+    }
+
+    private suspend fun awaitRepositoriesReady() {
+        isResourceRepositoryReady.asFlow().filterNotNull().filter { it }.first()
     }
 
     override fun transitionToFirstScreen() {

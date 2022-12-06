@@ -351,8 +351,7 @@ internal abstract class BaseSheetViewModel(
         object AddPaymentMethodSheet : TransitionTarget()
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    fun setStripeIntent(stripeIntent: StripeIntent?) {
+    protected fun setStripeIntent(stripeIntent: StripeIntent?) {
         savedStateHandle[SAVE_STRIPE_INTENT] = stripeIntent
 
         /**

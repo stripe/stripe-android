@@ -576,9 +576,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     fun transitionToFirstScreenWhenReady() {
         viewModelScope.launch {
-            isReadyEvents.asFlow().filter { it.peekContent() }.first()
+            awaitReady()
             transitionToFirstScreen()
         }
+    }
+
+    private suspend fun awaitReady() {
+        isReadyEvents.asFlow().filter { it.peekContent() }.first()
     }
 
     override fun transitionToFirstScreen() {
