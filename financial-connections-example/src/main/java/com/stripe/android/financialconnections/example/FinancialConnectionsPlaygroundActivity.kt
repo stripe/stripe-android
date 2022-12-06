@@ -27,8 +27,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -38,6 +42,7 @@ import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 
+@OptIn(ExperimentalComposeUiApi::class)
 class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<FinancialConnectionsPlaygroundViewModel>()
@@ -135,6 +140,10 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
+                    Text(
+                        text = "Backend url: ${state.backendUrl}",
+                        color = Color.Gray
+                    )
                     Button(
                         onClick = {
                             onButtonClick(
@@ -159,7 +168,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                             }
                         }
                     }
-
                 }
             }
         )
@@ -188,6 +196,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         ) {
             radioOptions.forEach { text ->
                 RadioButton(
+                    modifier = Modifier
+                        .semantics { testTagsAsResourceId = true }
+                        .testTag("${text.name}_checkbox"),
                     selected = (text == selectedOption),
                     onClick = { onOptionSelected(text) }
                 )
@@ -213,6 +224,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         ) {
             Mode.values().forEach { text ->
                 RadioButton(
+                    modifier = Modifier
+                        .semantics { testTagsAsResourceId = true }
+                        .testTag("${text.name}_checkbox"),
                     selected = (text == selectedOption),
                     onClick = { onOptionSelected(text) }
                 )
@@ -238,6 +252,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         ) {
             Flow.values().forEach { text ->
                 RadioButton(
+                    modifier = Modifier
+                        .semantics { testTagsAsResourceId = true }
+                        .testTag("${text.name}_checkbox"),
                     selected = (text == selectedOption),
                     onClick = { onOptionSelected(text) }
                 )
@@ -253,7 +270,12 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     @Composable
     fun ContentPreview() {
         FinancialConnectionsContent(
-            state = FinancialConnectionsPlaygroundState(false, "pk", listOf("Result: Pending")),
+            state = FinancialConnectionsPlaygroundState(
+                backendUrl = "http://backend.url",
+                loading = false,
+                publishableKey = "pk",
+                status = listOf("Result: Pending")
+            ),
             onButtonClick = { _, _ -> }
         )
     }

@@ -2,29 +2,43 @@ appId: com.stripe.android.financialconnections.example
 ---
 - launchApp
 # Android specific: Navigate to example (1)
-- tapOn: "Collect bank account for Connect payouts"
+- tapOn: "Playground"
 
 # Android specific: Navigate to example (2)
-- takeScreenshot: ExampleAppLauncher
-- tapOn: "CONNECT AN ACCOUNT"
+- takeScreenshot: TestOAuth_ExampleAppLauncher
+- tapOn:
+      id: "Native_checkbox"
+- tapOn:
+      id: "Test_checkbox"
+- tapOn:
+      id: "Token_checkbox"
+- tapOn: "Connect Accounts!"
+
 
 # Common: web AuthFlow - connect OAuth institution
+- extendedWaitUntil:
+    visible: "Agree"
+    timeout: 30000
 - assertVisible: "Enter account details manually instead"
 - takeScreenshot: ManualEntry_Consent
 - tapOn: "Enter account details manually instead"
 - assertVisible: "Enter bank account details"
 - takeScreenshot: ManualEntry_Input
-- tapOn: "Routing number"
+- tapOn:
+    id: "RoutingInput"
 - inputText: "110000000"
 - takeScreenshot: ManualEntry_RoutingNumber
-- tapOn: "Account number"
+- scroll
+- tapOn:
+    id: "AccountInput"
 - inputText: "000123456789"
 - takeScreenshot: ManualEntry_AccountNumber
 - scroll
-- tapOn: "Confirm account number"
+- tapOn:
+    id: "ConfirmAccountInput"
 - inputText: "000123456789"
 - takeScreenshot: ManualEntry_ConfirmAccountNumber
 - tapOn: "Continue"
-- assertVisible: "Micro-deposits initiated"
 - takeScreenshot: ManualEntry_Success
 - tapOn: "Done"
+- assertVisible: ".*Completed!.*"
