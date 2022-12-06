@@ -124,12 +124,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         return starterArgs
     }
 
-    private fun isSelectOrAddFragment() = supportFragmentManager.fragments.firstOrNull()?.let {
-        it.tag == ADD_FULL_FRAGMENT_TAG ||
-            it.tag == ADD_PAYMENT_METHOD_SHEET_TAG ||
-            it.tag == SELECT_SAVED_PAYMENT_METHOD_TAG
-    } ?: false
-
     override fun resetPrimaryButtonState() {
         viewBinding.continueButton.lockVisible = false
         viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
@@ -168,7 +162,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                         fragmentContainerId,
                         PaymentOptionsAddPaymentMethodFragment::class.java,
                         fragmentArgs,
-                        ADD_FULL_FRAGMENT_TAG
                     )
                 }
                 is BaseSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
@@ -176,7 +169,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                         fragmentContainerId,
                         PaymentOptionsListFragment::class.java,
                         fragmentArgs,
-                        SELECT_SAVED_PAYMENT_METHOD_TAG
                     )
                 }
                 is BaseSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
@@ -187,7 +179,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                         fragmentContainerId,
                         PaymentOptionsAddPaymentMethodFragment::class.java,
                         fragmentArgs,
-                        ADD_PAYMENT_METHOD_SHEET_TAG
                     )
                 }
             }
@@ -211,10 +202,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     internal companion object {
-        internal const val EXTRA_FRAGMENT_CONFIG = BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         internal const val EXTRA_STARTER_ARGS = BaseSheetActivity.EXTRA_STARTER_ARGS
-        const val ADD_FULL_FRAGMENT_TAG = "AddFullFragment"
-        const val ADD_PAYMENT_METHOD_SHEET_TAG = "AddPaymentMethodSheet"
-        const val SELECT_SAVED_PAYMENT_METHOD_TAG = "SelectSavedPaymentMethod"
     }
 }

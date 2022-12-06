@@ -63,6 +63,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
+@Suppress("TooManyFunctions")
 internal abstract class BaseSheetViewModel(
     application: Application,
     internal val config: PaymentSheet.Configuration?,
@@ -316,14 +317,12 @@ internal abstract class BaseSheetViewModel(
         // before adding the Fragment.
         val paymentMethodsValue = paymentMethods.value
 
-        return (
-            stripeIntentValue != null &&
+        return stripeIntentValue != null &&
             paymentMethodsValue != null &&
             isGooglePayReadyValue != null &&
             isResourceRepositoryReadyValue != null &&
             isLinkReadyValue != null &&
             savedSelectionValue != null
-        )
     }
 
     abstract fun transitionToFirstScreen()
