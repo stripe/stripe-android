@@ -227,8 +227,10 @@ class AddressElementTest {
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingExpanded(
-                PhoneNumberState.REQUIRED
-            ),
+                googleApiKey = null,
+                autocompleteCountries = null,
+                phoneNumberState = PhoneNumberState.REQUIRED,
+            ) { },
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -247,8 +249,10 @@ class AddressElementTest {
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingExpanded(
-                PhoneNumberState.HIDDEN
-            ),
+                googleApiKey = null,
+                autocompleteCountries = null,
+                phoneNumberState = PhoneNumberState.HIDDEN,
+            ) { },
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -266,8 +270,10 @@ class AddressElementTest {
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingExpanded(
-                PhoneNumberState.OPTIONAL
-            ),
+                googleApiKey = null,
+                autocompleteCountries = null,
+                phoneNumberState = PhoneNumberState.OPTIONAL,
+            ) { },
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -362,8 +368,10 @@ class AddressElementTest {
             addressRepository,
             countryDropdownFieldController = countryDropdownFieldController,
             addressType = AddressType.ShippingExpanded(
-                PhoneNumberState.OPTIONAL
-            ),
+                googleApiKey = null,
+                autocompleteCountries = null,
+                phoneNumberState = PhoneNumberState.OPTIONAL,
+            ) { },
             sameAsShippingElement = null,
             shippingValuesMap = null
         )

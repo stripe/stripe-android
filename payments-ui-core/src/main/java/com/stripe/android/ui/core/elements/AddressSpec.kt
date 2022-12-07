@@ -1,8 +1,11 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.toLowerCase
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressRepository
+import com.stripe.android.ui.core.elements.autocomplete.DefaultIsPlacesAvailable
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.supportedBillingCountries
@@ -18,18 +21,37 @@ enum class DisplayField {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 sealed class AddressType {
+    interface AutocompleteCapable {
+        val googleApiKey: String?
+        val autocompleteCountries: Set<String>?
+        val onNavigation: () -> Unit
+
+        fun supportsAutoComplete(country: String?): Boolean {
+            val supportedCountries = autocompleteCountries
+            val autocompleteSupportsCountry = supportedCountries
+                ?.map { it.toLowerCase(Locale.current) }
+                ?.contains(country?.toLowerCase(Locale.current)) == true
+            val autocompleteAvailable = DefaultIsPlacesAvailable().invoke() &&
+                !googleApiKey.isNullOrBlank()
+            return autocompleteSupportsCountry && autocompleteAvailable
+        }
+    }
+
     abstract val phoneNumberState: PhoneNumberState
 
     data class ShippingCondensed(
-        val googleApiKey: String?,
-        val autocompleteCountries: Set<String>?,
+        override val googleApiKey: String?,
+        override val autocompleteCountries: Set<String>?,
         override val phoneNumberState: PhoneNumberState,
-        val onNavigation: () -> Unit
-    ) : AddressType()
+        override val onNavigation: () -> Unit
+    ) : AddressType(), AutocompleteCapable
 
-    data class ShippingExpanded(
-        override val phoneNumberState: PhoneNumberState
-    ) : AddressType()
+    data class ShippingExpanded constructor(
+        override val googleApiKey: String?,
+        override val autocompleteCountries: Set<String>?,
+        override val phoneNumberState: PhoneNumberState,
+        override val onNavigation: () -> Unit,
+    ) : AddressType(), AutocompleteCapable
 
     data class Normal(
         override val phoneNumberState: PhoneNumberState =

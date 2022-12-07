@@ -48,14 +48,7 @@ internal class InputAddressViewModel @Inject constructor(
                 val oldAddress = _collectedAddress.value
                 val autocompleteAddress = AddressDetails(
                     name = oldAddress?.name ?: it?.name,
-                    address = oldAddress?.address?.copy(
-                        city = oldAddress.address.city ?: it?.address?.city,
-                        country = oldAddress.address.country ?: it?.address?.country,
-                        line1 = oldAddress.address.line1 ?: it?.address?.line1,
-                        line2 = oldAddress.address.line2 ?: it?.address?.line2,
-                        postalCode = oldAddress.address.postalCode ?: it?.address?.postalCode,
-                        state = oldAddress.address.state ?: it?.address?.state
-                    ) ?: it?.address,
+                    address = it?.address ?: oldAddress?.address,
                     phoneNumber = oldAddress?.phoneNumber ?: it?.phoneNumber,
                     isCheckboxSelected = oldAddress?.isCheckboxSelected
                         ?: it?.isCheckboxSelected
@@ -116,28 +109,18 @@ internal class InputAddressViewModel @Inject constructor(
                 type = AddressType.ShippingCondensed(
                     googleApiKey = args.config?.googlePlacesApiKey,
                     autocompleteCountries = args.config?.autocompleteCountries,
-                    phoneNumberState = phoneNumberState
-                ) {
-                    viewModelScope.launch {
-                        val addressDetails = getCurrentAddress()
-                        addressDetails?.let {
-                            _collectedAddress.emit(it)
-                        }
-                        addressDetails?.address?.country?.let {
-                            navigator.navigateTo(
-                                AddressElementScreen.Autocomplete(
-                                    country = it
-                                )
-                            )
-                        }
-                    }
-                }
+                    phoneNumberState = phoneNumberState,
+                    onNavigation = ::navigateToAutocompleteScreen,
+                )
             )
         } else {
             AddressSpec(
                 showLabel = false,
                 type = AddressType.ShippingExpanded(
-                    phoneNumberState = phoneNumberState
+                    googleApiKey = args.config?.googlePlacesApiKey,
+                    autocompleteCountries = args.config?.autocompleteCountries,
+                    phoneNumberState = phoneNumberState,
+                    onNavigation = ::navigateToAutocompleteScreen,
                 )
             )
         }
@@ -191,6 +174,22 @@ internal class InputAddressViewModel @Inject constructor(
 
     fun clickCheckbox(newValue: Boolean) {
         _checkboxChecked.value = newValue
+    }
+
+    private fun navigateToAutocompleteScreen() {
+        viewModelScope.launch {
+            val addressDetails = getCurrentAddress()
+            addressDetails?.let {
+                _collectedAddress.emit(it)
+            }
+            addressDetails?.address?.country?.let {
+                navigator.navigateTo(
+                    AddressElementScreen.Autocomplete(
+                        country = it
+                    )
+                )
+            }
+        }
     }
 
     internal class Factory(
