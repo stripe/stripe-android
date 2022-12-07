@@ -57,7 +57,10 @@ internal abstract class BasePaymentMethodsListFragment(
         }
         this.config = nullableConfig
 
-        setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
+        sheetViewModel.paymentMethods.observe(this) { paymentMethods ->
+            setHasOptionsMenu(paymentMethods.isNotEmpty())
+        }
+
         sheetViewModel.reportShowExistingPaymentOptions()
     }
 

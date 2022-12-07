@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
@@ -102,6 +103,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntent = stripeIntent,
                     customerPaymentMethods = emptyList(),
+                    supportedPaymentMethodTypes = listOf("card"),
                     savedSelection = SavedSelection.Link,
                     isGooglePayReady = false,
                     newPaymentSelection = null,
@@ -117,6 +119,7 @@ internal class DefaultPaymentSheetLoaderTest {
                         ),
                         loginState = LinkState.LoginState.LoggedIn,
                     ),
+                    amount = Amount(value = 1099, currencyCode = "usd"),
                 )
             )
         )
@@ -144,10 +147,12 @@ internal class DefaultPaymentSheetLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     customerPaymentMethods = PAYMENT_METHODS,
+                    supportedPaymentMethodTypes = listOf("card"),
                     savedSelection = SavedSelection.PaymentMethod(id = "pm_123456789"),
                     isGooglePayReady = true,
                     newPaymentSelection = null,
                     linkState = null,
+                    amount = Amount(value = 1099, currencyCode = "usd"),
                 )
             )
         )
@@ -172,6 +177,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntent = stripeIntent,
                     customerPaymentMethods = emptyList(),
+                    supportedPaymentMethodTypes = listOf("card"),
                     savedSelection = SavedSelection.Link,
                     isGooglePayReady = true,
                     newPaymentSelection = null,
@@ -187,6 +193,7 @@ internal class DefaultPaymentSheetLoaderTest {
                         ),
                         loginState = LinkState.LoginState.LoggedIn,
                     ),
+                    amount = Amount(value = 1099, currencyCode = "usd"),
                 )
             )
         )
@@ -224,10 +231,12 @@ internal class DefaultPaymentSheetLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntent = expectedIntent,
                     customerPaymentMethods = emptyList(),
+                    supportedPaymentMethodTypes = listOf("card"),
                     savedSelection = SavedSelection.Link,
                     isGooglePayReady = false,
                     newPaymentSelection = null,
                     linkState = expectedLinkState,
+                    amount = Amount(value = 1099, currencyCode = "usd"),
                 )
             )
         )
@@ -254,10 +263,12 @@ internal class DefaultPaymentSheetLoaderTest {
                         clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                         customerPaymentMethods = PAYMENT_METHODS,
+                        supportedPaymentMethodTypes = listOf("card"),
                         savedSelection = SavedSelection.PaymentMethod("pm_123456789"),
                         isGooglePayReady = true,
                         newPaymentSelection = null,
                         linkState = null,
+                        amount = Amount(value = 1099, currencyCode = "usd"),
                     )
                 )
             )
@@ -306,9 +317,11 @@ internal class DefaultPaymentSheetLoaderTest {
                         expectedIntent,
                         newPaymentSelection = null,
                         customerPaymentMethods = emptyList(),
+                        supportedPaymentMethodTypes = listOf("card"),
                         savedSelection = SavedSelection.Link,
                         isGooglePayReady = false,
                         linkState = expectedLinkState,
+                        amount = Amount(value = 1099, currencyCode = "usd"),
                     )
                 )
             )
@@ -352,9 +365,11 @@ internal class DefaultPaymentSheetLoaderTest {
                         expectedIntent,
                         newPaymentSelection = null,
                         customerPaymentMethods = emptyList(),
+                        supportedPaymentMethodTypes = listOf("card"),
                         savedSelection = SavedSelection.Link,
                         isGooglePayReady = true,
                         linkState = expectedLinkState,
+                        amount = Amount(value = 1099, currencyCode = "usd"),
                     )
                 )
             )

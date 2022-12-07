@@ -159,8 +159,6 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     internal val liveMode: LiveData<Boolean> = state.mapAsLiveData { it.stripeIntent.isLiveMode }
     internal val selection: LiveData<PaymentSelection?> = state.mapAsLiveData { it.selection }
 
-    private val editing: LiveData<Boolean> = state.mapAsLiveData { it.isEditing }
-
     val processing: LiveData<Boolean> = state.mapAsLiveData { it.isProcessing }
 
     private val _contentVisible = MutableLiveData(true)

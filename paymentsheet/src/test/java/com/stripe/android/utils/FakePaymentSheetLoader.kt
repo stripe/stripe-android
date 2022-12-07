@@ -5,6 +5,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.ClientSecret
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
@@ -17,6 +18,7 @@ internal class FakePaymentSheetLoader(
     private val shouldFail: Boolean = false,
     private var customerPaymentMethods: List<PaymentMethod> = emptyList(),
     private val savedSelection: SavedSelection = SavedSelection.None,
+    private val selection: PaymentSelection? = null,
     private val isGooglePayAvailable: Boolean = false,
     private val delay: Duration = Duration.ZERO,
     private val linkState: LinkState? = null,
@@ -43,6 +45,7 @@ internal class FakePaymentSheetLoader(
                     savedSelection = savedSelection,
                     isGooglePayReady = isGooglePayAvailable,
                     linkState = linkState,
+                    selection = selection,
                     newPaymentSelection = null,
                 )
             )

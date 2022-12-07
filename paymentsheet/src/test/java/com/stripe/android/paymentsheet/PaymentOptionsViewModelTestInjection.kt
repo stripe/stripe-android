@@ -85,9 +85,7 @@ internal open class PaymentOptionsViewModelTestInjection {
             injectorKey = injectorKey,
             lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
             addressResourceRepository = addressResourceRepository,
-            savedStateHandle = SavedStateHandle(), //.apply {
-                //set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
-            //},
+            savedStateHandle = SavedStateHandle(),
             linkLauncher = mock<LinkPaymentLauncher>().apply {
                 whenever(getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
             }

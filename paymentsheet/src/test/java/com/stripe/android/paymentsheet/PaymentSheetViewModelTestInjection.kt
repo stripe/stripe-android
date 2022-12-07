@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -85,7 +86,8 @@ internal open class PaymentSheetViewModelTestInjection {
         stripeIntent: StripeIntent,
         customerRepositoryPMs: List<PaymentMethod> = emptyList(),
         @InjectorKey injectorKey: String,
-        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
+        args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        selection: PaymentSelection? = null,
     ): PaymentSheetViewModel = runBlocking {
         PaymentSheetViewModel(
             ApplicationProvider.getApplicationContext(),
@@ -97,6 +99,7 @@ internal open class PaymentSheetViewModelTestInjection {
             FakePaymentSheetLoader(
                 stripeIntent = stripeIntent,
                 customerPaymentMethods = customerRepositoryPMs,
+                selection = selection,
             ),
             FakeCustomerRepository(customerRepositoryPMs),
             FakePrefsRepository(),

@@ -25,7 +25,6 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.TestUtils.idleLooper
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,11 +38,6 @@ import org.robolectric.annotation.Config
 internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection() {
     @InjectorKey
     private val injectorKey: String = "PaymentSheetListFragmentTest"
-
-    @After
-    override fun after() {
-        super.after()
-    }
 
     @Before
     fun setup() {
@@ -63,18 +57,20 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                 isGooglePayReady = true,
                 savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
             ),
-            initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions(paymentMethods = listOf(paymentMethod))
-        }.moveToState(Lifecycle.State.STARTED).onFragment {
-            assertThat(activityViewModel(it).selection.value)
-                .isEqualTo(paymentSelection)
+            initialState = Lifecycle.State.INITIALIZED,
+            selection = paymentSelection,
+        ).moveToState(Lifecycle.State.STARTED).onFragment {
+            val viewModel = activityViewModel(it)
+            viewModel.selection.observeForever {}
+            assertThat(viewModel.selection.value).isEqualTo(paymentSelection)
         }
 
         scenario.recreate()
+
         scenario.onFragment {
-            assertThat(activityViewModel(it).selection.value)
-                .isEqualTo(paymentSelection)
+            val viewModel = activityViewModel(it)
+            viewModel.selection.observeForever {}
+            assertThat(viewModel.selection.value).isEqualTo(paymentSelection)
         }
     }
 
@@ -88,9 +84,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                 savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
             ),
             initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions(paymentMethods = listOf(paymentMethod))
-        }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
+        ).moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
             assertThat(fragment.isEditing).isFalse()
             fragment.isEditing = true
         }.recreate().onFragment {
@@ -117,18 +111,12 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     @Test
     fun `sets up adapter`() {
         createScenario(
-            initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions(
-                isGooglePayReady = false,
-                isLinkEnabled = false,
-            )
-        }.moveToState(Lifecycle.State.RESUMED).onFragment {
+            initialState = Lifecycle.State.INITIALIZED,
+        ).moveToState(Lifecycle.State.RESUMED).onFragment {
             idleLooper()
 
             val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
-            assertThat(adapter.itemCount)
-                .isEqualTo(3)
+            assertThat(adapter.itemCount).isEqualTo(3)
         }
     }
 
@@ -137,9 +125,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     fun `when screen is 320dp wide, adapter should show 2 and a half items with 114dp width`() {
         createScenario(
             initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions()
-        }.moveToState(Lifecycle.State.RESUMED).onFragment {
+        ).moveToState(Lifecycle.State.RESUMED).onFragment {
             val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
             assertThat(item!!.measuredWidth).isEqualTo(114)
         }
@@ -150,9 +136,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     fun `when screen is 481dp wide, adapter should show 3 and a half items with 128dp width`() {
         createScenario(
             initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions()
-        }.moveToState(Lifecycle.State.RESUMED).onFragment {
+        ).moveToState(Lifecycle.State.RESUMED).onFragment {
             val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
             assertThat(item!!.measuredWidth).isEqualTo(128)
         }
@@ -163,9 +147,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     fun `when screen is 482dp wide, adapter should show 4 items with 112dp width`() {
         createScenario(
             initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions()
-        }.moveToState(Lifecycle.State.RESUMED).onFragment {
+        ).moveToState(Lifecycle.State.RESUMED).onFragment {
             val item = recyclerView(it).layoutManager!!.findViewByPosition(0)
             assertThat(item!!.measuredWidth).isEqualTo(112)
         }
@@ -254,7 +236,9 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         createScenario(
             initialState = Lifecycle.State.INITIALIZED,
             paymentMethods = PAYMENT_METHODS
-        ).moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
+        ).moveToState(
+            newState = Lifecycle.State.STARTED,
+        ).onFragment { fragment ->
             assertThat(fragment.hasOptionsMenu()).isTrue()
         }
     }
@@ -265,7 +249,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             initialState = Lifecycle.State.INITIALIZED,
             paymentMethods = emptyList()
         ).moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
-            fragment.initializePaymentOptions()
             idleLooper()
             assertThat(fragment.hasOptionsMenu()).isFalse()
         }
@@ -288,7 +271,8 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             injectorKey = injectorKey
         ),
         initialState: Lifecycle.State = Lifecycle.State.RESUMED,
-        paymentMethods: List<PaymentMethod> = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        paymentMethods: List<PaymentMethod> = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        selection: PaymentSelection? = null,
     ): FragmentScenario<PaymentSheetListFragment> {
         assertThat(WeakMapInjectorRegistry.retrieve(injectorKey)).isNull()
         fragmentConfig?.let {
@@ -296,7 +280,8 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                 fragmentConfig.stripeIntent,
                 customerRepositoryPMs = paymentMethods,
                 injectorKey = starterArgs.injectorKey,
-                args = starterArgs
+                args = starterArgs,
+                selection = selection,
             ).apply {
                 idleLooper()
                 registerViewModel(starterArgs.injectorKey, this, lpmRepository, addressRepository)
@@ -310,18 +295,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             R.style.StripePaymentSheetDefaultTheme,
             initialState = initialState
         )
-    }
-
-    private fun PaymentSheetListFragment.initializePaymentOptions(
-        paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
-        isGooglePayReady: Boolean = false,
-        isLinkEnabled: Boolean = false,
-        savedSelection: SavedSelection = SavedSelection.None,
-    ) {
-        sheetViewModel._paymentMethods.value = paymentMethods
-        sheetViewModel._isGooglePayReady.value = isGooglePayReady
-        sheetViewModel._isLinkEnabled.value = isLinkEnabled
-        sheetViewModel.savedStateHandle["saved_selection"] = savedSelection
     }
 
     private companion object {

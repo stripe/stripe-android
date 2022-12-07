@@ -110,6 +110,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }?.isReady()?.first() ?: false
     }
 
+    @Suppress("LongMethod")
     private suspend fun create(
         clientSecret: ClientSecret,
         stripeIntent: StripeIntent,
