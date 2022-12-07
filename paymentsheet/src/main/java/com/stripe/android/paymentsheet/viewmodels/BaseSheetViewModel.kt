@@ -49,9 +49,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -247,14 +245,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             }
         }
 
-        viewModelScope.launch {
-            // If the currently selected payment option has been removed, we set it to the one
-            // determined in the payment options state.
-            paymentOptionsState
-                .mapNotNull { it.selectedItem?.toPaymentSelection() }
-                .filter { it != selection.value }
-                .collect { updateSelection(it) }
-        }
+//        viewModelScope.launch {
+//            // If the currently selected payment option has been removed, we set it to the one
+//            // determined in the payment options state.
+//            paymentOptionsState
+//                .mapNotNull { it.selectedItem?.toPaymentSelection() }
+//                .filter { it != selection.value }
+//                .collect { updateSelection(it) }
+//        }
     }
 
     val fragmentConfigEvent = MediatorLiveData<FragmentConfig?>().apply {

@@ -14,13 +14,16 @@ internal fun PaymentSheetState.Full.removePaymentMethod(
     val updatedPaymentMethods = customerPaymentMethods.filter { it.id != paymentMethodId }
     val hasNoBankAccounts = updatedPaymentMethods.all { it.type != USBankAccount }
 
-    val newSelection = PaymentOptionsStateFactory.create(
-        paymentMethods = updatedPaymentMethods,
-        showGooglePay = true,
-        showLink = true,
-        initialSelection = savedSelection,
-        currentSelection = selection.takeUnless { didRemoveSelectedItem },
-    ).selectedItem?.toPaymentSelection()
+    val newSelection = if (didRemoveSelectedItem) {
+        PaymentOptionsStateFactory.create(
+            paymentMethods = updatedPaymentMethods,
+            showGooglePay = true,
+            showLink = true,
+            initialSelection = savedSelection,
+        ).selectedItem?.toPaymentSelection()
+    } else {
+        selection
+    }
 
     val newPrimaryButtonUiState = primaryButtonUiState?.copy(
         visible = if (hasNoBankAccounts) false else primaryButtonUiState.visible,

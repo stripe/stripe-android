@@ -26,7 +26,6 @@ import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcompone
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -122,9 +121,9 @@ internal open class PaymentSheetViewModelTestInjection {
             Logger.noop(),
             testDispatcher,
             injectorKey,
-            savedStateHandle = SavedStateHandle().apply {
-                set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
-            },
+            savedStateHandle = SavedStateHandle(), // .apply {
+//                set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
+//            },
             linkLauncher = mock()
         )
     }
