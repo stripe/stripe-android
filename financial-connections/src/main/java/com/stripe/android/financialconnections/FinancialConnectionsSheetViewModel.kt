@@ -289,7 +289,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             mutex.withLock {
                 val receivedUrl: Uri? = intent?.data?.toString()?.toUriOrNull()
-                setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
                 withState { state ->
                     when {
                         // stripe-auth://native-redirect
