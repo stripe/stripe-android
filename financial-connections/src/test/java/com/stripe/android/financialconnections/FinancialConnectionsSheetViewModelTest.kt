@@ -255,7 +255,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.APP2APP)
+                assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.INTERMEDIATE_DEEPLINK)
                 val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
                 assertThat(viewEffect.url).isEqualTo(aggregatorUrl)
             }
@@ -279,7 +279,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.APP2APP)
+                assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.INTERMEDIATE_DEEPLINK)
                 val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
                 assertThat(viewEffect.url).isEqualTo(
                     "${syncResponse.manifest.hostedAuthUrl}&startPolling=true&$returnUrlQueryParams"
@@ -348,7 +348,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.WEB)
+                assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.ON_EXTERNAL_ACTIVITY)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
             }
@@ -362,7 +362,7 @@ class FinancialConnectionsSheetViewModelTest {
             val viewModel = createViewModel(
                 defaultInitialState.copy(
                     manifest = syncResponse.manifest,
-                    webAuthFlowStatus = AuthFlowStatus.WEB
+                    webAuthFlowStatus = AuthFlowStatus.ON_EXTERNAL_ACTIVITY
                 )
             )
 
@@ -374,7 +374,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             withState(viewModel) {
-                assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.WEB)
+                assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.ON_EXTERNAL_ACTIVITY)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
             }

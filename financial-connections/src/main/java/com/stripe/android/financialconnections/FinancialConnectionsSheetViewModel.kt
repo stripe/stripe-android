@@ -57,6 +57,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         if (initialState.initialArgs.isValid()) {
             eventReporter.onPresented(initialState.initialArgs.configuration)
             // avoid re-fetching manifest if already exists (this will happen on process recreations)
+            viewModelScope.launch { stateFlow.collect { logger.debug(it.toString()) } }
             if (initialState.manifest == null) fetchManifest()
         } else {
             val result = Failed(
@@ -105,15 +106,15 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 onFatal(it, IllegalArgumentException("hostedAuthUrl is required!"))
             }
         } else {
-            val webAuthFlowStatus = if (nativeAuthFlowEnabled) {
+            val authFlowStatus = if (nativeAuthFlowEnabled) {
                 AuthFlowStatus.NONE
             } else {
-                AuthFlowStatus.WEB
+                AuthFlowStatus.ON_EXTERNAL_ACTIVITY
             }
             setState {
                 copy(
                     manifest = manifest,
-                    webAuthFlowStatus = webAuthFlowStatus,
+                    webAuthFlowStatus = authFlowStatus,
                     viewEffect = if (nativeAuthFlowEnabled) {
                         OpenNativeAuthFlow(initialArgs.configuration, synchronizeSessionResponse)
                     } else {
@@ -159,10 +160,15 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             mutex.withLock {
                 setState {
+                    logger.debug("FinancialConnectionsSheetState - entering onResume with $webAuthFlowStatus")
                     if (activityRecreated.not()) {
                         when (webAuthFlowStatus) {
-                            AuthFlowStatus.WEB -> copy(viewEffect = FinishWithResult(Canceled))
-                            AuthFlowStatus.APP2APP -> copy(webAuthFlowStatus = AuthFlowStatus.WEB)
+                            AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> copy(
+                                viewEffect = FinishWithResult(Canceled)
+                            )
+                            AuthFlowStatus.INTERMEDIATE_DEEPLINK -> copy(
+                                webAuthFlowStatus = AuthFlowStatus.ON_EXTERNAL_ACTIVITY
+                            )
                             AuthFlowStatus.NONE -> this
                         }
                     } else {
@@ -184,8 +190,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 setState {
                     if (activityRecreated) {
                         when (webAuthFlowStatus) {
-                            AuthFlowStatus.WEB -> copy(viewEffect = FinishWithResult(Canceled))
-                            AuthFlowStatus.APP2APP -> copy(webAuthFlowStatus = AuthFlowStatus.WEB)
+                            AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> copy(
+                                viewEffect = FinishWithResult(Canceled)
+                            )
+
+                            AuthFlowStatus.INTERMEDIATE_DEEPLINK -> copy(
+                                webAuthFlowStatus = AuthFlowStatus.ON_EXTERNAL_ACTIVITY
+                            )
                             AuthFlowStatus.NONE -> this
                         }
                     } else {
@@ -286,39 +297,42 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun handleOnNewIntent(intent: Intent?) {
         viewModelScope.launch {
             mutex.withLock {
+                logger.debug("FinancialConnectionsSheetState - entering onNewIntent with ${awaitState().webAuthFlowStatus}")
                 val receivedUrl: Uri? = intent?.data?.toString()?.toUriOrNull()
-                withState { state ->
-                    when {
-                        // stripe-auth://native-redirect
-                        receivedUrl?.host == "native-redirect" ->
-                            onStartApp2App(
-                                receivedUrl.toString()
-                                    .replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
-                            )
+                val state = awaitState()
+                when {
+                    // stripe-auth://native-redirect
+                    receivedUrl?.host == "native-redirect" ->
+                        onStartApp2App(
+                            receivedUrl.toString()
+                                .replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
+                        )
 
-                        // stripe-auth://link-accounts/.../authentication_return
-                        (receivedUrl?.host == "link-accounts") &&
-                            (
-                                receivedUrl?.buildUpon()?.clearQuery()
-                                    ?.build()?.path == "/$applicationId/authentication_return"
-                                ) ->
-                            onReturnUrlReceived(receivedUrl)
+                    // stripe-auth://link-accounts/.../authentication_return
+                    (receivedUrl?.host == "link-accounts") &&
+                        (
+                            receivedUrl?.buildUpon()?.clearQuery()
+                                ?.build()?.path == "/$applicationId/authentication_return"
+                            ) ->
+                        onFinishApp2App(receivedUrl)
 
-                        // stripe-auth://link-accounts/{applicationId/success
-                        receivedUrl?.buildUpon()?.clearQuery()
-                            .toString() == state.manifest?.successUrl -> onFlowSuccess(state, receivedUrl)
+                    // stripe-auth://link-accounts/{applicationId/success
+                    receivedUrl?.buildUpon()?.clearQuery()
+                        .toString() == state.manifest?.successUrl -> onFlowSuccess(
+                        state,
+                        receivedUrl
+                    )
 
-                        // stripe-auth://link-accounts/{applicationId/cancel
-                        receivedUrl?.buildUpon()?.clearQuery()
-                            .toString() == state.manifest?.cancelUrl -> onFlowCancelled(state)
+                    // stripe-auth://link-accounts/{applicationId/cancel
+                    receivedUrl?.buildUpon()?.clearQuery()
+                        .toString() == state.manifest?.cancelUrl -> onFlowCancelled(state)
 
-                        else -> {
-                            setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
-                            onFatal(
-                                state,
-                                Exception("Error processing FinancialConnectionsSheet intent")
-                            )
-                        }
+                    else -> {
+                        setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
+                        onFatal(
+                            state,
+                            Exception("Error processing FinancialConnectionsSheet intent")
+                        )
                     }
                 }
             }
@@ -327,9 +341,22 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     private fun onStartApp2App(unwrappedUriString: String) {
         setState {
+            logger.debug("FinancialConnectionsSheetState - Start app2app with $webAuthFlowStatus (Changing to INTERMEDIATE_DEEPLINK)")
             copy(
-                webAuthFlowStatus = AuthFlowStatus.APP2APP,
+                webAuthFlowStatus = AuthFlowStatus.INTERMEDIATE_DEEPLINK,
                 viewEffect = OpenAuthFlowWithUrl(unwrappedUriString)
+            )
+        }
+    }
+
+    private fun onFinishApp2App(receivedUrl: Uri) {
+        setState {
+            logger.debug("FinancialConnectionsSheetState - Finish app2app with $webAuthFlowStatus  (Changing to INTERMEDIATE_DEEPLINK)")
+            val authFlowResumeUrl =
+                "${manifest!!.hostedAuthUrl}&startPolling=true&${receivedUrl.fragment}"
+            copy(
+                webAuthFlowStatus = AuthFlowStatus.INTERMEDIATE_DEEPLINK,
+                viewEffect = OpenAuthFlowWithUrl(authFlowResumeUrl)
             )
         }
     }
@@ -351,16 +378,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         onUserCancel(state)
     }
 
-    private fun onReturnUrlReceived(receivedUrl: Uri) {
-        setState {
-            val authFlowResumeUrl =
-                "${manifest!!.hostedAuthUrl}&startPolling=true&${receivedUrl.fragment}"
-            copy(
-                webAuthFlowStatus = AuthFlowStatus.APP2APP,
-                viewEffect = OpenAuthFlowWithUrl(authFlowResumeUrl)
-            )
-        }
-    }
 
     internal fun onViewEffectLaunched() {
         setState { copy(viewEffect = null) }
