@@ -67,7 +67,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             )
             setState { copy(viewEffect = FinishWithResult(result)) }
         }
-
     }
 
     /**
@@ -170,7 +169,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                             AuthFlowStatus.APP2APP -> copy(webAuthFlowStatus = AuthFlowStatus.WEB)
                             AuthFlowStatus.NONE -> this
                         }
-                    } else this
+                    } else {
+                        this
+                    }
                 }
             }
         }
@@ -192,7 +193,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                             AuthFlowStatus.APP2APP -> copy(webAuthFlowStatus = AuthFlowStatus.WEB)
                             AuthFlowStatus.NONE -> this
                         }
-                    } else this
+                    } else {
+                        this
+                    }
                 }
             }
         }
@@ -293,8 +296,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     when {
                         // stripe-auth://native-redirect
                         receivedUrl?.host == "native-redirect" ->
-                            onStartApp2App(receivedUrl.toString()
-                                .replaceFirst("stripe-auth://native-redirect/$applicationId/", ""))
+                            onStartApp2App(
+                                receivedUrl.toString()
+                                    .replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
+                            )
 
                         // stripe-auth://link-accounts/.../authentication_return
                         receivedUrl?.host == "link-accounts" && receivedUrl?.buildUpon()?.clearQuery()?.build()?.path == "/$applicationId/authentication_return" ->
@@ -307,7 +312,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                         // stripe-auth://link-accounts/{applicationId/cancel
                         receivedUrl?.buildUpon()?.clearQuery()
                             .toString() == state.manifest?.cancelUrl -> onFlowCancelled(state)
-                        
+
                         else -> {
                             setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
                             onFatal(
@@ -330,7 +335,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
     }
 
-    private  fun onFlowSuccess(state: FinancialConnectionsSheetState, receivedUrl: Uri?) {
+    private fun onFlowSuccess(state: FinancialConnectionsSheetState, receivedUrl: Uri?) {
         if (receivedUrl == null) {
             onFatal(state, Exception("Intent url received from web flow is null"))
         }
@@ -357,7 +362,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             )
         }
     }
-    
+
     internal fun onViewEffectLaunched() {
         setState { copy(viewEffect = null) }
     }
