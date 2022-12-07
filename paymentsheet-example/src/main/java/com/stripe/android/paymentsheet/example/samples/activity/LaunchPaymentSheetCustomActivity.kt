@@ -36,7 +36,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
             it?.label ?: resources.getString(R.string.select)
         }
         val selectedPaymentMethodIcon = selectedPaymentMethod.asFlow().map {
-            it?.fetchIcon()
+            it?.icon()
         }
 
         setContent {
