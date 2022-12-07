@@ -2,8 +2,6 @@ name: financial-connections-nightly
 on:
   # Can be executed manually.
   workflow_dispatch:
-  # PRs (delete)
-  pull_request:
   # Execute hourly.
   schedule:
     - cron: '0 * * * *'

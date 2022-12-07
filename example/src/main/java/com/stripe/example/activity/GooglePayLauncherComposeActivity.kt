@@ -1,5 +1,6 @@
 package com.stripe.example.activity
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -122,6 +123,7 @@ class GooglePayLauncherComposeActivity : StripeIntentActivity() {
         )
     }
 
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @Composable
     private fun GooglePayLauncherScreen(
         scaffoldState: ScaffoldState,

@@ -465,9 +465,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
-
-            viewModel._processing.value = true
-
+            viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
             idleLooper()
 
             assertThat(activity.toolbar.isEnabled).isFalse()
@@ -573,10 +571,10 @@ internal class PaymentSheetActivityTest {
 
             activity.viewBinding.googlePayButton.performClick()
 
-            assertThat(viewModel._contentVisible.value).isEqualTo(false)
+            assertThat(viewModel.contentVisible.value).isEqualTo(false)
 
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
-            assertThat(viewModel._contentVisible.value).isEqualTo(true)
+            assertThat(viewModel.contentVisible.value).isEqualTo(true)
         }
     }
 
@@ -588,7 +586,7 @@ internal class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             idleLooper()
 
-            viewModel._paymentSheetResult.value = PaymentSheetResult.Completed
+            viewModel.onFinish()
 
             idleLooper()
 
@@ -878,24 +876,24 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `when intent is in live mode show no indicator`() {
+        val viewModel = createViewModel(paymentIntent = PAYMENT_INTENT.copy(isLiveMode = true))
         val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
-
-            viewModel._liveMode.value = true
             assertThat(activity.viewBinding.testmode.isVisible).isFalse()
         }
     }
 
     @Test
     fun `when intent is not in live mode show indicator`() {
+        val viewModel = createViewModel(paymentIntent = PAYMENT_INTENT.copy(isLiveMode = false))
         val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
-
-            viewModel._liveMode.value = false
             assertThat(activity.viewBinding.testmode.isVisible).isTrue()
         }
     }
