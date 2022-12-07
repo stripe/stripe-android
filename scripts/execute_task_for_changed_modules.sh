@@ -8,7 +8,7 @@ if [[ "$GITHUB_REF_NAME" == "master" ]]; then
   eval "./gradlew ${tasks_to_run}"
   exit
 else
-  echo "Branch: ${BRANCH}"
+  echo "Branch: ${GITHUB_REF_NAME}"
 fi
 
 echo -----Fetching orign master
