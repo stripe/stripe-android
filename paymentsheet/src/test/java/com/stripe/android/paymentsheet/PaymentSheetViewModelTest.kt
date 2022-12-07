@@ -26,7 +26,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
@@ -63,6 +62,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -299,9 +299,11 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Launches Link when user is logged in to their Link account`() = runTest {
+        val configuration: LinkPaymentLauncher.Configuration = mock()
+
         val viewModel = createViewModel(
             linkState = LinkState(
-                configuration = mock(),
+                configuration = configuration,
                 loginState = LinkState.LoginState.LoggedIn,
             ),
         )
@@ -309,7 +311,11 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewModel.showLinkVerificationDialog.value).isFalse()
         assertThat(viewModel.activeLinkSession.value).isTrue()
         assertThat(viewModel.isLinkEnabled.value).isTrue()
-        assertThat(viewModel.launchedLinkDirectly).isTrue()
+
+        verify(linkLauncher).present(
+            configuration = eq(configuration),
+            prefilledNewCardParams = isNull(),
+        )
     }
 
     @Test
@@ -601,14 +607,17 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `when StripeIntent does not accept any of the supported payment methods should return error`() {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            stripeIntent = PAYMENT_INTENT.copy(
+                paymentMethodTypes = listOf("unsupported_payment_type"),
+            ),
+        )
+
         var result: PaymentSheetResult? = null
         viewModel.paymentSheetResult.observeForever {
             result = it
         }
-        viewModel.setStripeIntent(
-            PAYMENT_INTENT.copy(paymentMethodTypes = listOf("unsupported_payment_type"))
-        )
+
         assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
             .startsWith(
                 "None of the requested payment methods ([unsupported_payment_type]) " +
@@ -624,14 +633,11 @@ internal class PaymentSheetViewModelTest {
                     shippingDetails = null,
                     allowsPaymentMethodsRequiringShippingAddress = false,
                 )
-            )
-        )
-
-        viewModel.setStripeIntent(
-            PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+            ),
+            stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("afterpay_clearpay"),
                 shipping = null,
-            )
+            ),
         )
 
         assertThat(viewModel.supportedPaymentMethods).isEmpty()
@@ -644,14 +650,11 @@ internal class PaymentSheetViewModelTest {
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
                     allowsPaymentMethodsRequiringShippingAddress = true,
                 )
-            )
-        )
-
-        viewModel.setStripeIntent(
-            PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+            ),
+            stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("afterpay_clearpay"),
                 shipping = null,
-            )
+            ),
         )
 
         val expectedPaymentMethod = lpmRepository.fromCode("afterpay_clearpay")
@@ -665,63 +668,14 @@ internal class PaymentSheetViewModelTest {
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
                     allowsPaymentMethodsRequiringShippingAddress = false,
                 )
-            )
-        )
-
-        viewModel.setStripeIntent(
-            PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
+            ),
+            stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("afterpay_clearpay"),
-            )
+            ),
         )
 
         val expectedPaymentMethod = lpmRepository.fromCode("afterpay_clearpay")
         assertThat(viewModel.supportedPaymentMethods).containsExactly(expectedPaymentMethod)
-    }
-
-    fun `Verify PI off_session excludes LPMs requiring mandate`() {
-        val viewModel = createViewModel()
-        viewModel.setStripeIntent(
-            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                setupFutureUsage = StripeIntent.Usage.OffSession,
-                paymentMethodTypes = listOf("sepa_debit")
-            )
-        )
-
-        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(0)
-
-        viewModel.setStripeIntent(
-            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                setupFutureUsage = StripeIntent.Usage.OneTime,
-                paymentMethodTypes = listOf("sepa_debit")
-            )
-        )
-
-        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
-        assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-            lpmRepository.fromCode("sepa_debit")!!
-        )
-    }
-
-    fun `Verify SetupIntent excludes LPMs requiring mandate`() {
-        val viewModel = createViewModel()
-        viewModel.setStripeIntent(
-            SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("sepa_debit")
-            )
-        )
-
-        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(0)
-
-        viewModel.setStripeIntent(
-            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("sepa_debit")
-            )
-        )
-
-        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
-        assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-            lpmRepository.fromCode("sepa_debit")!!
-        )
     }
 
     @Test
@@ -853,16 +807,15 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `getSupportedPaymentMethods() filters payment methods with delayed settlement`() {
-        val viewModel = createViewModel()
-        viewModel.setStripeIntent(
-            PAYMENT_INTENT.copy(
+        val viewModel = createViewModel(
+            stripeIntent = PAYMENT_INTENT.copy(
                 paymentMethodTypes = listOf(
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.Ideal.code,
                     PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Sofort.code
-                )
-            )
+                    PaymentMethod.Type.Sofort.code,
+                ),
+            ),
         )
 
         assertThat(
@@ -881,17 +834,15 @@ internal class PaymentSheetViewModelTest {
                     merchantDisplayName = "Example, Inc.",
                     allowsDelayedPaymentMethods = true
                 )
-            )
-        )
-        viewModel.setStripeIntent(
-            PAYMENT_INTENT.copy(
+            ),
+            stripeIntent = PAYMENT_INTENT.copy(
                 paymentMethodTypes = listOf(
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.Ideal.code,
                     PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Sofort.code
-                )
-            )
+                    PaymentMethod.Type.Sofort.code,
+                ),
+            ),
         )
 
         assertThat(

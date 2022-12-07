@@ -1,5 +1,6 @@
 package com.stripe.example.activity
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -89,6 +90,7 @@ class GooglePayPaymentMethodLauncherComposeActivity : AppCompatActivity() {
         )
     }
 
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @Composable
     private fun GooglePayPaymentMethodLauncherScreen(
         scaffoldState: ScaffoldState,
