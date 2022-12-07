@@ -62,6 +62,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -298,9 +299,11 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Launches Link when user is logged in to their Link account`() = runTest {
+        val configuration: LinkPaymentLauncher.Configuration = mock()
+
         val viewModel = createViewModel(
             linkState = LinkState(
-                configuration = mock(),
+                configuration = configuration,
                 loginState = LinkState.LoginState.LoggedIn,
             ),
         )
@@ -308,7 +311,11 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewModel.showLinkVerificationDialog.value).isFalse()
         assertThat(viewModel.activeLinkSession.value).isTrue()
         assertThat(viewModel.isLinkEnabled.value).isTrue()
-        assertThat(viewModel.launchedLinkDirectly).isTrue()
+
+        verify(linkLauncher).present(
+            configuration = eq(configuration),
+            prefilledNewCardParams = isNull(),
+        )
     }
 
     @Test
