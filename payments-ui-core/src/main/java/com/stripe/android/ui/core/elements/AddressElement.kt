@@ -241,7 +241,7 @@ open class AddressElement constructor(
         val icon: TextFieldIcon.Trailing? = if (supportsAutocomplete == true) {
             TextFieldIcon.Trailing(
                 idRes = R.drawable.stripe_ic_search,
-                isTintable = false,
+                isTintable = true,
                 contentDescription = R.string.stripe_address_search_content_description,
                 onClick = {
                     addressType.onNavigation()
