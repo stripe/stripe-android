@@ -1,19 +1,19 @@
-# This script first finds all the modules changed in a PR then executes the taskname passed as the first parameter $1 to the script.
-echo -----Fetching orign master
-git fetch origin master:refs/remotes/origin/master
-echo -----Done fetching orign master
+# This script first finds all the modules changed in a PR then executes the taskname passed as the parameters $@ to the script.
 
 tasks_to_run=$@
 
-BRANCH="$(git rev-parse --abbrev-ref HEAD)"
-if [[ "$BRANCH" == "master" ]]; then
-  echo "Running all tasks because we're on branch: ${BRANCH}."
+if [[ "$GITHUB_REF_NAME" == "master" ]]; then
+  echo "Running all tasks because we're on branch: ${GITHUB_REF_NAME}."
   echo "./gradlew ${tasks_to_run}"
   eval "./gradlew ${tasks_to_run}"
   exit
 else
   echo "Branch: ${BRANCH}"
 fi
+
+echo -----Fetching orign master
+git fetch origin master:refs/remotes/origin/master
+echo -----Done fetching orign master
 
 # directory names that corresponds to all modules, space delimited.
 TESTABLE_MODULES=`./gradlew projects |  grep -E ".*--- Project ':.*'$" | sed -r "s/^.*--- Project ':(.+)'$/\1/" | tr '\n' ' '`
