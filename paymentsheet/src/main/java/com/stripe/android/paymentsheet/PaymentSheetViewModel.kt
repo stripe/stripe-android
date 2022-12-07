@@ -116,8 +116,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         args.config?.shippingDetails?.toConfirmPaymentIntentShipping()
     )
 
-    @VisibleForTesting
-    internal val _paymentSheetResult = MutableLiveData<PaymentSheetResult>()
+    private val _paymentSheetResult = MutableLiveData<PaymentSheetResult>()
     internal val paymentSheetResult: LiveData<PaymentSheetResult> = _paymentSheetResult
 
     private val _startConfirm = MutableLiveData<Event<ConfirmStripeIntentParams>>()
@@ -149,8 +148,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override var newPaymentSelection: PaymentSelection.New? = null
 
-    @VisibleForTesting
-    internal var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
+    private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
 
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
@@ -449,7 +447,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     /**
      * Method called with the result of launching the Link UI to collect a payment.
      */
-    private fun onLinkActivityResult(result: LinkActivityResult) {
+    fun onLinkActivityResult(result: LinkActivityResult) {
         val completePaymentFlow = result is LinkActivityResult.Completed
         val cancelPaymentFlow = launchedLinkDirectly &&
             result is LinkActivityResult.Canceled && result.reason == Reason.BackPressed

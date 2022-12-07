@@ -588,7 +588,7 @@ internal class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             idleLooper()
 
-            viewModel._paymentSheetResult.value = PaymentSheetResult.Completed
+            viewModel.onFinish()
 
             idleLooper()
 

@@ -354,8 +354,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         _transition.postValue(Event(target))
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    fun setStripeIntent(stripeIntent: StripeIntent?) {
+    protected fun setStripeIntent(stripeIntent: StripeIntent?) {
         savedStateHandle[SAVE_STRIPE_INTENT] = stripeIntent
 
         /**

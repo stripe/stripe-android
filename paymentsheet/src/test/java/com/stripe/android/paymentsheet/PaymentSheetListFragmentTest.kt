@@ -15,7 +15,6 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
@@ -233,11 +232,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     fun `total amount label correctly displays amount`() {
         createScenario().onFragment { fragment ->
             shadowOf(getMainLooper()).idle()
-            fragment.sheetViewModel.setStripeIntent(
-                PaymentIntentFixtures.PI_OFF_SESSION.copy(
-                    amount = 399
-                )
-            )
 
             assertThat(fragment.sheetViewModel.isProcessingPaymentIntent).isTrue()
         }
@@ -304,7 +298,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
                 injectorKey = starterArgs.injectorKey,
                 args = starterArgs
             ).apply {
-                setStripeIntent(fragmentConfig.stripeIntent)
                 idleLooper()
                 registerViewModel(starterArgs.injectorKey, this, lpmRepository, addressRepository)
             }
