@@ -3,6 +3,18 @@ echo -----Fetching orign master
 git fetch origin master:refs/remotes/origin/master
 echo -----Done fetching orign master
 
+tasks_to_run=$@
+
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+if [[ "$BRANCH" == "master" ]]; then
+  echo "Running all tasks because we're on branch: ${BRANCH}."
+  echo "./gradlew ${tasks_to_run}"
+  eval "./gradlew ${tasks_to_run}"
+  exit
+else
+  echo "Branch: ${BRANCH}"
+fi
+
 # directory names that corresponds to all modules, space delimited.
 TESTABLE_MODULES=`./gradlew projects |  grep -E ".*--- Project ':.*'$" | sed -r "s/^.*--- Project ':(.+)'$/\1/" | tr '\n' ' '`
 
@@ -32,8 +44,6 @@ projectContainsTask() {
   result="$(./gradlew :${module}:tasks | grep -E ^${task} | wc -l)"
   [[ result -ge 1 ]]
 }
-
-tasks_to_run=$@
 
 # find all dirs changed through git diff
 changed_dirs=""
