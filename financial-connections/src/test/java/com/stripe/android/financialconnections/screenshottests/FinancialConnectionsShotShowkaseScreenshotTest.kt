@@ -38,9 +38,7 @@ class PaparazziSampleScreenshotTest {
     }
 
     @get:Rule
-    val paparazzi = Paparazzi(
-        maxPercentDifference = 0.0
-    )
+    val paparazzi = Paparazzi()
 
     @Test
     fun preview_tests(
