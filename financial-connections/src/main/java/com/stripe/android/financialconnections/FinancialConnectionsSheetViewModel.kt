@@ -302,7 +302,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                             )
 
                         // stripe-auth://link-accounts/.../authentication_return
-                        receivedUrl?.host == "link-accounts" && receivedUrl?.buildUpon()?.clearQuery()?.build()?.path == "/$applicationId/authentication_return" ->
+                        (receivedUrl?.host == "link-accounts") &&
+                            (
+                                receivedUrl?.buildUpon()?.clearQuery()
+                                    ?.build()?.path == "/$applicationId/authentication_return"
+                                ) ->
                             onReturnUrlReceived(receivedUrl)
 
                         // stripe-auth://link-accounts/{applicationId/success
