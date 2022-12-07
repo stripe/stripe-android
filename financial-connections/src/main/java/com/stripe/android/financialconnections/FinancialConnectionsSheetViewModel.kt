@@ -58,9 +58,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             eventReporter.onPresented(initialState.initialArgs.configuration)
             // avoid re-fetching manifest if already exists (this will happen on process recreations)
             if (initialState.manifest == null) fetchManifest()
-            viewModelScope.launch {
-                stateFlow.collect { logger.debug("STATE: ${it.webAuthFlowStatus}, recreated: ${it.activityRecreated}") }
-            }
         } else {
             val result = Failed(
                 IllegalStateException("Invalid configuration provided when instantiating activity")
@@ -162,7 +159,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             mutex.withLock {
                 setState {
-                    logger.debug("STATE: entering onResume, status = $webAuthFlowStatus")
                     if (activityRecreated.not()) {
                         when (webAuthFlowStatus) {
                             AuthFlowStatus.WEB -> copy(viewEffect = FinishWithResult(Canceled))
@@ -186,7 +182,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             mutex.withLock {
                 setState {
-                    logger.debug("STATE: entering onActivityResult, status = $webAuthFlowStatus")
                     if (activityRecreated) {
                         when (webAuthFlowStatus) {
                             AuthFlowStatus.WEB -> copy(viewEffect = FinishWithResult(Canceled))
