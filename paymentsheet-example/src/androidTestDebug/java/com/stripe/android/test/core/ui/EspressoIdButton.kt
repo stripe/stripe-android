@@ -10,10 +10,13 @@ import java.security.InvalidParameterException
 
 open class EspressoIdButton(@IntegerRes val id: Int) {
 
-    fun click() {
-        val interaction = Espresso.onView(ViewMatchers.withId(id))
+    private val interaction: ViewInteraction
+        get() = Espresso.onView(ViewMatchers.withId(id))
 
-        if (interaction.isNotVisible) {
+    fun click() {
+        val isNotVisible = runCatching { isDisplayed() }.isFailure
+
+        if (isNotVisible) {
             interaction.perform(ViewActions.scrollTo())
         }
 
@@ -21,13 +24,12 @@ open class EspressoIdButton(@IntegerRes val id: Int) {
     }
 
     fun isEnabled() {
-        Espresso.onView(ViewMatchers.withId(id))
-            .check(ViewAssertions.matches(ViewMatchers.isEnabled()))
+        interaction.check(ViewAssertions.matches(ViewMatchers.isEnabled()))
     }
 
     fun checkEnabled(): Boolean {
         return try {
-            Espresso.onView(ViewMatchers.withId(id))
+            interaction
                 .withFailureHandler { _, _ ->
                     throw InvalidParameterException("No payment selector found")
                 }
@@ -39,10 +41,6 @@ open class EspressoIdButton(@IntegerRes val id: Int) {
     }
 
     fun isDisplayed() {
-        Espresso.onView(ViewMatchers.withId(id))
-            .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+        interaction.check(ViewAssertions.matches(ViewMatchers.isCompletelyDisplayed()))
     }
 }
-
-private val ViewInteraction.isNotVisible: Boolean
-    get() = runCatching { check(ViewAssertions.matches(ViewMatchers.isDisplayed())) }.isFailure
