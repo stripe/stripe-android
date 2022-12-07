@@ -224,7 +224,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     @Parcelize
     internal data class UIState(
         val label: String?,
-        val onClick: (() -> Unit)?, // TODO Determine in sheet view model based on state
+        val onClick: (() -> Unit)?,
         val enabled: Boolean,
         val visible: Boolean,
     ) : Parcelable
