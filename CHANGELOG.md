@@ -27,6 +27,7 @@
 
 ### PaymentSheet
 * [FIXED][5910](https://github.com/stripe/stripe-android/pull/5910) PaymentSheet now fails gracefully when launched with invalid arguments.
+* [Changed][5927](https://github.com/stripe/stripe-android/pull/5927) Customers can now re-enter the autocomplete flow of the Address Element by tapping an icon in the line 1 text field.
 
 ## 20.16.2 - 2022-12-05
 
