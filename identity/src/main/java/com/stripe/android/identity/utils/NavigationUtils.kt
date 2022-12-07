@@ -5,7 +5,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONFIRMATION
@@ -229,30 +228,6 @@ internal fun Fragment.navigateToErrorFragmentWithFailedReason(
             identityViewModel
         )
     }
-}
-
-/**
- * Clear [IdentityViewModel.collectedData], [IdentityViewModel.documentFrontUploadedState] and
- * [IdentityViewModel.documentBackUploadedState] when the corresponding data collections screens
- * are about to be popped from navigation stack.
- * Then pop the screen by calling [NavController.navigateUp].
- */
-internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityViewModel): Boolean {
-    currentBackStackEntry?.destination?.id?.let { currentEntryId ->
-        if (DOCUMENT_UPLOAD_SCREENS.contains(currentEntryId)) {
-            identityViewModel.clearUploadedData()
-        }
-        currentEntryId.fragmentIdToRequirement().forEach(identityViewModel::clearCollectedData)
-    }
-
-    previousBackStackEntry?.destination?.id?.let { previousEntryId ->
-        if (DOCUMENT_UPLOAD_SCREENS.contains(previousEntryId)) {
-            identityViewModel.clearUploadedData()
-        }
-        previousEntryId.fragmentIdToRequirement().forEach(identityViewModel::clearCollectedData)
-    }
-
-    return navigateUp()
 }
 
 /**

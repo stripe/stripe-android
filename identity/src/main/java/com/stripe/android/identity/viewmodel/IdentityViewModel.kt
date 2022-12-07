@@ -1,9 +1,11 @@
 package com.stripe.android.identity.viewmodel
 
+import android.app.Application
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -14,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.navigation.NavController
 import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -32,6 +35,14 @@ import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
+import com.stripe.android.identity.navigation.ConfirmationDestination
+import com.stripe.android.identity.navigation.ConsentDestination
+import com.stripe.android.identity.navigation.DocSelectionDestination
+import com.stripe.android.identity.navigation.SelfieDestination
+import com.stripe.android.identity.navigation.navigateTo
+import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
+import com.stripe.android.identity.navigation.navigateToErrorScreenWithRequirementError
+import com.stripe.android.identity.navigation.routeToScreenName
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
@@ -48,7 +59,14 @@ import com.stripe.android.identity.networking.models.CollectedDataParam.Companio
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageData
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.hasError
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBack
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingConsent
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingDocType
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingFront
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingSelfie
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.states.FaceDetectorTransitioner
@@ -69,6 +87,7 @@ import kotlin.coroutines.CoroutineContext
  * ViewModel hosted by IdentityActivity, shared across fragments.
  */
 internal class IdentityViewModel constructor(
+    application: Application,
     internal val verificationArgs: IdentityVerificationSheetContract.Args,
     private val identityRepository: IdentityRepository,
     private val identityModelFetcher: IdentityModelFetcher,
@@ -79,7 +98,7 @@ internal class IdentityViewModel constructor(
     private val savedStateHandle: SavedStateHandle,
     @UIContext internal val uiContext: CoroutineContext,
     @IOContext internal val workContext: CoroutineContext
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     /**
      * StateFlow to track the upload status of high/low resolution image for front of document.
@@ -202,7 +221,8 @@ internal class IdentityViewModel constructor(
     /**
      * Response for initial VerificationPage, used for building UI.
      */
-    private val _verificationPage = MutableLiveData<Resource<VerificationPage>>()
+    @VisibleForTesting
+    internal val _verificationPage = MutableLiveData<Resource<VerificationPage>>()
     val verificationPage: LiveData<Resource<VerificationPage>> = _verificationPage
 
     /**
@@ -813,6 +833,7 @@ internal class IdentityViewModel constructor(
 
     /**
      * Post collected [CollectedDataParam] to update [VerificationPageData].
+     * TODO(ccen) remove after all Fragment extension calls are removed.
      */
     @Throws(
         APIConnectionException::class,
@@ -854,6 +875,7 @@ internal class IdentityViewModel constructor(
 
     /**
      * Submit the final [VerificationPageData].
+     * TODO(ccen) remove after all Fragment extension calls are removed.
      */
     @Throws(
         APIConnectionException::class,
@@ -871,6 +893,207 @@ internal class IdentityViewModel constructor(
                 Resource.success(DUMMY_RESOURCE)
             }
             return it
+        }
+    }
+
+    /**
+     * Send a POST request to VerificationPageData,
+     * If POST succeeded, invoke [onCorrectResponse].
+     * Otherwise transition to Error screen.
+     */
+    fun postVerificationPageData(
+        navController: NavController,
+        collectedDataParam: CollectedDataParam,
+        fromRoute: String,
+        onCorrectResponse: suspend ((verificationPageDataWithNoError: VerificationPageData) -> Unit) = {}
+    ) {
+        viewModelScope.launch {
+            screenTracker.screenTransitionStart(
+                fromRoute.routeToScreenName()
+            )
+            verificationPageData.updateStateAndSave {
+                Resource.loading()
+            }
+            runCatching {
+                identityRepository.postVerificationPageData(
+                    verificationArgs.verificationSessionId,
+                    verificationArgs.ephemeralKeySecret,
+                    collectedDataParam,
+                    calculateClearDataParam(collectedDataParam)
+                )
+            }.onSuccess { newVerificationPageData ->
+                verificationPageData.updateStateAndSave {
+                    Resource.success(DUMMY_RESOURCE)
+                }
+                _collectedData.updateStateAndSave { oldValue ->
+                    oldValue.mergeWith(collectedDataParam)
+                }
+                _missingRequirements.updateStateAndSave {
+                    requireNotNull(newVerificationPageData.requirements.missings) {
+                        "VerificationPageDataRequirements.missings is null"
+                    }
+                }
+
+                if (newVerificationPageData.hasError()) {
+                    newVerificationPageData.requirements.errors[0].let { requirementError ->
+                        errorCause.postValue(
+                            IllegalStateException("VerificationPageDataRequirementError: $requirementError")
+                        )
+                        navController.navigateToErrorScreenWithRequirementError(
+                            fromRoute,
+                            requirementError,
+                        )
+                    }
+                } else {
+                    onCorrectResponse(newVerificationPageData)
+                }
+            }.onFailure { cause ->
+                errorCause.postValue(cause)
+                navController.navigateToErrorScreenWithDefaultValues(getApplication())
+            }
+        }
+    }
+
+    /**
+     * Send a POST request to VerificationPageData, navigate or invoke the callbacks based on result.
+     */
+    fun postVerificationPageDataAndMaybeNavigate(
+        navController: NavController,
+        collectedDataParam: CollectedDataParam,
+        fromRoute: String,
+        onMissingFront: () -> Unit = {
+            errorCause.postValue(
+                IllegalStateException(
+                    "unhandled onMissingFront from $fromRoute with $collectedDataParam"
+                )
+            )
+            navController.navigateToErrorScreenWithDefaultValues(getApplication())
+        },
+        onMissingBack: () -> Unit = {
+            errorCause.postValue(
+                IllegalStateException(
+                    "unhandled onMissingBack from $fromRoute with $collectedDataParam"
+                )
+            )
+            navController.navigateToErrorScreenWithDefaultValues(getApplication())
+        },
+        onReadyToSubmit: () -> Unit = {
+            errorCause.postValue(
+                IllegalStateException(
+                    "unhandled onReadyToSubmit from $fromRoute with $collectedDataParam"
+                )
+            )
+            navController.navigateToErrorScreenWithDefaultValues(getApplication())
+        }
+    ) {
+        postVerificationPageData(
+            navController = navController,
+            collectedDataParam = collectedDataParam,
+            fromRoute = fromRoute
+        ) { verificationPageData ->
+            if (verificationPageData.isMissingConsent()) {
+                navController.navigateTo(ConsentDestination)
+            } else if (verificationPageData.isMissingDocType()) {
+                navController.navigateTo(DocSelectionDestination)
+            } else if (verificationPageData.isMissingFront()) {
+                onMissingFront()
+            } else if (verificationPageData.isMissingBack()) {
+                onMissingBack()
+            } else if (verificationPageData.isMissingSelfie()) {
+                navController.navigateTo(SelfieDestination)
+            } else {
+                onReadyToSubmit()
+            }
+        }
+    }
+
+    /**
+     * Check if Selfie is needed from [verificationPage] and navigate.
+     * If selfie is needed, navigate to [SelfieDestination]
+     * Otherwise, sends a POST request to VerificationPageDataSubmit and navigate to [ConfirmationDestination].
+     */
+    fun navigateToSelfieOrSubmit(
+        navController: NavController,
+        fromRoute: String
+    ) {
+        if (requireNotNull(verificationPage.value?.data).requireSelfie()) {
+            navController.navigateTo(SelfieDestination)
+        } else {
+            submitAndNavigate(navController, fromRoute)
+        }
+    }
+
+    /**
+     * Submit the verification and navigate based on result.
+     */
+    fun submitAndNavigate(
+        navController: NavController,
+        fromRoute: String
+    ) {
+        viewModelScope.launch {
+            verificationPageSubmit.updateStateAndSave {
+                Resource.loading()
+            }
+            runCatching {
+                identityRepository.postVerificationPageSubmit(
+                    verificationArgs.verificationSessionId,
+                    verificationArgs.ephemeralKeySecret
+                )
+            }.onSuccess { submittedVerificationPageData ->
+                verificationPageSubmit.updateStateAndSave {
+                    Resource.success(DUMMY_RESOURCE)
+                }
+                when {
+                    submittedVerificationPageData.hasError() -> {
+                        submittedVerificationPageData.requirements.errors[0].let { requirementError ->
+                            errorCause.postValue(
+                                IllegalStateException("VerificationPageDataRequirementError: $requirementError")
+                            )
+                            navController.navigateToErrorScreenWithRequirementError(
+                                fromRoute,
+                                requirementError
+                            )
+                        }
+                    }
+                    submittedVerificationPageData.submitted -> {
+                        navController.navigateTo(ConfirmationDestination)
+                    }
+                    else -> {
+                        errorCause.postValue(IllegalStateException("VerificationPage submit failed"))
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                    }
+                }
+            }.onFailure {
+                errorCause.postValue(it)
+                navController.navigateToErrorScreenWithDefaultValues(getApplication())
+            }
+        }
+    }
+
+    /**
+     * Observe for [verificationPage] and callback onSuccess, navigate to error otherwise.
+     */
+    fun requireVerificationPage(
+        lifecycleOwner: LifecycleOwner,
+        navController: NavController,
+        onSuccess: (VerificationPage) -> Unit
+    ) {
+        verificationPage.observe(lifecycleOwner) { resource ->
+            when (resource.status) {
+                Status.SUCCESS -> {
+                    onSuccess(requireNotNull(resource.data))
+                }
+                Status.ERROR -> {
+                    Log.e(TAG, "Fail to get VerificationPage")
+                    val cause = requireNotNull(resource.throwable)
+                    errorCause.postValue(cause)
+                    navController.navigateToErrorScreenWithDefaultValues(
+                        getApplication()
+                    )
+                }
+                Status.LOADING -> {} // no-op
+                Status.IDLE -> {} // no-op
+            }
         }
     }
 
@@ -953,6 +1176,7 @@ internal class IdentityViewModel constructor(
     }
 
     internal class IdentityViewModelFactory(
+        private val applicationSupplier: () -> Application,
         private val uiContextSupplier: () -> CoroutineContext,
         private val workContextSupplier: () -> CoroutineContext,
         private val subcomponentSupplier: () -> IdentityActivitySubcomponent
@@ -964,6 +1188,7 @@ internal class IdentityViewModel constructor(
             val savedStateHandle = extras.createSavedStateHandle()
 
             return IdentityViewModel(
+                applicationSupplier(),
                 subcomponent.verificationArgs,
                 subcomponent.identityRepository,
                 subcomponent.identityModelFetcher,
