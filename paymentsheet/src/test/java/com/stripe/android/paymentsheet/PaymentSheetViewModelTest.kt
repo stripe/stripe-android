@@ -678,59 +678,6 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewModel.supportedPaymentMethods).containsExactly(expectedPaymentMethod)
     }
 
-//    @Test
-//    fun `Verify PI off_session excludes LPMs requiring mandate`() {
-//        val viewModel = createViewModel(
-//            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-//                setupFutureUsage = StripeIntent.Usage.OffSession,
-//                paymentMethodTypes = listOf("sepa_debit")
-//            ),
-//        )
-//
-//        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(0)
-//    }
-//
-//    @Test
-//    fun `Verify PI not off_session does not exclude LPMs requiring mandate`() {
-//        val viewModel = createViewModel(
-//            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-//                setupFutureUsage = StripeIntent.Usage.OnSession,
-//                paymentMethodTypes = listOf("sepa_debit")
-//            ),
-//        )
-//
-//        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
-//        assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-//            lpmRepository.fromCode("sepa_debit")!!
-//        )
-//    }
-//
-//    @Test
-//    fun `Verify SetupIntent excludes LPMs requiring mandate`() {
-//        val viewModel = createViewModel(
-//            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
-//                paymentMethodTypes = listOf("sepa_debit")
-//            ),
-//        )
-//
-//        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(0)
-//    }
-//
-//    @Test
-//    fun `Verify SetupIntent not off_session excludes LPMs requiring mandate 2`() {
-//        val viewModel = createViewModel(
-//            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-//                setupFutureUsage = StripeIntent.Usage.OnSession,
-//                paymentMethodTypes = listOf(PaymentMethod.Type.SepaDebit.code),
-//            ),
-//        )
-//
-//        assertThat(viewModel.supportedPaymentMethods.size).isEqualTo(1)
-//        assertThat(viewModel.supportedPaymentMethods.first()).isEqualTo(
-//            lpmRepository.fromCode(PaymentMethod.Type.SepaDebit.code)!!
-//        )
-//    }
-
     @Test
     fun `isGooglePayReady without google pay config should emit false`() {
         val viewModel = createViewModel(PaymentSheetFixtures.ARGS_CUSTOMER_WITHOUT_GOOGLEPAY)

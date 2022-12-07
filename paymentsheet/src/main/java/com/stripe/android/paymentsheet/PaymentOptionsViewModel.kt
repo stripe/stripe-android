@@ -197,7 +197,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onPaymentResult(paymentResult: PaymentResult) {
-        _processing.value = false
+        savedStateHandle[SAVE_PROCESSING] = false
     }
 
     override fun updateSelection(selection: PaymentSelection?) {

@@ -28,7 +28,6 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkPaymentDetails
@@ -441,7 +440,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     /**
      * Method called with the result of launching the Link UI to collect a payment.
      */
-    fun onLinkActivityResult(result: LinkActivityResult) {
+    private fun onLinkActivityResult(result: LinkActivityResult) {
         val completePaymentFlow = result is LinkActivityResult.Completed
         val cancelPaymentFlow = launchedLinkDirectly &&
             result is LinkActivityResult.Canceled && result.reason == Reason.BackPressed
