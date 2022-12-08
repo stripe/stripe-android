@@ -40,13 +40,29 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
                     FinancialConnectionsSheetNativeActivity::class.java
                 )
             // link-accounts hosts:
-            // - redirections from embedded web AuthFlow back to SDK (app2app return and AuthFlow end)
+            host == "link-accounts" -> {
+                when {
+                    // Redirect from app2app finish back to SDK.
+                    // TODO@carlosmuvi check if the current flow is native or web from the deeplink
+                    this.toString().contains("authentication_return") -> Intent(
+                        this@FinancialConnectionsSheetRedirectActivity,
+                        FinancialConnectionsSheetNativeActivity::class.java
+                    )
+                    // redirect from embedded AuthFlow completed on web back to SDK.
+                    else -> Intent(
+                        this@FinancialConnectionsSheetRedirectActivity,
+                        FinancialConnectionsSheetActivity::class.java
+                    )
+                }
+            }
+
             // native-redirect hosts:
-            // - redirections from embedded web AuthFlow back SDK (app2app start)
-            host == "link-accounts" || host == "native-redirect" -> Intent(
+            // redirections from embedded web AuthFlow back SDK (app2app start)
+            host == "native-redirect" -> Intent(
                 this@FinancialConnectionsSheetRedirectActivity,
                 FinancialConnectionsSheetActivity::class.java
             )
+
             else -> null
         }
 }

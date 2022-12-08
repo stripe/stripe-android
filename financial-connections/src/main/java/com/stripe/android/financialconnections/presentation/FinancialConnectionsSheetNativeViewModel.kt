@@ -61,6 +61,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     init {
         setState { copy(firstInit = false) }
         viewModelScope.launch {
+            stateFlow.collect { logger.debug("state: $it")}
+        }
+        viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
                 when (message) {
                     is Message.Finish -> {
@@ -86,6 +89,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         viewModelScope.launch {
             val receivedUrl: String = intent?.data?.toString() ?: ""
             when {
+                receivedUrl.contains("authentication_return", true) -> {
+                    setState {
+                        copy(webAuthFlow = Success(receivedUrl))
+                    }
+                }
                 uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     baseUrl(applicationId)
