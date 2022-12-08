@@ -88,33 +88,17 @@ private class DelegateDrawable(
         }
     }
 
-    override fun getIntrinsicHeight(): Int = delegate.intrinsicHeight
+    override fun getIntrinsicHeight(): Int {
+        return delegate.intrinsicHeight
+    }
 
-    override fun getIntrinsicWidth(): Int = delegate.intrinsicWidth
+    override fun getIntrinsicWidth(): Int {
+        return delegate.intrinsicWidth
+    }
 
     override fun setColorFilter(color: Int, mode: PorterDuff.Mode) {
         delegate.setColorFilter(color, mode)
     }
-
-//    override fun setBounds(left: Int, top: Int, right: Int, bottom: Int) {
-//        delegate.setBounds(left, top, right, bottom)
-//    }
-//
-//    override fun setBounds(bounds: Rect) {
-//        delegate.setBounds(bounds)
-//    }
-//
-    override fun getDirtyBounds(): Rect {
-        return bounds
-    }
-
-//    override fun setChangingConfigurations(configs: Int) {
-//        delegate.setChangingConfigurations(configs)
-//    }
-//
-//    override fun getChangingConfigurations(): Int {
-//        return delegate.getChangingConfigurations()
-//    }
 
     override fun setDither(dither: Boolean) {
         delegate.setDither(dither)
@@ -127,30 +111,6 @@ private class DelegateDrawable(
     override fun isFilterBitmap(): Boolean {
         return delegate.isFilterBitmap()
     }
-
-//    override fun getCallback(): Callback? {
-//        return delegate.getCallback()
-//    }
-
-//    override fun invalidateSelf() {
-//        delegate.invalidateSelf()
-//    }
-
-//    override fun scheduleSelf(what: Runnable, `when`: Long) {
-//        delegate.scheduleSelf(what, `when`)
-//    }
-//
-//    override fun unscheduleSelf(what: Runnable) {
-//        delegate.unscheduleSelf(what)
-//    }
-//
-//    override fun getLayoutDirection(): Int {
-//        return delegate.getLayoutDirection()
-//    }
-//
-//    override fun onLayoutDirectionChanged(layoutDirection: Int): Boolean {
-//        return delegate.onLayoutDirectionChanged(layoutDirection)
-//    }
 
     override fun getAlpha(): Int {
         return delegate.getAlpha()
@@ -180,30 +140,6 @@ private class DelegateDrawable(
         delegate.clearColorFilter()
     }
 
-//    override fun setHotspot(x: Float, y: Float) {
-//        delegate.setHotspot(x, y)
-//    }
-//
-//    override fun setHotspotBounds(left: Int, top: Int, right: Int, bottom: Int) {
-//        delegate.setHotspotBounds(left, top, right, bottom)
-//    }
-//
-//    override fun getHotspotBounds(outRect: Rect) {
-//        delegate.getHotspotBounds(outRect)
-//    }
-//
-//    override fun isProjected(): Boolean {
-//        return delegate.isProjected()
-//    }
-//
-//    override fun isStateful(): Boolean {
-//        return delegate.isStateful()
-//    }
-//
-//    override fun hasFocusStateSpecified(): Boolean {
-//        return delegate.hasFocusStateSpecified()
-//    }
-
     override fun setState(stateSet: IntArray): Boolean {
         return delegate.setState(stateSet)
     }
@@ -220,18 +156,6 @@ private class DelegateDrawable(
         return delegate
     }
 
-//    override fun setVisible(visible: Boolean, restart: Boolean): Boolean {
-//        return delegate.setVisible(visible, restart)
-//    }
-//
-//    override fun setAutoMirrored(mirrored: Boolean) {
-//        delegate.setAutoMirrored(mirrored)
-//    }
-//
-//    override fun isAutoMirrored(): Boolean {
-//        return delegate.isAutoMirrored()
-//    }
-
     override fun applyTheme(t: Resources.Theme) {
         delegate.applyTheme(t)
     }
@@ -244,17 +168,9 @@ private class DelegateDrawable(
         return delegate.getTransparentRegion()
     }
 
-//    override fun onStateChange(state: IntArray): Boolean {
-//        return delegate.onStateChange(state)
-//    }
-//
-//    override fun onLevelChange(level: Int): Boolean {
-//        return delegate.onLevelChange(level)
-//    }
-//
-//    override fun onBoundsChange(bounds: Rect) {
-//        delegate.onBoundsChange(bounds)
-//    }
+    override fun onBoundsChange(bounds: Rect) {
+        delegate.bounds = bounds
+    }
 
     override fun getMinimumWidth(): Int {
         return delegate.getMinimumWidth()
@@ -277,25 +193,8 @@ private class DelegateDrawable(
     }
 
     override fun mutate(): Drawable {
-        return delegate.mutate()
+        return this
     }
-
-//    override fun inflate(r: Resources, parser: XmlPullParser, attrs: AttributeSet) {
-//        delegate.inflate(r, parser, attrs)
-//    }
-//
-//    override fun inflate(
-//        r: Resources,
-//        parser: XmlPullParser,
-//        attrs: AttributeSet,
-//        theme: Resources.Theme?
-//    ) {
-//        delegate.inflate(r, parser, attrs, theme)
-//    }
-//
-//    override fun getConstantState(): ConstantState? {
-//        return delegate.getConstantState()
-//    }
 
     override fun draw(canvas: Canvas) {
         delegate.draw(canvas)
@@ -309,5 +208,7 @@ private class DelegateDrawable(
         delegate.colorFilter = colorFilter
     }
 
-    override fun getOpacity(): Int = delegate.opacity
+    override fun getOpacity(): Int {
+        return delegate.opacity
+    }
 }
