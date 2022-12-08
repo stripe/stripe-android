@@ -375,7 +375,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         onUserCancel(state)
     }
 
-
     internal fun onViewEffectLaunched() {
         setState { copy(viewEffect = null) }
     }
