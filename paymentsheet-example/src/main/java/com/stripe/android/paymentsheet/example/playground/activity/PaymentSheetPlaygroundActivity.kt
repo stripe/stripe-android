@@ -539,16 +539,11 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         if (paymentOption != null) {
             viewBinding.paymentMethod.text = paymentOption.label
             val iconDrawable = paymentOption.icon()
-            viewBinding.paymentMethod.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                iconDrawable,
-                null,
-                null,
-                null
-            )
+            viewBinding.paymentMethodIcon.setImageDrawable(iconDrawable)
             viewBinding.customCheckoutButton.isEnabled = true
         } else {
             viewBinding.paymentMethod.setText(R.string.select)
-            viewBinding.paymentMethod.setCompoundDrawables(null, null, null, null)
+            viewBinding.paymentMethodIcon.setImageDrawable(null)
             viewBinding.customCheckoutButton.isEnabled = false
         }
     }
