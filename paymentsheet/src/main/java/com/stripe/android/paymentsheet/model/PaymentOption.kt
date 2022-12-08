@@ -12,8 +12,9 @@ import android.graphics.Rect
 import android.graphics.Region
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
-import android.util.Log
+import android.os.Build
 import androidx.annotation.DrawableRes
+import androidx.annotation.RequiresApi
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -51,6 +52,7 @@ constructor(
         throw IllegalStateException("Must pass in an image loader to use iconDrawable.")
     }
 
+    @Suppress("DEPRECATION")
     internal constructor(
         @DrawableRes drawableResourceId: Int,
         label: String,
@@ -80,7 +82,6 @@ private class DelegateDrawable(
         @OptIn(DelicateCoroutinesApi::class)
         GlobalScope.launch {
             delegate = imageLoader(paymentOption)
-            Log.d("Jay", "Width: ${delegate.intrinsicWidth} - Height: ${delegate.intrinsicHeight}")
             withContext(Dispatchers.Main) {
                 super.setBounds(0, 0, delegate.intrinsicWidth, delegate.intrinsicHeight)
                 invalidateSelf()
@@ -96,20 +97,25 @@ private class DelegateDrawable(
         return delegate.intrinsicWidth
     }
 
+    @Deprecated("Deprecated in Java")
     override fun setColorFilter(color: Int, mode: PorterDuff.Mode) {
+        @Suppress("DEPRECATION")
         delegate.setColorFilter(color, mode)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun setDither(dither: Boolean) {
+        @Suppress("DEPRECATION")
         delegate.setDither(dither)
     }
 
     override fun setFilterBitmap(filter: Boolean) {
-        delegate.setFilterBitmap(filter)
+        delegate.isFilterBitmap = filter
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun isFilterBitmap(): Boolean {
-        return delegate.isFilterBitmap()
+        return delegate.isFilterBitmap
     }
 
     override fun getAlpha(): Int {
@@ -128,6 +134,7 @@ private class DelegateDrawable(
         delegate.setTintMode(tintMode)
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun setTintBlendMode(blendMode: BlendMode?) {
         delegate.setTintBlendMode(blendMode)
     }
@@ -184,8 +191,9 @@ private class DelegateDrawable(
         return delegate.getPadding(padding)
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun getOpticalInsets(): Insets {
-        return delegate.getOpticalInsets()
+        return delegate.opticalInsets
     }
 
     override fun getOutline(outline: Outline) {
@@ -208,7 +216,9 @@ private class DelegateDrawable(
         delegate.colorFilter = colorFilter
     }
 
+    @Deprecated("Deprecated in Java")
     override fun getOpacity(): Int {
+        @Suppress("DEPRECATION")
         return delegate.opacity
     }
 }
