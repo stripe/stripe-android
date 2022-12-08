@@ -3,7 +3,6 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>ComplexCondition:BaseSheetViewModel.kt$BaseSheetViewModel$stripeIntentValue != null &amp;&amp; paymentMethodsValue != null &amp;&amp; isGooglePayReadyValue != null &amp;&amp; isResourceRepositoryReadyValue != null &amp;&amp; isLinkReadyValue != null &amp;&amp; savedSelectionValue != null</ID>
-    <ID>ComplexCondition:PaymentOptionsAdapter.kt$PaymentOptionsAdapter$force || position != NO_POSITION &amp;&amp; (canClickSelectedItem || position != selectedItemPosition) &amp;&amp; !isEditing</ID>
     <ID>EmptyDefaultConstructor:PaymentOptionsListFragment.kt$PaymentOptionsListFragment$()</ID>
     <ID>EmptyDefaultConstructor:PaymentSheetAddPaymentMethodFragment.kt$PaymentSheetAddPaymentMethodFragment$()</ID>
     <ID>EmptyDefaultConstructor:PaymentSheetListFragment.kt$PaymentSheetListFragment$()</ID>
@@ -34,7 +33,6 @@
     <ID>MagicNumber:AutocompleteScreen.kt$0.07f</ID>
     <ID>MagicNumber:GooglePayButton.kt$GooglePayButton$0.5f</ID>
     <ID>MagicNumber:PaymentMethodsUI.kt$0.6F</ID>
-    <ID>MagicNumber:PaymentMethodsUI.kt$100</ID>
     <ID>MagicNumber:PaymentOptionsAdapter.kt$0.6F</ID>
     <ID>MagicNumber:PaymentOptionsAdapter.kt$18</ID>
     <ID>MagicNumber:PaymentOptionsAdapter.kt$9</ID>
@@ -44,7 +42,6 @@
     <ID>MaxLineLength:BillingAddressViewTest.kt$BillingAddressViewTest$fun</ID>
     <ID>MaxLineLength:ConfirmPaymentIntentParamsFactoryTest.kt$ConfirmPaymentIntentParamsFactoryTest$fun</ID>
     <ID>MaxLineLength:CustomerRepositoryTest.kt$CustomerRepositoryTest$onBlocking { detachPaymentMethod(anyString(), any(), anyString(), any()) }.doThrow(InvalidParameterException("error"))</ID>
-    <ID>MaxLineLength:DefaultFlowControllerInitializerTest.kt$DefaultFlowControllerInitializerTest$fun</ID>
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$.</ID>
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$fun</ID>
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$viewModel.paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())</ID>
@@ -76,8 +73,6 @@
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput$fun toCsv()</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput.Companion$fun toCsvHeader()</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.TestOutput.Companion$formShowsSaveCheckbox == false &amp;&amp; formShowsCheckboxControlledFields == true -> "merchantRequiredSave"</ID>
-    <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$assertThat(viewModel.saveForFutureUseElement.controller.saveForFutureUse.stateIn(viewModel.viewModelScope).value).isFalse()</ID>
-    <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$assertThat(viewModel.saveForFutureUseElement.controller.saveForFutureUse.stateIn(viewModel.viewModelScope).value).isTrue()</ID>
     <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.NameAndEmailCollection)</ID>
     <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)</ID>
     <ID>NestedBlockDepth:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$private fun generatePaymentIntentScenarios(): List&lt;PaymentIntentTestInput></ID>
@@ -85,17 +80,10 @@
     <ID>ReturnCount:PaymentOptionFactory.kt$PaymentOptionFactory$private suspend fun loadPaymentOption(paymentOption: PaymentOption): Drawable</ID>
     <ID>SwallowedException:PaymentOptionsActivity.kt$PaymentOptionsActivity$e: InvalidParameterException</ID>
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
-    <ID>TooManyFunctions:BasePaymentMethodsListFragment.kt$BasePaymentMethodsListFragment : Fragment</ID>
-    <ID>TooManyFunctions:BaseSheetActivity.kt$BaseSheetActivity&lt;ResultType> : AppCompatActivity</ID>
     <ID>TooManyFunctions:BaseSheetViewModel.kt$BaseSheetViewModel&lt;TransitionTargetType> : AndroidViewModel</ID>
-    <ID>TooManyFunctions:DefaultFlowController.kt$DefaultFlowController : FlowControllerInjector</ID>
     <ID>TooManyFunctions:FlowControllerComponent.kt$FlowControllerComponent$Builder</ID>
-    <ID>TooManyFunctions:PaymentOptionsAdapter.kt$PaymentOptionsAdapter : Adapter</ID>
-    <ID>TooManyFunctions:PaymentOptionsViewModel.kt$PaymentOptionsViewModel : BaseSheetViewModel</ID>
+    <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>
     <ID>TooManyFunctions:PaymentSheetViewModel.kt$PaymentSheetViewModel : BaseSheetViewModel</ID>
-    <ID>TooManyFunctions:USBankAccountFormFragment.kt$USBankAccountFormFragment : Fragment</ID>
-    <ID>TooManyFunctions:USBankAccountFormViewModel.kt$USBankAccountFormViewModel : ViewModel</ID>
-    <ID>UnnecessaryAbstractClass:FlowControllerModule.kt$FlowControllerModule$FlowControllerModule</ID>
     <ID>UnnecessaryAbstractClass:PaymentSheetCommonModule.kt$PaymentSheetCommonModule$PaymentSheetCommonModule</ID>
     <ID>UnnecessaryAbstractClass:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule$PaymentSheetLauncherModule</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
