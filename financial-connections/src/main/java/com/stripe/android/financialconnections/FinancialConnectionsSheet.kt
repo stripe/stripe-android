@@ -30,11 +30,7 @@ class FinancialConnectionsSheet internal constructor(
         val financialConnectionsSessionClientSecret: String,
         val publishableKey: String,
         val stripeAccountId: String? = null
-    ) : Parcelable {
-        override fun toString(): String {
-            return "Configuration()"
-        }
-    }
+    ) : Parcelable
 
     /**
      * Present the [FinancialConnectionsSheet].

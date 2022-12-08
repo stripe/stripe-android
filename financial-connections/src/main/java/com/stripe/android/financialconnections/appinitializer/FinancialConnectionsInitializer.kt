@@ -8,7 +8,7 @@ import com.airbnb.mvrx.Mavericks
 
 internal class FinancialConnectionsInitializer : ContentProvider() {
     override fun onCreate(): Boolean {
-        Mavericks.initialize(debugMode = false)
+        Mavericks.initialize(context = requireNotNull(context))
         return true
     }
 

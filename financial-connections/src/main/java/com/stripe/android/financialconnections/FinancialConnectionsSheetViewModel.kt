@@ -57,7 +57,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         if (initialState.initialArgs.isValid()) {
             eventReporter.onPresented(initialState.initialArgs.configuration)
             // avoid re-fetching manifest if already exists (this will happen on process recreations)
-            viewModelScope.launch { stateFlow.collect { logger.debug(it.toString()) } }
             if (initialState.manifest == null) fetchManifest()
         } else {
             val result = Failed(
@@ -160,7 +159,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             mutex.withLock {
                 setState {
-                    logger.debug("FinancialConnectionsSheetState - entering onResume with $webAuthFlowStatus")
                     if (activityRecreated.not()) {
                         when (webAuthFlowStatus) {
                             AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> copy(
@@ -188,7 +186,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             mutex.withLock {
                 setState {
-                    logger.debug("FinancialConnectionsSheetState - entering onBrowserActivityResult with $webAuthFlowStatus")
                     if (activityRecreated) {
                         when (webAuthFlowStatus) {
                             AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> copy(
@@ -298,7 +295,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun handleOnNewIntent(intent: Intent?) {
         viewModelScope.launch {
             mutex.withLock {
-                logger.debug("FinancialConnectionsSheetState - entering onNewIntent with ${awaitState().webAuthFlowStatus}")
                 val receivedUrl: Uri? = intent?.data?.toString()?.toUriOrNull()
                 val state = awaitState()
                 when {
@@ -342,7 +338,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     private fun onStartApp2App(unwrappedUriString: String) {
         setState {
-            logger.debug("FinancialConnectionsSheetState - Start app2app with $webAuthFlowStatus (Changing to INTERMEDIATE_DEEPLINK)")
             copy(
                 webAuthFlowStatus = AuthFlowStatus.INTERMEDIATE_DEEPLINK,
                 activityRecreated = false,
@@ -353,7 +348,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     private fun onFinishApp2App(receivedUrl: Uri) {
         setState {
-            logger.debug("FinancialConnectionsSheetState - Finish app2app with $webAuthFlowStatus  (Changing to INTERMEDIATE_DEEPLINK)")
             val authFlowResumeUrl =
                 "${manifest!!.hostedAuthUrl}&startPolling=true&${receivedUrl.fragment}"
             copy(

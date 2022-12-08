@@ -359,8 +359,4 @@ internal data class FinancialConnectionsSessionManifest(
                 UNKNOWN
             )
     }
-
-    override fun toString(): String {
-        return "FinancialConnectionsSessionManifest()"
-    }
 }
