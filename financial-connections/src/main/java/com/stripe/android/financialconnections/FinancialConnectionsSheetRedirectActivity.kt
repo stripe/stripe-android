@@ -44,11 +44,12 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
                 when {
                     // Redirect from app2app finish back to SDK.
                     // TODO@carlosmuvi check if the current flow is native or web from the deeplink
-                    this.toString().contains("authentication_return") -> Intent(
+                    toString().contains("authentication_return") -> Intent(
                         this@FinancialConnectionsSheetRedirectActivity,
                         FinancialConnectionsSheetNativeActivity::class.java
                     )
-                    // redirect from embedded AuthFlow completed on web back to SDK.
+                    // redirect from embedded AuthFlow completed on web back to SDK
+                    // (/success, /cancel, /fail)
                     else -> Intent(
                         this@FinancialConnectionsSheetRedirectActivity,
                         FinancialConnectionsSheetActivity::class.java
