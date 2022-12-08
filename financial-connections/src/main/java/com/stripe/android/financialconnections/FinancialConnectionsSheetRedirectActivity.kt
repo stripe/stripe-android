@@ -34,38 +34,33 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
         when {
             isFinancialConnectionsScheme().not() -> null
             // auth-redirect hosts: redirections from Abstract Auth in web back to native SDK
-            host == "auth-redirect" ->
-                Intent(
-                    this@FinancialConnectionsSheetRedirectActivity,
-                    FinancialConnectionsSheetNativeActivity::class.java
-                )
-            // link-accounts hosts:
-            host == "link-accounts" -> {
-                when {
-                    // Redirect from app2app finish back to SDK.
+            host == "auth-redirect" -> FinancialConnectionsSheetNativeActivity::class.java
+
+            host == "link-accounts" -> when {
+                // link-accounts/.../authentication_return: Redirect from app2app finish to SDK.
+                toString().contains("authentication_return") -> {
                     // TODO@carlosmuvi check if the current flow is native or web from the deeplink
-                    toString().contains("authentication_return") -> Intent(
-                        this@FinancialConnectionsSheetRedirectActivity,
+                    val native = true
+                    if (native) {
                         FinancialConnectionsSheetNativeActivity::class.java
-                    )
-                    // redirect from embedded AuthFlow completed on web back to SDK
-                    // (/success, /cancel, /fail)
-                    else -> Intent(
-                        this@FinancialConnectionsSheetRedirectActivity,
+                    } else {
                         FinancialConnectionsSheetActivity::class.java
-                    )
+                    }
                 }
+                // link-accounts/.../{success,cancel,fail: redirect from web AuthFlow completed to SDK
+                else -> FinancialConnectionsSheetActivity::class.java
             }
 
             // native-redirect hosts:
             // redirections from embedded web AuthFlow back SDK (app2app start)
-            host == "native-redirect" -> Intent(
-                this@FinancialConnectionsSheetRedirectActivity,
-                FinancialConnectionsSheetActivity::class.java
-            )
+            host == "native-redirect" -> FinancialConnectionsSheetActivity::class.java
 
             else -> null
-        }
+        }?.let { destinationActivity ->
+                Intent(this@FinancialConnectionsSheetRedirectActivity,
+                    destinationActivity
+                )
+            }
 }
 
 private fun Uri.isFinancialConnectionsScheme(): Boolean {
