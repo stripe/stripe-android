@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +24,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -47,9 +49,13 @@ import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.image.StripeImageLoader
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 @FlowPreview
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
@@ -160,12 +166,14 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     },
                     formArguments = arguments,
                     onFormFieldValuesChanged = { formValues ->
-                        sheetViewModel.updateSelection(
-                            transformToPaymentSelection(
-                                formValues,
-                                selectedItem
+                        lifecycleScope.launch {
+                            sheetViewModel.updateSelection(
+                                transformToPaymentSelection(
+                                    formValues,
+                                    selectedItem
+                                )
                             )
-                        )
+                        }
                     }
                 )
             }
@@ -334,37 +342,49 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     )
 
     @VisibleForTesting
-    internal fun transformToPaymentSelection(
+    internal suspend fun transformToPaymentSelection(
         formFieldValues: FormFieldValues?,
         selectedPaymentMethodResources: LpmRepository.SupportedPaymentMethod
-    ) = formFieldValues?.let {
-        FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
-            formFieldValues.fieldValuePairs
-                .filterNot { entry ->
-                    entry.key == IdentifierSpec.SaveForFutureUse ||
-                        entry.key == IdentifierSpec.CardBrand
-                },
-            selectedPaymentMethodResources.code,
-            selectedPaymentMethodResources.requiresMandate
-        ).run {
-            if (selectedPaymentMethodResources.code == PaymentMethod.Type.Card.code) {
-                PaymentSelection.New.Card(
-                    paymentMethodCreateParams = this,
-                    brand = CardBrand.fromCode(
-                        formFieldValues.fieldValuePairs[IdentifierSpec.CardBrand]?.value
-                    ),
-                    customerRequestedSave = formFieldValues.userRequestedReuse
+    ) = coroutineScope {
+        formFieldValues?.let {
+            FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
+                formFieldValues.fieldValuePairs
+                    .filterNot { entry ->
+                        entry.key == IdentifierSpec.SaveForFutureUse ||
+                            entry.key == IdentifierSpec.CardBrand
+                    },
+                selectedPaymentMethodResources.code,
+                selectedPaymentMethodResources.requiresMandate
+            ).run {
+                if (selectedPaymentMethodResources.code == PaymentMethod.Type.Card.code) {
+                    PaymentSelection.New.Card(
+                        paymentMethodCreateParams = this,
+                        brand = CardBrand.fromCode(
+                            formFieldValues.fieldValuePairs[IdentifierSpec.CardBrand]?.value
+                        ),
+                        customerRequestedSave = formFieldValues.userRequestedReuse
 
-                )
-            } else {
-                PaymentSelection.New.GenericPaymentMethod(
-                    getString(selectedPaymentMethodResources.displayNameResource),
-                    selectedPaymentMethodResources.iconResource,
-                    selectedPaymentMethodResources.lightThemeIconUrl,
-                    selectedPaymentMethodResources.darkThemeIconUrl,
-                    this,
-                    customerRequestedSave = formFieldValues.userRequestedReuse
-                )
+                    )
+                } else {
+                    val lightIcon: Deferred<Bitmap?> = async {
+                        selectedPaymentMethodResources.lightThemeIconUrl?.let { url ->
+                            imageLoader.load(url).getOrNull()
+                        }
+                    }
+                    val darkIcon: Deferred<Bitmap?> = async {
+                        selectedPaymentMethodResources.darkThemeIconUrl?.let { url ->
+                            imageLoader.load(url).getOrNull()
+                        }
+                    }
+                    PaymentSelection.New.GenericPaymentMethod(
+                        getString(selectedPaymentMethodResources.displayNameResource),
+                        selectedPaymentMethodResources.iconResource,
+                        lightIcon.await(),
+                        darkIcon.await(),
+                        this,
+                        customerRequestedSave = formFieldValues.userRequestedReuse
+                    )
+                }
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.model
 
+import android.graphics.Bitmap
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import com.stripe.android.link.LinkPaymentDetails
@@ -88,8 +89,8 @@ internal sealed class PaymentSelection : Parcelable {
         data class GenericPaymentMethod(
             val labelResource: String,
             @DrawableRes val iconResource: Int,
-            val lightThemeIconUrl: String?,
-            val darkThemeIconUrl: String?,
+            val lightThemeIcon: Bitmap?,
+            val darkThemeIcon: Bitmap?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val customerRequestedSave: CustomerRequestedSave
         ) : New()
