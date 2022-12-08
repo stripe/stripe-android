@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.observeEvents
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.AnimationConstants
@@ -123,13 +124,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             linkPaymentLauncher = viewModel.linkLauncher
         }
 
-        viewModel.transition.observe(this) { transitionEvent ->
-            transitionEvent?.let {
-                clearErrorMessages()
-                it.getContentIfNotHandled()?.let { transitionTarget ->
-                    onTransitionTarget(transitionTarget)
-                }
-            }
+        viewModel.transition.observeEvents(this) { transitionTarget ->
+            clearErrorMessages()
+            onTransitionTarget(transitionTarget)
         }
 
         if (savedInstanceState == null) {

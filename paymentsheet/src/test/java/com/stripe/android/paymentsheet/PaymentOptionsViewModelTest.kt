@@ -20,11 +20,11 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.TestUtils.idleLooper
+import com.stripe.android.utils.TestUtils.observeEventsForever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -121,15 +121,15 @@ internal class PaymentOptionsViewModelTest {
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(newPaymentSelection = null)
         )
 
-        var transitionTarget: BaseSheetViewModel.Event<TransitionTarget?>? = null
-        viewModel.transition.observeForever {
+        var transitionTarget: TransitionTarget? = null
+        viewModel.transition.observeEventsForever {
             transitionTarget = it
         }
 
         // no customer, no new card, no paymentMethods
         viewModel.resolveTransitionTarget()
 
-        assertThat(transitionTarget!!.peekContent()).isNull()
+        assertThat(transitionTarget).isNull()
     }
 
     @Test
@@ -143,16 +143,12 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
-        viewModel.transition.observeForever {
-            transitionTarget.add(it)
-        }
+        val transitionTarget = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTarget.add(it) }
 
         viewModel.resolveTransitionTarget()
 
-        assertThat(transitionTarget).hasSize(2)
-        assertThat(transitionTarget[0].peekContent()).isNull()
-        assertThat(transitionTarget[1].peekContent()).isInstanceOf(TransitionTarget.AddPaymentMethodFull::class.java)
+        assertThat(transitionTarget).containsExactly(TransitionTarget.AddPaymentMethodFull)
     }
 
     @Test
@@ -166,18 +162,17 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
-        viewModel.transition.observeForever {
-            transitionTarget.add(it)
-        }
+        val transitionTarget = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTarget.add(it) }
 
         viewModel.resolveTransitionTarget()
-        assertThat(transitionTarget).hasSize(2)
-        assertThat(transitionTarget[1].peekContent())
-            .isInstanceOf(TransitionTarget.AddPaymentMethodFull::class.java)
+        assertThat(transitionTarget).containsExactly(TransitionTarget.AddPaymentMethodFull)
+
+        // Reset the list of observed values
+        transitionTarget.clear()
 
         viewModel.resolveTransitionTarget()
-        assertThat(transitionTarget).hasSize(2)
+        assertThat(transitionTarget).isEmpty()
     }
 
     @Test
