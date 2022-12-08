@@ -26,7 +26,7 @@ isTestableModule() {
 }
 
 # Files or directories that trigger all modules to run if changed
-CRITICAL_DEPS="build.gradle settings.gradle dependencies.gradle gradle.properties"
+CRITICAL_DEPS="build.gradle settings.gradle dependencies.gradle gradle.properties gradle/wrapper/gradle-wrapper.properties"
 # a function to check if a file/dir is in CRITICAL_DEPS
 isCriticalDeps() {
   [[ $CRITICAL_DEPS =~ (^|[[:space:]])$1($|[[:space:]]) ]]
