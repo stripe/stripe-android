@@ -188,6 +188,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             mutex.withLock {
                 setState {
+                    logger.debug("FinancialConnectionsSheetState - entering onBrowserActivityResult with $webAuthFlowStatus")
                     if (activityRecreated) {
                         when (webAuthFlowStatus) {
                             AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> copy(
@@ -344,6 +345,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             logger.debug("FinancialConnectionsSheetState - Start app2app with $webAuthFlowStatus (Changing to INTERMEDIATE_DEEPLINK)")
             copy(
                 webAuthFlowStatus = AuthFlowStatus.INTERMEDIATE_DEEPLINK,
+                activityRecreated = false,
                 viewEffect = OpenAuthFlowWithUrl(unwrappedUriString)
             )
         }
@@ -356,6 +358,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 "${manifest!!.hostedAuthUrl}&startPolling=true&${receivedUrl.fragment}"
             copy(
                 webAuthFlowStatus = AuthFlowStatus.INTERMEDIATE_DEEPLINK,
+                activityRecreated = false,
                 viewEffect = OpenAuthFlowWithUrl(authFlowResumeUrl)
             )
         }
