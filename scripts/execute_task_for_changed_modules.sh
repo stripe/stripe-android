@@ -1,4 +1,16 @@
-# This script first finds all the modules changed in a PR then executes the taskname passed as the first parameter $1 to the script.
+# This script first finds all the modules changed in a PR then executes the taskname passed as the parameters $@ to the script.
+
+tasks_to_run=$@
+
+if [[ "$GITHUB_REF_NAME" == "master" ]]; then
+  echo "Running all tasks because we're on branch: ${GITHUB_REF_NAME}."
+  echo "./gradlew ${tasks_to_run}"
+  eval "./gradlew ${tasks_to_run}"
+  exit
+else
+  echo "Branch: ${GITHUB_REF_NAME}"
+fi
+
 echo -----Fetching orign master
 git fetch origin master:refs/remotes/origin/master
 echo -----Done fetching orign master
@@ -32,8 +44,6 @@ projectContainsTask() {
   result="$(./gradlew :${module}:tasks | grep -E ^${task} | wc -l)"
   [[ result -ge 1 ]]
 }
-
-tasks_to_run=$@
 
 # find all dirs changed through git diff
 changed_dirs=""
