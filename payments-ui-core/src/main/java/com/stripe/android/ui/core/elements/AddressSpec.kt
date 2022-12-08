@@ -21,6 +21,7 @@ enum class DisplayField {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 sealed class AddressType {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     interface AutocompleteCapable {
         val googleApiKey: String?
         val autocompleteCountries: Set<String>?
