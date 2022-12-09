@@ -22,7 +22,7 @@
 
                 <!-- Returning from app2app: return_url is triggered to reopen native AuthFlow and poll accounts. -->
                 <data
-                    android:host="native-link-accounts"
+                    android:host="link-native-accounts"
                     android:scheme="stripe-auth"
                     android:pathPrefix="/${applicationId}/authentication_return" />
 

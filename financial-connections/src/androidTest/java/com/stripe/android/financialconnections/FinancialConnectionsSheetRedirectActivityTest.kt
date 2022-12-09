@@ -12,12 +12,15 @@ import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import junit.framework.Assert.assertEquals
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 internal class FinancialConnectionsSheetRedirectActivityTest {
 
     private val packageName = ApplicationProvider.getApplicationContext<Application>().packageName
@@ -26,14 +29,6 @@ internal class FinancialConnectionsSheetRedirectActivityTest {
     fun setUp() {
         Intents.init()
         mockLaunchIntents()
-    }
-
-    @Test
-    fun financialConnectionsSheetRedirectActivity_opens_FinancialConnectionsSheetNativeActivity() {
-        launchActivity("stripe-auth://link-accounts/login").use {
-            assertEquals(it.state, Lifecycle.State.DESTROYED)
-            intended(hasComponent(FinancialConnectionsSheetNativeActivity::class.java.name))
-        }
     }
 
     @Test
