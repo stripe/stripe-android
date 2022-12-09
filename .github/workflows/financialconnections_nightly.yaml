@@ -2,6 +2,7 @@ name: financial-connections-nightly
 on:
   # Can be executed manually.
   workflow_dispatch:
+  pull_request:
   # Execute hourly.
   schedule:
     - cron: '0 * * * *'
@@ -70,11 +71,11 @@ jobs:
             ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
             
             # Run Maestro test suite.
-            maestro test --format junit maestro/financial-connections/
+            maestro record maestro/financial-connections/testmode-manualentry.yaml
             
             # Pull recording from Device sdcard. (uncomment when `maestro record` gets fixed).
-            # mkdir -p financial-connections-example/build/reports 
-            # cd financial-connections-example/build/reports/ && adb pull /sdcard/maestro-screenrecording.mp4 || true
+            mkdir -p financial-connections-example/build/reports 
+            cd financial-connections-example/build/reports/ && adb pull /sdcard/maestro-screenrecording.mp4 || true
 
       - name: Publish Test Report
         id: publish_test_report
@@ -91,15 +92,12 @@ jobs:
           path: |
             *.png    
 
-#      `maestro record` now fails when videos are over 60 seconds. Using `maestro test` to
-#      just get the report for now.
-#
-#      - name: Archive screen record
-#        if: always()
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: maestro-screen-record
-#          path: financial-connections-example/build/reports/
+      - name: Archive screen record
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: maestro-screen-record
+          path: financial-connections-example/build/reports/
 
       - name: Send Maestro test results to Slack
         if: failure()
