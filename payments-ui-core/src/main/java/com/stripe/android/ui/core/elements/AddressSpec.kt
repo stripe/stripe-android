@@ -40,6 +40,7 @@ sealed class AddressType {
 
     abstract val phoneNumberState: PhoneNumberState
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     data class ShippingCondensed(
         override val googleApiKey: String?,
         override val autocompleteCountries: Set<String>?,
@@ -47,6 +48,7 @@ sealed class AddressType {
         override val onNavigation: () -> Unit
     ) : AddressType(), AutocompleteCapable
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     data class ShippingExpanded constructor(
         override val googleApiKey: String?,
         override val autocompleteCountries: Set<String>?,
@@ -54,6 +56,7 @@ sealed class AddressType {
         override val onNavigation: () -> Unit,
     ) : AddressType(), AutocompleteCapable
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     data class Normal(
         override val phoneNumberState: PhoneNumberState =
             PhoneNumberState.HIDDEN
