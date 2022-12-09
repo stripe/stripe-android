@@ -68,7 +68,7 @@ jobs:
             adb uninstall com.stripe.android.financialconnections.example || true
             
             # Record
-            adb screenrecord --bit-rate '100000' /sdcard/maestro-screenrecording.mp4
+            adb shell screenrecord --bit-rate '100000' /sdcard/maestro-screenrecording.mp4
             
             # Compile and install APK.
             ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
@@ -77,7 +77,7 @@ jobs:
             maestro test maestro/financial-connections/testmode-linkmore.yaml
             
             # Pause record and wait
-            adb killall -INT screenrecord
+            adb shell killall -INT screenrecord
             sleep 3000
             
             # Pull recording from Device sdcard. (uncomment when `maestro record` gets fixed).
