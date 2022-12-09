@@ -5,6 +5,9 @@ on:
   # Execute hourly.
   schedule:
     - cron: '0 * * * *'
+  # Delete (just to test changes)
+  pull_request:
+
 jobs:
   maestro:
     runs-on: macos-latest
@@ -54,6 +57,7 @@ jobs:
         run: echo "${HOME}/.maestro/bin" >> $GITHUB_PATH
 
       - name: Run Tests
+        id: run-tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
@@ -63,6 +67,17 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
+            # Create folder for reports
+            mkdir -p financial-connections-example/build/reports 
+
+            # clear logs
+            adb logcat -c
+            
+            # create log file and allow writes.
+            touch app/emulator.log
+            chmod 777 financial-connections-example/build/reports/emulator.log
+            adb logcat >> financial-connections-example/build/reports/emulator.log &          
+            
             # Uninstall existing app on cached AVD.
             adb uninstall com.stripe.android.financialconnections.example || true
             
@@ -73,7 +88,6 @@ jobs:
             maestro test --format junit maestro/financial-connections/
             
             # Pull recording from Device sdcard. (uncomment when `maestro record` gets fixed).
-            # mkdir -p financial-connections-example/build/reports 
             # cd financial-connections-example/build/reports/ && adb pull /sdcard/maestro-screenrecording.mp4 || true
 
       - name: Publish Test Report
@@ -90,6 +104,13 @@ jobs:
           name: maestro-screenshots
           path: |
             *.png    
+
+      - name: Upload Failing Test Report Log
+#        if: steps.run-tests.outcome != 'success'
+        uses: actions/upload-artifact@v2
+        with:
+          name: logs
+          path: app/emulator.log # path to where the log is
 
 #      `maestro record` now fails when videos are over 60 seconds. Using `maestro test` to
 #      just get the report for now.
