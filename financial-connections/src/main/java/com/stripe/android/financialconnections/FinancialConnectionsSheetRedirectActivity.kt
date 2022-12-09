@@ -34,7 +34,7 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
     private fun Uri.toIntent(): Intent? = when {
         isFinancialConnectionsScheme().not() -> null
         // auth-redirect hosts:
-        // redirections from Abstract Auth in web back to native SDK
+        // redirections from Abstract Auth (shim) in web back to native SDK
         host == HOST_AUTH_REDIRECT -> FinancialConnectionsSheetNativeActivity::class.java
         // native-link-accounts hosts:
         // redirections from app2app back to SDK (while in native flow)
