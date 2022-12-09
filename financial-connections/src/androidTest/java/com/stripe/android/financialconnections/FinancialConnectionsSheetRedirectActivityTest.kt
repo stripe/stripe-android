@@ -52,6 +52,22 @@ internal class FinancialConnectionsSheetRedirectActivityTest {
         }
     }
 
+    @Test
+    fun financialConnectionsSheetRedirectActivity_native_app2app_return_opens_FinancialConnectionsSheetNativeActivity() {
+        launchActivity("stripe-auth://link-native-accounts/$packageName/authentication_return").use {
+            assertEquals(it.state, Lifecycle.State.DESTROYED)
+            intended(hasComponent(FinancialConnectionsSheetNativeActivity::class.java.name))
+        }
+    }
+
+    @Test
+    fun financialConnectionsSheetRedirectActivity_web_app2app_return_opens_FinancialConnectionsSheetActivity() {
+        launchActivity("stripe-auth://link-accounts/$packageName/authentication_return").use {
+            assertEquals(it.state, Lifecycle.State.DESTROYED)
+            intended(hasComponent(FinancialConnectionsSheetActivity::class.java.name))
+        }
+    }
+
     /**
      * Don't actually open intents, as this just tests redirections happen.
      */
