@@ -68,7 +68,7 @@ jobs:
           disable-animations: true
           script: bash scripts/execute_maestro_tests.sh
         env:
-          STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: ${{ secrets.$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }}
+          STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: ${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }}
 
       - name: Publish Test Report
         id: publish_test_report
