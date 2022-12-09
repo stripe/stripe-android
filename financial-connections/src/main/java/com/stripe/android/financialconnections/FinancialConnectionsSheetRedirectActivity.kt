@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.stripe.android.financialconnections.debug.DebugConfiguration
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 
 /**
@@ -19,7 +20,7 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
          */
         intent.data
             ?.let { uri ->
-                uri.toIntent()
+                uri.overrideWithDebugConfiguration().toIntent()
                     ?.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     ?.also { it.data = intent.data }
                     ?.let { startActivity(it) }
@@ -30,39 +31,50 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
     /**
      * @return Intent, or null if deeplink cannot be mapped to an Intent (in case of unknown deep links).
      */
-    private fun Uri.toIntent(): Intent? =
-        when {
-            isFinancialConnectionsScheme().not() -> null
-            // auth-redirect hosts: redirections from Abstract Auth in web back to native SDK
-            host == "auth-redirect" -> FinancialConnectionsSheetNativeActivity::class.java
+    private fun Uri.toIntent(): Intent? = when {
+        isFinancialConnectionsScheme().not() -> null
+        // auth-redirect hosts:
+        // redirections from Abstract Auth in web back to native SDK
+        host == HOST_AUTH_REDIRECT -> FinancialConnectionsSheetNativeActivity::class.java
+        // native-link-accounts hosts:
+        // redirections from app2app back to SDK (while in native flow)
+        host == HOST_NATIVE_LINK_ACCOUNTS -> FinancialConnectionsSheetNativeActivity::class.java
+        // link-accounts hosts:
+        // - redirections from embedded web AuthFlow back to SDK (/success, /cancel, /fail)
+        // - redirections from app2app back to SDK (while in web AuthFlow)
+        host == HOST_LINK_ACCOUNTS -> FinancialConnectionsSheetActivity::class.java
+        // native-redirect hosts:
+        // redirections from embedded web AuthFlow back SDK (app2app start)
+        host == HOST_NATIVE_REDIRECT -> FinancialConnectionsSheetActivity::class.java
 
-            host == "link-accounts" -> when {
-                // link-accounts/.../authentication_return: Redirect from app2app finish to SDK.
-                toString().contains("authentication_return") -> {
-                    // TODO@carlosmuvi check if the current flow is native or web from the deeplink
-                    val native = true
-                    if (native) {
-                        FinancialConnectionsSheetNativeActivity::class.java
-                    } else {
-                        FinancialConnectionsSheetActivity::class.java
-                    }
-                }
-                // link-accounts/.../{success,cancel,fail: redirect from web AuthFlow completed to SDK
-                else -> FinancialConnectionsSheetActivity::class.java
-            }
+        else -> null
+    }?.let { destinationActivity ->
+        Intent(
+            this@FinancialConnectionsSheetRedirectActivity,
+            destinationActivity
+        )
+    }
 
-            // native-redirect hosts:
-            // redirections from embedded web AuthFlow back SDK (app2app start)
-            host == "native-redirect" -> FinancialConnectionsSheetActivity::class.java
+    /**
+     * Overrides app2app return url based on debug configuration (for testing purposes), or returns the original
+     * [Uri], if no override set.
+     */
+    private fun Uri.overrideWithDebugConfiguration(): Uri =
+        when (DebugConfiguration(application).overridenNative) {
+            true -> Uri.parse(toString().replace(HOST_LINK_ACCOUNTS, HOST_NATIVE_LINK_ACCOUNTS))
+            false -> Uri.parse(toString().replace(HOST_NATIVE_LINK_ACCOUNTS, HOST_LINK_ACCOUNTS))
+            null -> this
+        }
 
-            else -> null
-        }?.let { destinationActivity ->
-                Intent(this@FinancialConnectionsSheetRedirectActivity,
-                    destinationActivity
-                )
-            }
-}
 
-private fun Uri.isFinancialConnectionsScheme(): Boolean {
-    return (this.scheme == "stripe-auth" || this.scheme == "stripe")
+    private fun Uri.isFinancialConnectionsScheme(): Boolean {
+        return (this.scheme == "stripe-auth" || this.scheme == "stripe")
+    }
+
+    companion object {
+        const val HOST_NATIVE_LINK_ACCOUNTS = "link-native-accounts"
+        const val HOST_LINK_ACCOUNTS = "link-accounts"
+        const val HOST_NATIVE_REDIRECT = "native-redirect"
+        const val HOST_AUTH_REDIRECT = "auth-redirect"
+    }
 }
