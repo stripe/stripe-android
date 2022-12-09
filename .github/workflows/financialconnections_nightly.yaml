@@ -67,11 +67,11 @@ jobs:
             # Uninstall existing app on cached AVD.
             adb uninstall com.stripe.android.financialconnections.example || true
             
-            # Record
-            adb shell screenrecord --bit-rate '100000' /sdcard/maestro-screenrecording.mp4
-            
             # Compile and install APK.
             ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
+            
+            # Record
+            adb shell screenrecord --bit-rate '100000' /sdcard/maestro-screenrecording.mp4
             
             # Run Maestro test suite.
             maestro test maestro/financial-connections/testmode-linkmore.yaml || true
@@ -80,7 +80,7 @@ jobs:
             adb shell killall -INT screenrecord
             sleep 3000
             
-            # Pull recording from Device sdcard. (uncomment when `maestro record` gets fixed).
+            # Pull recording from Device sdcard.
             mkdir -p financial-connections-example/build/reports 
             cd financial-connections-example/build/reports/ && adb pull /sdcard/maestro-screenrecording.mp4 || true
 
