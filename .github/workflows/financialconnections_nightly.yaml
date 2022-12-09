@@ -74,7 +74,7 @@ jobs:
             adb logcat -c
             
             # create log file and allow writes.
-            touch app/emulator.log
+            touch financial-connections-example/build/reports/emulator.log
             chmod 777 financial-connections-example/build/reports/emulator.log
             
             # Uninstall existing app on cached AVD.
@@ -85,7 +85,7 @@ jobs:
             
             # Run Maestro test suite.
             adb logcat >> financial-connections-example/build/reports/emulator.log &          
-            maestro test --format junit maestro/financial-connections/
+            maestro test --format junit --output maestro/financial-connections/
             
             # Pull recording from Device sdcard. (uncomment when `maestro record` gets fixed).
             # cd financial-connections-example/build/reports/ && adb pull /sdcard/maestro-screenrecording.mp4 || true
