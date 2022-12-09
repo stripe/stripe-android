@@ -85,7 +85,7 @@ jobs:
             
             # Run Maestro test suite.
             adb logcat >> financial-connections-example/build/reports/emulator.log &          
-            maestro test --format junit maestro/financial-connections/
+            maestro test --format junit maestro/financial-connections/testmode-linkmore.yaml
             
             # Pull recording from Device sdcard. (uncomment when `maestro record` gets fixed).
             # cd financial-connections-example/build/reports/ && adb pull /sdcard/maestro-screenrecording.mp4 || true
