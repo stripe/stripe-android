@@ -199,17 +199,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         }
     }
 
-//    @Test
-//    fun `fragment created without FragmentConfig should emit fatal`() {
-//        createScenario(
-//            fragmentConfig = null,
-//            initialState = Lifecycle.State.CREATED
-//        ).onFragment { fragment ->
-//            assertThat((fragment.sheetViewModel.paymentSheetResult.value as PaymentSheetResult.Failed).error.message)
-//                .isEqualTo("Failed to start existing payment options fragment.")
-//        }
-//    }
-
     @Test
     fun `total amount label correctly displays amount`() {
         createScenario().onFragment { fragment ->
