@@ -71,7 +71,7 @@ jobs:
             ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
             
             # Run Maestro test suite.
-            maestro record maestro/financial-connections/testmode-manualentry.yaml
+            maestro record maestro/financial-connections/testmode-linkmore.yaml
             
             # Pull recording from Device sdcard. (uncomment when `maestro record` gets fixed).
             mkdir -p financial-connections-example/build/reports 
