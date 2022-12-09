@@ -67,6 +67,8 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: bash scripts/execute_maestro_tests.sh
+        env:
+          STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL: ${{ secrets.$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }}
 
       - name: Publish Test Report
         id: publish_test_report
@@ -85,7 +87,7 @@ jobs:
             *.png    
 
       - name: Upload Reports
-#        if: steps.run-tests.outcome != 'success'
+        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: logs

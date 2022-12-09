@@ -13,7 +13,7 @@ touch financial-connections-example/build/reports/emulator.log
 chmod 777 financial-connections-example/build/reports/emulator.log
 
 # Compile and install APK.
-./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
+./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL :financial-connections-example:installDebug
 
 # Clear logs
 adb logcat -c
