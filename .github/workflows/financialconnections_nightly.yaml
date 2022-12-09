@@ -105,12 +105,12 @@ jobs:
           path: |
             *.png    
 
-      - name: Upload Failing Test Report Log
+      - name: Upload Reports
 #        if: steps.run-tests.outcome != 'success'
         uses: actions/upload-artifact@v2
         with:
           name: logs
-          path: app/emulator.log # path to where the log is
+          path: financial-connections-example/build/reports/
 
 #      `maestro record` now fails when videos are over 60 seconds. Using `maestro test` to
 #      just get the report for now.
