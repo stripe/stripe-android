@@ -29,14 +29,6 @@ internal class FinancialConnectionsSheetRedirectActivityTest {
     }
 
     @Test
-    fun financialConnectionsSheetRedirectActivity_opens_FinancialConnectionsSheetNativeActivity() {
-        launchActivity("stripe-auth://link-accounts/login").use {
-            assertEquals(it.state, Lifecycle.State.DESTROYED)
-            intended(hasComponent(FinancialConnectionsSheetNativeActivity::class.java.name))
-        }
-    }
-
-    @Test
     fun financialConnectionsSheetRedirectActivity_success_opens_FinancialConnectionsSheetActivity() {
         launchActivity("stripe-auth://link-accounts/$packageName/success").use {
             assertEquals(it.state, Lifecycle.State.DESTROYED)
