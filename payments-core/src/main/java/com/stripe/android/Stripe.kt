@@ -401,6 +401,7 @@ class Stripe internal constructor(
      * @param clientSecret the client_secret with which to retrieve the [PaymentIntent]
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     * @param expand Optional, a list of keys to expand on the returned `PaymentIntent` object.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @UiThread
@@ -408,6 +409,7 @@ class Stripe internal constructor(
     fun retrievePaymentIntent(
         clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId,
+        expand: List<String> = emptyList(),
         callback: ApiResultCallback<PaymentIntent>
     ) {
         executeAsync(callback) {
@@ -416,7 +418,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
-                )
+                ),
+                expand,
             )
         }
     }
@@ -431,6 +434,7 @@ class Stripe internal constructor(
      * @param clientSecret the client_secret with which to retrieve the [PaymentIntent]
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     * @param expand Optional, a list of keys to expand on the returned `PaymentIntent` object.
      * @return a [PaymentIntent] or `null` if a problem occurred
      */
     @Throws(
@@ -443,7 +447,8 @@ class Stripe internal constructor(
     @JvmOverloads
     fun retrievePaymentIntentSynchronous(
         clientSecret: String,
-        stripeAccountId: String? = this.stripeAccountId
+        stripeAccountId: String? = this.stripeAccountId,
+        expand: List<String> = emptyList(),
     ): PaymentIntent? {
         return runBlocking {
             stripeRepository.retrievePaymentIntent(
@@ -451,7 +456,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
-                )
+                ),
+                expand,
             )
         }
     }
@@ -517,6 +523,7 @@ class Stripe internal constructor(
      * | Custom return_url | WebView                | WebView           | WebView  |
      *
      * @param activity the `Activity` that is launching the payment authentication flow
+     * @param confirmSetupIntentParams a set of params with which to confirm the Setup Intent
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
@@ -558,6 +565,7 @@ class Stripe internal constructor(
      * | Custom return_url | WebView                | WebView           | WebView  |
      *
      * @param fragment the `Fragment` that is launching the payment authentication flow
+     * @param confirmSetupIntentParams a set of params with which to confirm the Setup Intent
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      */
@@ -683,6 +691,7 @@ class Stripe internal constructor(
      * @param clientSecret the client_secret with which to retrieve the [SetupIntent]
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     * @param expand Optional, a list of keys to expand on the returned `SetupIntent` object.
      * @param callback a [ApiResultCallback] to receive the result or error
      */
     @Throws(
@@ -696,6 +705,7 @@ class Stripe internal constructor(
     fun retrieveSetupIntent(
         clientSecret: String,
         stripeAccountId: String? = this.stripeAccountId,
+        expand: List<String> = emptyList(),
         callback: ApiResultCallback<SetupIntent>
     ) {
         executeAsync(callback) {
@@ -704,7 +714,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
-                )
+                ),
+                expand,
             )
         }
     }
@@ -719,6 +730,7 @@ class Stripe internal constructor(
      * @param clientSecret client_secret of the [SetupIntent] to retrieve
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     * @param expand Optional, a list of keys to expand on the returned `SetupIntent` object.
      * @return a [SetupIntent] or `null` if a problem occurred
      */
     @Throws(
@@ -731,7 +743,8 @@ class Stripe internal constructor(
     @JvmOverloads
     fun retrieveSetupIntentSynchronous(
         clientSecret: String,
-        stripeAccountId: String? = this.stripeAccountId
+        stripeAccountId: String? = this.stripeAccountId,
+        expand: List<String> = emptyList(),
     ): SetupIntent? {
         return runBlocking {
             stripeRepository.retrieveSetupIntent(
@@ -739,7 +752,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
-                )
+                ),
+                expand,
             )
         }
     }
