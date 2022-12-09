@@ -95,6 +95,7 @@ jobs:
         uses: mikepenz/action-junit-report@v3
         if: always()
         with:
+          detailed_summary: true
           report_paths: 'report.xml'
 
       - name: Archive maestro screenshots
