@@ -71,14 +71,14 @@ jobs:
             ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
             
             # Record
-            adb shell screenrecord --bit-rate '100000' /sdcard/maestro-screenrecording.mp4
+            # adb shell screenrecord --bit-rate '100000' /sdcard/maestro-screenrecording.mp4
             
             # Run Maestro test suite.
-            maestro test maestro/financial-connections/testmode-linkmore.yaml || true
+            maestro record maestro/financial-connections/testmode-linkmore.yaml || true
             
             # Pause record and wait
-            adb shell killall -INT screenrecord
-            sleep 3000
+            # adb shell killall -INT screenrecord
+            # sleep 3000
             
             # Pull recording from Device sdcard.
             mkdir -p financial-connections-example/build/reports 
