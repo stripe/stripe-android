@@ -145,7 +145,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         supportFragmentManager.commit {
             when (transitionTarget) {
-                is BaseSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
+                is BaseSheetViewModel.TransitionTarget.AddAnotherPaymentMethod -> {
                     // Once the add fragment has been opened there is never a scenario that
                     // we should back to the add fragment from the select list view.
                     viewModel.hasTransitionToUnsavedLpm = true
@@ -163,14 +163,14 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                         fragmentArgs,
                     )
                 }
-                is BaseSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
+                is BaseSheetViewModel.TransitionTarget.SavedPaymentMethods -> {
                     replace(
                         fragmentContainerId,
                         PaymentOptionsListFragment::class.java,
                         fragmentArgs,
                     )
                 }
-                is BaseSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
+                is BaseSheetViewModel.TransitionTarget.AddFirstPaymentMethod -> {
                     // Once the add fragment has been opened there is never a scenario that
                     // we should back to the add fragment from the select list view.
                     viewModel.hasTransitionToUnsavedLpm = true

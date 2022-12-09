@@ -270,7 +270,7 @@ internal class PaymentOptionsActivityTest {
             }
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethod)
+        assertThat(transitionTargets).containsExactly(TransitionTarget.SavedPaymentMethods)
     }
 
     @Test
@@ -292,7 +292,7 @@ internal class PaymentOptionsActivityTest {
             }
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethod)
+        assertThat(transitionTargets).containsExactly(TransitionTarget.SavedPaymentMethods)
     }
 
     @Test
@@ -311,7 +311,7 @@ internal class PaymentOptionsActivityTest {
             idleLooper()
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethod)
+        assertThat(transitionTargets).containsExactly(TransitionTarget.SavedPaymentMethods)
     }
 
     @Test
@@ -330,7 +330,7 @@ internal class PaymentOptionsActivityTest {
             idleLooper()
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.AddPaymentMethodSheet)
+        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
@@ -356,7 +356,7 @@ internal class PaymentOptionsActivityTest {
             }
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethod)
+        assertThat(transitionTargets).containsExactly(TransitionTarget.SavedPaymentMethods)
     }
 
     @Test

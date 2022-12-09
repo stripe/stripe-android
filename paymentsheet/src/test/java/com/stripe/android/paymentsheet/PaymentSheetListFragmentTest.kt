@@ -188,7 +188,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             idleLooper()
 
             assertThat(activityViewModel.transition.value?.peekContent())
-                .isEqualTo(BaseSheetViewModel.TransitionTarget.AddPaymentMethodFull)
+                .isEqualTo(BaseSheetViewModel.TransitionTarget.AddAnotherPaymentMethod)
         }
     }
 

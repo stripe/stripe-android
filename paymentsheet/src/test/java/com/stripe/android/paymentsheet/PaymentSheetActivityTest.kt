@@ -709,7 +709,6 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
-            viewModel.transitionToSavedPaymentMethods()
             viewModel.transitionToAddPaymentScreen()
 
             idleLooper()
@@ -1076,7 +1075,7 @@ internal class PaymentSheetActivityTest {
             }
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethod)
+        assertThat(transitionTargets).containsExactly(TransitionTarget.SavedPaymentMethods)
     }
 
     @Test
@@ -1092,7 +1091,7 @@ internal class PaymentSheetActivityTest {
             }
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.AddPaymentMethodSheet)
+        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
@@ -1114,7 +1113,7 @@ internal class PaymentSheetActivityTest {
             }
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.AddPaymentMethodSheet)
+        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 
     private fun currentFragment(activity: PaymentSheetActivity) =

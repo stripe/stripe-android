@@ -148,7 +148,7 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.resolveTransitionTarget()
 
-        assertThat(transitionTarget).containsExactly(TransitionTarget.AddPaymentMethodFull)
+        assertThat(transitionTarget).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
     }
 
     @Test
@@ -166,7 +166,7 @@ internal class PaymentOptionsViewModelTest {
         viewModel.transition.observeEventsForever { transitionTarget.add(it) }
 
         viewModel.resolveTransitionTarget()
-        assertThat(transitionTarget).containsExactly(TransitionTarget.AddPaymentMethodFull)
+        assertThat(transitionTarget).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
 
         // Reset the list of observed values
         transitionTarget.clear()
