@@ -76,7 +76,6 @@ jobs:
             # create log file and allow writes.
             touch app/emulator.log
             chmod 777 financial-connections-example/build/reports/emulator.log
-            adb logcat >> financial-connections-example/build/reports/emulator.log &          
             
             # Uninstall existing app on cached AVD.
             adb uninstall com.stripe.android.financialconnections.example || true
@@ -85,6 +84,7 @@ jobs:
             ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
             
             # Run Maestro test suite.
+            adb logcat >> financial-connections-example/build/reports/emulator.log &          
             maestro test --format junit maestro/financial-connections/
             
             # Pull recording from Device sdcard. (uncomment when `maestro record` gets fixed).
