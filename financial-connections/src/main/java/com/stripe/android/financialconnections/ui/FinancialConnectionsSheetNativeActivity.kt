@@ -223,11 +223,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         viewModel.onResume()
     }
 
-    override fun onDestroy() {
-        logger.debug("ACTIVITY DESTROYED!")
-        super.onDestroy()
-    }
-
     @Composable
     private fun NavigationEffect(navController: NavHostController) {
         LaunchedEffect(navigationManager.commands) {
