@@ -66,29 +66,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: |
-            # Create folder for reports
-            mkdir -p financial-connections-example/build/reports 
-
-            # clear logs
-            adb logcat -c
-            
-            # create log file and allow writes.
-            touch financial-connections-example/build/reports/emulator.log
-            chmod 777 financial-connections-example/build/reports/emulator.log
-            
-            # Uninstall existing app on cached AVD.
-            adb uninstall com.stripe.android.financialconnections.example || true
-            
-            # Compile and install APK.
-            ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
-            
-            # Run Maestro test suite.
-            adb logcat >> financial-connections-example/build/reports/emulator.log &          
-            maestro test --format junit maestro/financial-connections/testmode-linkmore.yaml
-            
-            # Pull recording from Device sdcard. (uncomment when `maestro record` gets fixed).
-            # cd financial-connections-example/build/reports/ && adb pull /sdcard/maestro-screenrecording.mp4 || true
+          script: bash scripts/execute_maestro_tests.sh
 
       - name: Publish Test Report
         id: publish_test_report
