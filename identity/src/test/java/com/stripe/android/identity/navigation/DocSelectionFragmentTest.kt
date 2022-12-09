@@ -122,9 +122,6 @@ internal class DocSelectionFragmentTest {
                 whenever(verificationPage.documentSelect).thenReturn(
                     DOC_SELECT_SINGLE_CHOICE_DL
                 )
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
-                    MISSING_BACK_VERIFICATION_PAGE_DATA
-                )
                 // mock file is available
                 whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
                     MutableLiveData(
@@ -139,12 +136,6 @@ internal class DocSelectionFragmentTest {
 //                    .callOnClick()
 
                 verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_SELECT), any())
-
-                verify(mockIdentityViewModel).postVerificationPageData(
-                    eq(
-                        CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
-                    )
-                )
 
                 verify(mockCameraPermissionEnsureable).ensureCameraPermission(
                     onCameraReadyCaptor.capture(),
@@ -172,9 +163,6 @@ internal class DocSelectionFragmentTest {
                     DOC_SELECT_SINGLE_CHOICE_DL
                 )
                 whenever(verificationPage.selfieCapture).thenReturn(mock())
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
-                    MISSING_BACK_VERIFICATION_PAGE_DATA
-                )
                 // mock file is available
                 whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
                     MutableLiveData(
@@ -189,12 +177,6 @@ internal class DocSelectionFragmentTest {
 //                    .callOnClick()
 
                 verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_SELECT), any())
-
-                verify(mockIdentityViewModel).postVerificationPageData(
-                    eq(
-                        CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
-                    )
-                )
 
                 verify(mockCameraPermissionEnsureable).ensureCameraPermission(
                     onCameraReadyCaptor.capture(),
@@ -228,9 +210,6 @@ internal class DocSelectionFragmentTest {
                 whenever(verificationPage.documentCapture).thenReturn(
                     mockDocumentCapture
                 )
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
-                    MISSING_BACK_VERIFICATION_PAGE_DATA
-                )
                 // mock file is not available
                 whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
                     MutableLiveData(Resource.error())
@@ -242,12 +221,6 @@ internal class DocSelectionFragmentTest {
 //                    .callOnClick()
 
                 verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_SELECT), any())
-
-                verify(mockIdentityViewModel).postVerificationPageData(
-                    eq(
-                        CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
-                    )
-                )
 
                 verify(mockCameraPermissionEnsureable).ensureCameraPermission(
                     onCameraReadyCaptor.capture(),
@@ -290,9 +263,6 @@ internal class DocSelectionFragmentTest {
                 whenever(verificationPage.documentCapture).thenReturn(
                     mockDocumentCapture
                 )
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
-                    MISSING_BACK_VERIFICATION_PAGE_DATA
-                )
                 // mock file is not available
                 whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
                     MutableLiveData(Resource.error())
@@ -304,12 +274,6 @@ internal class DocSelectionFragmentTest {
 //                    .callOnClick()
 
                 verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DOC_SELECT), any())
-
-                verify(mockIdentityViewModel).postVerificationPageData(
-                    eq(
-                        CollectedDataParam(idDocumentType = CollectedDataParam.Type.DRIVINGLICENSE)
-                    )
-                )
 
                 verify(mockCameraPermissionEnsureable).ensureCameraPermission(
                     onCameraReadyCaptor.capture(),
@@ -350,11 +314,6 @@ internal class DocSelectionFragmentTest {
             whenever(verificationPage.documentCapture).thenReturn(
                 mockDocumentCapture
             )
-            runBlocking {
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
-                    MISSING_BACK_VERIFICATION_PAGE_DATA
-                )
-            }
             // mock scan is not available
             whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
                 MutableLiveData(Resource.error())
@@ -402,11 +361,6 @@ internal class DocSelectionFragmentTest {
             whenever(verificationPage.documentCapture).thenReturn(
                 mockDocumentCapture
             )
-            runBlocking {
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
-                    MISSING_BACK_VERIFICATION_PAGE_DATA
-                )
-            }
             // mock file is available
             whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
                 MutableLiveData(Resource.success(mock()))
@@ -459,11 +413,6 @@ internal class DocSelectionFragmentTest {
             whenever(verificationPage.documentCapture).thenReturn(
                 mockDocumentCapture
             )
-            runBlocking {
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
-                    MISSING_BACK_VERIFICATION_PAGE_DATA
-                )
-            }
             // mock file is available
             whenever(mockIdentityViewModel.idDetectorModelFile).thenReturn(
                 MutableLiveData(Resource.success(mock()))

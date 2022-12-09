@@ -7,6 +7,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
@@ -14,7 +15,6 @@ import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Compani
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
-import com.stripe.android.identity.utils.navigateOnResume
 
 /**
  * Fragment to indicate live capture failure.
@@ -54,7 +54,7 @@ internal class CouldNotCaptureFragment(
                         identityViewModel.screenTracker.screenTransitionStart(
                             SCREEN_NAME_ERROR
                         )
-                        navigateOnResume(
+                        findNavController().navigateTo(
                             scanType.toUploadDestination(
                                 shouldShowTakePhoto = true,
                                 shouldShowChoosePhoto = !args.getBoolean(ARG_REQUIRE_LIVE_CAPTURE)
@@ -69,7 +69,7 @@ internal class CouldNotCaptureFragment(
                     identityViewModel.screenTracker.screenTransitionStart(
                         SCREEN_NAME_ERROR
                     )
-                    navigateOnResume(
+                    findNavController().navigateTo(
                         scanType.toScanDestination()
                     )
                 }

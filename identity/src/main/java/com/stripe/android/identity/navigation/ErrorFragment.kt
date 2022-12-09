@@ -19,7 +19,6 @@ import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHO
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_ROUTE
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
-import com.stripe.android.identity.utils.navigateOnResume
 
 /**
  * Fragment to show generic error.
@@ -65,7 +64,7 @@ internal class ErrorFragment(
                         val destination = args.getString(ARG_GO_BACK_BUTTON_DESTINATION)
 
                         if (destination == UNEXPECTED_ROUTE) {
-                            navigateOnResume(ConsentDestination)
+                            findNavController().navigateTo(ConsentDestination)
                         } else {
                             findNavController().let { navController ->
                                 var shouldContinueNavigateUp = true

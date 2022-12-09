@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.CameraXAdapter
@@ -27,17 +28,11 @@ import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.camera.scanui.util.startAnimationIfNotRunning
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingBack
-import com.stripe.android.identity.networking.models.VerificationPageData.Companion.isMissingSelfie
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.Companion.isFront
 import com.stripe.android.identity.states.IdentityScanState.Companion.isNullOrFront
 import com.stripe.android.identity.ui.DocumentScanScreen
 import com.stripe.android.identity.utils.fragmentIdToScreenName
-import com.stripe.android.identity.utils.navigateOnResume
-import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
-import com.stripe.android.identity.utils.postVerificationPageData
-import com.stripe.android.identity.utils.submitVerificationPageDataAndNavigate
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -240,66 +235,53 @@ internal abstract class IdentityDocumentScanFragment(
         type: CollectedDataParam.Type,
         isFront: Boolean
     ) = viewLifecycleOwner.lifecycleScope.launch {
+        val navController = findNavController()
         if (isFront) {
             identityViewModel.documentFrontUploadedState
         } else {
             identityViewModel.documentBackUploadedState
         }.collectLatest { uploadedState ->
             if (uploadedState.hasError()) {
-                navigateToDefaultErrorFragment(uploadedState.getError(), identityViewModel)
-            } else if (uploadedState.isUploaded()) {
-                identityViewModel.observeForVerificationPage(
-                    viewLifecycleOwner,
-                    onSuccess = {
-                        viewLifecycleOwner.lifecycleScope.launch {
-                            runCatching {
-                                postVerificationPageData(
-                                    identityViewModel = identityViewModel,
-                                    collectedDataParam =
-                                    if (isFront) {
-                                        CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
-                                            type = type,
-                                            frontHighResResult = requireNotNull(uploadedState.highResResult.data),
-                                            frontLowResResult = requireNotNull(uploadedState.lowResResult.data)
-                                        )
-                                    } else {
-                                        CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
-                                            type = type,
-                                            backHighResResult = requireNotNull(uploadedState.highResResult.data),
-                                            backLowResResult = requireNotNull(uploadedState.lowResResult.data)
-                                        )
-                                    },
-                                    fromRoute = route
-                                ) { verificationPageDataWithNoError ->
-                                    if (verificationPageDataWithNoError.isMissingBack()) {
-                                        startScanning(
-                                            requireNotNull(backScanType) {
-                                                "backScanType is null while still missing back"
-                                            }
-                                        )
-                                    } else if (verificationPageDataWithNoError.isMissingSelfie()) {
-                                        navigateOnResume(SelfieDestination)
-                                    } else {
-                                        submitVerificationPageDataAndNavigate(
-                                            identityViewModel,
-                                            route
-                                        )
-                                    }
-                                }
-                            }.onFailure { throwable ->
-                                Log.e(
-                                    TAG,
-                                    "fail to submit uploaded files: $throwable"
-                                )
-                                navigateToDefaultErrorFragment(throwable, identityViewModel)
-                            }
-                        }
-                    },
-                    onFailure = { throwable ->
-                        Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
-                        navigateToDefaultErrorFragment(throwable, identityViewModel)
-                    }
+                identityViewModel.errorCause.postValue(uploadedState.getError())
+                navController.navigateToErrorScreenWithDefaultValues(
+                    requireContext()
                 )
+            } else if (uploadedState.isUploaded()) {
+                identityViewModel.requireVerificationPage(
+                    viewLifecycleOwner,
+                    navController
+                ) {
+                    identityViewModel.postVerificationPageDataAndMaybeNavigate(
+                        navController = navController,
+                        collectedDataParam = if (isFront) {
+                            CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
+                                type = type,
+                                frontHighResResult = requireNotNull(uploadedState.highResResult.data),
+                                frontLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                            )
+                        } else {
+                            CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
+                                type = type,
+                                backHighResResult = requireNotNull(uploadedState.highResResult.data),
+                                backLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                            )
+                        },
+                        fromRoute = route,
+                        onMissingBack = {
+                            startScanning(
+                                requireNotNull(backScanType) {
+                                    "backScanType is null while still missing back"
+                                }
+                            )
+                        },
+                        onReadyToSubmit = {
+                            identityViewModel.submitAndNavigate(
+                                navController = navController,
+                                fromRoute = route
+                            )
+                        }
+                    )
+                }
             }
         }
     }

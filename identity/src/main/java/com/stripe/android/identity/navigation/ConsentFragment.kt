@@ -12,15 +12,13 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.ui.ConsentScreen
-import com.stripe.android.identity.utils.navigateOnResume
-import com.stripe.android.identity.utils.navigateToErrorFragmentWithFailedReason
-import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
 
@@ -64,56 +62,39 @@ internal class ConsentFragment(
                         )
                     )
                 },
-                onFallbackUrl = this@ConsentFragment::logErrorAndLaunchFallback,
-                onError = this@ConsentFragment::logErrorAndNavigateToError,
-                onConsentAgreed = this@ConsentFragment::agreeConsentAndPost,
-                onConsentDeclined = this@ConsentFragment::declineConsentAndPost
-            )
-        }
-    }
-
-    private fun logErrorAndLaunchFallback(fallbackUrl: String) {
-        Log.e(TAG, "Unsupported client, launching fallback url")
-        fallbackUrlLauncher.launchFallbackUrl(fallbackUrl)
-    }
-
-    private fun logErrorAndNavigateToError(throwable: Throwable) {
-        Log.e(
-            TAG,
-            "Failed to get verificationPage: $throwable"
-        )
-        navigateToErrorFragmentWithFailedReason(throwable, identityViewModel)
-    }
-
-    private fun agreeConsentAndPost() {
-        postVerificationPageDataAndNavigate(
-            CollectedDataParam(
-                biometricConsent = true
-            )
-        )
-    }
-
-    private fun declineConsentAndPost() {
-        postVerificationPageDataAndNavigate(
-            CollectedDataParam(
-                false
-            )
-        )
-    }
-
-    /**
-     * Post VerificationPageData with the type and navigate base on its result.
-     */
-    private fun postVerificationPageDataAndNavigate(
-        collectedDataParam: CollectedDataParam
-    ) {
-        lifecycleScope.launch {
-            postVerificationPageDataAndMaybeSubmit(
-                identityViewModel,
-                collectedDataParam,
-                fromRoute = ConsentDestination.ROUTE.route,
-                notSubmitBlock = {
-                    navigateOnResume(DocSelectionDestination)
+                onFallbackUrl =
+                { fallbackUrl ->
+                    Log.e(TAG, "Unsupported client, launching fallback url")
+                    fallbackUrlLauncher.launchFallbackUrl(fallbackUrl)
+                },
+                onError = { throwable ->
+                    Log.e(
+                        TAG,
+                        "Failed to get verificationPage: $throwable"
+                    )
+                    identityViewModel.errorCause.postValue(throwable)
+                    findNavController().navigateToErrorScreenWithFailedReason(
+                        requireContext(),
+                    )
+                },
+                onConsentAgreed =
+                {
+                    identityViewModel.postVerificationPageDataAndMaybeNavigate(
+                        findNavController(),
+                        CollectedDataParam(
+                            biometricConsent = true
+                        ),
+                        ConsentDestination.ROUTE.route
+                    )
+                },
+                onConsentDeclined = {
+                    identityViewModel.postVerificationPageDataAndMaybeNavigate(
+                        findNavController(),
+                        CollectedDataParam(
+                            biometricConsent = false
+                        ),
+                        ConsentDestination.ROUTE.route
+                    )
                 }
             )
         }

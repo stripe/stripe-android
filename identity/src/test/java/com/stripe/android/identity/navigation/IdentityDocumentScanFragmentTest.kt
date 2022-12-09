@@ -17,9 +17,6 @@ import com.stripe.android.core.model.StripeFile
 import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE
-import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_BACK
-import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_SELFIE
-import com.stripe.android.identity.VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ScreenTracker
@@ -353,7 +350,7 @@ class IdentityDocumentScanFragmentTest {
     }
 
     @Test
-    fun `front scanned and uploaded - response is missing back - back scanned and uploaded - not require selfie - post submit`() {
+    fun `front scanned and uploaded - response is missing back - back scanned and uploaded - invokes postVerificationPageDataAndMaybeNavigate`() {
         launchTestFragment().onFragment { fragment ->
             runBlocking {
                 val navController = TestNavHostController(
@@ -399,29 +396,32 @@ class IdentityDocumentScanFragmentTest {
 
                 documentFrontUploadState.update { frontUploadedState }
 
-                // post returns missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
-                    VERIFICATION_PAGE_DATA_MISSING_BACK
-                )
-
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
+                verify(mockIdentityViewModel).requireVerificationPage(
                     any(),
-                    successCaptor.capture(),
-                    any()
+                    any(),
+                    successCaptor.capture()
                 )
                 successCaptor.lastValue.invoke(mock())
 
-                verify(mockIdentityViewModel).postVerificationPageData(
+                val onMissingBackCaptor = argumentCaptor<() -> Unit>()
+                verify(mockIdentityViewModel).postVerificationPageDataAndMaybeNavigate(
+                    any(),
                     eq(
                         CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
                             type = CollectedDataParam.Type.IDCARD,
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    )
+                    ),
+                    eq(IDScanDestination.ROUTE.route),
+                    any(),
+                    onMissingBackCaptor.capture(),
+                    any()
                 )
+                onMissingBackCaptor.lastValue.invoke()
+
                 // verify start scanning back
                 verify(mockScanFlow).startFlow(
                     same(fragment.requireContext()),
@@ -441,7 +441,7 @@ class IdentityDocumentScanFragmentTest {
                 finalResultLiveData.postValue(mockBackFinalResult)
                 verifyUploadedWithFinalResult(
                     mockBackFinalResult,
-                    time = 4,
+                    time = 3,
                     targetType = IdentityScanState.ScanType.ID_BACK
                 )
 
@@ -452,38 +452,33 @@ class IdentityDocumentScanFragmentTest {
                 )
                 documentBackUploadState.update { backUploadedState }
 
-                verify(mockIdentityViewModel, times(5)).observeForVerificationPage(
+                verify(mockIdentityViewModel, times(2)).requireVerificationPage(
                     any(),
-                    successCaptor.capture(),
-                    any()
+                    any(),
+                    successCaptor.capture()
                 )
-
-                // post returns not missing selfie
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
-                    VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
-                )
-
                 successCaptor.lastValue.invoke(mock())
 
-                // verify post request
-                verify(mockIdentityViewModel).postVerificationPageData(
+                verify(mockIdentityViewModel).postVerificationPageDataAndMaybeNavigate(
+                    any(),
                     eq(
                         CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
                             type = CollectedDataParam.Type.IDCARD,
                             backHighResResult = BACK_HIGH_RES_RESULT,
                             backLowResResult = BACK_LOW_RES_RESULT
                         )
-                    )
+                    ),
+                    eq(IDScanDestination.ROUTE.route),
+                    any(),
+                    any(),
+                    any()
                 )
-
-                // post submit
-                verify(mockIdentityViewModel).postVerificationPageSubmit()
             }
         }
     }
 
     @Test
-    fun `front scanned and uploaded - response is missing back - back scanned and uploaded - require selfie - to selfie`() {
+    fun `front scanned and uploaded - invokes postVerificationPageDataAndMaybeNavigate`() {
         launchTestFragment().onFragment { fragment ->
             runBlocking {
                 val navController = TestNavHostController(
@@ -529,241 +524,29 @@ class IdentityDocumentScanFragmentTest {
 
                 documentFrontUploadState.update { frontUploadedState }
 
-                // post returns missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
-                    VERIFICATION_PAGE_DATA_MISSING_BACK
-                )
-
                 // observeForVerificationPage - trigger onSuccess
                 val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
+                verify(mockIdentityViewModel).requireVerificationPage(
                     any(),
-                    successCaptor.capture(),
-                    any()
+                    any(),
+                    successCaptor.capture()
                 )
                 successCaptor.lastValue.invoke(mock())
 
-                verify(mockIdentityViewModel).postVerificationPageData(
+                verify(mockIdentityViewModel).postVerificationPageDataAndMaybeNavigate(
+                    any(),
                     eq(
                         CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
                             type = CollectedDataParam.Type.IDCARD,
                             frontHighResResult = FRONT_HIGH_RES_RESULT,
                             frontLowResResult = FRONT_LOW_RES_RESULT
                         )
-                    )
-                )
-                // verify start scanning back
-                verify(mockScanFlow).startFlow(
-                    same(fragment.requireContext()),
+                    ),
+                    eq(IDScanDestination.ROUTE.route),
                     any(),
                     any(),
-                    same(fragment.viewLifecycleOwner),
-                    same(fragment.lifecycleScope),
-                    eq(IdentityScanState.ScanType.ID_BACK)
-                )
-
-                // mock success of back scan
-                val mockBackFinalResult = mock<IdentityAggregator.FinalResult>().also {
-                    whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
-                }
-                // mock viewModel target change
-                targetScanTypeFlow.update { IdentityScanState.ScanType.ID_BACK }
-                finalResultLiveData.postValue(mockBackFinalResult)
-                verifyUploadedWithFinalResult(
-                    mockBackFinalResult,
-                    time = 4,
-                    targetType = IdentityScanState.ScanType.ID_BACK
-                )
-
-                // mock click continue by calling collectDocumentUploadedStateAndPost
-                fragment.collectDocumentUploadedStateAndPost(
-                    fragment.collectedDataParamType,
-                    IdentityScanState.ScanType.ID_BACK.isFront()
-                )
-                documentBackUploadState.update { backUploadedState }
-
-                verify(mockIdentityViewModel, times(5)).observeForVerificationPage(
-                    any(),
-                    successCaptor.capture(),
                     any()
                 )
-
-                // post returns not missing selfie
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
-                    VERIFICATION_PAGE_DATA_MISSING_SELFIE
-                )
-
-                successCaptor.lastValue.invoke(mock())
-
-                // verify post request
-                verify(mockIdentityViewModel).postVerificationPageData(
-                    eq(
-                        CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
-                            type = CollectedDataParam.Type.IDCARD,
-                            backHighResResult = BACK_HIGH_RES_RESULT,
-                            backLowResResult = BACK_LOW_RES_RESULT
-                        )
-                    )
-                )
-
-                // navigates to selfie
-                assertThat(navController.currentDestination?.id).isEqualTo(R.id.selfieFragment)
-            }
-        }
-    }
-
-    @Test
-    fun `front scanned and uploaded - response is not back and not require selfie - post submit`() {
-        launchTestFragment().onFragment { fragment ->
-            runBlocking {
-                val navController = TestNavHostController(
-                    ApplicationProvider.getApplicationContext()
-                )
-                navController.setGraph(
-                    R.navigation.identity_nav_graph
-                )
-                navController.setCurrentDestination(R.id.IDScanFragment)
-                Navigation.setViewNavController(
-                    fragment.requireView(),
-                    navController
-                )
-                simulateModelDownloaded()
-
-                // verify start scanning back
-                verify(mockScanFlow).startFlow(
-                    same(fragment.requireContext()),
-                    any(),
-                    any(),
-                    same(fragment.viewLifecycleOwner),
-                    same(fragment.lifecycleScope),
-                    eq(IdentityScanState.ScanType.ID_FRONT)
-                )
-                // mock success of front scan
-                val mockFrontFinalResult = mock<IdentityAggregator.FinalResult>().also {
-                    whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
-                }
-                // mock viewModel target change
-                targetScanTypeFlow.update { IdentityScanState.ScanType.ID_FRONT }
-                finalResultLiveData.postValue(mockFrontFinalResult)
-                verifyUploadedWithFinalResult(
-                    mockFrontFinalResult,
-                    time = 2,
-                    targetType = IdentityScanState.ScanType.ID_FRONT
-                )
-
-                // mock click continue by calling collectDocumentUploadedStateAndPost
-                fragment.collectDocumentUploadedStateAndPost(
-                    fragment.collectedDataParamType,
-                    IdentityScanState.ScanType.ID_FRONT.isFront()
-                )
-
-                documentFrontUploadState.update { frontUploadedState }
-
-                // post returns not missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
-                    VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
-                )
-
-                // observeForVerificationPage - trigger onSuccess
-                val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
-                    any(),
-                    successCaptor.capture(),
-                    any()
-                )
-                successCaptor.lastValue.invoke(mock())
-
-                // verify post request
-                verify(mockIdentityViewModel).postVerificationPageData(
-                    eq(
-                        CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
-                            type = CollectedDataParam.Type.IDCARD,
-                            frontHighResResult = FRONT_HIGH_RES_RESULT,
-                            frontLowResResult = FRONT_LOW_RES_RESULT
-                        )
-                    )
-                )
-
-                // post submit
-                verify(mockIdentityViewModel).postVerificationPageSubmit()
-            }
-        }
-    }
-
-    @Test
-    fun `front scanned and uploaded - response is not back and require selfie - to selfie`() {
-        launchTestFragment().onFragment { fragment ->
-            runBlocking {
-                val navController = TestNavHostController(
-                    ApplicationProvider.getApplicationContext()
-                )
-                navController.setGraph(
-                    R.navigation.identity_nav_graph
-                )
-                navController.setCurrentDestination(R.id.IDScanFragment)
-                Navigation.setViewNavController(
-                    fragment.requireView(),
-                    navController
-                )
-                simulateModelDownloaded()
-
-                // verify start scanning back
-                verify(mockScanFlow).startFlow(
-                    same(fragment.requireContext()),
-                    any(),
-                    any(),
-                    same(fragment.viewLifecycleOwner),
-                    same(fragment.lifecycleScope),
-                    eq(IdentityScanState.ScanType.ID_FRONT)
-                )
-                // mock success of front scan
-                val mockFrontFinalResult = mock<IdentityAggregator.FinalResult>().also {
-                    whenever(it.identityState).thenReturn(mock<IdentityScanState.Finished>())
-                }
-                // mock viewModel target change
-                targetScanTypeFlow.update { IdentityScanState.ScanType.ID_FRONT }
-                finalResultLiveData.postValue(mockFrontFinalResult)
-                verifyUploadedWithFinalResult(
-                    mockFrontFinalResult,
-                    time = 2,
-                    targetType = IdentityScanState.ScanType.ID_FRONT
-                )
-
-                // mock click continue by calling collectDocumentUploadedStateAndPost
-                fragment.collectDocumentUploadedStateAndPost(
-                    fragment.collectedDataParamType,
-                    IdentityScanState.ScanType.ID_FRONT.isFront()
-                )
-
-                documentFrontUploadState.update { frontUploadedState }
-
-                // post returns not missing back
-                whenever(mockIdentityViewModel.postVerificationPageData(any())).thenReturn(
-                    VERIFICATION_PAGE_DATA_MISSING_SELFIE
-                )
-
-                // observeForVerificationPage - trigger onSuccess
-                val successCaptor = argumentCaptor<(VerificationPage) -> Unit>()
-                verify(mockIdentityViewModel, times(3)).observeForVerificationPage(
-                    any(),
-                    successCaptor.capture(),
-                    any()
-                )
-                successCaptor.lastValue.invoke(mock())
-
-                // verify post request
-                verify(mockIdentityViewModel).postVerificationPageData(
-                    eq(
-                        CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
-                            type = CollectedDataParam.Type.IDCARD,
-                            frontHighResResult = FRONT_HIGH_RES_RESULT,
-                            frontLowResResult = FRONT_LOW_RES_RESULT
-                        )
-                    )
-                )
-
-                // navigates to selfie
-                assertThat(navController.currentDestination?.id).isEqualTo(R.id.selfieFragment)
             }
         }
     }
@@ -812,7 +595,7 @@ class IdentityDocumentScanFragmentTest {
             )
         }
 
-    private companion object {
+    internal companion object {
         val TEST_FRAGMENT_ID = R.id.IDScanFragment
         val FRONT_HIGH_RES_RESULT = UploadedResult(
             uploadedStripeFile = StripeFile(

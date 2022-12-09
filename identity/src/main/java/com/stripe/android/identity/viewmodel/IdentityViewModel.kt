@@ -18,8 +18,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.navigation.NavController
 import com.stripe.android.camera.framework.image.longerEdge
-import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.model.StripeFilePurpose
@@ -831,70 +829,12 @@ internal class IdentityViewModel constructor(
         }
     }
 
-    /**
-     * Post collected [CollectedDataParam] to update [VerificationPageData].
-     * TODO(ccen) remove after all Fragment extension calls are removed.
-     */
-    @Throws(
-        APIConnectionException::class,
-        APIException::class
-    )
-    suspend fun postVerificationPageData(
-        collectedDataParam: CollectedDataParam
-    ): VerificationPageData {
-        verificationPageData.updateStateAndSave {
-            Resource.loading()
-        }
-        identityRepository.postVerificationPageData(
-            verificationArgs.verificationSessionId,
-            verificationArgs.ephemeralKeySecret,
-            collectedDataParam,
-            calculateClearDataParam(collectedDataParam)
-        ).let { verificationPageData ->
-            this.verificationPageData.updateStateAndSave {
-                Resource.success(DUMMY_RESOURCE)
-            }
-            _collectedData.updateStateAndSave { oldValue ->
-                oldValue.mergeWith(collectedDataParam)
-            }
-            _missingRequirements.updateStateAndSave {
-                requireNotNull(verificationPageData.requirements.missings) {
-                    "VerificationPageDataRequirements.missings is null"
-                }
-            }
-            return verificationPageData
-        }
-    }
-
     private fun calculateClearDataParam(dataToBeCollected: CollectedDataParam) =
         ClearDataParam.createFromRequirements(
             Requirement.values().toMutableSet().minus(
                 collectedData.value.collectedRequirements()
             ).minus(dataToBeCollected.collectedRequirements())
         )
-
-    /**
-     * Submit the final [VerificationPageData].
-     * TODO(ccen) remove after all Fragment extension calls are removed.
-     */
-    @Throws(
-        APIConnectionException::class,
-        APIException::class
-    )
-    suspend fun postVerificationPageSubmit(): VerificationPageData {
-        verificationPageSubmit.updateStateAndSave {
-            Resource.loading()
-        }
-        identityRepository.postVerificationPageSubmit(
-            verificationArgs.verificationSessionId,
-            verificationArgs.ephemeralKeySecret
-        ).let {
-            verificationPageSubmit.updateStateAndSave {
-                Resource.success(DUMMY_RESOURCE)
-            }
-            return it
-        }
-    }
 
     /**
      * Send a POST request to VerificationPageData,

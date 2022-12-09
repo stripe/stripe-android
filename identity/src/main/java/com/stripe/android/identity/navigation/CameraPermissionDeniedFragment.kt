@@ -7,13 +7,13 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.AppSettingsOpenable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
-import com.stripe.android.identity.utils.navigateOnResume
 
 /**
  * Fragment to show user denies camera permission.
@@ -42,7 +42,7 @@ internal class CameraPermissionDeniedFragment(
                         buttonText = stringResource(id = R.string.file_upload)
                     ) {
                         identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_ERROR)
-                        navigateOnResume(
+                        findNavController().navigateTo(
                             it.toUploadDestination(
                                 shouldShowTakePhoto = false,
                                 shouldShowChoosePhoto = true
@@ -56,7 +56,7 @@ internal class CameraPermissionDeniedFragment(
                     appSettingsOpenable.openAppSettings()
                     // navigate back to DocSelectFragment, so that when user is back to the app from settings
                     // the camera permission check can be triggered again from there.
-                    navigateOnResume(DocSelectionDestination)
+                    findNavController().navigateTo(DocSelectionDestination)
                 }
             )
         }

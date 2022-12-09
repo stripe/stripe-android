@@ -11,12 +11,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONFIRMATION
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.ui.ConfirmationScreen
-import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
 
@@ -42,7 +42,10 @@ internal class ConfirmationFragment(
             val verificationPage by identityViewModel.verificationPage.observeAsState(Resource.loading())
             ConfirmationScreen(
                 verificationPageState = verificationPage,
-                onError = { navigateToDefaultErrorFragment(it, identityViewModel) },
+                onError = {
+                    identityViewModel.errorCause.postValue(it)
+                    findNavController().navigateToErrorScreenWithDefaultValues(requireContext())
+                },
                 onComposeFinish = {
                     lifecycleScope.launch(identityViewModel.workContext) {
                         identityViewModel.screenTracker.screenTransitionFinish(
