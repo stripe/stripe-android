@@ -74,7 +74,7 @@ jobs:
             ./gradlew -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=${{ secrets.STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL }} :financial-connections-example:installDebug
             
             # Run Maestro test suite.
-            maestro test maestro/financial-connections/testmode-linkmore.yaml
+            maestro test maestro/financial-connections/testmode-linkmore.yaml || true
             
             # Pause record and wait
             adb shell killall -INT screenrecord
