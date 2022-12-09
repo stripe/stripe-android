@@ -341,7 +341,7 @@ class LpmRepository constructor(
                 "revolut_pay",
                 false,
                 R.string.stripe_paymentsheet_payment_method_revolute_pay,
-                R.drawable.stripe_ic_paymentsheet_pm_revolt_pay,
+                R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
                 false,
                 RevolutePayRequirement,
                 LayoutSpec(sharedDataSpec.fields)
