@@ -236,7 +236,7 @@ open class AddressElement constructor(
         countryCode: String?
     ) {
         val addressType = addressType
-        val supportsAutocomplete = (addressType as? AddressType.AutocompleteCapable)
+        val supportsAutocomplete = (addressType as? AutocompleteCapableAddressType)
             ?.supportsAutoComplete(countryCode)
         val icon: TextFieldIcon.Trailing? = if (supportsAutocomplete == true) {
             TextFieldIcon.Trailing(

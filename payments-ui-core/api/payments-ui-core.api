@@ -81,10 +81,6 @@ public final class com/stripe/android/ui/core/elements/AddressSpec$Companion {
 public final class com/stripe/android/ui/core/elements/AddressTextFieldUIKt {
 }
 
-public final class com/stripe/android/ui/core/elements/AddressType$AutocompleteCapable$DefaultImpls {
-	public static fun supportsAutoComplete (Lcom/stripe/android/ui/core/elements/AddressType$AutocompleteCapable;Ljava/lang/String;)Z
-}
-
 public abstract class com/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country {
 	public static final field $stable I
 	public synthetic fun <init> (ILjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V

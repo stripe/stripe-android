@@ -19,25 +19,24 @@ enum class DisplayField {
     Country
 }
 
+internal interface AutocompleteCapableAddressType {
+    val googleApiKey: String?
+    val autocompleteCountries: Set<String>?
+    val onNavigation: () -> Unit
+
+    fun supportsAutoComplete(country: String?): Boolean {
+        val supportedCountries = autocompleteCountries
+        val autocompleteSupportsCountry = supportedCountries
+            ?.map { it.toLowerCase(Locale.current) }
+            ?.contains(country?.toLowerCase(Locale.current)) == true
+        val autocompleteAvailable = DefaultIsPlacesAvailable().invoke() &&
+            !googleApiKey.isNullOrBlank()
+        return autocompleteSupportsCountry && autocompleteAvailable
+    }
+}
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 sealed class AddressType {
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    interface AutocompleteCapable {
-        val googleApiKey: String?
-        val autocompleteCountries: Set<String>?
-        val onNavigation: () -> Unit
-
-        fun supportsAutoComplete(country: String?): Boolean {
-            val supportedCountries = autocompleteCountries
-            val autocompleteSupportsCountry = supportedCountries
-                ?.map { it.toLowerCase(Locale.current) }
-                ?.contains(country?.toLowerCase(Locale.current)) == true
-            val autocompleteAvailable = DefaultIsPlacesAvailable().invoke() &&
-                !googleApiKey.isNullOrBlank()
-            return autocompleteSupportsCountry && autocompleteAvailable
-        }
-    }
-
     abstract val phoneNumberState: PhoneNumberState
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -46,7 +45,7 @@ sealed class AddressType {
         override val autocompleteCountries: Set<String>?,
         override val phoneNumberState: PhoneNumberState,
         override val onNavigation: () -> Unit
-    ) : AddressType(), AutocompleteCapable
+    ) : AddressType(), AutocompleteCapableAddressType
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     data class ShippingExpanded constructor(
@@ -54,7 +53,7 @@ sealed class AddressType {
         override val autocompleteCountries: Set<String>?,
         override val phoneNumberState: PhoneNumberState,
         override val onNavigation: () -> Unit,
-    ) : AddressType(), AutocompleteCapable
+    ) : AddressType(), AutocompleteCapableAddressType
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     data class Normal(
