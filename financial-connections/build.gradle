@@ -9,7 +9,7 @@ apply plugin: 'dev.chrisbanes.paparazzi'
 android {
     defaultConfig {
         testApplicationId "com.stripe.android.financialconnections.test"
-        testInstrumentationRunner "com.karumi.shot.ShotTestRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     testOptions {
         unitTests {
