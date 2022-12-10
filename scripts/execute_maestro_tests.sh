@@ -18,7 +18,7 @@ chmod 777 financial-connections-example/build/reports/emulator.log
 # Clear logs
 adb logcat -c
 adb logcat >> financial-connections-example/build/reports/emulator.log &
-if maestro test --format junit maestro/financial-connections/testmode-linkmore.yaml; then
+if maestro test --format junit maestro/financial-connections; then
   echo "Maestro tests succeeded" >&2
   exit 0
 else

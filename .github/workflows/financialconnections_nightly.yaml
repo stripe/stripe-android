@@ -93,16 +93,6 @@ jobs:
           name: logs
           path: financial-connections-example/build/reports/
 
-#      `maestro record` now fails when videos are over 60 seconds. Using `maestro test` to
-#      just get the report for now.
-#
-#      - name: Archive screen record
-#        if: always()
-#        uses: actions/upload-artifact@v3
-#        with:
-#          name: maestro-screen-record
-#          path: financial-connections-example/build/reports/
-
       - name: Send Maestro test results to Slack
         if: failure()
         id: slack
