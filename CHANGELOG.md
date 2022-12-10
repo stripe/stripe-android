@@ -3,7 +3,7 @@
 ## XX.XX.XX - 2022-XX-XX
 
 ### Payments
-* [ADDED][5938](https://github.com/stripe/stripe-android/pull/5938) Methods on `Stripe` for retrieving and confirming intents now accept an optional `expand` argument to expand fields in the response.
+* [CHANGED][5938](https://github.com/stripe/stripe-android/pull/5938) Methods on `Stripe` for retrieving and confirming intents now accept an optional `expand` argument to expand fields in the response.
 
 ### PaymentSheet
 * [FIXED][5910](https://github.com/stripe/stripe-android/pull/5910) PaymentSheet now fails gracefully when launched with invalid arguments.
