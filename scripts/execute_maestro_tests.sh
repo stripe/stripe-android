@@ -18,6 +18,7 @@ chmod 777 financial-connections-example/build/reports/emulator.log
 adb logcat -c
 
 # Start screen record
+adb shell "screenrecord /sdcard/rec-1.mp4; screenrecord /sdcard/rec-2.mp4; screenrecord /sdcard/rec-3.mp4; screenrecord /sdcard/rec-4.mp4"
 adb shell screenrecord --bit-rate '100000' /sdcard/emulator-screenrecording.mp4 &
 childpid=$!
 
@@ -29,7 +30,11 @@ result=$?
 # Stop video recording and pull record.
 kill "$childpid"
 wait "$childpid"
-cd financial-connections-example/build/reports/ && adb pull /sdcard/emulator-screenrecording.mp4 || true
+cd financial-connections-example/build/reports/
+adb pull /sdcard/emulator-rec-1.mp4 || true
+adb pull /sdcard/emulator-rec-2.mp4 || true
+adb pull /sdcard/emulator-rec-3.mp4 || true
+adb pull /sdcard/emulator-rec-4.mp4 || true
 
 #echo "TEST $?"
 exit "$result"
