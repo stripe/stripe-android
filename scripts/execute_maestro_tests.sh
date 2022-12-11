@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 # Uninstall existing app on cached AVD.
 adb uninstall com.stripe.android.financialconnections.example || true
 
@@ -18,20 +17,22 @@ chmod 777 financial-connections-example/build/reports/emulator.log
 # Clear logs
 adb logcat -c
 
-adb screenrecord --bit-rate '100000' /sdcard/emulator-screenrecording.mp4
+# Start screen record
+adb shell screenrecord --bit-rate '100000' /sdcard/emulator-screenrecording.mp4 &
+childpid=$!
 
+# Start collecting logs
 adb logcat >> financial-connections-example/build/reports/emulator.log &
-if maestro test --format junit maestro/financial-connections; then
-  killall -INT screenrecord || true
-  sleep 3s
-  cd financial-connections-example/build/reports/ && adb pull /sdcard/emulator-screenrecording.mp4 || true
-  echo "Maestro tests succeeded" >&2
-  exit 0
-else
-  killall -INT screenrecord || true
-  sleep 3s
-  cd financial-connections-example/build/reports/ && adb pull /sdcard/emulator-screenrecording.mp4 || true
-  echo "Maestro tests failed" >&2
-  exit 1
-fi
+maestro test --format junit maestro/financial-connections
+result=$?
+
+# Stop video recording and pull record.
+kill "$childpid"
+wait "$childpid"
+cd financial-connections-example/build/reports/ && adb pull /sdcard/emulator-screenrecording.mp4 || true
+
+#echo "TEST $?"
+exit "$result"
+
+
 
