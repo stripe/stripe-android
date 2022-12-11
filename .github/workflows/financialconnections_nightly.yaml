@@ -14,9 +14,9 @@ jobs:
     strategy:
       matrix:
         api-level: [ 30 ]
-        arch: [x86_64]
-        target: [google_apis]
-        profile: [Nexus 6]
+        arch: [ x86_64 ]
+        target: [ default ]
+        profile: [ Nexus 6 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v1
