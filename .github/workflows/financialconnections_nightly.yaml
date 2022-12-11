@@ -13,9 +13,9 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        api-level: [ 29, 30 ]
+        api-level: [ 29 ]
         arch: [ x86_64 ]
-        target: [ default, google_apis ]
+        target: [ google_apis ]
         profile: [ Nexus 6 ]
     steps:
       - name: Checkout
