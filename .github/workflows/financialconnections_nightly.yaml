@@ -15,7 +15,7 @@ jobs:
       matrix:
         api-level: [ 29 ]
         arch: [ x86_64 ]
-        target: [ google_apis ]
+        target: [ default ]
         profile: [ Nexus 6 ]
     steps:
       - name: Checkout
