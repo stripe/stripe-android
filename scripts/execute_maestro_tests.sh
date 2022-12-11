@@ -17,14 +17,21 @@ chmod 777 financial-connections-example/build/reports/emulator.log
 
 # Clear logs
 adb logcat -c
+
+adb screenrecord --bit-rate '100000' /sdcard/emulator-screenrecording.mp4
+
 adb logcat >> financial-connections-example/build/reports/emulator.log &
 if maestro test --format junit maestro/financial-connections; then
+  killall -INT screenrecord || true
+  sleep 3s
+  cd financial-connections-example/build/reports/ && adb pull /sdcard/emulator-screenrecording.mp4 || true
   echo "Maestro tests succeeded" >&2
   exit 0
 else
+  killall -INT screenrecord || true
+  sleep 3s
+  cd financial-connections-example/build/reports/ && adb pull /sdcard/emulator-screenrecording.mp4 || true
   echo "Maestro tests failed" >&2
   exit 1
 fi
 
-# Pull recording from Device sdcard. (uncomment when `maestro record` gets fixed).
-# cd financial-connections-example/build/reports/ && adb pull /sdcard/maestro-screenrecording.mp4 || true
