@@ -2,6 +2,8 @@ name: financial-connections-nightly
 on:
   # Can be executed manually.
   workflow_dispatch:
+  # DELETE!
+  pull_request:
   # Execute hourly.
   schedule:
     - cron: '0 * * * *'
@@ -13,6 +15,7 @@ jobs:
       matrix:
         api-level: [ 30 ]
         arch: [x86_64]
+        target: [google_apis]
         profile: [Nexus 6]
     steps:
       - name: Checkout
@@ -34,7 +37,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ matrix.api-level }}-${{ matrix.arch }}-${{ matrix.profile }}
+          key: avd-${{ matrix.api-level }}-${{ matrix.arch }}-${{ matrix.profile }}-${{ matrix.target }}
 
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -43,6 +46,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           arch: ${{ matrix.arch }}
           profile: ${{ matrix.profile }}
+          target: ${{ matrix.target }}
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
@@ -61,6 +65,7 @@ jobs:
           api-level: ${{ matrix.api-level }}
           arch: ${{ matrix.arch }}
           profile: ${{ matrix.profile }}
+          target: ${{ matrix.target }}
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
