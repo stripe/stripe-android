@@ -16,7 +16,7 @@ jobs:
         api-level: [ 29 ]
         arch: [ x86_64 ]
         target: [ default ]
-        profile: [ Pixel C ]
+        profile: [ Nexus 10 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v1
