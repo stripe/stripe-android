@@ -461,6 +461,7 @@ suspend fun Stripe.createRadarSession(): RadarSession {
  * @param clientSecret the client_secret with which to retrieve the [PaymentIntent]
  * @param stripeAccountId Optional, the Connect account to associate with this request.
  * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+ * @param expand Optional, a list of keys to expand on the returned `PaymentIntent` object.
  *
  * @return a [PaymentIntent] object
  *
@@ -477,14 +478,16 @@ suspend fun Stripe.createRadarSession(): RadarSession {
 )
 suspend fun Stripe.retrievePaymentIntent(
     clientSecret: String,
-    stripeAccountId: String? = this.stripeAccountId
+    stripeAccountId: String? = this.stripeAccountId,
+    expand: List<String> = emptyList(),
 ): PaymentIntent = runApiRequest {
     stripeRepository.retrievePaymentIntent(
         clientSecret,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
-        )
+        ),
+        expand,
     )
 }
 
@@ -497,6 +500,7 @@ suspend fun Stripe.retrievePaymentIntent(
  * @param clientSecret the client_secret with which to retrieve the [SetupIntent]
  * @param stripeAccountId Optional, the Connect account to associate with this request.
  * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+ * @param expand Optional, a list of keys to expand on the returned `SetupIntent` object.
  *
  * @return a [SetupIntent] object
  *
@@ -513,14 +517,16 @@ suspend fun Stripe.retrievePaymentIntent(
 )
 suspend fun Stripe.retrieveSetupIntent(
     clientSecret: String,
-    stripeAccountId: String? = this.stripeAccountId
+    stripeAccountId: String? = this.stripeAccountId,
+    expand: List<String> = emptyList(),
 ): SetupIntent = runApiRequest {
     stripeRepository.retrieveSetupIntent(
         clientSecret,
         ApiRequest.Options(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId
-        )
+        ),
+        expand,
     )
 }
 
@@ -571,6 +577,7 @@ suspend fun Stripe.retrieveSource(
  *
  * @param confirmSetupIntentParams a set of params with which to confirm the Setup Intent
  * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+ * @param expand Optional, a list of keys to expand on the returned `SetupIntent` object.
  *
  * @return a [SetupIntent] object
  *
@@ -587,7 +594,8 @@ suspend fun Stripe.retrieveSource(
 )
 suspend fun Stripe.confirmSetupIntent(
     confirmSetupIntentParams: ConfirmSetupIntentParams,
-    idempotencyKey: String? = null
+    idempotencyKey: String? = null,
+    expand: List<String> = emptyList(),
 ): SetupIntent = runApiRequest {
     stripeRepository.confirmSetupIntent(
         confirmSetupIntentParams,
@@ -595,7 +603,8 @@ suspend fun Stripe.confirmSetupIntent(
             apiKey = publishableKey,
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey
-        )
+        ),
+        expand,
     )
 }
 
