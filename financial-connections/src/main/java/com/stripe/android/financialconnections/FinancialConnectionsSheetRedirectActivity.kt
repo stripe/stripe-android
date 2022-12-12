@@ -66,7 +66,6 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
             null -> this
         }
 
-
     private fun Uri.isFinancialConnectionsScheme(): Boolean {
         return (this.scheme == "stripe-auth" || this.scheme == "stripe")
     }

@@ -103,8 +103,6 @@ private fun Flow.partnerIcon(): Int? = when (this) {
     Flow.DIRECT_WEBVIEW,
 
     Flow.UNKNOWN -> null
-
-
 }
 
 @StringRes
