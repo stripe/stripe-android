@@ -354,6 +354,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     fun unregisterFromActivity() {
         paymentLauncher?.unregisterPollingAuthenticator()
         paymentLauncher = null
+        linkLauncher.unregister()
     }
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
