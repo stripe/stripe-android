@@ -203,7 +203,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                         fragmentArgs
                     )
                 }
-                is BaseSheetViewModel.TransitionTarget.SavedPaymentMethods -> {
+                is BaseSheetViewModel.TransitionTarget.SelectSavedPaymentMethods -> {
                     setCustomAnimations(
                         AnimationConstants.FADE_IN,
                         AnimationConstants.FADE_OUT,

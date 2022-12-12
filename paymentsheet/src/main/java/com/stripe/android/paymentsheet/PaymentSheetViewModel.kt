@@ -590,7 +590,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             updateSelection(null)
             TransitionTarget.AddFirstPaymentMethod
         } else {
-            TransitionTarget.SavedPaymentMethods
+            TransitionTarget.SelectSavedPaymentMethods
         }
         transitionTo(target)
     }

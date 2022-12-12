@@ -337,7 +337,7 @@ internal abstract class BaseSheetViewModel(
     }
 
     internal sealed class TransitionTarget {
-        object SavedPaymentMethods : TransitionTarget()
+        object SelectSavedPaymentMethods : TransitionTarget()
         object AddAnotherPaymentMethod : TransitionTarget()
         object AddFirstPaymentMethod : TransitionTarget()
     }

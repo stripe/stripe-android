@@ -1075,7 +1075,7 @@ internal class PaymentSheetActivityTest {
             }
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SavedPaymentMethods)
+        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test

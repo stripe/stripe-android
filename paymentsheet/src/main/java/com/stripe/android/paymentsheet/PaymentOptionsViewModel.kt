@@ -297,7 +297,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun transitionToFirstScreen() {
         val target = if (args.state.hasPaymentOptions) {
-            TransitionTarget.SavedPaymentMethods
+            TransitionTarget.SelectSavedPaymentMethods
         } else {
             TransitionTarget.AddFirstPaymentMethod
         }
