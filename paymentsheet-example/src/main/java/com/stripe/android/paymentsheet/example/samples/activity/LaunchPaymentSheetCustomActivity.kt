@@ -35,7 +35,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
         val selectedPaymentMethodLabel = selectedPaymentMethod.map {
             it?.label ?: resources.getString(R.string.select)
         }
-        val selectedPaymentMethodIcon = selectedPaymentMethod.asFlow().map {
+        val selectedPaymentMethodIcon = selectedPaymentMethod.map {
             it?.icon()
         }
 
@@ -45,7 +45,7 @@ internal class LaunchPaymentSheetCustomActivity : BasePaymentSheetActivity() {
                 val paymentCompletedState by paymentCompleted.observeAsState(false)
                 val status by viewModel.status.observeAsState("")
                 val paymentMethodLabel by selectedPaymentMethodLabel.observeAsState(stringResource(R.string.loading))
-                val paymentMethodIcon by selectedPaymentMethodIcon.collectAsState(initial = null)
+                val paymentMethodIcon by selectedPaymentMethodIcon.observeAsState()
 
                 if (status.isNotBlank()) {
                     snackbar.setText(status).show()
