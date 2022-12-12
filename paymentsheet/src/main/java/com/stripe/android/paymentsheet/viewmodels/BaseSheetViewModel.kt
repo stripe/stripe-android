@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -36,7 +37,6 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
@@ -64,7 +64,8 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
-internal abstract class BaseSheetViewModel<TransitionTargetType>(
+@Suppress("TooManyFunctions")
+internal abstract class BaseSheetViewModel(
     application: Application,
     internal val config: PaymentSheet.Configuration?,
     internal val eventReporter: EventReporter,
@@ -148,8 +149,8 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
-    internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
+    private val _transition = MutableLiveData<Event<TransitionTarget>?>(null)
+    internal val transition: LiveData<Event<TransitionTarget>?> = _transition
 
     private val _liveMode = savedStateHandle.getLiveData<Boolean>(SAVE_STATE_LIVE_MODE)
     internal val liveMode: LiveData<Boolean> = _liveMode
@@ -290,7 +291,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    val fragmentConfigEvent = MediatorLiveData<FragmentConfig?>().apply {
+    protected val isReadyEvents = MediatorLiveData<Boolean>().apply {
         listOf(
             savedSelection,
             stripeIntent,
@@ -300,14 +301,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             isLinkEnabled
         ).forEach { source ->
             addSource(source) {
-                value = createFragmentConfig()
+                value = determineIfReady()
             }
         }
     }.distinctUntilChanged().map {
         Event(it)
     }
 
-    private fun createFragmentConfig(): FragmentConfig? {
+    private fun determineIfReady(): Boolean {
         val stripeIntentValue = stripeIntent.value
         val isGooglePayReadyValue = isGooglePayReady.value
         val isResourceRepositoryReadyValue = isResourceRepositoryReady.value
@@ -317,26 +318,28 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         // before adding the Fragment.
         val paymentMethodsValue = paymentMethods.value
 
-        return if (
-            stripeIntentValue != null &&
+        return stripeIntentValue != null &&
             paymentMethodsValue != null &&
             isGooglePayReadyValue != null &&
             isResourceRepositoryReadyValue != null &&
             isLinkReadyValue != null &&
             savedSelectionValue != null
-        ) {
-            FragmentConfig(
-                stripeIntent = stripeIntentValue,
-                isGooglePayReady = isGooglePayReadyValue,
-                savedSelection = savedSelectionValue
-            )
-        } else {
-            null
-        }
     }
 
-    fun transitionTo(target: TransitionTargetType) {
+    abstract fun transitionToFirstScreen()
+
+    protected fun transitionTo(target: TransitionTarget) {
         _transition.postValue(Event(target))
+    }
+
+    fun transitionToAddPaymentScreen() {
+        transitionTo(TransitionTarget.AddAnotherPaymentMethod)
+    }
+
+    internal sealed class TransitionTarget {
+        object SelectSavedPaymentMethods : TransitionTarget()
+        object AddAnotherPaymentMethod : TransitionTarget()
+        object AddFirstPaymentMethod : TransitionTarget()
     }
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
@@ -643,5 +646,15 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
         internal const val SAVE_STATE_LIVE_MODE = "save_state_live_mode"
         internal const val LINK_CONFIGURATION = "link_configuration"
+    }
+}
+
+internal fun <T> LiveData<BaseSheetViewModel.Event<T>?>.observeEvents(
+    lifecycleOwner: LifecycleOwner,
+    observer: (T) -> Unit
+) {
+    observe(lifecycleOwner) { event ->
+        val content = event?.getContentIfNotHandled() ?: return@observe
+        observer(content)
     }
 }
