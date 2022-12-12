@@ -7,6 +7,7 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -107,6 +108,7 @@ internal object PaymentSheetFixtures {
         stripeIntent: StripeIntent = state.stripeIntent,
         config: PaymentSheet.Configuration? = state.config,
         newPaymentSelection: PaymentSelection.New? = state.newPaymentSelection,
+        clientSecret: ClientSecret = state.clientSecret,
     ): PaymentOptionContract.Args {
         return copy(
             state = state.copy(
@@ -115,6 +117,7 @@ internal object PaymentSheetFixtures {
                 stripeIntent = stripeIntent,
                 config = config,
                 newPaymentSelection = newPaymentSelection,
+                clientSecret = clientSecret,
             ),
         )
     }

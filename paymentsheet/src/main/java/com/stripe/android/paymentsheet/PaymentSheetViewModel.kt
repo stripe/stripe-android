@@ -28,7 +28,6 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkPaymentDetails
@@ -116,8 +115,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         args.config?.shippingDetails?.toConfirmPaymentIntentShipping()
     )
 
-    @VisibleForTesting
-    internal val _paymentSheetResult = MutableLiveData<PaymentSheetResult>()
+    private val _paymentSheetResult = MutableLiveData<PaymentSheetResult>()
     internal val paymentSheetResult: LiveData<PaymentSheetResult> = _paymentSheetResult
 
     private val _startConfirm = MutableLiveData<Event<ConfirmStripeIntentParams>>()
@@ -149,14 +147,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override var newPaymentSelection: PaymentSelection.New? = null
 
-    @VisibleForTesting
-    internal var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
+    private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
 
-    private var linkActivityResultLauncher:
-        ActivityResultLauncher<LinkActivityContract.Args>? = null
-
-    @VisibleForTesting
-    internal var launchedLinkDirectly: Boolean = false
+    private var launchedLinkDirectly: Boolean = false
 
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
@@ -337,9 +330,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * Must be called from the Activity's `onCreate`.
      */
     fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
-        linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
-            LinkActivityContract(),
-            ::onLinkActivityResult
+        linkLauncher.register(
+            activityResultCaller,
+            ::onLinkActivityResult,
         )
 
         paymentLauncher = paymentLauncherFactory.create(
@@ -360,8 +353,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      */
     fun unregisterFromActivity() {
         paymentLauncher?.unregisterPollingAuthenticator()
-        linkActivityResultLauncher = null
         paymentLauncher = null
+        linkLauncher.unregister()
     }
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
@@ -427,14 +420,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams? = null
     ) {
         launchedLinkDirectly = launchedDirectly
-        linkActivityResultLauncher?.let { activityResultLauncher ->
-            linkLauncher.present(
-                configuration,
-                activityResultLauncher,
-                paymentMethodCreateParams
-            )
-            onLinkLaunched()
-        }
+
+        linkLauncher.present(
+            configuration,
+            paymentMethodCreateParams,
+        )
+
+        onLinkLaunched()
     }
 
     /**

@@ -8,7 +8,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
@@ -480,6 +482,13 @@ internal class PaymentOptionsActivityTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun `Handles missing args correctly`() {
+        val emptyIntent = Intent(context, PaymentOptionsActivity::class.java)
+        val scenario = ActivityScenario.launchActivityForResult<PaymentOptionsActivity>(emptyIntent)
+        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
     }
 
     private fun createIntent(

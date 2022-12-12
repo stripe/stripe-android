@@ -96,7 +96,6 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
             injectorKey = args.injectorKey,
             args = args
         )
-        viewModel.setStripeIntent(args.state.stripeIntent)
         TestUtils.idleLooper()
 
         if (registerInjector) {
