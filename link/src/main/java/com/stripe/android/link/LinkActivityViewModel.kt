@@ -57,6 +57,7 @@ internal class LinkActivityViewModel @Inject internal constructor(
 
     fun unregisterFromActivity() {
         confirmationManager.invalidatePaymentLauncher()
+        navigator.unregister()
     }
 
     /**
