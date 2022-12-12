@@ -128,7 +128,7 @@ android {
         versionCode 11
         versionName VERSION_NAME
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.karumi.shot.ShotTestRunner"
 
         manifestPlaceholders = [
                 BACKEND_URL: getBackendUrl(),

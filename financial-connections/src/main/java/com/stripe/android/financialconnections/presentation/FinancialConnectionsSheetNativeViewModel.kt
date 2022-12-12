@@ -61,9 +61,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     init {
         setState { copy(firstInit = false) }
         viewModelScope.launch {
-            stateFlow.collect { logger.debug("state: $it") }
-        }
-        viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
                 when (message) {
                     is Message.Finish -> {
