@@ -3795,6 +3795,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field Oxxo Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field P24 Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field PayPal Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field RevolutPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field SepaDebit Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Sofort Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field USBankAccount Lcom/stripe/android/model/PaymentMethod$Type;
