@@ -24,7 +24,7 @@ import com.stripe.android.paymentsheet.forms.MobilePayRequirement
 import com.stripe.android.paymentsheet.forms.P24Requirement
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.forms.PaypalRequirement
-import com.stripe.android.paymentsheet.forms.RevolutePayRequirement
+import com.stripe.android.paymentsheet.forms.RevolutPayRequirement
 import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
@@ -345,7 +345,7 @@ class LpmRepository constructor(
                 R.string.stripe_paymentsheet_payment_method_revolut_pay,
                 R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
                 false,
-                RevolutePayRequirement,
+                RevolutPayRequirement,
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.MobilePay.code -> SupportedPaymentMethod(
