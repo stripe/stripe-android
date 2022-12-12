@@ -25,8 +25,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_MINIMUM
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
-import com.stripe.android.paymentsheet.model.FragmentConfig
-import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.Amount
@@ -217,15 +215,10 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
             injectorKey = "testInjectorKeyAddFragmentTest"
         ),
-        fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         paymentMethods: List<PaymentMethod> = emptyList(),
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
         registerInjector: Boolean = true,
-        onReady: (
-            PaymentSheetAddPaymentMethodFragment,
-
-            PaymentSheetViewModel
-        ) -> Unit
+        onReady: (PaymentSheetAddPaymentMethodFragment, PaymentSheetViewModel) -> Unit
     ): FragmentScenario<PaymentSheetAddPaymentMethodFragment> {
         assertThat(WeakMapInjectorRegistry.staticCacheMap.size).isEqualTo(0)
         val viewModel = createViewModel(
@@ -238,10 +231,7 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         // somehow the saveInstanceState for the viewModel needs to be present
 
         return launchFragmentInContainer<PaymentSheetAddPaymentMethodFragment>(
-            bundleOf(
-                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
-                PaymentSheetActivity.EXTRA_STARTER_ARGS to args
-            ),
+            bundleOf(PaymentSheetActivity.EXTRA_STARTER_ARGS to args),
             R.style.StripePaymentSheetDefaultTheme,
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment {

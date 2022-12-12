@@ -13,19 +13,18 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.TestUtils.idleLooper
+import com.stripe.android.utils.TestUtils.observeEventsForever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -122,16 +121,15 @@ internal class PaymentOptionsViewModelTest {
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(newPaymentSelection = null)
         )
 
-        var transitionTarget: BaseSheetViewModel.Event<TransitionTarget?>? = null
-        viewModel.transition.observeForever {
+        var transitionTarget: TransitionTarget? = null
+        viewModel.transition.observeEventsForever {
             transitionTarget = it
         }
 
         // no customer, no new card, no paymentMethods
-        val fragmentConfig = FragmentConfigFixtures.DEFAULT
-        viewModel.resolveTransitionTarget(fragmentConfig)
+        viewModel.resolveTransitionTarget()
 
-        assertThat(transitionTarget!!.peekContent()).isNull()
+        assertThat(transitionTarget).isNull()
     }
 
     @Test
@@ -145,17 +143,12 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
-        viewModel.transition.observeForever {
-            transitionTarget.add(it)
-        }
+        val transitionTarget = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTarget.add(it) }
 
-        val fragmentConfig = FragmentConfigFixtures.DEFAULT
-        viewModel.resolveTransitionTarget(fragmentConfig)
+        viewModel.resolveTransitionTarget()
 
-        assertThat(transitionTarget).hasSize(2)
-        assertThat(transitionTarget[0].peekContent()).isNull()
-        assertThat(transitionTarget[1].peekContent()).isInstanceOf(TransitionTarget.AddPaymentMethodFull::class.java)
+        assertThat(transitionTarget).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
     }
 
     @Test
@@ -169,19 +162,17 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
-        viewModel.transition.observeForever {
-            transitionTarget.add(it)
-        }
+        val transitionTarget = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTarget.add(it) }
 
-        val fragmentConfig = FragmentConfigFixtures.DEFAULT
-        viewModel.resolveTransitionTarget(fragmentConfig)
-        assertThat(transitionTarget).hasSize(2)
-        assertThat(transitionTarget[1].peekContent())
-            .isInstanceOf(TransitionTarget.AddPaymentMethodFull::class.java)
+        viewModel.resolveTransitionTarget()
+        assertThat(transitionTarget).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
 
-        viewModel.resolveTransitionTarget(fragmentConfig)
-        assertThat(transitionTarget).hasSize(2)
+        // Reset the list of observed values
+        transitionTarget.clear()
+
+        viewModel.resolveTransitionTarget()
+        assertThat(transitionTarget).isEmpty()
     }
 
     @Test
