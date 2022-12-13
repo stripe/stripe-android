@@ -70,10 +70,10 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
         return (this.scheme == "stripe-auth" || this.scheme == "stripe")
     }
 
-    companion object {
-        const val HOST_NATIVE_LINK_ACCOUNTS = "link-native-accounts"
-        const val HOST_LINK_ACCOUNTS = "link-accounts"
-        const val HOST_NATIVE_REDIRECT = "native-redirect"
-        const val HOST_AUTH_REDIRECT = "auth-redirect"
+    private companion object {
+        private const val HOST_NATIVE_LINK_ACCOUNTS = "link-native-accounts"
+        private const val HOST_LINK_ACCOUNTS = "link-accounts"
+        private const val HOST_NATIVE_REDIRECT = "native-redirect"
+        private const val HOST_AUTH_REDIRECT = "auth-redirect"
     }
 }
