@@ -11,7 +11,9 @@ internal data class SynchronizeSessionResponse(
     @SerialName("manifest")
     val manifest: FinancialConnectionsSessionManifest,
     @SerialName("text")
-    val text: TextUpdate? = null
+    val text: TextUpdate? = null,
+    @SerialName("visual")
+    val visual: VisualUpdate? = null,
 ) : Parcelable
 
 @Serializable
@@ -19,6 +21,20 @@ internal data class SynchronizeSessionResponse(
 internal data class TextUpdate(
     @SerialName("consent_pane")
     val consent: ConsentPane? = null
+) : Parcelable
+
+
+@Serializable
+@Parcelize
+data class VisualUpdate(
+    // Indicates whether the logo should be removed from most panes
+    @SerialName("reduced_branding")
+    val reducedBranding: Boolean,
+
+    // If this field is present, it will be used in the combined logo.
+    // If it is not present, the combined logo will not include a merchant logo.
+    @SerialName("merchant_logo")
+    val merchantLogo: String?
 ) : Parcelable
 
 @Serializable
