@@ -23,7 +23,6 @@ internal data class TextUpdate(
     val consent: ConsentPane? = null
 ) : Parcelable
 
-
 @Serializable
 @Parcelize
 data class VisualUpdate(

@@ -46,6 +46,7 @@ import com.stripe.android.financialconnections.presentation.CreateBrowserIntentF
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.ui.components.TopAppBarConfiguration
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.argsOrNull
 import com.stripe.android.financialconnections.utils.viewModelLazy
@@ -80,14 +81,20 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     Column {
                         Box(modifier = Modifier.weight(1f)) {
                             val showCloseDialog = viewModel.collectAsState { it.showCloseDialog }
-                            val firstPane = viewModel.collectAsState(mapper = { it.initialPane })
+                            val firstPane =
+                                viewModel.collectAsState { it.initialPane }
+                            val topAppBarConfiguration =
+                                viewModel.collectAsState { it.topAppBarConfiguration }
                             if (showCloseDialog.value) {
                                 CloseDialog(
                                     viewModel::onCloseConfirm,
                                     viewModel::onCloseDismiss
                                 )
                             }
-                            NavHost(firstPane.value)
+                            NavHost(
+                                firstPane.value,
+                                topAppBarConfiguration.value
+                            )
                         }
                     }
                 }
@@ -125,7 +132,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @OptIn(ExperimentalMaterialApi::class)
     @Suppress("LongMethod")
     @Composable
-    fun NavHost(initialPane: Pane) {
+    fun NavHost(
+        initialPane: Pane,
+        topAppBarConfiguration: TopAppBarConfiguration
+    ) {
         val context = LocalContext.current
         val navController = rememberNavController()
         val uriHandler = remember { CustomTabUriHandler(context) }
@@ -138,6 +148,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             }
         NavigationEffect(navController)
         CompositionLocalProvider(
+            LocalTopAppBarConfiguration provides topAppBarConfiguration,
             LocalNavHostController provides navController,
             LocalImageLoader provides imageLoader,
             LocalUriHandler provides uriHandler
@@ -261,6 +272,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
 internal val LocalNavHostController = staticCompositionLocalOf<NavHostController> {
     error("No NavHostController provided")
+}
+
+internal val LocalTopAppBarConfiguration = staticCompositionLocalOf<TopAppBarConfiguration> {
+    error("No TopAppBarConfiguration provided")
 }
 
 internal val LocalImageLoader = staticCompositionLocalOf<StripeImageLoader> {

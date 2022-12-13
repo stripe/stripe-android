@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -20,25 +21,31 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
+import com.stripe.android.financialconnections.ui.LocalTopAppBarConfiguration
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun FinancialConnectionsTopAppBar(
-    title: @Composable () -> Unit = {
-        Icon(
-            painter = painterResource(id = R.drawable.stripe_logo),
-            contentDescription = null // decorative element
-        )
-    },
     elevation: Dp = 0.dp,
     showBack: Boolean = true,
     onCloseClick: () -> Unit
 ) {
+
     val localBackPressed = LocalOnBackPressedDispatcherOwner.current
         ?.onBackPressedDispatcher
     val navController = LocalNavHostController.current
+    val topAppBarConfiguration = LocalTopAppBarConfiguration.current
     TopAppBar(
-        title = title,
+        title = if (topAppBarConfiguration.reducedBranding) {
+            { Text("") }
+        } else {
+            {
+                Icon(
+                    painter = painterResource(id = R.drawable.stripe_logo),
+                    contentDescription = null // decorative element
+                )
+            }
+        },
         elevation = elevation,
         navigationIcon = if (navController.previousBackStackEntry != null && showBack) {
             {
@@ -88,12 +95,14 @@ internal val LazyListState.elevation: Dp
         AppBarDefaults.TopAppBarElevation
     }
 
+internal data class TopAppBarConfiguration(
+    val reducedBranding: Boolean
+)
+
 @Composable
 @Preview(group = "Components", name = "TopAppBar - idle")
 internal fun FinancialConnectionsTopAppBarPreview() {
     FinancialConnectionsPreview {
-        FinancialConnectionsTopAppBar(
-            title = {}
-        ) {}
+        FinancialConnectionsTopAppBar() {}
     }
 }
