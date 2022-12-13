@@ -87,7 +87,7 @@ internal class USBankAccountFormFragment : Fragment() {
         }
     }
 
-    private val sheetViewModel: BaseSheetViewModel<*>? by lazy {
+    private val sheetViewModel: BaseSheetViewModel? by lazy {
         when (requireActivity()) {
             is PaymentOptionsActivity -> {
                 activityViewModels<PaymentOptionsViewModel> {

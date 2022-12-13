@@ -31,7 +31,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -43,12 +42,14 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.TestUtils.idleLooper
+import com.stripe.android.utils.TestUtils.observeEventsForever
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -716,24 +717,16 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `fragmentConfig when all data is ready should emit value`() {
+    fun `Transition only happens when view model is ready`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
+        val observedTransitions = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
+
+        viewModel.transitionToFirstScreenWhenReady()
+        assertThat(observedTransitions).isEmpty()
 
         viewModel._isGooglePayReady.value = true
-        viewModel._isLinkEnabled.value = true
-
-        val configs = mutableListOf<FragmentConfig>()
-        viewModel.fragmentConfigEvent.observeForever { event ->
-            val config = event.getContentIfNotHandled()
-            if (config != null) {
-                configs.add(config)
-            }
-        }
-
-        idleLooper()
-
-        assertThat(configs)
-            .hasSize(1)
+        assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test

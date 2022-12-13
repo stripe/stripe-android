@@ -53,7 +53,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @FlowPreview
 internal abstract class BaseAddPaymentMethodFragment : Fragment() {
-    abstract val sheetViewModel: BaseSheetViewModel<*>
+    abstract val sheetViewModel: BaseSheetViewModel
 
     private lateinit var imageLoader: StripeImageLoader
 

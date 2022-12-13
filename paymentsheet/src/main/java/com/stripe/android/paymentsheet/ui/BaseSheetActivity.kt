@@ -50,7 +50,7 @@ import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
 
 internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
-    abstract val viewModel: BaseSheetViewModel<*>
+    abstract val viewModel: BaseSheetViewModel
 
     @VisibleForTesting
     internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
