@@ -5,7 +5,6 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.VisualUpdate
-import com.stripe.android.financialconnections.ui.components.TopAppBarConfiguration
 import org.junit.Test
 
 internal class FinancialConnectionsSheetNativeStateTest {
@@ -16,7 +15,7 @@ internal class FinancialConnectionsSheetNativeStateTest {
     )
 
     @Test
-    fun `init - TopAppBarConfiguration includes reducedBranding when true`() {
+    fun `init - reducedBranding includes reducedBranding when true`() {
         assertThat(
             FinancialConnectionsSheetNativeState(
                 args = args(
@@ -25,14 +24,12 @@ internal class FinancialConnectionsSheetNativeStateTest {
                         merchantLogo = null
                     )
                 )
-            ).topAppBarConfiguration,
-        ).isEqualTo(
-            TopAppBarConfiguration(reducedBranding = true)
-        )
+            ).reducedBranding,
+        ).isTrue()
     }
 
     @Test
-    fun `init - TopAppBarConfiguration includes reducedBranding when false`() {
+    fun `init - reducedBranding includes reducedBranding when false`() {
         assertThat(
             FinancialConnectionsSheetNativeState(
                 args = args(
@@ -41,23 +38,19 @@ internal class FinancialConnectionsSheetNativeStateTest {
                         merchantLogo = null
                     )
                 )
-            ).topAppBarConfiguration,
-        ).isEqualTo(
-            TopAppBarConfiguration(reducedBranding = false)
-        )
+            ).reducedBranding,
+        ).isFalse()
     }
 
     @Test
-    fun `init - TopAppBarConfiguration includes reducedBranding when null`() {
+    fun `init - reducedBranding includes reducedBranding when null`() {
         assertThat(
             FinancialConnectionsSheetNativeState(
                 args = args(
                     visual = null
                 )
-            ).topAppBarConfiguration,
-        ).isEqualTo(
-            TopAppBarConfiguration(reducedBranding = false)
-        )
+            ).reducedBranding,
+        ).isFalse()
     }
 
     fun args(visual: VisualUpdate?) = FinancialConnectionsSheetNativeActivityArgs(

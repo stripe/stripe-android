@@ -37,7 +37,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
-import com.stripe.android.financialconnections.ui.components.TopAppBarConfiguration
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -307,7 +306,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val firstInit: Boolean,
     val configuration: FinancialConnectionsSheet.Configuration,
     val showCloseDialog: Boolean,
-    val topAppBarConfiguration: TopAppBarConfiguration,
+    val reducedBranding: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
     val initialPane: Pane
 ) : MavericksState {
@@ -318,9 +317,7 @@ internal data class FinancialConnectionsSheetNativeState(
     @Suppress("Unused")
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
-        topAppBarConfiguration = TopAppBarConfiguration(
-            reducedBranding = args.initialSyncResponse.visual?.reducedBranding ?: false
-        ),
+        reducedBranding = args.initialSyncResponse.visual?.reducedBranding ?: false,
         firstInit = true,
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,

@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
-import com.stripe.android.financialconnections.ui.LocalTopAppBarConfiguration
+import com.stripe.android.financialconnections.ui.LocalReducedBranding
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -33,9 +33,9 @@ internal fun FinancialConnectionsTopAppBar(
     val localBackPressed = LocalOnBackPressedDispatcherOwner.current
         ?.onBackPressedDispatcher
     val navController = LocalNavHostController.current
-    val topAppBarConfiguration = LocalTopAppBarConfiguration.current
+    val reducedBranding = LocalReducedBranding.current
     TopAppBar(
-        title = if (topAppBarConfiguration.reducedBranding) {
+        title = if (reducedBranding) {
             { Text("") }
         } else {
             {
@@ -93,10 +93,6 @@ internal val LazyListState.elevation: Dp
         // If not the first element, always set elevation and show the shadow
         AppBarDefaults.TopAppBarElevation
     }
-
-internal data class TopAppBarConfiguration(
-    val reducedBranding: Boolean
-)
 
 @Composable
 @Preview(group = "Components", name = "TopAppBar - idle")

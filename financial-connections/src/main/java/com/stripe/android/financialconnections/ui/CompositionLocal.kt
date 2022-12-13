@@ -5,7 +5,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.ui.components.TopAppBarConfiguration
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.image.NetworkImageDecoder
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -24,9 +23,7 @@ internal fun FinancialConnectionsPreview(
     FinancialConnectionsTheme {
         CompositionLocalProvider(
             LocalNavHostController provides navController,
-            LocalTopAppBarConfiguration provides TopAppBarConfiguration(
-                reducedBranding = false
-            ),
+            LocalReducedBranding provides false,
             LocalImageLoader provides StripeImageLoader(
                 context = LocalContext.current,
                 logger = Logger.noop(),
