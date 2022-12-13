@@ -33,7 +33,7 @@ internal data class VisualUpdate(
     // If this field is present, it will be used in the combined logo.
     // If it is not present, the combined logo will not include a merchant logo.
     @SerialName("merchant_logo")
-    val merchantLogo: String?
+    val merchantLogo: String? = null
 ) : Parcelable
 
 @Serializable

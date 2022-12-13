@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -36,7 +35,7 @@ internal fun FinancialConnectionsTopAppBar(
     val reducedBranding = LocalReducedBranding.current
     TopAppBar(
         title = if (reducedBranding) {
-            { Text("") }
+            { /* Empty content */ }
         } else {
             {
                 Icon(
