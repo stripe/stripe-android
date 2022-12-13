@@ -30,7 +30,6 @@ internal fun FinancialConnectionsTopAppBar(
     showBack: Boolean = true,
     onCloseClick: () -> Unit
 ) {
-
     val localBackPressed = LocalOnBackPressedDispatcherOwner.current
         ?.onBackPressedDispatcher
     val navController = LocalNavHostController.current
