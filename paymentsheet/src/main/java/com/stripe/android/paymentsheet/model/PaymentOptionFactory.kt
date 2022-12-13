@@ -23,24 +23,32 @@ internal class PaymentOptionFactory(
     }
 
     private suspend fun loadPaymentOption(paymentOption: PaymentOption): Drawable {
+        fun loadResource(): Drawable {
+            @Suppress("DEPRECATION")
+            return ResourcesCompat.getDrawable(
+                resources,
+                paymentOption.drawableResourceId,
+                null
+            ) ?: ShapeDrawable()
+        }
+
+        suspend fun loadIcon(url: String): Drawable {
+            return imageLoader.load(url).getOrNull()?.let {
+                BitmapDrawable(resources, it)
+            } ?: loadResource()
+        }
+
         // If the payment option has an icon URL, we prefer it.
         // Some payment options don't have an icon URL, and are loaded locally via resource.
-        paymentOption.lightThemeIconUrl?.let { iconUrl ->
-            val darkThemeIconUrl = paymentOption.darkThemeIconUrl
-            val iconToLoad = if (isDarkTheme() && darkThemeIconUrl != null) {
-                darkThemeIconUrl
-            } else {
-                iconUrl
-            }
-            imageLoader.load(iconToLoad).getOrNull()?.let {
-                return BitmapDrawable(resources, it)
-            }
+        val lightThemeIconUrl = paymentOption.lightThemeIconUrl
+        val darkThemeIconUrl = paymentOption.darkThemeIconUrl
+        return if (isDarkTheme() && darkThemeIconUrl != null) {
+            loadIcon(darkThemeIconUrl)
+        } else if (lightThemeIconUrl != null) {
+            loadIcon(lightThemeIconUrl)
+        } else {
+            loadResource()
         }
-        @Suppress("DEPRECATION")
-        ResourcesCompat.getDrawable(resources, paymentOption.drawableResourceId, null)?.let {
-            return it
-        }
-        return ShapeDrawable()
     }
 
     fun create(selection: PaymentSelection): PaymentOption {
