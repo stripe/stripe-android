@@ -90,6 +90,8 @@ internal class PaymentOptionsActivityTest {
                 false,
                 com.stripe.android.ui.core.R.string.stripe_paymentsheet_payment_method_card,
                 com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
+                null,
+                null,
                 true,
                 PaymentMethodRequirements(emptySet(), emptySet(), true),
                 LayoutSpec.create(
