@@ -532,7 +532,6 @@ internal class DefaultFlowController @Inject internal constructor(
         fun getInstance(
             appContext: Context,
             viewModelStoreOwner: ViewModelStoreOwner,
-            lifecycleScope: CoroutineScope,
             lifecycleOwner: LifecycleOwner,
             activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
@@ -547,7 +546,6 @@ internal class DefaultFlowController @Inject internal constructor(
             val flowControllerComponent = DaggerFlowControllerComponent.builder()
                 .appContext(appContext)
                 .viewModelStoreOwner(viewModelStoreOwner)
-                .lifecycleScope(lifecycleScope)
                 .lifeCycleOwner(lifecycleOwner)
                 .activityResultCaller(activityResultCaller)
                 .statusBarColor(statusBarColor)

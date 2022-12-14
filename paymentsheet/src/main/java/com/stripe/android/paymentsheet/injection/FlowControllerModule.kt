@@ -2,11 +2,13 @@ package com.stripe.android.paymentsheet.injection
 
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineScope
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -31,4 +33,10 @@ internal object FlowControllerModule {
     @Singleton
     fun provideViewModel(viewModelStoreOwner: ViewModelStoreOwner): FlowControllerViewModel =
         ViewModelProvider(viewModelStoreOwner)[FlowControllerViewModel::class.java]
+
+    @Provides
+    @Singleton
+    fun provideViewModelScope(viewModel: FlowControllerViewModel): CoroutineScope {
+        return viewModel.viewModelScope
+    }
 }
