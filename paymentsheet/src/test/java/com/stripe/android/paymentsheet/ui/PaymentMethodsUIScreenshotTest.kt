@@ -10,6 +10,7 @@ import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.mock
 
 class PaymentMethodsUIScreenshotTest {
 
@@ -31,7 +32,8 @@ class PaymentMethodsUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
-                onItemSelectedListener = {}
+                onItemSelectedListener = {},
+                imageLoader = mock(),
             )
         }
     }
@@ -44,7 +46,8 @@ class PaymentMethodsUIScreenshotTest {
                 selectedIndex = 3,
                 isEnabled = true,
                 state = LazyListState(firstVisibleItemIndex = 3),
-                onItemSelectedListener = {}
+                onItemSelectedListener = {},
+                imageLoader = mock(),
             )
         }
     }
@@ -56,7 +59,8 @@ class PaymentMethodsUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = false,
-                onItemSelectedListener = {}
+                onItemSelectedListener = {},
+                imageLoader = mock(),
             )
         }
     }
