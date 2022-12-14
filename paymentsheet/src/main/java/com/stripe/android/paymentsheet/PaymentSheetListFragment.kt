@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.fragment.app.activityViewModels
 
-internal class PaymentSheetListFragment() : BasePaymentMethodsListFragment(
+internal class PaymentSheetListFragment : BasePaymentMethodsListFragment(
     canClickSelectedItem = false
 ) {
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
@@ -14,12 +14,6 @@ internal class PaymentSheetListFragment() : BasePaymentMethodsListFragment(
     }
 
     override val sheetViewModel: PaymentSheetViewModel by lazy { activityViewModel }
-
-    override fun transitionToAddPaymentMethod() {
-        activityViewModel.transitionTo(
-            PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(config)
-        )
-    }
 
     override fun onResume() {
         super.onResume()

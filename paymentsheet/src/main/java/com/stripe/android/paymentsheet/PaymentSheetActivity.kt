@@ -29,6 +29,8 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.observeEvents
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.AnimationConstants
@@ -122,41 +124,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             linkPaymentLauncher = viewModel.linkLauncher
         }
 
-        viewModel.transition.observe(this) { transitionEvent ->
-            transitionEvent?.let {
-                clearErrorMessages()
-                it.getContentIfNotHandled()?.let { transitionTarget ->
-                    onTransitionTarget(
-                        transitionTarget,
-                        bundleOf(
-                            EXTRA_STARTER_ARGS to starterArgs,
-                            EXTRA_FRAGMENT_CONFIG to transitionTarget.fragmentConfig
-                        )
-                    )
-                }
-            }
+        viewModel.transition.observeEvents(this) { transitionTarget ->
+            clearErrorMessages()
+            onTransitionTarget(transitionTarget)
         }
 
-        viewModel.fragmentConfigEvent.observe(this) { event ->
-            val config = event.getContentIfNotHandled()
-            if (config != null) {
-                // We only want to do this if the loading fragment is shown.  Otherwise this causes
-                // a new fragment to be created if the activity was destroyed and recreated.
-                // If hyperion is an added dependency it is loaded on top of the
-                // PaymentSheetLoadingFragment
-                if (supportFragmentManager.fragments
-                    .filterIsInstance<PaymentSheetLoadingFragment>()
-                    .isNotEmpty()
-                ) {
-                    val target = if (viewModel.paymentMethods.value.isNullOrEmpty()) {
-                        viewModel.updateSelection(null)
-                        PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet(config)
-                    } else {
-                        PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(config)
-                    }
-                    viewModel.transitionTo(target)
-                }
-            }
+        if (savedInstanceState == null) {
+            viewModel.transitionToFirstScreenWhenReady()
         }
 
         viewModel.startConfirm.observe(this) { event ->
@@ -209,12 +183,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun onTransitionTarget(
-        transitionTarget: PaymentSheetViewModel.TransitionTarget,
-        fragmentArgs: Bundle
+        transitionTarget: BaseSheetViewModel.TransitionTarget,
     ) {
+        val fragmentArgs = bundleOf(EXTRA_STARTER_ARGS to starterArgs)
+
         supportFragmentManager.commit {
             when (transitionTarget) {
-                is PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull -> {
+                is BaseSheetViewModel.TransitionTarget.AddAnotherPaymentMethod -> {
                     setCustomAnimations(
                         AnimationConstants.FADE_IN,
                         AnimationConstants.FADE_OUT,
@@ -228,7 +203,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                         fragmentArgs
                     )
                 }
-                is PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
+                is BaseSheetViewModel.TransitionTarget.SelectSavedPaymentMethods -> {
                     setCustomAnimations(
                         AnimationConstants.FADE_IN,
                         AnimationConstants.FADE_OUT,
@@ -241,7 +216,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                         fragmentArgs
                     )
                 }
-                is PaymentSheetViewModel.TransitionTarget.AddPaymentMethodSheet -> {
+                is BaseSheetViewModel.TransitionTarget.AddFirstPaymentMethod -> {
                     setCustomAnimations(
                         AnimationConstants.FADE_IN,
                         AnimationConstants.FADE_OUT,
@@ -376,7 +351,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     internal companion object {
-        internal const val EXTRA_FRAGMENT_CONFIG = BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         internal const val EXTRA_STARTER_ARGS = BaseSheetActivity.EXTRA_STARTER_ARGS
     }
 }
