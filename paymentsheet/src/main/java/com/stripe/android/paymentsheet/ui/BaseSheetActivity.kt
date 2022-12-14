@@ -20,7 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -29,6 +29,9 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -47,6 +50,9 @@ import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.KeyboardController
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
@@ -125,7 +131,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
-        viewModel.processing.observe(this) { isProcessing ->
+        viewModel.processing.collectInActivity { isProcessing ->
             updateRootViewClickHandling(isProcessing)
             toolbar.isEnabled = !isProcessing
         }
@@ -149,7 +155,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         setupPrimaryButton()
         setupNotes()
 
-        viewModel.showLinkVerificationDialog.observe(this) { show ->
+        viewModel.showLinkVerificationDialog.collectInActivity { show ->
             linkAuthView.setContent {
                 if (show) {
                     LinkVerificationDialog(
@@ -160,7 +166,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
-        viewModel.contentVisible.observe(this) {
+        viewModel.contentVisible.collectInActivity {
             scrollView.isVisible = it
         }
 
@@ -168,7 +174,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // `rootView`'s click listener
         bottomSheet.isClickable = true
 
-        viewModel.liveMode.observe(this) { isLiveMode ->
+        viewModel.liveMode.collectInActivity { isLiveMode ->
             testModeIndicator.visibility = if (isLiveMode) View.GONE else View.VISIBLE
         }
 
@@ -192,7 +198,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (viewModel.processing.value == false) {
+        if (!viewModel.processing.value) {
             if (supportFragmentManager.backStackEntryCount > 0) {
                 viewModel.onUserBack()
                 clearErrorMessages()
@@ -241,7 +247,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         header.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val text = viewModel.headerText.observeAsState()
+                val text = viewModel.headerText.collectAsState(null)
 
                 text.value?.let {
                     PaymentsTheme {
@@ -259,7 +265,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
      * Perform the initial setup for the primary button.
      */
     private fun setupPrimaryButton() {
-        viewModel.primaryButtonUIState.observe(this) { state ->
+        viewModel.primaryButtonUIState.collectInActivity { state ->
             state?.let {
                 primaryButton.setOnClickListener {
                     state.onClick?.invoke()
@@ -271,10 +277,13 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 resetPrimaryButtonState()
             }
         }
-        viewModel.primaryButtonState.observe(this) { state ->
+        viewModel.resetPrimaryButtonUI.collectInActivity {
+            resetPrimaryButtonState()
+        }
+        viewModel.primaryButtonState.collectInActivity { state ->
             primaryButton.updateState(state)
         }
-        viewModel.ctaEnabled.observe(this) { isEnabled ->
+        viewModel.ctaEnabled.collectInActivity { isEnabled ->
             primaryButton.isEnabled = isEnabled
         }
 
@@ -293,7 +302,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract fun resetPrimaryButtonState()
 
     private fun setupNotes() {
-        viewModel.notesText.observe(this) { text ->
+        viewModel.notesText.collectInActivity { text ->
             val showNotes = text != null
             text?.let {
                 notesView.setContent {
@@ -378,8 +387,27 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         bottomSheet.layoutParams = params
     }
 
+    protected inline fun <T> StateFlow<T>.collectInActivity(crossinline transform: (T) -> Unit) {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                collect {
+                    transform(it)
+                }
+            }
+        }
+    }
+
+    protected inline fun <T> Flow<T>.collectInActivity(crossinline transform: (T) -> Unit) {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                collect {
+                    transform(it)
+                }
+            }
+        }
+    }
+
     internal companion object {
-        const val EXTRA_FRAGMENT_CONFIG = "com.stripe.android.paymentsheet.extra_fragment_config"
         const val EXTRA_STARTER_ARGS = "com.stripe.android.paymentsheet.extra_starter_args"
         const val TABLET_WIDTH_RATIO = .6
     }

@@ -5,15 +5,10 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.createSavedStateHandle
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
@@ -69,8 +64,14 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -117,27 +118,26 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         args.config?.shippingDetails?.toConfirmPaymentIntentShipping()
     )
 
-    private val _paymentSheetResult = MutableLiveData<PaymentSheetResult>()
-    internal val paymentSheetResult: LiveData<PaymentSheetResult> = _paymentSheetResult
+    private val _paymentSheetResult = MutableStateFlow<PaymentSheetResult?>(null)
+    internal val paymentSheetResult: StateFlow<PaymentSheetResult?> = _paymentSheetResult
 
-    private val _startConfirm = MutableLiveData<Event<ConfirmStripeIntentParams>>()
-    internal val startConfirm: LiveData<Event<ConfirmStripeIntentParams>> = _startConfirm
+    private val _startConfirm = MutableStateFlow<Event<ConfirmStripeIntentParams>?>(null)
+    internal val startConfirm: StateFlow<Event<ConfirmStripeIntentParams>?> = _startConfirm
 
     @VisibleForTesting
-    internal val _viewState = MutableLiveData<PaymentSheetViewState>(null)
-    internal val viewState: LiveData<PaymentSheetViewState> = _viewState.distinctUntilChanged()
+    internal val _viewState = MutableStateFlow<PaymentSheetViewState?>(null)
+    internal val viewState: StateFlow<PaymentSheetViewState?> = _viewState
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-    internal fun getButtonStateObservable(
-        checkoutIdentifier: CheckoutIdentifier
-    ): MediatorLiveData<PaymentSheetViewState?> {
-        val outputLiveData = MediatorLiveData<PaymentSheetViewState?>()
-        outputLiveData.addSource(viewState) { currentValue ->
+
+    fun getButtonStateObservable(checkoutIdentifier: CheckoutIdentifier): Flow<PaymentSheetViewState?> {
+        return _viewState.map {
             if (this.checkoutIdentifier == checkoutIdentifier) {
-                outputLiveData.value = currentValue
+                it
+            } else {
+                null
             }
         }
-        return outputLiveData
     }
 
     // Holds a reference to the last selected payment method while checking out with Google Pay.
@@ -177,20 +177,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
     // Whether the top container, containing Google Pay and Link buttons, should be visible
-    internal val showTopContainer = MediatorLiveData<Boolean>().apply {
-        listOf(
-            isLinkEnabled,
-            isGooglePayReady,
-            isReadyEvents
-        ).forEach {
-            addSource(it) {
-                value = (
-                    isLinkEnabled.value == true ||
-                        isGooglePayReady.value == true
-                    ) && isReadyEvents.value?.peekContent() == true
-            }
-        }
-    }
+    internal val showTopContainer = combine(
+        isLinkEnabled,
+        isGooglePayReady,
+        isReadyEvents
+    ) { isLinkEnabled, isGooglePayReady, isReadyEvents ->
+        (isLinkEnabled || isGooglePayReady) && isReadyEvents.peekContent()
+    }.distinctUntilChanged()
 
     private var paymentLauncher: StripePaymentLauncher? = null
 
@@ -583,11 +576,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun awaitReady() {
-        isReadyEvents.asFlow().filter { it.peekContent() }.first()
+        isReadyEvents.filter { it.peekContent() }.first()
     }
 
     override fun transitionToFirstScreen() {
-        val target = if (paymentMethods.value.isNullOrEmpty()) {
+        val target = if (paymentMethods.value.isEmpty()) {
             updateSelection(null)
             TransitionTarget.AddFirstPaymentMethod
         } else {

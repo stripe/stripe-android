@@ -30,7 +30,6 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.observeEvents
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.AnimationConstants
@@ -124,17 +123,19 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             linkPaymentLauncher = viewModel.linkLauncher
         }
 
-        viewModel.transition.observeEvents(this) { transitionTarget ->
+        viewModel.transition.collectInActivity { transitionEvent ->
             clearErrorMessages()
-            onTransitionTarget(transitionTarget)
+            transitionEvent?.getContentIfNotHandled()?.let { transitionTarget ->
+                onTransitionTarget(transitionTarget)
+            }
         }
 
         if (savedInstanceState == null) {
             viewModel.transitionToFirstScreenWhenReady()
         }
 
-        viewModel.startConfirm.observe(this) { event ->
-            val confirmParams = event.getContentIfNotHandled()
+        viewModel.startConfirm.collectInActivity { event ->
+            val confirmParams = event?.getContentIfNotHandled()
             if (confirmParams != null) {
                 window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
                 lifecycleScope.launch {
@@ -143,22 +144,25 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        viewModel.paymentSheetResult.observe(this) {
-            closeSheet(it)
+        viewModel.paymentSheetResult.collectInActivity {
+            it?.let {
+                closeSheet(it)
+            }
         }
 
-        viewModel.buttonsEnabled.observe(this) { enabled ->
+        viewModel.buttonsEnabled.collectInActivity { enabled ->
             linkButton.isEnabled = enabled
             googlePayButton.isEnabled = enabled
         }
 
-        viewModel.selection.observe(this) {
+        viewModel.selection.collectInActivity {
             clearErrorMessages()
             resetPrimaryButtonState()
         }
 
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
-            .observe(this, buyButtonStateObserver)
+        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy).collectInActivity {
+            buyButtonStateObserver(it)
+        }
     }
 
     private fun initializeArgs(): Result<PaymentSheetContract.Args?> {
@@ -269,7 +273,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 R.string.stripe_paymentsheet_or_pay_using
             }
         )
-        viewModel.showTopContainer.observe(this) { visible ->
+        viewModel.showTopContainer.collectInActivity { visible ->
             linkButton.isVisible = viewModel.isLinkEnabled.value == true
             googlePayButton.isVisible = viewModel.isGooglePayReady.value == true
             topContainer.isVisible = visible
@@ -298,14 +302,14 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewModel.updateSelection(PaymentSelection.GooglePay)
         }
 
-        viewModel.selection.observe(this) { paymentSelection ->
+        viewModel.selection.collectInActivity { paymentSelection ->
             if (paymentSelection == PaymentSelection.GooglePay) {
                 viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
             }
         }
 
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
-            .observe(this) { viewState ->
+            .collectInActivity { viewState ->
                 if (viewState is PaymentSheetViewState.Reset) {
                     // If Google Pay was cancelled or failed, re-select the form payment method
                     viewModel.updateSelection(viewModel.lastSelectedPaymentMethod)

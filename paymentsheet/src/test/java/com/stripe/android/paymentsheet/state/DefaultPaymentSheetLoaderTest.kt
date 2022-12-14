@@ -8,9 +8,11 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.FakePrefsRepository
@@ -101,6 +103,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     config = null,
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntent = stripeIntent,
+                    supportedPaymentMethodTypes = listOf(PaymentMethod.Type.Card.code),
                     customerPaymentMethods = emptyList(),
                     savedSelection = SavedSelection.Link,
                     isGooglePayReady = false,
@@ -143,6 +146,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                    supportedPaymentMethodTypes = listOf(PaymentMethod.Type.Card.code),
                     customerPaymentMethods = PAYMENT_METHODS,
                     savedSelection = SavedSelection.PaymentMethod(id = "pm_123456789"),
                     isGooglePayReady = true,
@@ -171,6 +175,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntent = stripeIntent,
+                    supportedPaymentMethodTypes = listOf(PaymentMethod.Type.Card.code),
                     customerPaymentMethods = emptyList(),
                     savedSelection = SavedSelection.Link,
                     isGooglePayReady = true,
@@ -223,6 +228,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                     stripeIntent = expectedIntent,
+                    supportedPaymentMethodTypes = listOf(PaymentMethod.Type.Card.code),
                     customerPaymentMethods = emptyList(),
                     savedSelection = SavedSelection.Link,
                     isGooglePayReady = false,
@@ -253,6 +259,7 @@ internal class DefaultPaymentSheetLoaderTest {
                         config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                         clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                        supportedPaymentMethodTypes = listOf(PaymentMethod.Type.Card.code),
                         customerPaymentMethods = PAYMENT_METHODS,
                         savedSelection = SavedSelection.PaymentMethod("pm_123456789"),
                         isGooglePayReady = true,
@@ -304,6 +311,7 @@ internal class DefaultPaymentSheetLoaderTest {
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         expectedIntent,
+                        supportedPaymentMethodTypes = listOf(PaymentMethod.Type.Card.code),
                         newPaymentSelection = null,
                         customerPaymentMethods = emptyList(),
                         savedSelection = SavedSelection.Link,
@@ -350,6 +358,7 @@ internal class DefaultPaymentSheetLoaderTest {
                         PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                         PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET,
                         expectedIntent,
+                        supportedPaymentMethodTypes = listOf(PaymentMethod.Type.Card.code),
                         newPaymentSelection = null,
                         customerPaymentMethods = emptyList(),
                         savedSelection = SavedSelection.Link,
@@ -660,6 +669,127 @@ internal class DefaultPaymentSheetLoaderTest {
             .isEqualTo("email@stripe.com")
     }
 
+    @Test
+    fun `Verify supported payment methods exclude afterpay if no shipping and no allow flag`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("afterpay_clearpay", "card"),
+                shipping = null,
+            ),
+        )
+
+        val result = loader.load(
+            clientSecret = PaymentIntentClientSecret("secret"),
+            paymentSheetConfiguration = mockConfiguration(
+                allowsPaymentMethodsRequiringShippingAddress = false
+            )
+        )
+
+        assertThat(result)
+            .isInstanceOf(PaymentSheetLoader.Result.Success::class.java)
+        assertThat((result as PaymentSheetLoader.Result.Success).state.supportedPaymentMethodTypes)
+            .doesNotContain("afterpay_clearpay")
+    }
+
+    @Test
+    fun `Verify supported payment methods include afterpay if allow flag but no shipping`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("afterpay_clearpay"),
+                shipping = null,
+            ),
+        )
+
+        val result = loader.load(
+            clientSecret = PaymentIntentClientSecret("secret"),
+            paymentSheetConfiguration = mockConfiguration(
+                allowsPaymentMethodsRequiringShippingAddress = true
+            )
+        )
+
+        assertThat(result)
+            .isInstanceOf(PaymentSheetLoader.Result.Success::class.java)
+        assertThat((result as PaymentSheetLoader.Result.Success).state.supportedPaymentMethodTypes)
+            .containsExactly("afterpay_clearpay")
+    }
+
+    @Test
+    fun `Verify supported payment methods include afterpay if shipping but no allow flag`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("afterpay_clearpay"),
+                shipping = PaymentIntent.Shipping(
+                    address = Address("city")
+                )
+            ),
+        )
+
+        val result = loader.load(
+            clientSecret = PaymentIntentClientSecret("secret"),
+            paymentSheetConfiguration = mockConfiguration(
+                allowsPaymentMethodsRequiringShippingAddress = true
+            )
+        )
+
+        assertThat(result)
+            .isInstanceOf(PaymentSheetLoader.Result.Success::class.java)
+        assertThat((result as PaymentSheetLoader.Result.Success).state.supportedPaymentMethodTypes)
+            .containsExactly("afterpay_clearpay")
+    }
+
+    @Test
+    fun `getSupportedPaymentMethods() filters payment methods with delayed settlement`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.Ideal.code,
+                    PaymentMethod.Type.SepaDebit.code,
+                    PaymentMethod.Type.Sofort.code,
+                )
+            ),
+        )
+
+        val result = loader.load(
+            clientSecret = PaymentIntentClientSecret("secret"),
+            paymentSheetConfiguration = mockConfiguration(
+                allowsPaymentMethodsRequiringShippingAddress = true
+            )
+        )
+
+        assertThat(result)
+            .isInstanceOf(PaymentSheetLoader.Result.Success::class.java)
+        assertThat((result as PaymentSheetLoader.Result.Success).state.supportedPaymentMethodTypes)
+            .containsExactly("card", "ideal")
+    }
+
+    @Test
+    fun `getSupportedPaymentMethods() does not filter payment methods when supportsDelayedSettlement = true`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.Ideal.code,
+                    PaymentMethod.Type.SepaDebit.code,
+                    PaymentMethod.Type.Sofort.code,
+                )
+            ),
+        )
+
+        val result = loader.load(
+            clientSecret = PaymentIntentClientSecret("secret"),
+            paymentSheetConfiguration = mockConfiguration(
+                allowsPaymentMethodsRequiringShippingAddress = true,
+                allowsDelayedPaymentMethods = true
+            )
+        )
+
+        assertThat(result)
+            .isInstanceOf(PaymentSheetLoader.Result.Success::class.java)
+        assertThat((result as PaymentSheetLoader.Result.Success).state.supportedPaymentMethodTypes)
+            .containsExactly("card", "ideal", "sepa_debit", "sofort")
+    }
+
     private fun createPaymentSheetLoader(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -688,6 +818,8 @@ internal class DefaultPaymentSheetLoaderTest {
         isGooglePayEnabled: Boolean = true,
         shippingDetails: AddressDetails? = null,
         defaultBillingDetails: PaymentSheet.BillingDetails? = null,
+        allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
+        allowsDelayedPaymentMethods: Boolean = false
     ): PaymentSheet.Configuration {
         return PaymentSheet.Configuration(
             merchantDisplayName = "Merchant",
@@ -697,7 +829,9 @@ internal class DefaultPaymentSheetLoaderTest {
             googlePay = PaymentSheet.GooglePayConfiguration(
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                 countryCode = CountryCode.US.value
-            ).takeIf { isGooglePayEnabled }
+            ).takeIf { isGooglePayEnabled },
+            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods
         )
     }
 

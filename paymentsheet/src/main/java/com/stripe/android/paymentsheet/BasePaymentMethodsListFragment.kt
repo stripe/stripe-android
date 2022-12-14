@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.isSystemDarkTheme
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 internal abstract class BasePaymentMethodsListFragment(
@@ -43,7 +44,7 @@ internal abstract class BasePaymentMethodsListFragment(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
+        setHasOptionsMenu(sheetViewModel.paymentMethods.value.isNotEmpty())
         sheetViewModel.eventReporter.onShowExistingPaymentOptions(
             linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
             activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
@@ -127,23 +128,35 @@ internal abstract class BasePaymentMethodsListFragment(
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 sheetViewModel.paymentOptionsState.collect { paymentOptionsState ->
-                    adapter.update(
-                        items = paymentOptionsState.items,
-                        selectedIndex = paymentOptionsState.selectedIndex,
-                    )
+                    paymentOptionsState?.items?.let { items ->
+                        adapter.update(
+                            items = items,
+                            selectedIndex = paymentOptionsState.selectedIndex,
+                        )
+                    }
                 }
             }
         }
 
-        sheetViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
+        sheetViewModel.paymentMethods.collectInFragment { paymentMethods ->
             if (isEditing && paymentMethods.isEmpty()) {
                 isEditing = false
             }
         }
 
-        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
+        sheetViewModel.processing.collectInFragment { isProcessing ->
             adapter.isEnabled = !isProcessing
             layoutManager.canScroll = !isProcessing
+        }
+    }
+
+    private inline fun <T> StateFlow<T>.collectInFragment(crossinline transform: (T) -> Unit) {
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                collect {
+                    transform(it)
+                }
+            }
         }
     }
 

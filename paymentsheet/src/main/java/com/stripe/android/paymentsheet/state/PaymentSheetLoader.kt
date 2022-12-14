@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
+import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -147,11 +148,23 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             }
         }
 
+        val supportedPaymentMethodTypes = async {
+            lpmResourceRepository.waitUntilLoaded()
+            getPMsToAdd(
+                stripeIntent = stripeIntent,
+                config = config,
+                lpmRepository = lpmResourceRepository.getRepository(),
+            ).map {
+                it.code
+            }
+        }
+
         return@coroutineScope PaymentSheetLoader.Result.Success(
             PaymentSheetState.Full(
                 config = config,
                 clientSecret = clientSecret,
                 stripeIntent = stripeIntent,
+                supportedPaymentMethodTypes = supportedPaymentMethodTypes.await(),
                 customerPaymentMethods = paymentMethods.await(),
                 savedSelection = savedSelection.await(),
                 isGooglePayReady = isGooglePayReady,
