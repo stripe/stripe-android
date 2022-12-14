@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
-import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
 @Singleton
@@ -46,9 +45,6 @@ internal interface FlowControllerComponent {
 
         @BindsInstance
         fun viewModelStoreOwner(viewModelStoreOwner: ViewModelStoreOwner): Builder
-
-        @BindsInstance
-        fun lifecycleScope(lifecycleScope: CoroutineScope): Builder
 
         @BindsInstance
         fun lifeCycleOwner(lifecycleOwner: LifecycleOwner): Builder
