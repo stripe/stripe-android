@@ -1,0 +1,18 @@
+appId: ${APP_ID}
+---
+####### Bypass Chrome on-boarding screen #######
+# ACCEPT TERMS (tries id and text)
+- tapOn:
+    id: "com.android.chrome:id/terms_accept"
+    optional: true
+- tapOn:
+    text: ".*(?i)Accept.*"
+    optional: true
+# REJECT TURN ON SYNC (tries id and text)
+- tapOn:
+    id: "com.android.chrome:id/negative_button"
+    optional: true
+- tapOn:
+    text: ".*(?i)No thanks.*"
+    optional: true
+###############################################
