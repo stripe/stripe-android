@@ -25,6 +25,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 
 @Composable
 internal fun FinancialConnectionsTopAppBar(
+    hideStripeLogo: Boolean = LocalReducedBranding.current,
     elevation: Dp = 0.dp,
     showBack: Boolean = true,
     onCloseClick: () -> Unit
@@ -34,7 +35,7 @@ internal fun FinancialConnectionsTopAppBar(
     val navController = LocalNavHostController.current
     val reducedBranding = LocalReducedBranding.current
     TopAppBar(
-        title = if (reducedBranding) {
+        title = if (hideStripeLogo) {
             { /* Empty content */ }
         } else {
             {
@@ -94,9 +95,20 @@ internal val LazyListState.elevation: Dp
     }
 
 @Composable
-@Preview(group = "Components", name = "TopAppBar - idle")
-internal fun FinancialConnectionsTopAppBarPreview() {
+@Preview(group = "Components", name = "TopAppBar")
+internal fun TopAppBarNoStripeLogoPreview() {
     FinancialConnectionsPreview {
-        FinancialConnectionsTopAppBar() {}
+        FinancialConnectionsTopAppBar {}
     }
 }
+
+@Composable
+@Preview(group = "Components", name = "TopAppBar - no Stripe logo")
+internal fun FinancialConnectionsTopAppBarPreview() {
+    FinancialConnectionsPreview {
+        FinancialConnectionsTopAppBar(
+            hideStripeLogo = true
+        ) {}
+    }
+}
+
