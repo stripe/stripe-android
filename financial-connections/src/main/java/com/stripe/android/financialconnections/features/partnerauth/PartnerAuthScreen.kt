@@ -132,7 +132,7 @@ private fun PartnerAuthScreenContent(
 }
 
 @Composable
-fun ErrorContent(
+internal fun ErrorContent(
     error: Throwable,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,

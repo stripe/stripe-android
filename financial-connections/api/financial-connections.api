@@ -337,10 +337,6 @@ public final class com/stripe/android/financialconnections/features/partnerauth/
 	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/financialconnections/features/partnerauth/PartnerAuthScreenKt {
-	public static final fun ErrorContent (Ljava/lang/Throwable;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
-}
-
 public final class com/stripe/android/financialconnections/features/reset/ComposableSingletons$ResetScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/reset/ComposableSingletons$ResetScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
