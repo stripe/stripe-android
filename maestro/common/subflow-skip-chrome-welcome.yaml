@@ -1,4 +1,4 @@
-appId: com.stripe.android.financialconnections.example
+appId: ${APP_ID}
 ---
 ####### Bypass Chrome on-boarding screen #######
 # ACCEPT TERMS (tries id and text)

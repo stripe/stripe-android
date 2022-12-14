@@ -28,7 +28,10 @@ appId: com.stripe.android.financialconnections.example
 - takeScreenshot: TestOAuth_Prepane
 - tapOn: "Continue"
 ####### Bypass Chrome on-boarding screen #######
-- runFlow: ../../common/subflow-skip-chrome-welcome.yaml
+- runFlow:
+    file: ../../common/subflow-skip-chrome-welcome.yaml
+    env:
+        APP_ID: com.stripe.android.financialconnections.example
 ###############################################
 - assertVisible: "Select all accounts"
 - takeScreenshot: TestOAuth_AccountPicker
