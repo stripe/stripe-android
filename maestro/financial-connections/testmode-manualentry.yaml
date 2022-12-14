@@ -39,6 +39,7 @@ appId: com.stripe.android.financialconnections.example
 - tapOn:
     id: "ConfirmAccountInput"
 - inputText: "000123456789"
+- hideKeyboard
 - takeScreenshot: ManualEntry_ConfirmAccountNumber
 - tapOn: "Continue"
 - takeScreenshot: ManualEntry_Success
