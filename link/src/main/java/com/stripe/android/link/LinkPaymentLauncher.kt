@@ -102,6 +102,11 @@ class LinkPaymentLauncher @Inject internal constructor(
         )
     }
 
+    fun unregister() {
+        linkActivityResultLauncher?.unregister()
+        linkActivityResultLauncher = null
+    }
+
     /**
      * Launch the Link UI to process a payment.
      *

@@ -7,7 +7,6 @@
     <ID>ConstructorParameterNaming:Device.kt$Device$val android_id: String?</ID>
     <ID>EmptyFunctionBlock:CardImageVerificationFlowTest.kt$CardImageVerificationFlowTest.&lt;no name provided>${}</ID>
     <ID>EmptyFunctionBlock:CardScanFragment.kt$CardScanFragment${}</ID>
-    <ID>ForbiddenComment:AppDetails.kt$// TODO: replace this with something like BuildConfig.SDK_VERSION_STRING</ID>
     <ID>ForbiddenComment:ClientStats.kt$StatsPayload$// TODO: these should probably be reported as part of scanstats</ID>
     <ID>ForbiddenComment:MainLoopAggregator.kt$MainLoopAggregator$// TODO: when we want to collect this in scan stats, give this a name</ID>
     <ID>ForbiddenComment:MemoizeTest.kt$MemoizeTest$// TODO: this should ideally use `runBlockingTest`, but that does not actually advance the</ID>
@@ -22,7 +21,6 @@
     <ID>ForbiddenComment:Timer.kt$LoggingTimer$// TODO: use contracts when they are no longer experimental</ID>
     <ID>ForbiddenComment:Timer.kt$NoOpTimer$// TODO: use contracts when they are no longer experimental</ID>
     <ID>ForbiddenComment:Timer.kt$Timer$* Log the duration of a single task and return the result from that task. * * TODO: use contracts when they are no longer experimental</ID>
-    <ID>FunctionOnlyReturningConstant:AppDetails.kt$internal fun getSdkVersion(): String</ID>
     <ID>FunctionOnlyReturningConstant:AppDetails.kt$private fun getApplicationId(): String</ID>
     <ID>FunctionOnlyReturningConstant:Device.kt$@SuppressLint("HardwareIds") private fun getAndroidId()</ID>
     <ID>FunctionOnlyReturningConstant:Device.kt$internal fun getPlatform()</ID>
@@ -72,7 +70,6 @@
     <ID>SwallowedException:Device.kt$t: Throwable</ID>
     <ID>SwallowedException:Fetcher.kt$FetchedData.Companion$t: Throwable</ID>
     <ID>SwallowedException:File.kt$t: Throwable</ID>
-    <ID>SwallowedException:GetCameraAdapter.kt$t: Throwable</ID>
     <ID>SwallowedException:Loader.kt$Loader$t: Throwable</ID>
     <ID>SwallowedException:Network.kt$et: Throwable</ID>
     <ID>SwallowedException:StripeNetwork.kt$StripeNetwork$et: Throwable</ID>
@@ -92,7 +89,6 @@
     <ID>TooGenericExceptionCaught:TensorFlowLiteAnalyzer.kt$TFLAnalyzerFactory$t: Throwable</ID>
     <ID>TooGenericExceptionThrown:RetryTest.kt$RetryTest$throw RuntimeException()</ID>
     <ID>TooManyFunctions:ArrayExtensions.kt$com.stripe.android.stripecardscan.framework.util.ArrayExtensions.kt</ID>
-    <ID>TooManyFunctions:CardExpiry.kt$com.stripe.android.stripecardscan.payment.card.CardExpiry.kt</ID>
     <ID>TooManyFunctions:CardImageVerificationActivity.kt$CardImageVerificationActivity : SimpleScanActivitySimpleScanStateful</ID>
     <ID>TooManyFunctions:CardScanActivity.kt$CardScanActivity : ScanActivitySimpleScanStateful</ID>
     <ID>TooManyFunctions:CardScanFragment.kt$CardScanFragment : ScanFragmentSimpleScanStateful</ID>
@@ -103,7 +99,6 @@
     <ID>TooManyFunctions:SimpleScanActivity.kt$SimpleScanActivity&lt;ScanFlowParameters> : ScanActivity</ID>
     <ID>TooManyFunctions:SizeAndCenter.kt$com.stripe.android.stripecardscan.framework.ml.ssd.SizeAndCenter.kt</ID>
     <ID>UnnecessaryAbstractClass:MachineState.kt$MachineState$MachineState</ID>
-    <ID>UnusedPrivateMember:AcceptedImageConfigs.kt$AcceptedImageConfigs$val mappedFormats = it.preferredFormats?.map { ImageFormat.fromValue(it) } ?.filter { isformatSupport(it) } ?.takeIf { it.count() > 0 } ?.let { preferredFormats = it.toTypedArray() }</ID>
     <ID>UnusedPrivateMember:PaymentCardUtils.kt$@CheckResult private fun jaccardIndex(string1: String, string2: String): Double</ID>
     <ID>UnusedPrivateMember:PaymentCardUtils.kt$private fun String.isDigitsOnly()</ID>
     <ID>UnusedPrivateMember:ScanActivity.kt$ScanActivity$private val permissionStat = Stats.trackTask("camera_permission")</ID>

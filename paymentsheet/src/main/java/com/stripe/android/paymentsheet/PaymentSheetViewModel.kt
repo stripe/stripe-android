@@ -11,6 +11,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
@@ -51,7 +52,6 @@ import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherCompo
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
-import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -69,6 +69,8 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -96,7 +98,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @InjectorKey injectorKey: String,
     savedStateHandle: SavedStateHandle,
     linkLauncher: LinkPaymentLauncher
-) : BaseSheetViewModel<PaymentSheetViewModel.TransitionTarget>(
+) : BaseSheetViewModel(
     application = application,
     config = args.config,
     eventReporter = eventReporter,
@@ -179,13 +181,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         listOf(
             isLinkEnabled,
             isGooglePayReady,
-            fragmentConfigEvent
+            isReadyEvents
         ).forEach {
             addSource(it) {
                 value = (
                     isLinkEnabled.value == true ||
                         isGooglePayReady.value == true
-                    ) && fragmentConfigEvent.value?.peekContent() != null
+                    ) && isReadyEvents.value?.peekContent() == true
             }
         }
     }
@@ -354,6 +356,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     fun unregisterFromActivity() {
         paymentLauncher?.unregisterPollingAuthenticator()
         paymentLauncher = null
+        linkLauncher.unregister()
     }
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
@@ -572,23 +575,25 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is LinkActivityResult.Failed -> PaymentResult.Failed(error)
         }
 
-    internal sealed class TransitionTarget {
-        abstract val fragmentConfig: FragmentConfig
+    fun transitionToFirstScreenWhenReady() {
+        viewModelScope.launch {
+            awaitReady()
+            transitionToFirstScreen()
+        }
+    }
 
-        // User has saved PM's and is selected
-        data class SelectSavedPaymentMethod(
-            override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget()
+    private suspend fun awaitReady() {
+        isReadyEvents.asFlow().filter { it.peekContent() }.first()
+    }
 
-        // User has saved PM's and is adding a new one
-        data class AddPaymentMethodFull(
-            override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget()
-
-        // User has no saved PM's
-        data class AddPaymentMethodSheet(
-            override val fragmentConfig: FragmentConfig
-        ) : TransitionTarget()
+    override fun transitionToFirstScreen() {
+        val target = if (paymentMethods.value.isNullOrEmpty()) {
+            updateSelection(null)
+            TransitionTarget.AddFirstPaymentMethod
+        } else {
+            TransitionTarget.SelectSavedPaymentMethods
+        }
+        transitionTo(target)
     }
 
     internal class Factory(
