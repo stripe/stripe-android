@@ -1,0 +1,10 @@
+appId: com.stripe.android.financialconnections.example
+---
+####### Bypass Chrome on-boarding screen #######
+- tapOn:
+    text: ".*(?i)Accept.*"
+    optional: true
+- tapOn:
+    text: ".*(?i)No thanks.*"
+    optional: true
+###############################################
