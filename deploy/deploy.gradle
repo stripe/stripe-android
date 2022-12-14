@@ -66,9 +66,8 @@ afterEvaluate { project ->
 
                     licenses {
                         license {
-                            name = "The MIT License"
-                            url = "https://raw.githubusercontent.com/stripe/stripe-android/master/LICENSE"
-                            distribution = "repo"
+                            name = "MIT License"
+                            url = "https://opensource.org/licenses/MIT"
                         }
                     }
 

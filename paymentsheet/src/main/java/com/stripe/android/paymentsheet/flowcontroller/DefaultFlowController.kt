@@ -157,18 +157,19 @@ internal class DefaultFlowController @Inject internal constructor(
                     ).also {
                         it.registerPollingAuthenticator()
                     }
+
+                    linkLauncher.register(
+                        activityResultCaller = activityResultCaller,
+                        callback = ::onLinkActivityResult,
+                    )
                 }
 
                 override fun onDestroy(owner: LifecycleOwner) {
                     paymentLauncher?.unregisterPollingAuthenticator()
                     paymentLauncher = null
+                    linkLauncher.unregister()
                 }
             }
-        )
-
-        linkLauncher.register(
-            activityResultCaller = activityResultCaller,
-            callback = ::onLinkActivityResult,
         )
 
         paymentOptionActivityLauncher =

@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import org.mockito.kotlin.mock
 
@@ -109,6 +110,7 @@ internal object PaymentSheetFixtures {
         config: PaymentSheet.Configuration? = state.config,
         newPaymentSelection: PaymentSelection.New? = state.newPaymentSelection,
         clientSecret: ClientSecret = state.clientSecret,
+        linkState: LinkState? = state.linkState,
     ): PaymentOptionContract.Args {
         return copy(
             state = state.copy(
@@ -118,6 +120,7 @@ internal object PaymentSheetFixtures {
                 config = config,
                 newPaymentSelection = newPaymentSelection,
                 clientSecret = clientSecret,
+                linkState = linkState,
             ),
         )
     }

@@ -16,7 +16,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.Injectable
@@ -27,7 +26,6 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -37,8 +35,10 @@ import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.LinkState.LoginState.LoggedIn
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -50,6 +50,7 @@ import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
+import com.stripe.android.utils.TestUtils.observeEventsForever
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
@@ -163,14 +164,15 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `ContinueButton should be hidden when showing payment options`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent(
-                PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-                    paymentMethods = PaymentMethodFixtures.createCards(5)
-                )
-            )
-        ).use {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = PaymentMethodFixtures.createCards(5)
+        )
+
+        val scenario = activityScenario(
+            viewModel = createViewModel(args)
+        )
+
+        scenario.launch(createIntent(args)).use {
             it.onActivity { activity ->
                 assertThat(activity.viewBinding.continueButton.isVisible)
                     .isFalse()
@@ -203,25 +205,20 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `ContinueButton should be hidden when returning to payment options`() {
-        val scenario = activityScenario()
-        scenario.launch(
-            createIntent(
-                PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-                    paymentMethods = PaymentMethodFixtures.createCards(5)
-                )
-            )
-        ).use {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = PaymentMethodFixtures.createCards(5)
+        )
+
+        val viewModel = createViewModel(args)
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(createIntent(args)).use {
             it.onActivity { activity ->
                 assertThat(activity.viewBinding.continueButton.isVisible)
                     .isFalse()
 
                 // Navigate to "Add Payment Method" fragment
-                with(
-                    activity.supportFragmentManager.findFragmentById(R.id.fragment_container)
-                        as PaymentOptionsListFragment
-                ) {
-                    transitionToAddPaymentMethod()
-                }
+                viewModel.transitionToAddPaymentScreen()
                 idleLooper()
 
                 assertThat(activity.viewBinding.continueButton.isVisible)
@@ -260,46 +257,106 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify if google pay is ready, stay on the select saved payment method`() {
+    fun `Verify if Google Pay is ready, display the saved payment methods screen`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(isGooglePayReady = true)
         val viewModel = createViewModel(args)
 
-        val transitionTarget = mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
-        viewModel.transition.observeForever {
-            transitionTarget.add(it)
+        val transitionTargets = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
+
+        activityScenario(viewModel).launch(createIntent(args)).use {
+            it.onActivity {
+                idleLooper()
+            }
         }
-        val scenario = activityScenario(viewModel)
-        scenario.launch(
-            createIntent(args)
-        ).use {
-            idleLooper()
-            assertThat(transitionTarget[1].peekContent())
-                .isInstanceOf(TransitionTarget.SelectSavedPaymentMethod::class.java)
-        }
+
+        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
-    fun `Verify if payment methods is not empty select, saved payment method`() {
+    fun `Verify if Link is available, display the saved payment methods screen`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            linkState = LinkState(configuration = mock(), loginState = LoggedIn),
+            isGooglePayReady = false,
+            paymentMethods = emptyList(),
+        )
+
+        val viewModel = createViewModel(args)
+
+        val transitionTargets = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
+
+        activityScenario(viewModel).launch(createIntent(args)).use {
+            it.onActivity {
+                idleLooper()
+            }
+        }
+
+        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+    }
+
+    @Test
+    fun `Verify if customer has payment methods, display the saved payment methods screen`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             isGooglePayReady = false,
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
 
         val viewModel = createViewModel(args)
-        val transitionTarget =
-            mutableListOf<BaseSheetViewModel.Event<TransitionTarget?>>()
-        viewModel.transition.observeForever {
-            transitionTarget.add(it)
+
+        val transitionTargets = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
+
+        activityScenario(viewModel).launch(createIntent(args)).use {
+            idleLooper()
         }
 
-        val scenario = activityScenario(viewModel)
-        scenario.launch(
-            createIntent(args)
-        ).use {
+        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+    }
+
+    @Test
+    fun `Verify if there are no payment methods, display the add payment method screen`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            isGooglePayReady = false,
+            paymentMethods = emptyList(),
+        )
+
+        val viewModel = createViewModel(args)
+
+        val transitionTargets = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
+
+        activityScenario(viewModel).launch(createIntent(args)).use {
             idleLooper()
-            assertThat(transitionTarget[1].peekContent())
-                .isInstanceOf(TransitionTarget.SelectSavedPaymentMethod::class.java)
         }
+
+        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+    }
+
+    @Test
+    fun `Verify doesn't transition to first screen again on activity recreation`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        )
+
+        val viewModel = createViewModel(args)
+
+        val transitionTargets = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
+
+        activityScenario(viewModel).launch(createIntent(args)).use { scenario ->
+            scenario.onActivity {
+                idleLooper()
+            }
+
+            scenario.recreate()
+
+            scenario.onActivity {
+                idleLooper()
+            }
+        }
+
+        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
@@ -421,7 +478,7 @@ internal class PaymentOptionsActivityTest {
             it.onActivity { activity ->
                 viewModel.updateBelowButtonText(
                     ApplicationProvider.getApplicationContext<Context>().getString(
-                        com.stripe.android.paymentsheet.R.string.stripe_paymentsheet_payment_method_us_bank_account
+                        R.string.stripe_paymentsheet_payment_method_us_bank_account
                     )
                 )
                 assertThat(activity.viewBinding.notes.isVisible).isTrue()
