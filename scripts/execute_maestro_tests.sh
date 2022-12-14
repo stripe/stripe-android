@@ -17,7 +17,7 @@ chmod 777 financial-connections-example/build/reports/emulator.log
 # Clear logs
 adb logcat -c
 
-# Start screen record
+# Start screen record (adb screenrecord has a 3 min limit, for now take consequent recordings.
 adb shell "screenrecord /sdcard/rec-1.mp4; screenrecord /sdcard/rec-2.mp4; screenrecord /sdcard/rec-3.mp4; screenrecord /sdcard/rec-4.mp4" &
 childpid=$!
 
