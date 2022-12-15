@@ -12,8 +12,9 @@ import com.stripe.android.paymentsheet.ui.getCardBrandIcon
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.uicore.image.StripeImageLoader
+import javax.inject.Inject
 
-internal class PaymentOptionFactory(
+internal class PaymentOptionFactory @Inject constructor(
     private val resources: Resources,
     private val imageLoader: StripeImageLoader,
 ) {

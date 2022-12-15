@@ -535,7 +535,6 @@ internal class DefaultFlowController @Inject internal constructor(
             lifecycleOwner: LifecycleOwner,
             activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
-            paymentOptionFactory: PaymentOptionFactory,
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback
         ): PaymentSheet.FlowController {
@@ -549,7 +548,6 @@ internal class DefaultFlowController @Inject internal constructor(
                 .lifeCycleOwner(lifecycleOwner)
                 .activityResultCaller(activityResultCaller)
                 .statusBarColor(statusBarColor)
-                .paymentOptionFactory(paymentOptionFactory)
                 .paymentOptionCallback(paymentOptionCallback)
                 .paymentResultCallback(paymentResultCallback)
                 .injectorKey(injectorKey)
