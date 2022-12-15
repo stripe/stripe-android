@@ -15,12 +15,12 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.IntSize.Companion.Zero
 import com.stripe.android.uicore.image.StripeImageState.Error
 import com.stripe.android.uicore.image.StripeImageState.Loading
 import com.stripe.android.uicore.image.StripeImageState.Success
-import kotlinx.coroutines.launch
 
 /**
  * A composable that executes an image request asynchronously using the
@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
  *  represents. This should always be provided unless this image is used for decorative purposes,
  *  and does not represent a meaningful action that a user can take.
  * @param imageLoader The [StripeImageLoader] that will be used to execute the request.
+ * @param debugPainter If provided, this painter will be render on Compose previews.
  * @param modifier Modifier used to adjust the layout algorithm or draw decoration content.
  * @param errorContent content to render when image loading fails.
  * @param loadingContent content to render when image loads.
@@ -46,26 +47,31 @@ fun StripeImage(
     modifier: Modifier = Modifier,
     contentScale: ContentScale = ContentScale.Fit,
     colorFilter: ColorFilter? = null,
+    debugPainter: Painter? = null,
     errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
     loadingContent: @Composable BoxWithConstraintsScope.() -> Unit = {}
 ) {
     BoxWithConstraints(modifier) {
+        val debugMode = LocalInspectionMode.current
         val (width, height) = calculateBoxSize()
-        val state: MutableState<StripeImageState> =
-            remember { mutableStateOf(Loading) }
-        LaunchedEffect(url) {
-            launch {
-                imageLoader
-                    .load(url, width, height)
-                    .onSuccess {
-                        it?.let { bitmap ->
-                            state.value = Success(BitmapPainter(bitmap.asImageBitmap()))
-                        }
-                    }
-                    .onFailure {
-                        state.value = Error
-                    }
+        val state: MutableState<StripeImageState> = remember {
+            if (debugMode && debugPainter != null) {
+                mutableStateOf(Success(debugPainter))
+            } else {
+                mutableStateOf(Loading)
             }
+        }
+        LaunchedEffect(url) {
+            imageLoader
+                .load(url, width, height)
+                .onSuccess {
+                    it?.let { bitmap ->
+                        state.value = Success(BitmapPainter(bitmap.asImageBitmap()))
+                    }
+                }
+                .onFailure {
+                    state.value = Error
+                }
         }
         when (val result = state.value) {
             Error -> errorContent()

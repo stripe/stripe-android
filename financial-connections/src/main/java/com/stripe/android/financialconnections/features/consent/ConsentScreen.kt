@@ -5,7 +5,9 @@ package com.stripe.android.financialconnections.features.consent
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
@@ -30,7 +33,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -41,6 +47,7 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenBottomSheet
@@ -116,7 +123,7 @@ private fun ConsentContent(
     when (val consent = state.consent) {
         Uninitialized, is Loading -> LoadingContent()
         is Success -> LoadedContent(
-            consent = consent(),
+            payload = consent(),
             bottomSheetMode = state.currentBottomSheet,
             acceptConsent = state.acceptConsent,
             bottomSheetState = bottomSheetState,
@@ -132,22 +139,23 @@ private fun ConsentContent(
 
 @Composable
 private fun ConsentMainContent(
-    consent: ConsentPane,
+    payload: ConsentState.Payload,
     acceptConsent: Async<Unit>,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
     onCloseClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
-    val title = remember(consent.title) {
-        TextResource.Text(fromHtml(consent.title))
+    val title = remember(payload.consent.title) {
+        TextResource.Text(fromHtml(payload.consent.title))
     }
-    val bullets = remember(consent.body.bullets) {
-        consent.body.bullets.map { bullet -> BulletUI.from(bullet) }
+    val bullets = remember(payload.consent.body.bullets) {
+        payload.consent.body.bullets.map { bullet -> BulletUI.from(bullet) }
     }
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
+                hideStripeLogo = true,
                 onCloseClick = onCloseClick,
                 elevation = scrollState.elevation
             )
@@ -161,23 +169,29 @@ private fun ConsentMainContent(
                     .weight(1f)
                     .verticalScroll(scrollState)
                     .padding(
-                        top = 16.dp,
+                        top = 0.dp,
                         start = 24.dp,
                         end = 24.dp,
                         bottom = 24.dp
                     )
             ) {
+                ConsentLogoHeader(
+                    logos = payload.merchantLogos,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Spacer(modifier = Modifier.size(20.dp))
                 AnnotatedText(
                     text = title,
                     onClickableTextClick = { onClickableTextClick(it) },
-                    defaultStyle = typography.subtitle,
+                    defaultStyle = typography.subtitle.copy(
+                        textAlign = TextAlign.Center
+                    ),
                     annotationStyles = mapOf(
                         StringAnnotation.CLICKABLE to typography.subtitle
                             .toSpanStyle()
                             .copy(color = colors.textBrand),
                     )
                 )
-                Spacer(modifier = Modifier.size(24.dp))
                 bullets.forEach { bullet ->
                     Spacer(modifier = Modifier.size(16.dp))
                     ConsentBottomSheetBullet(
@@ -188,7 +202,7 @@ private fun ConsentMainContent(
                 Spacer(modifier = Modifier.weight(1f))
             }
             ConsentFooter(
-                consent = consent,
+                consent = payload.consent,
                 acceptConsent = acceptConsent,
                 onClickableTextClick = onClickableTextClick,
                 onContinueClick = onContinueClick
@@ -198,8 +212,59 @@ private fun ConsentMainContent(
 }
 
 @Composable
+@Suppress("MagicNumber")
+private fun ConsentLogoHeader(
+    modifier: Modifier = Modifier,
+    logos: List<String>
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        /**
+         * - 2 logos: (platform or institution)
+         * - 3 logos: (connected account)
+         * - Other # of logos: Fallback to Stripe logo as client can't render.
+         */
+        if (logos.size != 2 && logos.size != 3) {
+            Image(
+                // TODO figure right default logo
+                painterResource(id = R.drawable.stripe_ic_brandicon_institution_circle),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape),
+            )
+        } else {
+            logos.forEachIndexed { index, logoUrl ->
+                StripeImage(
+                    url = logoUrl,
+                    debugPainter = painterResource(
+                        id = R.drawable.stripe_ic_brandicon_institution_circle
+                    ),
+                    imageLoader = LocalImageLoader.current,
+                    contentScale = ContentScale.Crop,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                )
+                // Adds ellipsis to link logos.
+                if (index != logos.lastIndex) {
+                    Image(
+                        painterResource(id = R.drawable.stripe_consent_logo_ellipsis),
+                        contentDescription = null
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun LoadedContent(
-    consent: ConsentPane,
+    payload: ConsentState.Payload,
     bottomSheetState: ModalBottomSheetState,
     acceptConsent: Async<Unit>,
     onContinueClick: () -> Unit,
@@ -216,13 +281,13 @@ private fun LoadedContent(
         sheetContent = {
             when (bottomSheetMode) {
                 ConsentState.BottomSheetContent.LEGAL -> LegalDetailsBottomSheetContent(
-                    legalDetails = consent.legalDetailsNotice,
+                    legalDetails = payload.consent.legalDetailsNotice,
                     onConfirmModalClick = onConfirmModalClick,
                     onClickableTextClick = onClickableTextClick
                 )
 
                 ConsentState.BottomSheetContent.DATA -> DataAccessBottomSheetContent(
-                    dataDialog = consent.dataAccessNotice,
+                    dataDialog = payload.consent.dataAccessNotice,
                     onConfirmModalClick = onConfirmModalClick,
                     onClickableTextClick = onClickableTextClick
                 )
@@ -233,7 +298,7 @@ private fun LoadedContent(
         content = {
             ConsentMainContent(
                 acceptConsent = acceptConsent,
-                consent = consent,
+                payload = payload,
                 onClickableTextClick = onClickableTextClick,
                 onContinueClick = onContinueClick,
                 onCloseClick = onCloseClick
@@ -573,6 +638,44 @@ private fun ConsentBulletIcon(iconUrl: String?) {
 @Preview(group = "Consent Pane", name = "canonical")
 internal fun ContentPreview(
     state: ConsentState = ConsentStates.canonical()
+) {
+    FinancialConnectionsPreview {
+        ConsentContent(
+            state = state,
+            bottomSheetState = rememberModalBottomSheetState(
+                ModalBottomSheetValue.Hidden,
+                skipHalfExpanded = true
+            ),
+            onContinueClick = {},
+            onClickableTextClick = {},
+            onConfirmModalClick = {},
+        ) {}
+    }
+}
+
+@Composable
+@Preview(group = "Consent Pane", name = "Logos: platform or institution")
+internal fun ContentWithPlatformLogosPreview(
+    state: ConsentState = ConsentStates.withPlatformLogos()
+) {
+    FinancialConnectionsPreview {
+        ConsentContent(
+            state = state,
+            bottomSheetState = rememberModalBottomSheetState(
+                ModalBottomSheetValue.Hidden,
+                skipHalfExpanded = true
+            ),
+            onContinueClick = {},
+            onClickableTextClick = {},
+            onConfirmModalClick = {},
+        ) {}
+    }
+}
+
+@Composable
+@Preview(group = "Consent Pane", name = "Logos: Connected Account")
+internal fun ContentWithConnectedAccountLogosPreview(
+    state: ConsentState = ConsentStates.withConnectedAccountLogos()
 ) {
     FinancialConnectionsPreview {
         ConsentContent(
