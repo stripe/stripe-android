@@ -9,6 +9,7 @@ import android.text.util.Linkify
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
@@ -141,6 +142,10 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
         // This prevents the first click from being eaten by the focus.
         viewBinding.recycler.requestFocusFromTouch()
+
+        onBackPressedDispatcher.addCallback {
+            finishWithResult(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
+        }
     }
 
     private fun setupRecyclerView() {
@@ -211,10 +216,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
             // Payment Method.
             finishWithResult(paymentMethod)
         }
-    }
-
-    override fun onBackPressed() {
-        finishWithResult(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
     }
 
     private fun fetchCustomerPaymentMethods() {

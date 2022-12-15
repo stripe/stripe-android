@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
@@ -96,6 +97,14 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             args.url,
             viewModel.extraHeaders
         )
+
+        onBackPressedDispatcher.addCallback {
+            if (viewBinding.webView.canGoBack()) {
+                viewBinding.webView.goBack()
+            } else {
+                cancelIntentSource()
+            }
+        }
     }
 
     @VisibleForTesting
@@ -146,14 +155,6 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             return true
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onBackPressed() {
-        if (viewBinding.webView.canGoBack()) {
-            viewBinding.webView.goBack()
-        } else {
-            cancelIntentSource()
-        }
     }
 
     private fun cancelIntentSource() {

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -71,6 +72,13 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
         setContent {
             PaymentsTheme {
+                BackHandler {
+                    if (parentFragmentManager.backStackEntryCount > 0) {
+                        parentFragmentManager.popBackStack()
+                        sheetViewModel.onUserBack()
+                    }
+                }
+
                 AddPaymentMethod(showCheckboxFlow)
             }
         }

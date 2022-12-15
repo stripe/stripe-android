@@ -13,6 +13,7 @@ import android.view.WindowInsets
 import android.view.WindowMetrics
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
@@ -125,9 +126,19 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
+        val onBackCallback = onBackPressedDispatcher.addCallback {
+            if (supportFragmentManager.backStackEntryCount > 0) {
+                viewModel.onUserBack()
+                clearErrorMessages()
+            } else {
+                viewModel.onUserCancel()
+            }
+        }
+
         viewModel.processing.observe(this) { isProcessing ->
             updateRootViewClickHandling(isProcessing)
             toolbar.isEnabled = !isProcessing
+            onBackCallback.isEnabled = !isProcessing
         }
 
         // Set Toolbar to act as the ActionBar so it displays the menu items.
@@ -139,7 +150,9 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 if (supportFragmentManager.backStackEntryCount == 0) {
                     viewModel.onUserCancel()
                 } else {
-                    onUserBack()
+                    keyboardController.hide()
+                    supportFragmentManager.popBackStack()
+                    onBackCallback.handleOnBackPressed()
                 }
             }
         }
@@ -188,19 +201,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     override fun finish() {
         super.finish()
         overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (viewModel.processing.value == false) {
-            if (supportFragmentManager.backStackEntryCount > 0) {
-                viewModel.onUserBack()
-                clearErrorMessages()
-                super.onBackPressed()
-            } else {
-                viewModel.onUserCancel()
-            }
-        }
     }
 
     protected fun closeSheet(
@@ -348,11 +348,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             rootView.setOnClickListener(null)
             rootView.isClickable = false
         }
-    }
-
-    private fun onUserBack() {
-        keyboardController.hide()
-        onBackPressed()
     }
 
     private fun setSheetWidthForTablets() {

@@ -9,6 +9,7 @@ import android.util.Size
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.activity.addCallback
 import androidx.annotation.RestrictTo
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.Stats
@@ -214,6 +215,12 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         }
 
         displayState(requireNotNull(scanState), scanStatePrevious)
+
+        onBackPressedDispatcher.addCallback {
+            runBlocking { scanStat.trackResult("user_canceled") }
+            resultListener.userCanceled(CancellationReason.Back)
+            closeScanner()
+        }
     }
 
     override fun onResume() {
@@ -224,15 +231,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     override fun onDestroy() {
         scanFlow.cancelFlow()
         super.onDestroy()
-    }
-
-    /**
-     * Cancel the scan when the user presses back.
-     */
-    override fun onBackPressed() {
-        runBlocking { scanStat.trackResult("user_canceled") }
-        resultListener.userCanceled(CancellationReason.Back)
-        closeScanner()
     }
 
     override fun onFlashSupported(supported: Boolean) {

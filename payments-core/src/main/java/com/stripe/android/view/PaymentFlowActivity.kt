@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
@@ -98,6 +99,27 @@ class PaymentFlowActivity : StripeActivity() {
 
         viewPager.currentItem = viewModel.currentPage
         title = paymentFlowPagerAdapter.getPageTitle(viewPager.currentItem)
+
+        val callback = onBackPressedDispatcher.addCallback(enabled = false) {
+            viewModel.currentPage -= 1
+            viewPager.currentItem = viewModel.currentPage
+        }
+
+        viewPager.addOnPageChangeListener(
+            object : ViewPager.OnPageChangeListener {
+                override fun onPageScrolled(
+                    position: Int,
+                    positionOffset: Float,
+                    positionOffsetPixels: Int
+                ) = Unit
+
+                override fun onPageScrollStateChanged(state: Int) = Unit
+
+                override fun onPageSelected(position: Int) {
+                    callback.isEnabled = position == 1
+                }
+            }
+        )
     }
 
     public override fun onActionSave() {
@@ -124,22 +146,19 @@ class PaymentFlowActivity : StripeActivity() {
     private fun onShippingInfoValidated(shippingMethods: List<ShippingMethod>) {
         viewModel.paymentSessionData.shippingInformation?.let { shippingInfo ->
             viewModel.saveCustomerShippingInformation(shippingInfo)
-                .observe(
-                    this,
-                    { result ->
-                        result.fold(
-                            onSuccess = {
-                                onShippingInfoSaved(
-                                    it.shippingInformation,
-                                    shippingMethods
-                                )
-                            },
-                            onFailure = {
-                                showError(it.message.orEmpty())
-                            }
-                        )
-                    }
-                )
+                .observe(this) { result ->
+                    result.fold(
+                        onSuccess = {
+                            onShippingInfoSaved(
+                                it.shippingInformation,
+                                shippingMethods
+                            )
+                        },
+                        onFailure = {
+                            showError(it.message.orEmpty())
+                        }
+                    )
+                }
         }
     }
 
@@ -186,10 +205,6 @@ class PaymentFlowActivity : StripeActivity() {
         return viewPager.currentItem + 1 < paymentFlowPagerAdapter.count
     }
 
-    private fun hasPreviousPage(): Boolean {
-        return viewPager.currentItem != 0
-    }
-
     private fun onShippingMethodSave() {
         val selectedShippingMethod =
             viewPager
@@ -211,18 +226,15 @@ class PaymentFlowActivity : StripeActivity() {
             shippingInfoValidator,
             shippingMethodsFactory,
             shippingInformation
-        ).observe(
-            this,
-            { result ->
-                result.fold(
-                    // show shipping methods screen
-                    onSuccess = ::onShippingInfoValidated,
+        ).observe(this) { result ->
+            result.fold(
+                // show shipping methods screen
+                onSuccess = ::onShippingInfoValidated,
 
-                    // show error on current screen
-                    onFailure = ::onShippingInfoError
-                )
-            }
-        )
+                // show error on current screen
+                onFailure = ::onShippingInfoError
+            )
+        }
     }
 
     private fun onShippingInfoError(error: Throwable) {
@@ -244,15 +256,6 @@ class PaymentFlowActivity : StripeActivity() {
             Intent().putExtra(EXTRA_PAYMENT_SESSION_DATA, paymentSessionData)
         )
         finish()
-    }
-
-    override fun onBackPressed() {
-        if (hasPreviousPage()) {
-            viewModel.currentPage -= 1
-            viewPager.currentItem = viewModel.currentPage
-        } else {
-            super.onBackPressed()
-        }
     }
 
     internal companion object {

@@ -10,6 +10,7 @@ import android.util.Size
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPermissionCheckingActivity
@@ -82,6 +83,12 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
 
         if (!CameraAdapter.isCameraSupported(this)) {
             showCameraNotSupportedDialog()
+        }
+
+        onBackPressedDispatcher.addCallback {
+            runBlocking { scanStat.trackResult("user_canceled") }
+            resultListener.userCanceled(CancellationReason.Back)
+            closeScanner()
         }
     }
 
@@ -184,15 +191,6 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
         Log.e(LOG_TAG, "Canceling scan due to error", cause)
         runBlocking { scanStat.trackResult("scan_failure") }
         resultListener.failed(cause)
-        closeScanner()
-    }
-
-    /**
-     * Cancel the scan when the user presses back.
-     */
-    override fun onBackPressed() {
-        runBlocking { scanStat.trackResult("user_canceled") }
-        resultListener.userCanceled(CancellationReason.Back)
         closeScanner()
     }
 
