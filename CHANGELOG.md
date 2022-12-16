@@ -5,6 +5,7 @@
 ### PaymentSheet
 * [DEPRECATED][5928](https://github.com/stripe/stripe-android/pull/5928) Deprecated `PaymentOption` public constructor, and `drawableResourceId` property.
 * [ADDED][5928](https://github.com/stripe/stripe-android/pull/5928) Added `PaymentOption.icon()`, which returns a `Drawable`, and replaces `PaymentOption.drawableResourceId`.
+* [ADDED][5937](https://github.com/stripe/stripe-android/pull/5937) Added support for Revolut Pay in PaymentSheet.
 
 ## 20.17.0 - 2022-12-12
 
@@ -13,7 +14,6 @@
 
 ### PaymentSheet
 * [FIXED][5910](https://github.com/stripe/stripe-android/pull/5910) PaymentSheet now fails gracefully when launched with invalid arguments.
-* [Changed][5937](https://github.com/stripe/stripe-android/pull/5937) Added support for Revolut Pay in PaymentSheet.
 
 ## 20.16.2 - 2022-12-05
 
