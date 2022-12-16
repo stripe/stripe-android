@@ -18,6 +18,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Ignore
 import org.junit.Rule
@@ -54,7 +55,8 @@ internal class PaymentMethodsUITest {
                 ),
                 selectedIndex = 0,
                 isEnabled = true,
-                onItemSelectedListener = {}
+                imageLoader = StripeImageLoader(composeTestRule.activity.applicationContext),
+                onItemSelectedListener = {},
             )
         }
 
@@ -79,7 +81,8 @@ internal class PaymentMethodsUITest {
                 ),
                 selectedIndex = 4,
                 isEnabled = true,
-                onItemSelectedListener = {}
+                imageLoader = StripeImageLoader(composeTestRule.activity.applicationContext),
+                onItemSelectedListener = {},
             )
         }
 
@@ -107,7 +110,8 @@ internal class PaymentMethodsUITest {
                 ),
                 selectedIndex = 0,
                 isEnabled = enabled,
-                onItemSelectedListener = {}
+                imageLoader = StripeImageLoader(composeTestRule.activity.applicationContext),
+                onItemSelectedListener = {},
             )
         }
 
@@ -132,7 +136,8 @@ internal class PaymentMethodsUITest {
                 ),
                 selectedIndex = 0,
                 isEnabled = enabled,
-                onItemSelectedListener = {}
+                imageLoader = StripeImageLoader(composeTestRule.activity.applicationContext),
+                onItemSelectedListener = {},
             )
         }
 

@@ -14,11 +14,9 @@ import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
-import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
 @Singleton
@@ -48,9 +46,6 @@ internal interface FlowControllerComponent {
         fun viewModelStoreOwner(viewModelStoreOwner: ViewModelStoreOwner): Builder
 
         @BindsInstance
-        fun lifecycleScope(lifecycleScope: CoroutineScope): Builder
-
-        @BindsInstance
         fun lifeCycleOwner(lifecycleOwner: LifecycleOwner): Builder
 
         @BindsInstance
@@ -58,9 +53,6 @@ internal interface FlowControllerComponent {
 
         @BindsInstance
         fun statusBarColor(statusBarColor: () -> Int?): Builder
-
-        @BindsInstance
-        fun paymentOptionFactory(paymentOptionFactory: PaymentOptionFactory): Builder
 
         @BindsInstance
         fun paymentOptionCallback(paymentOptionCallback: PaymentOptionCallback): Builder

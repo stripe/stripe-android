@@ -35,7 +35,7 @@ internal fun PaymentMethodForm(
 
     val formValues by formViewModel.completeFormValues.collectAsState(null)
 
-    LaunchedEffect(formValues) {
+    LaunchedEffect(args.paymentMethodCode, formValues) {
         onFormFieldValuesChanged(formValues)
     }
 

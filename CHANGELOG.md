@@ -2,6 +2,10 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [DEPRECATED][5928](https://github.com/stripe/stripe-android/pull/5928) Deprecated `PaymentOption` public constructor, and `drawableResourceId` property.
+* [ADDED][5928](https://github.com/stripe/stripe-android/pull/5928) Added `PaymentOption.icon()`, which returns a `Drawable`, and replaces `PaymentOption.drawableResourceId`.
+
 ## 20.17.0 - 2022-12-12
 
 ### Payments

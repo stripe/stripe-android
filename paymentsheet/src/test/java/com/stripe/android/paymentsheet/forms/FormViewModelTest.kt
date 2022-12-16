@@ -75,6 +75,8 @@ internal class FormViewModelTest {
                 false,
                 R.string.stripe_paymentsheet_payment_method_card,
                 R.drawable.stripe_ic_paymentsheet_pm_card,
+                null,
+                null,
                 true,
                 PaymentMethodRequirements(emptySet(), emptySet(), true),
                 layoutSpec
