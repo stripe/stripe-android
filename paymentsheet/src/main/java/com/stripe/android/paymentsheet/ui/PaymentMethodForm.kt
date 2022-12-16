@@ -22,7 +22,7 @@ internal fun PaymentMethodForm(
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     showCheckboxFlow: Flow<Boolean>,
     injector: NonFallbackInjector,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     val formViewModel: FormViewModel = viewModel(
         key = args.paymentMethodCode,
