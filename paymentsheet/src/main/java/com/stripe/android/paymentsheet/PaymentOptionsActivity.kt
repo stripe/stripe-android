@@ -23,7 +23,6 @@ import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.observeEvents
 import com.stripe.android.utils.AnimationConstants
 
 /**
@@ -87,11 +86,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 messageView,
                 BaseSheetViewModel.UserErrorMessage(it)
             )
-        }
-
-        viewModel.transition.observeEvents(this) { transitionTarget ->
-            clearErrorMessages()
-            onTransitionTarget(transitionTarget)
         }
 
         if (savedInstanceState == null) {

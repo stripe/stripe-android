@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.compose.BackHandler
+import androidx.activity.addCallback
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -61,6 +61,12 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         imageLoader = StripeImageLoader(requireContext().applicationContext)
+
+        // We need to add the callback for this Fragment to effectively override the
+        // FragmentManager's callback.
+        requireActivity().onBackPressedDispatcher.addCallback {
+            sheetViewModel.handleBackPress()
+        }
     }
 
     override fun onCreateView(
@@ -72,15 +78,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
         setContent {
             PaymentsTheme {
-                BackHandler {
-                    if (parentFragmentManager.backStackEntryCount > 0) {
-                        parentFragmentManager.popBackStack()
-                        sheetViewModel.onUserBack()
-                    } else {
-                        sheetViewModel.onUserCancel()
-                    }
-                }
-
                 AddPaymentMethod(showCheckboxFlow)
             }
         }

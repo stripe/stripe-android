@@ -9,9 +9,7 @@ internal class PaymentOptionsListFragment : BasePaymentMethodsListFragment(
 ) {
     private val activityViewModel by activityViewModels<PaymentOptionsViewModel> {
         PaymentOptionsViewModel.Factory {
-            requireNotNull(
-                requireArguments().getParcelable(PaymentOptionsActivity.EXTRA_STARTER_ARGS)
-            )
+            requireNotNull(PaymentOptionContract.Args.fromIntent(requireActivity().intent))
         }
     }
 

@@ -30,7 +30,6 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.observeEvents
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.AnimationConstants
@@ -124,11 +123,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             linkPaymentLauncher = viewModel.linkLauncher
         }
 
-        viewModel.transition.observeEvents(this) { transitionTarget ->
-            clearErrorMessages()
-            onTransitionTarget(transitionTarget)
-        }
-
         if (savedInstanceState == null) {
             viewModel.transitionToFirstScreenWhenReady()
         }
@@ -159,6 +153,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
             .observe(this, buyButtonStateObserver)
+
+        lifecycleScope.launch {
+            viewModel.backStack.collect {
+                buttonContainer.isVisible = it.isNotEmpty()
+            }
+        }
     }
 
     private fun initializeArgs(): Result<PaymentSheetContract.Args?> {

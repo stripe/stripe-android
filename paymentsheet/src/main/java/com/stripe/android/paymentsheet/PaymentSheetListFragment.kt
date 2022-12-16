@@ -7,9 +7,7 @@ internal class PaymentSheetListFragment : BasePaymentMethodsListFragment(
 ) {
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory {
-            requireNotNull(
-                requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS)
-            )
+            requireNotNull(PaymentSheetContract.Args.fromIntent(requireActivity().intent))
         }
     }
 

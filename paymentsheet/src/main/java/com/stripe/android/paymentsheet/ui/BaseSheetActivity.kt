@@ -30,12 +30,14 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.navigation.PaymentSheetNavigator
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
@@ -48,6 +50,7 @@ import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.KeyboardController
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
@@ -59,6 +62,8 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     protected val bottomSheetController: BottomSheetController by lazy {
         BottomSheetController(bottomSheetBehavior = bottomSheetBehavior)
     }
+
+    private val navigator = PaymentSheetNavigator()
 
     /**
      * This variable is a temporary way of passing parameters to [USBankAccountFormFragment] from
@@ -127,12 +132,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
 
         val onBackCallback = onBackPressedDispatcher.addCallback {
-            if (supportFragmentManager.backStackEntryCount > 0) {
-                viewModel.onUserBack()
-                clearErrorMessages()
-            } else {
-                viewModel.onUserCancel()
-            }
+            viewModel.handleBackPress()
         }
 
         viewModel.processing.observe(this) { isProcessing ->
@@ -196,6 +196,16 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
 
         setSheetWidthForTablets()
+
+        navigator.attach(this)
+
+        lifecycleScope.launch {
+            viewModel.backStack.collect {
+                primaryButton
+                clearErrorMessages()
+                navigator.handle(it)
+            }
+        }
     }
 
     override fun finish() {

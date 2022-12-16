@@ -50,12 +50,14 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
@@ -149,8 +151,8 @@ internal abstract class BaseSheetViewModel(
         savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val _transition = MutableLiveData<Event<TransitionTarget>?>(null)
-    internal val transition: LiveData<Event<TransitionTarget>?> = _transition
+    private val _backStack = MutableStateFlow<List<TransitionTarget>>(emptyList())
+    internal val backStack: StateFlow<List<TransitionTarget>> = _backStack
 
     private val _liveMode = savedStateHandle.getLiveData<Boolean>(SAVE_STATE_LIVE_MODE)
     internal val liveMode: LiveData<Boolean> = _liveMode
@@ -329,7 +331,7 @@ internal abstract class BaseSheetViewModel(
     abstract fun transitionToFirstScreen()
 
     protected fun transitionTo(target: TransitionTarget) {
-        _transition.postValue(Event(target))
+        _backStack.update { it + target }
     }
 
     fun transitionToAddPaymentScreen() {
@@ -588,7 +590,16 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun onUserCancel()
 
-    fun onUserBack() {
+    fun handleBackPress() {
+        if (backStack.value.isNotEmpty()) {
+            _backStack.update { it.dropLast(1) }
+            onUserBack()
+        } else {
+            onUserCancel()
+        }
+    }
+
+    private fun onUserBack() {
         // Reset the selection to the one from before opening the add payment method screen
         val paymentOptionsState = paymentOptionsState.value
         updateSelection(paymentOptionsState.selectedItem?.toPaymentSelection())

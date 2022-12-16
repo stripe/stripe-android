@@ -10,7 +10,7 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
 
     override val sheetViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory {
-            requireNotNull(requireArguments().getParcelable(PaymentSheetActivity.EXTRA_STARTER_ARGS))
+            requireNotNull(PaymentSheetContract.Args.fromIntent(requireActivity().intent))
         }
     }
 
