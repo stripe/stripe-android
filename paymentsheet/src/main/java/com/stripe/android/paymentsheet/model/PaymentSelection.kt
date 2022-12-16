@@ -88,6 +88,8 @@ internal sealed class PaymentSelection : Parcelable {
         data class GenericPaymentMethod(
             val labelResource: String,
             @DrawableRes val iconResource: Int,
+            val lightThemeIconUrl: String?,
+            val darkThemeIconUrl: String?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val customerRequestedSave: CustomerRequestedSave
         ) : New()

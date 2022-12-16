@@ -532,11 +532,9 @@ internal class DefaultFlowController @Inject internal constructor(
         fun getInstance(
             appContext: Context,
             viewModelStoreOwner: ViewModelStoreOwner,
-            lifecycleScope: CoroutineScope,
             lifecycleOwner: LifecycleOwner,
             activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
-            paymentOptionFactory: PaymentOptionFactory,
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback
         ): PaymentSheet.FlowController {
@@ -547,11 +545,9 @@ internal class DefaultFlowController @Inject internal constructor(
             val flowControllerComponent = DaggerFlowControllerComponent.builder()
                 .appContext(appContext)
                 .viewModelStoreOwner(viewModelStoreOwner)
-                .lifecycleScope(lifecycleScope)
                 .lifeCycleOwner(lifecycleOwner)
                 .activityResultCaller(activityResultCaller)
                 .statusBarColor(statusBarColor)
-                .paymentOptionFactory(paymentOptionFactory)
                 .paymentOptionCallback(paymentOptionCallback)
                 .paymentResultCallback(paymentResultCallback)
                 .injectorKey(injectorKey)

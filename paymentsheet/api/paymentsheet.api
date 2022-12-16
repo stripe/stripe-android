@@ -1112,6 +1112,7 @@ public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public final fun getDrawableResourceId ()I
 	public final fun getLabel ()Ljava/lang/String;
 	public fun hashCode ()I
+	public final fun icon ()Landroid/graphics/drawable/Drawable;
 	public fun toString ()Ljava/lang/String;
 }
 

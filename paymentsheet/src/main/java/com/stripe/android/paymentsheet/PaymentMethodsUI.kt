@@ -2,7 +2,9 @@ package com.stripe.android.paymentsheet
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -22,7 +24,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -32,11 +36,14 @@ import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.ui.core.getBorderStroke
 import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.image.StripeImage
+import com.stripe.android.uicore.image.StripeImageLoader
 
 private object Spacing {
     val cardLeadingInnerPadding = 12.dp
     val carouselOuterPadding = 20.dp
     val carouselInnerPadding = 12.dp
+    val iconSize = 28.dp
 }
 
 @VisibleForTesting
@@ -48,6 +55,7 @@ internal fun PaymentMethodsUI(
     selectedIndex: Int,
     isEnabled: Boolean,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
+    imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
 ) {
@@ -71,12 +79,19 @@ internal fun PaymentMethodsUI(
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
             itemsIndexed(items = paymentMethods) { index, item ->
+                val iconUrl = if (isSystemInDarkTheme() && item.darkThemeIconUrl != null) {
+                    item.darkThemeIconUrl
+                } else {
+                    item.lightThemeIconUrl
+                }
                 PaymentMethodUI(
                     modifier = Modifier.testTag(
                         TEST_TAG_LIST + stringResource(item.displayNameResource)
                     ),
                     minViewWidth = viewWidth,
                     iconRes = item.iconResource,
+                    iconUrl = iconUrl,
+                    imageLoader = imageLoader,
                     title = stringResource(item.displayNameResource),
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
@@ -143,6 +158,8 @@ private fun computeItemWidthWhenExceedingMaxWidth(
 internal fun PaymentMethodUI(
     minViewWidth: Dp,
     iconRes: Int,
+    iconUrl: String?,
+    imageLoader: StripeImageLoader,
     title: String,
     isSelected: Boolean,
     isEnabled: Boolean,
@@ -178,17 +195,22 @@ internal fun PaymentMethodUI(
                     }
                 )
         ) {
-            val colorFilter = if (tintOnSelected) ColorFilter.tint(color) else null
-
-            Image(
-                painter = painterResource(iconRes),
-                contentDescription = null,
-                colorFilter = colorFilter,
-                modifier = Modifier.padding(
-                    top = Spacing.cardLeadingInnerPadding,
-                    start = Spacing.cardLeadingInnerPadding,
+            Box(
+                modifier = Modifier
+                    .height(Spacing.iconSize)
+                    .padding(
+                        start = Spacing.cardLeadingInnerPadding,
+                        top = Spacing.cardLeadingInnerPadding,
+                    )
+            ) {
+                PaymentMethodIconUi(
+                    iconRes = iconRes,
+                    iconUrl = iconUrl,
+                    imageLoader = imageLoader,
+                    color = color,
+                    tintOnSelected = tintOnSelected
                 )
-            )
+            }
 
             LpmSelectorText(
                 text = title,
@@ -201,5 +223,37 @@ internal fun PaymentMethodUI(
                 )
             )
         }
+    }
+}
+
+@Composable
+private fun PaymentMethodIconUi(
+    iconRes: Int,
+    iconUrl: String?,
+    imageLoader: StripeImageLoader,
+    tintOnSelected: Boolean,
+    color: Color,
+) {
+    val colorFilter = remember(tintOnSelected, color) {
+        if (tintOnSelected) {
+            ColorFilter.tint(color)
+        } else {
+            null
+        }
+    }
+
+    if (iconUrl != null) {
+        StripeImage(
+            url = iconUrl,
+            imageLoader = imageLoader,
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+        )
+    } else {
+        Image(
+            painter = painterResource(iconRes),
+            contentDescription = null,
+            colorFilter = colorFilter,
+        )
     }
 }
