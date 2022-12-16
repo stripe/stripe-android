@@ -13,8 +13,6 @@
 
 ### PaymentSheet
 * [FIXED][5910](https://github.com/stripe/stripe-android/pull/5910) PaymentSheet now fails gracefully when launched with invalid arguments.
-* [Changed][5937](https://github.com/stripe/stripe-android/pull/5937) Added support for Revolut Pay in PaymentSheet.
-* [Changed][5942](https://github.com/stripe/stripe-android/pull/5942) Added support for MobilePay in PaymentSheet.
 
 ## 20.16.2 - 2022-12-05
 
