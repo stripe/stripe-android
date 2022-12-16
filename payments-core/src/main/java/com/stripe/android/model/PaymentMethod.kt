@@ -343,6 +343,13 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false
         ),
+        MobilePay(
+            "mobilepay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
         USBankAccount(
             code = "us_bank_account",
             isReusable = true,

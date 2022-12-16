@@ -3791,6 +3791,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field Ideal Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Klarna Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Link Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field MobilePay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Netbanking Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Oxxo Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field P24 Lcom/stripe/android/model/PaymentMethod$Type;

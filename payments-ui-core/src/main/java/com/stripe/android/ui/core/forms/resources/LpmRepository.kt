@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.forms.EpsRequirement
 import com.stripe.android.paymentsheet.forms.GiropayRequirement
 import com.stripe.android.paymentsheet.forms.IdealRequirement
 import com.stripe.android.paymentsheet.forms.KlarnaRequirement
+import com.stripe.android.paymentsheet.forms.MobilePayRequirement
 import com.stripe.android.paymentsheet.forms.P24Requirement
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.forms.PaypalRequirement
@@ -78,6 +79,7 @@ class LpmRepository constructor(
             PaymentMethod.Type.USBankAccount.code,
             PaymentMethod.Type.Affirm.code,
             PaymentMethod.Type.RevolutPay.code,
+            PaymentMethod.Type.MobilePay.code,
             PaymentMethod.Type.AuBecsDebit.code,
             PaymentMethod.Type.Upi.code,
         )
@@ -370,6 +372,17 @@ class LpmRepository constructor(
                 sharedDataSpec.selectorIcon?.darkThemePng,
                 false,
                 RevolutPayRequirement,
+                LayoutSpec(sharedDataSpec.fields)
+            )
+            PaymentMethod.Type.MobilePay.code -> SupportedPaymentMethod(
+                "mobilepay",
+                false,
+                R.string.stripe_paymentsheet_payment_method_mobile_pay,
+                R.drawable.stripe_ic_paymentsheet_pm_mobile_pay,
+                sharedDataSpec.selectorIcon?.lightThemePng,
+                sharedDataSpec.selectorIcon?.darkThemePng,
+                false,
+                MobilePayRequirement,
                 LayoutSpec(sharedDataSpec.fields)
             )
             PaymentMethod.Type.AuBecsDebit.code -> SupportedPaymentMethod(

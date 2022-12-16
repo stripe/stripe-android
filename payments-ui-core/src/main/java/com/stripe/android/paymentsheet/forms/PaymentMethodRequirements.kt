@@ -284,6 +284,12 @@ internal val RevolutPayRequirement = PaymentMethodRequirements(
     confirmPMFromCustomer = null
 )
 
+internal val MobilePayRequirement = PaymentMethodRequirements(
+    piRequirements = setOf(ShippingAddress),
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)
+
 /**
  * This defines the requirements for usage as a Payment Method.
  */
