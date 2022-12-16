@@ -212,7 +212,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 PaymentMethodForm(
                     args = formArguments,
                     enabled = enabled,
-                    selectedItem = selectedItem,
                     onFormFieldValuesChanged = onFormFieldValuesChanged,
                     showCheckboxFlow = showCheckboxFlow,
                     injector = sheetViewModel.injector,

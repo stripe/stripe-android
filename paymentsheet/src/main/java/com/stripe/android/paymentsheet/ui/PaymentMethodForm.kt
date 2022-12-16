@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.FormUI
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 
@@ -19,7 +18,6 @@ import kotlinx.coroutines.flow.Flow
 @Composable
 internal fun PaymentMethodForm(
     args: FormFragmentArguments,
-    selectedItem: LpmRepository.SupportedPaymentMethod,
     enabled: Boolean,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     showCheckboxFlow: Flow<Boolean>,
@@ -37,7 +35,7 @@ internal fun PaymentMethodForm(
 
     val formValues by formViewModel.completeFormValues.collectAsState(null)
 
-    LaunchedEffect(selectedItem, formValues) {
+    LaunchedEffect(args.paymentMethodCode, formValues) {
         onFormFieldValuesChanged(formValues)
     }
 
