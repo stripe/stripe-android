@@ -628,8 +628,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
-            // make sure loading fragment isn't in back stack
-            activity.onBackPressed()
+            activity.onBackPressedDispatcher.onBackPressed()
             idleLooper()
 
             assertThat(activity.bottomSheetBehavior.state)

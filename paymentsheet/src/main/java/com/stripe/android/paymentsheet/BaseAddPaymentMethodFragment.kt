@@ -76,6 +76,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     if (parentFragmentManager.backStackEntryCount > 0) {
                         parentFragmentManager.popBackStack()
                         sheetViewModel.onUserBack()
+                    } else {
+                        sheetViewModel.onUserCancel()
                     }
                 }
 
