@@ -278,6 +278,12 @@ internal val AffirmRequirement = PaymentMethodRequirements(
     confirmPMFromCustomer = null
 )
 
+internal val RevolutPayRequirement = PaymentMethodRequirements(
+    piRequirements = setOf(ShippingAddress),
+    siRequirements = null,
+    confirmPMFromCustomer = null
+)
+
 /**
  * This defines the requirements for usage as a Payment Method.
  */
