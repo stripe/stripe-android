@@ -336,6 +336,20 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false
         ),
+        RevolutPay(
+            "revolut_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
+        MobilePay(
+            "mobilepay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false
+        ),
         USBankAccount(
             code = "us_bank_account",
             isReusable = true,
