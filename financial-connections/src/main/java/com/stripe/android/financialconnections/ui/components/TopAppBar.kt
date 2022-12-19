@@ -33,7 +33,6 @@ internal fun FinancialConnectionsTopAppBar(
     val localBackPressed = LocalOnBackPressedDispatcherOwner.current
         ?.onBackPressedDispatcher
     val navController = LocalNavHostController.current
-    val reducedBranding = LocalReducedBranding.current
     TopAppBar(
         title = if (hideStripeLogo) {
             { /* Empty content */ }
@@ -111,4 +110,3 @@ internal fun FinancialConnectionsTopAppBarPreview() {
         ) {}
     }
 }
-
