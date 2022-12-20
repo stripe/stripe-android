@@ -10,6 +10,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
@@ -24,7 +25,15 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.google.accompanist.web.WebView
+import com.google.accompanist.web.rememberWebViewState
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.domain.prepane.Body
+import com.stripe.android.financialconnections.domain.prepane.Cta
+import com.stripe.android.financialconnections.domain.prepane.Display
+import com.stripe.android.financialconnections.domain.prepane.OauthPrepane
+import com.stripe.android.financialconnections.domain.prepane.PartnerNotice
+import com.stripe.android.financialconnections.domain.prepane.Text
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
@@ -39,13 +48,18 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAuthori
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
+import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
+import com.stripe.android.financialconnections.ui.components.StringAnnotation
+import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.image.StripeImage
 
@@ -163,8 +177,15 @@ private fun LoadedContent(
     onSelectAnotherBank: () -> Unit
 ) {
     when (authenticationStatus) {
-        is Uninitialized -> when (payload.authSession.isOAuth ?: false) {
-            true -> PrePaneContent(
+        is Uninitialized -> when (payload.authSession.isOAuth) {
+            true -> if (payload.authSession.display == null) DefaultPrePaneContent(
+                institution = payload.institution,
+                flow = payload.authSession.flow,
+                isStripeDirect = payload.isStripeDirect,
+                showPartnerDisclosure = payload.authSession.showPartnerDisclosure ?: false,
+                onContinueClick = onContinueClick
+            ) else InstitutionalPrePaneContent(
+                content = payload.authSession.display.text.oauthPrepane,
                 institution = payload.institution,
                 flow = payload.authSession.flow,
                 isStripeDirect = payload.isStripeDirect,
@@ -191,7 +212,7 @@ private fun LoadedContent(
 }
 
 @Composable
-private fun PrePaneContent(
+private fun DefaultPrePaneContent(
     institution: FinancialConnectionsInstitution,
     flow: Flow?,
     showPartnerDisclosure: Boolean,
@@ -244,8 +265,89 @@ private fun PrePaneContent(
 }
 
 @Composable
+private fun InstitutionalPrePaneContent(
+    institution: FinancialConnectionsInstitution,
+    flow: Flow?,
+    showPartnerDisclosure: Boolean,
+    isStripeDirect: Boolean,
+    onContinueClick: () -> Unit,
+    content: OauthPrepane
+) {
+    val title = remember(content.title) {
+        TextResource.Text(fromHtml(content.title))
+    }
+    Column(
+        modifier = Modifier
+            .padding(
+                top = 8.dp,
+                start = 24.dp,
+                end = 24.dp,
+                bottom = 24.dp
+            )
+    ) {
+        val modifier = Modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(6.dp))
+        StripeImage(
+            url = institution.icon?.default ?: "",
+            contentDescription = null,
+            imageLoader = LocalImageLoader.current,
+            errorContent = { InstitutionPlaceholder(modifier) },
+            modifier = modifier
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        // TITLE
+        AnnotatedText(
+            text = title,
+            onClickableTextClick = { },
+            defaultStyle = FinancialConnectionsTheme.typography.subtitle,
+            annotationStyles = mapOf(
+                StringAnnotation.BOLD to FinancialConnectionsTheme.typography.subtitleEmphasized.toSpanStyle()
+            )
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+
+        // CONTENT
+        content.body.forEach { bodyItem ->
+            when (bodyItem) {
+                is Body.Image -> {
+                    // TODO remember state correctly.
+                    WebView(state = rememberWebViewState(bodyItem.content.default!!))
+                }
+
+                is Body.Text -> AnnotatedText(
+                    text = TextResource.Text(fromHtml(bodyItem.content)),
+                    onClickableTextClick = { },
+                    defaultStyle = FinancialConnectionsTheme.typography.body,
+                    annotationStyles = mapOf(
+                        StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized.toSpanStyle()
+                    )
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+        if (flow != null && showPartnerDisclosure) PartnerCallout(
+            isStripeDirect,
+            content.partnerNotice
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        FinancialConnectionsButton(
+            onClick = onContinueClick,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(R.string.stripe_prepane_continue),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
 @Preview
-internal fun PrepaneContentPreview() {
+internal fun DefaultPrepaneContentPreview() {
     FinancialConnectionsPreview {
         PartnerAuthScreenContent(
             state = PartnerAuthState(
@@ -266,7 +368,24 @@ internal fun PrepaneContentPreview() {
                             showPartnerDisclosure = true,
                             _isOAuth = true,
                             nextPane = Pane.PARTNER_AUTH,
-                            id = "1234"
+                            id = "1234",
+                            display = Display(
+                                Text(
+                                    oauthPrepane = OauthPrepane(
+                                        title = "",
+                                        body = emptyList(),
+                                        cta = Cta(
+                                            icon = Image(""),
+                                            text = ""
+                                        ),
+                                        institutionIcon = Image(""),
+                                        partnerNotice = PartnerNotice(
+                                            partnerIcon = Image(""),
+                                            text = ""
+                                        )
+                                    ),
+                                )
+                            )
                         ),
                         isStripeDirect = false
                     )

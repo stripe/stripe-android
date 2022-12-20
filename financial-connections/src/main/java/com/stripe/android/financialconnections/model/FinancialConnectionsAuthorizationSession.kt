@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
 import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
+import com.stripe.android.financialconnections.domain.prepane.Display
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -48,7 +49,10 @@ internal data class FinancialConnectionsAuthorizationSession(
     val urlQrCode: String? = null,
 
     @SerialName(value = "is_oauth")
-    private val _isOAuth: Boolean? = false
+    private val _isOAuth: Boolean? = false,
+
+    @SerialName(value = "display")
+    val display: Display? = null
 
 ) : Parcelable {
 

@@ -38,11 +38,3 @@ internal data class FinancialConnectionsInstitution(
     @SerialName(value = "url") val url: String? = null
 
 ) : Parcelable
-
-@Serializable
-@Parcelize
-internal data class Image(
-
-    @SerialName(value = "default") val default: String?
-
-) : Parcelable
