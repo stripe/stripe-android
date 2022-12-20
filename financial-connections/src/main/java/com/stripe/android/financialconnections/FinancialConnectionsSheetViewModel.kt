@@ -90,15 +90,15 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     /**
      * Builds the ChromeCustomTab intent to launch the hosted auth flow and launches it.
      *
-     * @param synchronizeSessionResponse with manifest containing the hosted auth flow URL to launch
+     * @param sync with manifest containing the hosted auth flow URL to launch
      *
      */
-    private fun openAuthFlow(synchronizeSessionResponse: SynchronizeSessionResponse) {
+    private fun openAuthFlow(sync: SynchronizeSessionResponse) {
         // stores manifest in state for future references.
-        val manifest = synchronizeSessionResponse.manifest
-        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(synchronizeSessionResponse)
+        val manifest = sync.manifest
+        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(sync.manifest)
         viewModelScope.launch {
-            nativeRouter.logExposure(synchronizeSessionResponse)
+            nativeRouter.logExposure(sync.manifest)
         }
         if (manifest.hostedAuthUrl == null) {
             withState {
@@ -115,7 +115,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     manifest = manifest,
                     webAuthFlowStatus = authFlowStatus,
                     viewEffect = if (nativeAuthFlowEnabled) {
-                        OpenNativeAuthFlow(initialArgs.configuration, synchronizeSessionResponse)
+                        OpenNativeAuthFlow(initialArgs.configuration, sync)
                     } else {
                         OpenAuthFlowWithUrl(manifest.hostedAuthUrl)
                     }
@@ -308,7 +308,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     // stripe-auth://link-accounts/.../authentication_return
                     (receivedUrl?.host == "link-accounts") &&
                         (
-                            receivedUrl?.buildUpon()?.clearQuery()
+                            receivedUrl.buildUpon()?.clearQuery()
                                 ?.build()?.path == "/$applicationId/authentication_return"
                             ) ->
                         onFinishApp2App(receivedUrl)
