@@ -74,6 +74,7 @@ jobs:
 
       - name: Run Tests (try 2)
         id: run-tests-2
+        continue-on-error: true
         if: steps.run-tests-1.outcome == 'failure'
         uses: reactivecircus/android-emulator-runner@v2
         with:
