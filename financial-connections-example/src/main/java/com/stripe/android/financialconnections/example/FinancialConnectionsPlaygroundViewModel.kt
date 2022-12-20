@@ -44,15 +44,15 @@ class FinancialConnectionsPlaygroundViewModel(
         when (flow) {
             Flow.Data -> startForData(mode)
             Flow.Token -> startForToken(mode)
-            Flow.PaymentIntent -> startWithPaymentIntent()
+            Flow.PaymentIntent -> startWithPaymentIntent(mode)
         }
     }
 
 
-    private fun startWithPaymentIntent() {
+    private fun startWithPaymentIntent(mode: Mode) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
-            kotlin.runCatching { repository.createPaymentIntent("US") }
+            kotlin.runCatching { repository.createPaymentIntent("US", mode.flow) }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
                     _state.update { current ->
@@ -195,7 +195,7 @@ class FinancialConnectionsPlaygroundViewModel(
 }
 
 enum class Mode(val flow: String) {
-    Test("testmode"), Live("mx")
+    Test("testmode"), Live("mx"), App2App("app2app")
 }
 
 enum class Flow {
