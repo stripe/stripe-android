@@ -311,6 +311,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val firstInit: Boolean,
     val configuration: FinancialConnectionsSheet.Configuration,
     val showCloseDialog: Boolean,
+    val reducedBranding: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
     val initialPane: Pane
 ) : MavericksState {
@@ -321,6 +322,7 @@ internal data class FinancialConnectionsSheetNativeState(
     @Suppress("Unused")
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
+        reducedBranding = args.initialSyncResponse.visual?.reducedBranding ?: false,
         firstInit = true,
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
