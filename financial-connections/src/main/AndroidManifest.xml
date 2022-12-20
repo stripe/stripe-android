@@ -14,9 +14,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <!-- Returning from app2app: returl_url is triggered to reopen the web flow and poll accounts. -->
+                <!-- Returning from app2app: return_url is triggered to reopen web AuthFlow and poll accounts. -->
                 <data
                     android:host="link-accounts"
+                    android:scheme="stripe-auth"
+                    android:pathPrefix="/${applicationId}/authentication_return" />
+
+                <!-- Returning from app2app: return_url is triggered to reopen native AuthFlow and poll accounts. -->
+                <data
+                    android:host="link-native-accounts"
                     android:scheme="stripe-auth"
                     android:pathPrefix="/${applicationId}/authentication_return" />
 

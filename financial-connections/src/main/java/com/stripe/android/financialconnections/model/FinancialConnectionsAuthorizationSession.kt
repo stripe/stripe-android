@@ -88,6 +88,9 @@ internal data class FinancialConnectionsAuthorizationSession(
         @SerialName("mx_oauth")
         MX_OAUTH("mx_oauth"),
 
+        @SerialName("mx_oauth_app_to_app")
+        MX_OAUTH_APP2APP("mx_oauth_app_to_app"),
+
         @SerialName("mx_oauth_redirect")
         MX_OAUTH_REDIRECT("mx_oauth_redirect"),
 

@@ -138,6 +138,7 @@ internal fun Flow.partnerIcon(): Int? = when (this) {
     Flow.MX_CONNECT,
     Flow.MX_OAUTH,
     Flow.MX_OAUTH_REDIRECT,
+    Flow.MX_OAUTH_APP2APP,
     Flow.MX_OAUTH_WEBVIEW -> R.drawable.stripe_ic_partner_mx
 
     Flow.TESTMODE,
@@ -151,6 +152,7 @@ internal fun Flow.partnerIcon(): Int? = when (this) {
     Flow.WELLS_FARGO_WEBVIEW,
     Flow.DIRECT,
     Flow.DIRECT_WEBVIEW,
+
     Flow.UNKNOWN -> null
 }
 
@@ -165,6 +167,7 @@ internal fun Flow.partnerName(): Int? = when (this) {
     Flow.MX_CONNECT,
     Flow.MX_OAUTH,
     Flow.MX_OAUTH_REDIRECT,
+    Flow.MX_OAUTH_APP2APP,
     Flow.MX_OAUTH_WEBVIEW -> R.string.stripe_partner_mx
 
     Flow.TESTMODE,

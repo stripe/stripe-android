@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.analytics.AuthSessionEvent.Loaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -37,6 +38,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativ
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
+import javax.inject.Named
 
 @Suppress("LongParameterList")
 internal class PartnerAuthViewModel @Inject constructor(
@@ -44,6 +46,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val createAuthorizationSession: PostAuthorizationSession,
     private val cancelAuthorizationSession: CancelAuthorizationSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    @Named(APPLICATION_ID) private val applicationId: String,
     private val postAuthSessionEvent: PostAuthSessionEvent,
     private val getManifest: GetManifest,
     private val goNext: GoNext,
@@ -115,7 +118,9 @@ internal class PartnerAuthViewModel @Inject constructor(
     private suspend fun launchAuthInBrowser() {
         kotlin.runCatching { requireNotNull(getManifest().activeAuthSession) }
             .onSuccess {
-                it.url?.let { setState { copy(viewEffect = OpenPartnerAuth(it)) } }
+                it.url
+                    ?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
+                    ?.let { setState { copy(viewEffect = OpenPartnerAuth(it)) } }
             }
             .onFailure {
                 eventTracker.track(FinancialConnectionsEvent.Error(Pane.PARTNER_AUTH, it))

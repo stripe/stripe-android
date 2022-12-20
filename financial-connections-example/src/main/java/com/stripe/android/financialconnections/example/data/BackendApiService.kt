@@ -1,10 +1,9 @@
 package com.stripe.android.financialconnections.example.data
 
+import com.google.gson.annotations.SerializedName
 import com.stripe.android.financialconnections.example.data.model.CreateIntentResponse
 import com.stripe.android.financialconnections.example.data.model.CreateLinkAccountSessionResponse
 import retrofit2.http.Body
-import retrofit2.http.FieldMap
-import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
 
 interface BackendApiService {
@@ -18,13 +17,23 @@ interface BackendApiService {
         @Body linkAccountSessionBody: LinkAccountSessionBody
     ): CreateLinkAccountSessionResponse
 
-    @FormUrlEncoded
     @POST("create_payment_intent")
     suspend fun createPaymentIntent(
-        @FieldMap params: MutableMap<String, String>
+        @Body params: PaymentIntentBody
     ): CreateIntentResponse
 }
 
 data class LinkAccountSessionBody(
     val flow: String?
+)
+
+data class PaymentIntentBody(
+    @SerializedName("flow")
+    val flow: String?,
+    @SerializedName("country")
+    val country: String?,
+    @SerializedName("customer_id")
+    val customerId: String?,
+    @SerializedName("supported_payment_methods")
+    val supportedPaymentMethods: String?
 )
