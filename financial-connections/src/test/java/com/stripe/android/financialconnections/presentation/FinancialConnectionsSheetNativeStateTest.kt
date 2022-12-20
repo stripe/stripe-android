@@ -20,8 +20,7 @@ internal class FinancialConnectionsSheetNativeStateTest {
             FinancialConnectionsSheetNativeState(
                 args = args(
                     VisualUpdate(
-                        reducedBranding = true,
-                        merchantLogo = null
+                        reducedBranding = true
                     )
                 )
             ).reducedBranding,
@@ -34,8 +33,7 @@ internal class FinancialConnectionsSheetNativeStateTest {
             FinancialConnectionsSheetNativeState(
                 args = args(
                     VisualUpdate(
-                        reducedBranding = false,
-                        merchantLogo = null
+                        reducedBranding = false
                     )
                 )
             ).reducedBranding,
