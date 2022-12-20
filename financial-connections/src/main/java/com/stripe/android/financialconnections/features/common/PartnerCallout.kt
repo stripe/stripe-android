@@ -19,12 +19,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.domain.prepane.PartnerNotice
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession.Flow
+import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
+import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.uicore.image.StripeImage
+
 
 @Composable
 internal fun PartnerCallout(
@@ -76,8 +81,54 @@ internal fun PartnerCallout(
     }
 }
 
+@Composable
+internal fun PartnerCallout(
+    isStripeDirect: Boolean,
+    partnerNotice: PartnerNotice
+) {
+    val uriHandler = LocalUriHandler.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape = RoundedCornerShape(8.dp))
+            .background(color = FinancialConnectionsTheme.colors.backgroundContainer)
+            .padding(12.dp)
+    ) {
+        StripeImage(
+            url = partnerNotice.partnerIcon.default ?: "",
+            imageLoader = LocalImageLoader.current,
+            contentDescription = null,
+            modifier = Modifier
+                .size(24.dp)
+                .clip(RoundedCornerShape(6.dp))
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+        AnnotatedText(
+            TextResource.Text(
+                fromHtml(partnerNotice.text)
+            ),
+            defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
+                color = FinancialConnectionsTheme.colors.textSecondary
+            ),
+            annotationStyles = mapOf(
+                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
+                    .toSpanStyle()
+                    .copy(color = FinancialConnectionsTheme.colors.textBrand),
+                StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
+                    .toSpanStyle()
+                    .copy(color = FinancialConnectionsTheme.colors.textSecondary)
+            ),
+            onClickableTextClick = {
+                uriHandler.openUri(
+                    FinancialConnectionsUrlResolver.getPartnerNotice(isStripeDirect)
+                )
+            }
+        )
+    }
+}
+
 @DrawableRes
-private fun Flow.partnerIcon(): Int? = when (this) {
+internal fun Flow.partnerIcon(): Int? = when (this) {
     Flow.FINICITY_CONNECT_V2_FIX,
     Flow.FINICITY_CONNECT_V2_LITE,
     Flow.FINICITY_CONNECT_V2_OAUTH,
@@ -106,7 +157,7 @@ private fun Flow.partnerIcon(): Int? = when (this) {
 }
 
 @StringRes
-private fun Flow.partnerName(): Int? = when (this) {
+internal fun Flow.partnerName(): Int? = when (this) {
     Flow.FINICITY_CONNECT_V2_FIX,
     Flow.FINICITY_CONNECT_V2_LITE,
     Flow.FINICITY_CONNECT_V2_OAUTH,
@@ -134,3 +185,4 @@ private fun Flow.partnerName(): Int? = when (this) {
     Flow.DIRECT_WEBVIEW,
     Flow.UNKNOWN -> null
 }
+

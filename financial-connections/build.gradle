@@ -37,6 +37,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$androidxLifecycleVersion"
     implementation "androidx.navigation:navigation-compose:$androidxNavigationVersion"
     implementation "com.airbnb.android:showkase-annotation:$showkaseVersion"
+    implementation "com.google.accompanist:accompanist-webview:$accompanistVersion"
     implementation "com.google.dagger:dagger:$daggerVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
