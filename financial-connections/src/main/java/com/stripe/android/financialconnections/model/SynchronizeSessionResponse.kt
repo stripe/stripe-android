@@ -28,7 +28,7 @@ internal data class TextUpdate(
 internal data class VisualUpdate(
     // Indicates whether the logo should be removed from most panes
     @SerialName("reduced_branding")
-    val reducedBranding: Boolean,
+    val reducedBranding: Boolean
 ) : Parcelable
 
 @Serializable
