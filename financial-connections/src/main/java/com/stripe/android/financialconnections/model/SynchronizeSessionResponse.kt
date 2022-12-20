@@ -29,11 +29,6 @@ internal data class VisualUpdate(
     // Indicates whether the logo should be removed from most panes
     @SerialName("reduced_branding")
     val reducedBranding: Boolean,
-
-    // If this field is present, it will be used in the combined logo.
-    // If it is not present, the combined logo will not include a merchant logo.
-    @SerialName("merchant_logo")
-    val merchantLogo: String? = null
 ) : Parcelable
 
 @Serializable
