@@ -5,6 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.testIn
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -20,7 +21,6 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -41,7 +41,6 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
@@ -50,7 +49,6 @@ import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.utils.TestUtils.observeEventsForever
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -59,7 +57,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
@@ -353,22 +350,19 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    @Ignore
-    // TODO: (jameswoo) This test is failing because we changed the behavior of getButtonStateObservable
     fun `On checkout clear the previous view state error`() = runTest {
         val viewModel = createViewModel()
         viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
 
+        val turbine1 = viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
+            .testIn(backgroundScope)
+        val turbine2 = viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
+            .testIn(backgroundScope)
+
         viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
 
-        assertThat(
-            viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
-                .stateIn(viewModel.viewModelScope).value
-        ).isEqualTo(PaymentSheetViewState.Reset(null))
-        assertThat(
-            viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
-                .stateIn(viewModel.viewModelScope).value
-        ).isEqualTo(PaymentSheetViewState.StartProcessing)
+        assertThat(turbine1.awaitItem()).isEqualTo(PaymentSheetViewState.Reset(null))
+        assertThat(turbine2.awaitItem()).isEqualTo(PaymentSheetViewState.StartProcessing)
     }
 
     @Test

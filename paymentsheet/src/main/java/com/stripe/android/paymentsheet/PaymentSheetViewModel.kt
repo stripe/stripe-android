@@ -70,6 +70,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -137,7 +138,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             } else {
                 null
             }
-        }
+        }.filterNotNull()
     }
 
     // Holds a reference to the last selected payment method while checking out with Google Pay.

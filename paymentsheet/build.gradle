@@ -70,6 +70,7 @@ dependencies {
     testImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
+    testImplementation 'app.cash.turbine:turbine:0.12.1'
 
     androidTestImplementation "com.google.android.libraries.places:places:$placesVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
