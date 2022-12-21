@@ -32,7 +32,6 @@ import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -201,12 +200,11 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
     }
 
     @Test
-    fun `Factory gets initialized with fallback when no Injector is available`() =
-        kotlinx.coroutines.test.runTest(UnconfinedTestDispatcher()) {
-            createFragment(registerInjector = false) { fragment, viewModel ->
-                assertThat(fragment.sheetViewModel).isNotEqualTo(viewModel)
-            }
+    fun `Factory gets initialized with fallback when no Injector is available`() {
+        createFragment(registerInjector = false) { fragment, viewModel ->
+            assertThat(fragment.sheetViewModel).isNotEqualTo(viewModel)
         }
+    }
 
     private fun createAmount(paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING) =
         Amount(paymentIntent.amount!!, paymentIntent.currency!!)
