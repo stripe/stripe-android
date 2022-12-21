@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.AnimationConstants
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
 
@@ -155,7 +156,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             googlePayButton.isEnabled = enabled
         }
 
-        viewModel.selection.collectInActivity {
+        viewModel.selection.filterNotNull().collectInActivity {
             clearErrorMessages()
             resetPrimaryButtonState()
         }

@@ -77,7 +77,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -756,11 +755,6 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    @Ignore
-    // TODO: (jameswoo) behavior has changed. The error message should be cleared first,
-    // then set to the error message from the state. Right now, it is being cleared because
-    // viewModel.updateSelection is being called from
-    // PaymentSheetActivity#getButtonStateObservable, viewState == Reset
     fun `GPay button error message is displayed`() {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
@@ -814,12 +808,8 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.viewBinding.message.isVisible).isFalse()
             assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
-            // TODO: (jameswoo) behavior has changed. The error message should be cleared first,
-            // then set to the error message from the state. Right now, it is being cleared because
-            // viewModel.updateSelection is being called from
-            // PaymentSheetActivity#getButtonStateObservable, viewState == Reset
-            // assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
-            // assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
+            assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
+            assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
 
             viewModel.updateSelection(PaymentSelection.GooglePay)
 
@@ -867,12 +857,8 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.message.isVisible).isFalse()
             assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
 
-            // TODO: (jameswoo) behavior has changed. The error message should be cleared first,
-            // then set to the error message from the state. Right now, it is being cleared because
-            // viewModel.updateSelection is being called from
-            // PaymentSheetActivity#getButtonStateObservable, viewState == Reset
-            // assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
-            // assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
+             assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
+             assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
 
             viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
 
