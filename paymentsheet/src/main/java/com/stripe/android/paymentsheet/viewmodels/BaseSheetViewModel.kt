@@ -16,26 +16,23 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
+import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
+import com.stripe.android.paymentsheet.PaymentSelectionRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -49,7 +46,6 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
@@ -77,8 +73,8 @@ internal abstract class BaseSheetViewModel(
     val lpmResourceRepository: ResourceRepository<LpmRepository>,
     val addressResourceRepository: ResourceRepository<AddressRepository>,
     val savedStateHandle: SavedStateHandle,
-    val linkLauncher: LinkPaymentLauncher
-) : AndroidViewModel(application) {
+    val linkHandler: LinkHandler,
+) : AndroidViewModel(application), PaymentSelectionRepository {
     /**
      * This ViewModel exists during the whole user flow, and needs to share the Dagger dependencies
      * with the other, screen-specific ViewModels. So it holds a reference to the injector which is
@@ -103,16 +99,6 @@ internal abstract class BaseSheetViewModel(
 
     internal val isResourceRepositoryReady: LiveData<Boolean?> =
         _isResourceRepositoryReady.distinctUntilChanged()
-
-    @VisibleForTesting
-    internal val _isLinkEnabled = MutableLiveData<Boolean>()
-    internal val isLinkEnabled: LiveData<Boolean> = _isLinkEnabled
-
-    internal val activeLinkSession = MutableLiveData(false)
-
-    protected val _linkConfiguration =
-        savedStateHandle.getLiveData<LinkPaymentLauncher.Configuration>(LINK_CONFIGURATION)
-    internal val linkConfiguration: LiveData<LinkPaymentLauncher.Configuration> = _linkConfiguration
 
     private val _stripeIntent = savedStateHandle.getLiveData<StripeIntent>(SAVE_STRIPE_INTENT)
     internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
@@ -158,6 +144,11 @@ internal abstract class BaseSheetViewModel(
     private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
     internal val selection: LiveData<PaymentSelection?> = _selection
 
+    override val paymentSelection: PaymentSelection?
+        get() {
+            return selection.value
+        }
+
     private val editing = MutableLiveData(false)
 
     val processing: LiveData<Boolean> = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
@@ -178,11 +169,6 @@ internal abstract class BaseSheetViewModel(
     private val _notesText = MutableLiveData<String?>()
     internal val notesText: LiveData<String?> = _notesText
 
-    private val _showLinkVerificationDialog = MutableLiveData(false)
-    val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog
-
-    private val linkVerificationChannel = Channel<Boolean>(capacity = 1)
-
     /**
      * This should be initialized from the starter args, and then from that point forward it will be
      * the last valid new payment method entered by the user.
@@ -191,8 +177,6 @@ internal abstract class BaseSheetViewModel(
      * the user returns to that payment method type.
      */
     abstract var newPaymentSelection: PaymentSelection.New?
-
-    open var linkInlineSelection = MutableLiveData<PaymentSelection.New.LinkInline?>(null)
 
     abstract fun onFatal(throwable: Throwable)
 
@@ -234,7 +218,7 @@ internal abstract class BaseSheetViewModel(
             initialSelection = savedSelection,
             currentSelection = selection,
             isGooglePayReady = isGooglePayReady,
-            isLinkEnabled = isLinkEnabled,
+            isLinkEnabled = linkHandler.isLinkEnabled,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
         )
     }
@@ -253,7 +237,7 @@ internal abstract class BaseSheetViewModel(
                 val savedSelection = withContext(workContext) {
                     prefsRepository.getSavedSelection(
                         isGooglePayReady.asFlow().first(),
-                        isLinkEnabled.asFlow().first()
+                        linkHandler.isLinkEnabled.asFlow().first()
                     )
                 }
                 savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection
@@ -298,7 +282,7 @@ internal abstract class BaseSheetViewModel(
             paymentMethods,
             isGooglePayReady,
             isResourceRepositoryReady,
-            isLinkEnabled
+            linkHandler.isLinkEnabled
         ).forEach { source ->
             addSource(source) {
                 value = determineIfReady()
@@ -312,7 +296,7 @@ internal abstract class BaseSheetViewModel(
         val stripeIntentValue = stripeIntent.value
         val isGooglePayReadyValue = isGooglePayReady.value
         val isResourceRepositoryReadyValue = isResourceRepositoryReady.value
-        val isLinkReadyValue = isLinkEnabled.value
+        val isLinkReadyValue = linkHandler.isLinkEnabled.value
         val savedSelectionValue = savedSelection.value
         // List of Payment Methods is not passed in the config but we still wait for it to be loaded
         // before adding the Fragment.
@@ -360,8 +344,8 @@ internal abstract class BaseSheetViewModel(
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
                         " (${
-                        lpmResourceRepository.getRepository().values()
-                            .map { it.code }.toList()
+                            lpmResourceRepository.getRepository().values()
+                                .map { it.code }.toList()
                         })"
                 )
             )
@@ -469,122 +453,11 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    protected suspend fun createLinkConfiguration(
-        stripeIntent: StripeIntent
-    ): LinkPaymentLauncher.Configuration {
-        val shippingDetails: AddressDetails? = config?.shippingDetails
-        val customerPhone = if (shippingDetails?.isCheckboxSelected == true) {
-            shippingDetails.phoneNumber
-        } else {
-            config?.defaultBillingDetails?.phone
-        }
-        val shippingAddress = if (shippingDetails?.isCheckboxSelected == true) {
-            shippingDetails.toIdentifierMap(config?.defaultBillingDetails)
-        } else {
-            null
-        }
-        val customerEmail = config?.defaultBillingDetails?.email ?: config?.customer?.let {
-            customerRepository.retrieveCustomer(
-                it.id,
-                it.ephemeralKeySecret
-            )
-        }?.email
-        return LinkPaymentLauncher.Configuration(
-            stripeIntent = stripeIntent,
-            merchantName = merchantName,
-            customerEmail = customerEmail,
-            customerPhone = customerPhone,
-            customerName = config?.defaultBillingDetails?.name,
-            customerBillingCountryCode = config?.defaultBillingDetails?.address?.country,
-            shippingValues = shippingAddress
-        )
-    }
-
-    protected suspend fun requestLinkVerification(): Boolean {
-        _showLinkVerificationDialog.value = true
-        return linkVerificationChannel.receive()
-    }
-
-    fun handleLinkVerificationResult(success: Boolean) {
-        _showLinkVerificationDialog.value = false
-        activeLinkSession.value = success
-        linkVerificationChannel.trySend(success)
-    }
-
-    fun payWithLinkInline(configuration: LinkPaymentLauncher.Configuration, userInput: UserInput?) {
-        (selection.value as? PaymentSelection.New.Card)?.paymentMethodCreateParams?.let { params ->
-            savedStateHandle[SAVE_PROCESSING] = true
-            updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
-
-            viewModelScope.launch {
-                when (linkLauncher.getAccountStatusFlow(configuration).first()) {
-                    AccountStatus.Verified -> {
-                        activeLinkSession.value = true
-                        completeLinkInlinePayment(
-                            configuration,
-                            params,
-                            userInput is UserInput.SignIn
-                        )
-                    }
-                    AccountStatus.VerificationStarted,
-                    AccountStatus.NeedsVerification -> {
-                        val success = requestLinkVerification()
-
-                        if (success) {
-                            completeLinkInlinePayment(
-                                configuration,
-                                params,
-                                userInput is UserInput.SignIn
-                            )
-                        } else {
-                            savedStateHandle[SAVE_PROCESSING] = false
-                            updatePrimaryButtonState(PrimaryButton.State.Ready)
-                        }
-                    }
-                    AccountStatus.SignedOut,
-                    AccountStatus.Error -> {
-                        activeLinkSession.value = false
-                        userInput?.let {
-                            linkLauncher.signInWithUserInput(configuration, userInput).fold(
-                                onSuccess = {
-                                    // If successful, the account was fetched or created, so try again
-                                    payWithLinkInline(configuration, userInput)
-                                },
-                                onFailure = {
-                                    onError(it.localizedMessage)
-                                    savedStateHandle[SAVE_PROCESSING] = false
-                                    updatePrimaryButtonState(PrimaryButton.State.Ready)
-                                }
-                            )
-                        } ?: run {
-                            savedStateHandle[SAVE_PROCESSING] = false
-                            updatePrimaryButtonState(PrimaryButton.State.Ready)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    internal open fun completeLinkInlinePayment(
-        configuration: LinkPaymentLauncher.Configuration,
-        paymentMethodCreateParams: PaymentMethodCreateParams,
-        isReturningUser: Boolean
-    ) {
+    fun payWithLinkInline(linkConfig: LinkPaymentLauncher.Configuration, userInput: UserInput?) {
         viewModelScope.launch {
-            onLinkPaymentDetailsCollected(
-                linkLauncher.attachNewCardToAccount(
-                    configuration,
-                    paymentMethodCreateParams
-                ).getOrNull()
-            )
+            linkHandler.payWithLinkInline(linkConfig, userInput)
         }
     }
-
-    /**
-     * Method called after completing collection of payment data for a payment with Link.
-     */
-    abstract fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?)
 
     abstract fun onUserCancel()
 

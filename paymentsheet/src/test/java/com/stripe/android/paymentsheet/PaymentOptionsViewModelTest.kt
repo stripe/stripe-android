@@ -2,12 +2,10 @@ package com.stripe.android.paymentsheet
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -47,7 +45,6 @@ internal class PaymentOptionsViewModelTest {
     private val customerRepository = FakeCustomerRepository()
     private val paymentMethodRepository = FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
     private val lpmResourceRepository = StaticLpmResourceRepository(mock())
-    private val linkLauncher = mock<LinkPaymentLauncher>()
 
     @Test
     fun `onUserSelection() when selection has been made should set the view state to process result`() {
@@ -234,8 +231,8 @@ internal class PaymentOptionsViewModelTest {
         )
 
         assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
-        assertThat(viewModel.activeLinkSession.value).isTrue()
-        assertThat(viewModel.isLinkEnabled.value).isTrue()
+        assertThat(viewModel.linkHandler.activeLinkSession.value).isTrue()
+        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
     @Test
@@ -248,8 +245,8 @@ internal class PaymentOptionsViewModelTest {
         )
 
         assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
-        assertThat(viewModel.activeLinkSession.value).isFalse()
-        assertThat(viewModel.isLinkEnabled.value).isTrue()
+        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
+        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
     @Test
@@ -262,8 +259,8 @@ internal class PaymentOptionsViewModelTest {
         )
 
         assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link)
-        assertThat(viewModel.activeLinkSession.value).isFalse()
-        assertThat(viewModel.isLinkEnabled.value).isTrue()
+        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
+        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
     @Test
@@ -273,27 +270,31 @@ internal class PaymentOptionsViewModelTest {
         )
 
         assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link)
-        assertThat(viewModel.activeLinkSession.value).isFalse()
-        assertThat(viewModel.isLinkEnabled.value).isFalse()
+        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
+        assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
     }
 
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
-    ) = PaymentOptionsViewModel(
-        args = args.copy(state = args.state.copy(linkState = linkState)),
-        prefsRepositoryFactory = { prefsRepository },
+    ) = TestViewModelFactory.create(
         eventReporter = eventReporter,
-        customerRepository = customerRepository,
-        workContext = testDispatcher,
-        application = ApplicationProvider.getApplicationContext(),
-        logger = Logger.noop(),
-        injectorKey = DUMMY_INJECTOR_KEY,
-        lpmResourceRepository = lpmResourceRepository,
-        addressResourceRepository = mock(),
-        savedStateHandle = SavedStateHandle(),
-        linkLauncher = linkLauncher
-    )
+    ) { linkHandler, savedStateHandle ->
+        PaymentOptionsViewModel(
+            args = args.copy(state = args.state.copy(linkState = linkState)),
+            prefsRepositoryFactory = { prefsRepository },
+            eventReporter = eventReporter,
+            customerRepository = customerRepository,
+            workContext = testDispatcher,
+            application = ApplicationProvider.getApplicationContext(),
+            logger = Logger.noop(),
+            injectorKey = DUMMY_INJECTOR_KEY,
+            lpmResourceRepository = lpmResourceRepository,
+            addressResourceRepository = mock(),
+            savedStateHandle = savedStateHandle,
+            linkHandler = linkHandler
+        )
+    }
 
     private companion object {
         private val SELECTION_SAVED_PAYMENT_METHOD = PaymentSelection.Saved(

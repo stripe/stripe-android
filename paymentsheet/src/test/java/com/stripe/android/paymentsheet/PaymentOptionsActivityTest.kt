@@ -9,7 +9,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -575,22 +574,27 @@ internal class PaymentOptionsActivityTest {
         val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
             onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
         }
-        registerFormViewModelInjector()
-        return PaymentOptionsViewModel(
-            args = args,
-            prefsRepositoryFactory = { FakePrefsRepository() },
+        return TestViewModelFactory.create(
+            linkLauncher = linkPaymentLauncher,
             eventReporter = eventReporter,
-            customerRepository = FakeCustomerRepository(),
-            workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY,
-            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
-            savedStateHandle = SavedStateHandle(),
-            linkLauncher = linkPaymentLauncher
-        ).also {
-            it.injector = injector
+        ) { linkHandler, savedStateHandle ->
+            registerFormViewModelInjector()
+            PaymentOptionsViewModel(
+                args = args,
+                prefsRepositoryFactory = { FakePrefsRepository() },
+                eventReporter = eventReporter,
+                customerRepository = FakeCustomerRepository(),
+                workContext = testDispatcher,
+                application = ApplicationProvider.getApplicationContext(),
+                logger = Logger.noop(),
+                injectorKey = DUMMY_INJECTOR_KEY,
+                lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
+                addressResourceRepository = StaticAddressResourceRepository(addressRepository),
+                savedStateHandle = savedStateHandle,
+                linkHandler = linkHandler,
+            ).also {
+                it.injector = injector
+            }
         }
     }
 
