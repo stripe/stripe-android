@@ -1,11 +1,18 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
+import android.webkit.WebView
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,7 +33,7 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.google.accompanist.web.WebView
-import com.google.accompanist.web.rememberWebViewState
+import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.domain.prepane.Body
 import com.stripe.android.financialconnections.domain.prepane.Cta
@@ -185,12 +192,9 @@ private fun LoadedContent(
                 showPartnerDisclosure = payload.authSession.showPartnerDisclosure ?: false,
                 onContinueClick = onContinueClick
             ) else InstitutionalPrePaneContent(
-                content = payload.authSession.display.text.oauthPrepane,
-                institution = payload.institution,
-                flow = payload.authSession.flow,
                 isStripeDirect = payload.isStripeDirect,
-                showPartnerDisclosure = payload.authSession.showPartnerDisclosure ?: false,
-                onContinueClick = onContinueClick
+                onContinueClick = onContinueClick,
+                content = payload.authSession.display.text.oauthPrepane
             )
 
             false -> LoadingContent(
@@ -266,9 +270,6 @@ private fun DefaultPrePaneContent(
 
 @Composable
 private fun InstitutionalPrePaneContent(
-    institution: FinancialConnectionsInstitution,
-    flow: Flow?,
-    showPartnerDisclosure: Boolean,
     isStripeDirect: Boolean,
     onContinueClick: () -> Unit,
     content: OauthPrepane
@@ -276,27 +277,17 @@ private fun InstitutionalPrePaneContent(
     val title = remember(content.title) {
         TextResource.Text(fromHtml(content.title))
     }
+    val scrollState = rememberScrollState()
     Column(
-        modifier = Modifier
+        Modifier
+            .fillMaxSize()
             .padding(
-                top = 8.dp,
+                top = 16.dp,
                 start = 24.dp,
                 end = 24.dp,
                 bottom = 24.dp
             )
     ) {
-        val modifier = Modifier
-            .size(36.dp)
-            .clip(RoundedCornerShape(6.dp))
-        StripeImage(
-            url = institution.icon?.default ?: "",
-            contentDescription = null,
-            imageLoader = LocalImageLoader.current,
-            errorContent = { InstitutionPlaceholder(modifier) },
-            modifier = modifier
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        // TITLE
         AnnotatedText(
             text = title,
             onClickableTextClick = { },
@@ -305,49 +296,70 @@ private fun InstitutionalPrePaneContent(
                 StringAnnotation.BOLD to FinancialConnectionsTheme.typography.subtitleEmphasized.toSpanStyle()
             )
         )
-        Spacer(modifier = Modifier.size(16.dp))
-
-        // CONTENT
-        content.body.forEach { bodyItem ->
-            when (bodyItem) {
-                is Body.Image -> {
-                    // TODO remember state correctly.
-                    WebView(state = rememberWebViewState(bodyItem.content.default!!))
-                }
-
-                is Body.Text -> AnnotatedText(
-                    text = TextResource.Text(fromHtml(bodyItem.content)),
-                    onClickableTextClick = { },
-                    defaultStyle = FinancialConnectionsTheme.typography.body,
-                    annotationStyles = mapOf(
-                        StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized.toSpanStyle()
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .padding(top = 16.dp, bottom = 16.dp)
+                .weight(1f)
+                .verticalScroll(scrollState)
+        ) {
+            // CONTENT
+            content.body.forEach { bodyItem ->
+                when (bodyItem) {
+                    is Body.Image -> {
+                        GifWebView(bodyItem.content.default!!)
+                    }
+                    is Body.Text -> AnnotatedText(
+                        text = TextResource.Text(fromHtml(bodyItem.content)),
+                        onClickableTextClick = { },
+                        defaultStyle = FinancialConnectionsTheme.typography.body,
+                        annotationStyles = mapOf(
+                            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized.toSpanStyle()
+                        )
                     )
+                }
+            }
+
+            PartnerCallout(
+                isStripeDirect = isStripeDirect,
+                content.partnerNotice
+            )
+        }
+        Box {
+            FinancialConnectionsButton(
+                onClick = onContinueClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.stripe_prepane_continue),
+                    textAlign = TextAlign.Center
                 )
             }
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
-        if (flow != null && showPartnerDisclosure) PartnerCallout(
-            isStripeDirect,
-            content.partnerNotice
-        )
-        Spacer(modifier = Modifier.size(16.dp))
-        FinancialConnectionsButton(
-            onClick = onContinueClick,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = stringResource(R.string.stripe_prepane_continue),
-                textAlign = TextAlign.Center
-            )
         }
     }
 }
 
 @Composable
+private fun GifWebView(gifUrl: String) {
+    val state = rememberWebViewStateWithHTMLData(
+        "<html><body><img style=\"width: 100%\" src=\"$gifUrl\"></body></html>"
+    )
+    WebView(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(500.dp),
+        onCreated = { it: WebView ->
+            it.isVerticalScrollBarEnabled = false
+            it.isVerticalFadingEdgeEnabled = false
+        },
+        state = state
+    )
+}
+
+@Composable
 @Preview
-internal fun DefaultPrepaneContentPreview() {
+internal fun InstitutionalPrepaneContentPreview() {
     FinancialConnectionsPreview {
         PartnerAuthScreenContent(
             state = PartnerAuthState(
@@ -372,18 +384,30 @@ internal fun DefaultPrepaneContentPreview() {
                             display = Display(
                                 Text(
                                     oauthPrepane = OauthPrepane(
-                                        title = "",
-                                        body = emptyList(),
-                                        cta = Cta(
-                                            icon = Image(""),
-                                            text = ""
+                                        title = "Sign in with **Banco del Nabo**",
+                                        body = listOf(
+                                            Body.Text(
+                                                "Some very large text will most likely go here!"
+                                            ),
+                                            Body.Image(
+                                                Image(
+                                                    "https://media.tenor.com/H04kLkyt_tUAAAAM/dog-little-dog.gif"
+                                                )
+                                            ),
+                                            Body.Text(
+                                                "Some very large text will most likely go here!"
+                                            ),
                                         ),
-                                        institutionIcon = Image(""),
+                                        cta = Cta(
+                                            icon = null,
+                                            text = "Continue!"
+                                        ),
+                                        institutionIcon = Image("https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--reserve-primary-3x.png"),
                                         partnerNotice = PartnerNotice(
-                                            partnerIcon = Image(""),
-                                            text = ""
+                                            partnerIcon = Image("https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--reserve-primary-3x.png"),
+                                            text = "LOLOLOLOLOLOLOLOLOL"
                                         )
-                                    ),
+                                    )
                                 )
                             )
                         ),

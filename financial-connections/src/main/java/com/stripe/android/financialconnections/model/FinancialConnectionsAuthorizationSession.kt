@@ -2,7 +2,12 @@ package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
 import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
+import com.stripe.android.financialconnections.domain.prepane.Body
+import com.stripe.android.financialconnections.domain.prepane.Cta
 import com.stripe.android.financialconnections.domain.prepane.Display
+import com.stripe.android.financialconnections.domain.prepane.OauthPrepane
+import com.stripe.android.financialconnections.domain.prepane.PartnerNotice
+import com.stripe.android.financialconnections.domain.prepane.Text
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -51,9 +56,38 @@ internal data class FinancialConnectionsAuthorizationSession(
     @SerialName(value = "is_oauth")
     private val _isOAuth: Boolean? = false,
 
-    @SerialName(value = "display")
-    val display: Display? = null
+//    @SerialName(value = "display")
+    @Transient
+    val display: Display? = Display(
+        Text(
+            OauthPrepane(
+                title = "Sign in with **Random Bank**",
+                body = listOf(
+                    Body.Text(
+                        "Some very large text will most likely go here!"
+                    ),
+                    Body.Image(
+                        Image(
+                            "https://media.tenor.com/H04kLkyt_tUAAAAM/dog-little-dog.gif"
+                        )
+                    ),
+                    Body.Text(
+                        "Some very large text will most likely go here!"
+                    ),
+                ),
+                cta = Cta(
+                    icon = null,
+                    text = "Continue!"
+                ),
+                institutionIcon = Image("https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--reserve-primary-3x.png"),
+                partnerNotice = PartnerNotice(
+                    partnerIcon = Image("https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--reserve-primary-3x.png"),
+                    text = "LOLOLOLOLOLOLOLOLOL"
+                )
+            )
+        )
 
+    )
 ) : Parcelable {
 
     val isOAuth: Boolean

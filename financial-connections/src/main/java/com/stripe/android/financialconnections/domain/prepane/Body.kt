@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.domain.prepane
 
 import android.os.Parcelable
 import com.stripe.android.financialconnections.model.serializer.BodySerializer
+import com.stripe.android.financialconnections.model.serializer.MarkdownToHtmlSerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
@@ -10,14 +11,13 @@ internal sealed class Body : Parcelable {
     @Serializable
     @Parcelize
     internal data class Text(
-        val type: String,
+        @Serializable(with = MarkdownToHtmlSerializer::class)
         val content: String
     ) : Body(), Parcelable
 
     @Serializable
     @Parcelize
     internal data class Image(
-        val type: String,
         val content: com.stripe.android.financialconnections.model.Image
     ) : Body(), Parcelable
 

@@ -1,11 +1,5 @@
 package com.stripe.android.financialconnections.features
 
-import com.stripe.android.financialconnections.domain.prepane.Body
-import com.stripe.android.financialconnections.domain.prepane.Cta
-import com.stripe.android.financialconnections.domain.prepane.Display
-import com.stripe.android.financialconnections.domain.prepane.OauthPrepane
-import com.stripe.android.financialconnections.domain.prepane.PartnerNotice
-import com.stripe.android.financialconnections.domain.prepane.Text
 import com.stripe.android.financialconnections.model.Bullet
 import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.ConsentPaneBody
@@ -31,37 +25,6 @@ internal object MarkdownParser {
         }
         return newText
     }
-
-    internal fun toHtml(display: Display) = Display(
-        Text(
-            oauthPrepane = toHtml(display.text.oauthPrepane),
-        )
-    )
-
-    private fun toHtml(prepane: OauthPrepane) = OauthPrepane(
-        body = prepane.body.map { item ->
-            when (item) {
-                is Body.Image -> Body.Image(
-                    type = item.type,
-                    content = item.content
-                )
-                is Body.Text -> Body.Text(
-                    type = item.type,
-                    content = toHtml(item.content)
-                )
-            }
-        },
-        cta = Cta(
-            text = prepane.cta.text,
-            icon = prepane.cta.icon
-        ),
-        institutionIcon = prepane.institutionIcon,
-        title = toHtml(prepane.title),
-        partnerNotice = PartnerNotice(
-            text = toHtml(prepane.partnerNotice.text),
-            partnerIcon = prepane.partnerNotice.partnerIcon
-        )
-    )
 
     internal fun toHtml(pane: ConsentPane): ConsentPane = ConsentPane(
         title = toHtml(pane.title),

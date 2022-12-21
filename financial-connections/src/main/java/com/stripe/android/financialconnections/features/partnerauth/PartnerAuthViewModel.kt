@@ -25,7 +25,6 @@ import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOA
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowCancelledException
-import com.stripe.android.financialconnections.features.MarkdownParser
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.PartnerAuthViewEffect.OpenPartnerAuth
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
@@ -64,9 +63,6 @@ internal class PartnerAuthViewModel @Inject constructor(
             val authSession = createAuthorizationSession(
                 institution = requireNotNull(manifest.activeInstitution),
                 allowManualEntry = manifest.allowManualEntry
-            )
-            authSession.copy(
-                display = authSession.display?.let { MarkdownParser.toHtml(it) }
             )
             Payload(
                 authSession = authSession,
