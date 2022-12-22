@@ -7,10 +7,10 @@ mobilepay, true, true, on_session, false, card/mobilepay, false, false, not avai
 mobilepay, true, true, on_session, false, card/eps/mobilepay, false, false, not available, false
 mobilepay, true, false, on_session, false, card/mobilepay, false, false, not available, false
 mobilepay, true, false, on_session, false, card/eps/mobilepay, false, false, not available, false
-mobilepay, true, true, null, false, card/mobilepay, false, false, not available, false
-mobilepay, true, true, null, false, card/eps/mobilepay, false, false, not available, false
-mobilepay, true, false, null, false, card/mobilepay, false, false, not available, false
-mobilepay, true, false, null, false, card/eps/mobilepay, false, false, not available, false
+mobilepay, true, true, null, false, card/mobilepay, false, true, oneTime, true
+mobilepay, true, true, null, false, card/eps/mobilepay, false, true, oneTime, true
+mobilepay, true, false, null, false, card/mobilepay, false, true, oneTime, true
+mobilepay, true, false, null, false, card/eps/mobilepay, false, true, oneTime, true
 mobilepay, false, true, off_session, false, card/mobilepay, false, false, not available, false
 mobilepay, false, true, off_session, false, card/eps/mobilepay, false, false, not available, false
 mobilepay, false, false, off_session, false, card/mobilepay, false, false, not available, false
@@ -19,10 +19,10 @@ mobilepay, false, true, on_session, false, card/mobilepay, false, false, not ava
 mobilepay, false, true, on_session, false, card/eps/mobilepay, false, false, not available, false
 mobilepay, false, false, on_session, false, card/mobilepay, false, false, not available, false
 mobilepay, false, false, on_session, false, card/eps/mobilepay, false, false, not available, false
-mobilepay, false, true, null, false, card/mobilepay, false, false, not available, false
-mobilepay, false, true, null, false, card/eps/mobilepay, false, false, not available, false
-mobilepay, false, false, null, false, card/mobilepay, false, false, not available, false
-mobilepay, false, false, null, false, card/eps/mobilepay, false, false, not available, false
+mobilepay, false, true, null, false, card/mobilepay, false, true, oneTime, true
+mobilepay, false, true, null, false, card/eps/mobilepay, false, true, oneTime, true
+mobilepay, false, false, null, false, card/mobilepay, false, true, oneTime, true
+mobilepay, false, false, null, false, card/eps/mobilepay, false, true, oneTime, true
 mobilepay, true, true, off_session, true, card/mobilepay, false, false, not available, false
 mobilepay, true, true, off_session, true, card/eps/mobilepay, false, false, not available, false
 mobilepay, true, false, off_session, true, card/mobilepay, false, false, not available, false

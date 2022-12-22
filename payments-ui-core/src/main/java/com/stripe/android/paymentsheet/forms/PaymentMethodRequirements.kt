@@ -279,13 +279,13 @@ internal val AffirmRequirement = PaymentMethodRequirements(
 )
 
 internal val RevolutPayRequirement = PaymentMethodRequirements(
-    piRequirements = setOf(ShippingAddress),
+    piRequirements = emptySet(),
     siRequirements = null,
     confirmPMFromCustomer = null
 )
 
 internal val MobilePayRequirement = PaymentMethodRequirements(
-    piRequirements = setOf(ShippingAddress),
+    piRequirements = emptySet(),
     siRequirements = null,
     confirmPMFromCustomer = null
 )
