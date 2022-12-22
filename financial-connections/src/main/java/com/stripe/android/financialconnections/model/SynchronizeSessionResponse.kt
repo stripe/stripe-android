@@ -29,9 +29,8 @@ internal data class VisualUpdate(
     // Indicates whether the logo should be removed from most panes
     @SerialName("reduced_branding")
     val reducedBranding: Boolean,
-    // TODO@carlosmuvi use logo array.
     @SerialName("merchant_logo")
-    val merchantLogo: String? = null
+    val merchantLogos: List<String>
 ) : Parcelable
 
 @Serializable

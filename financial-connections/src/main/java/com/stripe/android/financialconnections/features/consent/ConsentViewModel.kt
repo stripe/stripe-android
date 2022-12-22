@@ -44,7 +44,7 @@ internal class ConsentViewModel @Inject constructor(
             val sync = getOrFetchSync()
             ConsentState.Payload(
                 consent = MarkdownParser.toHtml(sync.text!!.consent!!),
-                merchantLogos = sync.visual?.merchantLogo?.let { listOf(it) } ?: emptyList()
+                merchantLogos = sync.visual?.merchantLogos ?: emptyList()
             )
         }.execute { copy(consent = it) }
     }
