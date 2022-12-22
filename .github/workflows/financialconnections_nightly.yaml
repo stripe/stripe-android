@@ -60,6 +60,7 @@ jobs:
         id: run-tests-1
         continue-on-error: true
         uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 30
         with:
           api-level: ${{ matrix.api-level }}
           arch: ${{ matrix.arch }}
@@ -77,6 +78,7 @@ jobs:
         continue-on-error: true
         if: steps.run-tests-1.outcome == 'failure'
         uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 30
         with:
           api-level: ${{ matrix.api-level }}
           arch: ${{ matrix.arch }}
@@ -93,6 +95,7 @@ jobs:
         id: run-tests-3
         if: steps.run-tests-2.outcome == 'failure'
         uses: reactivecircus/android-emulator-runner@v2
+        timeout-minutes: 30
         with:
           api-level: ${{ matrix.api-level }}
           arch: ${{ matrix.arch }}
