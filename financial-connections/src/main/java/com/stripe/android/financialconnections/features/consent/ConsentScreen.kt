@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,6 +50,7 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingContent
+import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
@@ -229,11 +231,10 @@ private fun ConsentLogoHeader(
          */
         if (logos.size != 2 && logos.size != 3) {
             Image(
-                // TODO figure right default logo
-                painterResource(id = R.drawable.stripe_ic_brandicon_institution_circle),
+                painterResource(id = R.drawable.stripe_logo),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(40.dp)
+                    .width(50.dp)
                     .clip(CircleShape),
             )
         } else {
@@ -243,6 +244,18 @@ private fun ConsentLogoHeader(
                     debugPainter = painterResource(
                         id = R.drawable.stripe_ic_brandicon_institution_circle
                     ),
+                    loadingContent = {
+                        LoadingShimmerEffect { shimmer ->
+                            Spacer(
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .size(40.dp)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .fillMaxWidth(fraction = 0.5f)
+                                    .background(shimmer)
+                            )
+                        }
+                    },
                     imageLoader = LocalImageLoader.current,
                     contentScale = ContentScale.Crop,
                     contentDescription = null,
