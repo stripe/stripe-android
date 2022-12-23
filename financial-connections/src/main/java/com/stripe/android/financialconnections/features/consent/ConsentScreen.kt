@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -61,6 +62,7 @@ import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
+import com.stripe.android.financialconnections.ui.LocalReducedBranding
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -157,7 +159,10 @@ private fun ConsentMainContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                hideStripeLogo = true,
+                hideStripeLogo = when {
+                    payload.shouldShowMerchantLogos -> true
+                    else -> LocalReducedBranding.current
+                },
                 onCloseClick = onCloseClick,
                 elevation = scrollState.elevation
             )
@@ -177,23 +182,40 @@ private fun ConsentMainContent(
                         bottom = 24.dp
                     )
             ) {
-                ConsentLogoHeader(
-                    logos = payload.merchantLogos,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-                Spacer(modifier = Modifier.size(20.dp))
-                AnnotatedText(
-                    text = title,
-                    onClickableTextClick = { onClickableTextClick(it) },
-                    defaultStyle = typography.subtitle.copy(
-                        textAlign = TextAlign.Center
-                    ),
-                    annotationStyles = mapOf(
-                        StringAnnotation.CLICKABLE to typography.subtitle
-                            .toSpanStyle()
-                            .copy(color = colors.textBrand),
+                if (payload.shouldShowMerchantLogos) {
+                    // Merchant logos: Control
+                    ConsentLogoHeader(
+                        logos = payload.merchantLogos,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
-                )
+                    Spacer(modifier = Modifier.size(20.dp))
+                    AnnotatedText(
+                        text = title,
+                        onClickableTextClick = { onClickableTextClick(it) },
+                        defaultStyle = typography.subtitle.copy(
+                            textAlign = TextAlign.Center
+                        ),
+                        annotationStyles = mapOf(
+                            StringAnnotation.CLICKABLE to typography.subtitle
+                                .toSpanStyle()
+                                .copy(color = colors.textBrand),
+                        )
+                    )
+                } else {
+                    // Merchant logos: Treatment
+                    Spacer(modifier = Modifier.size(16.dp))
+                    AnnotatedText(
+                        text = title,
+                        onClickableTextClick = { onClickableTextClick(it) },
+                        defaultStyle = typography.subtitle,
+                        annotationStyles = mapOf(
+                            StringAnnotation.CLICKABLE to typography.subtitle
+                                .toSpanStyle()
+                                .copy(color = colors.textBrand),
+                        )
+                    )
+                    Spacer(modifier = Modifier.size(24.dp))
+                }
                 bullets.forEach { bullet ->
                     Spacer(modifier = Modifier.size(16.dp))
                     ConsentBottomSheetBullet(
@@ -234,7 +256,8 @@ private fun ConsentLogoHeader(
                 painterResource(id = R.drawable.stripe_logo),
                 contentDescription = null,
                 modifier = Modifier
-                    .width(50.dp)
+                    .width(100.dp)
+                    .height(30.dp)
                     .clip(CircleShape),
             )
         } else {
@@ -651,6 +674,25 @@ private fun ConsentBulletIcon(iconUrl: String?) {
 @Preview(group = "Consent Pane", name = "canonical")
 internal fun ContentPreview(
     state: ConsentState = ConsentStates.canonical()
+) {
+    FinancialConnectionsPreview {
+        ConsentContent(
+            state = state,
+            bottomSheetState = rememberModalBottomSheetState(
+                ModalBottomSheetValue.Hidden,
+                skipHalfExpanded = true
+            ),
+            onContinueClick = {},
+            onClickableTextClick = {},
+            onConfirmModalClick = {},
+        ) {}
+    }
+}
+
+@Composable
+@Preview(group = "Consent Pane", name = "No Logos")
+internal fun ContentWithNoLogosPreview(
+    state: ConsentState = ConsentStates.withNoLogos()
 ) {
     FinancialConnectionsPreview {
         ConsentContent(

@@ -28,7 +28,19 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
                 consent = Success(
                     ConsentState.Payload(
                         consent = sampleConsent().copy(belowCta = null),
-                        merchantLogos = emptyList()
+                        merchantLogos = emptyList(),
+                        shouldShowMerchantLogos = false
+                    )
+                )
+            )
+
+        fun withNoLogos() =
+            ConsentState(
+                consent = Success(
+                    ConsentState.Payload(
+                        consent = sampleConsent().copy(belowCta = null),
+                        merchantLogos = emptyList(),
+                        shouldShowMerchantLogos = true
                     )
                 )
             )
@@ -41,7 +53,8 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
                         merchantLogos = listOf(
                             "www.logo1.com",
                             "www.logo2.com"
-                        )
+                        ),
+                        shouldShowMerchantLogos = true
                     )
                 )
             )
@@ -55,7 +68,8 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
                             "www.logo1.com",
                             "www.logo2.com",
                             "www.logo3.com",
-                        )
+                        ),
+                        shouldShowMerchantLogos = true
                     )
                 )
             )
@@ -64,7 +78,8 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
             consent = Success(
                 ConsentState.Payload(
                     consent = sampleConsent(),
-                    merchantLogos = emptyList()
+                    merchantLogos = emptyList(),
+                    shouldShowMerchantLogos = false
                 )
             )
         )

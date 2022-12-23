@@ -15,7 +15,8 @@ internal data class ConsentState(
 
     data class Payload(
         val consent: ConsentPane,
-        val merchantLogos: List<String>
+        val merchantLogos: List<String>,
+        val shouldShowMerchantLogos: Boolean
     )
 
     enum class BottomSheetContent {
