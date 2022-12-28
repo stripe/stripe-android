@@ -2,7 +2,6 @@ package com.stripe.android.identity.navigation
 
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,18 +16,15 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.DocumentUploadSideInfo
 import com.stripe.android.identity.ui.UploadMethod
 import com.stripe.android.identity.ui.UploadScreen
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.fragmentIdToScreenName
-import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
-import com.stripe.android.identity.utils.navigateToSelfieOrSubmit
-import com.stripe.android.identity.utils.postVerificationPageData
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -200,21 +196,9 @@ internal abstract class IdentityUploadFragment(
                     )
                 }
             ) {
-                identityViewModel.observeForVerificationPage(
-                    viewLifecycleOwner,
-                    onSuccess = { verificationPage ->
-                        lifecycleScope.launch {
-                            navigateToSelfieOrSubmit(
-                                verificationPage,
-                                identityViewModel,
-                                route
-                            )
-                        }
-                    },
-                    onFailure = { throwable ->
-                        Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
-                        navigateToDefaultErrorFragment(throwable, identityViewModel)
-                    }
+                identityViewModel.navigateToSelfieOrSubmit(
+                    findNavController(),
+                    route
                 )
             }
         }
@@ -230,18 +214,18 @@ internal abstract class IdentityUploadFragment(
      * Only post when that side is not yet collected.
      */
     private fun collectedUploadState() {
-        lifecycleScope.launch {
+        val navController = findNavController()
+        viewLifecycleOwner.lifecycleScope.launch {
             identityViewModel.frontCollectedInfo.collectLatest { (frontUploadState, collectedData) ->
                 if (collectedData.idDocumentFront == null) {
                     if (frontUploadState.hasError()) {
-                        navigateToDefaultErrorFragment(
-                            frontUploadState.getError(),
-                            identityViewModel
-                        )
+                        identityViewModel.errorCause.postValue(frontUploadState.getError())
+                        navController.navigateToErrorScreenWithDefaultValues(requireContext())
                     } else if (frontUploadState.isHighResUploaded()) {
                         val front = requireNotNull(frontUploadState.highResResult.data)
-                        postCollectedDataParamAndNavigate(
-                            CollectedDataParam(
+                        identityViewModel.postVerificationPageData(
+                            navController = navController,
+                            collectedDataParam = CollectedDataParam(
                                 idDocumentFront = DocumentUploadParam(
                                     highResImage = requireNotNull(front.uploadedStripeFile.id) {
                                         "front uploaded file id is null"
@@ -249,24 +233,24 @@ internal abstract class IdentityUploadFragment(
                                     uploadMethod = requireNotNull(front.uploadMethod)
                                 ),
                                 idDocumentType = collectedDataParamType
-                            )
+                            ),
+                            fromRoute = route
                         )
                     }
                 }
             }
         }
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             identityViewModel.backCollectedInfo.collectLatest { (backUploadedState, collectedData) ->
                 if (collectedData.idDocumentBack == null) {
                     if (backUploadedState.hasError()) {
-                        navigateToDefaultErrorFragment(
-                            backUploadedState.getError(),
-                            identityViewModel
-                        )
+                        identityViewModel.errorCause.postValue(backUploadedState.getError())
+                        navController.navigateToErrorScreenWithDefaultValues(requireContext())
                     } else if (backUploadedState.isHighResUploaded()) {
                         val back = requireNotNull(backUploadedState.highResResult.data)
-                        postCollectedDataParamAndNavigate(
-                            CollectedDataParam(
+                        identityViewModel.postVerificationPageData(
+                            navController = navController,
+                            collectedDataParam = CollectedDataParam(
                                 idDocumentBack = DocumentUploadParam(
                                     highResImage = requireNotNull(back.uploadedStripeFile.id) {
                                         "back uploaded file id is null"
@@ -274,51 +258,13 @@ internal abstract class IdentityUploadFragment(
                                     uploadMethod = requireNotNull(back.uploadMethod)
                                 ),
                                 idDocumentType = collectedDataParamType
-                            )
+                            ),
+                            fromRoute = route
                         )
                     }
                 }
             }
         }
-    }
-
-    private fun postCollectedDataParamAndNavigate(
-        collectedDataParam: CollectedDataParam
-    ) = identityViewModel.observeForVerificationPage(
-        viewLifecycleOwner,
-        onSuccess = {
-            lifecycleScope.launch {
-                runCatching {
-                    postVerificationPageData(
-                        identityViewModel = identityViewModel,
-                        collectedDataParam =
-                        collectedDataParam,
-                        fromRoute = route
-                    )
-                }.onFailure {
-                    Log.e(TAG, "Fail to observeForVerificationPage: $it")
-                    navigateToDefaultErrorFragment(it, identityViewModel)
-                }
-            }
-        },
-        onFailure = { throwable ->
-            Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
-            navigateToDefaultErrorFragment(throwable, identityViewModel)
-        }
-    )
-
-    private fun observeForDocCapturePage(
-        onSuccess: (VerificationPageStaticContentDocumentCapturePage) -> Unit
-    ) {
-        identityViewModel.observeForVerificationPage(
-            viewLifecycleOwner,
-            onSuccess = {
-                onSuccess(it.documentCapture)
-            },
-            onFailure = {
-                navigateToDefaultErrorFragment(it, identityViewModel)
-            }
-        )
     }
 
     private fun uploadResult(
@@ -327,11 +273,14 @@ internal abstract class IdentityUploadFragment(
         isFront: Boolean,
         scanType: IdentityScanState.ScanType
     ) {
-        observeForDocCapturePage { docCapturePage ->
+        identityViewModel.requireVerificationPage(
+            lifecycleOwner = viewLifecycleOwner,
+            navController = findNavController()
+        ) {
             identityViewModel.uploadManualResult(
                 uri = uri,
                 isFront = isFront,
-                docCapturePage = docCapturePage,
+                docCapturePage = it.documentCapture,
                 uploadMethod = uploadMethod,
                 scanType = scanType
             )

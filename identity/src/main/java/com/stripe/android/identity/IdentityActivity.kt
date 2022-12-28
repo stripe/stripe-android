@@ -172,7 +172,11 @@ internal class IdentityActivity :
                 }
             },
             onFailure = {
-                navController.navigateToErrorScreenWithDefaultValues(this, it, identityViewModel)
+                // This error will trigger lateinit property not initialized error for
+                // IdentityAnalyticsRequestFactory.verificationPage in ErrorFragment
+                // TODO(ccen) don't send analytics request for this case when ErrorFragment is removed.
+                identityViewModel.errorCause.postValue(it)
+                navController.navigateToErrorScreenWithDefaultValues(this)
             }
         )
 
