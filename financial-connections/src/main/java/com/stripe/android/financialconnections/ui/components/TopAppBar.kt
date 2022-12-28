@@ -20,16 +20,12 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
+import com.stripe.android.financialconnections.ui.LocalReducedBranding
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
 internal fun FinancialConnectionsTopAppBar(
-    title: @Composable () -> Unit = {
-        Icon(
-            painter = painterResource(id = R.drawable.stripe_logo),
-            contentDescription = null // decorative element
-        )
-    },
+    hideStripeLogo: Boolean = LocalReducedBranding.current,
     elevation: Dp = 0.dp,
     showBack: Boolean = true,
     onCloseClick: () -> Unit
@@ -38,7 +34,16 @@ internal fun FinancialConnectionsTopAppBar(
         ?.onBackPressedDispatcher
     val navController = LocalNavHostController.current
     TopAppBar(
-        title = title,
+        title = if (hideStripeLogo) {
+            { /* Empty content */ }
+        } else {
+            {
+                Icon(
+                    painter = painterResource(id = R.drawable.stripe_logo),
+                    contentDescription = null // decorative element
+                )
+            }
+        },
         elevation = elevation,
         navigationIcon = if (navController.previousBackStackEntry != null && showBack) {
             {
@@ -89,11 +94,19 @@ internal val LazyListState.elevation: Dp
     }
 
 @Composable
-@Preview(group = "Components", name = "TopAppBar - idle")
+@Preview(group = "Components", name = "TopAppBar")
+internal fun TopAppBarNoStripeLogoPreview() {
+    FinancialConnectionsPreview {
+        FinancialConnectionsTopAppBar {}
+    }
+}
+
+@Composable
+@Preview(group = "Components", name = "TopAppBar - no Stripe logo")
 internal fun FinancialConnectionsTopAppBarPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsTopAppBar(
-            title = {}
+            hideStripeLogo = true
         ) {}
     }
 }

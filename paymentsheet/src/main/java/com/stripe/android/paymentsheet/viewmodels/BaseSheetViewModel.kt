@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -27,7 +28,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
-import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
@@ -37,7 +37,6 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.model.FragmentConfig
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
@@ -65,7 +64,8 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
  */
-internal abstract class BaseSheetViewModel<TransitionTargetType>(
+@Suppress("TooManyFunctions")
+internal abstract class BaseSheetViewModel(
     application: Application,
     internal val config: PaymentSheet.Configuration?,
     internal val eventReporter: EventReporter,
@@ -135,12 +135,9 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
      */
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
-    @VisibleForTesting
-    internal val _amount = savedStateHandle.getLiveData<Amount>(SAVE_AMOUNT)
-    internal val amount: LiveData<Amount> = _amount
+    internal val amount: LiveData<Amount> = savedStateHandle.getLiveData<Amount>(SAVE_AMOUNT)
 
     internal val headerText = MutableLiveData<String>()
-    internal val googlePayDividerVisibilility: MutableLiveData<Boolean> = MutableLiveData(false)
 
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
@@ -152,31 +149,20 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val _transition = MutableLiveData<Event<TransitionTargetType?>>(Event(null))
-    internal val transition: LiveData<Event<TransitionTargetType?>> = _transition
+    private val _transition = MutableLiveData<Event<TransitionTarget>?>(null)
+    internal val transition: LiveData<Event<TransitionTarget>?> = _transition
 
-    @VisibleForTesting
-    internal val _liveMode
-        get() = savedStateHandle.getLiveData<Boolean>(SAVE_STATE_LIVE_MODE)
+    private val _liveMode = savedStateHandle.getLiveData<Boolean>(SAVE_STATE_LIVE_MODE)
     internal val liveMode: LiveData<Boolean> = _liveMode
 
-    /**
-     * On [ComposeFormDataCollectionFragment] this is set every time the details in the add
-     * card fragment is determined to be valid (not necessarily selected)
-     * On [BasePaymentMethodsListFragment] this is set when a user selects one of the options
-     */
     private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
-
     internal val selection: LiveData<PaymentSelection?> = _selection
 
     private val editing = MutableLiveData(false)
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    internal val _processing = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
-    val processing: LiveData<Boolean> = _processing
+    val processing: LiveData<Boolean> = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
 
-    @VisibleForTesting
-    internal val _contentVisible = MutableLiveData(true)
+    private val _contentVisible = MutableLiveData(true)
     internal val contentVisible: LiveData<Boolean> = _contentVisible.distinctUntilChanged()
 
     /**
@@ -192,10 +178,10 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
     private val _notesText = MutableLiveData<String?>()
     internal val notesText: LiveData<String?> = _notesText
 
-    protected val _showLinkVerificationDialog = MutableLiveData(false)
+    private val _showLinkVerificationDialog = MutableLiveData(false)
     val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog
 
-    protected val linkVerificationChannel = Channel<Boolean>(capacity = 1)
+    private val linkVerificationChannel = Channel<Boolean>(capacity = 1)
 
     /**
      * This should be initialized from the starter args, and then from that point forward it will be
@@ -305,7 +291,7 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         }
     }
 
-    val fragmentConfigEvent = MediatorLiveData<FragmentConfig?>().apply {
+    protected val isReadyEvents = MediatorLiveData<Boolean>().apply {
         listOf(
             savedSelection,
             stripeIntent,
@@ -315,14 +301,14 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
             isLinkEnabled
         ).forEach { source ->
             addSource(source) {
-                value = createFragmentConfig()
+                value = determineIfReady()
             }
         }
     }.distinctUntilChanged().map {
         Event(it)
     }
 
-    private fun createFragmentConfig(): FragmentConfig? {
+    private fun determineIfReady(): Boolean {
         val stripeIntentValue = stripeIntent.value
         val isGooglePayReadyValue = isGooglePayReady.value
         val isResourceRepositoryReadyValue = isResourceRepositoryReady.value
@@ -332,30 +318,31 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         // before adding the Fragment.
         val paymentMethodsValue = paymentMethods.value
 
-        return if (
-            stripeIntentValue != null &&
+        return stripeIntentValue != null &&
             paymentMethodsValue != null &&
             isGooglePayReadyValue != null &&
             isResourceRepositoryReadyValue != null &&
             isLinkReadyValue != null &&
             savedSelectionValue != null
-        ) {
-            FragmentConfig(
-                stripeIntent = stripeIntentValue,
-                isGooglePayReady = isGooglePayReadyValue,
-                savedSelection = savedSelectionValue
-            )
-        } else {
-            null
-        }
     }
 
-    fun transitionTo(target: TransitionTargetType) {
+    abstract fun transitionToFirstScreen()
+
+    protected fun transitionTo(target: TransitionTarget) {
         _transition.postValue(Event(target))
     }
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    fun setStripeIntent(stripeIntent: StripeIntent?) {
+    fun transitionToAddPaymentScreen() {
+        transitionTo(TransitionTarget.AddAnotherPaymentMethod)
+    }
+
+    internal sealed class TransitionTarget {
+        object SelectSavedPaymentMethods : TransitionTarget()
+        object AddAnotherPaymentMethod : TransitionTarget()
+        object AddFirstPaymentMethod : TransitionTarget()
+    }
+
+    protected fun setStripeIntent(stripeIntent: StripeIntent?) {
         savedStateHandle[SAVE_STRIPE_INTENT] = stripeIntent
 
         /**
@@ -659,5 +646,15 @@ internal abstract class BaseSheetViewModel<TransitionTargetType>(
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
         internal const val SAVE_STATE_LIVE_MODE = "save_state_live_mode"
         internal const val LINK_CONFIGURATION = "link_configuration"
+    }
+}
+
+internal fun <T> LiveData<BaseSheetViewModel.Event<T>?>.observeEvents(
+    lifecycleOwner: LifecycleOwner,
+    observer: (T) -> Unit
+) {
+    observe(lifecycleOwner) { event ->
+        val content = event?.getContentIfNotHandled() ?: return@observe
+        observer(content)
     }
 }

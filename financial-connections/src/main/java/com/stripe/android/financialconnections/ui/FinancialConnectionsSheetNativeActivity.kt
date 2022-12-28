@@ -80,14 +80,20 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     Column {
                         Box(modifier = Modifier.weight(1f)) {
                             val showCloseDialog = viewModel.collectAsState { it.showCloseDialog }
-                            val firstPane = viewModel.collectAsState(mapper = { it.initialPane })
+                            val firstPane =
+                                viewModel.collectAsState { it.initialPane }
+                            val reducedBranding =
+                                viewModel.collectAsState { it.reducedBranding }
                             if (showCloseDialog.value) {
                                 CloseDialog(
                                     viewModel::onCloseConfirm,
                                     viewModel::onCloseDismiss
                                 )
                             }
-                            NavHost(firstPane.value)
+                            NavHost(
+                                firstPane.value,
+                                reducedBranding.value
+                            )
                         }
                     }
                 }
@@ -125,7 +131,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @OptIn(ExperimentalMaterialApi::class)
     @Suppress("LongMethod")
     @Composable
-    fun NavHost(initialPane: Pane) {
+    fun NavHost(
+        initialPane: Pane,
+        reducedBranding: Boolean
+    ) {
         val context = LocalContext.current
         val navController = rememberNavController()
         val uriHandler = remember { CustomTabUriHandler(context) }
@@ -138,6 +147,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             }
         NavigationEffect(navController)
         CompositionLocalProvider(
+            LocalReducedBranding provides reducedBranding,
             LocalNavHostController provides navController,
             LocalImageLoader provides imageLoader,
             LocalUriHandler provides uriHandler
@@ -261,6 +271,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
 internal val LocalNavHostController = staticCompositionLocalOf<NavHostController> {
     error("No NavHostController provided")
+}
+
+internal val LocalReducedBranding = staticCompositionLocalOf<Boolean> {
+    error("No ReducedBranding provided")
 }
 
 internal val LocalImageLoader = staticCompositionLocalOf<StripeImageLoader> {

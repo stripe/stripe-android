@@ -69,6 +69,11 @@ internal class Navigator @Inject constructor() {
     }
 
     fun isOnRootScreen() = navigationController?.isOnRootScreen()
+
+    fun unregister() {
+        onDismiss = null
+        navigationController = null
+    }
 }
 
 // The Loading screen is always at the bottom of the stack, so a size of 2 means the current

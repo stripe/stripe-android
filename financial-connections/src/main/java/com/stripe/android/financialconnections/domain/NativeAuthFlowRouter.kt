@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.debug.DebugConfiguration
-import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import javax.inject.Inject
 
 /**
@@ -15,21 +15,21 @@ internal class NativeAuthFlowRouter @Inject constructor(
     private val debugConfiguration: DebugConfiguration
 ) {
 
-    fun nativeAuthFlowEnabled(sync: SynchronizeSessionResponse): Boolean {
+    fun nativeAuthFlowEnabled(manifest: FinancialConnectionsSessionManifest): Boolean {
         debugConfiguration.overridenNative?.let { return it }
-        val killSwitchEnabled = nativeKillSwitchActive(sync)
+        val killSwitchEnabled = nativeKillSwitchActive(manifest)
         val nativeExperimentEnabled =
-            sync.experimentAssignment(EXPERIMENT_KEY_NATIVE) == EXPERIMENT_VALUE_NATIVE_TREATMENT
+            manifest.experimentAssignment(EXPERIMENT_KEY_NATIVE) == EXPERIMENT_VALUE_NATIVE_TREATMENT
         return killSwitchEnabled.not() && nativeExperimentEnabled
     }
 
     @Suppress("ComplexCondition")
-    suspend fun logExposure(sync: SynchronizeSessionResponse) {
+    suspend fun logExposure(manifest: FinancialConnectionsSessionManifest) {
         debugConfiguration.overridenNative?.let { return }
-        val assignmentEventId = sync.manifest.assignmentEventId
-        val accountHolderId = sync.manifest.accountholderToken
-        val shouldLogExposure = nativeKillSwitchActive(sync).not() &&
-            sync.experimentPresent(EXPERIMENT_KEY_NATIVE)
+        val assignmentEventId = manifest.assignmentEventId
+        val accountHolderId = manifest.accountholderToken
+        val shouldLogExposure = nativeKillSwitchActive(manifest).not() &&
+            manifest.experimentPresent(EXPERIMENT_KEY_NATIVE)
         if (
             shouldLogExposure &&
             assignmentEventId != null &&
@@ -45,18 +45,18 @@ internal class NativeAuthFlowRouter @Inject constructor(
         }
     }
 
-    private fun nativeKillSwitchActive(sync: SynchronizeSessionResponse): Boolean =
-        sync.manifest.features
+    private fun nativeKillSwitchActive(manifest: FinancialConnectionsSessionManifest): Boolean =
+        manifest.features
             ?.any { it.key == FEATURE_KEY_NATIVE_KILLSWITCH && it.value }
             ?: true
 
-    private fun SynchronizeSessionResponse.experimentPresent(
+    private fun FinancialConnectionsSessionManifest.experimentPresent(
         experimentKey: String
     ): Boolean = experimentAssignment(experimentKey) != null
 
-    private fun SynchronizeSessionResponse.experimentAssignment(
+    private fun FinancialConnectionsSessionManifest.experimentAssignment(
         experimentKey: String
-    ): String? = manifest.experimentAssignments?.get(experimentKey)
+    ): String? = experimentAssignments?.get(experimentKey)
 
     companion object {
         private const val FEATURE_KEY_NATIVE_KILLSWITCH =
