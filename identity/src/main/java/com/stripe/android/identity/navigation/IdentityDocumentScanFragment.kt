@@ -269,7 +269,7 @@ internal abstract class IdentityDocumentScanFragment(
                                             backLowResResult = requireNotNull(uploadedState.lowResResult.data)
                                         )
                                     },
-                                    fromFragment = fragmentId
+                                    fromRoute = route
                                 ) { verificationPageDataWithNoError ->
                                     if (verificationPageDataWithNoError.isMissingBack()) {
                                         startScanning(
@@ -282,7 +282,7 @@ internal abstract class IdentityDocumentScanFragment(
                                     } else {
                                         submitVerificationPageDataAndNavigate(
                                             identityViewModel,
-                                            fragmentId
+                                            route
                                         )
                                     }
                                 }

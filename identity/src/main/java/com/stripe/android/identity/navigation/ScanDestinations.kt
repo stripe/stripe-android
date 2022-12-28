@@ -87,7 +87,7 @@ internal class DriverLicenseScanDestination(
 
 internal object SelfieDestination : IdentityTopLevelDestination() {
     const val SELFIE = "Selfie"
-    private val ROUTE = object : DestinationRoute() {
+    val ROUTE = object : DestinationRoute() {
         override val routeBase = SELFIE
     }
     override val destination = R.id.action_global_selfieFragment

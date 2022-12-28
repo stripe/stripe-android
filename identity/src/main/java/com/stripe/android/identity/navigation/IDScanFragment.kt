@@ -24,4 +24,5 @@ internal class IDScanFragment(
     override val frontMessageStringRes = R.string.position_id_front
     override val backMessageStringRes = R.string.position_id_back
     override val collectedDataParamType = CollectedDataParam.Type.IDCARD
+    override val route = IDScanDestination.ROUTE.route
 }

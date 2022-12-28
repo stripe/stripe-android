@@ -23,4 +23,5 @@ internal class DriverLicenseUploadFragment(
     override var backScanType: IdentityScanState.ScanType? = IdentityScanState.ScanType.DL_BACK
     override val fragmentId = R.id.driverLicenseUploadFragment
     override val collectedDataParamType = CollectedDataParam.Type.DRIVINGLICENSE
+    override val route = DriverLicenseUploadDestination.ROUTE.route
 }

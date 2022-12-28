@@ -13,7 +13,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.identity.FallbackUrlLauncher
-import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -112,7 +111,7 @@ internal class ConsentFragment(
             postVerificationPageDataAndMaybeSubmit(
                 identityViewModel,
                 collectedDataParam,
-                fromFragment = R.id.consentFragment,
+                fromRoute = ConsentDestination.ROUTE.route,
                 notSubmitBlock = {
                     navigateOnResume(DocSelectionDestination)
                 }

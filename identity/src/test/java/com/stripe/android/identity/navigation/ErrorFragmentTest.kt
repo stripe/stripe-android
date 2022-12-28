@@ -23,7 +23,7 @@ import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_ERR
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_GO_BACK_BUTTON_DESTINATION
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_GO_BACK_BUTTON_TEXT
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
-import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_DESTINATION
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_ROUTE
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -87,7 +87,7 @@ class ErrorFragmentTest {
 
     @Test
     fun `bottom button is set correctly when set`() {
-        launchErrorFragment(UNEXPECTED_DESTINATION).onFragment {
+        launchErrorFragment(UNEXPECTED_ROUTE).onFragment {
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
             )
@@ -150,7 +150,7 @@ class ErrorFragmentTest {
     fun `when destination is present in backstack, clicking back keep popping until destination is reached`() {
         val navigationDestination = R.id.consentFragment
 
-        launchErrorFragment(navigationDestination).onFragment {
+        launchErrorFragment(ConsentDestination.ROUTE.route).onFragment {
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
             )
@@ -180,9 +180,8 @@ class ErrorFragmentTest {
 
     @Test
     fun `when destination is not present in backstack, clicking back reaches the first entry`() {
-        val navigationDestination = R.id.confirmationFragment
         val firstEntry = R.id.consentFragment
-        launchErrorFragment(navigationDestination).onFragment {
+        launchErrorFragment(ConfirmationDestination.ROUTE.route).onFragment {
             val navController = TestNavHostController(
                 ApplicationProvider.getApplicationContext()
             )
@@ -212,7 +211,7 @@ class ErrorFragmentTest {
     }
 
     private fun launchErrorFragment(
-        navigationDestination: Int? = null
+        navigationDestination: String? = null
     ) = launchFragmentInContainer(
         bundleOf(
             ARG_ERROR_TITLE to TEST_ERROR_TITLE,
@@ -220,7 +219,7 @@ class ErrorFragmentTest {
             ARG_GO_BACK_BUTTON_TEXT to TEST_GO_BACK_BUTTON_TEXT
         ).also { bundle ->
             navigationDestination?.let {
-                bundle.putInt(ARG_GO_BACK_BUTTON_DESTINATION, navigationDestination)
+                bundle.putString(ARG_GO_BACK_BUTTON_DESTINATION, navigationDestination)
             }
         },
         themeResId = R.style.Theme_MaterialComponents

@@ -1,17 +1,16 @@
 package com.stripe.android.identity.navigation
 
 import android.content.Context
-import androidx.annotation.IdRes
 import androidx.navigation.NavController
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
-import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_DESTINATION
-import com.stripe.android.identity.networking.models.Requirement.Companion.matchesFromFragment
+import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_ROUTE
+import com.stripe.android.identity.networking.models.Requirement.Companion.matchesFromRoute
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 internal fun NavController.navigateToErrorScreenWithRequirementError(
-    @IdRes fromFragment: Int,
+    route: String,
     requirementError: VerificationPageDataRequirementError,
     identityViewModel: IdentityViewModel
 ) {
@@ -25,10 +24,10 @@ internal fun NavController.navigateToErrorScreenWithRequirementError(
                 ?: context.getString(R.string.unexpected_error_try_again),
             backButtonText = requirementError.backButtonText ?: context.getString(R.string.go_back),
             backButtonDestination =
-            if (requirementError.requirement.matchesFromFragment(fromFragment)) {
-                fromFragment
+            if (requirementError.requirement.matchesFromRoute(route)) {
+                route
             } else {
-                UNEXPECTED_DESTINATION
+                UNEXPECTED_ROUTE
             },
             shouldFail = false
         )
@@ -45,7 +44,7 @@ internal fun NavController.navigateToErrorScreenWithDefaultValues(
         ErrorDestination(
             errorTitle = context.getString(R.string.error),
             errorContent = context.getString(R.string.unexpected_error_try_again),
-            backButtonDestination = R.id.consentFragment,
+            backButtonDestination = ConsentDestination.ROUTE.route,
             backButtonText = context.getString(R.string.go_back),
             shouldFail = false
         )

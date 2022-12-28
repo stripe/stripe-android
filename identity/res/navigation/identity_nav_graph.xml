@@ -154,8 +154,8 @@
             app:argType="string" />
         <argument
             android:name="goBackButtonDestination"
-            android:defaultValue="0"
-            app:argType="integer" />
+            android:defaultValue=""
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/couldNotCaptureFragment"
