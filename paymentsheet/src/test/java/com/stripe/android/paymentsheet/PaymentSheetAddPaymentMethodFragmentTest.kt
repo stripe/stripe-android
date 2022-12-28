@@ -25,8 +25,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.CONFIG_MINIMUM
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
-import com.stripe.android.paymentsheet.model.FragmentConfig
-import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.Amount
@@ -88,6 +86,8 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             PaymentSelection.New.GenericPaymentMethod(
                 context.getString(R.string.stripe_paymentsheet_payment_method_bancontact),
                 R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+                null,
+                null,
                 paymentMethodCreateParams,
                 PaymentSelection.CustomerRequestedSave.NoRequest
             )
@@ -217,15 +217,10 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
             injectorKey = "testInjectorKeyAddFragmentTest"
         ),
-        fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         paymentMethods: List<PaymentMethod> = emptyList(),
         stripeIntent: StripeIntent? = PaymentIntentFixtures.PI_WITH_SHIPPING,
         registerInjector: Boolean = true,
-        onReady: (
-            PaymentSheetAddPaymentMethodFragment,
-
-            PaymentSheetViewModel
-        ) -> Unit
+        onReady: (PaymentSheetAddPaymentMethodFragment, PaymentSheetViewModel) -> Unit
     ): FragmentScenario<PaymentSheetAddPaymentMethodFragment> {
         assertThat(WeakMapInjectorRegistry.staticCacheMap.size).isEqualTo(0)
         val viewModel = createViewModel(
@@ -238,15 +233,11 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
         // somehow the saveInstanceState for the viewModel needs to be present
 
         return launchFragmentInContainer<PaymentSheetAddPaymentMethodFragment>(
-            bundleOf(
-                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
-                PaymentSheetActivity.EXTRA_STARTER_ARGS to args
-            ),
+            bundleOf(PaymentSheetActivity.EXTRA_STARTER_ARGS to args),
             R.style.StripePaymentSheetDefaultTheme,
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment {
             if (registerInjector) {
-                viewModel.setStripeIntent(stripeIntent)
                 idleLooper()
                 registerViewModel(args.injectorKey, viewModel, lpmRepository, addressRepository)
             } else {
@@ -254,7 +245,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                     stripeIntent.paymentMethodTypes,
                     null
                 )
-                it.sheetViewModel.setStripeIntent(stripeIntent)
                 idleLooper()
             }
         }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->

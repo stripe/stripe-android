@@ -30,6 +30,7 @@ internal class PartnerAuthViewModelTest {
     @get:Rule
     val mvrxRule = MvRxTestRule(testDispatcher = UnconfinedTestDispatcher())
 
+    private val applicationId = "com.sample.applicationid"
     private val getManifest = mock<GetManifest>()
     private val postAuthSessionEvent = mock<PostAuthSessionEvent>()
     private val pollAuthorizationSessionOAuthResults = mock<PollAuthorizationSessionOAuthResults>()
@@ -143,7 +144,8 @@ internal class PartnerAuthViewModelTest {
             navigationManager = mock(),
             pollAuthorizationSessionOAuthResults = pollAuthorizationSessionOAuthResults,
             logger = mock(),
-            initialState = initialState
+            initialState = initialState,
+            applicationId = applicationId
         )
     }
 }

@@ -14,13 +14,17 @@ import com.stripe.android.model.StripeParamsModel
 import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.isA
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
@@ -34,7 +38,7 @@ internal class StripeKtxTest {
     private val mockApiRepository: StripeApiRepository = mock()
     private val mockPaymentController: PaymentController = mock()
 
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val stripe: Stripe =
         Stripe(
@@ -559,6 +563,125 @@ internal class StripeKtxTest {
                 )
             }
         }
+
+    @Test
+    fun `Verify retrievePaymentIntent passes expand fields on to repository`(): Unit = runTest {
+        whenever(mockApiRepository.retrievePaymentIntent(isA(), isA(), isA())).doReturn(mock())
+
+        val expandFields = listOf("payment_method")
+
+        stripe.retrievePaymentIntent(
+            clientSecret = "clientSecret",
+            expand = expandFields,
+        )
+
+        verify(mockApiRepository).retrievePaymentIntent(
+            clientSecret = eq("clientSecret"),
+            options = isA(),
+            expandFields = eq(expandFields),
+        )
+    }
+
+    @Test
+    fun `Verify retrieveSetupIntent passes expand fields on to repository`(): Unit = runTest {
+        whenever(mockApiRepository.retrieveSetupIntent(isA(), isA(), isA())).doReturn(mock())
+        val expandFields = listOf("payment_method")
+
+        stripe.retrieveSetupIntent(
+            clientSecret = "clientSecret",
+            expand = expandFields,
+        )
+
+        verify(mockApiRepository).retrieveSetupIntent(
+            clientSecret = isA(),
+            options = isA(),
+            expandFields = eq(expandFields),
+        )
+    }
+
+    @Test
+    fun `Verify confirmSetupIntent passes expand fields on to repository`(): Unit = runTest {
+        whenever(mockApiRepository.confirmSetupIntent(isA(), isA(), isA())).doReturn(mock())
+
+        val expandFields = listOf("payment_method")
+
+        stripe.confirmSetupIntent(
+            confirmSetupIntentParams = mock(),
+            expand = expandFields,
+        )
+
+        verify(mockApiRepository).confirmSetupIntent(
+            confirmSetupIntentParams = isA(),
+            options = isA(),
+            expandFields = eq(expandFields),
+        )
+    }
+
+    @Test
+    fun `Verify retrievePaymentIntent with callback passes expand fields on to repository`() = runTest {
+        val expandFields = listOf("payment_method")
+
+        stripe.retrievePaymentIntent(
+            clientSecret = "pi_123_secret_123",
+            expand = expandFields,
+            callback = mock(),
+        )
+
+        verify(mockApiRepository).retrievePaymentIntent(
+            clientSecret = eq("pi_123_secret_123"),
+            options = isA(),
+            expandFields = eq(expandFields),
+        )
+    }
+
+    @Test
+    fun `Verify retrievePaymentIntentSynchronous passes expand fields on to repository`() = runTest {
+        val expandFields = listOf("payment_method")
+
+        stripe.retrievePaymentIntentSynchronous(
+            clientSecret = "pi_123_secret_123",
+            expand = expandFields,
+        )
+
+        verify(mockApiRepository).retrievePaymentIntent(
+            clientSecret = eq("pi_123_secret_123"),
+            options = isA(),
+            expandFields = eq(expandFields),
+        )
+    }
+
+    @Test
+    fun `Verify retrieveSetupIntent with callback passes expand fields on to repository`() = runTest {
+        val expandFields = listOf("payment_method")
+
+        stripe.retrieveSetupIntent(
+            clientSecret = "seti_123_secret_123",
+            expand = expandFields,
+            callback = mock(),
+        )
+
+        verify(mockApiRepository).retrieveSetupIntent(
+            clientSecret = eq("seti_123_secret_123"),
+            options = isA(),
+            expandFields = eq(expandFields),
+        )
+    }
+
+    @Test
+    fun `Verify retrieveSetupIntentSynchronous passes expand fields on to repository`() = runTest {
+        val expandFields = listOf("payment_method")
+
+        stripe.retrieveSetupIntentSynchronous(
+            clientSecret = "seti_123_secret_123",
+            expand = expandFields,
+        )
+
+        verify(mockApiRepository).retrieveSetupIntent(
+            clientSecret = eq("seti_123_secret_123"),
+            options = isA(),
+            expandFields = eq(expandFields),
+        )
+    }
 
     private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns non-empty value when calling createAPI then returns correct result`(

@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.example.samples.activity
 
+import android.graphics.drawable.Drawable
 import androidx.activity.viewModels
-import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +40,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.viewmodel.PaymentSheetViewModel
+import com.stripe.android.paymentsheet.example.utils.rememberDrawablePainter
 
 internal abstract class BasePaymentSheetActivity : AppCompatActivity() {
     protected val viewModel: PaymentSheetViewModel by viewModels()
@@ -209,7 +209,7 @@ fun ReceiptRow(
 fun PaymentMethodSelector(
     isEnabled: Boolean,
     paymentMethodLabel: String,
-    @DrawableRes paymentMethodIcon: Int?,
+    paymentMethodIcon: Drawable?,
     onClick: () -> Unit,
 ) {
     Row(
@@ -231,7 +231,7 @@ fun PaymentMethodSelector(
         ) {
             paymentMethodIcon?.let {
                 Icon(
-                    painter = painterResource(id = paymentMethodIcon),
+                    painter = rememberDrawablePainter(paymentMethodIcon),
                     contentDescription = null, // decorative element
                     modifier = Modifier.padding(horizontal = 4.dp),
                     tint = Color.Unspecified

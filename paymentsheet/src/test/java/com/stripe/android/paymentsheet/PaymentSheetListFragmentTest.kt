@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.content.Context
 import android.os.Looper.getMainLooper
 import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
@@ -9,7 +8,6 @@ import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -18,13 +16,12 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.paymentsheet.model.FragmentConfig
-import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.Companion.addressRepository
+import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.Companion.lpmRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.ui.core.address.AddressRepository
-import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.After
 import org.junit.Before
@@ -60,10 +57,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         val paymentSelection = PaymentSelection.Saved(paymentMethod)
 
         val scenario = createScenario(
-            fragmentConfig = FRAGMENT_CONFIG.copy(
-                isGooglePayReady = true,
-                savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
-            ),
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
             fragment.initializePaymentOptions(paymentMethods = listOf(paymentMethod))
@@ -84,10 +77,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
         createScenario(
-            fragmentConfig = FRAGMENT_CONFIG.copy(
-                isGooglePayReady = true,
-                savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
-            ),
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
             fragment.initializePaymentOptions(paymentMethods = listOf(paymentMethod))
@@ -103,11 +92,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     fun `When last item is deleted then edit menu item is hidden`() {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
-        createScenario(
-            fragmentConfig = FRAGMENT_CONFIG.copy(
-                savedSelection = SavedSelection.PaymentMethod(paymentMethod.id.orEmpty())
-            )
-        ).onFragment { fragment ->
+        createScenario().onFragment { fragment ->
             fragment.isEditing = true
             fragment.adapter.items = fragment.adapter.items.dropLast(1)
             fragment.deletePaymentMethod(PaymentOptionsItem.SavedPaymentMethod(paymentMethod))
@@ -203,11 +188,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             idleLooper()
 
             assertThat(activityViewModel.transition.value?.peekContent())
-                .isEqualTo(
-                    PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                        FragmentConfigFixtures.DEFAULT
-                    )
-                )
+                .isEqualTo(BaseSheetViewModel.TransitionTarget.AddAnotherPaymentMethod)
         }
     }
 
@@ -219,25 +200,9 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     }
 
     @Test
-    fun `fragment created without FragmentConfig should emit fatal`() {
-        createScenario(
-            fragmentConfig = null,
-            initialState = Lifecycle.State.CREATED
-        ).onFragment { fragment ->
-            assertThat((fragment.sheetViewModel.paymentSheetResult.value as PaymentSheetResult.Failed).error.message)
-                .isEqualTo("Failed to start existing payment options fragment.")
-        }
-    }
-
-    @Test
     fun `total amount label correctly displays amount`() {
         createScenario().onFragment { fragment ->
             shadowOf(getMainLooper()).idle()
-            fragment.sheetViewModel.setStripeIntent(
-                PaymentIntentFixtures.PI_OFF_SESSION.copy(
-                    amount = 399
-                )
-            )
 
             assertThat(fragment.sheetViewModel.isProcessingPaymentIntent).isTrue()
         }
@@ -246,8 +211,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     @Test
     fun `total amount label is hidden for SetupIntent`() {
         createScenario(
-            FRAGMENT_CONFIG.copy(stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD),
-            PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
+            starterArgs = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         ).onFragment { fragment ->
             shadowOf(getMainLooper()).idle()
 
@@ -289,31 +253,25 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     }
 
     private fun createScenario(
-        fragmentConfig: FragmentConfig? = FRAGMENT_CONFIG,
         starterArgs: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
             injectorKey = injectorKey
         ),
         initialState: Lifecycle.State = Lifecycle.State.RESUMED,
-        paymentMethods: List<PaymentMethod> = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        paymentMethods: List<PaymentMethod> = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
     ): FragmentScenario<PaymentSheetListFragment> {
         assertThat(WeakMapInjectorRegistry.retrieve(injectorKey)).isNull()
-        fragmentConfig?.let {
-            createViewModel(
-                fragmentConfig.stripeIntent,
-                customerRepositoryPMs = paymentMethods,
-                injectorKey = starterArgs.injectorKey,
-                args = starterArgs
-            ).apply {
-                setStripeIntent(fragmentConfig.stripeIntent)
-                idleLooper()
-                registerViewModel(starterArgs.injectorKey, this, lpmRepository, addressRepository)
-            }
+        createViewModel(
+            stripeIntent = stripeIntent,
+            customerRepositoryPMs = paymentMethods,
+            injectorKey = starterArgs.injectorKey,
+            args = starterArgs
+        ).apply {
+            idleLooper()
+            registerViewModel(starterArgs.injectorKey, this, lpmRepository, addressRepository)
         }
         return launchFragmentInContainer(
-            bundleOf(
-                PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
-                PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs
-            ),
+            bundleOf(PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs),
             R.style.StripePaymentSheetDefaultTheme,
             initialState = initialState
         )
@@ -336,17 +294,5 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
-
-        private val FRAGMENT_CONFIG = FragmentConfigFixtures.DEFAULT
-
-        val addressRepository = AddressRepository(ApplicationProvider.getApplicationContext<Context>().resources)
-        val lpmRepository =
-            LpmRepository(
-                LpmRepository.LpmRepositoryArguments(
-                    InstrumentationRegistry.getInstrumentation().targetContext.resources
-                )
-            ).apply {
-                this.updateFromDisk()
-            }
     }
 }

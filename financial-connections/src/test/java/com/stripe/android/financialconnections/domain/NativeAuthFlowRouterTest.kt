@@ -33,7 +33,7 @@ internal class NativeAuthFlowRouterTest {
             ),
             features = mapOf()
         )
-        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse)
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest)
 
         assertThat(nativeAuthFlowEnabled).isTrue()
     }
@@ -48,7 +48,7 @@ internal class NativeAuthFlowRouterTest {
                 "bank_connections_mobile_native_version_killswitch" to true
             )
         )
-        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse)
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest)
 
         assertThat(nativeAuthFlowEnabled).isFalse()
     }
@@ -63,7 +63,7 @@ internal class NativeAuthFlowRouterTest {
                 "bank_connections_mobile_native_version_killswitch" to false
             )
         )
-        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse)
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest)
 
         assertThat(nativeAuthFlowEnabled).isFalse()
     }
@@ -78,7 +78,7 @@ internal class NativeAuthFlowRouterTest {
                 "bank_connections_mobile_native_version_killswitch" to false
             )
         )
-        router.logExposure(syncResponse)
+        router.logExposure(syncResponse.manifest)
 
         verify(eventTracker).track(
             FinancialConnectionsEvent.Exposure(
@@ -99,7 +99,7 @@ internal class NativeAuthFlowRouterTest {
                 "bank_connections_mobile_native_version_killswitch" to true
             )
         )
-        router.logExposure(syncResponse)
+        router.logExposure(syncResponse.manifest)
 
         verifyNoInteractions(eventTracker)
     }

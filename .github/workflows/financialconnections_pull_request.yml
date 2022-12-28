@@ -1,4 +1,4 @@
-name: financial-connections-example size diff
+name: financial-connections-pr
 on:
   pull_request:
     paths:

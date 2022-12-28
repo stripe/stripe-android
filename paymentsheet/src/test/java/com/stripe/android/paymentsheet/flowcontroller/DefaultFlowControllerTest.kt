@@ -52,6 +52,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
@@ -671,7 +672,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), any(), eq(null))
+        verify(linkPaymentLauncher).present(any(), isNull())
     }
 
     @Test
@@ -704,7 +705,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), any(), eq(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
+        verify(linkPaymentLauncher).present(any(), eq(PaymentMethodCreateParamsFixtures.DEFAULT_CARD))
     }
 
     @Test
@@ -1029,7 +1030,7 @@ internal class DefaultFlowControllerTest {
         testScope,
         lifeCycleOwner,
         { activity.window.statusBarColor },
-        PaymentOptionFactory(activity.resources),
+        PaymentOptionFactory(activity.resources, StripeImageLoader(activity)),
         paymentOptionCallback,
         paymentResultCallback,
         activityResultCaller,
@@ -1071,7 +1072,9 @@ internal class DefaultFlowControllerTest {
             iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
             labelResource = "Bancontact",
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
-            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
         )
         private val VISA_PAYMENT_OPTION = PaymentOption(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,

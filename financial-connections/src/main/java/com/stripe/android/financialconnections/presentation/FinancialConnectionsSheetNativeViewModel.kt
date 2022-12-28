@@ -86,6 +86,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         viewModelScope.launch {
             val receivedUrl: String = intent?.data?.toString() ?: ""
             when {
+                receivedUrl.contains("authentication_return", true) -> {
+                    setState {
+                        copy(webAuthFlow = Success(receivedUrl))
+                    }
+                }
                 uriUtils.compareSchemeAuthorityAndPath(
                     receivedUrl,
                     baseUrl(applicationId)
@@ -306,6 +311,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val firstInit: Boolean,
     val configuration: FinancialConnectionsSheet.Configuration,
     val showCloseDialog: Boolean,
+    val reducedBranding: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
     val initialPane: Pane
 ) : MavericksState {
@@ -316,6 +322,7 @@ internal data class FinancialConnectionsSheetNativeState(
     @Suppress("Unused")
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = Uninitialized,
+        reducedBranding = args.initialSyncResponse.visual?.reducedBranding ?: false,
         firstInit = true,
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,

@@ -117,6 +117,7 @@ internal fun NavController.navigateToErrorScreenWithFailedReason(
 internal fun NavController.navigateToErrorScreenWithFailedReason(
     context: Context
 ) {
+    identityViewModel.errorCause.postValue(failedReason)
     navigateTo(
         ErrorDestination(
             errorTitle = context.getString(R.string.error),

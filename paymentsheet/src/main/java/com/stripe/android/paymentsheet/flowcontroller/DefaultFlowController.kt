@@ -20,7 +20,6 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
@@ -109,8 +108,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val googlePayActivityLauncher:
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContract.Args>
-    private val linkActivityResultLauncher:
-        ActivityResultLauncher<LinkActivityContract.Args>
 
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
@@ -160,11 +157,17 @@ internal class DefaultFlowController @Inject internal constructor(
                     ).also {
                         it.registerPollingAuthenticator()
                     }
+
+                    linkLauncher.register(
+                        activityResultCaller = activityResultCaller,
+                        callback = ::onLinkActivityResult,
+                    )
                 }
 
                 override fun onDestroy(owner: LifecycleOwner) {
                     paymentLauncher?.unregisterPollingAuthenticator()
                     paymentLauncher = null
+                    linkLauncher.unregister()
                 }
             }
         )
@@ -178,11 +181,6 @@ internal class DefaultFlowController @Inject internal constructor(
             activityResultCaller.registerForActivityResult(
                 GooglePayPaymentMethodLauncherContract(),
                 ::onGooglePayResult
-            )
-        linkActivityResultLauncher =
-            activityResultCaller.registerForActivityResult(
-                LinkActivityContract(),
-                ::onLinkActivityResult
             )
     }
 
@@ -467,12 +465,11 @@ internal class DefaultFlowController @Inject internal constructor(
                 // If a returning user is paying with a new card inline, launch Link
                 linkLauncher.present(
                     configuration = linkConfig,
-                    activityResultLauncher = linkActivityResultLauncher,
                     prefilledNewCardParams = linkInline.linkPaymentDetails.originalParams,
                 )
             } else if (paymentSelection is PaymentSelection.Link) {
                 // User selected Link as the payment method, not inline
-                linkLauncher.present(linkConfig, linkActivityResultLauncher)
+                linkLauncher.present(linkConfig)
             } else {
                 // New user paying inline, complete without launching Link
                 confirmPaymentSelection(paymentSelection, state)
@@ -535,11 +532,9 @@ internal class DefaultFlowController @Inject internal constructor(
         fun getInstance(
             appContext: Context,
             viewModelStoreOwner: ViewModelStoreOwner,
-            lifecycleScope: CoroutineScope,
             lifecycleOwner: LifecycleOwner,
             activityResultCaller: ActivityResultCaller,
             statusBarColor: () -> Int?,
-            paymentOptionFactory: PaymentOptionFactory,
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback
         ): PaymentSheet.FlowController {
@@ -550,11 +545,9 @@ internal class DefaultFlowController @Inject internal constructor(
             val flowControllerComponent = DaggerFlowControllerComponent.builder()
                 .appContext(appContext)
                 .viewModelStoreOwner(viewModelStoreOwner)
-                .lifecycleScope(lifecycleScope)
                 .lifeCycleOwner(lifecycleOwner)
                 .activityResultCaller(activityResultCaller)
                 .statusBarColor(statusBarColor)
-                .paymentOptionFactory(paymentOptionFactory)
                 .paymentOptionCallback(paymentOptionCallback)
                 .paymentResultCallback(paymentResultCallback)
                 .injectorKey(injectorKey)

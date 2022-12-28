@@ -24,12 +24,17 @@ class FinancialConnectionsPlaygroundViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
-    private val repository = BackendRepository(Settings(application))
+    private val settings = Settings(application)
+    private val repository = BackendRepository(settings)
     private val _state = MutableStateFlow(FinancialConnectionsPlaygroundState())
     val state: StateFlow<FinancialConnectionsPlaygroundState> = _state
 
     private val _viewEffect = MutableSharedFlow<FinancialConnectionsPlaygroundViewEffect?>()
     val viewEffect: SharedFlow<FinancialConnectionsPlaygroundViewEffect?> = _viewEffect
+
+    init {
+        _state.update { it.copy(backendUrl = settings.backendUrl) }
+    }
 
     fun startFinancialConnectionsSession(
         mode: Mode,
@@ -39,15 +44,15 @@ class FinancialConnectionsPlaygroundViewModel(
         when (flow) {
             Flow.Data -> startForData(mode)
             Flow.Token -> startForToken(mode)
-            Flow.PaymentIntent -> startWithPaymentIntent()
+            Flow.PaymentIntent -> startWithPaymentIntent(mode)
         }
     }
 
 
-    private fun startWithPaymentIntent() {
+    private fun startWithPaymentIntent(mode: Mode) {
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
-            kotlin.runCatching { repository.createPaymentIntent("US") }
+            kotlin.runCatching { repository.createPaymentIntent("US", mode.flow) }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
                     _state.update { current ->
@@ -190,7 +195,7 @@ class FinancialConnectionsPlaygroundViewModel(
 }
 
 enum class Mode(val flow: String) {
-    Test("testmode"), Live("mx")
+    Test("testmode"), Live("mx"), App2App("app2app")
 }
 
 enum class Flow {
@@ -217,6 +222,7 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
 }
 
 data class FinancialConnectionsPlaygroundState(
+    val backendUrl: String = "",
     val loading: Boolean = false,
     val publishableKey: String? = null,
     val status: List<String> = emptyList()
