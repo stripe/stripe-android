@@ -136,7 +136,6 @@ internal class ErrorDestination(
     errorTitle: String,
     errorContent: String,
     backButtonText: String,
-    cause: Throwable, // TODO(ccen) Remove this param after moving to Jetpack compose
     backButtonDestination: Int = UNEXPECTED_DESTINATION,
     shouldFail: Boolean = false
 ) : IdentityTopLevelDestination() {
@@ -147,8 +146,7 @@ internal class ErrorDestination(
         ARG_ERROR_CONTENT to errorContent,
         ARG_GO_BACK_BUTTON_DESTINATION to backButtonDestination,
         ARG_GO_BACK_BUTTON_TEXT to backButtonText,
-        ARG_SHOULD_FAIL to shouldFail,
-        ARG_CAUSE to cause
+        ARG_SHOULD_FAIL to shouldFail
     )
 
     override val argsBundle = bundleOf(
@@ -156,8 +154,7 @@ internal class ErrorDestination(
         ARG_ERROR_CONTENT to errorContent,
         ARG_GO_BACK_BUTTON_DESTINATION to backButtonDestination,
         ARG_GO_BACK_BUTTON_TEXT to backButtonText,
-        ARG_SHOULD_FAIL to shouldFail,
-        ARG_CAUSE to cause
+        ARG_SHOULD_FAIL to shouldFail
     )
 
     internal companion object {
@@ -171,7 +168,6 @@ internal class ErrorDestination(
 
         // if set to true, clicking bottom button and pressBack would end flow with Failed
         const val ARG_SHOULD_FAIL = "shouldFail"
-        const val ARG_CAUSE = "cause"
 
         // Indicates the server returns a requirementError that doesn't match with current Fragment.
         //  E.g ConsentFragment->DocSelectFragment could only have BIOMETRICCONSENT error but not IDDOCUMENTFRONT error.

@@ -83,7 +83,7 @@ internal class ConsentFragment(
             TAG,
             "Failed to get verificationPage: $throwable"
         )
-        navigateToErrorFragmentWithFailedReason(throwable)
+        navigateToErrorFragmentWithFailedReason(throwable, identityViewModel)
     }
 
     private fun agreeConsentAndPost() {

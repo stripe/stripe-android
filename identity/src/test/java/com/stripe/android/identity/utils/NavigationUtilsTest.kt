@@ -199,6 +199,7 @@ internal class NavigationUtilsTest {
             )
 
             whenever(it.screenTracker).thenReturn(mockScreenTracker)
+            whenever(it.errorCause).thenReturn(mock())
         }
 
         launchFragment { navController, fragment ->
@@ -236,6 +237,7 @@ internal class NavigationUtilsTest {
                     APIException()
                 )
                 whenever(it.screenTracker).thenReturn(mockScreenTracker)
+                whenever(it.errorCause).thenReturn(mock())
             }
 
             launchFragment { navController, fragment ->
@@ -313,6 +315,7 @@ internal class NavigationUtilsTest {
                     ERROR_VERIFICATION_PAGE_DATA_BIOMETRICCONSENT
                 )
                 whenever(it.screenTracker).thenReturn(mockScreenTracker)
+                whenever(it.errorCause).thenReturn(mock())
             }
 
             launchFragment { navController, fragment ->
@@ -377,6 +380,7 @@ internal class NavigationUtilsTest {
                     CORRECT_WITH_SUBMITTED_FAILURE_VERIFICATION_PAGE_DATA
                 )
                 whenever(it.screenTracker).thenReturn(mockScreenTracker)
+                whenever(it.errorCause).thenReturn(mock())
             }
 
             launchFragment { navController, fragment ->
@@ -404,6 +408,7 @@ internal class NavigationUtilsTest {
                     APIException()
                 )
                 whenever(it.screenTracker).thenReturn(mockScreenTracker)
+                whenever(it.errorCause).thenReturn(mock())
             }
 
             launchFragment { navController, fragment ->

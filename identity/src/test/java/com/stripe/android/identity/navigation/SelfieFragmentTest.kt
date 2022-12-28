@@ -113,6 +113,7 @@ internal class SelfieFragmentTest {
         on { uiContext } doReturn testDispatcher
         on { workContext } doReturn testDispatcher
         on { verificationPage } doReturn verificationPageLiveData
+        on { errorCause } doReturn mock()
     }
 
     @Before

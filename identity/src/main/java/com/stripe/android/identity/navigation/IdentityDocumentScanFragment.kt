@@ -246,7 +246,7 @@ internal abstract class IdentityDocumentScanFragment(
             identityViewModel.documentBackUploadedState
         }.collectLatest { uploadedState ->
             if (uploadedState.hasError()) {
-                navigateToDefaultErrorFragment(uploadedState.getError())
+                navigateToDefaultErrorFragment(uploadedState.getError(), identityViewModel)
             } else if (uploadedState.isUploaded()) {
                 identityViewModel.observeForVerificationPage(
                     viewLifecycleOwner,
@@ -291,13 +291,13 @@ internal abstract class IdentityDocumentScanFragment(
                                     TAG,
                                     "fail to submit uploaded files: $throwable"
                                 )
-                                navigateToDefaultErrorFragment(throwable)
+                                navigateToDefaultErrorFragment(throwable, identityViewModel)
                             }
                         }
                     },
                     onFailure = { throwable ->
                         Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
-                        navigateToDefaultErrorFragment(throwable)
+                        navigateToDefaultErrorFragment(throwable, identityViewModel)
                     }
                 )
             }

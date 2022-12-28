@@ -73,7 +73,7 @@ internal class SelfieFragment(
                 },
                 newDisplayState = newDisplayState,
                 verificationPageState = verificationPage,
-                onError = ::navigateToDefaultErrorFragment,
+                onError = { navigateToDefaultErrorFragment(it, identityViewModel) },
                 onCameraViewCreated = {
                     if (cameraView == null) {
                         cameraView = it
@@ -142,7 +142,7 @@ internal class SelfieFragment(
                     it.hasError() -> {
                         "Fail to upload files: ${it.getError()}".let { msg ->
                             Log.e(TAG, msg)
-                            navigateToDefaultErrorFragment(msg)
+                            navigateToDefaultErrorFragment(msg, identityViewModel)
                         }
                     }
                     it.isAllUploaded() -> {
@@ -176,7 +176,7 @@ internal class SelfieFragment(
                                 TAG,
                                 "fail to submit uploaded files: $throwable"
                             )
-                            navigateToDefaultErrorFragment(throwable)
+                            navigateToDefaultErrorFragment(throwable, identityViewModel)
                         }
                     }
                     else -> {
@@ -185,7 +185,7 @@ internal class SelfieFragment(
                                 "reaches unexpected upload state: $it"
                             ).let { msg ->
                             Log.e(TAG, msg)
-                            navigateToDefaultErrorFragment(msg)
+                            navigateToDefaultErrorFragment(msg, identityViewModel)
                         }
                     }
                 }

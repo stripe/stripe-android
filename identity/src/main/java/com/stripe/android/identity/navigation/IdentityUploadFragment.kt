@@ -211,7 +211,7 @@ internal abstract class IdentityUploadFragment(
                     },
                     onFailure = { throwable ->
                         Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
-                        navigateToDefaultErrorFragment(throwable)
+                        navigateToDefaultErrorFragment(throwable, identityViewModel)
                     }
                 )
             }
@@ -232,7 +232,10 @@ internal abstract class IdentityUploadFragment(
             identityViewModel.frontCollectedInfo.collectLatest { (frontUploadState, collectedData) ->
                 if (collectedData.idDocumentFront == null) {
                     if (frontUploadState.hasError()) {
-                        navigateToDefaultErrorFragment(frontUploadState.getError())
+                        navigateToDefaultErrorFragment(
+                            frontUploadState.getError(),
+                            identityViewModel
+                        )
                     } else if (frontUploadState.isHighResUploaded()) {
                         val front = requireNotNull(frontUploadState.highResResult.data)
                         postCollectedDataParamAndNavigate(
@@ -254,7 +257,10 @@ internal abstract class IdentityUploadFragment(
             identityViewModel.backCollectedInfo.collectLatest { (backUploadedState, collectedData) ->
                 if (collectedData.idDocumentBack == null) {
                     if (backUploadedState.hasError()) {
-                        navigateToDefaultErrorFragment(backUploadedState.getError())
+                        navigateToDefaultErrorFragment(
+                            backUploadedState.getError(),
+                            identityViewModel
+                        )
                     } else if (backUploadedState.isHighResUploaded()) {
                         val back = requireNotNull(backUploadedState.highResResult.data)
                         postCollectedDataParamAndNavigate(
@@ -289,13 +295,13 @@ internal abstract class IdentityUploadFragment(
                     )
                 }.onFailure {
                     Log.e(TAG, "Fail to observeForVerificationPage: $it")
-                    navigateToDefaultErrorFragment(it)
+                    navigateToDefaultErrorFragment(it, identityViewModel)
                 }
             }
         },
         onFailure = { throwable ->
             Log.e(TAG, "Fail to observeForVerificationPage: $throwable")
-            navigateToDefaultErrorFragment(throwable)
+            navigateToDefaultErrorFragment(throwable, identityViewModel)
         }
     )
 
@@ -308,7 +314,7 @@ internal abstract class IdentityUploadFragment(
                 onSuccess(it.documentCapture)
             },
             onFailure = {
-                navigateToDefaultErrorFragment(it)
+                navigateToDefaultErrorFragment(it, identityViewModel)
             }
         )
     }

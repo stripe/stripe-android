@@ -109,7 +109,8 @@ internal suspend fun Fragment.submitVerificationPageDataAndNavigate(
                 submittedVerificationPageData.hasError() -> {
                     navigateToRequirementErrorFragment(
                         fromFragment,
-                        submittedVerificationPageData.requirements.errors[0]
+                        submittedVerificationPageData.requirements.errors[0],
+                        identityViewModel
                     )
                 }
                 submittedVerificationPageData.submitted -> {
@@ -118,14 +119,14 @@ internal suspend fun Fragment.submitVerificationPageDataAndNavigate(
                 else -> {
                     "VerificationPage submit failed".let { msg ->
                         Log.e(TAG, msg)
-                        navigateToDefaultErrorFragment(msg)
+                        navigateToDefaultErrorFragment(msg, identityViewModel)
                     }
                 }
             }
         },
         onFailure = {
             Log.e(TAG, "Failed to postVerificationPageSubmit: $it")
-            navigateToDefaultErrorFragment(it)
+            navigateToDefaultErrorFragment(it, identityViewModel)
         }
     )
 }
@@ -150,7 +151,8 @@ internal suspend fun Fragment.postVerificationPageData(
             if (postedVerificationPageData.hasError()) {
                 navigateToRequirementErrorFragment(
                     fromFragment,
-                    postedVerificationPageData.requirements.errors[0]
+                    postedVerificationPageData.requirements.errors[0],
+                    identityViewModel
                 )
             } else {
                 onCorrectResponse(postedVerificationPageData)
@@ -158,7 +160,7 @@ internal suspend fun Fragment.postVerificationPageData(
         },
         onFailure = {
             Log.e(TAG, "Failed to postVerificationPageData: $it")
-            navigateToDefaultErrorFragment(it)
+            navigateToDefaultErrorFragment(it, identityViewModel)
         }
     )
 }
@@ -168,13 +170,15 @@ internal suspend fun Fragment.postVerificationPageData(
  */
 private fun Fragment.navigateToRequirementErrorFragment(
     @IdRes fromFragment: Int,
-    requirementError: VerificationPageDataRequirementError
+    requirementError: VerificationPageDataRequirementError,
+    identityViewModel: IdentityViewModel
 ) {
     repeatOnResume {
         findNavController()
             .navigateToErrorScreenWithRequirementError(
                 fromFragment,
-                requirementError
+                requirementError,
+                identityViewModel
             )
     }
 }
@@ -182,20 +186,31 @@ private fun Fragment.navigateToRequirementErrorFragment(
 /**
  * Navigate to [ErrorFragment] with default values and a cause.
  */
-internal fun Fragment.navigateToDefaultErrorFragment(cause: Throwable) {
+internal fun Fragment.navigateToDefaultErrorFragment(
+    cause: Throwable,
+    identityViewModel: IdentityViewModel
+) {
     repeatOnResume {
-        findNavController().navigateToErrorScreenWithDefaultValues(requireContext(), cause)
+        findNavController().navigateToErrorScreenWithDefaultValues(
+            requireContext(),
+            cause,
+            identityViewModel
+        )
     }
 }
 
 /**
  * Navigate to [ErrorFragment] with default values and a message.
  */
-internal fun Fragment.navigateToDefaultErrorFragment(message: String) {
+internal fun Fragment.navigateToDefaultErrorFragment(
+    message: String,
+    identityViewModel: IdentityViewModel
+) {
     repeatOnResume {
         findNavController().navigateToErrorScreenWithDefaultValues(
             requireContext(),
-            IllegalStateException(message)
+            IllegalStateException(message),
+            identityViewModel
         )
     }
 }
@@ -203,9 +218,16 @@ internal fun Fragment.navigateToDefaultErrorFragment(message: String) {
 /**
  * Navigate to [ErrorFragment] as final destination.
  */
-internal fun Fragment.navigateToErrorFragmentWithFailedReason(failedReason: Throwable) {
+internal fun Fragment.navigateToErrorFragmentWithFailedReason(
+    failedReason: Throwable,
+    identityViewModel: IdentityViewModel
+) {
     repeatOnResume {
-        findNavController().navigateToErrorScreenWithFailedReason(requireContext(), failedReason)
+        findNavController().navigateToErrorScreenWithFailedReason(
+            requireContext(),
+            failedReason,
+            identityViewModel
+        )
     }
 }
 
