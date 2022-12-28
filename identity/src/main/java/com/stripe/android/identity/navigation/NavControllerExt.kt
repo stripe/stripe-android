@@ -114,20 +114,6 @@ internal fun NavController.navigateToErrorScreenWithFailedReason(
     )
 }
 
-internal fun NavController.navigateToErrorScreenWithFailedReason(
-    context: Context
-) {
-    identityViewModel.errorCause.postValue(failedReason)
-    navigateTo(
-        ErrorDestination(
-            errorTitle = context.getString(R.string.error),
-            errorContent = context.getString(R.string.unexpected_error_try_again),
-            backButtonText = context.getString(R.string.go_back),
-            shouldFail = true
-        )
-    )
-}
-
 /**
  * ID of all screens that collect front/back of a document.
  */
