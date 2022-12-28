@@ -12,8 +12,6 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.model.FragmentConfig
-import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -83,7 +81,6 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
             enableLogging = false,
             productUsage = mock()
         ),
-        fragmentConfig: FragmentConfig? = FragmentConfigFixtures.DEFAULT,
         registerInjector: Boolean = true,
         onReady: (
             PaymentOptionsAddPaymentMethodFragment,
@@ -96,17 +93,13 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
             injectorKey = args.injectorKey,
             args = args
         )
-        viewModel.setStripeIntent(args.state.stripeIntent)
         TestUtils.idleLooper()
 
         if (registerInjector) {
             registerViewModel(args.injectorKey, viewModel, lpmRepository)
         }
         return launchFragmentInContainer<PaymentOptionsAddPaymentMethodFragment>(
-            bundleOf(
-                PaymentOptionsActivity.EXTRA_FRAGMENT_CONFIG to fragmentConfig,
-                PaymentOptionsActivity.EXTRA_STARTER_ARGS to args
-            ),
+            bundleOf(PaymentOptionsActivity.EXTRA_STARTER_ARGS to args),
             R.style.StripePaymentSheetDefaultTheme
         ).onFragment { fragment ->
             fragment.sheetViewModel.lpmResourceRepository.getRepository().updateFromDisk()

@@ -7,6 +7,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
@@ -41,7 +42,6 @@ import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
-import com.stripe.android.paymentsheet.model.FragmentConfigFixtures
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
@@ -51,6 +51,7 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -64,6 +65,7 @@ import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.getOrAwaitValue
 import com.stripe.android.utils.TestUtils.idleLooper
+import com.stripe.android.utils.TestUtils.observeEventsForever
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityScenarioFactory
@@ -257,11 +259,7 @@ internal class PaymentSheetActivityTest {
             )
             viewModel.updateSelection(initialSelection)
 
-            viewModel.transitionTo(
-                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                    FragmentConfigFixtures.DEFAULT
-                )
-            )
+            viewModel.transitionToAddPaymentScreen()
 
             assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
 
@@ -289,11 +287,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
-            viewModel.transitionTo(
-                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                    FragmentConfigFixtures.DEFAULT
-                )
-            )
+            viewModel.transitionToAddPaymentScreen()
             idleLooper()
             assertThat(currentFragment(activity))
                 .isInstanceOf(PaymentSheetAddPaymentMethodFragment::class.java)
@@ -334,11 +328,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.toolbar.navigationContentDescription)
                 .isEqualTo(context.getString(R.string.stripe_paymentsheet_close))
 
-            viewModel.transitionTo(
-                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                    FragmentConfigFixtures.DEFAULT
-                )
-            )
+            viewModel.transitionToAddPaymentScreen()
             idleLooper()
 
             assertThat(activity.toolbar.navigationContentDescription)
@@ -464,9 +454,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
-
-            viewModel._processing.value = true
-
+            viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
             idleLooper()
 
             assertThat(activity.toolbar.isEnabled).isFalse()
@@ -572,10 +560,10 @@ internal class PaymentSheetActivityTest {
 
             activity.viewBinding.googlePayButton.performClick()
 
-            assertThat(viewModel._contentVisible.value).isEqualTo(false)
+            assertThat(viewModel.contentVisible.value).isEqualTo(false)
 
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
-            assertThat(viewModel._contentVisible.value).isEqualTo(true)
+            assertThat(viewModel.contentVisible.value).isEqualTo(true)
         }
     }
 
@@ -587,7 +575,7 @@ internal class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             idleLooper()
 
-            viewModel._paymentSheetResult.value = PaymentSheetResult.Completed
+            viewModel.onFinish()
 
             idleLooper()
 
@@ -721,16 +709,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.bottomSheetBehavior.state)
                 .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
 
-            viewModel.transitionTo(
-                PaymentSheetViewModel.TransitionTarget.SelectSavedPaymentMethod(
-                    FragmentConfigFixtures.DEFAULT
-                )
-            )
-            viewModel.transitionTo(
-                PaymentSheetViewModel.TransitionTarget.AddPaymentMethodFull(
-                    FragmentConfigFixtures.DEFAULT
-                )
-            )
+            viewModel.transitionToAddPaymentScreen()
 
             idleLooper()
 
@@ -877,24 +856,24 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `when intent is in live mode show no indicator`() {
+        val viewModel = createViewModel(paymentIntent = PAYMENT_INTENT.copy(isLiveMode = true))
         val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
-
-            viewModel._liveMode.value = true
             assertThat(activity.viewBinding.testmode.isVisible).isFalse()
         }
     }
 
     @Test
     fun `when intent is not in live mode show indicator`() {
+        val viewModel = createViewModel(paymentIntent = PAYMENT_INTENT.copy(isLiveMode = false))
         val scenario = activityScenario(viewModel)
+
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
-
-            viewModel._liveMode.value = false
             assertThat(activity.viewBinding.testmode.isVisible).isTrue()
         }
     }
@@ -1022,6 +1001,121 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `Handles missing arguments correctly`() {
+        val scenario = ActivityScenario.launchActivityForResult(PaymentSheetActivity::class.java)
+
+        val result = contract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        )
+
+        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+    }
+
+    @Test
+    fun `Handles invalid arguments correctly`() {
+        val invalidCustomerConfig = PaymentSheet.CustomerConfiguration(
+            id = "",
+            ephemeralKeySecret = "",
+        )
+
+        val args = PaymentSheetContract.Args(
+            clientSecret = PaymentIntentClientSecret("abc"),
+            config = PaymentSheet.Configuration(
+                merchantDisplayName = "Some name",
+                customer = invalidCustomerConfig,
+            ),
+        )
+
+        val intent = contract.createIntent(context, args)
+
+        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
+
+        val result = contract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        )
+
+        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+    }
+
+    @Test
+    fun `Handles invalid client secret correctly`() {
+        val args = PaymentSheetContract.Args(
+            clientSecret = PaymentIntentClientSecret(""),
+            config = null,
+        )
+
+        val intent = contract.createIntent(context, args)
+
+        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
+
+        val result = contract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        )
+
+        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+    }
+
+    @Test
+    fun `Verify if customer has payment methods, display the saved payment methods screen`() {
+        val viewModel = createViewModel(paymentMethods = PAYMENT_METHODS)
+
+        val transitionTargets = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
+
+        activityScenario(viewModel).launch(intent).use {
+            it.onActivity {
+                idleLooper()
+            }
+        }
+
+        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+    }
+
+    @Test
+    fun `Verify if there are no payment methods, display the add payment method screen`() {
+        val viewModel = createViewModel(paymentMethods = emptyList())
+
+        val transitionTargets = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
+
+        activityScenario(viewModel).launch(intent).use {
+            it.onActivity {
+                idleLooper()
+            }
+        }
+
+        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+    }
+
+    @Test
+    fun `Verify doesn't transition to first screen again on activity recreation`() {
+        val viewModel = createViewModel(paymentMethods = emptyList())
+
+        val transitionTargets = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
+
+        activityScenario(viewModel).launch(intent).use {
+            it.onActivity {
+                idleLooper()
+            }
+
+            it.recreate()
+
+            it.onActivity {
+                idleLooper()
+            }
+        }
+
+        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
@@ -1099,6 +1193,8 @@ internal class PaymentSheetActivityTest {
                     false,
                     com.stripe.android.ui.core.R.string.stripe_paymentsheet_payment_method_card,
                     com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card,
+                    null,
+                    null,
                     true,
                     PaymentMethodRequirements(emptySet(), emptySet(), true),
                     LayoutSpec.create(

@@ -950,16 +950,20 @@ public final class com/stripe/android/Stripe {
 	public final fun onSetupResult (ILandroid/content/Intent;Lcom/stripe/android/ApiResultCallback;)Z
 	public final fun retrievePaymentIntent (Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun retrievePaymentIntent (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
-	public static synthetic fun retrievePaymentIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
+	public final fun retrievePaymentIntent (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lcom/stripe/android/ApiResultCallback;)V
+	public static synthetic fun retrievePaymentIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
 	public final fun retrievePaymentIntentSynchronous (Ljava/lang/String;)Lcom/stripe/android/model/PaymentIntent;
 	public final fun retrievePaymentIntentSynchronous (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/PaymentIntent;
-	public static synthetic fun retrievePaymentIntentSynchronous$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentIntent;
+	public final fun retrievePaymentIntentSynchronous (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lcom/stripe/android/model/PaymentIntent;
+	public static synthetic fun retrievePaymentIntentSynchronous$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentIntent;
 	public final fun retrieveSetupIntent (Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun retrieveSetupIntent (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
-	public static synthetic fun retrieveSetupIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
+	public final fun retrieveSetupIntent (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lcom/stripe/android/ApiResultCallback;)V
+	public static synthetic fun retrieveSetupIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
 	public final fun retrieveSetupIntentSynchronous (Ljava/lang/String;)Lcom/stripe/android/model/SetupIntent;
 	public final fun retrieveSetupIntentSynchronous (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SetupIntent;
-	public static synthetic fun retrieveSetupIntentSynchronous$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/SetupIntent;
+	public final fun retrieveSetupIntentSynchronous (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lcom/stripe/android/model/SetupIntent;
+	public static synthetic fun retrieveSetupIntentSynchronous$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lcom/stripe/android/model/SetupIntent;
 	public final fun retrieveSource (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public final fun retrieveSource (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;)V
 	public static synthetic fun retrieveSource$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/ApiResultCallback;ILjava/lang/Object;)V
@@ -1017,8 +1021,8 @@ public final class com/stripe/android/StripeKtxKt {
 	public static synthetic fun confirmAlipayPayment$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/AlipayAuthenticator;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun confirmPaymentIntent (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun confirmPaymentIntent$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun confirmSetupIntent (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun confirmSetupIntent$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun confirmSetupIntent (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun confirmSetupIntent$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmSetupIntentParams;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun confirmWeChatPayPayment (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun confirmWeChatPayPayment$default (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun createAccountToken (Lcom/stripe/android/Stripe;Lcom/stripe/android/model/AccountParams;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -1043,10 +1047,10 @@ public final class com/stripe/android/StripeKtxKt {
 	public static final fun getAuthenticateSourceResult (Lcom/stripe/android/Stripe;ILandroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun getPaymentIntentResult (Lcom/stripe/android/Stripe;ILandroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static final fun getSetupIntentResult (Lcom/stripe/android/Stripe;ILandroid/content/Intent;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static final fun retrievePaymentIntent (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun retrievePaymentIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static final fun retrieveSetupIntent (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public static synthetic fun retrieveSetupIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun retrievePaymentIntent (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun retrievePaymentIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static final fun retrieveSetupIntent (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun retrieveSetupIntent$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun retrieveSource (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun retrieveSource$default (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static final fun verifyPaymentIntentWithMicrodeposits (Lcom/stripe/android/Stripe;Ljava/lang/String;IILkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -3787,10 +3791,12 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field Ideal Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Klarna Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Link Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field MobilePay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Netbanking Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Oxxo Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field P24 Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field PayPal Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field RevolutPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field SepaDebit Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Sofort Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field USBankAccount Lcom/stripe/android/model/PaymentMethod$Type;

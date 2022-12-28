@@ -50,7 +50,7 @@ import com.stripe.android.view.KeyboardController
 import kotlin.math.roundToInt
 
 internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
-    abstract val viewModel: BaseSheetViewModel<*>
+    abstract val viewModel: BaseSheetViewModel
 
     @VisibleForTesting
     internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
@@ -81,6 +81,8 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val primaryButton: PrimaryButton
     abstract val bottomSpacer: View
 
+    protected var earlyExitDueToIllegalState: Boolean = false
+
     abstract fun setActivityResult(result: ResultType)
 
     private val keyboardController: KeyboardController by lazy {
@@ -89,6 +91,10 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (earlyExitDueToIllegalState) {
+            return
+        }
 
         if (Build.VERSION.SDK_INT != Build.VERSION_CODES.O) {
             // In Oreo, Activities where `android:windowIsTranslucent=true` can't request

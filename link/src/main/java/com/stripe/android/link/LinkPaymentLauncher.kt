@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.content.Context
 import android.os.Parcelable
+import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -88,18 +89,34 @@ class LinkPaymentLauncher @Inject internal constructor(
     fun getAccountStatusFlow(configuration: Configuration) =
         getLinkPaymentLauncherComponent(configuration).linkAccountManager.accountStatus
 
+    private var linkActivityResultLauncher:
+        ActivityResultLauncher<LinkActivityContract.Args>? = null
+
+    fun register(
+        activityResultCaller: ActivityResultCaller,
+        callback: (LinkActivityResult) -> Unit,
+    ) {
+        linkActivityResultLauncher = activityResultCaller.registerForActivityResult(
+            LinkActivityContract(),
+            callback,
+        )
+    }
+
+    fun unregister() {
+        linkActivityResultLauncher?.unregister()
+        linkActivityResultLauncher = null
+    }
+
     /**
      * Launch the Link UI to process a payment.
      *
      * @param configuration The payment and customer settings
-     * @param activityResultLauncher Launcher that will receive the payment result.
      * @param prefilledNewCardParams The card information prefilled by the user. If non null, Link
      *  will launch into adding a new card, with the card information pre-filled.
      */
     fun present(
         configuration: Configuration,
-        activityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>,
-        prefilledNewCardParams: PaymentMethodCreateParams? = null
+        prefilledNewCardParams: PaymentMethodCreateParams? = null,
     ) {
         val args = LinkActivityContract.Args(
             configuration,
@@ -113,7 +130,7 @@ class LinkPaymentLauncher @Inject internal constructor(
             )
         )
         buildLinkComponent(getLinkPaymentLauncherComponent(configuration), args)
-        activityResultLauncher.launch(args)
+        linkActivityResultLauncher?.launch(args)
     }
 
     /**

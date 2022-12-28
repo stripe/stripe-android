@@ -17,12 +17,14 @@ import com.stripe.android.uicore.image.StripeImageLoader
  */
 @Composable
 internal fun FinancialConnectionsPreview(
+    reducedBrandingOverride: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val navController = rememberNavController()
     FinancialConnectionsTheme {
         CompositionLocalProvider(
             LocalNavHostController provides navController,
+            LocalReducedBranding provides reducedBrandingOverride,
             LocalImageLoader provides StripeImageLoader(
                 context = LocalContext.current,
                 logger = Logger.noop(),

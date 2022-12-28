@@ -23,8 +23,8 @@ import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.observeEvents
 import com.stripe.android.utils.AnimationConstants
-import java.security.InvalidParameterException
 
 /**
  * An `Activity` for selecting a payment option.
@@ -65,20 +65,13 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     override val bottomSpacer: View by lazy { viewBinding.bottomSpacer }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val starterArgs = this.starterArgs
+        val starterArgs = initializeStarterArgs()
+        super.onCreate(savedInstanceState)
+
         if (starterArgs == null) {
             finish()
             return
         }
-        try {
-            starterArgs.state.config?.validate()
-            starterArgs.state.config?.appearance?.parseAppearance()
-        } catch (e: InvalidParameterException) {
-            finish()
-            return
-        }
-
-        super.onCreate(savedInstanceState)
 
         starterArgs.statusBarColor?.let {
             window.statusBarColor = it
@@ -96,45 +89,13 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        viewModel.transition.observe(this) { event ->
+        viewModel.transition.observeEvents(this) { transitionTarget ->
             clearErrorMessages()
-            event?.getContentIfNotHandled()?.let { transitionTarget ->
-                onTransitionTarget(
-                    transitionTarget,
-                    bundleOf(
-                        PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs,
-                        PaymentSheetActivity.EXTRA_FRAGMENT_CONFIG to
-                            transitionTarget.fragmentConfig
-                    )
-                )
-            }
+            onTransitionTarget(transitionTarget)
         }
 
-        // if we are recovering from process kill or activity died, we should leave the fragment
-        // in it's current state.
-        if (!isSelectOrAddFragment()) {
-            viewModel.fragmentConfigEvent.observe(this) { event ->
-                val config = event.getContentIfNotHandled()
-                if (config != null) {
-                    if (viewModel.isResourceRepositoryReady.value == true) {
-                        viewModel.transitionTo(
-                            // It would be nice to see this condition move into the PaymentOptionsListFragment
-                            // where we also jump to a new unsaved card. However this move require
-                            // the transition target to specify when to and when not to add things to the
-                            // backstack.
-                            if (starterArgs.state.hasPaymentOptions) {
-                                PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod(
-                                    config
-                                )
-                            } else {
-                                PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet(
-                                    config
-                                )
-                            }
-                        )
-                    }
-                }
-            }
+        if (savedInstanceState == null) {
+            viewModel.transitionToFirstScreenWhenReady()
         }
 
         viewModel.selection.observe(this) {
@@ -156,11 +117,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         )
     }
 
-    private fun isSelectOrAddFragment() = supportFragmentManager.fragments.firstOrNull()?.let {
-        it.tag == ADD_FULL_FRAGMENT_TAG ||
-            it.tag == ADD_PAYMENT_METHOD_SHEET_TAG ||
-            it.tag == SELECT_SAVED_PAYMENT_METHOD_TAG
-    } ?: false
+    private fun initializeStarterArgs(): PaymentOptionContract.Args? {
+        starterArgs?.state?.config?.appearance?.parseAppearance()
+        earlyExitDueToIllegalState = starterArgs == null
+        return starterArgs
+    }
 
     override fun resetPrimaryButtonState() {
         viewBinding.continueButton.lockVisible = false
@@ -178,12 +139,13 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     private fun onTransitionTarget(
-        transitionTarget: PaymentOptionsViewModel.TransitionTarget,
-        fragmentArgs: Bundle
+        transitionTarget: BaseSheetViewModel.TransitionTarget,
     ) {
+        val fragmentArgs = bundleOf(PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs)
+
         supportFragmentManager.commit {
             when (transitionTarget) {
-                is PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodFull -> {
+                is BaseSheetViewModel.TransitionTarget.AddAnotherPaymentMethod -> {
                     // Once the add fragment has been opened there is never a scenario that
                     // we should back to the add fragment from the select list view.
                     viewModel.hasTransitionToUnsavedLpm = true
@@ -199,18 +161,16 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                         fragmentContainerId,
                         PaymentOptionsAddPaymentMethodFragment::class.java,
                         fragmentArgs,
-                        ADD_FULL_FRAGMENT_TAG
                     )
                 }
-                is PaymentOptionsViewModel.TransitionTarget.SelectSavedPaymentMethod -> {
+                is BaseSheetViewModel.TransitionTarget.SelectSavedPaymentMethods -> {
                     replace(
                         fragmentContainerId,
                         PaymentOptionsListFragment::class.java,
                         fragmentArgs,
-                        SELECT_SAVED_PAYMENT_METHOD_TAG
                     )
                 }
-                is PaymentOptionsViewModel.TransitionTarget.AddPaymentMethodSheet -> {
+                is BaseSheetViewModel.TransitionTarget.AddFirstPaymentMethod -> {
                     // Once the add fragment has been opened there is never a scenario that
                     // we should back to the add fragment from the select list view.
                     viewModel.hasTransitionToUnsavedLpm = true
@@ -218,7 +178,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                         fragmentContainerId,
                         PaymentOptionsAddPaymentMethodFragment::class.java,
                         fragmentArgs,
-                        ADD_PAYMENT_METHOD_SHEET_TAG
                     )
                 }
             }
@@ -242,10 +201,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     internal companion object {
-        internal const val EXTRA_FRAGMENT_CONFIG = BaseSheetActivity.EXTRA_FRAGMENT_CONFIG
         internal const val EXTRA_STARTER_ARGS = BaseSheetActivity.EXTRA_STARTER_ARGS
-        const val ADD_FULL_FRAGMENT_TAG = "AddFullFragment"
-        const val ADD_PAYMENT_METHOD_SHEET_TAG = "AddPaymentMethodSheet"
-        const val SELECT_SAVED_PAYMENT_METHOD_TAG = "SelectSavedPaymentMethod"
     }
 }
