@@ -19,7 +19,6 @@ import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHO
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_ROUTE
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
-import com.stripe.android.identity.utils.clearDataAndNavigateUp
 import com.stripe.android.identity.utils.navigateOnResume
 
 /**

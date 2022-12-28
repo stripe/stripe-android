@@ -13,7 +13,8 @@
     <ID>EmptyFunctionBlock:IdentityCameraScanFragmentTest.kt$IdentityCameraScanFragmentTest.TestFragment${}</ID>
     <ID>FunctionOnlyReturningConstant:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$private fun isFaceFocused(): Boolean</ID>
     <ID>LargeClass:IdentityDocumentScanFragmentTest.kt$IdentityDocumentScanFragmentTest</ID>
-    <ID>LargeClass:IdentityViewModel.kt$IdentityViewModel : ViewModel</ID>
+    <ID>LargeClass:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
+    <ID>LargeClass:IdentityViewModelTest.kt$IdentityViewModelTest</ID>
     <ID>LongMethod:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( verificationPageState: Resource&lt;VerificationPage>, onError: (Throwable) -> Unit, onComposeFinish: (VerificationPage) -> Unit, onConfirmed: () -> Unit )</ID>
     <ID>LongMethod:ConsentScreen.kt$@Composable private fun SuccessUI( merchantLogoUri: Uri, verificationPage: VerificationPage, onConsentAgreed: () -> Unit, onConsentDeclined: () -> Unit )</ID>
     <ID>LongMethod:DocumenetScanScreen.kt$@Composable internal fun DocumentScanScreen( title: String, message: String, newDisplayState: IdentityScanState?, onCameraViewCreated: (CameraView) -> Unit, onContinueClicked: () -> Unit )</ID>
@@ -71,8 +72,7 @@
     <ID>MaximumLineLength:com.stripe.android.identity.states.IDDetectorTransitioner.kt:127</ID>
     <ID>ThrowsCount:DefaultIdentityRepository.kt$DefaultIdentityRepository$private suspend fun &lt;Response : StripeModel> executeRequestWithModelJsonParser( request: StripeRequest, responseJsonParser: ModelJsonParser&lt;Response>, onSuccessExecutionTimeBlock: (Long) -> Unit = {} ): Response</ID>
     <ID>TooManyFunctions:IdentityAnalyticsRequestFactory.kt$IdentityAnalyticsRequestFactory</ID>
-    <ID>TooManyFunctions:IdentityViewModel.kt$IdentityViewModel : ViewModel</ID>
-    <ID>TooManyFunctions:NavigationUtils.kt$com.stripe.android.identity.utils.NavigationUtils.kt</ID>
+    <ID>TooManyFunctions:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
     <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationConfirmButtonTag = "ConfirmButton"</ID>
     <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationTitleTag = "ConfirmationTitle"</ID>
     <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val docSelectionTitleTag = "Title"</ID>
@@ -81,5 +81,7 @@
     <ID>UnusedPrivateMember:CameraPermissionDeniedFragmentTest.kt$CameraPermissionDeniedFragmentTest$@StringRes expectedTitleSuffix: Int = 0</ID>
     <ID>UnusedPrivateMember:CouldNotCaptureFragmentTest.kt$CouldNotCaptureFragmentTest$testBlock: (Button, Button, TestNavHostController) -> Unit</ID>
     <ID>UnusedPrivateMember:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$i</ID>
+    <ID>UnusedPrivateMember:NavigationUtils.kt$/** * ID of all screens that collect front/back of a document. */ private val DOCUMENT_UPLOAD_SCREENS = setOf( R.id.IDUploadFragment, R.id.passportUploadFragment, R.id.driverLicenseUploadFragment, R.id.IDScanFragment, R.id.passportScanFragment, R.id.driverLicenseScanFragment )</ID>
+    <ID>VariableNaming:IdentityViewModel.kt$IdentityViewModel$/** * Response for initial VerificationPage, used for building UI. */ @VisibleForTesting internal val _verificationPage = MutableLiveData&lt;Resource&lt;VerificationPage>>()</ID>
   </CurrentIssues>
 </SmellBaseline>
