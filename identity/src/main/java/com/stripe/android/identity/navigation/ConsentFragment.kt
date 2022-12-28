@@ -73,7 +73,7 @@ internal class ConsentFragment(
                         "Failed to get verificationPage: $throwable"
                     )
                     identityViewModel.errorCause.postValue(throwable)
-                    findNavController().navigateToErrorScreenWithFailedReason(
+                    findNavController().navigateToFinalErrorScreen(
                         requireContext(),
                     )
                 },
