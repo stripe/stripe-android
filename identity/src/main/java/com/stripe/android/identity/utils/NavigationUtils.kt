@@ -1,9 +1,7 @@
 package com.stripe.android.identity.utils
 
-import android.os.Bundle
 import android.util.Log
 import androidx.annotation.IdRes
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -76,7 +74,7 @@ internal suspend fun Fragment.postVerificationPageDataAndMaybeSubmit(
 }
 
 /**
- * Check if selfie is required from [VerificationPage], navigate to selfie fragment if so, otherwise
+ * Check if selfie is required from [VerificationPage], navigate to Ω fragment if so, otherwise
  * submit the verification.
  */
 internal suspend fun Fragment.navigateToSelfieOrSubmit(
@@ -212,25 +210,6 @@ internal fun Fragment.navigateToErrorFragmentWithFailedReason(failedReason: Thro
 }
 
 /**
- * Navigate to upload fragment with shouldShowTakePhoto argument.
- */
-internal fun Fragment.navigateToUploadFragment(
-    @IdRes destinationId: Int,
-    shouldShowTakePhoto: Boolean,
-    shouldShowChoosePhoto: Boolean
-) {
-    repeatOnResume {
-        findNavController().navigate(
-            destinationId,
-            bundleOf(
-                ARG_SHOULD_SHOW_TAKE_PHOTO to shouldShowTakePhoto,
-                ARG_SHOULD_SHOW_CHOOSE_PHOTO to shouldShowChoosePhoto
-            )
-        )
-    }
-}
-
-/**
  * Clear [IdentityViewModel.collectedData], [IdentityViewModel.documentFrontUploadedState] and
  * [IdentityViewModel.documentBackUploadedState] when the corresponding data collections screens
  * are about to be popped from navigation stack.
@@ -258,12 +237,6 @@ internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityVie
  * Try navigate to a destination when the fragment is in resume state.
  * If app is backgrounded, navigate when it's brought to foreground.
  */
-internal fun Fragment.navigateOnResume(destinationId: Int, args: Bundle? = null) {
-    repeatOnResume {
-        findNavController().navigate(destinationId, args)
-    }
-}
-
 internal fun Fragment.navigateOnResume(destination: IdentityTopLevelDestination) {
     repeatOnResume {
         findNavController().navigateTo(destination)
@@ -367,15 +340,5 @@ private val DOCUMENT_UPLOAD_SCREENS = setOf(
     R.id.passportScanFragment,
     R.id.driverLicenseScanFragment
 )
-
-/**
- * Argument to indicate if take photo option should be shown when picking an image.
- */
-internal const val ARG_SHOULD_SHOW_TAKE_PHOTO = "shouldShowTakePhoto"
-
-/**
- * Argument to indicate if choose photo option should be shown when picking an image.
- */
-internal const val ARG_SHOULD_SHOW_CHOOSE_PHOTO = "shouldShowChoosePhoto"
 
 private const val TAG = "NAVIGATION_UTIL"

@@ -16,7 +16,6 @@ import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_ERR
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_GO_BACK_BUTTON_DESTINATION
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_GO_BACK_BUTTON_TEXT
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
-import com.stripe.android.identity.navigation.ErrorDestination.Companion.DEFAULT_BACK_BUTTON_NAVIGATION
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_DESTINATION
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
@@ -65,7 +64,7 @@ internal class ErrorFragment(
                     } else {
                         val destination = args.getInt(ARG_GO_BACK_BUTTON_DESTINATION)
                         if (destination == UNEXPECTED_DESTINATION) {
-                            navigateOnResume(DEFAULT_BACK_BUTTON_NAVIGATION)
+                            navigateOnResume(ConsentDestination)
                         } else {
                             findNavController().let { navController ->
                                 var shouldContinueNavigateUp = true

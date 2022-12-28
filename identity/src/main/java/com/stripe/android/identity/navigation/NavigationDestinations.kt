@@ -2,7 +2,6 @@ package com.stripe.android.identity.navigation
 
 import android.os.Bundle
 import androidx.annotation.IdRes
-import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
@@ -56,7 +55,6 @@ internal abstract class IdentityTopLevelDestination {
 
 private fun String.withBracket() = "{$this}"
 
-@VisibleForTesting
 internal fun IdentityTopLevelDestination.DestinationRoute.withParams(
     vararg params: Pair<String, Any?>
 ): String {
@@ -180,9 +178,6 @@ internal class ErrorDestination(
         // If this happens, set the back button destination to [DEFAULT_BACK_BUTTON_DESTINATION]
         const val UNEXPECTED_DESTINATION = -1
 
-        val DEFAULT_BACK_BUTTON_NAVIGATION =
-            R.id.action_errorFragment_to_consentFragment
-
         val Route = object : DestinationRoute() {
             override val routeBase = ERROR
             override val arguments = listOf(
@@ -208,19 +203,31 @@ internal class ErrorDestination(
 
 internal object ConfirmationDestination : IdentityTopLevelDestination() {
     private const val CONFIRMATION = "Confirmation"
-    override val destination = R.id.action_global_confirmationFragment
-    override val destinationRoute = object : DestinationRoute() {
+    private val ROUTE = object : DestinationRoute() {
         override val routeBase = CONFIRMATION
     }
+    override val destination = R.id.action_global_confirmationFragment
+    override val destinationRoute = ROUTE
     override val routeWithArgs = destinationRoute.route
 }
 
-internal object SelfieDestination : IdentityTopLevelDestination() {
-    private const val SELFIE = "Selfie"
-    override val destination = R.id.action_global_selfieFragment
-    override val destinationRoute = object : DestinationRoute() {
-        override val routeBase = SELFIE
+internal object DocSelectionDestination : IdentityTopLevelDestination() {
+    private const val DOC_SELECTION = "DocSelection"
+    private val ROUTE = object : DestinationRoute() {
+        override val routeBase = DOC_SELECTION
     }
+    override val destination = R.id.action_global_docSelectionFragment
+    override val destinationRoute = ROUTE
+    override val routeWithArgs = destinationRoute.route
+}
+
+internal object ConsentDestination : IdentityTopLevelDestination() {
+    private const val CONSENT = "Consent"
+    private val ROUTE = object : DestinationRoute() {
+        override val routeBase = CONSENT
+    }
+    override val destination = R.id.action_global_consentFragment
+    override val destinationRoute = ROUTE
     override val routeWithArgs = destinationRoute.route
 }
 

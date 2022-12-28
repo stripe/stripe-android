@@ -16,10 +16,10 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SHEET_PRESENTED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_VERIFICATION_CANCELED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_VERIFICATION_FAILED
+import com.stripe.android.identity.navigation.ARG_SHOULD_SHOW_CHOOSE_PHOTO
+import com.stripe.android.identity.navigation.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_CAUSE
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.utils.InjectableActivityScenario
 import com.stripe.android.identity.utils.injectableActivityScenario
 import com.stripe.android.identity.viewmodel.IdentityViewModel

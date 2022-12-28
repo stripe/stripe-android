@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.annotation.IdRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.ComposeView
@@ -24,7 +23,6 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.DocSelectionScreen
 import com.stripe.android.identity.utils.navigateOnResume
 import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
-import com.stripe.android.identity.utils.navigateToUploadFragment
 import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.launch
@@ -90,7 +88,7 @@ internal class DocSelectionFragment(
                                 when (modelResource.status) {
                                     // model ready, camera permission is granted -> navigate to scan
                                     Status.SUCCESS -> {
-                                        navigateOnResume(type.toScanDestinationId())
+                                        navigateOnResume(type.toScanDestination())
                                     }
                                     // model not ready, camera permission is granted -> navigate to manual capture
                                     Status.ERROR -> {
@@ -129,10 +127,11 @@ internal class DocSelectionFragment(
                         navigateToDefaultErrorFragment(msg)
                     }
                 } else {
-                    navigateToUploadFragment(
-                        type.toUploadDestinationId(),
-                        shouldShowTakePhoto = true,
-                        shouldShowChoosePhoto = true
+                    navigateOnResume(
+                        type.toUploadDestination(
+                            shouldShowTakePhoto = true,
+                            shouldShowChoosePhoto = true
+                        )
                     )
                 }
             },
@@ -174,20 +173,33 @@ internal class DocSelectionFragment(
         const val SELECTION_NONE = ""
         val TAG: String = DocSelectionFragment::class.java.simpleName
 
-        @IdRes
-        private fun Type.toScanDestinationId() =
+        private fun Type.toScanDestination() =
             when (this) {
-                Type.IDCARD -> R.id.action_docSelectionFragment_to_IDScanFragment
-                Type.PASSPORT -> R.id.action_docSelectionFragment_to_passportScanFragment
-                Type.DRIVINGLICENSE -> R.id.action_docSelectionFragment_to_driverLicenseScanFragment
+                Type.IDCARD -> IDScanDestination()
+                Type.PASSPORT -> PassportScanDestination()
+                Type.DRIVINGLICENSE -> DriverLicenseScanDestination()
             }
 
-        @IdRes
-        private fun Type.toUploadDestinationId() =
+        private fun Type.toUploadDestination(
+            shouldShowTakePhoto: Boolean,
+            shouldShowChoosePhoto: Boolean
+        ) =
             when (this) {
-                Type.IDCARD -> R.id.action_docSelectionFragment_to_IDUploadFragment
-                Type.PASSPORT -> R.id.action_docSelectionFragment_to_passportUploadFragment
-                Type.DRIVINGLICENSE -> R.id.action_docSelectionFragment_to_driverLicenseUploadFragment
+                Type.IDCARD ->
+                    IDUploadDestination(
+                        shouldShowTakePhoto,
+                        shouldShowChoosePhoto
+                    )
+                Type.PASSPORT ->
+                    PassportUploadDestination(
+                        shouldShowTakePhoto,
+                        shouldShowChoosePhoto
+                    )
+                Type.DRIVINGLICENSE ->
+                    DriverLicenseUploadDestination(
+                        shouldShowTakePhoto,
+                        shouldShowChoosePhoto
+                    )
             }
 
         private fun Type.toAnalyticsScanType() = when (this) {

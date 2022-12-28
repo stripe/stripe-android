@@ -3,7 +3,6 @@ package com.stripe.android.identity.navigation
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.annotation.IdRes
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
@@ -15,7 +14,6 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
 import com.stripe.android.identity.utils.navigateOnResume
-import com.stripe.android.identity.utils.navigateToUploadFragment
 
 /**
  * Fragment to show user denies camera permission.
@@ -44,10 +42,11 @@ internal class CameraPermissionDeniedFragment(
                         buttonText = stringResource(id = R.string.file_upload)
                     ) {
                         identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_ERROR)
-                        navigateToUploadFragment(
-                            it.toUploadDestinationId(),
-                            shouldShowTakePhoto = false,
-                            shouldShowChoosePhoto = true
+                        navigateOnResume(
+                            it.toUploadDestination(
+                                shouldShowTakePhoto = false,
+                                shouldShowChoosePhoto = true
+                            )
                         )
                     }
                 },
@@ -57,7 +56,7 @@ internal class CameraPermissionDeniedFragment(
                     appSettingsOpenable.openAppSettings()
                     // navigate back to DocSelectFragment, so that when user is back to the app from settings
                     // the camera permission check can be triggered again from there.
-                    navigateOnResume(R.id.action_cameraPermissionDeniedFragment_to_docSelectionFragment)
+                    navigateOnResume(DocSelectionDestination)
                 }
             )
         }
@@ -79,15 +78,22 @@ internal class CameraPermissionDeniedFragment(
     internal companion object {
         const val ARG_SCAN_TYPE = "scanType"
 
-        @IdRes
-        private fun CollectedDataParam.Type.toUploadDestinationId() =
-            when (this) {
-                CollectedDataParam.Type.IDCARD ->
-                    R.id.action_cameraPermissionDeniedFragment_to_IDUploadFragment
-                CollectedDataParam.Type.DRIVINGLICENSE ->
-                    R.id.action_cameraPermissionDeniedFragment_to_driverLicenseUploadFragment
-                CollectedDataParam.Type.PASSPORT ->
-                    R.id.action_cameraPermissionDeniedFragment_to_passportUploadFragment
-            }
+        private fun CollectedDataParam.Type.toUploadDestination(
+            shouldShowTakePhoto: Boolean,
+            shouldShowChoosePhoto: Boolean
+        ) = when (this) {
+            CollectedDataParam.Type.IDCARD -> IDUploadDestination(
+                shouldShowTakePhoto,
+                shouldShowChoosePhoto
+            )
+            CollectedDataParam.Type.DRIVINGLICENSE -> DriverLicenseUploadDestination(
+                shouldShowTakePhoto,
+                shouldShowChoosePhoto
+            )
+            CollectedDataParam.Type.PASSPORT -> PassportUploadDestination(
+                shouldShowTakePhoto,
+                shouldShowChoosePhoto
+            )
+        }
     }
 }

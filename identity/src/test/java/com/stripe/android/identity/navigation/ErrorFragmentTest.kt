@@ -160,7 +160,7 @@ class ErrorFragmentTest {
                 R.navigation.identity_nav_graph
             )
             navController.setCurrentDestination(R.id.consentFragment)
-            navController.navigate(R.id.action_consentFragment_to_docSelectionFragment)
+            navController.navigate(R.id.action_global_docSelectionFragment)
             navController.navigate(R.id.action_global_errorFragment)
 
             Navigation.setViewNavController(
@@ -192,7 +192,7 @@ class ErrorFragmentTest {
                 R.navigation.identity_nav_graph
             )
             navController.setCurrentDestination(firstEntry)
-            navController.navigate(R.id.action_consentFragment_to_docSelectionFragment)
+            navController.navigate(R.id.action_global_docSelectionFragment)
             navController.navigate(R.id.action_global_errorFragment)
 
             Navigation.setViewNavController(
