@@ -81,10 +81,11 @@ internal fun CameraScreenLaunchedEffect(
         identityScanViewModel.finalResult.observe(lifecycleOwner) { finalResult ->
             lifecycleOwner.lifecycleScope.launch {
                 identityViewModel.fpsTracker.reportAndReset(
-                    if (finalResult.result is FaceDetectorOutput)
+                    if (finalResult.result is FaceDetectorOutput) {
                         IdentityAnalyticsRequestFactory.TYPE_SELFIE
-                    else
+                    } else {
                         IdentityAnalyticsRequestFactory.TYPE_DOCUMENT
+                    }
                 )
             }
             identityScanViewModel.stopScan(lifecycleOwner)
