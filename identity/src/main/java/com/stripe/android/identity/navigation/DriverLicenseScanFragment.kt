@@ -18,11 +18,10 @@ internal class DriverLicenseScanFragment(
 ) {
     override val frontScanType = DL_FRONT
     override val backScanType = DL_BACK
-    override val fragmentId = R.id.driverLicenseScanFragment
     override val frontTitleStringRes = R.string.front_of_dl
     override val backTitleStringRes = R.string.back_of_dl
     override val frontMessageStringRes = R.string.position_dl_front
     override val backMessageStringRes = R.string.position_dl_back
     override val collectedDataParamType = CollectedDataParam.Type.DRIVINGLICENSE
-    override val route = DriverLicenseScanDestination.ROUTE.route
+    override val destinationRoute = DriverLicenseScanDestination.ROUTE
 }

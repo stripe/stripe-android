@@ -1096,6 +1096,111 @@ internal class IdentityViewModel constructor(
             verificationPageSubmit.value.status == Status.LOADING
     }
 
+    fun updateNewScanType(scanType: IdentityScanState.ScanType) {
+        updateAnalyticsState { oldState ->
+            when (scanType) {
+                IdentityScanState.ScanType.ID_FRONT -> {
+                    oldState.copy(
+                        docFrontRetryTimes =
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
+                    )
+                }
+                IdentityScanState.ScanType.ID_BACK -> {
+                    oldState.copy(
+                        docBackRetryTimes =
+                        oldState.docBackRetryTimes?.let { it + 1 } ?: 1
+                    )
+                }
+                IdentityScanState.ScanType.DL_FRONT -> {
+                    oldState.copy(
+                        docFrontRetryTimes =
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
+                    )
+                }
+                IdentityScanState.ScanType.DL_BACK -> {
+                    oldState.copy(
+                        docBackRetryTimes =
+                        oldState.docBackRetryTimes?.let { it + 1 } ?: 1
+                    )
+                }
+                IdentityScanState.ScanType.PASSPORT -> {
+                    oldState.copy(
+                        docFrontRetryTimes =
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
+                    )
+                }
+                IdentityScanState.ScanType.SELFIE -> {
+                    oldState.copy(
+                        selfieRetryTimes =
+                        oldState.selfieRetryTimes?.let { it + 1 } ?: 1
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Check the upload status of the document, post it with VerificationPageData, and decide
+     * next step based on result.
+     *
+     * If result is missing back, then start scanning back of the document,
+     * else if result is missing selfie, then start scanning selfie,
+     * Otherwise submit
+     */
+    fun collectDocumentUploadedStateAndPost(
+        navController: NavController,
+        lifecycleOwner: LifecycleOwner,
+        isFront: Boolean,
+        collectedDataParamType: CollectedDataParam.Type,
+        route: String,
+        onMissingBack: () -> Unit
+    ) {
+        viewModelScope.launch {
+            if (isFront) {
+                documentFrontUploadedState
+            } else {
+                documentBackUploadedState
+            }.collectLatest { uploadedState ->
+                if (uploadedState.hasError()) {
+                    errorCause.postValue(uploadedState.getError())
+                    navController.navigateToErrorScreenWithDefaultValues(
+                        getApplication()
+                    )
+                } else if (uploadedState.isUploaded()) {
+                    requireVerificationPage(
+                        lifecycleOwner,
+                        navController
+                    ) {
+                        postVerificationPageDataAndMaybeNavigate(
+                            navController = navController,
+                            collectedDataParam = if (isFront) {
+                                CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
+                                    type = collectedDataParamType,
+                                    frontHighResResult = requireNotNull(uploadedState.highResResult.data),
+                                    frontLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                                )
+                            } else {
+                                CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
+                                    type = collectedDataParamType,
+                                    backHighResResult = requireNotNull(uploadedState.highResResult.data),
+                                    backLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                                )
+                            },
+                            fromRoute = route,
+                            onMissingBack = onMissingBack,
+                            onReadyToSubmit = {
+                                submitAndNavigate(
+                                    navController = navController,
+                                    fromRoute = route
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     private fun <State> MutableStateFlow<State>.updateStateAndSave(function: (State) -> State) {
         this.update(function)
         savedStateHandle[
