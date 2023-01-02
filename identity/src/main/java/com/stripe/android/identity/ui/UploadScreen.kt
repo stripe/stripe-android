@@ -43,32 +43,46 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavController
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.identity.R
+import com.stripe.android.identity.navigation.routeToScreenName
 import com.stripe.android.identity.networking.Status
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.text.dimensionResourceSp
 
+internal const val FRONT_ROW_TAG = "frontRow"
+internal const val BACK_ROW_TAG = "backRow"
+internal const val UPLOAD_SCREEN_CONTINUE_BUTTON_TAG = "uploadScreenContinueButton"
+internal const val SHOULD_SHOW_TAKE_PHOTO_TAG = "shouldShowTakePhoto"
+internal const val SHOULD_SHOW_CHOOSE_PHOTO_TAG = "shouldShowChoosePhoto"
+
+internal enum class UploadMethod {
+    TAKE_PHOTO, CHOOSE_PHOTO
+}
+
 internal data class DocumentUploadSideInfo(
     val description: String,
     val checkmarkContentDescription: String,
     val scanType: IdentityScanState.ScanType,
-    val shouldShowTakePhoto: Boolean,
-    val shouldShowChoosePhoto: Boolean,
     val onPhotoSelected: (UploadMethod) -> Unit
 )
 
 @Composable
 internal fun UploadScreen(
+    navController: NavController,
     identityViewModel: IdentityViewModel,
+    collectedDataParamType: CollectedDataParam.Type,
+    route: String,
     title: String,
     context: String,
     frontInfo: DocumentUploadSideInfo,
     backInfo: DocumentUploadSideInfo?,
-    onComposeFinish: () -> Unit,
-    onContinueClicked: () -> Unit
+    shouldShowTakePhoto: Boolean,
+    shouldShowChoosePhoto: Boolean
 ) {
     val frontUploadState by identityViewModel.documentFrontUploadedState.collectAsState()
     val backUploadState by identityViewModel.documentBackUploadedState.collectAsState()
@@ -76,6 +90,20 @@ internal fun UploadScreen(
     val missings by identityViewModel.missingRequirements.collectAsState()
 
     MdcTheme {
+        LaunchedEffect(Unit) {
+            identityViewModel.collectDataForDocumentUploadScreen(
+                navController,
+                collectedDataParamType,
+                route
+            )
+        }
+
+        ScreenTransitionLaunchedEffect(
+            identityViewModel = identityViewModel,
+            screenName = route.routeToScreenName(),
+            scanType = frontInfo.scanType
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -128,7 +156,9 @@ internal fun UploadScreen(
 
             if (shouldShowFrontDialog) {
                 UploadImageDialog(
-                    frontInfo,
+                    uploadInfo = frontInfo,
+                    shouldShowTakePhoto = shouldShowTakePhoto,
+                    shouldShowChoosePhoto = shouldShowChoosePhoto,
                     onDismissRequest = { shouldShowFrontDialog = false }
                 ) { shouldShowFrontDialog = false }
             }
@@ -179,7 +209,9 @@ internal fun UploadScreen(
 
                 if (shouldShowBackDialog) {
                     UploadImageDialog(
-                        backInfo,
+                        uploadInfo = backInfo,
+                        shouldShowTakePhoto = shouldShowTakePhoto,
+                        shouldShowChoosePhoto = shouldShowChoosePhoto,
                         onDismissRequest = { shouldShowBackDialog = false }
                     ) { shouldShowBackDialog = false }
                 }
@@ -206,28 +238,20 @@ internal fun UploadScreen(
                 state = continueButtonState
             ) {
                 continueButtonState = LoadingButtonState.Loading
-                onContinueClicked()
+                identityViewModel.navigateToSelfieOrSubmit(
+                    navController,
+                    route
+                )
             }
         }
-        LaunchedEffect(Unit) {
-            onComposeFinish()
-        }
     }
-}
-
-internal const val FRONT_ROW_TAG = "frontRow"
-internal const val BACK_ROW_TAG = "backRow"
-internal const val UPLOAD_SCREEN_CONTINUE_BUTTON_TAG = "uploadScreenContinueButton"
-internal const val SHOULD_SHOW_TAKE_PHOTO_TAG = "shouldShowTakePhoto"
-internal const val SHOULD_SHOW_CHOOSE_PHOTO_TAG = "shouldShowChoosePhoto"
-
-internal enum class UploadMethod {
-    TAKE_PHOTO, CHOOSE_PHOTO
 }
 
 @Composable
 internal fun UploadImageDialog(
     uploadInfo: DocumentUploadSideInfo,
+    shouldShowTakePhoto: Boolean,
+    shouldShowChoosePhoto: Boolean,
     onDismissRequest: () -> Unit,
     onUploadMethodSelected: () -> Unit
 ) {
@@ -255,7 +279,7 @@ internal fun UploadImageDialog(
                     style = MaterialTheme.typography.subtitle1,
                     fontWeight = FontWeight.Bold
                 )
-                if (uploadInfo.shouldShowTakePhoto) {
+                if (shouldShowTakePhoto) {
                     DialogListItem(
                         text = stringResource(id = R.string.take_photo),
                         testTag = SHOULD_SHOW_TAKE_PHOTO_TAG
@@ -264,7 +288,7 @@ internal fun UploadImageDialog(
                         uploadInfo.onPhotoSelected(UploadMethod.TAKE_PHOTO)
                     }
                 }
-                if (uploadInfo.shouldShowChoosePhoto) {
+                if (shouldShowChoosePhoto) {
                     DialogListItem(
                         text = stringResource(id = R.string.choose_file),
                         testTag = SHOULD_SHOW_CHOOSE_PHOTO_TAG

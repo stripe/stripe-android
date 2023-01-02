@@ -21,7 +21,6 @@ internal class IDUploadFragment(
     override var backCheckMarkContentDescription: Int? = R.string.back_of_id_selected
     override val frontScanType = IdentityScanState.ScanType.ID_FRONT
     override var backScanType: IdentityScanState.ScanType? = IdentityScanState.ScanType.ID_BACK
-    override val fragmentId = R.id.IDUploadFragment
     override val collectedDataParamType = CollectedDataParam.Type.IDCARD
-    override val route = IDUploadDestination.ROUTE.route
+    override val destinationRoute = IDUploadDestination.ROUTE
 }

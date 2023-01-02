@@ -62,6 +62,7 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.clearData
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.collectedRequirements
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.mergeWith
+import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -1298,6 +1299,68 @@ internal class IdentityViewModel constructor(
                                     fromRoute = route
                                 )
                             }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Collect the last status of both sids of document upload and post.
+     * Only post when that side is not yet collected.
+     */
+    fun collectDataForDocumentUploadScreen(
+        navController: NavController,
+        collectedDataParamType: CollectedDataParam.Type,
+        route: String
+    ) {
+        viewModelScope.launch {
+            frontCollectedInfo.collectLatest { (frontUploadState, collectedData) ->
+                if (collectedData.idDocumentFront == null) {
+                    if (frontUploadState.hasError()) {
+                        errorCause.postValue(frontUploadState.getError())
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                    } else if (frontUploadState.isHighResUploaded()) {
+                        val front = requireNotNull(frontUploadState.highResResult.data)
+                        postVerificationPageData(
+                            navController = navController,
+                            collectedDataParam = CollectedDataParam(
+                                idDocumentFront = DocumentUploadParam(
+                                    highResImage = requireNotNull(front.uploadedStripeFile.id) {
+                                        "front uploaded file id is null"
+                                    },
+                                    uploadMethod = requireNotNull(front.uploadMethod)
+                                ),
+                                idDocumentType = collectedDataParamType
+                            ),
+                            fromRoute = route
+                        )
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            backCollectedInfo.collectLatest { (backUploadedState, collectedData) ->
+                if (collectedData.idDocumentBack == null) {
+                    if (backUploadedState.hasError()) {
+                        errorCause.postValue(backUploadedState.getError())
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                    } else if (backUploadedState.isHighResUploaded()) {
+                        val back = requireNotNull(backUploadedState.highResResult.data)
+                        postVerificationPageData(
+                            navController = navController,
+                            collectedDataParam = CollectedDataParam(
+                                idDocumentBack = DocumentUploadParam(
+                                    highResImage = requireNotNull(back.uploadedStripeFile.id) {
+                                        "back uploaded file id is null"
+                                    },
+                                    uploadMethod = requireNotNull(back.uploadMethod)
+                                ),
+                                idDocumentType = collectedDataParamType
+                            ),
+                            fromRoute = route
                         )
                     }
                 }

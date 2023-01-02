@@ -8,7 +8,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.navigation.NavController
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.navigation.IDUploadDestination
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -23,6 +25,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -33,11 +36,10 @@ class UploadScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    private val mockNavController = mock<NavController>()
     private val onPhotoSelected = mock<(UploadMethod) -> Unit>()
-    private val onContinueClicked = mock<() -> Unit>()
     private val onDismissRequest = mock<() -> Unit>()
     private val onUploadMethodSelected = mock<() -> Unit>()
-    private val onComposeFinish = mock<() -> Unit>()
 
     private val documentFrontUploadState = MutableStateFlow(IDLE_STATE)
     private val documentBackUploadState = MutableStateFlow(IDLE_STATE)
@@ -109,7 +111,11 @@ class UploadScreenTest {
             onNodeWithTag(UPLOAD_SCREEN_CONTINUE_BUTTON_TAG).onChildAt(0).let { continueButton ->
                 continueButton.assertIsEnabled()
                 continueButton.performClick()
-                verify(onContinueClicked).invoke()
+
+                verify(mockIdentityViewModel).navigateToSelfieOrSubmit(
+                    same(mockNavController),
+                    eq(IDUploadDestination.ROUTE.route)
+                )
             }
         }
     }
@@ -161,15 +167,16 @@ class UploadScreenTest {
     ) {
         composeTestRule.setContent {
             UploadScreen(
+                navController = mockNavController,
                 identityViewModel = mockIdentityViewModel,
+                collectedDataParamType = CollectedDataParam.Type.IDCARD,
+                route = IDUploadDestination.ROUTE.route,
                 title = TITLE,
                 context = CONTEXT,
                 frontInfo = DocumentUploadSideInfo(
                     description = FRONT_DESCRIPTION,
                     checkmarkContentDescription = FRONT_CHECKMARK_CONTENT_DESCRIPTION,
                     scanType = FRONT_SCAN_TYPE,
-                    shouldShowTakePhoto = true,
-                    shouldShowChoosePhoto = true,
                     onPhotoSelected = onPhotoSelected
                 ),
                 backInfo =
@@ -178,15 +185,13 @@ class UploadScreenTest {
                         description = BACK_DESCRIPTION,
                         checkmarkContentDescription = BACK_CHECKMARK_CONTENT_DESCRIPTION,
                         scanType = BACK_SCAN_TYPE,
-                        shouldShowTakePhoto = true,
-                        shouldShowChoosePhoto = true,
                         onPhotoSelected = onPhotoSelected
                     )
                 } else {
                     null
                 },
-                onComposeFinish = onComposeFinish,
-                onContinueClicked = onContinueClicked
+                shouldShowTakePhoto = true,
+                shouldShowChoosePhoto = true,
             )
         }
         with(composeTestRule, testBlock)
@@ -202,10 +207,10 @@ class UploadScreenTest {
                     description = FRONT_DESCRIPTION,
                     checkmarkContentDescription = FRONT_CHECKMARK_CONTENT_DESCRIPTION,
                     scanType = FRONT_SCAN_TYPE,
-                    shouldShowTakePhoto = true,
-                    shouldShowChoosePhoto = shouldShowChoosePhoto,
                     onPhotoSelected = onPhotoSelected
                 ),
+                shouldShowTakePhoto = true,
+                shouldShowChoosePhoto = shouldShowChoosePhoto,
                 onDismissRequest = onDismissRequest,
                 onUploadMethodSelected = onUploadMethodSelected
             )
