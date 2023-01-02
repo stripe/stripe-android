@@ -2,7 +2,6 @@ package com.stripe.android.identity.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -28,11 +27,6 @@ internal class IdentityScanViewModel(
      * StateFlow to keep track of current target scan type.
      */
     internal val targetScanTypeFlow = MutableStateFlow<IdentityScanState.ScanType?>(null)
-
-    /**
-     * TODO(ccen): remove this after SelfieFragment no longer extends IdentityCameraScanFragment
-     */
-    internal val cameraAdapterInitialized = MutableLiveData(false)
 
     private lateinit var cameraManager: IdentityCameraManager
 
