@@ -256,7 +256,7 @@ internal fun DocumentScanScreen(
                 ) {
                     loadingButtonState = LoadingButtonState.Loading
 
-                    identityViewModel.collectDocumentUploadedStateAndPost(
+                    identityViewModel.collectDataForDocumentScanScreen(
                         navController = navController,
                         lifecycleOwner = lifecycleOwner,
                         isFront = requireNotNull(targetScanType) {

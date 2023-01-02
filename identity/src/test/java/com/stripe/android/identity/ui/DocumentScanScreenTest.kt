@@ -125,7 +125,7 @@ class DocumentScanScreenTest {
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsEnabled()
 
             onNodeWithTag(CONTINUE_BUTTON_TAG).performClick()
-            verify(mockIdentityViewModel).collectDocumentUploadedStateAndPost(
+            verify(mockIdentityViewModel).collectDataForDocumentScanScreen(
                 eq(mockNavController),
                 any(),
                 eq(true),

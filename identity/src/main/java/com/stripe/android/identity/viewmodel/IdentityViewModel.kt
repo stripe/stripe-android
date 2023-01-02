@@ -1164,7 +1164,7 @@ internal class IdentityViewModel constructor(
      * else if result is missing selfie, then start scanning selfie,
      * Otherwise submit
      */
-    fun collectDocumentUploadedStateAndPost(
+    fun collectDataForDocumentScanScreen(
         navController: NavController,
         lifecycleOwner: LifecycleOwner,
         isFront: Boolean,
