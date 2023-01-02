@@ -256,8 +256,8 @@ private fun ConsentLogoHeader(
                 painterResource(id = R.drawable.stripe_logo),
                 contentDescription = null,
                 modifier = Modifier
-                    .width(100.dp)
-                    .height(30.dp)
+                    .width(60.dp)
+                    .height(25.dp)
                     .clip(CircleShape),
             )
         } else {

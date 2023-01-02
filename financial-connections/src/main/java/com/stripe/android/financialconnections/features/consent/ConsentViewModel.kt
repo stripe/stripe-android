@@ -52,7 +52,7 @@ internal class ConsentViewModel @Inject constructor(
             ConsentState.Payload(
                 consent = MarkdownParser.toHtml(sync.text!!.consent!!),
                 shouldShowMerchantLogos = shouldShowMerchantLogos,
-                merchantLogos = emptyList()
+                merchantLogos = sync.visual?.merchantLogos ?: emptyList()
             )
         }.execute { copy(consent = it) }
     }
