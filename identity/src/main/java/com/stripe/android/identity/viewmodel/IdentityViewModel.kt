@@ -17,6 +17,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.navigation.NavController
+import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
@@ -33,9 +34,16 @@ import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
+import com.stripe.android.identity.navigation.CameraPermissionDeniedDestination
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.DocSelectionDestination
+import com.stripe.android.identity.navigation.DriverLicenseScanDestination
+import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
+import com.stripe.android.identity.navigation.IDScanDestination
+import com.stripe.android.identity.navigation.IDUploadDestination
+import com.stripe.android.identity.navigation.PassportScanDestination
+import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.navigation.SelfieDestination
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
@@ -1154,6 +1162,87 @@ internal class IdentityViewModel constructor(
         }
     }
 
+    fun postVerificationPageDataForDocSelection(
+        type: CollectedDataParam.Type,
+        navController: NavController,
+        viewLifecycleOwner: LifecycleOwner,
+        cameraPermissionEnsureable: CameraPermissionEnsureable
+    ) {
+        postVerificationPageDataAndMaybeNavigate(
+            navController,
+            CollectedDataParam(idDocumentType = type),
+            fromRoute = DocSelectionDestination.ROUTE.route,
+            onMissingFront = {
+                cameraPermissionEnsureable.ensureCameraPermission(
+                    onCameraReady = {
+                        sendAnalyticsRequest(
+                            identityAnalyticsRequestFactory.cameraPermissionGranted(
+                                type.toAnalyticsScanType()
+                            )
+                        )
+                        idDetectorModelFile.observe(viewLifecycleOwner) { modelResource ->
+                            when (modelResource.status) {
+                                // model ready, camera permission is granted -> navigate to scan
+                                Status.SUCCESS -> {
+                                    navController.navigateTo(type.toScanDestination())
+                                }
+                                // model not ready, camera permission is granted -> navigate to manual capture
+                                Status.ERROR -> {
+                                    requireVerificationPage(
+                                        viewLifecycleOwner,
+                                        navController
+                                    ) { verificationPage ->
+                                        if (verificationPage.documentCapture.requireLiveCapture) {
+                                            errorCause.postValue(
+                                                IllegalStateException(
+                                                    "Can't access camera and client has " +
+                                                        "required live capture."
+                                                )
+                                            )
+                                            navController.navigateToErrorScreenWithDefaultValues(
+                                                getApplication(),
+                                            )
+                                        } else {
+                                            navController.navigateTo(
+                                                type.toUploadDestination(
+                                                    shouldShowTakePhoto = true,
+                                                    shouldShowChoosePhoto = true
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                                Status.LOADING -> {} // no-op
+                                Status.IDLE -> {} // no-op
+                            }
+                        }
+                    },
+                    onUserDeniedCameraPermission = {
+                        sendAnalyticsRequest(
+                            identityAnalyticsRequestFactory.cameraPermissionDenied(
+                                type.toAnalyticsScanType()
+                            )
+                        )
+                        requireVerificationPage(
+                            viewLifecycleOwner,
+                            navController
+                        ) { verificationPage ->
+                            navController.navigateTo(
+                                CameraPermissionDeniedDestination(
+                                    if (verificationPage.documentCapture.requireLiveCapture) {
+                                        null
+                                    } else {
+                                        type
+                                    }
+                                )
+                            )
+                        }
+                    }
+                )
+            }
+        )
+    }
+
     /**
      * Check the upload status of the document, post it with VerificationPageData, and decide
      * next step based on result.
@@ -1274,6 +1363,41 @@ internal class IdentityViewModel constructor(
                 }
             }
         }
+    }
+
+    private fun CollectedDataParam.Type.toScanDestination() =
+        when (this) {
+            CollectedDataParam.Type.IDCARD -> IDScanDestination()
+            CollectedDataParam.Type.PASSPORT -> PassportScanDestination()
+            CollectedDataParam.Type.DRIVINGLICENSE -> DriverLicenseScanDestination()
+        }
+
+    private fun CollectedDataParam.Type.toUploadDestination(
+        shouldShowTakePhoto: Boolean,
+        shouldShowChoosePhoto: Boolean
+    ) =
+        when (this) {
+            CollectedDataParam.Type.IDCARD ->
+                IDUploadDestination(
+                    shouldShowTakePhoto,
+                    shouldShowChoosePhoto
+                )
+            CollectedDataParam.Type.PASSPORT ->
+                PassportUploadDestination(
+                    shouldShowTakePhoto,
+                    shouldShowChoosePhoto
+                )
+            CollectedDataParam.Type.DRIVINGLICENSE ->
+                DriverLicenseUploadDestination(
+                    shouldShowTakePhoto,
+                    shouldShowChoosePhoto
+                )
+        }
+
+    private fun CollectedDataParam.Type.toAnalyticsScanType() = when (this) {
+        CollectedDataParam.Type.DRIVINGLICENSE -> IdentityScanState.ScanType.DL_FRONT
+        CollectedDataParam.Type.IDCARD -> IdentityScanState.ScanType.ID_FRONT
+        CollectedDataParam.Type.PASSPORT -> IdentityScanState.ScanType.PASSPORT
     }
 
     private fun <State> MutableStateFlow<State>.updateStateAndSave(function: (State) -> State) {

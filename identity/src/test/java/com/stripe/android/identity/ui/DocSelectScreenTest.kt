@@ -7,19 +7,23 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
+import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.TestApplication
-import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.DRIVING_LICENSE_KEY
-import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.ID_CARD_KEY
-import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.PASSPORT_KEY
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentSelectPage
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -30,9 +34,14 @@ class DocSelectScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val onDocTypeSelectedMock = mock<(CollectedDataParam.Type) -> Unit>()
-    private val onError = mock<(Throwable) -> Unit>()
-    private val onComposeFinish = mock<(VerificationPage) -> Unit>()
+    private val mockNavController = mock<NavController>()
+    private val mockCameraPermissionEnsureable = mock<CameraPermissionEnsureable>()
+    private val verificationPageLiveData =
+        MutableLiveData(Resource.success(mock<VerificationPage>()))
+
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { verificationPage } doReturn verificationPageLiveData
+    }
 
     private val verificationPageWithMultiChoice = mock<VerificationPage> {
         on { it.documentSelect } doReturn DOC_SELECT_MULTI_CHOICE
@@ -57,8 +66,11 @@ class DocSelectScreenTest {
                 .assertTextEquals(DRIVING_LICENSE_BUTTON_TEXT.uppercase())
 
             onNodeWithTag(DRIVING_LICENSE_KEY).onChildAt(0).performClick()
-            verify(onDocTypeSelectedMock).invoke(
-                CollectedDataParam.Type.DRIVINGLICENSE
+            verify(mockIdentityViewModel).postVerificationPageDataForDocSelection(
+                eq(CollectedDataParam.Type.DRIVINGLICENSE),
+                same(mockNavController),
+                any(),
+                same(mockCameraPermissionEnsureable)
             )
         }
     }
@@ -75,8 +87,11 @@ class DocSelectScreenTest {
                 .assertTextEquals(DOCUMENT_SELECT_BUTTON_TEXT)
 
             onNodeWithTag(singleSelectionTag).onChildAt(1).performClick()
-            verify(onDocTypeSelectedMock).invoke(
-                CollectedDataParam.Type.PASSPORT
+            verify(mockIdentityViewModel).postVerificationPageDataForDocSelection(
+                eq(CollectedDataParam.Type.PASSPORT),
+                same(mockNavController),
+                any(),
+                same(mockCameraPermissionEnsureable)
             )
         }
     }
@@ -85,12 +100,12 @@ class DocSelectScreenTest {
         verificationState: Resource<VerificationPage>,
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
+        verificationPageLiveData.postValue(verificationState)
         composeTestRule.setContent {
             DocSelectionScreen(
-                verificationPageState = verificationState,
-                onError = onError,
-                onComposeFinish = onComposeFinish,
-                onDocTypeSelected = onDocTypeSelectedMock
+                navController = mockNavController,
+                identityViewModel = mockIdentityViewModel,
+                cameraPermissionEnsureable = mockCameraPermissionEnsureable
             )
         }
         with(composeTestRule, testBlock)
