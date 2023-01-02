@@ -16,11 +16,13 @@ import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -31,25 +33,39 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.android.material.composethemeadapter.MdcTheme
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
+import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONFIRMATION
+import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.Resource
-import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.text.Html
 
 @Composable
 internal fun ConfirmationScreen(
-    verificationPageState: Resource<VerificationPage>,
-    onError: (Throwable) -> Unit,
-    onComposeFinish: (VerificationPage) -> Unit,
-    onConfirmed: () -> Unit
+    navController: NavController,
+    identityViewModel: IdentityViewModel,
+    verificationFlowFinishable: VerificationFlowFinishable
 ) {
+    val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
+    val context = LocalContext.current
+
     MdcTheme {
         CheckVerificationPageAndCompose(
             verificationPageResource = verificationPageState,
-            onError = onError
+            onError = {
+                identityViewModel.errorCause.postValue(it)
+                navController.navigateToErrorScreenWithDefaultValues(context)
+            }
         ) {
             val successPage = remember { it.success }
+            ScreenTransitionLaunchedEffect(
+                identityViewModel = identityViewModel,
+                screenName = SCREEN_NAME_CONFIRMATION
+            )
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -109,7 +125,12 @@ internal fun ConfirmationScreen(
                     )
                 }
                 Button(
-                    onClick = onConfirmed,
+                    onClick = {
+                        identityViewModel.sendSucceededAnalyticsRequestForNative()
+                        verificationFlowFinishable.finishWithResult(
+                            IdentityVerificationSheet.VerificationFlowResult.Completed
+                        )
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .semantics {
@@ -118,9 +139,6 @@ internal fun ConfirmationScreen(
                 ) {
                     Text(text = successPage.buttonText.uppercase())
                 }
-            }
-            LaunchedEffect(Unit) {
-                onComposeFinish(it)
             }
         }
     }
