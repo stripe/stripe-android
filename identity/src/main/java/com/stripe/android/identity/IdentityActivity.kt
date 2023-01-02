@@ -30,12 +30,10 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.injection.DaggerIdentityActivityFallbackComponent
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
-import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_CAUSE
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
+import com.stripe.android.identity.navigation.clearDataAndNavigateUp
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
-import com.stripe.android.identity.utils.clearDataAndNavigateUp
-import com.stripe.android.identity.utils.serializable
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
 import javax.inject.Provider
@@ -55,6 +53,7 @@ internal class IdentityActivity :
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         IdentityViewModel.IdentityViewModelFactory(
+            { application },
             { uiContext },
             { workContext },
             { subcomponent }
@@ -173,7 +172,11 @@ internal class IdentityActivity :
                 }
             },
             onFailure = {
-                navController.navigateToErrorScreenWithDefaultValues(this, it)
+                // This error will trigger lateinit property not initialized error for
+                // IdentityAnalyticsRequestFactory.verificationPage in ErrorFragment
+                // TODO(ccen) don't send analytics request for this case when ErrorFragment is removed.
+                identityViewModel.errorCause.postValue(it)
+                navController.navigateToErrorScreenWithDefaultValues(this)
             }
         )
 
@@ -394,11 +397,9 @@ internal class IdentityActivity :
                 }
                 isErrorFragmentThatShouldFail(destination, args) -> {
                     val failedReason = requireNotNull(
-                        args?.serializable(
-                            ARG_CAUSE
-                        ) as? Throwable
+                        identityViewModel.errorCause.value
                     ) {
-                        "Failed to get failedReason from $args"
+                        "Failed to get failedReason"
                     }
 
                     identityViewModel.sendAnalyticsRequest(

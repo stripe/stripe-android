@@ -41,6 +41,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -113,6 +115,7 @@ internal class SelfieFragmentTest {
         on { uiContext } doReturn testDispatcher
         on { workContext } doReturn testDispatcher
         on { verificationPage } doReturn verificationPageLiveData
+        on { errorCause } doReturn mock()
     }
 
     @Before
@@ -150,20 +153,27 @@ internal class SelfieFragmentTest {
                 val trainingConsent = false
                 selfieFragment.collectUploadedStateAndUploadForCollectedSelfies(trainingConsent)
 
-                verify(mockIdentityViewModel).postVerificationPageData(
-                    eq(
-                        CollectedDataParam.createForSelfie(
-                            firstHighResResult = requireNotNull(successUploadState.firstHighResResult.data),
-                            firstLowResResult = requireNotNull(successUploadState.firstLowResResult.data),
-                            lastHighResResult = requireNotNull(successUploadState.lastHighResResult.data),
-                            lastLowResResult = requireNotNull(successUploadState.lastLowResResult.data),
-                            bestHighResResult = requireNotNull(successUploadState.bestHighResResult.data),
-                            bestLowResResult = requireNotNull(successUploadState.bestLowResResult.data),
-                            trainingConsent = trainingConsent,
-                            bestFaceScore = BEST_FACE_SCORE,
-                            faceScoreVariance = SCORE_VARIANCE,
-                            numFrames = NUM_FRAMES
-                        )
+                val collectedDataParamCaptor = argumentCaptor<CollectedDataParam>()
+                verify(mockIdentityViewModel).postVerificationPageDataAndMaybeNavigate(
+                    any(),
+                    collectedDataParamCaptor.capture(),
+                    eq(SelfieDestination.ROUTE.route),
+                    any(),
+                    any(),
+                    any()
+                )
+                assertThat(collectedDataParamCaptor.lastValue).isEqualTo(
+                    CollectedDataParam.createForSelfie(
+                        firstHighResResult = requireNotNull(successUploadState.firstHighResResult.data),
+                        firstLowResResult = requireNotNull(successUploadState.firstLowResResult.data),
+                        lastHighResResult = requireNotNull(successUploadState.lastHighResResult.data),
+                        lastLowResResult = requireNotNull(successUploadState.lastLowResResult.data),
+                        bestHighResResult = requireNotNull(successUploadState.bestHighResResult.data),
+                        bestLowResResult = requireNotNull(successUploadState.bestLowResResult.data),
+                        trainingConsent = trainingConsent,
+                        bestFaceScore = BEST_FACE_SCORE,
+                        faceScoreVariance = SCORE_VARIANCE,
+                        numFrames = NUM_FRAMES
                     )
                 )
             }

@@ -308,6 +308,7 @@ class IdentityCameraScanFragmentTest {
         identityViewModelFactory
     ) {
         override val fragmentId = 0
+        override val route = "testRoute"
 
         override fun onCameraReady() {}
 

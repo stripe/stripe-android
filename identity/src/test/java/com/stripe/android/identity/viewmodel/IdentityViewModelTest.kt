@@ -2,31 +2,48 @@ package com.stripe.android.identity.viewmodel
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Bundle
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.navigation.NavController
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFilePurpose
+import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.IdentityVerificationSheetContract
-import com.stripe.android.identity.VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
+import com.stripe.android.identity.R
+import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE
+import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE
+import com.stripe.android.identity.VERIFICATION_PAGE_DATA_HAS_ERROR
+import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_BACK
+import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_CONSENT
+import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_DOCTYPE
+import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_FRONT
+import com.stripe.android.identity.VERIFICATION_PAGE_DATA_MISSING_SELFIE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
+import com.stripe.android.identity.navigation.ConsentDestination
+import com.stripe.android.identity.navigation.DocSelectionDestination
+import com.stripe.android.identity.navigation.IdentityTopLevelDestination
+import com.stripe.android.identity.navigation.SelfieDestination
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
-import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.UploadedResult
-import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCaptureModels
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
@@ -42,9 +59,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.nullable
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
 import org.mockito.kotlin.times
@@ -92,8 +111,15 @@ internal class IdentityViewModelTest {
     }
 
     private val mockIdentityAnalyticsRequestFactory = mock<IdentityAnalyticsRequestFactory>()
+    private val mockScreenTracker = mock<ScreenTracker>()
+    private val mockController = mock<NavController>()
+    private val mockCollectedDataParam = mock<CollectedDataParam>()
+    private val mockOnMissingFront = mock<() -> Unit>()
+    private val mockOnMissingBack = mock<() -> Unit>()
+    private val mockOnReadyToSubmit = mock<() -> Unit>()
 
     val viewModel = IdentityViewModel(
+        ApplicationProvider.getApplicationContext(),
         IdentityVerificationSheetContract.Args(
             verificationSessionId = VERIFICATION_SESSION_ID,
             ephemeralKeySecret = EPHEMERAL_KEY,
@@ -106,7 +132,7 @@ internal class IdentityViewModelTest {
         mockIdentityIO,
         mockIdentityAnalyticsRequestFactory,
         mock(),
-        mock(),
+        mockScreenTracker,
         mock(),
         mock(),
         mock()
@@ -313,56 +339,257 @@ internal class IdentityViewModelTest {
     }
 
     @Test
-    fun verifyPostVerificationPageData(): Unit = runBlocking {
-        val collectedDataParamWithBiometricConsent = CollectedDataParam(biometricConsent = true)
+    fun `postVerificationPageDataAndMaybeNavigate - postFailure`() = runBlocking {
+        val throwable = java.lang.RuntimeException()
+        whenever(
+            mockIdentityRepository.postVerificationPageData(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenThrow(throwable)
 
-        assertThat(viewModel.verificationPageData.value.status).isEqualTo(Status.IDLE)
-
-        whenever(mockIdentityRepository.postVerificationPageData(any(), any(), any(), any()))
-            .then {
-                assertThat(viewModel.verificationPageData.value.status).isEqualTo(Status.LOADING)
-                VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
-            }
-
-        viewModel.postVerificationPageData(collectedDataParamWithBiometricConsent)
+        viewModel.postVerificationPageDataAndMaybeNavigate(
+            mockController,
+            mockCollectedDataParam,
+            ConsentDestination.ROUTE.route,
+            mockOnMissingFront,
+            mockOnMissingBack,
+            mockOnReadyToSubmit
+        )
 
         verify(mockIdentityRepository).postVerificationPageData(
             eq(VERIFICATION_SESSION_ID),
             eq(EPHEMERAL_KEY),
-            same(collectedDataParamWithBiometricConsent),
-            // clear everything but biometricConsent
-            eq(
-                ClearDataParam(
-                    biometricConsent = false,
-                    idDocumentType = true,
-                    idDocumentFront = true,
-                    idDocumentBack = true,
-                    face = true
-                )
-            )
+            same(mockCollectedDataParam),
+            any()
         )
-        assertThat(viewModel.verificationPageData.value.status).isEqualTo(Status.SUCCESS)
-        assertThat(viewModel.collectedData.value).isEqualTo(CollectedDataParam(biometricConsent = true))
-        assertThat(viewModel.missingRequirements.value).isEmpty()
+        assertThat(viewModel.errorCause.value).isEqualTo(throwable)
+        verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
+        verify(mockController).navigate(
+            eq(R.id.action_global_errorFragment),
+            any()
+        )
     }
 
     @Test
-    fun verifyPostVerificationPageSubmit(): Unit = runBlocking {
-        assertThat(viewModel.verificationPageSubmit.value.status).isEqualTo(Status.IDLE)
-
-        whenever(mockIdentityRepository.postVerificationPageSubmit(any(), any()))
-            .then {
-                assertThat(viewModel.verificationPageSubmit.value.status).isEqualTo(Status.LOADING)
-                VERIFICATION_PAGE_DATA_NOT_MISSING_BACK
-            }
-
-        viewModel.postVerificationPageSubmit()
-
-        verify(mockIdentityRepository).postVerificationPageSubmit(
-            eq(VERIFICATION_SESSION_ID),
-            eq(EPHEMERAL_KEY)
+    fun `postVerificationPageDataAndMaybeNavigate - missingConsent`() {
+        testPostVerificationPageDataAndMaybeNavigate(
+            VERIFICATION_PAGE_DATA_MISSING_CONSENT,
+            ConsentDestination
         )
-        assertThat(viewModel.verificationPageSubmit.value.status).isEqualTo(Status.SUCCESS)
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeNavigate - missDocType`() {
+        testPostVerificationPageDataAndMaybeNavigate(
+            VERIFICATION_PAGE_DATA_MISSING_DOCTYPE,
+            DocSelectionDestination
+        )
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeNavigate - missSelfie`() {
+        testPostVerificationPageDataAndMaybeNavigate(
+            VERIFICATION_PAGE_DATA_MISSING_SELFIE,
+            SelfieDestination
+        )
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeNavigate - missingFront`() {
+        testPostVerificationPageDataAndMaybeNavigateWithCallback(
+            VERIFICATION_PAGE_DATA_MISSING_FRONT
+        ) {
+            verify(mockOnMissingFront).invoke()
+        }
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeNavigate - missingBack`() {
+        testPostVerificationPageDataAndMaybeNavigateWithCallback(
+            VERIFICATION_PAGE_DATA_MISSING_BACK
+        ) {
+            verify(mockOnMissingBack).invoke()
+        }
+    }
+
+    @Test
+    fun `postVerificationPageDataAndMaybeNavigate - no missing`() {
+        testPostVerificationPageDataAndMaybeNavigateWithCallback(
+            CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
+        ) {
+            verify(mockOnReadyToSubmit).invoke()
+        }
+    }
+
+    @Test
+    fun `navigateToSelfieOrSubmit - requireSelfie`() = runBlocking {
+        viewModel._verificationPage.postValue(
+            Resource.success(
+                SUCCESS_VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE
+            )
+        )
+        viewModel.navigateToSelfieOrSubmit(
+            mockController,
+            ConsentDestination.ROUTE.route
+        )
+        verify(mockController).navigate(
+            eq(SelfieDestination.destination),
+            eq(SelfieDestination.argsBundle)
+        )
+    }
+
+    @Test
+    fun `navigateToSelfieOrSubmit - not requireSelfie - hasError`() {
+        runBlocking {
+            whenever(
+                mockIdentityRepository.postVerificationPageSubmit(
+                    any(),
+                    any()
+                )
+            ).thenReturn(VERIFICATION_PAGE_DATA_HAS_ERROR)
+
+            viewModel._verificationPage.postValue(
+                Resource.success(
+                    SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE
+                )
+            )
+
+            viewModel.navigateToSelfieOrSubmit(
+                mockController,
+                ConsentDestination.ROUTE.route
+            )
+
+            verify(mockIdentityRepository).postVerificationPageSubmit(
+                eq(VERIFICATION_SESSION_ID),
+                eq(EPHEMERAL_KEY)
+            )
+
+            assertThat(viewModel.verificationPageSubmit.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
+
+            verify(mockController).navigate(
+                eq(R.id.action_global_errorFragment),
+                any()
+            )
+        }
+    }
+
+    @Test
+    fun `navigateToSelfieOrSubmit - not requireSelfie - noError`() {
+        runBlocking {
+            whenever(
+                mockIdentityRepository.postVerificationPageSubmit(
+                    any(),
+                    any()
+                )
+            ).thenReturn(CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA)
+
+            viewModel._verificationPage.postValue(
+                Resource.success(
+                    SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE
+                )
+            )
+
+            viewModel.navigateToSelfieOrSubmit(
+                mockController,
+                ConsentDestination.ROUTE.route
+            )
+
+            verify(mockIdentityRepository).postVerificationPageSubmit(
+                eq(VERIFICATION_SESSION_ID),
+                eq(EPHEMERAL_KEY)
+            )
+
+            assertThat(viewModel.verificationPageSubmit.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
+
+            verify(mockController).navigate(
+                eq(R.id.action_global_confirmationFragment),
+                isNull()
+            )
+        }
+    }
+
+    private fun testPostVerificationPageDataAndMaybeNavigate(
+        verificationPageData: VerificationPageData,
+        targetTopLevelDestination: IdentityTopLevelDestination
+    ) = runBlocking {
+        whenever(
+            mockIdentityRepository.postVerificationPageData(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenReturn(verificationPageData)
+
+        val collectedDataParam = CollectedDataParam(biometricConsent = true)
+        viewModel.postVerificationPageDataAndMaybeNavigate(
+            mockController,
+            collectedDataParam,
+            ConsentDestination.ROUTE.route,
+            mockOnMissingFront,
+            mockOnMissingBack,
+            mockOnReadyToSubmit
+        )
+
+        verify(mockIdentityRepository).postVerificationPageData(
+            eq(VERIFICATION_SESSION_ID),
+            eq(EPHEMERAL_KEY),
+            same(collectedDataParam),
+            any()
+        )
+
+        verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
+        assertThat(viewModel.verificationPageData.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
+        assertThat(viewModel.collectedData.value).isEqualTo(collectedDataParam)
+        assertThat(viewModel.missingRequirements.value).isEqualTo(
+            verificationPageData.requirements.missings
+        )
+        verify(mockController).navigate(
+            eq(targetTopLevelDestination.destination),
+            nullable(Bundle::class.java)
+        )
+    }
+
+    private fun testPostVerificationPageDataAndMaybeNavigateWithCallback(
+        verificationPageData: VerificationPageData,
+        callback: () -> Unit
+    ) = runBlocking {
+        whenever(
+            mockIdentityRepository.postVerificationPageData(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        ).thenReturn(verificationPageData)
+
+        val collectedDataParam = CollectedDataParam(biometricConsent = true)
+        viewModel.postVerificationPageDataAndMaybeNavigate(
+            mockController,
+            collectedDataParam,
+            ConsentDestination.ROUTE.route,
+            mockOnMissingFront,
+            mockOnMissingBack,
+            mockOnReadyToSubmit
+        )
+
+        verify(mockIdentityRepository).postVerificationPageData(
+            eq(VERIFICATION_SESSION_ID),
+            eq(EPHEMERAL_KEY),
+            same(collectedDataParam),
+            any()
+        )
+
+        verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
+        assertThat(viewModel.verificationPageData.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
+        assertThat(viewModel.collectedData.value).isEqualTo(collectedDataParam)
+        assertThat(viewModel.missingRequirements.value).isEqualTo(
+            verificationPageData.requirements.missings
+        )
+        callback()
     }
 
     private fun testUploadManualSuccessResult(isFront: Boolean) {

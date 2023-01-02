@@ -1,7 +1,14 @@
 package com.stripe.android.identity.networking.models
 
-import androidx.annotation.IdRes
-import com.stripe.android.identity.R
+import com.stripe.android.identity.navigation.ConsentDestination
+import com.stripe.android.identity.navigation.DocSelectionDestination
+import com.stripe.android.identity.navigation.DriverLicenseScanDestination
+import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
+import com.stripe.android.identity.navigation.IDScanDestination
+import com.stripe.android.identity.navigation.IDUploadDestination
+import com.stripe.android.identity.navigation.PassportScanDestination
+import com.stripe.android.identity.navigation.PassportUploadDestination
+import com.stripe.android.identity.navigation.SelfieDestination
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -23,34 +30,38 @@ internal enum class Requirement {
     FACE;
 
     internal companion object {
-        private val SCAN_UPLOAD_FRAGMENT_ID_SET = setOf(
-            R.id.driverLicenseUploadFragment,
-            R.id.IDUploadFragment,
-            R.id.passportUploadFragment,
-            R.id.driverLicenseScanFragment,
-            R.id.IDScanFragment,
-            R.id.passportScanFragment
+        private val SCAN_UPLOAD_ROUTE_SET = setOf(
+            DriverLicenseUploadDestination.ROUTE,
+            IDUploadDestination.ROUTE,
+            PassportUploadDestination.ROUTE,
+            DriverLicenseScanDestination.ROUTE,
+            IDScanDestination.ROUTE,
+            PassportScanDestination.ROUTE
         )
 
         /**
-         * Checks whether the Requirement matches the Fragment the error occurred from.
+         * Checks whether the Requirement matches the route the error occurred from.
          */
-        fun Requirement.matchesFromFragment(@IdRes fromFragment: Int) =
+        fun Requirement.matchesFromRoute(fromRoute: String) =
             when (this) {
                 BIOMETRICCONSENT -> {
-                    fromFragment == R.id.consentFragment
+                    fromRoute == ConsentDestination.ROUTE.route
                 }
                 IDDOCUMENTBACK -> {
-                    SCAN_UPLOAD_FRAGMENT_ID_SET.contains(fromFragment)
+                    SCAN_UPLOAD_ROUTE_SET.any {
+                        it.route == fromRoute
+                    }
                 }
                 IDDOCUMENTFRONT -> {
-                    SCAN_UPLOAD_FRAGMENT_ID_SET.contains(fromFragment)
+                    SCAN_UPLOAD_ROUTE_SET.any {
+                        it.route == fromRoute
+                    }
                 }
                 IDDOCUMENTTYPE -> {
-                    fromFragment == R.id.docSelectionFragment
+                    fromRoute == DocSelectionDestination.ROUTE.route
                 }
                 FACE -> {
-                    fromFragment == R.id.selfieFragment
+                    fromRoute == SelfieDestination.ROUTE.route
                 }
             }
     }

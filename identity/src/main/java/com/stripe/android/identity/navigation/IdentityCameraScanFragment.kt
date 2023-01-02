@@ -11,6 +11,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.scanui.CameraView
@@ -24,8 +25,6 @@ import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.Companion.isBack
 import com.stripe.android.identity.states.IdentityScanState.Companion.isFront
-import com.stripe.android.identity.utils.navigateOnResume
-import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.flow.update
@@ -45,6 +44,8 @@ internal abstract class IdentityCameraScanFragment(
 
     @get:IdRes
     protected abstract val fragmentId: Int
+
+    protected abstract val route: String
 
     internal var cameraAdapter: CameraAdapter<CameraPreviewImage<Bitmap>>? = null
         set(value) {
@@ -125,7 +126,7 @@ internal abstract class IdentityCameraScanFragment(
                             }
                         }
 
-                        navigateOnResume(
+                        findNavController().navigateTo(
                             CouldNotCaptureDestination(
                                 scanType = identityScanViewModel.targetScanTypeFlow.value,
                                 requireLiveCapture =
@@ -141,8 +142,8 @@ internal abstract class IdentityCameraScanFragment(
                     }
                 },
                 onFailure = {
-                    Log.e(TAG, "Fail to observeForVerificationPage: $it")
-                    navigateToDefaultErrorFragment(it)
+                    identityViewModel.errorCause.postValue(it)
+                    findNavController().navigateToErrorScreenWithDefaultValues(requireContext())
                 }
             )
         }
