@@ -173,9 +173,7 @@ internal fun DocumentScanScreen(
                 identityScanViewModel = identityScanViewModel,
                 verificationPage = verificationPage,
                 navController = navController,
-                cameraManager = cameraManager,
-                screenName = route.routeToScreenName(),
-                scanType = frontScanType
+                cameraManager = cameraManager
             ) {
                 if (shouldStartFromBack) {
                     startScanning(
@@ -195,6 +193,12 @@ internal fun DocumentScanScreen(
                     )
                 }
             }
+
+            ScreenTransitionLaunchedEffect(
+                identityViewModel = identityViewModel,
+                scanType = frontScanType,
+                screenName = route.routeToScreenName()
+            )
 
             Column(
                 modifier = Modifier

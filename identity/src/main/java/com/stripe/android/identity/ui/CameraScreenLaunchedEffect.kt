@@ -27,8 +27,6 @@ import kotlinx.coroutines.launch
  *  * Initialize identityScanFlow when pageAndModelFiles are ready
  *  * Track fps when an interim result is available
  *  * Process final result when one is available
- *  * Track screen presented
- *  * Track screen transition finished
  *
  * TODO(ccen): These logics were inside Fragment.onViewCreated before migrated to Jetpack Compose.
  *   They should be encapsulated within [IdentityScanViewModel] with corresponding events from
@@ -41,8 +39,6 @@ internal fun CameraScreenLaunchedEffect(
     verificationPage: VerificationPage,
     navController: NavController,
     cameraManager: IdentityCameraManager,
-    screenName: String,
-    scanType: IdentityScanState.ScanType,
     onCameraReady: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -147,19 +143,6 @@ internal fun CameraScreenLaunchedEffect(
                     )
                 )
             }
-        }
-
-        // Tracks screen presented
-        identityViewModel.sendAnalyticsRequest(
-            identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                scanType = scanType,
-                screenName = screenName
-            )
-        )
-
-        // Tracks screen transition finish
-        lifecycleOwner.lifecycleScope.launch(identityViewModel.workContext) {
-            identityViewModel.screenTracker.screenTransitionFinish(screenName)
         }
     }
 }

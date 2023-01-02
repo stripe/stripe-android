@@ -1045,6 +1045,23 @@ internal class IdentityViewModel constructor(
         }
     }
 
+    fun trackScreenPresented(scanType: IdentityScanState.ScanType?, screenName: String) {
+        Log.d("BGLM", "trackScreenPresented: $scanType, $screenName")
+        sendAnalyticsRequest(
+            identityAnalyticsRequestFactory.screenPresented(
+                scanType = scanType,
+                screenName = screenName
+            )
+        )
+    }
+
+    fun trackScreenTransitionFinish(screenName: String) {
+        Log.d("BGLM", "trackScreenTransitionFinish: $screenName")
+        viewModelScope.launch(workContext) {
+            screenTracker.screenTransitionFinish(screenName)
+        }
+    }
+
     /**
      * Send VerificationSucceeded analytics event with isFromFallbackUrl = false
      * based on values in [analyticsState].

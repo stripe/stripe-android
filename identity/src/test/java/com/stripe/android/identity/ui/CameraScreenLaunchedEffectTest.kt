@@ -336,25 +336,6 @@ class CameraScreenLaunchedEffectTest {
         }
     }
 
-    @Test
-    fun verifyScreenPresentedAnalytic() {
-        testCameraScreenLaunchedEffect {
-            verify(mockIdentityAnalyticsRequestFactory).screenPresented(
-                eq(IdentityScanState.ScanType.ID_FRONT),
-                eq(SCREEN_NAME)
-            )
-        }
-    }
-
-    @Test
-    fun verifyScreenTransitionFinishAnalytic() {
-        testCameraScreenLaunchedEffect {
-            runBlocking {
-                verify(mockScreenTracker).screenTransitionFinish(eq(SCREEN_NAME))
-            }
-        }
-    }
-
     private fun testCameraScreenLaunchedEffect(
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
@@ -365,8 +346,6 @@ class CameraScreenLaunchedEffectTest {
                 verificationPage = mockVerificationPage,
                 navController = mockNavController,
                 cameraManager = mockCameraManager,
-                screenName = SCREEN_NAME,
-                scanType = IdentityScanState.ScanType.ID_FRONT,
                 onCameraReady = mockOnCameraReady
             )
         }
@@ -374,7 +353,6 @@ class CameraScreenLaunchedEffectTest {
     }
 
     private companion object {
-        const val SCREEN_NAME = "TEST_SCREEN_NAME"
         const val FACE_SCORE = 123f
         const val ID_FRONT_SCORE = 456f
         const val ID_BACK_SCORE = 789f
