@@ -1220,7 +1220,7 @@ internal class IdentityViewModel constructor(
      * Check the upload status of the [selfieUploadState], post it with VerificationPageData and
      * navigate accordingly.
      */
-    fun collectSelfieUploadedStateAndPost(
+    fun collectDataForSelfieScreen(
         navController: NavController,
         faceDetectorTransitioner: FaceDetectorTransitioner,
         allowImageCollection: Boolean

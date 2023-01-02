@@ -156,7 +156,7 @@ class SelfieScreenTest {
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).performClick()
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
 
-            verify(mockIdentityViewModel).collectSelfieUploadedStateAndPost(
+            verify(mockIdentityViewModel).collectDataForSelfieScreen(
                 same(mockNavController),
                 same(faceDetectorTransitioner),
                 eq(false)

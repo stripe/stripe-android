@@ -258,7 +258,7 @@ internal fun SelfieScanScreen(
                     loadingButtonState = LoadingButtonState.Loading
                     allowImageCollectionCheckboxEnabled = false
 
-                    identityViewModel.collectSelfieUploadedStateAndPost(
+                    identityViewModel.collectDataForSelfieScreen(
                         navController = navController,
                         faceDetectorTransitioner =
                         requireNotNull(
