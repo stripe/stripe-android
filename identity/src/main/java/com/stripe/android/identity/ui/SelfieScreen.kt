@@ -177,9 +177,7 @@ internal fun SelfieScanScreen(
                 identityScanViewModel = identityScanViewModel,
                 verificationPage = verificationPage,
                 navController = navController,
-                cameraManager = cameraManager,
-                screenName = SCREEN_NAME_SELFIE,
-                scanType = IdentityScanState.ScanType.SELFIE
+                cameraManager = cameraManager
             ) {
                 startScanning(
                     IdentityScanState.ScanType.SELFIE,
@@ -188,6 +186,12 @@ internal fun SelfieScanScreen(
                     lifecycleOwner = lifecycleOwner
                 )
             }
+
+            ScreenTransitionLaunchedEffect(
+                identityViewModel = identityViewModel,
+                screenName = SCREEN_NAME_SELFIE,
+                scanType = IdentityScanState.ScanType.SELFIE
+            )
 
             Column(
                 modifier = Modifier
