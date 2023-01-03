@@ -51,6 +51,8 @@ class DocumentScanScreenTest {
     private val verificationPageLiveData =
         MutableLiveData(Resource.success(mock<VerificationPage>()))
     private val targetScanTypeFlow = MutableStateFlow<IdentityScanState.ScanType?>(null)
+    private val displayStateChangedFlow =
+        MutableStateFlow<Pair<IdentityScanState, IdentityScanState?>?>(null)
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn verificationPageLiveData
@@ -61,6 +63,7 @@ class DocumentScanScreenTest {
     }
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel> {
         on { targetScanTypeFlow } doReturn targetScanTypeFlow
+        on { displayStateChangedFlow } doReturn displayStateChangedFlow
         on { interimResults } doReturn mock()
         on { finalResult } doReturn mock()
     }
@@ -143,6 +146,9 @@ class DocumentScanScreenTest {
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
         targetScanTypeFlow.update { targetScanType }
+        displayState?.let {
+            displayStateChangedFlow.update { displayState to mock() }
+        }
         composeTestRule.setContent {
             DocumentScanScreen(
                 navController = mockNavController,
@@ -157,7 +163,6 @@ class DocumentScanScreenTest {
                     R.string.position_id_front,
                     R.string.position_id_back
                 ),
-                newDisplayState = displayState,
                 collectedDataParamType = CollectedDataParam.Type.IDCARD,
                 route = IDScanDestination.ROUTE.routeBase
             )

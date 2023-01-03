@@ -18,6 +18,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -83,11 +84,16 @@ internal fun DocumentScanScreen(
     backScanType: IdentityScanState.ScanType?,
     shouldStartFromBack: Boolean,
     messageRes: DocumentScanMessageRes,
-    newDisplayState: IdentityScanState?,
     collectedDataParamType: CollectedDataParam.Type,
     route: String
 ) {
     MdcTheme {
+        val changedDisplayState by identityScanViewModel.displayStateChangedFlow.collectAsState()
+        val newDisplayState by remember {
+            derivedStateOf {
+                changedDisplayState?.first
+            }
+        }
         val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
         val context = LocalContext.current
 
