@@ -85,9 +85,10 @@ internal abstract class BaseSheetViewModel(
         ?: application.applicationInfo.loadLabel(application.packageManager).toString()
 
     // a fatal error
-    protected val _fatal = MutableStateFlow<Throwable?>(null)
+    protected val fatalError = MutableStateFlow<Throwable?>(null)
 
     @VisibleForTesting
+    @Suppress("VariableNaming")
     internal val _isGooglePayReady = MutableStateFlow(savedStateHandle.get<Boolean>(SAVE_GOOGLE_PAY_READY) ?: false)
     internal val isGooglePayReady: StateFlow<Boolean> = _isGooglePayReady
 
@@ -97,11 +98,13 @@ internal abstract class BaseSheetViewModel(
     internal val isResourceRepositoryReady: StateFlow<Boolean?> = _isResourceRepositoryReady
 
     @VisibleForTesting
+    @Suppress("VariableNaming")
     internal val _isLinkEnabled = MutableStateFlow(false)
     internal val isLinkEnabled: StateFlow<Boolean> = _isLinkEnabled
 
     internal val activeLinkSession = MutableStateFlow(false)
 
+    @Suppress("VariableNaming")
     protected val _linkConfiguration = MutableStateFlow(
         savedStateHandle.get<LinkPaymentLauncher.Configuration?>(LINK_CONFIGURATION)
     )
@@ -163,7 +166,6 @@ internal abstract class BaseSheetViewModel(
     private val _primaryButtonUIState = MutableStateFlow<PrimaryButton.UIState?>(null)
     val primaryButtonUIState: StateFlow<PrimaryButton.UIState?> = _primaryButtonUIState
 
-    // TODO: (jameswoo) Figure out if there is a better way to force state flow to update
     private val _resetPrimaryButtonUI = MutableStateFlow(0L)
     internal val resetPrimaryButtonUI: StateFlow<Long> = _resetPrimaryButtonUI
 

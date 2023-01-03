@@ -45,6 +45,7 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @JvmSuppressWildcards
+@Suppress("TooManyFunctions")
 internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
     prefsRepositoryFactory: (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
@@ -129,7 +130,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onFatal(throwable: Throwable) {
-        _fatal.value = throwable
+        fatalError.value = throwable
         _paymentOptionResult.value =
             PaymentOptionResult.Failed(
                 error = throwable,
@@ -140,7 +141,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override fun onUserCancel() {
         _paymentOptionResult.value =
             PaymentOptionResult.Canceled(
-                mostRecentError = _fatal.value,
+                mostRecentError = fatalError.value,
                 paymentMethods = paymentMethods.value
             )
     }

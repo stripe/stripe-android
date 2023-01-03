@@ -126,6 +126,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val startConfirm: StateFlow<Event<ConfirmStripeIntentParams>?> = _startConfirm
 
     @VisibleForTesting
+    @Suppress("VariableNaming")
     internal val _viewState = MutableStateFlow<PaymentSheetViewState?>(null)
     internal val viewState: StateFlow<PaymentSheetViewState?> = _viewState
 
@@ -545,7 +546,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onFatal(throwable: Throwable) {
         logger.error("Payment Sheet error", throwable)
-        _fatal.value = throwable
+        fatalError.value = throwable
         _paymentSheetResult.value = PaymentSheetResult.Failed(throwable)
     }
 

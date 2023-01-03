@@ -261,16 +261,16 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         paymentMethodCode: String,
         linkAccountStatus: AccountStatus?
     ): Boolean {
+        val validStatusStates = setOf(
+            AccountStatus.NeedsVerification,
+            AccountStatus.VerificationStarted,
+            AccountStatus.SignedOut
+        )
+        val linkInlineSelectionValid = sheetViewModel.linkInlineSelection.value != null
         return sheetViewModel.isLinkEnabled.value && sheetViewModel.stripeIntent.value
             ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
             paymentMethodCode == PaymentMethod.Type.Card.code &&
-            (
-                linkAccountStatus in setOf(
-                    AccountStatus.NeedsVerification,
-                    AccountStatus.VerificationStarted,
-                    AccountStatus.SignedOut
-                ) || sheetViewModel.linkInlineSelection.value != null
-            )
+            (linkAccountStatus in validStatusStates || linkInlineSelectionValid)
     }
 
     private fun onLinkSignupStateChanged(
