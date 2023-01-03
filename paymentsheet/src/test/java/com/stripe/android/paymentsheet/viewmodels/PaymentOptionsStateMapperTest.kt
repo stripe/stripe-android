@@ -119,7 +119,6 @@ class PaymentOptionsStateMapperTest {
                 isNotPaymentFlow = true,
             )
 
-
             val cards = PaymentMethodFixtures.createCards(2)
             val selectedPaymentMethod = PaymentSelection.Saved(paymentMethod = cards.last())
             paymentMethodsFlow.value = cards

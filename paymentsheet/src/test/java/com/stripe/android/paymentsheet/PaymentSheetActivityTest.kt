@@ -857,8 +857,8 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.message.isVisible).isFalse()
             assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
 
-             assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
-             assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
+            assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
+            assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
 
             viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
 
