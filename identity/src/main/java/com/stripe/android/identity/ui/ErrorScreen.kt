@@ -26,9 +26,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 @Composable
 internal fun ErrorScreen(
+    identityViewModel: IdentityViewModel,
     title: String,
     modifier: Modifier = Modifier,
     message1: String? = null,
@@ -46,6 +49,10 @@ internal fun ErrorScreen(
                 )
         ) {
             val scrollState = rememberScrollState()
+            ScreenTransitionLaunchedEffect(
+                identityViewModel = identityViewModel,
+                screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
+            )
             Column(
                 modifier = Modifier
                     .weight(1f)

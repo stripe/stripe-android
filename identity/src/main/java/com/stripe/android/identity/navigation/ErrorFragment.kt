@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import com.stripe.android.identity.IdentityVerificationSheet
@@ -19,6 +21,7 @@ import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHO
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_ROUTE
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 /**
  * Fragment to show generic error.
@@ -26,7 +29,11 @@ import com.stripe.android.identity.ui.ErrorScreenButton
 internal class ErrorFragment(
     private val verificationFlowFinishable: VerificationFlowFinishable,
     identityViewModelFactory: ViewModelProvider.Factory
-) : BaseErrorFragment(identityViewModelFactory) {
+) : Fragment() {
+
+    private val identityViewModel: IdentityViewModel by activityViewModels {
+        identityViewModelFactory
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,6 +55,7 @@ internal class ErrorFragment(
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             ErrorScreen(
+                identityViewModel = identityViewModel,
                 title = requireNotNull(args.getString(ARG_ERROR_TITLE)),
                 message1 = requireNotNull(args.getString(ARG_ERROR_CONTENT)),
                 bottomButton = ErrorScreenButton(

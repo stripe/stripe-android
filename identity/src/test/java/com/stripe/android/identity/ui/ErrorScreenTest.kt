@@ -125,6 +125,7 @@ class ErrorScreenTest {
     ) {
         composeTestRule.setContent {
             ErrorScreen(
+                identityViewModel = mock(),
                 title = ERROR_TITLE,
                 message1 = message1,
                 message2 = message2,
