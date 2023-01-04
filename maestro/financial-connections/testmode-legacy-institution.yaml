@@ -26,7 +26,9 @@ appId: com.stripe.android.financialconnections.example
       APP_ID: com.stripe.android.financialconnections.example
 ###############################################
 # SELECT ALL ACCOUNTS
-- assertVisible: "Select all accounts"
+- extendedWaitUntil:
+    visible: "Select all accounts"
+    timeout: 30000
 - tapOn: "Select all accounts" # select all accounts
 - tapOn: "Link accounts"
 # CONFIRM AND COMPLETE
