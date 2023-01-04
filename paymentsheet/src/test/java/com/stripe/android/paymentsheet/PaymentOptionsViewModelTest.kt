@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -24,8 +25,8 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionT
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.utils.TestUtils.observeEventsForever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -116,24 +117,21 @@ internal class PaymentOptionsViewModelTest {
         }
 
     @Test
-    fun `resolveTransitionTarget no new card`() {
+    fun `resolveTransitionTarget no new card`() = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(newPaymentSelection = null)
         )
 
-        var transitionTarget: TransitionTarget? = null
-        viewModel.transition.observeEventsForever {
-            transitionTarget = it
-        }
-
         // no customer, no new card, no paymentMethods
         viewModel.resolveTransitionTarget()
 
-        assertThat(transitionTarget).isNull()
+        val target = viewModel.transition.stateIn(viewModel.viewModelScope).value
+
+        assertThat(target).isNull()
     }
 
     @Test
-    fun `resolveTransitionTarget new card saved`() {
+    fun `resolveTransitionTarget new card saved`() = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -143,16 +141,16 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        val transitionTarget = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTarget.add(it) }
-
         viewModel.resolveTransitionTarget()
 
-        assertThat(transitionTarget).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
+        val target = viewModel.transition.stateIn(viewModel.viewModelScope).value
+
+        assertThat(target?.peekContent())
+            .isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
     }
 
     @Test
-    fun `resolveTransitionTarget new card NOT saved`() {
+    fun `resolveTransitionTarget new card NOT saved`() = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -162,17 +160,17 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        val transitionTarget = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTarget.add(it) }
+        val target = viewModel.transition.stateIn(viewModel.viewModelScope)
 
         viewModel.resolveTransitionTarget()
-        assertThat(transitionTarget).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
 
-        // Reset the list of observed values
-        transitionTarget.clear()
+        assertThat(target.value?.peekContent())
+            .isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
 
         viewModel.resolveTransitionTarget()
-        assertThat(transitionTarget).isEmpty()
+
+        assertThat(target.value?.peekContent())
+            .isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
     }
 
     @Test
@@ -182,8 +180,10 @@ internal class PaymentOptionsViewModelTest {
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(paymentMethods = cards)
         )
 
+        assertThat(viewModel.paymentMethods.value)
+            .containsExactly(cards[0], cards[1], cards[2])
+
         viewModel.removePaymentMethod(cards[1])
-        idleLooper()
 
         assertThat(viewModel.paymentMethods.value)
             .containsExactly(cards[0], cards[2])
@@ -201,7 +201,6 @@ internal class PaymentOptionsViewModelTest {
         assertThat(viewModel.selection.value).isEqualTo(selection)
 
         viewModel.removePaymentMethod(selection.paymentMethod)
-        idleLooper()
 
         assertThat(viewModel.selection.value).isNull()
     }

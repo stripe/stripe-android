@@ -155,7 +155,7 @@ internal class USBankAccountFormFragment : Fragment() {
         )
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                sheetViewModel?.primaryButtonState?.observe(viewLifecycleOwner) { state ->
+                sheetViewModel?.primaryButtonState?.collect { state ->
                     // When the primary button state is StartProcessing or FinishProcessing
                     // we should disable the inputs of this form. StartProcessing shows the loading
                     // spinner, FinishProcessing shows the checkmark animation

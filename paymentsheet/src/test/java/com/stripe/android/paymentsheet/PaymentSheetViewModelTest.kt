@@ -3,7 +3,9 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.testIn
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -19,7 +21,6 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -40,7 +41,6 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
@@ -49,10 +49,10 @@ import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.utils.TestUtils.observeEventsForever
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -149,17 +149,12 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `checkout() should confirm saved card payment methods`() = runTest {
         val viewModel = createViewModel()
-        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
-        viewModel.startConfirm.observeForever {
-            confirmParams.add(it)
-        }
 
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout(CheckoutIdentifier.None)
 
-        assertThat(confirmParams).hasSize(1)
-        assertThat(confirmParams[0].peekContent())
+        assertThat(viewModel.startConfirm.value?.peekContent())
             .isEqualTo(
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     requireNotNull(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
@@ -174,17 +169,12 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `checkout() should confirm saved us_bank_account payment methods`() = runTest {
         val viewModel = createViewModel()
-        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
-        viewModel.startConfirm.observeForever {
-            confirmParams.add(it)
-        }
 
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout(CheckoutIdentifier.None)
 
-        assertThat(confirmParams).hasSize(1)
-        assertThat(confirmParams[0].peekContent())
+        assertThat(viewModel.startConfirm.value?.peekContent())
             .isEqualTo(
                 ConfirmPaymentIntentParams.createWithPaymentMethodId(
                     requireNotNull(PaymentMethodFixtures.US_BANK_ACCOUNT.id),
@@ -205,18 +195,12 @@ internal class PaymentSheetViewModelTest {
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         )
 
-        val events = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
-        viewModel.startConfirm.observeForever {
-            events.add(it)
-        }
-
         val paymentSelection =
             PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout(CheckoutIdentifier.None)
 
-        assertThat(events).hasSize(1)
-        val confirmParams = events[0].peekContent() as ConfirmSetupIntentParams
+        val confirmParams = viewModel.startConfirm.value?.peekContent() as ConfirmSetupIntentParams
         assertThat(confirmParams.mandateData)
             .isNotNull()
     }
@@ -224,10 +208,6 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `checkout() should confirm new payment methods`() = runTest {
         val viewModel = createViewModel()
-        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
-        viewModel.startConfirm.observeForever {
-            confirmParams.add(it)
-        }
 
         val paymentSelection = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -237,8 +217,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout(CheckoutIdentifier.None)
 
-        assertThat(confirmParams).hasSize(1)
-        assertThat(confirmParams[0].peekContent())
+        assertThat(viewModel.startConfirm.value?.peekContent())
             .isEqualTo(
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -252,8 +231,6 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `checkout() with shipping should confirm new payment methods`() = runTest {
-        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
-
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
@@ -267,10 +244,6 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        viewModel.startConfirm.observeForever {
-            confirmParams.add(it)
-        }
-
         val paymentSelection = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             CardBrand.Visa,
@@ -279,8 +252,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout(CheckoutIdentifier.None)
 
-        assertThat(confirmParams).hasSize(1)
-        assertThat(confirmParams[0].peekContent())
+        assertThat(viewModel.startConfirm.value?.peekContent())
             .isEqualTo(
                 ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                     PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -357,87 +329,55 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Google Pay checkout cancelled returns to Ready state`() {
+    fun `Google Pay checkout cancelled returns to Ready state`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.updateSelection(PaymentSelection.GooglePay)
         viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
 
-        val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
-            .observeForever {
-                viewState.add(it)
-            }
+        val buttonState = viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
+            .stateIn(viewModel.viewModelScope)
 
-        val processing: MutableList<Boolean> = mutableListOf()
-        viewModel.processing.observeForever {
-            processing.add(it)
-        }
-
-        assertThat(viewState.size).isEqualTo(1)
-        assertThat(processing.size).isEqualTo(1)
-        assertThat(viewState[0])
+        assertThat(buttonState.value)
             .isEqualTo(PaymentSheetViewState.StartProcessing)
-        assertThat(processing[0]).isTrue()
+        assertThat(viewModel.processing.value).isTrue()
 
         viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
-        assertThat(viewState.size).isEqualTo(2)
-        assertThat(processing.size).isEqualTo(2)
-        assertThat(viewState[1])
+        assertThat(buttonState.value)
             .isEqualTo(PaymentSheetViewState.Reset(null))
-        assertThat(processing[1]).isFalse()
+        assertThat(viewModel.processing.value).isFalse()
     }
 
     @Test
-    fun `On checkout clear the previous view state error`() {
+    fun `On checkout clear the previous view state error`() = runTest {
         val viewModel = createViewModel()
-        val googleViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
         viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
-            .observeForever {
-                googleViewState.add(it)
-            }
 
-        val buyViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
-            .observeForever {
-                buyViewState.add(it)
-            }
-
-        val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.viewState.observeForever {
-            viewState.add(it)
-        }
+        val turbine1 = viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
+            .testIn(backgroundScope)
+        val turbine2 = viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
+            .testIn(backgroundScope)
 
         viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
 
-        assertThat(googleViewState[0]).isEqualTo(PaymentSheetViewState.Reset(null))
-        assertThat(buyViewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
+        assertThat(turbine1.awaitItem()).isEqualTo(PaymentSheetViewState.Reset(null))
+        assertThat(turbine2.awaitItem()).isEqualTo(PaymentSheetViewState.StartProcessing)
     }
 
     @Test
-    fun `Google Pay checkout failed returns to Ready state and shows error`() {
+    fun `Google Pay checkout failed returns to Ready state and shows error`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.updateSelection(PaymentSelection.GooglePay)
         viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
 
-        val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
-            .observeForever {
-                viewState.add(it)
-            }
+        val buttonState = viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
+            .stateIn(viewModel.viewModelScope)
 
-        val processing: MutableList<Boolean> = mutableListOf()
-        viewModel.processing.observeForever {
-            processing.add(it)
-        }
-
-        assertThat(viewState.size).isEqualTo(1)
-        assertThat(processing.size).isEqualTo(1)
-        assertThat(viewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
-        assertThat(processing[0]).isTrue()
+        assertThat(buttonState.value)
+            .isEqualTo(PaymentSheetViewState.StartProcessing)
+        assertThat(viewModel.processing.value).isTrue()
 
         viewModel.onGooglePayResult(
             GooglePayPaymentMethodLauncher.Result.Failed(
@@ -446,12 +386,9 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
-        assertThat(processing.size).isEqualTo(2)
-
-        assertThat(viewState.size).isEqualTo(2)
-        assertThat(viewState[1])
+        assertThat(buttonState.value)
             .isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage("An internal error occurred.")))
-        assertThat(processing[1]).isFalse()
+        assertThat(viewModel.processing.value).isFalse()
     }
 
     @Test
@@ -462,24 +399,15 @@ internal class PaymentSheetViewModelTest {
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             viewModel.updateSelection(selection)
 
-            val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-            viewModel.viewState.observeForever {
-                viewState.add(it)
-            }
-
-            var paymentSheetResult: PaymentSheetResult? = null
-            viewModel.paymentSheetResult.observeForever {
-                paymentSheetResult = it
-            }
-
             viewModel.onPaymentResult(PaymentResult.Completed)
 
-            assertThat(viewState[1])
+            assertThat(viewModel.viewState.value)
                 .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
 
-            (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
+            (viewModel.viewState.value as PaymentSheetViewState.FinishProcessing).onComplete()
 
-            assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
+            assertThat(viewModel.paymentSheetResult.value)
+                .isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
                 .onPaymentSuccess(selection)
@@ -504,24 +432,15 @@ internal class PaymentSheetViewModelTest {
             )
             viewModel.updateSelection(selection)
 
-            val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-            viewModel.viewState.observeForever {
-                viewState.add(it)
-            }
-
-            var paymentSheetResult: PaymentSheetResult? = null
-            viewModel.paymentSheetResult.observeForever {
-                paymentSheetResult = it
-            }
-
             viewModel.onPaymentResult(PaymentResult.Completed)
 
-            assertThat(viewState[1])
+            assertThat(viewModel.viewState.value)
                 .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
 
-            (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
+            (viewModel.viewState.value as PaymentSheetViewState.FinishProcessing).onComplete()
 
-            assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
+            assertThat(viewModel.paymentSheetResult.value)
+                .isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
                 .onPaymentSuccess(selection)
@@ -546,15 +465,10 @@ internal class PaymentSheetViewModelTest {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(selection)
 
-        var stripeIntent: StripeIntent? = null
-        viewModel.stripeIntent.observeForever {
-            stripeIntent = it
-        }
-
         viewModel.onPaymentResult(PaymentResult.Failed(Throwable()))
         verify(eventReporter).onPaymentFailure(selection)
 
-        assertThat(stripeIntent).isNull()
+        assertThat(viewModel.stripeIntent.value).isNull()
     }
 
     @Test
@@ -562,19 +476,10 @@ internal class PaymentSheetViewModelTest {
         runTest {
             val viewModel = createViewModel()
 
-            val viewStateList = mutableListOf<PaymentSheetViewState>()
-            viewModel.viewState.observeForever {
-                viewStateList.add(it)
-            }
-
             val errorMessage = "very helpful error message"
             viewModel.onPaymentResult(PaymentResult.Failed(Throwable(errorMessage)))
 
-            assertThat(viewStateList[0])
-                .isEqualTo(
-                    PaymentSheetViewState.Reset(null)
-                )
-            assertThat(viewStateList[1])
+            assertThat(viewModel.viewState.value)
                 .isEqualTo(
                     PaymentSheetViewState.Reset(
                         UserErrorMessage(errorMessage)
@@ -585,12 +490,8 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `fetchPaymentIntent() should update ViewState LiveData`() {
         val viewModel = createViewModel()
-        var viewState: PaymentSheetViewState? = null
-        viewModel.viewState.observeForever {
-            viewState = it
-        }
 
-        assertThat(viewState)
+        assertThat(viewModel.viewState.value)
             .isEqualTo(
                 PaymentSheetViewState.Reset(null)
             )
@@ -599,11 +500,8 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Loading payment sheet state should propagate errors`() = runBlocking {
         val viewModel = createViewModel(shouldFailLoad = true)
-        var result: PaymentSheetResult? = null
-        viewModel.paymentSheetResult.observeForever {
-            result = it
-        }
-        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
+        assertThat(viewModel.paymentSheetResult.value)
+            .isInstanceOf(PaymentSheetResult.Failed::class.java)
     }
 
     @Test
@@ -614,12 +512,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        var result: PaymentSheetResult? = null
-        viewModel.paymentSheetResult.observeForever {
-            result = it
-        }
-
-        assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
+        assertThat((viewModel.paymentSheetResult.value as? PaymentSheetResult.Failed)?.error?.message)
             .startsWith(
                 "None of the requested payment methods ([unsupported_payment_type]) " +
                     "match the supported payment types "
@@ -682,11 +575,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `isGooglePayReady without google pay config should emit false`() {
         val viewModel = createViewModel(PaymentSheetFixtures.ARGS_CUSTOMER_WITHOUT_GOOGLEPAY)
-        var isReady: Boolean? = null
-        viewModel.isGooglePayReady.observeForever {
-            isReady = it
-        }
-        assertThat(isReady)
+        assertThat(viewModel.isGooglePayReady.value)
             .isFalse()
     }
 
@@ -701,11 +590,7 @@ internal class PaymentSheetViewModelTest {
                 )
             )
         )
-        var isReady: Boolean? = null
-        viewModel.isGooglePayReady.observeForever {
-            isReady = it
-        }
-        assertThat(isReady)
+        assertThat(viewModel.isGooglePayReady.value)
             .isFalse()
     }
 
@@ -719,54 +604,68 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Transition only happens when view model is ready`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
-        val observedTransitions = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
-
         viewModel.transitionToFirstScreenWhenReady()
-        assertThat(observedTransitions).isEmpty()
+        assertThat(viewModel.transition.value?.peekContent())
+            .isNull()
 
         viewModel._isGooglePayReady.value = true
-        assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+
+        idleLooper()
+
+        assertThat(viewModel.transition.value?.peekContent())
+            .isEqualTo(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
     fun `buyButton is enabled when primaryButtonEnabled is true, else not processing, not editing, and a selection has been made`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
-        var isEnabled = false
-
-        viewModel.ctaEnabled.observeForever {
-            isEnabled = it
-        }
+        val isEnabled = viewModel.ctaEnabled.stateIn(viewModel.viewModelScope)
 
         viewModel.savedStateHandle[SAVE_PROCESSING] = false
         viewModel.updateSelection(PaymentSelection.GooglePay)
         viewModel.setEditing(false)
 
-        assertThat(isEnabled).isTrue()
+        idleLooper()
+
+        assertThat(isEnabled.value).isTrue()
 
         viewModel.updateSelection(null)
-        assertThat(isEnabled).isFalse()
+        assertThat(isEnabled.value).isFalse()
+
+        idleLooper()
 
         viewModel.updateSelection(PaymentSelection.GooglePay)
-        assertThat(isEnabled).isTrue()
+        assertThat(isEnabled.value).isTrue()
+
+        idleLooper()
 
         viewModel.updatePrimaryButtonUIState(primaryButtonUIState.copy(enabled = false))
-        assertThat(isEnabled).isFalse()
+        assertThat(isEnabled.value).isFalse()
+
+        idleLooper()
 
         viewModel.updatePrimaryButtonUIState(primaryButtonUIState.copy(enabled = true))
-        assertThat(isEnabled).isTrue()
+        assertThat(isEnabled.value).isTrue()
+
+        idleLooper()
 
         viewModel.savedStateHandle[SAVE_PROCESSING] = true
-        assertThat(isEnabled).isFalse()
+        assertThat(isEnabled.value).isFalse()
+
+        idleLooper()
 
         viewModel.savedStateHandle[SAVE_PROCESSING] = false
-        assertThat(isEnabled).isTrue()
+        assertThat(isEnabled.value).isTrue()
+
+        idleLooper()
 
         viewModel.setEditing(true)
-        assertThat(isEnabled).isFalse()
+        assertThat(isEnabled.value).isFalse()
+
+        idleLooper()
 
         viewModel.setEditing(false)
-        assertThat(isEnabled).isTrue()
+        assertThat(isEnabled.value).isTrue()
     }
 
     @Test

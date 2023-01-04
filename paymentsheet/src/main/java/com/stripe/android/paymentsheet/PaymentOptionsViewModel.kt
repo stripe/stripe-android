@@ -8,7 +8,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -36,6 +35,7 @@ import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -45,6 +45,7 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @JvmSuppressWildcards
+@Suppress("TooManyFunctions")
 internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
     prefsRepositoryFactory: (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
@@ -84,7 +85,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     // and how to populate that view.
     override var newPaymentSelection = args.state.newPaymentSelection
 
-    override var linkInlineSelection = MutableLiveData<PaymentSelection.New.LinkInline?>(
+    override var linkInlineSelection = MutableStateFlow(
         args.state.newPaymentSelection as? PaymentSelection.New.LinkInline,
     )
 
@@ -129,19 +130,19 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onFatal(throwable: Throwable) {
-        _fatal.value = throwable
+        fatalError.value = throwable
         _paymentOptionResult.value =
             PaymentOptionResult.Failed(
                 error = throwable,
-                paymentMethods = _paymentMethods.value
+                paymentMethods = paymentMethods.value
             )
     }
 
     override fun onUserCancel() {
         _paymentOptionResult.value =
             PaymentOptionResult.Canceled(
-                mostRecentError = _fatal.value,
-                paymentMethods = _paymentMethods.value
+                mostRecentError = fatalError.value,
+                paymentMethods = paymentMethods.value
             )
     }
 
@@ -255,7 +256,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.value =
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
-                paymentMethods = _paymentMethods.value
+                paymentMethods = paymentMethods.value
             )
     }
 
@@ -264,7 +265,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.value =
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
-                paymentMethods = _paymentMethods.value
+                paymentMethods = paymentMethods.value
             )
     }
 
@@ -288,11 +289,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private suspend fun awaitReady() {
-        isReadyEvents.asFlow().filter { it.peekContent() }.first()
+        isReadyEvents.filter { it.peekContent() }.first()
     }
 
     private suspend fun awaitRepositoriesReady() {
-        isResourceRepositoryReady.asFlow().filterNotNull().filter { it }.first()
+        isResourceRepositoryReady.filterNotNull().filter { it }.first()
     }
 
     override fun transitionToFirstScreen() {

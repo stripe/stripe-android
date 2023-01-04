@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.ClientSecret
@@ -19,6 +20,7 @@ internal sealed interface PaymentSheetState : Parcelable {
         val config: PaymentSheet.Configuration?,
         val clientSecret: ClientSecret,
         val stripeIntent: StripeIntent,
+        val supportedPaymentMethodTypes: List<PaymentMethodCode> = emptyList(),
         val customerPaymentMethods: List<PaymentMethod>,
         val savedSelection: SavedSelection,
         val isGooglePayReady: Boolean,
