@@ -56,6 +56,11 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
     private lateinit var imageLoader: StripeImageLoader
 
+    private val linkHandler: LinkHandler
+        get() = sheetViewModel.linkHandler
+    private val linkLauncher: LinkPaymentLauncher
+        get() = linkHandler.linkLauncher
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         imageLoader = StripeImageLoader(requireContext().applicationContext)
@@ -82,9 +87,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         val isRepositoryReady by sheetViewModel.isResourceRepositoryReady.collectAsState()
         val processing by sheetViewModel.processing.collectAsState(false)
 
-        val linkConfig by sheetViewModel.linkConfiguration.collectAsState()
+        val linkConfig by linkHandler.linkConfiguration.collectAsState()
         val linkAccountStatus by linkConfig?.let {
-            sheetViewModel.linkLauncher.getAccountStatusFlow(it).collectAsState(null)
+            linkLauncher.getAccountStatusFlow(it).collectAsState(null)
         } ?: mutableStateOf(null)
 
         if (isRepositoryReady == true) {
@@ -112,7 +117,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             }
 
             val paymentSelection by sheetViewModel.selection.collectAsState()
-            val linkInlineSelection by sheetViewModel.linkInlineSelection.collectAsState()
+            val linkInlineSelection by linkHandler.linkInlineSelection.collectAsState()
             var linkSignupState by remember {
                 mutableStateOf<InlineSignupViewState?>(null)
             }
@@ -146,7 +151,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                     supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
                     selectedItem = selectedItem,
                     showLinkInlineSignup = showLinkInlineSignup,
-                    linkPaymentLauncher = sheetViewModel.linkLauncher,
+                    linkPaymentLauncher = linkLauncher,
                     showCheckboxFlow = showCheckboxFlow,
                     onItemSelectedListener = { selectedLpm ->
                         if (selectedItem != selectedLpm) {
@@ -218,14 +223,14 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 )
             }
 
-            val linkInlineSelection = sheetViewModel.linkInlineSelection.collectAsState()
+            val linkInlineSelection = sheetViewModel.linkHandler.linkInlineSelection.collectAsState()
 
             if (showLinkInlineSignup) {
                 if (linkInlineSelection.value != null) {
                     LinkInlineSignedIn(
                         linkPaymentLauncher = linkPaymentLauncher,
                         onLogout = {
-                            sheetViewModel.linkInlineSelection.value = null
+                            linkHandler.linkInlineSelection.value = null
                         },
                         modifier = Modifier
                             .padding(horizontal = horizontalPadding, vertical = 6.dp)
@@ -251,8 +256,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             getString(R.string.stripe_paymentsheet_add_payment_method_title)
 
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm(
-            linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
-            activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
+            linkEnabled = linkHandler.isLinkEnabled.value,
+            activeLinkSession = linkHandler.activeLinkSession.value,
         )
     }
 
@@ -275,8 +280,8 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             AccountStatus.VerificationStarted,
             AccountStatus.SignedOut
         )
-        val linkInlineSelectionValid = sheetViewModel.linkInlineSelection.value != null
-        return sheetViewModel.isLinkEnabled.value && sheetViewModel.stripeIntent.value
+        val linkInlineSelectionValid = sheetViewModel.linkHandler.linkInlineSelection.value != null
+        return sheetViewModel.linkHandler.isLinkEnabled.value && sheetViewModel.stripeIntent.value
             ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
             paymentMethodCode == PaymentMethod.Type.Card.code &&
             (linkAccountStatus in validStatusStates || linkInlineSelectionValid)

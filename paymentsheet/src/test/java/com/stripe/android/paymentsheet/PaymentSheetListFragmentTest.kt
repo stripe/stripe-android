@@ -287,7 +287,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     ) {
         sheetViewModel.savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods
         sheetViewModel._isGooglePayReady.value = isGooglePayReady
-        sheetViewModel._isLinkEnabled.value = isLinkEnabled
+        sheetViewModel.linkHandler._isLinkEnabled.value = isLinkEnabled
         sheetViewModel.savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection
     }
 

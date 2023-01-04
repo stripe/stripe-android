@@ -6,7 +6,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -1155,30 +1154,35 @@ internal class PaymentSheetActivityTest {
 
         registerFormViewModelInjector()
 
-        PaymentSheetViewModel(
-            ApplicationProvider.getApplicationContext(),
-            PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-            eventReporter,
-            { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-            StripeIntentRepository.Static(paymentIntent),
-            StripeIntentValidator(),
-            FakePaymentSheetLoader(
-                stripeIntent = paymentIntent,
-                customerPaymentMethods = paymentMethods,
-            ),
-            FakeCustomerRepository(paymentMethods),
-            FakePrefsRepository(),
-            StaticLpmResourceRepository(lpmRepository),
-            mock(),
-            stripePaymentLauncherAssistedFactory,
-            googlePayPaymentMethodLauncherFactory,
-            Logger.noop(),
-            testDispatcher,
-            DUMMY_INJECTOR_KEY,
-            savedStateHandle = SavedStateHandle(),
-            linkLauncher = linkPaymentLauncher
-        ).also {
-            it.injector = injector
+        TestViewModelFactory.create(
+            linkLauncher = linkPaymentLauncher,
+            eventReporter = eventReporter,
+        ) { linkHandler, savedStateHandle ->
+            PaymentSheetViewModel(
+                ApplicationProvider.getApplicationContext(),
+                PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+                eventReporter,
+                { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
+                StripeIntentRepository.Static(paymentIntent),
+                StripeIntentValidator(),
+                FakePaymentSheetLoader(
+                    stripeIntent = paymentIntent,
+                    customerPaymentMethods = paymentMethods,
+                ),
+                FakeCustomerRepository(paymentMethods),
+                FakePrefsRepository(),
+                StaticLpmResourceRepository(lpmRepository),
+                mock(),
+                stripePaymentLauncherAssistedFactory,
+                googlePayPaymentMethodLauncherFactory,
+                Logger.noop(),
+                testDispatcher,
+                DUMMY_INJECTOR_KEY,
+                savedStateHandle = savedStateHandle,
+                linkHandler = linkHandler
+            ).also {
+                it.injector = injector
+            }
         }
     }
 

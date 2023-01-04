@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.Injectable
@@ -73,26 +72,31 @@ internal open class PaymentOptionsViewModelTestInjection {
             ),
             null
         )
-        PaymentOptionsViewModel(
-            args,
-            prefsRepositoryFactory = {
-                FakePrefsRepository()
-            },
-            eventReporter = eventReporter,
-            customerRepository = FakeCustomerRepository(paymentMethods),
-            workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop(),
-            injectorKey = injectorKey,
-            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = addressResourceRepository,
-            savedStateHandle = SavedStateHandle().apply {
-                set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
-            },
+        TestViewModelFactory.create(
             linkLauncher = mock<LinkPaymentLauncher>().apply {
                 whenever(getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
-            }
-        )
+            },
+            eventReporter = eventReporter
+        ) { linkHandler, savedStateHandle ->
+            PaymentOptionsViewModel(
+                args,
+                prefsRepositoryFactory = {
+                    FakePrefsRepository()
+                },
+                eventReporter = eventReporter,
+                customerRepository = FakeCustomerRepository(paymentMethods),
+                workContext = testDispatcher,
+                application = ApplicationProvider.getApplicationContext(),
+                logger = Logger.noop(),
+                injectorKey = injectorKey,
+                lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
+                addressResourceRepository = addressResourceRepository,
+                savedStateHandle = savedStateHandle.apply {
+                    set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
+                },
+                linkHandler = linkHandler,
+            )
+        }
     }
 
     @FlowPreview

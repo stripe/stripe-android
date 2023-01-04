@@ -9,21 +9,20 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
+import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
+import com.stripe.android.paymentsheet.PaymentSelectionRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -40,13 +39,12 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
@@ -71,8 +69,8 @@ internal abstract class BaseSheetViewModel(
     val lpmResourceRepository: ResourceRepository<LpmRepository>,
     val addressResourceRepository: ResourceRepository<AddressRepository>,
     val savedStateHandle: SavedStateHandle,
-    val linkLauncher: LinkPaymentLauncher
-) : AndroidViewModel(application) {
+    val linkHandler: LinkHandler,
+) : AndroidViewModel(application), PaymentSelectionRepository {
     /**
      * This ViewModel exists during the whole user flow, and needs to share the Dagger dependencies
      * with the other, screen-specific ViewModels. So it holds a reference to the injector which is
@@ -96,20 +94,6 @@ internal abstract class BaseSheetViewModel(
     // with the save server specs when reconstructed.
     private var _isResourceRepositoryReady = MutableStateFlow<Boolean?>(null)
     internal val isResourceRepositoryReady: StateFlow<Boolean?> = _isResourceRepositoryReady
-
-    @VisibleForTesting
-    @Suppress("VariableNaming")
-    internal val _isLinkEnabled = MutableStateFlow(false)
-    internal val isLinkEnabled: StateFlow<Boolean> = _isLinkEnabled
-
-    internal val activeLinkSession = MutableStateFlow(false)
-
-    @Suppress("VariableNaming")
-    protected val _linkConfiguration = MutableStateFlow(
-        savedStateHandle.get<LinkPaymentLauncher.Configuration?>(LINK_CONFIGURATION)
-    )
-    internal val linkConfiguration: StateFlow<LinkPaymentLauncher.Configuration?> =
-        _linkConfiguration
 
     internal val stripeIntent: StateFlow<StripeIntent?> =
         savedStateHandle.getStateFlow<StripeIntent?>(SAVE_STRIPE_INTENT, null)
@@ -151,6 +135,11 @@ internal abstract class BaseSheetViewModel(
     internal val selection: StateFlow<PaymentSelection?> =
         savedStateHandle.getStateFlow(SAVE_SELECTION, null)
 
+    override val paymentSelection: PaymentSelection?
+        get() {
+            return selection.value
+        }
+
     private val editing = MutableStateFlow(false)
 
     val processing: StateFlow<Boolean> = savedStateHandle
@@ -175,11 +164,6 @@ internal abstract class BaseSheetViewModel(
     private val _notesText = MutableStateFlow<String?>(null)
     internal val notesText: StateFlow<String?> = _notesText
 
-    private val _showLinkVerificationDialog = MutableStateFlow(false)
-    val showLinkVerificationDialog: StateFlow<Boolean> = _showLinkVerificationDialog
-
-    private val linkVerificationChannel = Channel<Boolean>(capacity = 1)
-
     /**
      * This should be initialized from the starter args, and then from that point forward it will be
      * the last valid new payment method entered by the user.
@@ -188,8 +172,6 @@ internal abstract class BaseSheetViewModel(
      * the user returns to that payment method type.
      */
     abstract var newPaymentSelection: PaymentSelection.New?
-
-    open var linkInlineSelection = MutableStateFlow<PaymentSelection.New.LinkInline?>(null)
 
     abstract fun onFatal(throwable: Throwable)
 
@@ -222,7 +204,7 @@ internal abstract class BaseSheetViewModel(
             initialSelection = savedSelection,
             currentSelection = selection,
             isGooglePayReady = isGooglePayReady,
-            isLinkEnabled = isLinkEnabled,
+            isLinkEnabled = linkHandler.isLinkEnabled,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
         )
     }
@@ -276,12 +258,12 @@ internal abstract class BaseSheetViewModel(
         combine(
             isGooglePayReady,
             isResourceRepositoryReady,
-            isLinkEnabled,
+            linkHandler.isLinkEnabled,
             ::Triple
         )
     ) { _, _ ->
         determineIfReady()
-    }.map {
+    }.distinctUntilChanged().map {
         Event(it)
     }
 
@@ -331,8 +313,8 @@ internal abstract class BaseSheetViewModel(
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
                         " (${
-                        lpmResourceRepository.getRepository().values()
-                            .map { it.code }.toList()
+                            lpmResourceRepository.getRepository().values()
+                                .map { it.code }.toList()
                         })"
                 )
             )
@@ -445,91 +427,11 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    protected suspend fun requestLinkVerification(): Boolean {
-        _showLinkVerificationDialog.value = true
-        return linkVerificationChannel.receive()
-    }
-
-    fun handleLinkVerificationResult(success: Boolean) {
-        _showLinkVerificationDialog.value = false
-        activeLinkSession.value = success
-        linkVerificationChannel.trySend(success)
-    }
-
-    fun payWithLinkInline(configuration: LinkPaymentLauncher.Configuration, userInput: UserInput?) {
-        (selection.value as? PaymentSelection.New.Card)?.paymentMethodCreateParams?.let { params ->
-            savedStateHandle[SAVE_PROCESSING] = true
-            updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
-
-            viewModelScope.launch {
-                when (linkLauncher.getAccountStatusFlow(configuration).first()) {
-                    AccountStatus.Verified -> {
-                        activeLinkSession.value = true
-                        completeLinkInlinePayment(
-                            configuration,
-                            params,
-                            userInput is UserInput.SignIn
-                        )
-                    }
-                    AccountStatus.VerificationStarted,
-                    AccountStatus.NeedsVerification -> {
-                        val success = requestLinkVerification()
-
-                        if (success) {
-                            completeLinkInlinePayment(
-                                configuration,
-                                params,
-                                userInput is UserInput.SignIn
-                            )
-                        } else {
-                            savedStateHandle[SAVE_PROCESSING] = false
-                            updatePrimaryButtonState(PrimaryButton.State.Ready)
-                        }
-                    }
-                    AccountStatus.SignedOut,
-                    AccountStatus.Error -> {
-                        activeLinkSession.value = false
-                        userInput?.let {
-                            linkLauncher.signInWithUserInput(configuration, userInput).fold(
-                                onSuccess = {
-                                    // If successful, the account was fetched or created, so try again
-                                    payWithLinkInline(configuration, userInput)
-                                },
-                                onFailure = {
-                                    onError(it.localizedMessage)
-                                    savedStateHandle[SAVE_PROCESSING] = false
-                                    updatePrimaryButtonState(PrimaryButton.State.Ready)
-                                }
-                            )
-                        } ?: run {
-                            savedStateHandle[SAVE_PROCESSING] = false
-                            updatePrimaryButtonState(PrimaryButton.State.Ready)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    internal open fun completeLinkInlinePayment(
-        configuration: LinkPaymentLauncher.Configuration,
-        paymentMethodCreateParams: PaymentMethodCreateParams,
-        isReturningUser: Boolean
-    ) {
+    fun payWithLinkInline(linkConfig: LinkPaymentLauncher.Configuration, userInput: UserInput?) {
         viewModelScope.launch {
-            onLinkPaymentDetailsCollected(
-                linkLauncher.attachNewCardToAccount(
-                    configuration,
-                    paymentMethodCreateParams
-                ).getOrNull()
-            )
+            linkHandler.payWithLinkInline(linkConfig, userInput)
         }
     }
-
-    /**
-     * Method called after completing collection of payment data for a payment with Link.
-     */
-    abstract fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?)
 
     abstract fun onUserCancel()
 

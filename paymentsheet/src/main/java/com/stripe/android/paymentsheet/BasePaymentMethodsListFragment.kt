@@ -28,6 +28,9 @@ internal abstract class BasePaymentMethodsListFragment(
 ) {
     abstract val sheetViewModel: BaseSheetViewModel
 
+    val linkHandler: LinkHandler
+        get() = sheetViewModel.linkHandler
+
     @VisibleForTesting
     lateinit var adapter: PaymentOptionsAdapter
     private var editMenuItem: MenuItem? = null
@@ -46,8 +49,8 @@ internal abstract class BasePaymentMethodsListFragment(
 
         setHasOptionsMenu(sheetViewModel.paymentMethods.value.isNotEmpty())
         sheetViewModel.eventReporter.onShowExistingPaymentOptions(
-            linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
-            activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
+            linkEnabled = linkHandler.isLinkEnabled.value ?: false,
+            activeLinkSession = linkHandler.activeLinkSession.value ?: false
         )
     }
 
