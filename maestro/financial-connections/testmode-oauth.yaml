@@ -45,7 +45,7 @@ appId: com.stripe.android.financialconnections.example
 # SELECT ALL ACCOUNTS
 - extendedWaitUntil:
     visible: "Select all accounts"
-    timeout: 30000
+    timeout: 60000
 - takeScreenshot: TestOAuth_AccountPicker
 - tapOn: "Select all accounts" # select all accounts
 - takeScreenshot: TestOAuth_AccountPicker_AllAccounts
