@@ -35,28 +35,35 @@ internal class CameraPermissionDeniedFragment(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = ComposeView(requireContext()).apply {
-        val scanType = arguments?.getSerializable(ARG_SCAN_TYPE) as? CollectedDataParam.Type
+        val scanType =
+            arguments?.getSerializable(CameraPermissionDeniedDestination.ARG_SCAN_TYPE) as CollectedDataParam.Type
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             ErrorScreen(
                 identityViewModel = identityViewModel,
                 title = stringResource(id = R.string.camera_permission),
                 message1 = stringResource(id = R.string.grant_camera_permission_text),
-                message2 = scanType?.let {
-                    stringResource(R.string.upload_file_text, it.getDisplayName())
+                message2 =
+                if (scanType != CollectedDataParam.Type.INVALID) {
+                    stringResource(R.string.upload_file_text, scanType.getDisplayName())
+                } else {
+                    null
                 },
-                topButton = scanType?.let {
+                topButton =
+                if (scanType != CollectedDataParam.Type.INVALID) {
                     ErrorScreenButton(
                         buttonText = stringResource(id = R.string.file_upload)
                     ) {
                         identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_ERROR)
                         findNavController().navigateTo(
-                            it.toUploadDestination(
+                            scanType.toUploadDestination(
                                 shouldShowTakePhoto = false,
                                 shouldShowChoosePhoto = true
                             )
                         )
                     }
+                } else {
+                    null
                 },
                 bottomButton = ErrorScreenButton(
                     buttonText = stringResource(id = R.string.app_settings)
@@ -81,11 +88,12 @@ internal class CameraPermissionDeniedFragment(
             CollectedDataParam.Type.PASSPORT -> {
                 getString(R.string.passport)
             }
+            else -> {
+                throw IllegalStateException("Invalid CollectedDataParam.Type")
+            }
         }
 
     internal companion object {
-        const val ARG_SCAN_TYPE = "scanType"
-
         private fun CollectedDataParam.Type.toUploadDestination(
             shouldShowTakePhoto: Boolean,
             shouldShowChoosePhoto: Boolean
@@ -102,6 +110,9 @@ internal class CameraPermissionDeniedFragment(
                 shouldShowTakePhoto,
                 shouldShowChoosePhoto
             )
+            else -> {
+                throw IllegalStateException("Invalid CollectedDataParam.Type")
+            }
         }
     }
 }

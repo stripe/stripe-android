@@ -35,7 +35,9 @@ internal data class CollectedDataParam(
         IDCARD,
 
         @SerialName("passport")
-        PASSPORT;
+        PASSPORT,
+
+        INVALID;
 
         companion object {
             fun fromName(typeName: String) =
