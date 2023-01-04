@@ -3,10 +3,6 @@ package com.stripe.android.identity.navigation
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
@@ -35,17 +31,10 @@ internal class SelfieFragment(
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            val changedDisplayState by identityScanViewModel.displayStateChangedFlow.collectAsState()
-            val newDisplayState by remember {
-                derivedStateOf {
-                    changedDisplayState?.first
-                }
-            }
             SelfieScanScreen(
                 navController = findNavController(),
                 identityViewModel = identityViewModel,
-                identityScanViewModel = identityScanViewModel,
-                newDisplayState = newDisplayState
+                identityScanViewModel = identityScanViewModel
             )
         }
     }

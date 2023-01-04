@@ -28,6 +28,8 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -51,6 +53,9 @@ class SelfieScreenTest {
 
     private val mockNavController = mock<NavController>()
 
+    private val displayStateChangedFlow =
+        MutableStateFlow<Pair<IdentityScanState, IdentityScanState?>?>(null)
+
     private val selfieCapturePage = mock<VerificationPageStaticContentSelfieCapturePage> {
         on { consentText } doReturn SELFIE_CONSENT_TEXT
     }
@@ -68,6 +73,7 @@ class SelfieScreenTest {
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel> {
         on { interimResults } doReturn mock()
         on { finalResult } doReturn mock()
+        on { displayStateChangedFlow } doReturn displayStateChangedFlow
     }
 
     private val dummyBitmap: Bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
@@ -168,12 +174,16 @@ class SelfieScreenTest {
         newDisplayState: IdentityScanState?,
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
+        newDisplayState?.let { newDisplayState ->
+            displayStateChangedFlow.update {
+                newDisplayState to mock()
+            }
+        }
         composeTestRule.setContent {
             SelfieScanScreen(
                 navController = mockNavController,
                 identityViewModel = mockIdentityViewModel,
-                identityScanViewModel = mockIdentityScanViewModel,
-                newDisplayState = newDisplayState,
+                identityScanViewModel = mockIdentityScanViewModel
             )
         }
         with(composeTestRule, testBlock)

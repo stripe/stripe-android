@@ -25,6 +25,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -83,11 +85,16 @@ internal fun SelfieScanScreen(
     navController: NavController,
     identityViewModel: IdentityViewModel,
     identityScanViewModel: IdentityScanViewModel,
-    newDisplayState: IdentityScanState?
 ) {
     MdcTheme {
         val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
         val context = LocalContext.current
+        val changedDisplayState by identityScanViewModel.displayStateChangedFlow.collectAsState()
+        val newDisplayState by remember {
+            derivedStateOf {
+                changedDisplayState?.first
+            }
+        }
 
         CheckVerificationPageAndCompose(
             verificationPageResource = verificationPageState,
@@ -237,7 +244,7 @@ internal fun SelfieScanScreen(
 
                     if (newDisplayState is IdentityScanState.Finished) {
                         ResultView(
-                            displayState = newDisplayState,
+                            displayState = newDisplayState as IdentityScanState.Finished,
                             allowImageCollectionHtml = successSelfieCapturePage.consentText,
                             allowImageCollectionCheckboxEnabled = allowImageCollectionCheckboxEnabled,
                             allowImageCollection = allowImageCollection,
