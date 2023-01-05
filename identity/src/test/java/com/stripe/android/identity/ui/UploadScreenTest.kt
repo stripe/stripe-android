@@ -17,6 +17,7 @@ import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.IdentityImageHandler
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -48,12 +49,14 @@ class UploadScreenTest {
     private val missingRequirements =
         MutableStateFlow(listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK))
 
+    private val mockImageHandler = mock<IdentityImageHandler>()
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { documentFrontUploadedState } doReturn documentFrontUploadState
         on { documentBackUploadedState } doReturn documentBackUploadState
         on { collectedData } doReturn collectedData
         on { missingRequirements } doReturn missingRequirements
         on { verificationPage } doReturn MutableLiveData(Resource.success(mock()))
+        on { imageHandler } doReturn mockImageHandler
     }
 
     @Test
@@ -177,16 +180,14 @@ class UploadScreenTest {
                 frontInfo = DocumentUploadSideInfo(
                     description = FRONT_DESCRIPTION,
                     checkmarkContentDescription = FRONT_CHECKMARK_CONTENT_DESCRIPTION,
-                    scanType = FRONT_SCAN_TYPE,
-                    onPhotoSelected = onPhotoSelected
+                    scanType = FRONT_SCAN_TYPE
                 ),
                 backInfo =
                 if (hasBack) {
                     DocumentUploadSideInfo(
                         description = BACK_DESCRIPTION,
                         checkmarkContentDescription = BACK_CHECKMARK_CONTENT_DESCRIPTION,
-                        scanType = BACK_SCAN_TYPE,
-                        onPhotoSelected = onPhotoSelected
+                        scanType = BACK_SCAN_TYPE
                     )
                 } else {
                     null
@@ -207,11 +208,11 @@ class UploadScreenTest {
                 uploadInfo = DocumentUploadSideInfo(
                     description = FRONT_DESCRIPTION,
                     checkmarkContentDescription = FRONT_CHECKMARK_CONTENT_DESCRIPTION,
-                    scanType = FRONT_SCAN_TYPE,
-                    onPhotoSelected = onPhotoSelected
+                    scanType = FRONT_SCAN_TYPE
                 ),
                 shouldShowTakePhoto = true,
                 shouldShowChoosePhoto = shouldShowChoosePhoto,
+                onPhotoSelected = onPhotoSelected,
                 onDismissRequest = onDismissRequest,
                 onUploadMethodSelected = onUploadMethodSelected
             )

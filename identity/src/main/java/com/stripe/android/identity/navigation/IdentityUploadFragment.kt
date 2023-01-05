@@ -14,7 +14,6 @@ import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.DocumentUploadSideInfo
-import com.stripe.android.identity.ui.UploadMethod
 import com.stripe.android.identity.ui.UploadScreen
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
@@ -77,32 +76,14 @@ internal abstract class IdentityUploadFragment(
                     stringResource(id = frontTextRes),
                     stringResource(id = frontCheckMarkContentDescription),
                     frontScanType
-                ) { uploadMethod ->
-                    when (uploadMethod) {
-                        UploadMethod.TAKE_PHOTO -> {
-                            identityViewModel.imageHandler.takePhotoFront(requireContext())
-                        }
-                        UploadMethod.CHOOSE_PHOTO -> {
-                            identityViewModel.imageHandler.chooseImageFront()
-                        }
-                    }
-                },
+                ),
                 backInfo =
                 if (backTextRes != null && backCheckMarkContentDescription != null && backScanType != null) {
                     DocumentUploadSideInfo(
                         stringResource(id = backTextRes!!),
                         stringResource(id = backCheckMarkContentDescription!!),
                         backScanType!!
-                    ) { uploadMethod ->
-                        when (uploadMethod) {
-                            UploadMethod.TAKE_PHOTO -> {
-                                identityViewModel.imageHandler.takePhotoBack(requireContext())
-                            }
-                            UploadMethod.CHOOSE_PHOTO -> {
-                                identityViewModel.imageHandler.chooseImageBack()
-                            }
-                        }
-                    }
+                    )
                 } else {
                     null
                 },

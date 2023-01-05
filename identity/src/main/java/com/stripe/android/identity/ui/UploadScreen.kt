@@ -71,8 +71,7 @@ internal enum class UploadMethod {
 internal data class DocumentUploadSideInfo(
     val description: String,
     val checkmarkContentDescription: String,
-    val scanType: IdentityScanState.ScanType,
-    val onPhotoSelected: (UploadMethod) -> Unit
+    val scanType: IdentityScanState.ScanType
 )
 
 @Composable
@@ -173,6 +172,16 @@ internal fun UploadScreen(
                         uploadInfo = frontInfo,
                         shouldShowTakePhoto = shouldShowTakePhoto,
                         shouldShowChoosePhoto = shouldShowChoosePhoto,
+                        onPhotoSelected = { uploadMethod ->
+                            when (uploadMethod) {
+                                UploadMethod.TAKE_PHOTO -> {
+                                    identityViewModel.imageHandler.takePhotoFront(localContext)
+                                }
+                                UploadMethod.CHOOSE_PHOTO -> {
+                                    identityViewModel.imageHandler.chooseImageFront()
+                                }
+                            }
+                        },
                         onDismissRequest = { shouldShowFrontDialog = false }
                     ) { shouldShowFrontDialog = false }
                 }
@@ -226,6 +235,16 @@ internal fun UploadScreen(
                             uploadInfo = backInfo,
                             shouldShowTakePhoto = shouldShowTakePhoto,
                             shouldShowChoosePhoto = shouldShowChoosePhoto,
+                            onPhotoSelected = { uploadMethod ->
+                                when (uploadMethod) {
+                                    UploadMethod.TAKE_PHOTO -> {
+                                        identityViewModel.imageHandler.takePhotoBack(localContext)
+                                    }
+                                    UploadMethod.CHOOSE_PHOTO -> {
+                                        identityViewModel.imageHandler.chooseImageBack()
+                                    }
+                                }
+                            },
                             onDismissRequest = { shouldShowBackDialog = false }
                         ) { shouldShowBackDialog = false }
                     }
@@ -267,6 +286,7 @@ internal fun UploadImageDialog(
     uploadInfo: DocumentUploadSideInfo,
     shouldShowTakePhoto: Boolean,
     shouldShowChoosePhoto: Boolean,
+    onPhotoSelected: (UploadMethod) -> Unit,
     onDismissRequest: () -> Unit,
     onUploadMethodSelected: () -> Unit
 ) {
@@ -300,7 +320,7 @@ internal fun UploadImageDialog(
                         testTag = SHOULD_SHOW_TAKE_PHOTO_TAG
                     ) {
                         onUploadMethodSelected()
-                        uploadInfo.onPhotoSelected(UploadMethod.TAKE_PHOTO)
+                        onPhotoSelected(UploadMethod.TAKE_PHOTO)
                     }
                 }
                 if (shouldShowChoosePhoto) {
@@ -309,7 +329,7 @@ internal fun UploadImageDialog(
                         testTag = SHOULD_SHOW_CHOOSE_PHOTO_TAG
                     ) {
                         onUploadMethodSelected()
-                        uploadInfo.onPhotoSelected(UploadMethod.CHOOSE_PHOTO)
+                        onPhotoSelected(UploadMethod.CHOOSE_PHOTO)
                     }
                 }
             }
