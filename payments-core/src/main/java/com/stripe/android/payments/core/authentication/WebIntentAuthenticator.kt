@@ -82,6 +82,11 @@ internal class WebIntentAuthenticator @Inject constructor(
                 returnUrl = null
                 shouldCancelIntentOnUserNavigation = false
             }
+            is StripeIntent.NextActionData.CashAppRedirect -> {
+                authUrl = nextActionData.mobileAuthUrl
+                returnUrl = null
+                shouldCancelIntentOnUserNavigation = true // TODO Yay or nay?
+            }
             else ->
                 throw IllegalArgumentException("WebAuthenticator can't process nextActionData: $nextActionData")
         }

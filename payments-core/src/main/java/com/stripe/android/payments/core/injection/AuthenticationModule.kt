@@ -56,6 +56,14 @@ internal abstract class AuthenticationModule {
         oxxoAuthenticator: OxxoAuthenticator
     ): PaymentAuthenticator<StripeIntent>
 
+    @IntentAuthenticatorMap
+    @Binds
+    @IntoMap
+    @IntentAuthenticatorKey(NextActionData.CashAppRedirect::class)
+    abstract fun bindsCashAppRedirectAuthenticator(
+        webIntentAuthenticator: WebIntentAuthenticator
+    ): PaymentAuthenticator<StripeIntent>
+
     companion object {
         @Provides
         @Singleton

@@ -124,6 +124,7 @@ data class SetupIntent internal constructor(
             is StripeIntent.NextActionData.BlikAuthorize,
             is StripeIntent.NextActionData.WeChatPayRedirect,
             is StripeIntent.NextActionData.UpiAwaitNotification,
+            is StripeIntent.NextActionData.CashAppRedirect,
             null -> {
                 null
             }
