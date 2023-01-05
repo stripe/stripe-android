@@ -18,7 +18,7 @@ import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.ui.core.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

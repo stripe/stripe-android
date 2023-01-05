@@ -52,7 +52,7 @@ import com.stripe.android.link.ui.signup.EmailCollectionSection
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
-import com.stripe.android.ui.core.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.elements.TextFieldSection

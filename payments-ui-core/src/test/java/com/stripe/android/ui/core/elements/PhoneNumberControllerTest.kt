@@ -2,6 +2,8 @@ package com.stripe.android.ui.core.elements
 
 import androidx.lifecycle.asLiveData
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Test
 import org.junit.runner.RunWith

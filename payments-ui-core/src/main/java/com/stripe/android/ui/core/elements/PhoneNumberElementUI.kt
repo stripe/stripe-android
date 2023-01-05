@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.elements.PhoneNumberController
 
 @Preview
 @Composable

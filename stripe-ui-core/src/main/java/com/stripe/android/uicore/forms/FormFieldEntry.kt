@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.forms
+package com.stripe.android.uicore.forms
 
 import androidx.annotation.RestrictTo
 

@@ -8,7 +8,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.CardNumberViewOnlyController
-import com.stripe.android.ui.core.elements.CountryConfig
+import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.ui.core.elements.CountryElement
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownItemSpec

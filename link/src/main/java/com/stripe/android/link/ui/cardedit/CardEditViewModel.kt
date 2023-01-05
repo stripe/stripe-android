@@ -21,7 +21,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.ui.core.forms.LinkCardForm
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import kotlinx.coroutines.flow.Flow

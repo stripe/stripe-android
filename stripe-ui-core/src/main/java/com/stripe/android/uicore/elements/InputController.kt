@@ -1,14 +1,14 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 
 /**
  * This class provides the logic behind the fields.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed interface InputController : SectionFieldErrorController {
+interface InputController : SectionFieldErrorController {
     val label: Flow<Int>
     val fieldValue: Flow<String>
     val rawFieldValue: Flow<String?>

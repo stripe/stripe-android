@@ -2,6 +2,7 @@ package com.stripe.android.link.ui
 
 import android.content.res.Resources
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.link.R
@@ -18,7 +19,8 @@ internal fun Throwable.getErrorMessage() = when (this) {
 /**
  * Represents a user-facing error message.
  */
-internal sealed class ErrorMessage : Parcelable {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class ErrorMessage : Parcelable {
     abstract fun getMessage(resources: Resources): String
 
     @Parcelize

@@ -7,7 +7,10 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error.Blank
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.InputController
+import com.stripe.android.uicore.elements.SectionFieldErrorController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine

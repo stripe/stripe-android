@@ -1,9 +1,9 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed interface DropdownConfig {
+interface DropdownConfig {
     /** This is a label for debug logs **/
     val debugLabel: String
 

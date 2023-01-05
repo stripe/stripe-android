@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
  * or a section field that has other fields in it.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed interface SectionFieldErrorController : Controller {
+interface SectionFieldErrorController : Controller {
     val error: Flow<FieldError?>
 }
 

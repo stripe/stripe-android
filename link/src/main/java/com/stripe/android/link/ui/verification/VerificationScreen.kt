@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.verification
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
@@ -161,7 +162,8 @@ internal fun VerificationBody(
 }
 
 @Composable
-internal fun VerificationBody(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun VerificationBody(
     @StringRes headerStringResId: Int,
     @StringRes messageStringResId: Int,
     showChangeEmailMessage: Boolean,

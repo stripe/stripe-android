@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.ImeAction
+import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.uicore.elements.PhoneNumberController
 
 @Composable
 internal fun SectionFieldElementUI(

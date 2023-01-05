@@ -1,8 +1,8 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.R
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-class PhoneNumberController internal constructor(
+class PhoneNumberController constructor(
     val initialPhoneNumber: String = "",
     initiallySelectedCountryCode: String? = null,
     overrideCountryCodes: Set<String> = emptySet(),
@@ -31,12 +31,20 @@ class PhoneNumberController internal constructor(
         overrideCountryCodes,
         tinyMode = true,
         expandedLabelMapper = { country ->
-            "${CountryConfig.countryCodeToEmoji(country.code.value)} ${country.name}" +
-                (PhoneNumberFormatter.prefixForCountry(country.code.value)?.let { " $it" } ?: "")
+            "${
+                CountryConfig.countryCodeToEmoji(
+                    country.code.value
+                )
+            } ${country.name}" +
+                (PhoneNumberFormatter.prefixForCountry(
+                    country.code.value
+                )?.let { " $it" } ?: "")
         },
         collapsedLabelMapper = { country ->
             CountryConfig.countryCodeToEmoji(country.code.value) +
-                (PhoneNumberFormatter.prefixForCountry(country.code.value)?.let { "  $it  " } ?: "")
+                (PhoneNumberFormatter.prefixForCountry(
+                    country.code.value
+                )?.let { "  $it  " } ?: "")
         }
     )
     val countryDropdownController = DropdownFieldController(
@@ -81,9 +89,9 @@ class PhoneNumberController internal constructor(
         }
     }
 
-    internal val placeholder = phoneNumberFormatter.map { it.placeholder }
+    val placeholder = phoneNumberFormatter.map { it.placeholder }
 
-    internal val visualTransformation = phoneNumberFormatter.map { it.visualTransformation }
+    val visualTransformation = phoneNumberFormatter.map { it.visualTransformation }
 
     fun getCountryCode() = phoneNumberFormatter.value.countryCode
 
@@ -93,7 +101,8 @@ class PhoneNumberController internal constructor(
     fun onSelectedCountryIndex(index: Int) = countryConfig.countries[index].takeIf {
         it.code.value != phoneNumberFormatter.value.countryCode
     }?.let {
-        phoneNumberFormatter.value = PhoneNumberFormatter.forCountry(it.code.value)
+        phoneNumberFormatter.value =
+            PhoneNumberFormatter.forCountry(it.code.value)
     }
 
     fun onValueChange(displayFormatted: String) {
@@ -122,9 +131,13 @@ class PhoneNumberController internal constructor(
             val hasCountryPrefix = initialValue.startsWith("+")
 
             val formatter = if (initiallySelectedCountryCode == null && hasCountryPrefix) {
-                PhoneNumberFormatter.forPrefix(initialValue)
+                PhoneNumberFormatter.forPrefix(
+                    initialValue
+                )
             } else if (initiallySelectedCountryCode != null) {
-                PhoneNumberFormatter.forCountry(initiallySelectedCountryCode)
+                PhoneNumberFormatter.forCountry(
+                    initiallySelectedCountryCode
+                )
             } else {
                 null
             }

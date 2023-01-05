@@ -1,11 +1,11 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import com.stripe.android.core.model.Country
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.R
 import java.util.Locale
 
 /**

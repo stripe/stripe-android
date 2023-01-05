@@ -11,6 +11,7 @@ import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -27,7 +28,7 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.OTPController
 import com.stripe.android.ui.core.elements.OTPElement
 import com.stripe.android.ui.core.elements.OTPSpec
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.forms.FormFieldEntry
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -189,6 +190,7 @@ internal class VerificationScreenTest {
                 messageStringResId = R.string.verification_message,
                 showChangeEmailMessage = true,
                 redactedPhoneNumber = redactedPhoneNumber,
+                isSendingNewCode = true,
                 email = email,
                 otpElement = otpElement,
                 isProcessing = isProcessing,

@@ -5,7 +5,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter.Companion.addPath
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter.Companion.getKeys
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.forms.FormFieldEntry
 import org.junit.Test
 
 class FieldValuesToParamsMapConverterTest {

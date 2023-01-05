@@ -1,6 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.DropdownFieldController
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
