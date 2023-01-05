@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.model.serializer
 
-import com.stripe.android.financialconnections.domain.prepane.Body
+import com.stripe.android.financialconnections.domain.prepane.Entry
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonElement
@@ -8,12 +8,12 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 internal object BodySerializer :
-    JsonContentPolymorphicSerializer<Body>(Body::class) {
+    JsonContentPolymorphicSerializer<Entry>(Entry::class) {
 
-    override fun selectDeserializer(element: JsonElement): KSerializer<out Body> {
+    override fun selectDeserializer(element: JsonElement): KSerializer<out Entry> {
         return when (element.typeValue) {
-            Body.TYPE_TEXT -> Body.Text.serializer()
-            Body.TYPE_IMAGE -> Body.Image.serializer()
+            Entry.TYPE_TEXT -> Entry.Text.serializer()
+            Entry.TYPE_IMAGE -> Entry.Image.serializer()
             else -> throw IllegalArgumentException("Unknown type!")
         }
     }

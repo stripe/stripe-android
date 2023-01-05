@@ -36,6 +36,7 @@ import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.domain.prepane.Body
+import com.stripe.android.financialconnections.domain.prepane.Entry
 import com.stripe.android.financialconnections.domain.prepane.Cta
 import com.stripe.android.financialconnections.domain.prepane.Display
 import com.stripe.android.financialconnections.domain.prepane.OauthPrepane
@@ -304,26 +305,30 @@ private fun InstitutionalPrePaneContent(
                 .verticalScroll(scrollState)
         ) {
             // CONTENT
-            content.body.forEach { bodyItem ->
+            content.body.entries.forEach { bodyItem ->
                 when (bodyItem) {
-                    is Body.Image -> {
+                    is Entry.Image -> {
                         GifWebView(bodyItem.content.default!!)
                     }
-                    is Body.Text -> AnnotatedText(
+
+                    is Entry.Text -> AnnotatedText(
                         text = TextResource.Text(fromHtml(bodyItem.content)),
                         onClickableTextClick = { },
                         defaultStyle = FinancialConnectionsTheme.typography.body,
                         annotationStyles = mapOf(
-                            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized.toSpanStyle()
+                            StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized.toSpanStyle(),
+                            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.bodyEmphasized
+                                .toSpanStyle()
+                                .copy(color = FinancialConnectionsTheme.colors.textBrand)
                         )
                     )
                 }
             }
 
-            PartnerCallout(
-                isStripeDirect = isStripeDirect,
-                content.partnerNotice
-            )
+//            PartnerCallout(
+//                isStripeDirect = isStripeDirect,
+//                content.partnerNotice
+//            )
         }
         Box {
             FinancialConnectionsButton(
@@ -385,18 +390,20 @@ internal fun InstitutionalPrepaneContentPreview() {
                                 Text(
                                     oauthPrepane = OauthPrepane(
                                         title = "Sign in with **Banco del Nabo**",
-                                        body = listOf(
-                                            Body.Text(
-                                                "Some very large text will most likely go here!"
-                                            ),
-                                            Body.Image(
-                                                Image(
-                                                    "https://media.tenor.com/H04kLkyt_tUAAAAM/dog-little-dog.gif"
-                                                )
-                                            ),
-                                            Body.Text(
-                                                "Some very large text will most likely go here!"
-                                            ),
+                                        body = Body(
+                                            listOf(
+                                                Entry.Text(
+                                                    "Some very large text will most likely go here!"
+                                                ),
+                                                Entry.Image(
+                                                    Image(
+                                                        "https://media.tenor.com/H04kLkyt_tUAAAAM/dog-little-dog.gif"
+                                                    )
+                                                ),
+                                                Entry.Text(
+                                                    "Some very large text will most likely go here!"
+                                                ),
+                                            )
                                         ),
                                         cta = Cta(
                                             icon = null,
