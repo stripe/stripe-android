@@ -58,6 +58,36 @@ internal class IdentityScanViewModel(
         cameraManager.requireCameraAdapter().unbindFromLifecycle(lifecycleOwner)
     }
 
+    private lateinit var cameraManager: IdentityCameraManager
+
+    fun initializeCameraManager(cameraManager: IdentityCameraManager) {
+        this.cameraManager = cameraManager
+    }
+
+    fun startScan(
+        scanType: IdentityScanState.ScanType,
+        lifecycleOwner: LifecycleOwner
+    ) {
+        targetScanTypeFlow.update { scanType }
+        cameraManager.requireCameraAdapter().bindToLifecycle(lifecycleOwner)
+        scanState = null
+        scanStatePrevious = null
+
+        identityScanFlow?.startFlow(
+            context = requireNotNull(context.get()),
+            imageStream = cameraManager.requireCameraAdapter().getImageStream(),
+            viewFinder = cameraManager.requireCameraView().viewFinderWindowView.asRect(),
+            lifecycleOwner = lifecycleOwner,
+            coroutineScope = viewModelScope,
+            parameters = scanType
+        )
+    }
+
+    fun stopScan(lifecycleOwner: LifecycleOwner) {
+        requireNotNull(identityScanFlow).resetFlow()
+        cameraManager.requireCameraAdapter().unbindFromLifecycle(lifecycleOwner)
+    }
+
     internal class IdentityScanViewModelFactory @Inject constructor(
         private val context: Context,
         private val modelPerformanceTracker: ModelPerformanceTracker,
