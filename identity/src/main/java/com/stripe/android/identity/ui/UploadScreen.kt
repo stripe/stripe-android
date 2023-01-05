@@ -1,5 +1,6 @@
 package com.stripe.android.identity.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,8 +70,10 @@ internal enum class UploadMethod {
 }
 
 internal data class DocumentUploadSideInfo(
-    val description: String,
-    val checkmarkContentDescription: String,
+    @StringRes
+    val descriptionRes: Int,
+    @StringRes
+    val checkmarkContentDescriptionRes: Int,
     val scanType: IdentityScanState.ScanType
 )
 
@@ -80,8 +83,8 @@ internal fun UploadScreen(
     identityViewModel: IdentityViewModel,
     collectedDataParamType: CollectedDataParam.Type,
     route: String,
-    title: String,
-    context: String,
+    @StringRes titleRes: Int,
+    @StringRes contextRes: Int,
     frontInfo: DocumentUploadSideInfo,
     backInfo: DocumentUploadSideInfo?,
     shouldShowTakePhoto: Boolean,
@@ -130,7 +133,7 @@ internal fun UploadScreen(
                     .testTag(SCROLLABLE_COLUMN_TAG)
             ) {
                 Text(
-                    text = title,
+                    text = stringResource(id = titleRes),
                     fontSize = dimensionResourceSp(id = R.dimen.upload_title_text_size),
 
                     modifier = Modifier.padding(
@@ -138,7 +141,7 @@ internal fun UploadScreen(
                     )
                 )
                 Text(
-                    text = context,
+                    text = stringResource(id = contextRes),
                     modifier = Modifier.padding(
                         bottom = 32.dp
                     )
@@ -408,7 +411,7 @@ private fun SingleSideUploadRow(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = uploadInfo.description,
+            text = stringResource(id = uploadInfo.descriptionRes),
             modifier = Modifier.align(CenterVertically)
         )
         when (uploadUiState) {
@@ -430,7 +433,7 @@ private fun SingleSideUploadRow(
             DocumentUploadUIState.Done -> {
                 Image(
                     painter = painterResource(id = R.drawable.check_mark),
-                    contentDescription = uploadInfo.checkmarkContentDescription,
+                    contentDescription = stringResource(id = uploadInfo.checkmarkContentDescriptionRes),
                     modifier = Modifier
                         .height(18.dp)
                         .width(18.dp)

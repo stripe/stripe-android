@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
+import com.stripe.android.identity.R
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.navigation.IDUploadDestination
 import com.stripe.android.identity.networking.Resource
@@ -175,18 +176,18 @@ class UploadScreenTest {
                 identityViewModel = mockIdentityViewModel,
                 collectedDataParamType = CollectedDataParam.Type.IDCARD,
                 route = IDUploadDestination.ROUTE.route,
-                title = TITLE,
-                context = CONTEXT,
+                titleRes = R.string.file_upload,
+                contextRes = R.string.file_upload_content_dl,
                 frontInfo = DocumentUploadSideInfo(
-                    description = FRONT_DESCRIPTION,
-                    checkmarkContentDescription = FRONT_CHECKMARK_CONTENT_DESCRIPTION,
+                    descriptionRes = R.string.front_of_dl,
+                    checkmarkContentDescriptionRes = R.string.front_of_dl_selected,
                     scanType = FRONT_SCAN_TYPE
                 ),
                 backInfo =
                 if (hasBack) {
                     DocumentUploadSideInfo(
-                        description = BACK_DESCRIPTION,
-                        checkmarkContentDescription = BACK_CHECKMARK_CONTENT_DESCRIPTION,
+                        descriptionRes = R.string.back_of_dl,
+                        checkmarkContentDescriptionRes = R.string.back_of_dl_selected,
                         scanType = BACK_SCAN_TYPE
                     )
                 } else {
@@ -206,8 +207,8 @@ class UploadScreenTest {
         composeTestRule.setContent {
             UploadImageDialog(
                 uploadInfo = DocumentUploadSideInfo(
-                    description = FRONT_DESCRIPTION,
-                    checkmarkContentDescription = FRONT_CHECKMARK_CONTENT_DESCRIPTION,
+                    descriptionRes = R.string.front_of_dl,
+                    checkmarkContentDescriptionRes = R.string.front_of_dl_selected,
                     scanType = FRONT_SCAN_TYPE
                 ),
                 shouldShowTakePhoto = true,
@@ -221,14 +222,7 @@ class UploadScreenTest {
     }
 
     private companion object {
-        const val TITLE = "title"
-        const val CONTEXT = "context"
-        const val FRONT_DESCRIPTION = "front description"
-        const val FRONT_CHECKMARK_CONTENT_DESCRIPTION = "front checkmark description"
         val FRONT_SCAN_TYPE = IdentityScanState.ScanType.ID_FRONT
-
-        const val BACK_DESCRIPTION = "back description"
-        const val BACK_CHECKMARK_CONTENT_DESCRIPTION = "back checkmark description"
         val BACK_SCAN_TYPE = IdentityScanState.ScanType.ID_BACK
         val UPLOADED_STATE = SingleSideDocumentUploadState(
             highResResult = Resource.success(mock()),

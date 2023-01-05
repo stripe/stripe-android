@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
@@ -69,19 +68,19 @@ internal abstract class IdentityUploadFragment(
                 identityViewModel = identityViewModel,
                 collectedDataParamType = collectedDataParamType,
                 route = destinationRoute.route,
-                title = stringResource(id = titleRes),
-                context = stringResource(id = contextRes),
+                titleRes = titleRes,
+                contextRes = contextRes,
                 frontInfo =
                 DocumentUploadSideInfo(
-                    stringResource(id = frontTextRes),
-                    stringResource(id = frontCheckMarkContentDescription),
+                    frontTextRes,
+                    frontCheckMarkContentDescription,
                     frontScanType
                 ),
                 backInfo =
                 if (backTextRes != null && backCheckMarkContentDescription != null && backScanType != null) {
                     DocumentUploadSideInfo(
-                        stringResource(id = backTextRes!!),
-                        stringResource(id = backCheckMarkContentDescription!!),
+                        backTextRes!!,
+                        backCheckMarkContentDescription!!,
                         backScanType!!
                     )
                 } else {
