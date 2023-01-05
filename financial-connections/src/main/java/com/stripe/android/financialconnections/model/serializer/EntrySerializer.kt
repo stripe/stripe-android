@@ -7,7 +7,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-internal object BodySerializer :
+internal object EntrySerializer :
     JsonContentPolymorphicSerializer<Entry>(Entry::class) {
 
     override fun selectDeserializer(element: JsonElement): KSerializer<out Entry> {

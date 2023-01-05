@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections.domain
 import android.os.Parcelable
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.Image
-import com.stripe.android.financialconnections.model.serializer.BodySerializer
+import com.stripe.android.financialconnections.model.serializer.EntrySerializer
 import com.stripe.android.financialconnections.model.serializer.MarkdownToHtmlSerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
@@ -68,7 +68,7 @@ internal data class Body(
     val entries: List<Entry>,
 ) : Parcelable
 
-@Serializable(with = BodySerializer::class)
+@Serializable(with = EntrySerializer::class)
 internal sealed class Entry : Parcelable {
     @Serializable
     @Parcelize
