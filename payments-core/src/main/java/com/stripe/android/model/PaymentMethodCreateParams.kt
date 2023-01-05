@@ -64,6 +64,7 @@ data class PaymentMethodCreateParams internal constructor(
         netbanking: Netbanking? = null,
         usBankAccount: USBankAccount? = null,
         link: Link? = null,
+        cashAppPay: CashAppPay? = null,
         billingDetails: PaymentMethod.BillingDetails? = null,
         metadata: Map<String, String>? = null,
         productUsage: Set<String> = emptySet(),
@@ -208,6 +209,17 @@ data class PaymentMethodCreateParams internal constructor(
         usBankAccount = usBankAccount,
         billingDetails = billingDetails,
         metadata = metadata
+    )
+
+    private constructor(
+        cashAppPay: CashAppPay,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?,
+    ) : this(
+        type = PaymentMethod.Type.CashAppPay,
+        cashAppPay = cashAppPay,
+        billingDetails = billingDetails,
+        metadata = metadata,
     )
 
     override fun toParamMap(): Map<String, Any> {
@@ -464,6 +476,11 @@ data class PaymentMethodCreateParams internal constructor(
         private companion object {
             private const val PARAM_BANK = "bank"
         }
+    }
+
+    @Parcelize
+    class CashAppPay : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> = emptyMap()
     }
 
     @Parcelize
@@ -915,6 +932,15 @@ data class PaymentMethodCreateParams internal constructor(
                 billingDetails = billingDetails,
                 metadata = metadata
             )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun createCashAppPay(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(CashAppPay(), billingDetails, metadata)
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

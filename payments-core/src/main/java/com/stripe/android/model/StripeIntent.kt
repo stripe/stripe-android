@@ -84,7 +84,8 @@ sealed interface StripeIntent : StripeModel {
         BlikAuthorize("blik_authorize"),
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
         VerifyWithMicrodeposits("verify_with_microdeposits"),
-        UpiAwaitNotification("upi_await_notification");
+        UpiAwaitNotification("upi_await_notification"),
+        CashAppRedirect("cashapp_handle_redirect_or_display_qr_code");
 
         override fun toString(): String {
             return code
@@ -291,5 +292,10 @@ sealed interface StripeIntent : StripeModel {
                 return this === other
             }
         }
+
+        @Parcelize
+        data class CashAppRedirect(
+            val mobileAuthUrl: String,
+        ) : NextActionData()
     }
 }

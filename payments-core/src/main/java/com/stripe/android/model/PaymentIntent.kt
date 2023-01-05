@@ -177,6 +177,9 @@ constructor(
             is StripeIntent.NextActionData.UpiAwaitNotification -> {
                 StripeIntent.NextActionType.UpiAwaitNotification
             }
+            is StripeIntent.NextActionData.CashAppRedirect -> {
+                StripeIntent.NextActionType.CashAppRedirect
+            }
             is StripeIntent.NextActionData.AlipayRedirect,
             is StripeIntent.NextActionData.BlikAuthorize,
             is StripeIntent.NextActionData.WeChatPayRedirect,
