@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterialApi::class)
+
 package com.stripe.android.financialconnections.features.partnerauth
 
 import android.webkit.WebView
@@ -12,13 +14,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,14 +44,15 @@ import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.domain.prepane.Body
-import com.stripe.android.financialconnections.domain.prepane.Entry
 import com.stripe.android.financialconnections.domain.prepane.Cta
 import com.stripe.android.financialconnections.domain.prepane.Display
+import com.stripe.android.financialconnections.domain.prepane.Entry
 import com.stripe.android.financialconnections.domain.prepane.OauthPrepane
 import com.stripe.android.financialconnections.domain.prepane.PartnerNotice
 import com.stripe.android.financialconnections.domain.prepane.Text
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
+import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.InstitutionPlaceholder
 import com.stripe.android.financialconnections.features.common.InstitutionPlannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.InstitutionUnknownErrorContent
@@ -50,7 +60,9 @@ import com.stripe.android.financialconnections.features.common.InstitutionUnplan
 import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.features.common.PartnerCallout
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.PartnerAuthViewEffect.OpenPartnerAuth
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenBottomSheet
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenPartnerAuth
+import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -69,6 +81,8 @@ import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.image.StripeImage
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun PartnerAuthScreen() {
@@ -76,50 +90,97 @@ internal fun PartnerAuthScreen() {
     val activityViewModel: FinancialConnectionsSheetNativeViewModel = mavericksActivityViewModel()
     val parentViewModel = parentViewModel()
     val webAuthFlow = activityViewModel.collectAsState { it.webAuthFlow }
+    val uriHandler = LocalUriHandler.current
 
     // step view model
     val viewModel: PartnerAuthViewModel = mavericksViewModel()
+
     val state: State<PartnerAuthState> = viewModel.collectAsState()
 
-    ObserveViewEffect(state, activityViewModel, viewModel)
+    val scope = rememberCoroutineScope()
+
+    val bottomSheetState = rememberModalBottomSheetState(
+        ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
+    )
+
+    state.value.viewEffect?.let { viewEffect ->
+        LaunchedEffect(viewEffect) {
+            when (viewEffect) {
+                is OpenBottomSheet -> bottomSheetState.show()
+                is OpenUrl -> uriHandler.openUri(viewEffect.url)
+                is OpenPartnerAuth -> {
+                    activityViewModel.openPartnerAuthFlowInBrowser(viewEffect.url)
+                    viewModel.onViewEffectLaunched()
+                }
+            }
+        }
+    }
+
     LaunchedEffect(webAuthFlow.value) {
         viewModel.onWebAuthFlowFinished(webAuthFlow.value)
     }
+
     PartnerAuthScreenContent(
         state = state.value,
         onContinueClick = viewModel::onLaunchAuthClick,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
         onEnterDetailsManually = viewModel::onEnterDetailsManuallyClick,
+        modalBottomSheetState = bottomSheetState,
+        onClickableTextClick = viewModel::onClickableTextClick,
+        onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
         onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.PARTNER_AUTH) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
 
 @Composable
-private fun ObserveViewEffect(
-    state: State<PartnerAuthState>,
-    activityViewModel: FinancialConnectionsSheetNativeViewModel,
-    viewModel: PartnerAuthViewModel
+private fun PartnerAuthScreenContent(
+    state: PartnerAuthState,
+    modalBottomSheetState: ModalBottomSheetState,
+    onContinueClick: () -> Unit,
+    onSelectAnotherBank: () -> Unit,
+    onClickableTextClick: (String) -> Unit,
+    onEnterDetailsManually: () -> Unit,
+    onCloseClick: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit,
+    onConfirmModalClick: () -> Unit,
 ) {
-    LaunchedEffect(state.value.viewEffect) {
-        when (val viewEffect = state.value.viewEffect) {
-            null -> Unit
-            is OpenPartnerAuth -> {
-                activityViewModel.openPartnerAuthFlowInBrowser(viewEffect.url)
-                viewModel.onViewEffectLaunched()
-            }
+    ModalBottomSheetLayout(
+        sheetState = modalBottomSheetState,
+        sheetBackgroundColor = FinancialConnectionsTheme.colors.backgroundSurface,
+        sheetShape = RoundedCornerShape(8.dp),
+        scrimColor = FinancialConnectionsTheme.colors.textSecondary.copy(alpha = 0.5f),
+        sheetContent = {
+            state.dataAccess?.let {
+                DataAccessBottomSheetContent(
+                    dataDialog = it,
+                    onConfirmModalClick = onConfirmModalClick,
+                    onClickableTextClick = onClickableTextClick
+                )
+            } ?: Spacer(modifier = Modifier.size(16.dp)) //TODO move
+        },
+        content = {
+            PartnerAuthScreenMainContent(
+                state,
+                onCloseClick,
+                onSelectAnotherBank,
+                onEnterDetailsManually,
+                onCloseFromErrorClick,
+                onContinueClick
+            )
         }
-    }
+    )
 }
 
 @Composable
-private fun PartnerAuthScreenContent(
+private fun PartnerAuthScreenMainContent(
     state: PartnerAuthState,
-    onContinueClick: () -> Unit,
+    onCloseClick: () -> Unit,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
-    onCloseClick: () -> Unit,
-    onCloseFromErrorClick: (Throwable) -> Unit
+    onCloseFromErrorClick: (Throwable) -> Unit,
+    onContinueClick: () -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
@@ -428,7 +489,13 @@ internal fun InstitutionalPrepaneContentPreview() {
             onContinueClick = {},
             onSelectAnotherBank = {},
             onEnterDetailsManually = {},
-            onCloseClick = {}
-        ) {}
+            onCloseClick = {},
+            modalBottomSheetState = rememberModalBottomSheetState(
+                initialValue = ModalBottomSheetValue.Hidden
+            ),
+            onClickableTextClick = {},
+            onCloseFromErrorClick = {},
+            onConfirmModalClick = {}
+        )
     }
 }

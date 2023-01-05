@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
+import com.stripe.android.financialconnections.model.serializer.MarkdownToHtmlSerializer
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -35,18 +36,22 @@ internal data class VisualUpdate(
 @Parcelize
 internal data class ConsentPane(
     @SerialName("above_cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val aboveCta: String,
     @SerialName("below_cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val belowCta: String? = null,
     @SerialName("body")
     val body: ConsentPaneBody,
     @SerialName("cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val cta: String,
     @SerialName("data_access_notice")
     val dataAccessNotice: DataAccessNotice,
     @SerialName("legal_details_notice")
     val legalDetailsNotice: LegalDetailsNotice,
     @SerialName("title")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val title: String
 ) : Parcelable
 
@@ -68,10 +73,12 @@ internal data class DataAccessNoticeBody(
 @Parcelize
 internal data class Bullet(
     @SerialName("content")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val content: String? = null,
     @SerialName("icon")
     val icon: Image? = null,
     @SerialName("title")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val title: String? = null
 ) : Parcelable
 
@@ -81,12 +88,16 @@ internal data class DataAccessNotice(
     @SerialName("body")
     val body: DataAccessNoticeBody,
     @SerialName("title")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val title: String,
     @SerialName("cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val cta: String,
     @SerialName("learn_more")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val learnMore: String,
     @SerialName("connected_account_notice")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val connectedAccountNotice: String? = null,
 ) : Parcelable
 
@@ -96,10 +107,13 @@ internal data class LegalDetailsNotice(
     @SerialName("body")
     val body: LegalDetailsBody,
     @SerialName("title")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val title: String,
     @SerialName("cta")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val cta: String,
     @SerialName("learn_more")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
     val learnMore: String,
 
 ) : Parcelable

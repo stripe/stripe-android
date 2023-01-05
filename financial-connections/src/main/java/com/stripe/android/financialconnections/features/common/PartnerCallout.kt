@@ -30,7 +30,6 @@ import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.image.StripeImage
 
-
 @Composable
 internal fun PartnerCallout(
     flow: Flow,
@@ -185,4 +184,3 @@ internal fun Flow.partnerName(): Int? = when (this) {
     Flow.DIRECT_WEBVIEW,
     Flow.UNKNOWN -> null
 }
-

@@ -13,7 +13,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GoNext
-import com.stripe.android.financialconnections.features.MarkdownParser
 import com.stripe.android.financialconnections.features.consent.ConsentState.BottomSheetContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
@@ -41,8 +40,7 @@ internal class ConsentViewModel @Inject constructor(
     init {
         logErrors()
         suspend {
-            val sync = getOrFetchSync()
-            MarkdownParser.toHtml(sync.text!!.consent!!)
+            getOrFetchSync().text!!.consent!!
         }.execute { copy(consent = it) }
     }
 
@@ -102,6 +100,7 @@ internal class ConsentViewModel @Inject constructor(
                         )
                     }
                 }
+
                 null -> logger.error("Unrecognized clickable text: $uri")
             }
         }

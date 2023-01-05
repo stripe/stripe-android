@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.domain.prepane
 
 import android.os.Parcelable
+import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.serializer.MarkdownToHtmlSerializer
 import kotlinx.parcelize.Parcelize
@@ -18,6 +19,8 @@ internal data class OauthPrepane(
     val institutionIcon: Image,
     @SerialName("partner_notice")
     val partnerNotice: PartnerNotice? = null,
+    @SerialName("data_access_notice")
+    val dataAccessNotice: DataAccessNotice? = null,
     @SerialName("title")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val title: String

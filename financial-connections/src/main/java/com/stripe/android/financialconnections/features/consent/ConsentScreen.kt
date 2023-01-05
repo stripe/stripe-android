@@ -4,15 +4,12 @@
 package com.stripe.android.financialconnections.features.consent
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -28,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
@@ -41,17 +37,17 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
+import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LoadingContent
+import com.stripe.android.financialconnections.features.common.ModalBottomSheetBullet
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.ConsentPane
-import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -63,7 +59,6 @@ import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.uicore.image.StripeImage
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
@@ -180,7 +175,7 @@ private fun ConsentMainContent(
                 Spacer(modifier = Modifier.size(24.dp))
                 bullets.forEach { bullet ->
                     Spacer(modifier = Modifier.size(16.dp))
-                    ConsentBottomSheetBullet(
+                    ModalBottomSheetBullet(
                         bullet,
                         onClickableTextClick = onClickableTextClick
                     )
@@ -309,263 +304,6 @@ private fun ConsentFooter(
             )
             Spacer(modifier = Modifier.size(16.dp))
         }
-    }
-}
-
-@Composable
-private fun LegalDetailsBottomSheetContent(
-    legalDetails: LegalDetailsNotice,
-    onClickableTextClick: (String) -> Unit,
-    onConfirmModalClick: () -> Unit
-) {
-    val title = remember(legalDetails.title) {
-        TextResource.Text(fromHtml(legalDetails.title))
-    }
-    val learnMore = remember(legalDetails.learnMore) {
-        TextResource.Text(fromHtml(legalDetails.learnMore))
-    }
-    val bullets = remember(legalDetails.body.bullets) {
-        legalDetails.body.bullets.map { BulletUI.from(it) }
-    }
-    ConsentBottomSheetContent(
-        title = title,
-        onClickableTextClick = onClickableTextClick,
-        bullets = bullets,
-        connectedAccountNotice = null,
-        cta = legalDetails.cta,
-        learnMore = learnMore,
-        onConfirmModalClick = onConfirmModalClick,
-    )
-}
-
-@Composable
-private fun DataAccessBottomSheetContent(
-    dataDialog: DataAccessNotice,
-    onClickableTextClick: (String) -> Unit,
-    onConfirmModalClick: () -> Unit
-) {
-    val title = remember(dataDialog.title) {
-        TextResource.Text(fromHtml(dataDialog.title))
-    }
-    val learnMore = remember(dataDialog.learnMore) {
-        TextResource.Text(fromHtml(dataDialog.learnMore))
-    }
-    val connectedAccountNotice = remember(dataDialog.connectedAccountNotice) {
-        dataDialog.connectedAccountNotice?.let { TextResource.Text(fromHtml(it)) }
-    }
-    val bullets = remember(dataDialog.body.bullets) {
-        dataDialog.body.bullets.map { BulletUI.from(it) }
-    }
-    ConsentBottomSheetContent(
-        title = title,
-        onClickableTextClick = onClickableTextClick,
-        bullets = bullets,
-        connectedAccountNotice = connectedAccountNotice,
-        cta = dataDialog.cta,
-        learnMore = learnMore,
-        onConfirmModalClick = onConfirmModalClick,
-    )
-}
-
-@Composable
-private fun ConsentBottomSheetContent(
-    title: TextResource.Text,
-    onClickableTextClick: (String) -> Unit,
-    bullets: List<BulletUI>,
-    connectedAccountNotice: TextResource?,
-    cta: String,
-    learnMore: TextResource,
-    onConfirmModalClick: () -> Unit,
-) {
-    val scrollState = rememberScrollState()
-    Column {
-        Column(
-            Modifier
-                .verticalScroll(scrollState)
-                .padding(24.dp)
-        ) {
-            AnnotatedText(
-                text = title,
-                defaultStyle = typography.heading.copy(
-                    color = colors.textPrimary
-                ),
-                annotationStyles = emptyMap(),
-                onClickableTextClick = onClickableTextClick
-            )
-            bullets.forEach {
-                Spacer(modifier = Modifier.size(16.dp))
-                ConsentBottomSheetBullet(
-                    bullet = it,
-                    onClickableTextClick = onClickableTextClick
-                )
-            }
-        }
-        Column(
-            Modifier.padding(
-                bottom = 24.dp,
-                start = 24.dp,
-                end = 24.dp
-            )
-        ) {
-            if (connectedAccountNotice != null) {
-                AnnotatedText(
-                    text = connectedAccountNotice,
-                    onClickableTextClick = onClickableTextClick,
-                    defaultStyle = typography.caption.copy(
-                        color = colors.textSecondary
-                    ),
-                    annotationStyles = mapOf(
-                        StringAnnotation.CLICKABLE to typography.captionEmphasized
-                            .toSpanStyle()
-                            .copy(color = colors.textBrand),
-                        StringAnnotation.BOLD to typography.captionEmphasized
-                            .toSpanStyle()
-                            .copy(color = colors.textSecondary),
-                    )
-                )
-                Spacer(modifier = Modifier.size(12.dp))
-            }
-            AnnotatedText(
-                text = learnMore,
-                onClickableTextClick = onClickableTextClick,
-                defaultStyle = typography.caption.copy(
-                    color = colors.textSecondary
-                ),
-                annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to typography.captionEmphasized
-                        .toSpanStyle()
-                        .copy(color = colors.textBrand),
-                    StringAnnotation.BOLD to typography.captionEmphasized
-                        .toSpanStyle()
-                        .copy(color = colors.textSecondary),
-                )
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            FinancialConnectionsButton(
-                onClick = { onConfirmModalClick() },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = cta)
-            }
-        }
-    }
-}
-
-@Composable
-private fun ConsentBottomSheetBullet(
-    bullet: BulletUI,
-    onClickableTextClick: (String) -> Unit
-) {
-    Row {
-        ConsentBulletIcon(iconUrl = bullet.icon)
-        Spacer(modifier = Modifier.size(8.dp))
-        Column {
-            when {
-                // title + content
-                bullet.title != null && bullet.content != null -> {
-                    AnnotatedText(
-                        text = bullet.title,
-                        defaultStyle = typography.body.copy(
-                            color = colors.textPrimary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textBrand),
-                            StringAnnotation.BOLD to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textPrimary),
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                    Spacer(modifier = Modifier.size(2.dp))
-                    AnnotatedText(
-                        text = bullet.content,
-                        defaultStyle = typography.detail.copy(
-                            color = colors.textSecondary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to typography.detailEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textBrand),
-                            StringAnnotation.BOLD to typography.detailEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textSecondary),
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                }
-                // only title
-                bullet.title != null -> {
-                    AnnotatedText(
-                        text = bullet.title,
-                        defaultStyle = typography.body.copy(
-                            color = colors.textPrimary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textBrand),
-                            StringAnnotation.BOLD to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textPrimary),
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                }
-                // only content
-                bullet.content != null -> {
-                    AnnotatedText(
-                        text = bullet.content,
-                        defaultStyle = typography.body.copy(
-                            color = colors.textSecondary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textBrand),
-                            StringAnnotation.BOLD to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textSecondary),
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ConsentBulletIcon(iconUrl: String?) {
-    val modifier = Modifier
-        .size(16.dp)
-        .offset(y = 2.dp)
-    if (iconUrl == null) {
-        val color = colors.textPrimary
-        Canvas(
-            modifier = Modifier
-                .size(16.dp)
-                .padding(6.dp)
-                .offset(y = 2.dp),
-            onDraw = { drawCircle(color = color) }
-        )
-    } else {
-        StripeImage(
-            url = iconUrl,
-            errorContent = {
-                val color = colors.textSecondary
-                Canvas(
-                    modifier = Modifier
-                        .size(6.dp)
-                        .align(Alignment.Center),
-                    onDraw = { drawCircle(color = color) }
-                )
-            },
-            imageLoader = LocalImageLoader.current,
-            contentDescription = null,
-            modifier = modifier
-        )
     }
 }
 
