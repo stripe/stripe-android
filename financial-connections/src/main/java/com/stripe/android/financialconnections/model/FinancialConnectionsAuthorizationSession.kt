@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
 import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
-import com.stripe.android.financialconnections.domain.prepane.Display
+import com.stripe.android.financialconnections.domain.Display
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

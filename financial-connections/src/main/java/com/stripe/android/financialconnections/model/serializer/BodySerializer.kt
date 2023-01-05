@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.model.serializer
 
-import com.stripe.android.financialconnections.domain.prepane.Entry
+import com.stripe.android.financialconnections.domain.Entry
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonElement
