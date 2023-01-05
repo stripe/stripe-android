@@ -1,5 +1,9 @@
 package com.stripe.android.paymentsheet.viewmodels
 
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.distinctUntilChanged
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
@@ -7,8 +11,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 
 internal class PaymentOptionsStateMapper(
     private val paymentMethods: StateFlow<List<PaymentMethod>>,
@@ -20,21 +22,19 @@ internal class PaymentOptionsStateMapper(
 ) {
 
     operator fun invoke(): Flow<PaymentOptionsState> {
-        return combine(
-            combine(
-                paymentMethods,
-                currentSelection,
-                initialSelection,
-                ::Triple
-            ),
-            combine(
-                isGooglePayReady,
-                isLinkEnabled,
-                ::Pair
-            )
-        ) { _, _ ->
-            createPaymentOptionsState()
-        }.distinctUntilChanged()
+        return MediatorLiveData<PaymentOptionsState>().apply {
+            listOf(
+                paymentMethods.asLiveData(),
+                currentSelection.asLiveData(),
+                initialSelection.asLiveData(),
+                isGooglePayReady.asLiveData(),
+                isLinkEnabled.asLiveData(),
+            ).forEach { source ->
+                addSource(source) {
+                    value = createPaymentOptionsState()
+                }
+            }
+        }.distinctUntilChanged().asFlow()
     }
 
     @Suppress("ReturnCount")

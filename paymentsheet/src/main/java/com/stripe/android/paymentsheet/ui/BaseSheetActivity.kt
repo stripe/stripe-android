@@ -29,9 +29,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -39,6 +36,7 @@ import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
@@ -50,9 +48,6 @@ import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.KeyboardController
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
@@ -131,7 +126,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
-        viewModel.processing.collectInActivity { isProcessing ->
+        viewModel.processing.launchAndCollectIn(this) { isProcessing ->
             updateRootViewClickHandling(isProcessing)
             toolbar.isEnabled = !isProcessing
         }
@@ -155,7 +150,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         setupPrimaryButton()
         setupNotes()
 
-        viewModel.showLinkVerificationDialog.collectInActivity { show ->
+        viewModel.showLinkVerificationDialog.launchAndCollectIn(this) { show ->
             linkAuthView.setContent {
                 if (show) {
                     LinkVerificationDialog(
@@ -166,7 +161,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
-        viewModel.contentVisible.collectInActivity {
+        viewModel.contentVisible.launchAndCollectIn(this) {
             scrollView.isVisible = it
         }
 
@@ -174,7 +169,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // `rootView`'s click listener
         bottomSheet.isClickable = true
 
-        viewModel.liveMode.collectInActivity { isLiveMode ->
+        viewModel.liveMode.launchAndCollectIn(this) { isLiveMode ->
             testModeIndicator.visibility = if (isLiveMode) View.GONE else View.VISIBLE
         }
 
@@ -265,7 +260,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
      * Perform the initial setup for the primary button.
      */
     private fun setupPrimaryButton() {
-        viewModel.primaryButtonUIState.collectInActivity { state ->
+        viewModel.primaryButtonUIState.launchAndCollectIn(this) { state ->
             state?.let {
                 primaryButton.setOnClickListener {
                     state.onClick?.invoke()
@@ -277,13 +272,13 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 resetPrimaryButtonState()
             }
         }
-        viewModel.resetPrimaryButtonUI.collectInActivity {
+        viewModel.resetPrimaryButtonUI.launchAndCollectIn(this) {
             resetPrimaryButtonState()
         }
-        viewModel.primaryButtonState.collectInActivity { state ->
+        viewModel.primaryButtonState.launchAndCollectIn(this) { state ->
             primaryButton.updateState(state)
         }
-        viewModel.ctaEnabled.collectInActivity { isEnabled ->
+        viewModel.ctaEnabled.launchAndCollectIn(this) { isEnabled ->
             primaryButton.isEnabled = isEnabled
         }
 
@@ -302,7 +297,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract fun resetPrimaryButtonState()
 
     private fun setupNotes() {
-        viewModel.notesText.collectInActivity { text ->
+        viewModel.notesText.launchAndCollectIn(this) { text ->
             val showNotes = text != null
             text?.let {
                 notesView.setContent {
@@ -385,26 +380,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         val params: ViewGroup.LayoutParams = bottomSheet.layoutParams
         params.width = (screenWidth * TABLET_WIDTH_RATIO).roundToInt()
         bottomSheet.layoutParams = params
-    }
-
-    protected inline fun <T> StateFlow<T>.collectInActivity(crossinline transform: (T) -> Unit) {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                collect {
-                    transform(it)
-                }
-            }
-        }
-    }
-
-    protected inline fun <T> Flow<T>.collectInActivity(crossinline transform: (T) -> Unit) {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                collect {
-                    transform(it)
-                }
-            }
-        }
     }
 
     internal companion object {

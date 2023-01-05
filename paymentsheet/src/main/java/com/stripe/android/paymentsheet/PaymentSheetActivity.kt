@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -124,7 +125,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             linkPaymentLauncher = viewModel.linkLauncher
         }
 
-        viewModel.transition.collectInActivity { transitionEvent ->
+        viewModel.transition.launchAndCollectIn(this) { transitionEvent ->
             clearErrorMessages()
             transitionEvent?.getContentIfNotHandled()?.let { transitionTarget ->
                 onTransitionTarget(transitionTarget)
@@ -135,7 +136,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewModel.transitionToFirstScreenWhenReady()
         }
 
-        viewModel.startConfirm.collectInActivity { event ->
+        viewModel.startConfirm.launchAndCollectIn(this) { event ->
             val confirmParams = event?.getContentIfNotHandled()
             if (confirmParams != null) {
                 window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
@@ -145,23 +146,25 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        viewModel.paymentSheetResult.collectInActivity {
+        viewModel.paymentSheetResult.launchAndCollectIn(this) {
             it?.let {
                 closeSheet(it)
             }
         }
 
-        viewModel.buttonsEnabled.collectInActivity { enabled ->
+        viewModel.buttonsEnabled.launchAndCollectIn(this) { enabled ->
             linkButton.isEnabled = enabled
             googlePayButton.isEnabled = enabled
         }
 
-        viewModel.selection.filterNotNull().collectInActivity {
+        viewModel.selection.filterNotNull().launchAndCollectIn(this) {
             clearErrorMessages()
             resetPrimaryButtonState()
         }
 
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy).collectInActivity {
+        viewModel.getButtonStateObservable(
+            CheckoutIdentifier.SheetBottomBuy
+        ).launchAndCollectIn(this) {
             buyButtonStateObserver(it)
         }
     }
@@ -274,7 +277,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 R.string.stripe_paymentsheet_or_pay_using
             }
         )
-        viewModel.showTopContainer.collectInActivity { visible ->
+        viewModel.showTopContainer.launchAndCollectIn(this) { visible ->
             linkButton.isVisible = viewModel.isLinkEnabled.value == true
             googlePayButton.isVisible = viewModel.isGooglePayReady.value == true
             topContainer.isVisible = visible
@@ -303,14 +306,14 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewModel.updateSelection(PaymentSelection.GooglePay)
         }
 
-        viewModel.selection.collectInActivity { paymentSelection ->
+        viewModel.selection.launchAndCollectIn(this) { paymentSelection ->
             if (paymentSelection == PaymentSelection.GooglePay) {
                 viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
             }
         }
 
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
-            .collectInActivity { viewState ->
+            .launchAndCollectIn(this) { viewState ->
                 if (viewState is PaymentSheetViewState.Reset) {
                     // If Google Pay was cancelled or failed, re-select the form payment method
                     viewModel.updateSelection(viewModel.lastSelectedPaymentMethod)

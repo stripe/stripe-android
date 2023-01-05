@@ -14,11 +14,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
+import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.isSystemDarkTheme
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 internal abstract class BasePaymentMethodsListFragment(
@@ -138,25 +138,15 @@ internal abstract class BasePaymentMethodsListFragment(
             }
         }
 
-        sheetViewModel.paymentMethods.collectInFragment { paymentMethods ->
+        sheetViewModel.paymentMethods.launchAndCollectIn(this) { paymentMethods ->
             if (isEditing && paymentMethods.isEmpty()) {
                 isEditing = false
             }
         }
 
-        sheetViewModel.processing.collectInFragment { isProcessing ->
+        sheetViewModel.processing.launchAndCollectIn(this) { isProcessing ->
             adapter.isEnabled = !isProcessing
             layoutManager.canScroll = !isProcessing
-        }
-    }
-
-    private inline fun <T> StateFlow<T>.collectInFragment(crossinline transform: (T) -> Unit) {
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                collect {
-                    transform(it)
-                }
-            }
         }
     }
 

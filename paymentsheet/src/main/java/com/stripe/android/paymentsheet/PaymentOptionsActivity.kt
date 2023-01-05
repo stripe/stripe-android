@@ -22,6 +22,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.AnimationConstants
 
@@ -88,7 +89,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        viewModel.transition.collectInActivity { transitionEvent ->
+        viewModel.transition.launchAndCollectIn(this) { transitionEvent ->
             clearErrorMessages()
             transitionEvent?.getContentIfNotHandled()?.let { transitionTarget ->
                 onTransitionTarget(transitionTarget)
@@ -99,7 +100,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             viewModel.transitionToFirstScreenWhenReady()
         }
 
-        viewModel.selection.collectInActivity {
+        viewModel.selection.launchAndCollectIn(this) {
             clearErrorMessages()
             resetPrimaryButtonState()
         }
