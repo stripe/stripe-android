@@ -16,12 +16,8 @@ internal data class OauthPrepane(
     val cta: Cta,
     @SerialName("institution_icon")
     val institutionIcon: Image,
-    //@SerialName("partner_notice")
-    @Transient
-    val partnerNotice: PartnerNotice = PartnerNotice(
-        partnerIcon = Image("https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--reserve-primary-3x.png"),
-        text = "LOLOLOLOLOLOLOLOLOL"
-    ),
+    @SerialName("partner_notice")
+    val partnerNotice: PartnerNotice? = null,
     @SerialName("title")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val title: String

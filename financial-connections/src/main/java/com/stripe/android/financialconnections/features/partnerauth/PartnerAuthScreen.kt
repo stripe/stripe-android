@@ -324,13 +324,15 @@ private fun InstitutionalPrePaneContent(
                     )
                 }
             }
-
-//            PartnerCallout(
-//                isStripeDirect = isStripeDirect,
-//                content.partnerNotice
-//            )
         }
         Box {
+            content.partnerNotice?.let {
+                PartnerCallout(
+                    isStripeDirect = isStripeDirect,
+                    content.partnerNotice
+                )
+            }
+            Spacer(modifier = Modifier.size(16.dp))
             FinancialConnectionsButton(
                 onClick = onContinueClick,
                 modifier = Modifier
