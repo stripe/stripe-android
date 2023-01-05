@@ -81,7 +81,6 @@ import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.image.StripeImage
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 @Composable
@@ -162,12 +161,13 @@ private fun PartnerAuthScreenContent(
         },
         content = {
             PartnerAuthScreenMainContent(
-                state,
-                onCloseClick,
-                onSelectAnotherBank,
-                onEnterDetailsManually,
-                onCloseFromErrorClick,
-                onContinueClick
+                state = state,
+                onCloseClick = onCloseClick,
+                onSelectAnotherBank = onSelectAnotherBank,
+                onEnterDetailsManually = onEnterDetailsManually,
+                onCloseFromErrorClick = onCloseFromErrorClick,
+                onClickableTextClick = onClickableTextClick,
+                onContinueClick = onContinueClick,
             )
         }
     )
@@ -180,7 +180,8 @@ private fun PartnerAuthScreenMainContent(
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
-    onContinueClick: () -> Unit
+    onContinueClick: () -> Unit,
+    onClickableTextClick: (String) -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
@@ -206,8 +207,9 @@ private fun PartnerAuthScreenMainContent(
             is Success -> LoadedContent(
                 authenticationStatus = state.authenticationStatus,
                 payload = payload(),
+                onClickableTextClick = onClickableTextClick,
                 onContinueClick = onContinueClick,
-                onSelectAnotherBank = onSelectAnotherBank
+                onSelectAnotherBank = onSelectAnotherBank,
             )
         }
     }
@@ -242,7 +244,8 @@ private fun LoadedContent(
     authenticationStatus: Async<String>,
     payload: PartnerAuthState.Payload,
     onContinueClick: () -> Unit,
-    onSelectAnotherBank: () -> Unit
+    onSelectAnotherBank: () -> Unit,
+    onClickableTextClick: (String) -> Unit
 ) {
     when (authenticationStatus) {
         is Uninitialized -> when (payload.authSession.isOAuth) {
@@ -253,9 +256,10 @@ private fun LoadedContent(
                 showPartnerDisclosure = payload.authSession.showPartnerDisclosure ?: false,
                 onContinueClick = onContinueClick
             ) else InstitutionalPrePaneContent(
+                onClickableTextClick = onClickableTextClick,
                 isStripeDirect = payload.isStripeDirect,
                 onContinueClick = onContinueClick,
-                content = payload.authSession.display.text.oauthPrepane
+                content = payload.authSession.display.text.oauthPrepane,
             )
 
             false -> LoadingContent(
@@ -333,7 +337,8 @@ private fun DefaultPrePaneContent(
 private fun InstitutionalPrePaneContent(
     isStripeDirect: Boolean,
     onContinueClick: () -> Unit,
-    content: OauthPrepane
+    content: OauthPrepane,
+    onClickableTextClick: (String) -> Unit
 ) {
     val title = remember(content.title) {
         TextResource.Text(fromHtml(content.title))
@@ -373,7 +378,7 @@ private fun InstitutionalPrePaneContent(
 
                     is Entry.Text -> AnnotatedText(
                         text = TextResource.Text(fromHtml(bodyItem.content)),
-                        onClickableTextClick = { },
+                        onClickableTextClick = onClickableTextClick,
                         defaultStyle = FinancialConnectionsTheme.typography.body,
                         annotationStyles = mapOf(
                             StringAnnotation.BOLD to FinancialConnectionsTheme.typography.bodyEmphasized.toSpanStyle(),
