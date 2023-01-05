@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.navigation.IDUploadDestination
@@ -52,9 +53,9 @@ class UploadScreenTest {
         on { documentBackUploadedState } doReturn documentBackUploadState
         on { collectedData } doReturn collectedData
         on { missingRequirements } doReturn missingRequirements
+        on { verificationPage } doReturn MutableLiveData(Resource.success(mock()))
     }
 
-    // Test UploadScreen
     @Test
     fun `when front is not uploaded, front upload UI is enabled and back UI is not visible`() {
         testUploadScreen(hasBack = false) {

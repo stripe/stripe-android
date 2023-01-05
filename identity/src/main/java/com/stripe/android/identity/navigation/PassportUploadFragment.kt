@@ -4,15 +4,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.utils.IdentityIO
 
 /**
  * Fragment to upload passport.
  */
 internal open class PassportUploadFragment(
-    identityIO: IdentityIO,
     identityViewModelFactory: ViewModelProvider.Factory
-) : IdentityUploadFragment(identityIO, identityViewModelFactory) {
+) : IdentityUploadFragment(identityViewModelFactory) {
     override val titleRes = R.string.file_upload
     override val contextRes = R.string.file_upload_content_passport
     override val frontTextRes = R.string.passport

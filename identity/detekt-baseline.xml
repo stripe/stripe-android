@@ -67,6 +67,6 @@
     <ID>UnusedPrivateMember:CameraPermissionDeniedFragmentTest.kt$CameraPermissionDeniedFragmentTest$@StringRes expectedTitleSuffix: Int = 0</ID>
     <ID>UnusedPrivateMember:CouldNotCaptureFragmentTest.kt$CouldNotCaptureFragmentTest$testBlock: (Button, Button, TestNavHostController) -> Unit</ID>
     <ID>UnusedPrivateMember:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$i</ID>
-    <ID>VariableNaming:IdentityViewModel.kt$IdentityViewModel$/** * Response for initial VerificationPage, used for building UI. */ @VisibleForTesting internal val _verificationPage = MutableLiveData&lt;Resource&lt;VerificationPage>>()</ID>
+    <ID>VariableNaming:IdentityViewModel.kt$IdentityViewModel$/** * Response for initial VerificationPage, used for building UI. */ @VisibleForTesting internal val _verificationPage: MutableLiveData&lt;Resource&lt;VerificationPage>> = // No need to write to savedStateHandle for livedata savedStateHandle.getLiveData( key = VERIFICATION_PAGE, initialValue = Resource.idle() )</ID>
   </CurrentIssues>
 </SmellBaseline>

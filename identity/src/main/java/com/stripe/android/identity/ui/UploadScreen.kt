@@ -28,6 +28,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -46,7 +48,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.identity.R
+import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
 import com.stripe.android.identity.navigation.routeToScreenName
+import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.Requirement
@@ -84,114 +88,69 @@ internal fun UploadScreen(
     shouldShowTakePhoto: Boolean,
     shouldShowChoosePhoto: Boolean
 ) {
-    val frontUploadState by identityViewModel.documentFrontUploadedState.collectAsState()
-    val backUploadState by identityViewModel.documentBackUploadedState.collectAsState()
-    val collectedData by identityViewModel.collectedData.collectAsState()
-    val missings by identityViewModel.missingRequirements.collectAsState()
-
     MdcTheme {
-        LaunchedEffect(Unit) {
-            identityViewModel.collectDataForDocumentUploadScreen(
-                navController,
-                collectedDataParamType,
-                route
-            )
-        }
-
-        ScreenTransitionLaunchedEffect(
-            identityViewModel = identityViewModel,
-            screenName = route.routeToScreenName(),
-            scanType = frontInfo.scanType
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(
-                    start = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    end = dimensionResource(id = R.dimen.page_horizontal_margin),
-                    top = 64.dp,
-                    bottom = dimensionResource(id = R.dimen.page_vertical_margin)
+        val localContext = LocalContext.current
+        val verificationState by identityViewModel.verificationPage.observeAsState(Resource.loading())
+        CheckVerificationPageAndCompose(
+            verificationPageResource = verificationState,
+            onError = {
+                identityViewModel.errorCause.postValue(it)
+                navController.navigateToFinalErrorScreen(
+                    localContext,
                 )
-                .testTag(SCROLLABLE_COLUMN_TAG)
+            }
         ) {
-            Text(
-                text = title,
-                fontSize = dimensionResourceSp(id = R.dimen.upload_title_text_size),
-
-                modifier = Modifier.padding(
-                    vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+            val frontUploadState by identityViewModel.documentFrontUploadedState.collectAsState()
+            val backUploadState by identityViewModel.documentBackUploadedState.collectAsState()
+            val collectedData by identityViewModel.collectedData.collectAsState()
+            val missings by identityViewModel.missingRequirements.collectAsState()
+            LaunchedEffect(Unit) {
+                identityViewModel.collectDataForDocumentUploadScreen(
+                    navController,
+                    collectedDataParamType,
+                    route
                 )
+            }
+
+            ScreenTransitionLaunchedEffect(
+                identityViewModel = identityViewModel,
+                screenName = route.routeToScreenName(),
+                scanType = frontInfo.scanType
             )
-            Text(
-                text = context,
-                modifier = Modifier.padding(
-                    bottom = 32.dp
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(
+                        start = dimensionResource(id = R.dimen.page_horizontal_margin),
+                        end = dimensionResource(id = R.dimen.page_horizontal_margin),
+                        top = 64.dp,
+                        bottom = dimensionResource(id = R.dimen.page_vertical_margin)
+                    )
+                    .testTag(SCROLLABLE_COLUMN_TAG)
+            ) {
+                Text(
+                    text = title,
+                    fontSize = dimensionResourceSp(id = R.dimen.upload_title_text_size),
+
+                    modifier = Modifier.padding(
+                        vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+                    )
                 )
-            )
+                Text(
+                    text = context,
+                    modifier = Modifier.padding(
+                        bottom = 32.dp
+                    )
+                )
 
-            val frontUploadedUiState by remember {
-                derivedStateOf {
-                    collectedData.idDocumentFront?.let {
-                        DocumentUploadUIState.Done
-                    } ?: run {
-                        when (frontUploadState.highResResult.status) {
-                            Status.SUCCESS -> DocumentUploadUIState.Loading
-                            Status.LOADING -> DocumentUploadUIState.Loading
-                            Status.IDLE -> DocumentUploadUIState.Idle
-                            // place holder, Error will redirect to ErrorScreen
-                            Status.ERROR -> DocumentUploadUIState.Idle
-                        }
-                    }
-                }
-            }
-
-            var shouldShowFrontDialog by remember { mutableStateOf(false) }
-            SingleSideUploadRow(
-                modifier = Modifier.testTag(FRONT_ROW_TAG),
-                uploadUiState = frontUploadedUiState,
-                uploadInfo = frontInfo,
-            ) { shouldShowFrontDialog = true }
-
-            if (shouldShowFrontDialog) {
-                UploadImageDialog(
-                    uploadInfo = frontInfo,
-                    shouldShowTakePhoto = shouldShowTakePhoto,
-                    shouldShowChoosePhoto = shouldShowChoosePhoto,
-                    onDismissRequest = { shouldShowFrontDialog = false }
-                ) { shouldShowFrontDialog = false }
-            }
-
-            // decide should show back or not
-            val shouldShowBack by remember {
-                derivedStateOf {
-                    // If front and back are collected, it means the user has already uploaded both sides,
-                    // should show both sides done and enable continue button
-                    if (collectedData.idDocumentFront != null && collectedData.idDocumentBack != null) {
-                        true
-                    }
-                    // Otherwise show back when all the follows are true
-                    //  * backInfo is not null - e.g not a passport scan where backInfo is null
-                    //  * collectedData.idDocumentFront not null - front is already scanned
-                    //  * missing BACK - front already scanned and server returns missing back
-                    else {
-                        backInfo != null && collectedData.idDocumentFront != null && missings.contains(
-                            Requirement.IDDOCUMENTBACK
-                        )
-                    }
-                }
-            }
-
-            if (shouldShowBack) {
-                var shouldShowBackDialog by remember { mutableStateOf(false) }
-                Divider(modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin)))
-                val backUploadedUiState by remember {
+                val frontUploadedUiState by remember {
                     derivedStateOf {
-                        collectedData.idDocumentBack?.let {
+                        collectedData.idDocumentFront?.let {
                             DocumentUploadUIState.Done
                         } ?: run {
-                            when (backUploadState.highResResult.status) {
+                            when (frontUploadState.highResResult.status) {
                                 Status.SUCCESS -> DocumentUploadUIState.Loading
                                 Status.LOADING -> DocumentUploadUIState.Loading
                                 Status.IDLE -> DocumentUploadUIState.Idle
@@ -201,47 +160,103 @@ internal fun UploadScreen(
                         }
                     }
                 }
-                SingleSideUploadRow(
-                    modifier = Modifier.testTag(BACK_ROW_TAG),
-                    uploadUiState = backUploadedUiState,
-                    uploadInfo = requireNotNull(backInfo),
-                ) { shouldShowBackDialog = true }
 
-                if (shouldShowBackDialog) {
+                var shouldShowFrontDialog by remember { mutableStateOf(false) }
+                SingleSideUploadRow(
+                    modifier = Modifier.testTag(FRONT_ROW_TAG),
+                    uploadUiState = frontUploadedUiState,
+                    uploadInfo = frontInfo,
+                ) { shouldShowFrontDialog = true }
+
+                if (shouldShowFrontDialog) {
                     UploadImageDialog(
-                        uploadInfo = backInfo,
+                        uploadInfo = frontInfo,
                         shouldShowTakePhoto = shouldShowTakePhoto,
                         shouldShowChoosePhoto = shouldShowChoosePhoto,
-                        onDismissRequest = { shouldShowBackDialog = false }
-                    ) { shouldShowBackDialog = false }
+                        onDismissRequest = { shouldShowFrontDialog = false }
+                    ) { shouldShowFrontDialog = false }
                 }
-            }
 
-            Spacer(modifier = Modifier.weight(1f))
-
-            // enable LoadingButton when collectedData has both front and back
-            var continueButtonState by remember(missings) {
-                mutableStateOf(
-                    if (missings.contains(Requirement.IDDOCUMENTFRONT) || missings.contains(
-                            Requirement.IDDOCUMENTBACK
-                        )
-                    ) {
-                        LoadingButtonState.Disabled
-                    } else {
-                        LoadingButtonState.Idle
+                // decide should show back or not
+                val shouldShowBack by remember {
+                    derivedStateOf {
+                        // If front and back are collected, it means the user has already uploaded both sides,
+                        // should show both sides done and enable continue button
+                        if (collectedData.idDocumentFront != null && collectedData.idDocumentBack != null) {
+                            true
+                        }
+                        // Otherwise show back when all the follows are true
+                        //  * backInfo is not null - e.g not a passport scan where backInfo is null
+                        //  * collectedData.idDocumentFront not null - front is already scanned
+                        //  * missing BACK - front already scanned and server returns missing back
+                        else {
+                            backInfo != null && collectedData.idDocumentFront != null && missings.contains(
+                                Requirement.IDDOCUMENTBACK
+                            )
+                        }
                     }
-                )
-            }
-            LoadingButton(
-                modifier = Modifier.testTag(UPLOAD_SCREEN_CONTINUE_BUTTON_TAG),
-                text = stringResource(id = R.string.kontinue).uppercase(),
-                state = continueButtonState
-            ) {
-                continueButtonState = LoadingButtonState.Loading
-                identityViewModel.navigateToSelfieOrSubmit(
-                    navController,
-                    route
-                )
+                }
+
+                if (shouldShowBack) {
+                    var shouldShowBackDialog by remember { mutableStateOf(false) }
+                    Divider(modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin)))
+                    val backUploadedUiState by remember {
+                        derivedStateOf {
+                            collectedData.idDocumentBack?.let {
+                                DocumentUploadUIState.Done
+                            } ?: run {
+                                when (backUploadState.highResResult.status) {
+                                    Status.SUCCESS -> DocumentUploadUIState.Loading
+                                    Status.LOADING -> DocumentUploadUIState.Loading
+                                    Status.IDLE -> DocumentUploadUIState.Idle
+                                    // place holder, Error will redirect to ErrorScreen
+                                    Status.ERROR -> DocumentUploadUIState.Idle
+                                }
+                            }
+                        }
+                    }
+                    SingleSideUploadRow(
+                        modifier = Modifier.testTag(BACK_ROW_TAG),
+                        uploadUiState = backUploadedUiState,
+                        uploadInfo = requireNotNull(backInfo),
+                    ) { shouldShowBackDialog = true }
+
+                    if (shouldShowBackDialog) {
+                        UploadImageDialog(
+                            uploadInfo = backInfo,
+                            shouldShowTakePhoto = shouldShowTakePhoto,
+                            shouldShowChoosePhoto = shouldShowChoosePhoto,
+                            onDismissRequest = { shouldShowBackDialog = false }
+                        ) { shouldShowBackDialog = false }
+                    }
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // enable LoadingButton when collectedData has both front and back
+                var continueButtonState by remember(missings) {
+                    mutableStateOf(
+                        if (missings.contains(Requirement.IDDOCUMENTFRONT) || missings.contains(
+                                Requirement.IDDOCUMENTBACK
+                            )
+                        ) {
+                            LoadingButtonState.Disabled
+                        } else {
+                            LoadingButtonState.Idle
+                        }
+                    )
+                }
+                LoadingButton(
+                    modifier = Modifier.testTag(UPLOAD_SCREEN_CONTINUE_BUTTON_TAG),
+                    text = stringResource(id = R.string.kontinue).uppercase(),
+                    state = continueButtonState
+                ) {
+                    continueButtonState = LoadingButtonState.Loading
+                    identityViewModel.navigateToSelfieOrSubmit(
+                        navController,
+                        route
+                    )
+                }
             }
         }
     }

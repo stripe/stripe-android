@@ -1,27 +1,21 @@
 package com.stripe.android.identity.navigation
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.stripe.android.identity.networking.models.CollectedDataParam
-import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.DocumentUploadSideInfo
 import com.stripe.android.identity.ui.UploadMethod
 import com.stripe.android.identity.ui.UploadScreen
-import com.stripe.android.identity.utils.IdentityIO
-import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 /**
@@ -29,7 +23,6 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
  *
  */
 internal abstract class IdentityUploadFragment(
-    identityIO: IdentityIO,
     private val identityViewModelFactory: ViewModelProvider.Factory
 ) : Fragment() {
 
@@ -59,64 +52,17 @@ internal abstract class IdentityUploadFragment(
 
     abstract val collectedDataParamType: CollectedDataParam.Type
 
-    @VisibleForTesting
-    internal var identityUploadViewModelFactory: ViewModelProvider.Factory =
-        IdentityUploadViewModel.FrontBackUploadViewModelFactory(identityIO)
-
-    private val identityUploadViewModel: IdentityUploadViewModel by viewModels {
-        identityUploadViewModelFactory
-    }
-
     protected val identityViewModel: IdentityViewModel by activityViewModels { identityViewModelFactory }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // Note: this could not be moved to a LaunchedEffect as activityResultCaller needs to be
-        // called in Fragment.onCreate.
-        // TODO(ccen): move it to Activity.onCreate when the fragment is removed.
-        identityUploadViewModel.registerActivityResultCaller(
-            activityResultCaller = this,
-            onFrontPhotoTaken = {
-                uploadResult(
-                    uri = it,
-                    uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
-                    isFront = true,
-                    scanType = frontScanType
-                )
-            },
-            onBackPhotoTaken = {
-                uploadResult(
-                    uri = it,
-                    uploadMethod = DocumentUploadParam.UploadMethod.MANUALCAPTURE,
-                    isFront = false,
-                    scanType = requireNotNull(backScanType) { "null backScanType" }
-                )
-            },
-            onFrontImageChosen = {
-                uploadResult(
-                    uri = it,
-                    uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
-                    isFront = true,
-                    scanType = frontScanType
-                )
-            },
-            onBackImageChosen = {
-                uploadResult(
-                    uri = it,
-                    uploadMethod = DocumentUploadParam.UploadMethod.FILEUPLOAD,
-                    isFront = false,
-                    scanType = requireNotNull(backScanType) { "null backScanType" }
-                )
-            }
-        )
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = ComposeView(requireContext()).apply {
+        identityViewModel.imageHandler.updateScanTypes(
+            frontScanType,
+            backScanType
+        )
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             UploadScreen(
@@ -134,10 +80,10 @@ internal abstract class IdentityUploadFragment(
                 ) { uploadMethod ->
                     when (uploadMethod) {
                         UploadMethod.TAKE_PHOTO -> {
-                            identityUploadViewModel.takePhotoFront(requireContext())
+                            identityViewModel.imageHandler.takePhotoFront(requireContext())
                         }
                         UploadMethod.CHOOSE_PHOTO -> {
-                            identityUploadViewModel.chooseImageFront()
+                            identityViewModel.imageHandler.chooseImageFront()
                         }
                     }
                 },
@@ -150,10 +96,10 @@ internal abstract class IdentityUploadFragment(
                     ) { uploadMethod ->
                         when (uploadMethod) {
                             UploadMethod.TAKE_PHOTO -> {
-                                identityUploadViewModel.takePhotoBack(requireContext())
+                                identityViewModel.imageHandler.takePhotoBack(requireContext())
                             }
                             UploadMethod.CHOOSE_PHOTO -> {
-                                identityUploadViewModel.chooseImageBack()
+                                identityViewModel.imageHandler.chooseImageBack()
                             }
                         }
                     }
@@ -168,29 +114,5 @@ internal abstract class IdentityUploadFragment(
                 )
             )
         }
-    }
-
-    private fun uploadResult(
-        uri: Uri,
-        uploadMethod: DocumentUploadParam.UploadMethod,
-        isFront: Boolean,
-        scanType: IdentityScanState.ScanType
-    ) {
-        identityViewModel.requireVerificationPage(
-            lifecycleOwner = viewLifecycleOwner,
-            navController = findNavController()
-        ) {
-            identityViewModel.uploadManualResult(
-                uri = uri,
-                isFront = isFront,
-                docCapturePage = it.documentCapture,
-                uploadMethod = uploadMethod,
-                scanType = scanType
-            )
-        }
-    }
-
-    companion object {
-        val TAG: String = IdentityUploadFragment::class.java.simpleName
     }
 }

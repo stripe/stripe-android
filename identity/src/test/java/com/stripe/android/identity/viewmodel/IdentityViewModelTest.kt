@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavController
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -62,6 +64,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.nullable
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
@@ -109,6 +112,9 @@ internal class IdentityViewModelTest {
             CROPPED_BITMAP
         )
     }
+    private val mockSavedStateHandle = mock<SavedStateHandle> {
+        on { getLiveData<Resource<VerificationPage>>(any(), any()) } doReturn MutableLiveData()
+    }
 
     private val mockIdentityAnalyticsRequestFactory = mock<IdentityAnalyticsRequestFactory>()
     private val mockScreenTracker = mock<ScreenTracker>()
@@ -134,6 +140,7 @@ internal class IdentityViewModelTest {
         mock(),
         mockScreenTracker,
         mock(),
+        mockSavedStateHandle,
         mock(),
         mock()
     )
