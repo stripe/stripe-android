@@ -390,7 +390,7 @@ internal fun InstitutionalPrepaneContentPreview() {
                             display = Display(
                                 Text(
                                     oauthPrepane = OauthPrepane(
-                                        title = "Sign in with **Banco del Nabo**",
+                                        title = "Sign in with Sample bank",
                                         body = Body(
                                             listOf(
                                                 Entry.Text(
@@ -413,7 +413,7 @@ internal fun InstitutionalPrepaneContentPreview() {
                                         institutionIcon = Image("https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--reserve-primary-3x.png"),
                                         partnerNotice = PartnerNotice(
                                             partnerIcon = Image("https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--reserve-primary-3x.png"),
-                                            text = "LOLOLOLOLOLOLOLOLOL"
+                                            text = "Stripe works with partners like MX to reliably offer access to thousands of financial institutions. Learn more"
                                         )
                                     )
                                 )
