@@ -1,4 +1,5 @@
 @file:OptIn(ExperimentalMaterialApi::class)
+@file:Suppress("LongMethod")
 
 package com.stripe.android.financialconnections.features.partnerauth
 
@@ -157,7 +158,7 @@ private fun PartnerAuthScreenContent(
                     onConfirmModalClick = onConfirmModalClick,
                     onClickableTextClick = onClickableTextClick
                 )
-            } ?: Spacer(modifier = Modifier.size(16.dp)) //TODO move
+            } ?: Spacer(modifier = Modifier)
         },
         content = {
             PartnerAuthScreenMainContent(
@@ -433,6 +434,8 @@ private fun GifWebView(gifUrl: String) {
 @Preview
 internal fun InstitutionalPrepaneContentPreview() {
     FinancialConnectionsPreview {
+        val sampleImage =
+            "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--reserve-primary-3x.png"
         PartnerAuthScreenContent(
             state = PartnerAuthState(
                 payload = Success(
@@ -463,9 +466,7 @@ internal fun InstitutionalPrepaneContentPreview() {
                                                     "Some very large text will most likely go here!"
                                                 ),
                                                 Entry.Image(
-                                                    Image(
-                                                        "https://media.tenor.com/H04kLkyt_tUAAAAM/dog-little-dog.gif"
-                                                    )
+                                                    Image(sampleImage)
                                                 ),
                                                 Entry.Text(
                                                     "Some very large text will most likely go here!"
@@ -476,10 +477,12 @@ internal fun InstitutionalPrepaneContentPreview() {
                                             icon = null,
                                             text = "Continue!"
                                         ),
-                                        institutionIcon = Image("https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--reserve-primary-3x.png"),
+                                        institutionIcon = Image(sampleImage),
                                         partnerNotice = PartnerNotice(
-                                            partnerIcon = Image("https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--reserve-primary-3x.png"),
-                                            text = "Stripe works with partners like MX to reliably offer access to thousands of financial institutions. Learn more"
+                                            partnerIcon = Image(sampleImage),
+                                            text = "Stripe works with partners like MX to reliably" +
+                                                " offer access to thousands of financial institutions." +
+                                                " Learn more"
                                         )
                                     )
                                 )
