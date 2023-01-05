@@ -17,13 +17,12 @@ internal class PassportScanFragment(
 ) {
     override val frontScanType = IdentityScanState.ScanType.PASSPORT
     override val backScanType: IdentityScanState.ScanType? = null
-    override val fragmentId = R.id.passportScanFragment
     override val frontTitleStringRes = R.string.passport
     override val backTitleStringRes = INVALID
     override val frontMessageStringRes = R.string.position_passport
     override val backMessageStringRes = INVALID
     override val collectedDataParamType = CollectedDataParam.Type.PASSPORT
-    override val route = PassportScanDestination.ROUTE.route
+    override val destinationRoute = PassportScanDestination.ROUTE
 
     internal companion object {
         const val INVALID = -1
