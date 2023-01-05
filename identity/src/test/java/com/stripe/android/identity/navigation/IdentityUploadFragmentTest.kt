@@ -31,8 +31,6 @@ import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_TAKE_PHOTO
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityUploadViewModel
@@ -112,6 +110,7 @@ class IdentityUploadFragmentTest {
         whenever(it.backCollectedInfo).thenReturn(backCollectedInfo)
         whenever(it.collectedData).thenReturn(collectedData)
         whenever(it.missingRequirements).thenReturn(missings)
+        whenever(it.errorCause).thenReturn(mock())
     }
 
     private val mockFrontBackUploadViewModel = mock<IdentityUploadViewModel>()
@@ -214,6 +213,7 @@ class IdentityUploadFragmentTest {
         override var backScanType: IdentityScanState.ScanType? = IdentityScanState.ScanType.ID_BACK
         override val collectedDataParamType = CollectedDataParam.Type.IDCARD
         override val fragmentId = R.id.IDUploadFragment
+        override val route = IDUploadDestination.ROUTE.route
 
         override fun onCreateView(
             inflater: LayoutInflater,

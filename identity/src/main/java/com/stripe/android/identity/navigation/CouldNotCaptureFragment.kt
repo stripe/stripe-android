@@ -3,22 +3,18 @@ package com.stripe.android.identity.navigation
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.annotation.IdRes
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
-import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_ERROR
 import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
 import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Companion.ARG_REQUIRE_LIVE_CAPTURE
-import com.stripe.android.identity.navigation.IdentityDocumentScanFragment.Companion.ARG_SHOULD_START_FROM_BACK
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
-import com.stripe.android.identity.utils.navigateOnResume
-import com.stripe.android.identity.utils.navigateToUploadFragment
 
 /**
  * Fragment to indicate live capture failure.
@@ -58,10 +54,11 @@ internal class CouldNotCaptureFragment(
                         identityViewModel.screenTracker.screenTransitionStart(
                             SCREEN_NAME_ERROR
                         )
-                        navigateToUploadFragment(
-                            scanType.toUploadDestinationId(),
-                            shouldShowTakePhoto = true,
-                            shouldShowChoosePhoto = !args.getBoolean(ARG_REQUIRE_LIVE_CAPTURE)
+                        findNavController().navigateTo(
+                            scanType.toUploadDestination(
+                                shouldShowTakePhoto = true,
+                                shouldShowChoosePhoto = !args.getBoolean(ARG_REQUIRE_LIVE_CAPTURE)
+                            )
                         )
                     }
                 },
@@ -72,11 +69,8 @@ internal class CouldNotCaptureFragment(
                     identityViewModel.screenTracker.screenTransitionStart(
                         SCREEN_NAME_ERROR
                     )
-                    navigateOnResume(
-                        scanType.toScanDestinationId(),
-                        bundleOf(
-                            ARG_SHOULD_START_FROM_BACK to scanType.toShouldStartFromBack()
-                        )
+                    findNavController().navigateTo(
+                        scanType.toScanDestination()
                     )
                 }
             )
@@ -85,49 +79,55 @@ internal class CouldNotCaptureFragment(
 
     internal companion object {
 
-        @IdRes
-        private fun IdentityScanState.ScanType.toUploadDestinationId() =
+        private fun IdentityScanState.ScanType.toUploadDestination(
+            shouldShowTakePhoto: Boolean,
+            shouldShowChoosePhoto: Boolean
+        ) =
             when (this) {
                 IdentityScanState.ScanType.ID_FRONT ->
-                    R.id.action_couldNotCaptureFragment_to_IDUploadFragment
+                    IDUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
                 IdentityScanState.ScanType.ID_BACK ->
-                    R.id.action_couldNotCaptureFragment_to_IDUploadFragment
+                    IDUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
                 IdentityScanState.ScanType.DL_FRONT ->
-                    R.id.action_couldNotCaptureFragment_to_driverLicenseUploadFragment
+                    DriverLicenseUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
                 IdentityScanState.ScanType.DL_BACK ->
-                    R.id.action_couldNotCaptureFragment_to_driverLicenseUploadFragment
+                    DriverLicenseUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
                 IdentityScanState.ScanType.PASSPORT ->
-                    R.id.action_couldNotCaptureFragment_to_passportUploadFragment
+                    PassportUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
                 IdentityScanState.ScanType.SELFIE -> {
                     throw IllegalArgumentException("SELFIE doesn't support upload")
                 }
             }
 
-        @IdRes
-        private fun IdentityScanState.ScanType.toScanDestinationId() =
+        private fun IdentityScanState.ScanType.toScanDestination() =
             when (this) {
                 IdentityScanState.ScanType.ID_FRONT ->
-                    R.id.action_couldNotCaptureFragment_to_IDScanFragment
+                    IDScanDestination(
+                        shouldStartFromBack = false,
+                        shouldPopUpToDocSelection = true
+                    )
                 IdentityScanState.ScanType.ID_BACK ->
-                    R.id.action_couldNotCaptureFragment_to_IDScanFragment
+                    IDScanDestination(
+                        shouldStartFromBack = true,
+                        shouldPopUpToDocSelection = true
+                    )
                 IdentityScanState.ScanType.DL_FRONT ->
-                    R.id.action_couldNotCaptureFragment_to_driverLicenseScanFragment
+                    DriverLicenseScanDestination(
+                        shouldStartFromBack = false,
+                        shouldPopUpToDocSelection = true
+                    )
                 IdentityScanState.ScanType.DL_BACK ->
-                    R.id.action_couldNotCaptureFragment_to_driverLicenseScanFragment
+                    DriverLicenseScanDestination(
+                        shouldStartFromBack = true,
+                        shouldPopUpToDocSelection = true
+                    )
                 IdentityScanState.ScanType.PASSPORT ->
-                    R.id.action_couldNotCaptureFragment_to_passportScanFragment
+                    PassportScanDestination(
+                        shouldStartFromBack = false,
+                        shouldPopUpToDocSelection = true
+                    )
                 IdentityScanState.ScanType.SELFIE ->
-                    R.id.action_couldNotCaptureFragment_to_selfieFragment
-            }
-
-        private fun IdentityScanState.ScanType.toShouldStartFromBack() =
-            when (this) {
-                IdentityScanState.ScanType.ID_FRONT -> false
-                IdentityScanState.ScanType.ID_BACK -> true
-                IdentityScanState.ScanType.DL_FRONT -> false
-                IdentityScanState.ScanType.DL_BACK -> true
-                IdentityScanState.ScanType.PASSPORT -> false
-                IdentityScanState.ScanType.SELFIE -> false
+                    SelfieDestination
             }
     }
 }

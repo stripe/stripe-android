@@ -18,7 +18,6 @@ import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Companion.ARG_COULD_NOT_CAPTURE_SCAN_TYPE
 import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Companion.ARG_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.states.IdentityScanState.ScanType
-import com.stripe.android.identity.utils.ARG_SHOULD_SHOW_CHOOSE_PHOTO
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi

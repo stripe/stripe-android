@@ -6,6 +6,7 @@ import com.stripe.android.identity.networking.VERIFICATION_PAGE_REQUIRE_SELFIE_L
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
+import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
 import kotlinx.serialization.json.Json
 
@@ -27,10 +28,22 @@ internal val CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA = Verificatio
     id = "id",
     objectType = "type",
     requirements = VerificationPageDataRequirements(
-        errors = emptyList()
+        errors = emptyList(),
+        missings = emptyList()
     ),
     status = VerificationPageData.Status.VERIFIED,
     submitted = true
+)
+
+internal val VERIFICATION_PAGE_DATA_MISSING_FRONT = VerificationPageData(
+    id = "id",
+    objectType = "type",
+    requirements = VerificationPageDataRequirements(
+        errors = emptyList(),
+        missings = listOf(Requirement.IDDOCUMENTFRONT)
+    ),
+    status = VerificationPageData.Status.REQUIRESINPUT,
+    submitted = false
 )
 
 internal val VERIFICATION_PAGE_DATA_MISSING_BACK = VerificationPageData(
@@ -39,6 +52,28 @@ internal val VERIFICATION_PAGE_DATA_MISSING_BACK = VerificationPageData(
     requirements = VerificationPageDataRequirements(
         errors = emptyList(),
         missings = listOf(Requirement.IDDOCUMENTBACK)
+    ),
+    status = VerificationPageData.Status.REQUIRESINPUT,
+    submitted = false
+)
+
+internal val VERIFICATION_PAGE_DATA_MISSING_CONSENT = VerificationPageData(
+    id = "id",
+    objectType = "type",
+    requirements = VerificationPageDataRequirements(
+        errors = emptyList(),
+        missings = listOf(Requirement.BIOMETRICCONSENT)
+    ),
+    status = VerificationPageData.Status.REQUIRESINPUT,
+    submitted = false
+)
+
+internal val VERIFICATION_PAGE_DATA_MISSING_DOCTYPE = VerificationPageData(
+    id = "id",
+    objectType = "type",
+    requirements = VerificationPageDataRequirements(
+        errors = emptyList(),
+        missings = listOf(Requirement.IDDOCUMENTTYPE)
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
     submitted = false
@@ -61,6 +96,24 @@ internal val VERIFICATION_PAGE_DATA_MISSING_SELFIE = VerificationPageData(
     requirements = VerificationPageDataRequirements(
         errors = emptyList(),
         missings = listOf(Requirement.FACE)
+    ),
+    status = VerificationPageData.Status.REQUIRESINPUT,
+    submitted = false
+)
+
+internal val VERIFICATION_PAGE_DATA_HAS_ERROR = VerificationPageData(
+    id = "id",
+    objectType = "type",
+    requirements = VerificationPageDataRequirements(
+        errors = listOf(
+            VerificationPageDataRequirementError(
+                body = ERROR_BODY,
+                backButtonText = ERROR_BUTTON_TEXT,
+                requirement = Requirement.BIOMETRICCONSENT,
+                title = ERROR_TITLE
+            )
+        ),
+        missings = listOf(Requirement.BIOMETRICCONSENT)
     ),
     status = VerificationPageData.Status.REQUIRESINPUT,
     submitted = false

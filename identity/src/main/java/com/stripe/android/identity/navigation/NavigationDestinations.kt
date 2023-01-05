@@ -2,13 +2,13 @@ package com.stripe.android.identity.navigation
 
 import android.os.Bundle
 import androidx.annotation.IdRes
-import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState
 
@@ -56,7 +56,6 @@ internal abstract class IdentityTopLevelDestination {
 
 private fun String.withBracket() = "{$this}"
 
-@VisibleForTesting
 internal fun IdentityTopLevelDestination.DestinationRoute.withParams(
     vararg params: Pair<String, Any?>
 ): String {
@@ -138,19 +137,17 @@ internal class ErrorDestination(
     errorTitle: String,
     errorContent: String,
     backButtonText: String,
-    cause: Throwable, // TODO(ccen) Remove this param after moving to Jetpack compose
-    backButtonDestination: Int = UNEXPECTED_DESTINATION,
+    backButtonDestination: String = UNEXPECTED_ROUTE,
     shouldFail: Boolean = false
 ) : IdentityTopLevelDestination() {
-    override val destinationRoute = Route
+    override val destinationRoute = ROUTE
     override val destination = R.id.action_global_errorFragment
     override val routeWithArgs = destinationRoute.withParams(
         ARG_ERROR_TITLE to errorTitle,
         ARG_ERROR_CONTENT to errorContent,
         ARG_GO_BACK_BUTTON_DESTINATION to backButtonDestination,
         ARG_GO_BACK_BUTTON_TEXT to backButtonText,
-        ARG_SHOULD_FAIL to shouldFail,
-        ARG_CAUSE to cause
+        ARG_SHOULD_FAIL to shouldFail
     )
 
     override val argsBundle = bundleOf(
@@ -158,8 +155,7 @@ internal class ErrorDestination(
         ARG_ERROR_CONTENT to errorContent,
         ARG_GO_BACK_BUTTON_DESTINATION to backButtonDestination,
         ARG_GO_BACK_BUTTON_TEXT to backButtonText,
-        ARG_SHOULD_FAIL to shouldFail,
-        ARG_CAUSE to cause
+        ARG_SHOULD_FAIL to shouldFail
     )
 
     internal companion object {
@@ -173,17 +169,13 @@ internal class ErrorDestination(
 
         // if set to true, clicking bottom button and pressBack would end flow with Failed
         const val ARG_SHOULD_FAIL = "shouldFail"
-        const val ARG_CAUSE = "cause"
 
-        // Indicates the server returns a requirementError that doesn't match with current Fragment.
-        //  E.g ConsentFragment->DocSelectFragment could only have BIOMETRICCONSENT error but not IDDOCUMENTFRONT error.
+        // Indicates the server returns a requirementError that doesn't match with current route.
+        //  E.g ConsentScreen->DocSelectScreen could only have BIOMETRICCONSENT error but not IDDOCUMENTFRONT error.
         // If this happens, set the back button destination to [DEFAULT_BACK_BUTTON_DESTINATION]
-        const val UNEXPECTED_DESTINATION = -1
+        const val UNEXPECTED_ROUTE = "UnexpectedRoute"
 
-        val DEFAULT_BACK_BUTTON_NAVIGATION =
-            R.id.action_errorFragment_to_consentFragment
-
-        val Route = object : DestinationRoute() {
+        val ROUTE = object : DestinationRoute() {
             override val routeBase = ERROR
             override val arguments = listOf(
                 navArgument(ARG_ERROR_TITLE) {
@@ -208,19 +200,31 @@ internal class ErrorDestination(
 
 internal object ConfirmationDestination : IdentityTopLevelDestination() {
     private const val CONFIRMATION = "Confirmation"
-    override val destination = R.id.action_global_confirmationFragment
-    override val destinationRoute = object : DestinationRoute() {
+    val ROUTE = object : DestinationRoute() {
         override val routeBase = CONFIRMATION
     }
+    override val destination = R.id.action_global_confirmationFragment
+    override val destinationRoute = ROUTE
     override val routeWithArgs = destinationRoute.route
 }
 
-internal object SelfieDestination : IdentityTopLevelDestination() {
-    private const val SELFIE = "Selfie"
-    override val destination = R.id.action_global_selfieFragment
-    override val destinationRoute = object : DestinationRoute() {
-        override val routeBase = SELFIE
+internal object DocSelectionDestination : IdentityTopLevelDestination() {
+    private const val DOC_SELECTION = "DocSelection"
+    val ROUTE = object : DestinationRoute() {
+        override val routeBase = DOC_SELECTION
     }
+    override val destination = R.id.action_global_docSelectionFragment
+    override val destinationRoute = ROUTE
+    override val routeWithArgs = destinationRoute.route
+}
+
+internal object ConsentDestination : IdentityTopLevelDestination() {
+    private const val CONSENT = "Consent"
+    val ROUTE = object : DestinationRoute() {
+        override val routeBase = CONSENT
+    }
+    override val destination = R.id.action_global_consentFragment
+    override val destinationRoute = ROUTE
     override val routeWithArgs = destinationRoute.route
 }
 
@@ -234,4 +238,49 @@ internal fun NavController.navigateTo(destination: IdentityTopLevelDestination) 
         destination.destination,
         destination.argsBundle
     )
+}
+
+internal fun String.routeToScreenName(): String = when (this) {
+    ConsentDestination.ROUTE.route -> {
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_CONSENT
+    }
+    DocSelectionDestination.ROUTE.route -> {
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_DOC_SELECT
+    }
+    IDScanDestination.ROUTE.route -> {
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_ID
+    }
+    PassportScanDestination.ROUTE.route -> {
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_PASSPORT
+    }
+    DriverLicenseScanDestination.ROUTE.route -> {
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE
+    }
+    IDUploadDestination.ROUTE.route -> {
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_ID
+    }
+    PassportUploadDestination.ROUTE.route -> {
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_PASSPORT
+    }
+    DriverLicenseUploadDestination.ROUTE.route -> {
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_DRIVER_LICENSE
+    }
+    SelfieDestination.ROUTE.route -> {
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE
+    }
+    ConfirmationDestination.ROUTE.route -> {
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_CONFIRMATION
+    }
+    CameraPermissionDeniedDestination.ROUTE.route -> {
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
+    }
+    ErrorDestination.ROUTE.route -> {
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
+    }
+    CouldNotCaptureDestination.ROUTE.route -> {
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
+    }
+    else -> {
+        throw IllegalArgumentException("Invalid route: $this")
+    }
 }

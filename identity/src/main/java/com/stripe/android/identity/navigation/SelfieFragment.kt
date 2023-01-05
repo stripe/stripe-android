@@ -16,6 +16,8 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.stripe.android.camera.CameraXAdapter
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.identity.R
@@ -25,8 +27,6 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.SelfieScanScreen
-import com.stripe.android.identity.utils.navigateToDefaultErrorFragment
-import com.stripe.android.identity.utils.postVerificationPageDataAndMaybeSubmit
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -39,6 +39,8 @@ internal class SelfieFragment(
     identityViewModelFactory: ViewModelProvider.Factory
 ) : IdentityCameraScanFragment(identityCameraScanViewModelFactory, identityViewModelFactory) {
     override val fragmentId = R.id.selfieFragment
+
+    override val route = SelfieDestination.ROUTE.route
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -73,7 +75,10 @@ internal class SelfieFragment(
                 },
                 newDisplayState = newDisplayState,
                 verificationPageState = verificationPage,
-                onError = ::navigateToDefaultErrorFragment,
+                onError = {
+                    identityViewModel.errorCause.postValue(it)
+                    findNavController().navigateToErrorScreenWithDefaultValues(requireContext())
+                },
                 onCameraViewCreated = {
                     if (cameraView == null) {
                         cameraView = it
@@ -127,23 +132,19 @@ internal class SelfieFragment(
     }
 
     /**
-     * Collect the [IdentityViewModel.selfieUploadState] and update UI accordingly.
-     *
-     * Try to [postVerificationPageDataAndMaybeSubmit] when all images are uploaded and navigates
-     * to error when error occurs.
+     * Collect the [IdentityViewModel.selfieUploadState] and navigate accordingly.
      */
     @VisibleForTesting
     internal fun collectUploadedStateAndUploadForCollectedSelfies(allowImageCollection: Boolean) =
         lifecycleScope.launch {
+            val navController = findNavController()
             identityViewModel.selfieUploadState.collectLatest {
                 when {
                     it.isIdle() -> {} // no-op
                     it.isAnyLoading() -> {} // no-op
                     it.hasError() -> {
-                        "Fail to upload files: ${it.getError()}".let { msg ->
-                            Log.e(TAG, msg)
-                            navigateToDefaultErrorFragment(msg)
-                        }
+                        identityViewModel.errorCause.postValue(it.getError())
+                        navController.navigateToErrorScreenWithDefaultValues(requireContext())
                     }
                     it.isAllUploaded() -> {
                         runCatching {
@@ -155,8 +156,9 @@ internal class SelfieFragment(
                                 ) {
                                     "Failed to retrieve final result for Selfie"
                                 }
-                            postVerificationPageDataAndMaybeSubmit(
-                                identityViewModel = identityViewModel,
+
+                            identityViewModel.postVerificationPageDataAndMaybeNavigate(
+                                navController = navController,
                                 collectedDataParam = CollectedDataParam.createForSelfie(
                                     firstHighResResult = requireNotNull(it.firstHighResResult.data),
                                     firstLowResResult = requireNotNull(it.firstLowResResult.data),
@@ -169,24 +171,26 @@ internal class SelfieFragment(
                                     bestFaceScore = faceDetectorTransitioner.bestFaceScore,
                                     numFrames = faceDetectorTransitioner.numFrames
                                 ),
-                                fromFragment = fragmentId
-                            )
+                                fromRoute = route
+                            ) {
+                                identityViewModel.submitAndNavigate(
+                                    navController = navController,
+                                    fromRoute = route
+                                )
+                            }
                         }.onFailure { throwable ->
-                            Log.e(
-                                TAG,
-                                "fail to submit uploaded files: $throwable"
-                            )
-                            navigateToDefaultErrorFragment(throwable)
+                            identityViewModel.errorCause.postValue(throwable)
+                            navController.navigateToErrorScreenWithDefaultValues(requireContext())
                         }
                     }
                     else -> {
-                        (
-                            "collectUploadedStateAndUploadForCollectedSelfies " +
-                                "reaches unexpected upload state: $it"
-                            ).let { msg ->
-                            Log.e(TAG, msg)
-                            navigateToDefaultErrorFragment(msg)
-                        }
+                        identityViewModel.errorCause.postValue(
+                            IllegalStateException(
+                                "collectUploadedStateAndUploadForCollectedSelfies " +
+                                    "reaches unexpected upload state: $it"
+                            )
+                        )
+                        navController.navigateToErrorScreenWithDefaultValues(requireContext())
                     }
                 }
             }
