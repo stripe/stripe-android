@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.features.partnerauth
 
 import android.webkit.WebView
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -325,7 +324,7 @@ private fun InstitutionalPrePaneContent(
                 }
             }
         }
-        Box {
+        Column {
             content.partnerNotice?.let {
                 PartnerCallout(
                     isStripeDirect = isStripeDirect,
