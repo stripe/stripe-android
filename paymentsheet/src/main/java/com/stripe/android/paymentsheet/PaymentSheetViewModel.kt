@@ -283,7 +283,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentSelection: PaymentSelection?,
         identifier: CheckoutIdentifier,
     ) {
-        clearErrorMessages()
         startProcessing(identifier)
 
         if (paymentSelection is PaymentSelection.GooglePay) {
