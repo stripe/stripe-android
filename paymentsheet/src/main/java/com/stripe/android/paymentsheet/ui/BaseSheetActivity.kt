@@ -195,7 +195,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         if (viewModel.processing.value == false) {
             if (supportFragmentManager.backStackEntryCount > 0) {
                 viewModel.onUserBack()
-                clearErrorMessages()
                 super.onBackPressed()
             } else {
                 viewModel.onUserCancel()
@@ -209,10 +208,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // TODO(mlb): Consider if this needs to be an abstract function
         setActivityResult(result)
         bottomSheetController.hide()
-    }
-
-    open fun clearErrorMessages() {
-        updateErrorMessage(messageView)
     }
 
     protected fun updateErrorMessage(

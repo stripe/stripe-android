@@ -274,6 +274,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkout(checkoutIdentifier: CheckoutIdentifier) {
+        clearErrorMessages()
         startProcessing(checkoutIdentifier)
 
         val paymentSelection = selection.value
@@ -324,6 +325,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             else -> {
                 // no-op
             }
+        }
+    }
+
+    override fun clearErrorMessages() {
+        if (_viewState.value is PaymentSheetViewState.Reset) {
+            _viewState.value = PaymentSheetViewState.Reset(message = null)
         }
     }
 

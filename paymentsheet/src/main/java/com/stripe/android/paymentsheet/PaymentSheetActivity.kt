@@ -125,7 +125,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewModel.transition.observeEvents(this) { transitionTarget ->
-            clearErrorMessages()
             onTransitionTarget(transitionTarget)
         }
 
@@ -153,7 +152,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewModel.selection.observe(this) {
-            clearErrorMessages()
+            viewModel.clearErrorMessages()
             resetPrimaryButtonState()
         }
 
@@ -251,7 +250,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewBinding.buyButton.setLabel(label)
 
         viewBinding.buyButton.setOnClickListener {
-            clearErrorMessages()
             viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
         }
     }
@@ -314,11 +312,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 updateErrorMessage(topMessage, viewState?.errorMessage)
                 googlePayButton.updateState(viewState?.convert())
             }
-    }
-
-    override fun clearErrorMessages() {
-        super.clearErrorMessages()
-        updateErrorMessage(topMessage)
     }
 
     override fun setActivityResult(result: PaymentSheetResult) {

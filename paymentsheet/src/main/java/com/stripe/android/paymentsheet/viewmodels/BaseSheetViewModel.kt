@@ -50,6 +50,7 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
@@ -60,6 +61,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
@@ -248,6 +250,11 @@ internal abstract class BaseSheetViewModel(
         )
 
     init {
+        viewModelScope.launch {
+            delay(5.seconds)
+            onError("fake error")
+        }
+
         if (_savedSelection.value == null) {
             viewModelScope.launch {
                 val savedSelection = withContext(workContext) {
@@ -329,6 +336,7 @@ internal abstract class BaseSheetViewModel(
     abstract fun transitionToFirstScreen()
 
     protected fun transitionTo(target: TransitionTarget) {
+        clearErrorMessages()
         _transition.postValue(Event(target))
     }
 
@@ -387,6 +395,8 @@ internal abstract class BaseSheetViewModel(
             warnUnactivatedIfNeeded(stripeIntent.unactivatedPaymentMethods)
         }
     }
+
+    abstract fun clearErrorMessages()
 
     private fun warnUnactivatedIfNeeded(unactivatedPaymentMethodTypes: List<String>) {
         if (unactivatedPaymentMethodTypes.isEmpty()) {
@@ -589,6 +599,8 @@ internal abstract class BaseSheetViewModel(
     abstract fun onUserCancel()
 
     fun onUserBack() {
+        clearErrorMessages()
+
         // Reset the selection to the one from before opening the add payment method screen
         val paymentOptionsState = paymentOptionsState.value
         updateSelection(paymentOptionsState.selectedItem?.toPaymentSelection())
