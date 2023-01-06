@@ -1,6 +1,7 @@
 package com.stripe.android.identity.camera
 
 import android.graphics.Bitmap
+import android.util.Size
 import com.stripe.android.camera.CameraAdapter
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.scanui.CameraView
@@ -38,4 +39,8 @@ internal abstract class IdentityCameraManager {
      * Callback when [cameraAdapter] and [CameraView] are initialized.
      */
     protected open fun onInitialized() {}
+
+    protected companion object {
+        val MINIMUM_RESOLUTION = Size(1440, 1080)
+    }
 }

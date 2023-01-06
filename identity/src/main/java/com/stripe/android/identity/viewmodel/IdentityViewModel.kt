@@ -1216,6 +1216,66 @@ internal class IdentityViewModel constructor(
         }
     }
 
+    /**
+     * Check the upload status of the [selfieUploadState], post it with VerificationPageData and
+     * navigate accordingly.
+     */
+    fun collectDataForSelfieScreen(
+        navController: NavController,
+        faceDetectorTransitioner: FaceDetectorTransitioner,
+        allowImageCollection: Boolean
+    ) {
+        viewModelScope.launch {
+            selfieUploadState.collectLatest {
+                when {
+                    it.isIdle() -> {} // no-op
+                    it.isAnyLoading() -> {} // no-op
+                    it.hasError() -> {
+                        errorCause.postValue(it.getError())
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                    }
+                    it.isAllUploaded() -> {
+                        runCatching {
+                            postVerificationPageDataAndMaybeNavigate(
+                                navController = navController,
+                                collectedDataParam = CollectedDataParam.createForSelfie(
+                                    firstHighResResult = requireNotNull(it.firstHighResResult.data),
+                                    firstLowResResult = requireNotNull(it.firstLowResResult.data),
+                                    lastHighResResult = requireNotNull(it.lastHighResResult.data),
+                                    lastLowResResult = requireNotNull(it.lastLowResResult.data),
+                                    bestHighResResult = requireNotNull(it.bestHighResResult.data),
+                                    bestLowResResult = requireNotNull(it.bestLowResResult.data),
+                                    trainingConsent = allowImageCollection,
+                                    faceScoreVariance = faceDetectorTransitioner.scoreVariance,
+                                    bestFaceScore = faceDetectorTransitioner.bestFaceScore,
+                                    numFrames = faceDetectorTransitioner.numFrames
+                                ),
+                                fromRoute = SelfieDestination.ROUTE.route
+                            ) {
+                                submitAndNavigate(
+                                    navController = navController,
+                                    fromRoute = SelfieDestination.ROUTE.route
+                                )
+                            }
+                        }.onFailure { throwable ->
+                            errorCause.postValue(throwable)
+                            navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                        }
+                    }
+                    else -> {
+                        errorCause.postValue(
+                            IllegalStateException(
+                                "collectSelfieUploadedStateAndPost " +
+                                    "reaches unexpected upload state: $it"
+                            )
+                        )
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                    }
+                }
+            }
+        }
+    }
+
     private fun <State> MutableStateFlow<State>.updateStateAndSave(function: (State) -> State) {
         this.update(function)
         savedStateHandle[
