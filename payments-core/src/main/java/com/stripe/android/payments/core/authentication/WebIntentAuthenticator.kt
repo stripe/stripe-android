@@ -11,6 +11,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
@@ -84,7 +85,7 @@ internal class WebIntentAuthenticator @Inject constructor(
             }
             is StripeIntent.NextActionData.CashAppRedirect -> {
                 authUrl = nextActionData.mobileAuthUrl
-                returnUrl = null
+                returnUrl = DefaultReturnUrl.create(host.context).value
                 shouldCancelIntentOnUserNavigation = true // TODO Yay or nay?
             }
             else ->
