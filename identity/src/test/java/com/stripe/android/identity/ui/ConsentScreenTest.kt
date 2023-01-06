@@ -1,6 +1,5 @@
 package com.stripe.android.identity.ui
 
-import android.net.Uri
 import android.os.Build
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
@@ -9,15 +8,24 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
+import com.stripe.android.identity.FallbackUrlLauncher
+import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
@@ -32,12 +40,19 @@ class ConsentScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val onSuccessMock = mock<(VerificationPage) -> Unit>()
-    private val onFallbackMock = mock<(String) -> Unit>()
-    private val onErrorMock = mock<(Throwable) -> Unit>()
-    private val onConsentAgreedMock = mock<() -> Unit>()
-    private val onConsentDeclinedMock = mock<() -> Unit>()
-    private val merchantLogoUri: Uri = mock()
+    private val verificationPageLiveData =
+        MutableLiveData<Resource<VerificationPage>>(Resource.idle())
+
+    private val mockVerificationArgs = mock<IdentityVerificationSheetContract.Args> {
+        on { brandLogo } doReturn mock()
+    }
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { verificationPage } doReturn verificationPageLiveData
+        on { verificationArgs } doReturn mockVerificationArgs
+    }
+
+    private val mockNavController = mock<NavController>()
+    private val mockFallbackUrlLauncher = mock<FallbackUrlLauncher>()
 
     private val verificationPageWithTimeAndPolicy = mock<VerificationPage>().also {
         whenever(it.biometricConsent).thenReturn(
@@ -86,7 +101,6 @@ class ConsentScreenTest {
     fun `when VerificationPage with time and policy UI is bound correctly`() {
         setComposeTestRuleWith(Resource.success(verificationPageWithTimeAndPolicy)) {
             onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
-            verify(onSuccessMock).invoke(same(verificationPageWithTimeAndPolicy))
 
             onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
             onNodeWithTag(TIME_ESTIMATE_TAG).assertTextEquals(CONSENT_TIME_ESTIMATE)
@@ -108,7 +122,6 @@ class ConsentScreenTest {
     fun `when VerificationPage without time and policy UI is bound correctly`() {
         setComposeTestRuleWith(Resource.success(verificationPageWithOutTimeAndPolicy)) {
             onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
-            verify(onSuccessMock).invoke(same(verificationPageWithOutTimeAndPolicy))
 
             onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
             onNodeWithTag(TIME_ESTIMATE_TAG).assertDoesNotExist()
@@ -127,10 +140,19 @@ class ConsentScreenTest {
     }
 
     @Test
-    fun `when agreed button is clicked onConsentDeclined is called`() {
+    fun `when agreed button is clicked correctly navigates`() {
         setComposeTestRuleWith(Resource.success(verificationPageWithTimeAndPolicy)) {
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).performClick()
-            verify(onConsentDeclinedMock).invoke()
+            verify(mockIdentityViewModel).postVerificationPageDataAndMaybeNavigate(
+                same(mockNavController),
+                argThat {
+                    biometricConsent == false
+                },
+                eq(ConsentDestination.ROUTE.route),
+                any(),
+                any(),
+                any()
+            )
 
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(1)
@@ -141,16 +163,9 @@ class ConsentScreenTest {
     }
 
     @Test
-    fun `when VerificationPage is unsupported, onFallbackUrl is called`() {
+    fun `when VerificationPage is unsupported, fallbackUrl is launched`() {
         setComposeTestRuleWith(Resource.success(verificationPageWithUnsupportedClient))
-        verify(onFallbackMock).invoke(eq(CONSENT_FALLBACK_URL))
-    }
-
-    @Test
-    fun `when VerificationPage with error onError is invoked`() {
-        val throwable = mock<Throwable>()
-        setComposeTestRuleWith(Resource.error(throwable = throwable))
-        verify(onErrorMock).invoke(same(throwable))
+        verify(mockFallbackUrlLauncher).launchFallbackUrl(CONSENT_FALLBACK_URL)
     }
 
     @Test
@@ -164,15 +179,12 @@ class ConsentScreenTest {
         verificationState: Resource<VerificationPage>,
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
+        verificationPageLiveData.postValue(verificationState)
         composeTestRule.setContent {
             ConsentScreen(
-                merchantLogoUri = merchantLogoUri,
-                verificationState = verificationState,
-                onComposeFinish = onSuccessMock,
-                onFallbackUrl = onFallbackMock,
-                onError = onErrorMock,
-                onConsentAgreed = onConsentAgreedMock,
-                onConsentDeclined = onConsentDeclinedMock
+                mockNavController,
+                mockIdentityViewModel,
+                mockFallbackUrlLauncher
             )
         }
 
