@@ -273,11 +273,22 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         _viewState.value = PaymentSheetViewState.StartProcessing
     }
 
-    fun checkout(checkoutIdentifier: CheckoutIdentifier) {
-        clearErrorMessages()
-        startProcessing(checkoutIdentifier)
-
+    fun checkout() {
         val paymentSelection = selection.value
+        checkout(paymentSelection, CheckoutIdentifier.SheetBottomBuy)
+    }
+
+    fun checkoutWithGooglePay() {
+        setContentVisible(false)
+        checkout(PaymentSelection.GooglePay, CheckoutIdentifier.SheetTopGooglePay)
+    }
+
+    private fun checkout(
+        paymentSelection: PaymentSelection?,
+        identifier: CheckoutIdentifier,
+    ) {
+        clearErrorMessages()
+        startProcessing(identifier)
 
         if (paymentSelection is PaymentSelection.GooglePay) {
             stripeIntent.value?.let { stripeIntent ->
@@ -290,21 +301,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         } else {
             confirmPaymentSelection(paymentSelection)
-        }
-    }
-
-    fun checkoutWithGooglePay() {
-        setContentVisible(false)
-        clearErrorMessages()
-        startProcessing(CheckoutIdentifier.SheetTopGooglePay)
-
-        stripeIntent.value?.let { stripeIntent ->
-            googlePayPaymentMethodLauncher?.present(
-                currencyCode = (stripeIntent as? PaymentIntent)?.currency
-                    ?: args.googlePayConfig?.currencyCode.orEmpty(),
-                amount = (stripeIntent as? PaymentIntent)?.amount?.toInt() ?: 0,
-                transactionId = stripeIntent.id
-            )
         }
     }
 
@@ -488,11 +484,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         linkPaymentDetails?.let {
             // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
             updateSelection(PaymentSelection.New.LinkInline(it))
-            checkout(CheckoutIdentifier.SheetBottomBuy)
+            checkout()
         } ?: run {
-            // Link PaymentDetails creationg failed, fallback to regular checkout.
+            // Link PaymentDetails creation failed, fallback to regular checkout.
             // paymentSelection is already set to the card parameters from the form.
-            checkout(CheckoutIdentifier.SheetBottomBuy)
+            checkout()
         }
     }
 
@@ -552,8 +548,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     internal fun onGooglePayResult(result: GooglePayPaymentMethodLauncher.Result) {
-//        setContentVisible(true)
-//        onError("fake gpay error")
         setContentVisible(true)
         when (result) {
             is GooglePayPaymentMethodLauncher.Result.Completed -> {

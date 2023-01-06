@@ -248,11 +248,6 @@ internal abstract class BaseSheetViewModel(
         )
 
     init {
-//        viewModelScope.launch {
-//            delay(5.seconds)
-//            onError("fake error")
-//        }
-
         if (_savedSelection.value == null) {
             viewModelScope.launch {
                 val savedSelection = withContext(workContext) {

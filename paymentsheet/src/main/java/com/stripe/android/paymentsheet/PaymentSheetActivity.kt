@@ -249,7 +249,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         viewBinding.buyButton.setLabel(label)
 
         viewBinding.buyButton.setOnClickListener {
-            viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
+            viewModel.checkout()
         }
     }
 
@@ -289,18 +289,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private fun setupGooglePayButton() {
         googlePayButton.setOnClickListener {
-            // TODO Don't go via PS
-//            viewModel.lastSelectedPaymentMethod = viewModel.selection.value
-//            viewModel.updateSelection(PaymentSelection.GooglePay)
-
             viewModel.checkoutWithGooglePay()
         }
-
-//        viewModel.selection.observe(this) { paymentSelection ->
-//            if (paymentSelection == PaymentSelection.GooglePay) {
-//                viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
-//            }
-//        }
 
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
             .observe(this) { viewState ->
