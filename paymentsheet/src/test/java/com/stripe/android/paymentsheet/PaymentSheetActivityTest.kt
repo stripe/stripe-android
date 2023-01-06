@@ -214,7 +214,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
 
             // Update to Google Pay
-            viewModel.updateSelection(PaymentSelection.GooglePay)
+            viewModel.checkoutWithGooglePay()
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
@@ -264,13 +264,9 @@ internal class PaymentSheetActivityTest {
             assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
 
             activity.viewBinding.googlePayButton.callOnClick()
-
-            // Updates PaymentSelection to Google Pay
-            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(PaymentSelection.GooglePay)
-
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
-            // Back to Ready state, should return to initial PaymentSelection
+            // Still using the initial PaymentSelection
             assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
         }
     }
@@ -454,7 +450,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
-            viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
+            viewModel.checkout()
             idleLooper()
 
             assertThat(activity.toolbar.isEnabled).isFalse()
@@ -829,7 +825,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.topMessage.isVisible).isFalse()
             assertThat(activity.viewBinding.topMessage.text.isNullOrEmpty()).isTrue()
 
-            viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
+            viewModel.checkout()
 
             assertThat(activity.viewBinding.message.isVisible).isFalse()
             assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
@@ -845,7 +841,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
             assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
 
-            viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
+            viewModel.checkout()
 
             assertThat(activity.viewBinding.message.isVisible).isFalse()
             assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
