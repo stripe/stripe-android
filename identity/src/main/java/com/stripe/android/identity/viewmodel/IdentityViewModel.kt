@@ -4,6 +4,8 @@ import android.app.Application
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
@@ -62,6 +64,7 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.clearData
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.collectedRequirements
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.mergeWith
+import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -78,6 +81,7 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.IdentityIO
+import com.stripe.android.identity.utils.IdentityImageHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -101,6 +105,7 @@ internal class IdentityViewModel constructor(
     internal val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     internal val fpsTracker: FPSTracker,
     internal val screenTracker: ScreenTracker,
+    internal val imageHandler: IdentityImageHandler,
     private val savedStateHandle: SavedStateHandle,
     @UIContext internal val uiContext: CoroutineContext,
     @IOContext internal val workContext: CoroutineContext
@@ -228,7 +233,13 @@ internal class IdentityViewModel constructor(
      * Response for initial VerificationPage, used for building UI.
      */
     @VisibleForTesting
-    internal val _verificationPage = MutableLiveData<Resource<VerificationPage>>()
+    internal val _verificationPage: MutableLiveData<Resource<VerificationPage>> =
+        // No need to write to savedStateHandle for livedata
+        savedStateHandle.getLiveData(
+            key = VERIFICATION_PAGE,
+            initialValue = Resource.idle()
+        )
+
     val verificationPage: LiveData<Resource<VerificationPage>> = _verificationPage
 
     /**
@@ -1306,6 +1317,68 @@ internal class IdentityViewModel constructor(
     }
 
     /**
+     * Collect the last status of both sids of document upload and post.
+     * Only post when that side is not yet collected.
+     */
+    fun collectDataForDocumentUploadScreen(
+        navController: NavController,
+        collectedDataParamType: CollectedDataParam.Type,
+        route: String
+    ) {
+        viewModelScope.launch {
+            frontCollectedInfo.collectLatest { (frontUploadState, collectedData) ->
+                if (collectedData.idDocumentFront == null) {
+                    if (frontUploadState.hasError()) {
+                        errorCause.postValue(frontUploadState.getError())
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                    } else if (frontUploadState.isHighResUploaded()) {
+                        val front = requireNotNull(frontUploadState.highResResult.data)
+                        postVerificationPageData(
+                            navController = navController,
+                            collectedDataParam = CollectedDataParam(
+                                idDocumentFront = DocumentUploadParam(
+                                    highResImage = requireNotNull(front.uploadedStripeFile.id) {
+                                        "front uploaded file id is null"
+                                    },
+                                    uploadMethod = requireNotNull(front.uploadMethod)
+                                ),
+                                idDocumentType = collectedDataParamType
+                            ),
+                            fromRoute = route
+                        )
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            backCollectedInfo.collectLatest { (backUploadedState, collectedData) ->
+                if (collectedData.idDocumentBack == null) {
+                    if (backUploadedState.hasError()) {
+                        errorCause.postValue(backUploadedState.getError())
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                    } else if (backUploadedState.isHighResUploaded()) {
+                        val back = requireNotNull(backUploadedState.highResResult.data)
+                        postVerificationPageData(
+                            navController = navController,
+                            collectedDataParam = CollectedDataParam(
+                                idDocumentBack = DocumentUploadParam(
+                                    highResImage = requireNotNull(back.uploadedStripeFile.id) {
+                                        "back uploaded file id is null"
+                                    },
+                                    uploadMethod = requireNotNull(back.uploadMethod)
+                                ),
+                                idDocumentType = collectedDataParamType
+                            ),
+                            fromRoute = route
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Check the upload status of the [selfieUploadState], post it with VerificationPageData and
      * navigate accordingly.
      */
@@ -1363,6 +1436,55 @@ internal class IdentityViewModel constructor(
                 }
             }
         }
+    }
+
+    /**
+     * Registers for the [ActivityResultLauncher]s to take photo or pick image, should be called
+     * during initialization of an Activity or Fragment.
+     */
+    fun registerActivityResultCaller(
+        activityResultCaller: ActivityResultCaller
+    ) {
+        imageHandler.registerActivityResultCaller(
+            activityResultCaller,
+            savedStateHandle,
+            onFrontPhotoTaken = { uri, scanType ->
+                uploadManualResult(
+                    uri = uri,
+                    isFront = true,
+                    docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
+                    uploadMethod = UploadMethod.MANUALCAPTURE,
+                    scanType = requireNotNull(scanType)
+                )
+            },
+            onBackPhotoTaken = { uri, scanType ->
+                uploadManualResult(
+                    uri = uri,
+                    isFront = false,
+                    docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
+                    uploadMethod = UploadMethod.MANUALCAPTURE,
+                    scanType = requireNotNull(scanType)
+                )
+            },
+            onFrontImageChosen = { uri, scanType ->
+                uploadManualResult(
+                    uri = uri,
+                    isFront = true,
+                    docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
+                    uploadMethod = UploadMethod.FILEUPLOAD,
+                    scanType = requireNotNull(scanType)
+                )
+            },
+            onBackImageChosen = { uri, scanType ->
+                uploadManualResult(
+                    uri = uri,
+                    isFront = false,
+                    docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
+                    uploadMethod = UploadMethod.FILEUPLOAD,
+                    scanType = requireNotNull(scanType)
+                )
+            }
+        )
     }
 
     private fun CollectedDataParam.Type.toScanDestination() =
@@ -1440,6 +1562,7 @@ internal class IdentityViewModel constructor(
                 subcomponent.identityAnalyticsRequestFactory,
                 subcomponent.fpsTracker,
                 subcomponent.screenTracker,
+                subcomponent.identityImageHandler,
                 savedStateHandle,
                 uiContextSupplier(),
                 workContextSupplier()
@@ -1458,6 +1581,7 @@ internal class IdentityViewModel constructor(
         private const val ANALYTICS_STATE = "analytics_upload_state"
         private const val COLLECTED_DATA = "collected_data"
         private const val MISSING_REQUIREMENTS = "missing_requirements"
+        private const val VERIFICATION_PAGE = "verification_page"
         private const val VERIFICATION_PAGE_DATA = "verification_page_data"
         private const val VERIFICATION_PAGE_SUBMIT = "verification_page_submit"
     }

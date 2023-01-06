@@ -168,6 +168,78 @@ public final class com/stripe/android/identity/networking/models/FaceUploadParam
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/identity/networking/models/VerificationPage$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPage;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPage;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/networking/models/VerificationPageRequirements$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageRequirements;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPageRequirements;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/networking/models/VerificationPageStaticContentConsentPage$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentConsentPage;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentConsentPage;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/networking/models/VerificationPageStaticContentDocumentCaptureModels$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentDocumentCaptureModels;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentDocumentCaptureModels;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/networking/models/VerificationPageStaticContentDocumentCapturePage$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentDocumentCapturePage;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentDocumentCapturePage;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/networking/models/VerificationPageStaticContentDocumentSelectPage$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentDocumentSelectPage;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentDocumentSelectPage;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/networking/models/VerificationPageStaticContentSelfieCapturePage$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentSelfieCapturePage;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentSelfieCapturePage;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/networking/models/VerificationPageStaticContentSelfieModels$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentSelfieModels;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentSelfieModels;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/identity/networking/models/VerificationPageStaticContentTextPage$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentTextPage;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/identity/networking/models/VerificationPageStaticContentTextPage;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/identity/ui/ComposableSingletons$UploadScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$UploadScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;

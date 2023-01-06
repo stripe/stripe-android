@@ -8,12 +8,17 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
+import com.stripe.android.identity.R
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.navigation.IDUploadDestination
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.IdentityImageHandler
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -23,6 +28,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -33,11 +39,10 @@ class UploadScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
+    private val mockNavController = mock<NavController>()
     private val onPhotoSelected = mock<(UploadMethod) -> Unit>()
-    private val onContinueClicked = mock<() -> Unit>()
     private val onDismissRequest = mock<() -> Unit>()
     private val onUploadMethodSelected = mock<() -> Unit>()
-    private val onComposeFinish = mock<() -> Unit>()
 
     private val documentFrontUploadState = MutableStateFlow(IDLE_STATE)
     private val documentBackUploadState = MutableStateFlow(IDLE_STATE)
@@ -45,14 +50,16 @@ class UploadScreenTest {
     private val missingRequirements =
         MutableStateFlow(listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK))
 
+    private val mockImageHandler = mock<IdentityImageHandler>()
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { documentFrontUploadedState } doReturn documentFrontUploadState
         on { documentBackUploadedState } doReturn documentBackUploadState
         on { collectedData } doReturn collectedData
         on { missingRequirements } doReturn missingRequirements
+        on { verificationPage } doReturn MutableLiveData(Resource.success(mock()))
+        on { imageHandler } doReturn mockImageHandler
     }
 
-    // Test UploadScreen
     @Test
     fun `when front is not uploaded, front upload UI is enabled and back UI is not visible`() {
         testUploadScreen(hasBack = false) {
@@ -109,7 +116,11 @@ class UploadScreenTest {
             onNodeWithTag(UPLOAD_SCREEN_CONTINUE_BUTTON_TAG).onChildAt(0).let { continueButton ->
                 continueButton.assertIsEnabled()
                 continueButton.performClick()
-                verify(onContinueClicked).invoke()
+
+                verify(mockIdentityViewModel).navigateToSelfieOrSubmit(
+                    same(mockNavController),
+                    eq(IDUploadDestination.ROUTE.route)
+                )
             }
         }
     }
@@ -161,32 +172,29 @@ class UploadScreenTest {
     ) {
         composeTestRule.setContent {
             UploadScreen(
+                navController = mockNavController,
                 identityViewModel = mockIdentityViewModel,
-                title = TITLE,
-                context = CONTEXT,
+                collectedDataParamType = CollectedDataParam.Type.IDCARD,
+                route = IDUploadDestination.ROUTE.route,
+                titleRes = R.string.file_upload,
+                contextRes = R.string.file_upload_content_dl,
                 frontInfo = DocumentUploadSideInfo(
-                    description = FRONT_DESCRIPTION,
-                    checkmarkContentDescription = FRONT_CHECKMARK_CONTENT_DESCRIPTION,
-                    scanType = FRONT_SCAN_TYPE,
-                    shouldShowTakePhoto = true,
-                    shouldShowChoosePhoto = true,
-                    onPhotoSelected = onPhotoSelected
+                    descriptionRes = R.string.front_of_dl,
+                    checkmarkContentDescriptionRes = R.string.front_of_dl_selected,
+                    scanType = FRONT_SCAN_TYPE
                 ),
                 backInfo =
                 if (hasBack) {
                     DocumentUploadSideInfo(
-                        description = BACK_DESCRIPTION,
-                        checkmarkContentDescription = BACK_CHECKMARK_CONTENT_DESCRIPTION,
-                        scanType = BACK_SCAN_TYPE,
-                        shouldShowTakePhoto = true,
-                        shouldShowChoosePhoto = true,
-                        onPhotoSelected = onPhotoSelected
+                        descriptionRes = R.string.back_of_dl,
+                        checkmarkContentDescriptionRes = R.string.back_of_dl_selected,
+                        scanType = BACK_SCAN_TYPE
                     )
                 } else {
                     null
                 },
-                onComposeFinish = onComposeFinish,
-                onContinueClicked = onContinueClicked
+                shouldShowTakePhoto = true,
+                shouldShowChoosePhoto = true,
             )
         }
         with(composeTestRule, testBlock)
@@ -199,13 +207,13 @@ class UploadScreenTest {
         composeTestRule.setContent {
             UploadImageDialog(
                 uploadInfo = DocumentUploadSideInfo(
-                    description = FRONT_DESCRIPTION,
-                    checkmarkContentDescription = FRONT_CHECKMARK_CONTENT_DESCRIPTION,
-                    scanType = FRONT_SCAN_TYPE,
-                    shouldShowTakePhoto = true,
-                    shouldShowChoosePhoto = shouldShowChoosePhoto,
-                    onPhotoSelected = onPhotoSelected
+                    descriptionRes = R.string.front_of_dl,
+                    checkmarkContentDescriptionRes = R.string.front_of_dl_selected,
+                    scanType = FRONT_SCAN_TYPE
                 ),
+                shouldShowTakePhoto = true,
+                shouldShowChoosePhoto = shouldShowChoosePhoto,
+                onPhotoSelected = onPhotoSelected,
                 onDismissRequest = onDismissRequest,
                 onUploadMethodSelected = onUploadMethodSelected
             )
@@ -214,14 +222,7 @@ class UploadScreenTest {
     }
 
     private companion object {
-        const val TITLE = "title"
-        const val CONTEXT = "context"
-        const val FRONT_DESCRIPTION = "front description"
-        const val FRONT_CHECKMARK_CONTENT_DESCRIPTION = "front checkmark description"
         val FRONT_SCAN_TYPE = IdentityScanState.ScanType.ID_FRONT
-
-        const val BACK_DESCRIPTION = "back description"
-        const val BACK_CHECKMARK_CONTENT_DESCRIPTION = "back checkmark description"
         val BACK_SCAN_TYPE = IdentityScanState.ScanType.ID_BACK
         val UPLOADED_STATE = SingleSideDocumentUploadState(
             highResResult = Resource.success(mock()),

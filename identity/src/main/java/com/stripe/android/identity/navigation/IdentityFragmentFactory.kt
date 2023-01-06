@@ -8,7 +8,6 @@ import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.injection.IdentityVerificationScope
-import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import javax.inject.Inject
 
@@ -22,8 +21,7 @@ internal class IdentityFragmentFactory @Inject constructor(
     private val verificationFlowFinishable: VerificationFlowFinishable,
     private val identityScanViewModelFactory: IdentityScanViewModel.IdentityScanViewModelFactory,
     internal val identityViewModelFactory: ViewModelProvider.Factory,
-    private val fallbackUrlLauncher: FallbackUrlLauncher,
-    private val identityIO: IdentityIO
+    private val fallbackUrlLauncher: FallbackUrlLauncher
 ) : FragmentFactory() {
 
     override fun instantiate(classLoader: ClassLoader, className: String): Fragment {
@@ -49,15 +47,12 @@ internal class IdentityFragmentFactory @Inject constructor(
                 identityViewModelFactory
             )
             IDUploadFragment::class.java.name -> IDUploadFragment(
-                identityIO,
                 identityViewModelFactory
             )
             DriverLicenseUploadFragment::class.java.name -> DriverLicenseUploadFragment(
-                identityIO,
                 identityViewModelFactory
             )
             PassportUploadFragment::class.java.name -> PassportUploadFragment(
-                identityIO,
                 identityViewModelFactory
             )
             ConsentFragment::class.java.name -> ConsentFragment(
