@@ -294,11 +294,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
             .observe(this) { viewState ->
-//                if (viewState is PaymentSheetViewState.Reset) {
-//                    // If Google Pay was cancelled or failed, re-select the form payment method
-//                    viewModel.updateSelection(viewModel.lastSelectedPaymentMethod)
-//                }
-
                 updateErrorMessage(topMessage, viewState?.errorMessage)
                 googlePayButton.updateState(viewState?.convert())
             }
