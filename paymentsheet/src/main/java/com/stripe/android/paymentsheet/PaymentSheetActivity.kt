@@ -24,7 +24,6 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
@@ -290,24 +289,25 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private fun setupGooglePayButton() {
         googlePayButton.setOnClickListener {
-            // The scroll will be made visible onResume of the activity
-            viewModel.setContentVisible(false)
-            viewModel.lastSelectedPaymentMethod = viewModel.selection.value
-            viewModel.updateSelection(PaymentSelection.GooglePay)
+            // TODO Don't go via PS
+//            viewModel.lastSelectedPaymentMethod = viewModel.selection.value
+//            viewModel.updateSelection(PaymentSelection.GooglePay)
+
+            viewModel.checkoutWithGooglePay()
         }
 
-        viewModel.selection.observe(this) { paymentSelection ->
-            if (paymentSelection == PaymentSelection.GooglePay) {
-                viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
-            }
-        }
+//        viewModel.selection.observe(this) { paymentSelection ->
+//            if (paymentSelection == PaymentSelection.GooglePay) {
+//                viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
+//            }
+//        }
 
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
             .observe(this) { viewState ->
-                if (viewState is PaymentSheetViewState.Reset) {
-                    // If Google Pay was cancelled or failed, re-select the form payment method
-                    viewModel.updateSelection(viewModel.lastSelectedPaymentMethod)
-                }
+//                if (viewState is PaymentSheetViewState.Reset) {
+//                    // If Google Pay was cancelled or failed, re-select the form payment method
+//                    viewModel.updateSelection(viewModel.lastSelectedPaymentMethod)
+//                }
 
                 updateErrorMessage(topMessage, viewState?.errorMessage)
                 googlePayButton.updateState(viewState?.convert())

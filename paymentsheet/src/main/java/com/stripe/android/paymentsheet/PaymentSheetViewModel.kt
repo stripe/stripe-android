@@ -142,7 +142,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     // Holds a reference to the last selected payment method while checking out with Google Pay.
     // If Google Pay is cancelled or fails, it will be set again as the selected payment method.
-    internal var lastSelectedPaymentMethod: PaymentSelection? = null
+//    internal var lastSelectedPaymentMethod: PaymentSelection? = null
 
     internal val isProcessingPaymentIntent
         get() = args.clientSecret is PaymentIntentClientSecret
@@ -290,6 +290,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         } else {
             confirmPaymentSelection(paymentSelection)
+        }
+    }
+
+    fun checkoutWithGooglePay() {
+        setContentVisible(false)
+        clearErrorMessages()
+        startProcessing(CheckoutIdentifier.SheetTopGooglePay)
+
+        stripeIntent.value?.let { stripeIntent ->
+            googlePayPaymentMethodLauncher?.present(
+                currencyCode = (stripeIntent as? PaymentIntent)?.currency
+                    ?: args.googlePayConfig?.currencyCode.orEmpty(),
+                amount = (stripeIntent as? PaymentIntent)?.amount?.toInt() ?: 0,
+                transactionId = stripeIntent.id
+            )
         }
     }
 
@@ -537,10 +552,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     internal fun onGooglePayResult(result: GooglePayPaymentMethodLauncher.Result) {
+//        setContentVisible(true)
+//        onError("fake gpay error")
         setContentVisible(true)
         when (result) {
-            is GooglePayPaymentMethodLauncher.Result.Completed ->
+            is GooglePayPaymentMethodLauncher.Result.Completed -> {
                 confirmPaymentSelection(PaymentSelection.Saved(result.paymentMethod))
+            }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 logger.error("Error processing Google Pay payment", result.error)
                 eventReporter.onPaymentFailure(PaymentSelection.GooglePay)
@@ -552,7 +570,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     }
                 )
             }
-            is GooglePayPaymentMethodLauncher.Result.Canceled -> resetViewState()
+            is GooglePayPaymentMethodLauncher.Result.Canceled -> {
+                resetViewState()
+            }
         }
     }
 

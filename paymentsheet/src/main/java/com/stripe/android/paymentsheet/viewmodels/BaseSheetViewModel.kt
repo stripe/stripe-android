@@ -50,7 +50,6 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
@@ -61,7 +60,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
-import kotlin.time.Duration.Companion.seconds
 
 /**
  * Base `ViewModel` for activities that use `BottomSheet`.
@@ -250,10 +248,10 @@ internal abstract class BaseSheetViewModel(
         )
 
     init {
-        viewModelScope.launch {
-            delay(5.seconds)
-            onError("fake error")
-        }
+//        viewModelScope.launch {
+//            delay(5.seconds)
+//            onError("fake error")
+//        }
 
         if (_savedSelection.value == null) {
             viewModelScope.launch {
