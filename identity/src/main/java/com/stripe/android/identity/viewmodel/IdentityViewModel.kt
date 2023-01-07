@@ -934,7 +934,7 @@ internal class IdentityViewModel constructor(
             )
             navController.navigateToErrorScreenWithDefaultValues(getApplication())
         },
-        onReadyToSubmit: () -> Unit = {
+        onReadyToSubmit: suspend () -> Unit = {
             errorCause.postValue(
                 IllegalStateException(
                     "unhandled onReadyToSubmit from $fromRoute with $collectedDataParam"
@@ -969,7 +969,7 @@ internal class IdentityViewModel constructor(
      * If selfie is needed, navigate to [SelfieDestination]
      * Otherwise, sends a POST request to VerificationPageDataSubmit and navigate to [ConfirmationDestination].
      */
-    fun navigateToSelfieOrSubmit(
+    suspend fun navigateToSelfieOrSubmit(
         navController: NavController,
         fromRoute: String
     ) {
@@ -983,47 +983,45 @@ internal class IdentityViewModel constructor(
     /**
      * Submit the verification and navigate based on result.
      */
-    private fun submitAndNavigate(
+    private suspend fun submitAndNavigate(
         navController: NavController,
         fromRoute: String
     ) {
-        viewModelScope.launch {
+        verificationPageSubmit.updateStateAndSave {
+            Resource.loading()
+        }
+        runCatching {
+            identityRepository.postVerificationPageSubmit(
+                verificationArgs.verificationSessionId,
+                verificationArgs.ephemeralKeySecret
+            )
+        }.onSuccess { submittedVerificationPageData ->
             verificationPageSubmit.updateStateAndSave {
-                Resource.loading()
+                Resource.success(DUMMY_RESOURCE)
             }
-            runCatching {
-                identityRepository.postVerificationPageSubmit(
-                    verificationArgs.verificationSessionId,
-                    verificationArgs.ephemeralKeySecret
-                )
-            }.onSuccess { submittedVerificationPageData ->
-                verificationPageSubmit.updateStateAndSave {
-                    Resource.success(DUMMY_RESOURCE)
-                }
-                when {
-                    submittedVerificationPageData.hasError() -> {
-                        submittedVerificationPageData.requirements.errors[0].let { requirementError ->
-                            errorCause.postValue(
-                                IllegalStateException("VerificationPageDataRequirementError: $requirementError")
-                            )
-                            navController.navigateToErrorScreenWithRequirementError(
-                                fromRoute,
-                                requirementError
-                            )
-                        }
-                    }
-                    submittedVerificationPageData.submitted -> {
-                        navController.navigateTo(ConfirmationDestination)
-                    }
-                    else -> {
-                        errorCause.postValue(IllegalStateException("VerificationPage submit failed"))
-                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+            when {
+                submittedVerificationPageData.hasError() -> {
+                    submittedVerificationPageData.requirements.errors[0].let { requirementError ->
+                        errorCause.postValue(
+                            IllegalStateException("VerificationPageDataRequirementError: $requirementError")
+                        )
+                        navController.navigateToErrorScreenWithRequirementError(
+                            fromRoute,
+                            requirementError
+                        )
                     }
                 }
-            }.onFailure {
-                errorCause.postValue(it)
-                navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                submittedVerificationPageData.submitted -> {
+                    navController.navigateTo(ConfirmationDestination)
+                }
+                else -> {
+                    errorCause.postValue(IllegalStateException("VerificationPage submit failed"))
+                    navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                }
             }
+        }.onFailure {
+            errorCause.postValue(it)
+            navController.navigateToErrorScreenWithDefaultValues(getApplication())
         }
     }
 

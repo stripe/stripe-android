@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -94,6 +95,7 @@ internal fun UploadScreen(
     MdcTheme {
         val localContext = LocalContext.current
         val verificationState by identityViewModel.verificationPage.observeAsState(Resource.loading())
+        val coroutineScope = rememberCoroutineScope()
         CheckVerificationPageAndCompose(
             verificationPageResource = verificationState,
             onError = {
@@ -287,10 +289,12 @@ internal fun UploadScreen(
                     state = continueButtonState
                 ) {
                     continueButtonState = LoadingButtonState.Loading
-                    identityViewModel.navigateToSelfieOrSubmit(
-                        navController,
-                        route
-                    )
+                    coroutineScope.launch {
+                        identityViewModel.navigateToSelfieOrSubmit(
+                            navController,
+                            route
+                        )
+                    }
                 }
             }
         }
