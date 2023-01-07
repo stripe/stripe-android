@@ -25,6 +25,7 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -128,14 +129,15 @@ class DocumentScanScreenTest {
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsEnabled()
 
             onNodeWithTag(CONTINUE_BUTTON_TAG).performClick()
-            verify(mockIdentityViewModel).collectDataForDocumentScanScreen(
-                eq(mockNavController),
-                any(),
-                eq(true),
-                eq(CollectedDataParam.Type.IDCARD),
-                eq(IDScanDestination.ROUTE.routeBase),
-                any()
-            )
+            runBlocking {
+                verify(mockIdentityViewModel).collectDataForDocumentScanScreen(
+                    eq(mockNavController),
+                    eq(true),
+                    eq(CollectedDataParam.Type.IDCARD),
+                    eq(IDScanDestination.ROUTE.routeBase),
+                    any()
+                )
+            }
         }
     }
 

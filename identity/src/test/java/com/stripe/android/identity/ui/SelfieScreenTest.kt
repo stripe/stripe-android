@@ -30,6 +30,7 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -162,11 +163,13 @@ class SelfieScreenTest {
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).performClick()
             onNodeWithTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
 
-            verify(mockIdentityViewModel).collectDataForSelfieScreen(
-                same(mockNavController),
-                same(faceDetectorTransitioner),
-                eq(false)
-            )
+            runBlocking {
+                verify(mockIdentityViewModel).collectDataForSelfieScreen(
+                    same(mockNavController),
+                    same(faceDetectorTransitioner),
+                    eq(false)
+                )
+            }
         }
     }
 

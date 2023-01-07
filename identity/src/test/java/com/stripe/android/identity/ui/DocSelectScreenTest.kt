@@ -16,6 +16,7 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentSelectPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -66,12 +67,14 @@ class DocSelectScreenTest {
                 .assertTextEquals(DRIVING_LICENSE_BUTTON_TEXT.uppercase())
 
             onNodeWithTag(DRIVING_LICENSE_KEY).onChildAt(0).performClick()
-            verify(mockIdentityViewModel).postVerificationPageDataForDocSelection(
-                eq(CollectedDataParam.Type.DRIVINGLICENSE),
-                same(mockNavController),
-                any(),
-                same(mockCameraPermissionEnsureable)
-            )
+            runBlocking {
+                verify(mockIdentityViewModel).postVerificationPageDataForDocSelection(
+                    eq(CollectedDataParam.Type.DRIVINGLICENSE),
+                    same(mockNavController),
+                    any(),
+                    same(mockCameraPermissionEnsureable)
+                )
+            }
         }
     }
 
@@ -87,12 +90,14 @@ class DocSelectScreenTest {
                 .assertTextEquals(DOCUMENT_SELECT_BUTTON_TEXT)
 
             onNodeWithTag(singleSelectionTag).onChildAt(1).performClick()
-            verify(mockIdentityViewModel).postVerificationPageDataForDocSelection(
-                eq(CollectedDataParam.Type.PASSPORT),
-                same(mockNavController),
-                any(),
-                same(mockCameraPermissionEnsureable)
-            )
+            runBlocking {
+                verify(mockIdentityViewModel).postVerificationPageDataForDocSelection(
+                    eq(CollectedDataParam.Type.PASSPORT),
+                    same(mockNavController),
+                    any(),
+                    same(mockCameraPermissionEnsureable)
+                )
+            }
         }
     }
 

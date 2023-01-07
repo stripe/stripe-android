@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,6 +70,7 @@ import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.text.dimensionResourceSp
+import kotlinx.coroutines.launch
 
 internal const val SELFIE_VIEW_FINDER_ASPECT_RATIO = 1f
 internal const val SELFIE_SCAN_TITLE_TAG = "SelfieScanTitle"
@@ -175,6 +177,8 @@ internal fun SelfieScanScreen(
 
             val lifecycleOwner = LocalLifecycleOwner.current
 
+            val coroutineScope = rememberCoroutineScope()
+
             LaunchedEffect(Unit) {
                 identityViewModel.resetSelfieUploadedState()
             }
@@ -264,17 +268,18 @@ internal fun SelfieScanScreen(
                 ) {
                     loadingButtonState = LoadingButtonState.Loading
                     allowImageCollectionCheckboxEnabled = false
-
-                    identityViewModel.collectDataForSelfieScreen(
-                        navController = navController,
-                        faceDetectorTransitioner =
-                        requireNotNull(
-                            newDisplayState?.transitioner as? FaceDetectorTransitioner
-                        ) {
-                            "Failed to retrieve final result for Selfie"
-                        },
-                        allowImageCollection = allowImageCollection
-                    )
+                    coroutineScope.launch {
+                        identityViewModel.collectDataForSelfieScreen(
+                            navController = navController,
+                            faceDetectorTransitioner =
+                            requireNotNull(
+                                newDisplayState?.transitioner as? FaceDetectorTransitioner
+                            ) {
+                                "Failed to retrieve final result for Selfie"
+                            },
+                            allowImageCollection = allowImageCollection
+                        )
+                    }
                 }
             }
         }

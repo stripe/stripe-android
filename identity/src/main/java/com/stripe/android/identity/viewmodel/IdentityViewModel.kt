@@ -860,63 +860,61 @@ internal class IdentityViewModel constructor(
      * If POST succeeded, invoke [onCorrectResponse].
      * Otherwise transition to Error screen.
      */
-    fun postVerificationPageData(
+    private suspend fun postVerificationPageData(
         navController: NavController,
         collectedDataParam: CollectedDataParam,
         fromRoute: String,
         onCorrectResponse: suspend ((verificationPageDataWithNoError: VerificationPageData) -> Unit) = {}
     ) {
-        viewModelScope.launch {
-            screenTracker.screenTransitionStart(
-                fromRoute.routeToScreenName()
+        screenTracker.screenTransitionStart(
+            fromRoute.routeToScreenName()
+        )
+        verificationPageData.updateStateAndSave {
+            Resource.loading()
+        }
+        runCatching {
+            identityRepository.postVerificationPageData(
+                verificationArgs.verificationSessionId,
+                verificationArgs.ephemeralKeySecret,
+                collectedDataParam,
+                calculateClearDataParam(collectedDataParam)
             )
+        }.onSuccess { newVerificationPageData ->
             verificationPageData.updateStateAndSave {
-                Resource.loading()
+                Resource.success(DUMMY_RESOURCE)
             }
-            runCatching {
-                identityRepository.postVerificationPageData(
-                    verificationArgs.verificationSessionId,
-                    verificationArgs.ephemeralKeySecret,
-                    collectedDataParam,
-                    calculateClearDataParam(collectedDataParam)
-                )
-            }.onSuccess { newVerificationPageData ->
-                verificationPageData.updateStateAndSave {
-                    Resource.success(DUMMY_RESOURCE)
+            _collectedData.updateStateAndSave { oldValue ->
+                oldValue.mergeWith(collectedDataParam)
+            }
+            _missingRequirements.updateStateAndSave {
+                requireNotNull(newVerificationPageData.requirements.missings) {
+                    "VerificationPageDataRequirements.missings is null"
                 }
-                _collectedData.updateStateAndSave { oldValue ->
-                    oldValue.mergeWith(collectedDataParam)
-                }
-                _missingRequirements.updateStateAndSave {
-                    requireNotNull(newVerificationPageData.requirements.missings) {
-                        "VerificationPageDataRequirements.missings is null"
-                    }
-                }
+            }
 
-                if (newVerificationPageData.hasError()) {
-                    newVerificationPageData.requirements.errors[0].let { requirementError ->
-                        errorCause.postValue(
-                            IllegalStateException("VerificationPageDataRequirementError: $requirementError")
-                        )
-                        navController.navigateToErrorScreenWithRequirementError(
-                            fromRoute,
-                            requirementError,
-                        )
-                    }
-                } else {
-                    onCorrectResponse(newVerificationPageData)
+            if (newVerificationPageData.hasError()) {
+                newVerificationPageData.requirements.errors[0].let { requirementError ->
+                    errorCause.postValue(
+                        IllegalStateException("VerificationPageDataRequirementError: $requirementError")
+                    )
+                    navController.navigateToErrorScreenWithRequirementError(
+                        fromRoute,
+                        requirementError,
+                    )
                 }
-            }.onFailure { cause ->
-                errorCause.postValue(cause)
-                navController.navigateToErrorScreenWithDefaultValues(getApplication())
+            } else {
+                onCorrectResponse(newVerificationPageData)
             }
+        }.onFailure { cause ->
+            errorCause.postValue(cause)
+            navController.navigateToErrorScreenWithDefaultValues(getApplication())
         }
     }
 
     /**
      * Send a POST request to VerificationPageData, navigate or invoke the callbacks based on result.
      */
-    fun postVerificationPageDataAndMaybeNavigate(
+    suspend fun postVerificationPageDataAndMaybeNavigate(
         navController: NavController,
         collectedDataParam: CollectedDataParam,
         fromRoute: String,
@@ -985,7 +983,7 @@ internal class IdentityViewModel constructor(
     /**
      * Submit the verification and navigate based on result.
      */
-    fun submitAndNavigate(
+    private fun submitAndNavigate(
         navController: NavController,
         fromRoute: String
     ) {
@@ -1173,7 +1171,7 @@ internal class IdentityViewModel constructor(
         }
     }
 
-    fun postVerificationPageDataForDocSelection(
+    suspend fun postVerificationPageDataForDocSelection(
         type: CollectedDataParam.Type,
         navController: NavController,
         viewLifecycleOwner: LifecycleOwner,
@@ -1262,56 +1260,48 @@ internal class IdentityViewModel constructor(
      * else if result is missing selfie, then start scanning selfie,
      * Otherwise submit
      */
-    fun collectDataForDocumentScanScreen(
+    suspend fun collectDataForDocumentScanScreen(
         navController: NavController,
-        lifecycleOwner: LifecycleOwner,
         isFront: Boolean,
         collectedDataParamType: CollectedDataParam.Type,
         route: String,
         onMissingBack: () -> Unit
     ) {
-        viewModelScope.launch {
-            if (isFront) {
-                documentFrontUploadedState
-            } else {
-                documentBackUploadedState
-            }.collectLatest { uploadedState ->
-                if (uploadedState.hasError()) {
-                    errorCause.postValue(uploadedState.getError())
-                    navController.navigateToErrorScreenWithDefaultValues(
-                        getApplication()
-                    )
-                } else if (uploadedState.isUploaded()) {
-                    requireVerificationPage(
-                        lifecycleOwner,
-                        navController
-                    ) {
-                        postVerificationPageDataAndMaybeNavigate(
+        if (isFront) {
+            documentFrontUploadedState
+        } else {
+            documentBackUploadedState
+        }.collectLatest { uploadedState ->
+            if (uploadedState.hasError()) {
+                errorCause.postValue(uploadedState.getError())
+                navController.navigateToErrorScreenWithDefaultValues(
+                    getApplication()
+                )
+            } else if (uploadedState.isUploaded()) {
+                postVerificationPageDataAndMaybeNavigate(
+                    navController = navController,
+                    collectedDataParam = if (isFront) {
+                        CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
+                            type = collectedDataParamType,
+                            frontHighResResult = requireNotNull(uploadedState.highResResult.data),
+                            frontLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                        )
+                    } else {
+                        CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
+                            type = collectedDataParamType,
+                            backHighResResult = requireNotNull(uploadedState.highResResult.data),
+                            backLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                        )
+                    },
+                    fromRoute = route,
+                    onMissingBack = onMissingBack,
+                    onReadyToSubmit = {
+                        submitAndNavigate(
                             navController = navController,
-                            collectedDataParam = if (isFront) {
-                                CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
-                                    type = collectedDataParamType,
-                                    frontHighResResult = requireNotNull(uploadedState.highResResult.data),
-                                    frontLowResResult = requireNotNull(uploadedState.lowResResult.data)
-                                )
-                            } else {
-                                CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
-                                    type = collectedDataParamType,
-                                    backHighResResult = requireNotNull(uploadedState.highResResult.data),
-                                    backLowResResult = requireNotNull(uploadedState.lowResResult.data)
-                                )
-                            },
-                            fromRoute = route,
-                            onMissingBack = onMissingBack,
-                            onReadyToSubmit = {
-                                submitAndNavigate(
-                                    navController = navController,
-                                    fromRoute = route
-                                )
-                            }
+                            fromRoute = route
                         )
                     }
-                }
+                )
             }
         }
     }
@@ -1320,12 +1310,13 @@ internal class IdentityViewModel constructor(
      * Collect the last status of both sids of document upload and post.
      * Only post when that side is not yet collected.
      */
-    fun collectDataForDocumentUploadScreen(
+    suspend fun collectDataForDocumentUploadScreen(
         navController: NavController,
         collectedDataParamType: CollectedDataParam.Type,
-        route: String
+        route: String,
+        isFront: Boolean
     ) {
-        viewModelScope.launch {
+        if (isFront) {
             frontCollectedInfo.collectLatest { (frontUploadState, collectedData) ->
                 if (collectedData.idDocumentFront == null) {
                     if (frontUploadState.hasError()) {
@@ -1349,9 +1340,7 @@ internal class IdentityViewModel constructor(
                     }
                 }
             }
-        }
-
-        viewModelScope.launch {
+        } else {
             backCollectedInfo.collectLatest { (backUploadedState, collectedData) ->
                 if (collectedData.idDocumentBack == null) {
                     if (backUploadedState.hasError()) {
@@ -1382,57 +1371,55 @@ internal class IdentityViewModel constructor(
      * Check the upload status of the [selfieUploadState], post it with VerificationPageData and
      * navigate accordingly.
      */
-    fun collectDataForSelfieScreen(
+    suspend fun collectDataForSelfieScreen(
         navController: NavController,
         faceDetectorTransitioner: FaceDetectorTransitioner,
         allowImageCollection: Boolean
     ) {
-        viewModelScope.launch {
-            selfieUploadState.collectLatest {
-                when {
-                    it.isIdle() -> {} // no-op
-                    it.isAnyLoading() -> {} // no-op
-                    it.hasError() -> {
-                        errorCause.postValue(it.getError())
-                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
-                    }
-                    it.isAllUploaded() -> {
-                        runCatching {
-                            postVerificationPageDataAndMaybeNavigate(
+        selfieUploadState.collectLatest {
+            when {
+                it.isIdle() -> {} // no-op
+                it.isAnyLoading() -> {} // no-op
+                it.hasError() -> {
+                    errorCause.postValue(it.getError())
+                    navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                }
+                it.isAllUploaded() -> {
+                    runCatching {
+                        postVerificationPageDataAndMaybeNavigate(
+                            navController = navController,
+                            collectedDataParam = CollectedDataParam.createForSelfie(
+                                firstHighResResult = requireNotNull(it.firstHighResResult.data),
+                                firstLowResResult = requireNotNull(it.firstLowResResult.data),
+                                lastHighResResult = requireNotNull(it.lastHighResResult.data),
+                                lastLowResResult = requireNotNull(it.lastLowResResult.data),
+                                bestHighResResult = requireNotNull(it.bestHighResResult.data),
+                                bestLowResResult = requireNotNull(it.bestLowResResult.data),
+                                trainingConsent = allowImageCollection,
+                                faceScoreVariance = faceDetectorTransitioner.scoreVariance,
+                                bestFaceScore = faceDetectorTransitioner.bestFaceScore,
+                                numFrames = faceDetectorTransitioner.numFrames
+                            ),
+                            fromRoute = SelfieDestination.ROUTE.route
+                        ) {
+                            submitAndNavigate(
                                 navController = navController,
-                                collectedDataParam = CollectedDataParam.createForSelfie(
-                                    firstHighResResult = requireNotNull(it.firstHighResResult.data),
-                                    firstLowResResult = requireNotNull(it.firstLowResResult.data),
-                                    lastHighResResult = requireNotNull(it.lastHighResResult.data),
-                                    lastLowResResult = requireNotNull(it.lastLowResResult.data),
-                                    bestHighResResult = requireNotNull(it.bestHighResResult.data),
-                                    bestLowResResult = requireNotNull(it.bestLowResResult.data),
-                                    trainingConsent = allowImageCollection,
-                                    faceScoreVariance = faceDetectorTransitioner.scoreVariance,
-                                    bestFaceScore = faceDetectorTransitioner.bestFaceScore,
-                                    numFrames = faceDetectorTransitioner.numFrames
-                                ),
                                 fromRoute = SelfieDestination.ROUTE.route
-                            ) {
-                                submitAndNavigate(
-                                    navController = navController,
-                                    fromRoute = SelfieDestination.ROUTE.route
-                                )
-                            }
-                        }.onFailure { throwable ->
-                            errorCause.postValue(throwable)
-                            navController.navigateToErrorScreenWithDefaultValues(getApplication())
-                        }
-                    }
-                    else -> {
-                        errorCause.postValue(
-                            IllegalStateException(
-                                "collectSelfieUploadedStateAndPost " +
-                                    "reaches unexpected upload state: $it"
                             )
-                        )
+                        }
+                    }.onFailure { throwable ->
+                        errorCause.postValue(throwable)
                         navController.navigateToErrorScreenWithDefaultValues(getApplication())
                     }
+                }
+                else -> {
+                    errorCause.postValue(
+                        IllegalStateException(
+                            "collectSelfieUploadedStateAndPost " +
+                                "reaches unexpected upload state: $it"
+                        )
+                    )
+                    navController.navigateToErrorScreenWithDefaultValues(getApplication())
                 }
             }
         }
