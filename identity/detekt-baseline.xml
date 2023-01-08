@@ -4,11 +4,8 @@
   <CurrentIssues>
     <ID>ComplexMethod:CameraScreenLaunchedEffect.kt$@Composable internal fun CameraScreenLaunchedEffect( identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, verificationPage: VerificationPage, navController: NavController, cameraManager: IdentityCameraManager, onCameraReady: () -> Unit )</ID>
     <ID>ComplexMethod:DocumenetScanScreen.kt$@Composable internal fun DocumentScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, frontScanType: IdentityScanState.ScanType, backScanType: IdentityScanState.ScanType?, shouldStartFromBack: Boolean, messageRes: DocumentScanMessageRes, collectedDataParamType: CollectedDataParam.Type, route: String )</ID>
-    <ID>ComplexMethod:ErrorFragment.kt$ErrorFragment$private fun String.toFragmentId(): Int</ID>
-    <ID>ComplexMethod:IdentityFragmentFactory.kt$IdentityFragmentFactory$override fun instantiate(classLoader: ClassLoader, className: String): Fragment</ID>
+    <ID>ComplexMethod:IdentityTopLevelDestination.kt$internal fun String.routeToScreenName(): String</ID>
     <ID>ComplexMethod:IdentityViewModel.kt$IdentityViewModel$fun updateNewScanType(scanType: IdentityScanState.ScanType)</ID>
-    <ID>ComplexMethod:NavigationDestinations.kt$internal fun String.routeToScreenName(): String</ID>
-    <ID>ComplexMethod:NavigationUtils.kt$internal fun Int.fragmentIdToScreenName(): String</ID>
     <ID>ComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, shouldShowTakePhoto: Boolean, shouldShowChoosePhoto: Boolean )</ID>
     <ID>FunctionOnlyReturningConstant:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$private fun isFaceFocused(): Boolean</ID>
     <ID>LargeClass:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
@@ -21,6 +18,7 @@
     <ID>LongMethod:ErrorScreen.kt$@Composable internal fun ErrorScreen( identityViewModel: IdentityViewModel, title: String, modifier: Modifier = Modifier, message1: String? = null, message2: String? = null, topButton: ErrorScreenButton? = null, bottomButton: ErrorScreenButton? = null, )</ID>
     <ID>LongMethod:IDDetectorAnalyzer.kt$IDDetectorAnalyzer$override suspend fun analyze( data: AnalyzerInput, state: IdentityScanState ): AnalyzerOutput</ID>
     <ID>LongMethod:IdentityActivity.kt$IdentityActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>LongMethod:IdentityNavGraph.kt$@Composable internal fun IdentityNavGraph( navController: NavHostController = rememberNavController(), identityViewModel: IdentityViewModel, fallbackUrlLauncher: FallbackUrlLauncher, appSettingsOpenable: AppSettingsOpenable, cameraPermissionEnsureable: CameraPermissionEnsureable, verificationFlowFinishable: VerificationFlowFinishable, identityScanViewModelFactory: IdentityScanViewModel.IdentityScanViewModelFactory, onTopBarNavigationClick: () -> Unit, topBarState: IdentityTopBarState, onNavControllerCreated: (NavController) -> Unit )</ID>
     <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$internal fun uploadScanResult( result: IdentityAggregator.FinalResult, verificationPage: VerificationPage, targetScanType: IdentityScanState.ScanType? )</ID>
     <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$private fun uploadDocumentImagesAndNotify( imageFile: File, filePurpose: StripeFilePurpose, uploadMethod: UploadMethod, scores: List&lt;Float>? = null, isHighRes: Boolean, isFront: Boolean, scanType: IdentityScanState.ScanType, compressionQuality: Float )</ID>
     <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$suspend fun postVerificationPageDataForDocSelection( type: CollectedDataParam.Type, navController: NavController, viewLifecycleOwner: LifecycleOwner, cameraPermissionEnsureable: CameraPermissionEnsureable )</ID>
@@ -42,7 +40,6 @@
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION - 1).milliseconds)</ID>
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION + 1).milliseconds)</ID>
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION - 1).milliseconds)</ID>
-    <ID>MaxLineLength:IdentityActivityTest.kt$IdentityActivityTest$(IdentityActivity, Toolbar, ImageButton, NavController, InjectableActivityScenario&lt;IdentityActivity>) -> Unit</ID>
     <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$body</ID>
     <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$face_detector_url</ID>
     <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$fallback_url</ID>
@@ -59,13 +56,12 @@
     <ID>ThrowsCount:DefaultIdentityRepository.kt$DefaultIdentityRepository$private suspend fun &lt;Response : StripeModel> executeRequestWithModelJsonParser( request: StripeRequest, responseJsonParser: ModelJsonParser&lt;Response>, onSuccessExecutionTimeBlock: (Long) -> Unit = {} ): Response</ID>
     <ID>TooManyFunctions:IdentityAnalyticsRequestFactory.kt$IdentityAnalyticsRequestFactory</ID>
     <ID>TooManyFunctions:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
+    <ID>TooManyFunctions:UploadDestinations.kt$DocumentUploadDestination$Companion</ID>
     <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationConfirmButtonTag = "ConfirmButton"</ID>
     <ID>TopLevelPropertyNaming:ConfirmationScreen.kt$internal const val confirmationTitleTag = "ConfirmationTitle"</ID>
     <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val docSelectionTitleTag = "Title"</ID>
     <ID>TopLevelPropertyNaming:DocSelectionScreen.kt$internal const val singleSelectionTag = "SingleSelection"</ID>
     <ID>UnnecessaryAbstractClass:IdentityCommonModule.kt$IdentityCommonModule$IdentityCommonModule</ID>
-    <ID>UnusedPrivateMember:CameraPermissionDeniedFragmentTest.kt$CameraPermissionDeniedFragmentTest$@StringRes expectedTitleSuffix: Int = 0</ID>
-    <ID>UnusedPrivateMember:CouldNotCaptureFragmentTest.kt$CouldNotCaptureFragmentTest$testBlock: (Button, Button, TestNavHostController) -> Unit</ID>
     <ID>UnusedPrivateMember:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$i</ID>
     <ID>VariableNaming:IdentityViewModel.kt$IdentityViewModel$/** * Response for initial VerificationPage, used for building UI. */ @VisibleForTesting internal val _verificationPage: MutableLiveData&lt;Resource&lt;VerificationPage>> = // No need to write to savedStateHandle for livedata savedStateHandle.getLiveData( key = VERIFICATION_PAGE, initialValue = Resource.idle() )</ID>
   </CurrentIssues>

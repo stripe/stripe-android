@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.identity.R
 import com.stripe.android.identity.camera.DocumentScanCameraManager
@@ -89,200 +88,198 @@ internal fun DocumentScanScreen(
     collectedDataParamType: CollectedDataParam.Type,
     route: String
 ) {
-    MdcTheme {
-        val changedDisplayState by identityScanViewModel.displayStateChangedFlow.collectAsState()
-        val newDisplayState by remember {
-            derivedStateOf {
-                changedDisplayState?.first
+    val changedDisplayState by identityScanViewModel.displayStateChangedFlow.collectAsState()
+    val newDisplayState by remember {
+        derivedStateOf {
+            changedDisplayState?.first
+        }
+    }
+    val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    CheckVerificationPageAndCompose(
+        verificationPageResource = verificationPageState,
+        onError = {
+            identityViewModel.errorCause.postValue(it)
+            navController.navigateToErrorScreenWithDefaultValues(context)
+        }
+    ) { verificationPage ->
+        val cameraManager = remember {
+            DocumentScanCameraManager(
+                context = context
+            ) { cause ->
+                identityViewModel.sendAnalyticsRequest(
+                    identityViewModel.identityAnalyticsRequestFactory.cameraError(
+                        scanType = frontScanType,
+                        throwable = IllegalStateException(cause)
+                    )
+                )
             }
         }
-        val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
-        val context = LocalContext.current
-        val coroutineScope = rememberCoroutineScope()
 
-        CheckVerificationPageAndCompose(
-            verificationPageResource = verificationPageState,
-            onError = {
-                identityViewModel.errorCause.postValue(it)
-                navController.navigateToErrorScreenWithDefaultValues(context)
-            }
-        ) { verificationPage ->
-            val cameraManager = remember {
-                DocumentScanCameraManager(
-                    context = context
-                ) { cause ->
-                    identityViewModel.sendAnalyticsRequest(
-                        identityViewModel.identityAnalyticsRequestFactory.cameraError(
-                            scanType = frontScanType,
-                            throwable = IllegalStateException(cause)
-                        )
-                    )
-                }
-            }
+        val lifecycleOwner = LocalLifecycleOwner.current
 
-            val lifecycleOwner = LocalLifecycleOwner.current
+        val targetScanType by identityScanViewModel.targetScanTypeFlow.collectAsState()
 
-            val targetScanType by identityScanViewModel.targetScanTypeFlow.collectAsState()
+        val title = if (targetScanType.isNullOrFront()) {
+            stringResource(id = messageRes.frontTitleStringRes)
+        } else {
+            stringResource(id = messageRes.backTitleStringRes)
+        }
 
-            val title = if (targetScanType.isNullOrFront()) {
-                stringResource(id = messageRes.frontTitleStringRes)
-            } else {
-                stringResource(id = messageRes.backTitleStringRes)
-            }
-
-            val message = when (newDisplayState) {
-                is IdentityScanState.Finished -> stringResource(id = R.string.scanned)
-                is IdentityScanState.Found -> stringResource(id = R.string.hold_still)
-                is IdentityScanState.Initial -> {
-                    if (targetScanType.isNullOrFront()) {
-                        stringResource(id = messageRes.frontMessageStringRes)
-                    } else {
-                        stringResource(id = messageRes.backMessageStringRes)
-                    }
-                }
-
-                is IdentityScanState.Satisfied -> stringResource(id = R.string.scanned)
-                is IdentityScanState.TimeOut -> ""
-                is IdentityScanState.Unsatisfied -> ""
-                null -> {
-                    if (targetScanType.isNullOrFront()) {
-                        stringResource(id = messageRes.frontMessageStringRes)
-                    } else {
-                        stringResource(id = messageRes.backMessageStringRes)
-                    }
-                }
-            }
-
-            LaunchedEffect(newDisplayState) {
-                when (newDisplayState) {
-                    null -> {
-                        cameraManager.toggleInitial()
-                    }
-                    is IdentityScanState.Initial -> {
-                        cameraManager.toggleInitial()
-                    }
-                    is IdentityScanState.Found -> {
-                        cameraManager.toggleFound()
-                    }
-                    is IdentityScanState.Finished -> {
-                        cameraManager.toggleFinished()
-                    }
-                    else -> {} // no-op
-                }
-            }
-
-            LaunchedEffect(Unit) {
-                if (shouldStartFromBack) {
-                    identityViewModel.resetDocumentUploadedState()
-                }
-            }
-
-            CameraScreenLaunchedEffect(
-                identityViewModel = identityViewModel,
-                identityScanViewModel = identityScanViewModel,
-                verificationPage = verificationPage,
-                navController = navController,
-                cameraManager = cameraManager
-            ) {
-                if (shouldStartFromBack) {
-                    startScanning(
-                        scanType = requireNotNull(backScanType) {
-                            "$backScanType should not be null when trying to scan from back"
-                        },
-                        identityViewModel = identityViewModel,
-                        identityScanViewModel = identityScanViewModel,
-                        lifecycleOwner = lifecycleOwner
-                    )
+        val message = when (newDisplayState) {
+            is IdentityScanState.Finished -> stringResource(id = R.string.scanned)
+            is IdentityScanState.Found -> stringResource(id = R.string.hold_still)
+            is IdentityScanState.Initial -> {
+                if (targetScanType.isNullOrFront()) {
+                    stringResource(id = messageRes.frontMessageStringRes)
                 } else {
-                    startScanning(
-                        scanType = frontScanType,
-                        identityViewModel = identityViewModel,
-                        identityScanViewModel = identityScanViewModel,
-                        lifecycleOwner = lifecycleOwner
-                    )
+                    stringResource(id = messageRes.backMessageStringRes)
                 }
             }
 
-            ScreenTransitionLaunchedEffect(
-                identityViewModel = identityViewModel,
-                scanType = frontScanType,
-                screenName = route.routeToScreenName()
-            )
+            is IdentityScanState.Satisfied -> stringResource(id = R.string.scanned)
+            is IdentityScanState.TimeOut -> ""
+            is IdentityScanState.Unsatisfied -> ""
+            null -> {
+                if (targetScanType.isNullOrFront()) {
+                    stringResource(id = messageRes.frontMessageStringRes)
+                } else {
+                    stringResource(id = messageRes.backMessageStringRes)
+                }
+            }
+        }
 
+        LaunchedEffect(newDisplayState) {
+            when (newDisplayState) {
+                null -> {
+                    cameraManager.toggleInitial()
+                }
+                is IdentityScanState.Initial -> {
+                    cameraManager.toggleInitial()
+                }
+                is IdentityScanState.Found -> {
+                    cameraManager.toggleFound()
+                }
+                is IdentityScanState.Finished -> {
+                    cameraManager.toggleFinished()
+                }
+                else -> {} // no-op
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            if (shouldStartFromBack) {
+                identityViewModel.resetDocumentUploadedState()
+            }
+        }
+
+        CameraScreenLaunchedEffect(
+            identityViewModel = identityViewModel,
+            identityScanViewModel = identityScanViewModel,
+            verificationPage = verificationPage,
+            navController = navController,
+            cameraManager = cameraManager
+        ) {
+            if (shouldStartFromBack) {
+                startScanning(
+                    scanType = requireNotNull(backScanType) {
+                        "$backScanType should not be null when trying to scan from back"
+                    },
+                    identityViewModel = identityViewModel,
+                    identityScanViewModel = identityScanViewModel,
+                    lifecycleOwner = lifecycleOwner
+                )
+            } else {
+                startScanning(
+                    scanType = frontScanType,
+                    identityViewModel = identityViewModel,
+                    identityScanViewModel = identityScanViewModel,
+                    lifecycleOwner = lifecycleOwner
+                )
+            }
+        }
+
+        ScreenTransitionLaunchedEffect(
+            identityViewModel = identityViewModel,
+            scanType = frontScanType,
+            screenName = route.routeToScreenName()
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    vertical = dimensionResource(id = R.dimen.page_vertical_margin),
+                    horizontal = dimensionResource(id = R.dimen.page_horizontal_margin)
+                )
+        ) {
+            var loadingButtonState by remember(newDisplayState) {
+                mutableStateOf(
+                    if (newDisplayState is IdentityScanState.Finished) {
+                        LoadingButtonState.Idle
+                    } else {
+                        LoadingButtonState.Disabled
+                    }
+                )
+            }
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        vertical = dimensionResource(id = R.dimen.page_vertical_margin),
-                        horizontal = dimensionResource(id = R.dimen.page_horizontal_margin)
-                    )
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
             ) {
-                var loadingButtonState by remember(newDisplayState) {
-                    mutableStateOf(
-                        if (newDisplayState is IdentityScanState.Finished) {
-                            LoadingButtonState.Idle
-                        } else {
-                            LoadingButtonState.Disabled
-                        }
-                    )
-                }
-                Column(
+                Text(
+                    text = title,
                     modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    Text(
-                        text = title,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .semantics {
-                                testTag = SCAN_TITLE_TAG
-                            },
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = message,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp)
-                            .padding(
-                                top = dimensionResource(id = R.dimen.item_vertical_margin),
-                                bottom = 48.dp
-                            )
-                            .semantics {
-                                testTag = SCAN_MESSAGE_TAG
-                            },
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    CameraViewFinder(newDisplayState, cameraManager)
-                }
-                LoadingButton(
-                    modifier = Modifier.testTag(CONTINUE_BUTTON_TAG),
-                    text = stringResource(id = R.string.kontinue).uppercase(),
-                    state = loadingButtonState
-                ) {
-                    loadingButtonState = LoadingButtonState.Loading
+                        .fillMaxWidth()
+                        .semantics {
+                            testTag = SCAN_TITLE_TAG
+                        },
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = message,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)
+                        .padding(
+                            top = dimensionResource(id = R.dimen.item_vertical_margin),
+                            bottom = 48.dp
+                        )
+                        .semantics {
+                            testTag = SCAN_MESSAGE_TAG
+                        },
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+                CameraViewFinder(newDisplayState, cameraManager)
+            }
+            LoadingButton(
+                modifier = Modifier.testTag(CONTINUE_BUTTON_TAG),
+                text = stringResource(id = R.string.kontinue).uppercase(),
+                state = loadingButtonState
+            ) {
+                loadingButtonState = LoadingButtonState.Loading
 
-                    coroutineScope.launch {
-                        identityViewModel.collectDataForDocumentScanScreen(
-                            navController = navController,
-                            isFront = requireNotNull(targetScanType) {
-                                "targetScanType is still null"
-                            }.isFront(),
-                            collectedDataParamType = collectedDataParamType,
-                            route = route
-                        ) {
-                            startScanning(
-                                scanType = requireNotNull(backScanType) {
-                                    "backScanType is null while still missing back"
-                                },
-                                identityViewModel = identityViewModel,
-                                identityScanViewModel = identityScanViewModel,
-                                lifecycleOwner = lifecycleOwner
-                            )
-                        }
+                coroutineScope.launch {
+                    identityViewModel.collectDataForDocumentScanScreen(
+                        navController = navController,
+                        isFront = requireNotNull(targetScanType) {
+                            "targetScanType is still null"
+                        }.isFront(),
+                        collectedDataParamType = collectedDataParamType,
+                        route = route
+                    ) {
+                        startScanning(
+                            scanType = requireNotNull(backScanType) {
+                                "backScanType is null while still missing back"
+                            },
+                            identityViewModel = identityViewModel,
+                            identityScanViewModel = identityScanViewModel,
+                            lifecycleOwner = lifecycleOwner
+                        )
                     }
                 }
             }

@@ -1,8 +1,13 @@
 package com.stripe.android.identity.networking.models
 
+import android.content.Context
 import android.os.Parcelable
 import com.stripe.android.core.networking.toMap
+import com.stripe.android.identity.R
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
+import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
+import com.stripe.android.identity.navigation.IDUploadDestination
+import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.networking.UploadedResult
 import com.stripe.android.identity.ui.DRIVING_LICENSE_KEY
 import com.stripe.android.identity.ui.ID_CARD_KEY
@@ -196,5 +201,38 @@ internal data class CollectedDataParam(
             }
             return requirements
         }
+
+        fun Type.toUploadDestination(
+            shouldShowTakePhoto: Boolean,
+            shouldShowChoosePhoto: Boolean
+        ) = when (this) {
+            Type.IDCARD -> IDUploadDestination(
+                shouldShowTakePhoto,
+                shouldShowChoosePhoto
+            )
+            Type.DRIVINGLICENSE -> DriverLicenseUploadDestination(
+                shouldShowTakePhoto,
+                shouldShowChoosePhoto
+            )
+            Type.PASSPORT -> PassportUploadDestination(
+                shouldShowTakePhoto,
+                shouldShowChoosePhoto
+            )
+            else -> throw java.lang.IllegalStateException("Invalid CollectedDataParam.Type")
+        }
+
+        fun Type.getDisplayName(context: Context) =
+            when (this) {
+                Type.IDCARD -> {
+                    context.getString(R.string.id_card)
+                }
+                Type.DRIVINGLICENSE -> {
+                    context.getString(R.string.driver_license)
+                }
+                Type.PASSPORT -> {
+                    context.getString(R.string.passport)
+                }
+                else -> throw java.lang.IllegalStateException("Invalid CollectedDataParam.Type")
+            }
     }
 }

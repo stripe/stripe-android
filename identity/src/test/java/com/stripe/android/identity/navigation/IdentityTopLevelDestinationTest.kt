@@ -14,7 +14,7 @@ class IdentityTopLevelDestinationTest {
     private class IdentityTopLevelDestinationWithArgs(
         arg1: String,
         arg2: Int,
-        arg3: CollectedDataParam.Type? = null
+        arg3: CollectedDataParam.Type
     ) : IdentityTopLevelDestination() {
         override val destinationRoute = ROUTE_WITH_ARGS
         override val routeWithArgs = destinationRoute.withParams(
@@ -22,13 +22,11 @@ class IdentityTopLevelDestinationTest {
             ARG2 to arg2,
             ARG3 to arg3,
         )
-        override val destination = -1
     }
 
     private class IdentityTopLevelDestinationWithoutArgs : IdentityTopLevelDestination() {
         override val destinationRoute = ROUTE_WITHOUT_ARGS
         override val routeWithArgs = destinationRoute.route
-        override val destination = -1
     }
 
     @Test
@@ -48,25 +46,6 @@ class IdentityTopLevelDestinationTest {
 
         assertThat(testDestination.routeWithArgs).isEqualTo(
             "TestRoute?arg1=$arg1&arg2=$arg2&arg3=$arg3"
-        )
-    }
-
-    @Test
-    fun testRouteWithNullArgumentsIsCalculatedCorrectly() {
-        val arg1 = "arg1"
-        val arg2 = 123
-        val testDestination = IdentityTopLevelDestinationWithArgs(
-            arg1,
-            arg2,
-            null
-        )
-
-        assertThat(testDestination.destinationRoute.route).isEqualTo(
-            "TestRoute?arg1={arg1}&arg2={arg2}&arg3={arg3}"
-        )
-
-        assertThat(testDestination.routeWithArgs).isEqualTo(
-            "TestRoute?arg1=$arg1&arg2=$arg2&arg3="
         )
     }
 

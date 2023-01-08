@@ -34,7 +34,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
@@ -53,92 +52,90 @@ internal fun ConfirmationScreen(
     val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
     val context = LocalContext.current
 
-    MdcTheme {
-        CheckVerificationPageAndCompose(
-            verificationPageResource = verificationPageState,
-            onError = {
-                identityViewModel.errorCause.postValue(it)
-                navController.navigateToErrorScreenWithDefaultValues(context)
-            }
+    CheckVerificationPageAndCompose(
+        verificationPageResource = verificationPageState,
+        onError = {
+            identityViewModel.errorCause.postValue(it)
+            navController.navigateToErrorScreenWithDefaultValues(context)
+        }
+    ) {
+        val successPage = remember { it.success }
+        ScreenTransitionLaunchedEffect(
+            identityViewModel = identityViewModel,
+            screenName = SCREEN_NAME_CONFIRMATION
+        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    vertical = dimensionResource(id = R.dimen.page_vertical_margin),
+                    horizontal = dimensionResource(id = R.dimen.page_horizontal_margin)
+                )
         ) {
-            val successPage = remember { it.success }
-            ScreenTransitionLaunchedEffect(
-                identityViewModel = identityViewModel,
-                screenName = SCREEN_NAME_CONFIRMATION
-            )
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        vertical = dimensionResource(id = R.dimen.page_vertical_margin),
-                        horizontal = dimensionResource(id = R.dimen.page_horizontal_margin)
-                    )
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
             ) {
-                Column(
+                Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState())
+                        .width(32.dp)
+                        .height(32.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(MaterialTheme.colors.primary),
+                    contentAlignment = Alignment.Center
+
                 ) {
-                    Box(
+                    Image(
+                        painter = painterResource(id = R.drawable.clock_icon),
                         modifier = Modifier
-                            .width(32.dp)
-                            .height(32.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(MaterialTheme.colors.primary),
-                        contentAlignment = Alignment.Center
-
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.clock_icon),
-                            modifier = Modifier
-                                .width(26.dp)
-                                .height(26.dp),
-                            contentDescription = stringResource(id = R.string.description_plus)
-                        )
-                    }
-                    Text(
-                        text = successPage.title,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                vertical = dimensionResource(id = R.dimen.item_vertical_margin)
-                            )
-                            .semantics {
-                                testTag = confirmationTitleTag
-                            },
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-
-                    Html(
-                        html = successPage.body,
-                        modifier = Modifier
-                            .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
-                            .semantics {
-                                testTag = BODY_TAG
-                            },
-                        color = MaterialTheme.colors.onBackground,
-                        urlSpanStyle = SpanStyle(
-                            textDecoration = TextDecoration.Underline,
-                            color = MaterialTheme.colors.secondary
-                        )
+                            .width(26.dp)
+                            .height(26.dp),
+                        contentDescription = stringResource(id = R.string.description_plus)
                     )
                 }
-                Button(
-                    onClick = {
-                        identityViewModel.sendSucceededAnalyticsRequestForNative()
-                        verificationFlowFinishable.finishWithResult(
-                            IdentityVerificationSheet.VerificationFlowResult.Completed
-                        )
-                    },
+                Text(
+                    text = successPage.title,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(
+                            vertical = dimensionResource(id = R.dimen.item_vertical_margin)
+                        )
                         .semantics {
-                            testTag = confirmationConfirmButtonTag
-                        }
-                ) {
-                    Text(text = successPage.buttonText.uppercase())
-                }
+                            testTag = confirmationTitleTag
+                        },
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Html(
+                    html = successPage.body,
+                    modifier = Modifier
+                        .padding(bottom = dimensionResource(id = R.dimen.item_vertical_margin))
+                        .semantics {
+                            testTag = BODY_TAG
+                        },
+                    color = MaterialTheme.colors.onBackground,
+                    urlSpanStyle = SpanStyle(
+                        textDecoration = TextDecoration.Underline,
+                        color = MaterialTheme.colors.secondary
+                    )
+                )
+            }
+            Button(
+                onClick = {
+                    identityViewModel.sendSucceededAnalyticsRequestForNative()
+                    verificationFlowFinishable.finishWithResult(
+                        IdentityVerificationSheet.VerificationFlowResult.Completed
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .semantics {
+                        testTag = confirmationConfirmButtonTag
+                    }
+            ) {
+                Text(text = successPage.buttonText.uppercase())
             }
         }
     }

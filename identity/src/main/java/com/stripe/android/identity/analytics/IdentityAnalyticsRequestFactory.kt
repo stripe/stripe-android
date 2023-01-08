@@ -18,7 +18,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
     context: Context,
     private val args: IdentityVerificationSheetContract.Args
 ) {
-    lateinit var verificationPage: VerificationPage
+    var verificationPage: VerificationPage? = null
     private val requestFactory = AnalyticsRequestV2Factory(
         context = context,
         clientId = CLIENT_ID,
@@ -29,10 +29,13 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         mapOf(
             PARAM_VERIFICATION_SESSION to args.verificationSessionId,
             PARAM_EVENT_META_DATA to
-                mapOf(
-                    PARAM_LIVE_MODE to verificationPage.livemode,
+                mutableMapOf(
                     *pairs
-                )
+                ).also {
+                    verificationPage?.let {
+                        PARAM_LIVE_MODE to it.livemode
+                    }
+                }
         )
 
     fun sheetPresented() = requestFactory.createRequest(

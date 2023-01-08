@@ -31,7 +31,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_SELECT
@@ -55,68 +54,66 @@ internal fun DocSelectionScreen(
     identityViewModel: IdentityViewModel,
     cameraPermissionEnsureable: CameraPermissionEnsureable
 ) {
-    MdcTheme {
-        val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
-        val context = LocalContext.current
-        val viewLifecycleOwner = LocalLifecycleOwner.current
-        CheckVerificationPageAndCompose(
-            verificationPageResource = verificationPageState,
-            onError = {
-                identityViewModel.errorCause.postValue(it)
-                navController.navigateToErrorScreenWithDefaultValues(context)
-            }
-        ) {
-            val documentSelect = remember { it.documentSelect }
+    val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
+    val context = LocalContext.current
+    val viewLifecycleOwner = LocalLifecycleOwner.current
+    CheckVerificationPageAndCompose(
+        verificationPageResource = verificationPageState,
+        onError = {
+            identityViewModel.errorCause.postValue(it)
+            navController.navigateToErrorScreenWithDefaultValues(context)
+        }
+    ) {
+        val documentSelect = remember { it.documentSelect }
 
-            ScreenTransitionLaunchedEffect(
-                identityViewModel = identityViewModel,
-                screenName = SCREEN_NAME_DOC_SELECT
+        ScreenTransitionLaunchedEffect(
+            identityViewModel = identityViewModel,
+            screenName = SCREEN_NAME_DOC_SELECT
+        )
+
+        val onDocTypeSelected: suspend (Type) -> Unit = { type: Type ->
+            identityViewModel.postVerificationPageDataForDocSelection(
+                type = type,
+                navController = navController,
+                viewLifecycleOwner = viewLifecycleOwner,
+                cameraPermissionEnsureable = cameraPermissionEnsureable
             )
+        }
 
-            val onDocTypeSelected: suspend (Type) -> Unit = { type: Type ->
-                identityViewModel.postVerificationPageDataForDocSelection(
-                    type = type,
-                    navController = navController,
-                    viewLifecycleOwner = viewLifecycleOwner,
-                    cameraPermissionEnsureable = cameraPermissionEnsureable
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    horizontal = dimensionResource(id = R.dimen.page_horizontal_margin),
+                    vertical = dimensionResource(id = R.dimen.page_vertical_margin)
                 )
-            }
-
-            Column(
+        ) {
+            Text(
+                text = documentSelect.title,
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(
-                        horizontal = dimensionResource(id = R.dimen.page_horizontal_margin),
-                        vertical = dimensionResource(id = R.dimen.page_vertical_margin)
+                        top = 58.dp,
+                        bottom = 32.dp
                     )
-            ) {
-                Text(
-                    text = documentSelect.title,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            top = 58.dp,
-                            bottom = 32.dp
-                        )
-                        .semantics {
-                            testTag = docSelectionTitleTag
-                        },
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                    .semantics {
+                        testTag = docSelectionTitleTag
+                    },
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+            if (documentSelect.idDocumentTypeAllowlist.count() > 1) {
+                MultiSelection(
+                    documentSelect.idDocumentTypeAllowlist,
+                    onDocTypeSelected = onDocTypeSelected
                 )
-                if (documentSelect.idDocumentTypeAllowlist.count() > 1) {
-                    MultiSelection(
-                        documentSelect.idDocumentTypeAllowlist,
-                        onDocTypeSelected = onDocTypeSelected
-                    )
-                } else {
-                    SingleSelection(
-                        allowedType = documentSelect.idDocumentTypeAllowlist.entries.first().key,
-                        buttonText = documentSelect.buttonText,
-                        bodyText = documentSelect.body,
-                        onDocTypeSelected = onDocTypeSelected
-                    )
-                }
+            } else {
+                SingleSelection(
+                    allowedType = documentSelect.idDocumentTypeAllowlist.entries.first().key,
+                    buttonText = documentSelect.buttonText,
+                    bodyText = documentSelect.body,
+                    onDocTypeSelected = onDocTypeSelected
+                )
             }
         }
     }
