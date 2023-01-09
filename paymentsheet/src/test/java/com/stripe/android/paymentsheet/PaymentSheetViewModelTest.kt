@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -544,10 +545,13 @@ internal class PaymentSheetViewModelTest {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(selection)
 
-        viewModel.onPaymentResult(PaymentResult.Failed(Throwable()))
-        verify(eventReporter).onPaymentFailure(selection)
+        viewModel.stripeIntent.test {
+            viewModel.onPaymentResult(PaymentResult.Failed(Throwable()))
+            verify(eventReporter).onPaymentFailure(selection)
 
-        assertThat(viewModel.stripeIntent.value).isNull()
+            val stripeIntent = awaitItem()
+            assertThat(stripeIntent).isNull()
+        }
     }
 
     @Test
