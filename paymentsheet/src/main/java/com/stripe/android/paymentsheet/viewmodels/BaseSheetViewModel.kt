@@ -87,10 +87,42 @@ internal abstract class BaseSheetViewModel(
     // a fatal error
     protected val fatalError = MutableStateFlow<Throwable?>(null)
 
-    @VisibleForTesting
-    @Suppress("VariableNaming")
-    internal val _isGooglePayReady = MutableStateFlow(savedStateHandle.get<Boolean>(SAVE_GOOGLE_PAY_READY) ?: false)
-    internal val isGooglePayReady: StateFlow<Boolean> = _isGooglePayReady
+    internal val isGooglePayReady: StateFlow<Boolean> = savedStateHandle
+        .getStateFlow(SAVE_GOOGLE_PAY_READY, false)
+
+    internal val linkConfiguration: StateFlow<LinkPaymentLauncher.Configuration?> = savedStateHandle
+        .getStateFlow<LinkPaymentLauncher.Configuration?>(LINK_CONFIGURATION, null)
+
+    internal val stripeIntent: StateFlow<StripeIntent?> = savedStateHandle
+        .getStateFlow<StripeIntent?>(SAVE_STRIPE_INTENT, null)
+
+    internal val liveMode: StateFlow<Boolean> = savedStateHandle
+        .getStateFlow(SAVE_STATE_LIVE_MODE, false)
+
+    internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
+        .getStateFlow(SAVE_SELECTION, null)
+
+    /**
+     * The list of saved payment methods for the current customer.
+     * Value is null until it's loaded, and non-null (could be empty) after that.
+     */
+    internal val paymentMethods: StateFlow<List<PaymentMethod>> = savedStateHandle
+        .getStateFlow(SAVE_PAYMENT_METHODS, listOf())
+
+    internal val amount: StateFlow<Amount?> = savedStateHandle
+        .getStateFlow(SAVE_AMOUNT, null)
+
+    /**
+     * Request to retrieve the value from the repository happens when initialize any fragment
+     * and any fragment will re-update when the result comes back.
+     * Represents what the user last selects (add or buy) on the
+     * [PaymentOptionsActivity]/[PaymentSheetActivity], and saved/restored from the preferences.
+     */
+    private val savedSelection: StateFlow<SavedSelection> = savedStateHandle
+        .getStateFlow<SavedSelection>(SAVE_SAVED_SELECTION, SavedSelection.None)
+
+    val processing: StateFlow<Boolean> = savedStateHandle
+        .getStateFlow(SAVE_PROCESSING, false)
 
     // Don't save the resource repository state because it must be re-initialized
     // with the save server specs when reconstructed.
@@ -104,16 +136,6 @@ internal abstract class BaseSheetViewModel(
 
     internal val activeLinkSession = MutableStateFlow(false)
 
-    @Suppress("VariableNaming")
-    protected val _linkConfiguration = MutableStateFlow(
-        savedStateHandle.get<LinkPaymentLauncher.Configuration?>(LINK_CONFIGURATION)
-    )
-    internal val linkConfiguration: StateFlow<LinkPaymentLauncher.Configuration?> =
-        _linkConfiguration
-
-    internal val stripeIntent: StateFlow<StripeIntent?> =
-        savedStateHandle.getStateFlow<StripeIntent?>(SAVE_STRIPE_INTENT, null)
-
     internal var supportedPaymentMethods
         get() = savedStateHandle.get<List<PaymentMethodCode>>(
             SAVE_SUPPORTED_PAYMENT_METHOD
@@ -122,39 +144,12 @@ internal abstract class BaseSheetViewModel(
         } ?: emptyList()
         set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value.map { it.code })
 
-    /**
-     * The list of saved payment methods for the current customer.
-     * Value is null until it's loaded, and non-null (could be empty) after that.
-     */
-    internal val paymentMethods: StateFlow<List<PaymentMethod>> =
-        savedStateHandle.getStateFlow(SAVE_PAYMENT_METHODS, listOf())
-
-    internal val amount: StateFlow<Amount?> = savedStateHandle.getStateFlow(SAVE_AMOUNT, null)
-
     internal val headerText = MutableStateFlow<String?>(null)
-
-    /**
-     * Request to retrieve the value from the repository happens when initialize any fragment
-     * and any fragment will re-update when the result comes back.
-     * Represents what the user last selects (add or buy) on the
-     * [PaymentOptionsActivity]/[PaymentSheetActivity], and saved/restored from the preferences.
-     */
-    private val savedSelection: StateFlow<SavedSelection> =
-        savedStateHandle.getStateFlow<SavedSelection>(SAVE_SAVED_SELECTION, SavedSelection.None)
 
     private val _transition = MutableStateFlow<Event<TransitionTarget>?>(null)
     internal val transition: StateFlow<Event<TransitionTarget>?> = _transition
 
-    private val _liveMode = MutableStateFlow(savedStateHandle[SAVE_STATE_LIVE_MODE] ?: false)
-    internal val liveMode: StateFlow<Boolean> = _liveMode
-
-    internal val selection: StateFlow<PaymentSelection?> =
-        savedStateHandle.getStateFlow(SAVE_SELECTION, null)
-
     private val editing = MutableStateFlow(false)
-
-    val processing: StateFlow<Boolean> = savedStateHandle
-        .getStateFlow(SAVE_PROCESSING, false)
 
     private val _contentVisible = MutableStateFlow(true)
     internal val contentVisible: StateFlow<Boolean> = _contentVisible
@@ -355,7 +350,7 @@ internal abstract class BaseSheetViewModel(
         }
 
         if (stripeIntent != null) {
-            _liveMode.update { stripeIntent.isLiveMode }
+            savedStateHandle[SAVE_STATE_LIVE_MODE] = stripeIntent.isLiveMode
             warnUnactivatedIfNeeded(stripeIntent.unactivatedPaymentMethods)
         }
     }

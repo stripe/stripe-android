@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
@@ -608,7 +609,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewModel.transition.value?.peekContent())
             .isNull()
 
-        viewModel._isGooglePayReady.value = true
+        viewModel.savedStateHandle[BaseSheetViewModel.SAVE_GOOGLE_PAY_READY] = true
 
         idleLooper()
 

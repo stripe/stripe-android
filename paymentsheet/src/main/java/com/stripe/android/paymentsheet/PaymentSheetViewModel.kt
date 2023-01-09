@@ -184,6 +184,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         isGooglePayReady,
         isReadyEvents
     ) { isLinkEnabled, isGooglePayReady, isReadyEvents ->
+        println("Show top container: $isLinkEnabled, $isGooglePayReady, ${isReadyEvents.peekContent()}")
         (isLinkEnabled || isGooglePayReady) && isReadyEvents.peekContent()
     }.distinctUntilChanged()
 
@@ -244,6 +245,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     lifecycleScope = lifecycleScope,
                     config = config,
                     readyCallback = { isReady ->
+                        println("Show top container: google pay is $isReady")
                         savedStateHandle[SAVE_GOOGLE_PAY_READY] = isReady
                     },
                     activityResultLauncher = activityResultLauncher
@@ -369,7 +371,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun setupLink(state: LinkState) {
-        _linkConfiguration.value = state.configuration
+        savedStateHandle[LINK_CONFIGURATION] = state.configuration
 
         when (state.loginState) {
             LinkState.LoginState.LoggedIn -> {

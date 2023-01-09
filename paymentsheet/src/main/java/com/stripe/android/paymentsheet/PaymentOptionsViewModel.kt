@@ -181,7 +181,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private fun setupLink(linkState: LinkState) {
-        _linkConfiguration.value = linkState.configuration
+        savedStateHandle[LINK_CONFIGURATION] = linkState.configuration
 
         if (linkState.isReadyForUse) {
             // If account exists, select Link by default
