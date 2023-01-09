@@ -2,10 +2,14 @@ package com.stripe.android.paymentsheet.navigation
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.BasePaymentMethodsListFragment
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget.AddAnotherPaymentMethod
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget.AddFirstPaymentMethod
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget.SelectSavedPaymentMethods
 
 internal sealed interface NavigationEffect {
     data class Navigate(val target: TransitionTarget) : NavigationEffect
@@ -23,15 +27,15 @@ internal fun TransitionTarget.toNavigationEffect(host: AppCompatActivity): Navig
     val hasBackStack = host.supportFragmentManager.backStackEntryCount > 0
 
     return when (this) {
-        TransitionTarget.SelectSavedPaymentMethods -> {
+        SelectSavedPaymentMethods -> {
             if (hasBackStack) {
                 NavigationEffect.GoBack
             } else {
                 NavigationEffect.Navigate(this)
             }
         }
-        TransitionTarget.AddFirstPaymentMethod,
-        TransitionTarget.AddAnotherPaymentMethod -> {
+        AddFirstPaymentMethod,
+        AddAnotherPaymentMethod -> {
             NavigationEffect.Navigate(this)
         }
     }
@@ -42,12 +46,30 @@ internal fun canIgnoreTransition(
     target: TransitionTarget,
 ): Boolean {
     return when (target) {
-        TransitionTarget.SelectSavedPaymentMethods -> {
+        SelectSavedPaymentMethods -> {
             currentFragment is BasePaymentMethodsListFragment
         }
-        TransitionTarget.AddFirstPaymentMethod,
-        TransitionTarget.AddAnotherPaymentMethod -> {
+        AddFirstPaymentMethod,
+        AddAnotherPaymentMethod -> {
             currentFragment is BaseAddPaymentMethodFragment
+        }
+    }
+}
+
+internal fun FragmentManager.constructBackStack(): List<TransitionTarget> {
+    return when (findFragmentById(R.id.fragment_container)) {
+        is BaseAddPaymentMethodFragment -> {
+            if (backStackEntryCount > 0) {
+                listOf(SelectSavedPaymentMethods, AddAnotherPaymentMethod)
+            } else {
+                listOf(AddFirstPaymentMethod)
+            }
+        }
+        is BasePaymentMethodsListFragment -> {
+            listOf(SelectSavedPaymentMethods)
+        }
+        else -> {
+            emptyList()
         }
     }
 }

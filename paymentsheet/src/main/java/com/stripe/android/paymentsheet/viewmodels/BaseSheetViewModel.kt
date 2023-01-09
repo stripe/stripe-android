@@ -339,6 +339,12 @@ internal abstract class BaseSheetViewModel(
         transitionTo(TransitionTarget.AddAnotherPaymentMethod)
     }
 
+    fun syncBackStackIfNeeded(backStack: List<TransitionTarget>) {
+        if (_backStack.value.isEmpty()) {
+            _backStack.value = backStack
+        }
+    }
+
     internal sealed class TransitionTarget {
         object SelectSavedPaymentMethods : TransitionTarget()
         object AddAnotherPaymentMethod : TransitionTarget()

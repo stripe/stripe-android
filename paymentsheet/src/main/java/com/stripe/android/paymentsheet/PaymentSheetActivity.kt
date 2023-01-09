@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.NavigationEffect
+import com.stripe.android.paymentsheet.navigation.constructBackStack
 import com.stripe.android.paymentsheet.navigation.toNavigationEffect
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
@@ -130,6 +131,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         if (savedInstanceState == null) {
             viewModel.transitionToFirstScreenWhenReady()
+        } else {
+            val backStack = supportFragmentManager.constructBackStack()
+            viewModel.syncBackStackIfNeeded(backStack = backStack)
         }
 
         viewModel.startConfirm.observe(this) { event ->
