@@ -6,9 +6,9 @@ import dagger.Binds
 import dagger.Module
 
 @Module
-internal abstract class PaymentSheetLinkModule {
+internal interface PaymentSheetLinkModule {
     @Binds
-    abstract fun providePaymentSelectionRepository(
+    fun providePaymentSelectionRepository(
         paymentSheetViewModel: PaymentSheetViewModel
     ): PaymentSelectionRepository
 }

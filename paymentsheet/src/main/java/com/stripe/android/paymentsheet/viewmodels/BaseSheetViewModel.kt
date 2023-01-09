@@ -313,8 +313,8 @@ internal abstract class BaseSheetViewModel(
                         " (${stripeIntent.paymentMethodTypes})" +
                         " match the supported payment types" +
                         " (${
-                            lpmResourceRepository.getRepository().values()
-                                .map { it.code }.toList()
+                        lpmResourceRepository.getRepository().values()
+                            .map { it.code }.toList()
                         })"
                 )
             )

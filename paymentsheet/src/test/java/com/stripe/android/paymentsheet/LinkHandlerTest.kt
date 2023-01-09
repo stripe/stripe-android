@@ -164,7 +164,7 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `test launchLink`() : Unit = runTest {
+    fun `test launchLink`(): Unit = runTest {
         val linkLauncher = mock<LinkPaymentLauncher>()
         val eventReporter = mock<EventReporter>()
         val handler = LinkHandler(
