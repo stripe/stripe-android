@@ -57,19 +57,21 @@ internal fun canIgnoreTransition(
 }
 
 internal fun FragmentManager.constructBackStack(): List<TransitionTarget> {
-    return when (findFragmentById(R.id.fragment_container)) {
-        is BaseAddPaymentMethodFragment -> {
-            if (backStackEntryCount > 0) {
-                listOf(SelectSavedPaymentMethods, AddAnotherPaymentMethod)
-            } else {
-                listOf(AddFirstPaymentMethod)
+    return fragments.mapIndexedNotNull { index, fragment ->
+        when (fragment) {
+            is BaseAddPaymentMethodFragment -> {
+                if (index > 0) {
+                    AddAnotherPaymentMethod
+                } else {
+                    AddFirstPaymentMethod
+                }
             }
-        }
-        is BasePaymentMethodsListFragment -> {
-            listOf(SelectSavedPaymentMethods)
-        }
-        else -> {
-            emptyList()
+            is BasePaymentMethodsListFragment -> {
+                SelectSavedPaymentMethods
+            }
+            else -> {
+                null
+            }
         }
     }
 }

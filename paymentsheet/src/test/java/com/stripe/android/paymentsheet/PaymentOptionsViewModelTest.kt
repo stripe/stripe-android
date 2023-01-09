@@ -26,7 +26,6 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionT
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.utils.TestUtils.observeEventsForever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -123,15 +122,10 @@ internal class PaymentOptionsViewModelTest {
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(newPaymentSelection = null)
         )
 
-        var transitionTarget: TransitionTarget? = null
-        viewModel.transition.observeEventsForever {
-            transitionTarget = it
-        }
-
         // no customer, no new card, no paymentMethods
         viewModel.resolveTransitionTarget()
 
-        assertThat(transitionTarget).isNull()
+        assertThat(viewModel.backStack.value).isEmpty()
     }
 
     @Test
@@ -145,12 +139,9 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        val transitionTarget = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTarget.add(it) }
-
         viewModel.resolveTransitionTarget()
 
-        assertThat(transitionTarget).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
+        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
     }
 
     @Test
@@ -164,17 +155,11 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        val transitionTarget = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTarget.add(it) }
+        viewModel.resolveTransitionTarget()
+        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
 
         viewModel.resolveTransitionTarget()
-        assertThat(transitionTarget).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
-
-        // Reset the list of observed values
-        transitionTarget.clear()
-
-        viewModel.resolveTransitionTarget()
-        assertThat(transitionTarget).isEmpty()
+        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
     }
 
     @Test

@@ -21,7 +21,7 @@ import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.
 import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.Companion.lpmRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.After
 import org.junit.Before
@@ -179,7 +179,12 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     fun `posts transition when add card clicked`() {
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)
-            assertThat(activityViewModel.transition.value?.peekContent()).isNull()
+            it.initializePaymentOptions()
+            activityViewModel.transitionToFirstScreenWhenReady()
+
+            assertThat(activityViewModel.backStack.value).containsExactly(
+                TransitionTarget.SelectSavedPaymentMethods,
+            )
 
             idleLooper()
 
@@ -187,8 +192,10 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             adapter.addCardClickListener()
             idleLooper()
 
-            assertThat(activityViewModel.transition.value?.peekContent())
-                .isEqualTo(BaseSheetViewModel.TransitionTarget.AddAnotherPaymentMethod)
+            assertThat(activityViewModel.backStack.value).containsExactly(
+                TransitionTarget.SelectSavedPaymentMethods,
+                TransitionTarget.AddAnotherPaymentMethod,
+            )
         }
     }
 

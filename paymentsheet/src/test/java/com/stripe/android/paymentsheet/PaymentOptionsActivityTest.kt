@@ -263,16 +263,13 @@ internal class PaymentOptionsActivityTest {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(isGooglePayReady = true)
         val viewModel = createViewModel(args)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
         activityScenario(viewModel).launch(createIntent(args)).use {
             it.onActivity {
                 idleLooper()
             }
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
@@ -285,16 +282,13 @@ internal class PaymentOptionsActivityTest {
 
         val viewModel = createViewModel(args)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
         activityScenario(viewModel).launch(createIntent(args)).use {
             it.onActivity {
                 idleLooper()
             }
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
@@ -306,14 +300,11 @@ internal class PaymentOptionsActivityTest {
 
         val viewModel = createViewModel(args)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
         activityScenario(viewModel).launch(createIntent(args)).use {
             idleLooper()
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
@@ -325,14 +316,11 @@ internal class PaymentOptionsActivityTest {
 
         val viewModel = createViewModel(args)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
         activityScenario(viewModel).launch(createIntent(args)).use {
             idleLooper()
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
@@ -342,9 +330,6 @@ internal class PaymentOptionsActivityTest {
         )
 
         val viewModel = createViewModel(args)
-
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
 
         activityScenario(viewModel).launch(createIntent(args)).use { scenario ->
             scenario.onActivity {
@@ -358,7 +343,7 @@ internal class PaymentOptionsActivityTest {
             }
         }
 
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
