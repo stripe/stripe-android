@@ -187,6 +187,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private fun handleBackStackChanged(backStack: List<BaseSheetViewModel.TransitionTarget>) {
         val target = backStack.lastOrNull() ?: return
+
+        buttonContainer.isVisible = true
+
         val effect = target.toNavigationEffect(this) ?: return
 
         when (effect) {
@@ -249,7 +252,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        buttonContainer.isVisible = true
+//        buttonContainer.isVisible = true
     }
 
     override fun resetPrimaryButtonState() {
