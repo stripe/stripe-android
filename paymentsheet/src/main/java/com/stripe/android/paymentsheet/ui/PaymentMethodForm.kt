@@ -52,7 +52,6 @@ internal fun PaymentMethodForm(
     )
 }
 
-
 @FlowPreview
 @Composable
 internal fun PaymentMethodForm(
