@@ -4,15 +4,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.utils.IdentityIO
 
 /**
  * Fragment to upload ID.
  */
 internal class IDUploadFragment(
-    identityIO: IdentityIO,
     identityViewModelFactory: ViewModelProvider.Factory
-) : IdentityUploadFragment(identityIO, identityViewModelFactory) {
+) : IdentityUploadFragment(identityViewModelFactory) {
     override val titleRes = R.string.file_upload
     override val contextRes = R.string.file_upload_content_id
     override val frontTextRes = R.string.front_of_id
@@ -21,7 +19,6 @@ internal class IDUploadFragment(
     override var backCheckMarkContentDescription: Int? = R.string.back_of_id_selected
     override val frontScanType = IdentityScanState.ScanType.ID_FRONT
     override var backScanType: IdentityScanState.ScanType? = IdentityScanState.ScanType.ID_BACK
-    override val fragmentId = R.id.IDUploadFragment
     override val collectedDataParamType = CollectedDataParam.Type.IDCARD
-    override val route = IDUploadDestination.ROUTE.route
+    override val destinationRoute = IDUploadDestination.ROUTE
 }

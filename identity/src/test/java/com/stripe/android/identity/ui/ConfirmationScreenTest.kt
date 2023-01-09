@@ -6,13 +6,20 @@ import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.MutableLiveData
+import androidx.navigation.NavController
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentTextPage
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -25,10 +32,6 @@ class ConfirmationScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val onConfirmedMock = mock<() -> Unit>()
-    private val onError = mock<(Throwable) -> Unit>()
-    private val onComposeFinish = mock<(VerificationPage) -> Unit>()
-
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.success).thenReturn(
             VerificationPageStaticContentTextPage(
@@ -39,31 +42,36 @@ class ConfirmationScreenTest {
         )
     }
 
+    private val mockIdentityViewModel = mock<IdentityViewModel>() {
+        on { verificationPage } doReturn MutableLiveData(Resource.success(verificationPage))
+    }
+    private val mockNavController = mock<NavController>()
+    private val mockVerificationFlowFinishable = mock<VerificationFlowFinishable>()
+
     @Test
     fun verifyUIIsBoundAndButtonInteracts() {
-        testConfirmationScreen(
-            Resource.success(verificationPage)
-        ) {
+        testConfirmationScreen {
             onNodeWithTag(confirmationTitleTag).assertTextEquals(CONFIRMATION_TITLE)
             onNodeWithTag(BODY_TAG).assertTextEquals(CONFIRMATION_BODY)
             onNodeWithTag(confirmationConfirmButtonTag).assertTextEquals(
                 CONFIRMATION_BUTTON_TEXT.uppercase()
             )
             onNodeWithTag(confirmationConfirmButtonTag).performClick()
-            verify(onConfirmedMock).invoke()
+            verify(mockIdentityViewModel).sendSucceededAnalyticsRequestForNative()
+            verify(mockVerificationFlowFinishable).finishWithResult(
+                eq(IdentityVerificationSheet.VerificationFlowResult.Completed)
+            )
         }
     }
 
     private fun testConfirmationScreen(
-        verificationState: Resource<VerificationPage>,
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
         composeTestRule.setContent {
             ConfirmationScreen(
-                verificationPageState = verificationState,
-                onError = onError,
-                onComposeFinish = onComposeFinish,
-                onConfirmed = onConfirmedMock
+                mockNavController,
+                mockIdentityViewModel,
+                mockVerificationFlowFinishable
             )
         }
         with(composeTestRule, testBlock)

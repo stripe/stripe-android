@@ -14,11 +14,14 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -26,29 +29,57 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.android.material.composethemeadapter.MdcTheme
+import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.R
-import com.stripe.android.identity.navigation.DocSelectionFragment.Companion.SELECTION_NONE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_SELECT
+import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam.Type
-import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 internal const val docSelectionTitleTag = "Title"
 internal const val singleSelectionTag = "SingleSelection"
 
+internal const val PASSPORT_KEY = "passport"
+internal const val DRIVING_LICENSE_KEY = "driving_license"
+internal const val ID_CARD_KEY = "id_card"
+internal const val SELECTION_NONE = ""
+
 @Composable
 internal fun DocSelectionScreen(
-    verificationPageState: Resource<VerificationPage>,
-    onError: (Throwable) -> Unit,
-    onComposeFinish: (VerificationPage) -> Unit,
-    onDocTypeSelected: (Type) -> Unit
+    navController: NavController,
+    identityViewModel: IdentityViewModel,
+    cameraPermissionEnsureable: CameraPermissionEnsureable
 ) {
     MdcTheme {
+        val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
+        val context = LocalContext.current
+        val viewLifecycleOwner = LocalLifecycleOwner.current
         CheckVerificationPageAndCompose(
             verificationPageResource = verificationPageState,
-            onError = onError
+            onError = {
+                identityViewModel.errorCause.postValue(it)
+                navController.navigateToErrorScreenWithDefaultValues(context)
+            }
         ) {
             val documentSelect = remember { it.documentSelect }
+
+            ScreenTransitionLaunchedEffect(
+                identityViewModel = identityViewModel,
+                screenName = SCREEN_NAME_DOC_SELECT
+            )
+
+            val onDocTypeSelected = { type: Type ->
+                identityViewModel.postVerificationPageDataForDocSelection(
+                    type = type,
+                    navController = navController,
+                    viewLifecycleOwner = viewLifecycleOwner,
+                    cameraPermissionEnsureable = cameraPermissionEnsureable
+                )
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -85,7 +116,6 @@ internal fun DocSelectionScreen(
                     )
                 }
             }
-            onComposeFinish(it)
         }
     }
 }

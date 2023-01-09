@@ -1,5 +1,7 @@
 package com.stripe.android.identity.networking.models
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -7,6 +9,7 @@ import kotlinx.serialization.Serializable
  * A VerificationPage contains the static content and initial state that is required for Stripe Identity's native mobile SDKs to render the verification flow.
  */
 @Serializable
+@Parcelize
 internal data class VerificationPage(
     @SerialName("biometric_consent")
     val biometricConsent: VerificationPageStaticContentConsentPage,
@@ -43,7 +46,7 @@ internal data class VerificationPage(
     val unsupportedClient: Boolean,
     @SerialName("welcome")
     val welcome: VerificationPageStaticContentTextPage? = null
-) {
+) : Parcelable {
     @Serializable
     internal enum class Status {
         @SerialName("canceled")

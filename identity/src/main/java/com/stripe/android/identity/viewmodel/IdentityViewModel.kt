@@ -4,6 +4,8 @@ import android.app.Application
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LifecycleOwner
@@ -17,6 +19,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.navigation.NavController
+import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
@@ -33,9 +36,16 @@ import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
+import com.stripe.android.identity.navigation.CameraPermissionDeniedDestination
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.DocSelectionDestination
+import com.stripe.android.identity.navigation.DriverLicenseScanDestination
+import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
+import com.stripe.android.identity.navigation.IDScanDestination
+import com.stripe.android.identity.navigation.IDUploadDestination
+import com.stripe.android.identity.navigation.PassportScanDestination
+import com.stripe.android.identity.navigation.PassportUploadDestination
 import com.stripe.android.identity.navigation.SelfieDestination
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
@@ -54,6 +64,7 @@ import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.clearData
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.collectedRequirements
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.mergeWith
+import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -70,6 +81,7 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.IdentityIO
+import com.stripe.android.identity.utils.IdentityImageHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -93,6 +105,7 @@ internal class IdentityViewModel constructor(
     internal val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     internal val fpsTracker: FPSTracker,
     internal val screenTracker: ScreenTracker,
+    internal val imageHandler: IdentityImageHandler,
     private val savedStateHandle: SavedStateHandle,
     @UIContext internal val uiContext: CoroutineContext,
     @IOContext internal val workContext: CoroutineContext
@@ -220,7 +233,13 @@ internal class IdentityViewModel constructor(
      * Response for initial VerificationPage, used for building UI.
      */
     @VisibleForTesting
-    internal val _verificationPage = MutableLiveData<Resource<VerificationPage>>()
+    internal val _verificationPage: MutableLiveData<Resource<VerificationPage>> =
+        // No need to write to savedStateHandle for livedata
+        savedStateHandle.getLiveData(
+            key = VERIFICATION_PAGE,
+            initialValue = Resource.idle()
+        )
+
     val verificationPage: LiveData<Resource<VerificationPage>> = _verificationPage
 
     /**
@@ -1045,6 +1064,21 @@ internal class IdentityViewModel constructor(
         }
     }
 
+    fun trackScreenPresented(scanType: IdentityScanState.ScanType?, screenName: String) {
+        sendAnalyticsRequest(
+            identityAnalyticsRequestFactory.screenPresented(
+                scanType = scanType,
+                screenName = screenName
+            )
+        )
+    }
+
+    fun trackScreenTransitionFinish(screenName: String) {
+        viewModelScope.launch(workContext) {
+            screenTracker.screenTransitionFinish(screenName)
+        }
+    }
+
     /**
      * Send VerificationSucceeded analytics event with isFromFallbackUrl = false
      * based on values in [analyticsState].
@@ -1096,6 +1130,398 @@ internal class IdentityViewModel constructor(
             verificationPageSubmit.value.status == Status.LOADING
     }
 
+    fun updateNewScanType(scanType: IdentityScanState.ScanType) {
+        updateAnalyticsState { oldState ->
+            when (scanType) {
+                IdentityScanState.ScanType.ID_FRONT -> {
+                    oldState.copy(
+                        docFrontRetryTimes =
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
+                    )
+                }
+                IdentityScanState.ScanType.ID_BACK -> {
+                    oldState.copy(
+                        docBackRetryTimes =
+                        oldState.docBackRetryTimes?.let { it + 1 } ?: 1
+                    )
+                }
+                IdentityScanState.ScanType.DL_FRONT -> {
+                    oldState.copy(
+                        docFrontRetryTimes =
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
+                    )
+                }
+                IdentityScanState.ScanType.DL_BACK -> {
+                    oldState.copy(
+                        docBackRetryTimes =
+                        oldState.docBackRetryTimes?.let { it + 1 } ?: 1
+                    )
+                }
+                IdentityScanState.ScanType.PASSPORT -> {
+                    oldState.copy(
+                        docFrontRetryTimes =
+                        oldState.docFrontRetryTimes?.let { it + 1 } ?: 1
+                    )
+                }
+                IdentityScanState.ScanType.SELFIE -> {
+                    oldState.copy(
+                        selfieRetryTimes =
+                        oldState.selfieRetryTimes?.let { it + 1 } ?: 1
+                    )
+                }
+            }
+        }
+    }
+
+    fun postVerificationPageDataForDocSelection(
+        type: CollectedDataParam.Type,
+        navController: NavController,
+        viewLifecycleOwner: LifecycleOwner,
+        cameraPermissionEnsureable: CameraPermissionEnsureable
+    ) {
+        postVerificationPageDataAndMaybeNavigate(
+            navController,
+            CollectedDataParam(idDocumentType = type),
+            fromRoute = DocSelectionDestination.ROUTE.route,
+            onMissingFront = {
+                cameraPermissionEnsureable.ensureCameraPermission(
+                    onCameraReady = {
+                        sendAnalyticsRequest(
+                            identityAnalyticsRequestFactory.cameraPermissionGranted(
+                                type.toAnalyticsScanType()
+                            )
+                        )
+                        idDetectorModelFile.observe(viewLifecycleOwner) { modelResource ->
+                            when (modelResource.status) {
+                                // model ready, camera permission is granted -> navigate to scan
+                                Status.SUCCESS -> {
+                                    navController.navigateTo(type.toScanDestination())
+                                }
+                                // model not ready, camera permission is granted -> navigate to manual capture
+                                Status.ERROR -> {
+                                    requireVerificationPage(
+                                        viewLifecycleOwner,
+                                        navController
+                                    ) { verificationPage ->
+                                        if (verificationPage.documentCapture.requireLiveCapture) {
+                                            errorCause.postValue(
+                                                IllegalStateException(
+                                                    "Can't access camera and client has " +
+                                                        "required live capture."
+                                                )
+                                            )
+                                            navController.navigateToErrorScreenWithDefaultValues(
+                                                getApplication(),
+                                            )
+                                        } else {
+                                            navController.navigateTo(
+                                                type.toUploadDestination(
+                                                    shouldShowTakePhoto = true,
+                                                    shouldShowChoosePhoto = true
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                                Status.LOADING -> {} // no-op
+                                Status.IDLE -> {} // no-op
+                            }
+                        }
+                    },
+                    onUserDeniedCameraPermission = {
+                        sendAnalyticsRequest(
+                            identityAnalyticsRequestFactory.cameraPermissionDenied(
+                                type.toAnalyticsScanType()
+                            )
+                        )
+                        requireVerificationPage(
+                            viewLifecycleOwner,
+                            navController
+                        ) { verificationPage ->
+                            navController.navigateTo(
+                                CameraPermissionDeniedDestination(
+                                    if (verificationPage.documentCapture.requireLiveCapture) {
+                                        null
+                                    } else {
+                                        type
+                                    }
+                                )
+                            )
+                        }
+                    }
+                )
+            }
+        )
+    }
+
+    /**
+     * Check the upload status of the document, post it with VerificationPageData, and decide
+     * next step based on result.
+     *
+     * If result is missing back, then start scanning back of the document,
+     * else if result is missing selfie, then start scanning selfie,
+     * Otherwise submit
+     */
+    fun collectDataForDocumentScanScreen(
+        navController: NavController,
+        lifecycleOwner: LifecycleOwner,
+        isFront: Boolean,
+        collectedDataParamType: CollectedDataParam.Type,
+        route: String,
+        onMissingBack: () -> Unit
+    ) {
+        viewModelScope.launch {
+            if (isFront) {
+                documentFrontUploadedState
+            } else {
+                documentBackUploadedState
+            }.collectLatest { uploadedState ->
+                if (uploadedState.hasError()) {
+                    errorCause.postValue(uploadedState.getError())
+                    navController.navigateToErrorScreenWithDefaultValues(
+                        getApplication()
+                    )
+                } else if (uploadedState.isUploaded()) {
+                    requireVerificationPage(
+                        lifecycleOwner,
+                        navController
+                    ) {
+                        postVerificationPageDataAndMaybeNavigate(
+                            navController = navController,
+                            collectedDataParam = if (isFront) {
+                                CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
+                                    type = collectedDataParamType,
+                                    frontHighResResult = requireNotNull(uploadedState.highResResult.data),
+                                    frontLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                                )
+                            } else {
+                                CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
+                                    type = collectedDataParamType,
+                                    backHighResResult = requireNotNull(uploadedState.highResResult.data),
+                                    backLowResResult = requireNotNull(uploadedState.lowResResult.data)
+                                )
+                            },
+                            fromRoute = route,
+                            onMissingBack = onMissingBack,
+                            onReadyToSubmit = {
+                                submitAndNavigate(
+                                    navController = navController,
+                                    fromRoute = route
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Collect the last status of both sids of document upload and post.
+     * Only post when that side is not yet collected.
+     */
+    fun collectDataForDocumentUploadScreen(
+        navController: NavController,
+        collectedDataParamType: CollectedDataParam.Type,
+        route: String
+    ) {
+        viewModelScope.launch {
+            frontCollectedInfo.collectLatest { (frontUploadState, collectedData) ->
+                if (collectedData.idDocumentFront == null) {
+                    if (frontUploadState.hasError()) {
+                        errorCause.postValue(frontUploadState.getError())
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                    } else if (frontUploadState.isHighResUploaded()) {
+                        val front = requireNotNull(frontUploadState.highResResult.data)
+                        postVerificationPageData(
+                            navController = navController,
+                            collectedDataParam = CollectedDataParam(
+                                idDocumentFront = DocumentUploadParam(
+                                    highResImage = requireNotNull(front.uploadedStripeFile.id) {
+                                        "front uploaded file id is null"
+                                    },
+                                    uploadMethod = requireNotNull(front.uploadMethod)
+                                ),
+                                idDocumentType = collectedDataParamType
+                            ),
+                            fromRoute = route
+                        )
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            backCollectedInfo.collectLatest { (backUploadedState, collectedData) ->
+                if (collectedData.idDocumentBack == null) {
+                    if (backUploadedState.hasError()) {
+                        errorCause.postValue(backUploadedState.getError())
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                    } else if (backUploadedState.isHighResUploaded()) {
+                        val back = requireNotNull(backUploadedState.highResResult.data)
+                        postVerificationPageData(
+                            navController = navController,
+                            collectedDataParam = CollectedDataParam(
+                                idDocumentBack = DocumentUploadParam(
+                                    highResImage = requireNotNull(back.uploadedStripeFile.id) {
+                                        "back uploaded file id is null"
+                                    },
+                                    uploadMethod = requireNotNull(back.uploadMethod)
+                                ),
+                                idDocumentType = collectedDataParamType
+                            ),
+                            fromRoute = route
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Check the upload status of the [selfieUploadState], post it with VerificationPageData and
+     * navigate accordingly.
+     */
+    fun collectDataForSelfieScreen(
+        navController: NavController,
+        faceDetectorTransitioner: FaceDetectorTransitioner,
+        allowImageCollection: Boolean
+    ) {
+        viewModelScope.launch {
+            selfieUploadState.collectLatest {
+                when {
+                    it.isIdle() -> {} // no-op
+                    it.isAnyLoading() -> {} // no-op
+                    it.hasError() -> {
+                        errorCause.postValue(it.getError())
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                    }
+                    it.isAllUploaded() -> {
+                        runCatching {
+                            postVerificationPageDataAndMaybeNavigate(
+                                navController = navController,
+                                collectedDataParam = CollectedDataParam.createForSelfie(
+                                    firstHighResResult = requireNotNull(it.firstHighResResult.data),
+                                    firstLowResResult = requireNotNull(it.firstLowResResult.data),
+                                    lastHighResResult = requireNotNull(it.lastHighResResult.data),
+                                    lastLowResResult = requireNotNull(it.lastLowResResult.data),
+                                    bestHighResResult = requireNotNull(it.bestHighResResult.data),
+                                    bestLowResResult = requireNotNull(it.bestLowResResult.data),
+                                    trainingConsent = allowImageCollection,
+                                    faceScoreVariance = faceDetectorTransitioner.scoreVariance,
+                                    bestFaceScore = faceDetectorTransitioner.bestFaceScore,
+                                    numFrames = faceDetectorTransitioner.numFrames
+                                ),
+                                fromRoute = SelfieDestination.ROUTE.route
+                            ) {
+                                submitAndNavigate(
+                                    navController = navController,
+                                    fromRoute = SelfieDestination.ROUTE.route
+                                )
+                            }
+                        }.onFailure { throwable ->
+                            errorCause.postValue(throwable)
+                            navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                        }
+                    }
+                    else -> {
+                        errorCause.postValue(
+                            IllegalStateException(
+                                "collectSelfieUploadedStateAndPost " +
+                                    "reaches unexpected upload state: $it"
+                            )
+                        )
+                        navController.navigateToErrorScreenWithDefaultValues(getApplication())
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Registers for the [ActivityResultLauncher]s to take photo or pick image, should be called
+     * during initialization of an Activity or Fragment.
+     */
+    fun registerActivityResultCaller(
+        activityResultCaller: ActivityResultCaller
+    ) {
+        imageHandler.registerActivityResultCaller(
+            activityResultCaller,
+            savedStateHandle,
+            onFrontPhotoTaken = { uri, scanType ->
+                uploadManualResult(
+                    uri = uri,
+                    isFront = true,
+                    docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
+                    uploadMethod = UploadMethod.MANUALCAPTURE,
+                    scanType = requireNotNull(scanType)
+                )
+            },
+            onBackPhotoTaken = { uri, scanType ->
+                uploadManualResult(
+                    uri = uri,
+                    isFront = false,
+                    docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
+                    uploadMethod = UploadMethod.MANUALCAPTURE,
+                    scanType = requireNotNull(scanType)
+                )
+            },
+            onFrontImageChosen = { uri, scanType ->
+                uploadManualResult(
+                    uri = uri,
+                    isFront = true,
+                    docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
+                    uploadMethod = UploadMethod.FILEUPLOAD,
+                    scanType = requireNotNull(scanType)
+                )
+            },
+            onBackImageChosen = { uri, scanType ->
+                uploadManualResult(
+                    uri = uri,
+                    isFront = false,
+                    docCapturePage = requireNotNull(verificationPage.value?.data).documentCapture,
+                    uploadMethod = UploadMethod.FILEUPLOAD,
+                    scanType = requireNotNull(scanType)
+                )
+            }
+        )
+    }
+
+    private fun CollectedDataParam.Type.toScanDestination() =
+        when (this) {
+            CollectedDataParam.Type.IDCARD -> IDScanDestination()
+            CollectedDataParam.Type.PASSPORT -> PassportScanDestination()
+            CollectedDataParam.Type.DRIVINGLICENSE -> DriverLicenseScanDestination()
+        }
+
+    private fun CollectedDataParam.Type.toUploadDestination(
+        shouldShowTakePhoto: Boolean,
+        shouldShowChoosePhoto: Boolean
+    ) =
+        when (this) {
+            CollectedDataParam.Type.IDCARD ->
+                IDUploadDestination(
+                    shouldShowTakePhoto,
+                    shouldShowChoosePhoto
+                )
+            CollectedDataParam.Type.PASSPORT ->
+                PassportUploadDestination(
+                    shouldShowTakePhoto,
+                    shouldShowChoosePhoto
+                )
+            CollectedDataParam.Type.DRIVINGLICENSE ->
+                DriverLicenseUploadDestination(
+                    shouldShowTakePhoto,
+                    shouldShowChoosePhoto
+                )
+        }
+
+    private fun CollectedDataParam.Type.toAnalyticsScanType() = when (this) {
+        CollectedDataParam.Type.DRIVINGLICENSE -> IdentityScanState.ScanType.DL_FRONT
+        CollectedDataParam.Type.IDCARD -> IdentityScanState.ScanType.ID_FRONT
+        CollectedDataParam.Type.PASSPORT -> IdentityScanState.ScanType.PASSPORT
+    }
+
     private fun <State> MutableStateFlow<State>.updateStateAndSave(function: (State) -> State) {
         this.update(function)
         savedStateHandle[
@@ -1136,6 +1562,7 @@ internal class IdentityViewModel constructor(
                 subcomponent.identityAnalyticsRequestFactory,
                 subcomponent.fpsTracker,
                 subcomponent.screenTracker,
+                subcomponent.identityImageHandler,
                 savedStateHandle,
                 uiContextSupplier(),
                 workContextSupplier()
@@ -1154,6 +1581,7 @@ internal class IdentityViewModel constructor(
         private const val ANALYTICS_STATE = "analytics_upload_state"
         private const val COLLECTED_DATA = "collected_data"
         private const val MISSING_REQUIREMENTS = "missing_requirements"
+        private const val VERIFICATION_PAGE = "verification_page"
         private const val VERIFICATION_PAGE_DATA = "verification_page_data"
         private const val VERIFICATION_PAGE_SUBMIT = "verification_page_submit"
     }

@@ -2,36 +2,32 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>ComplexMethod:CameraScreenLaunchedEffect.kt$@Composable internal fun CameraScreenLaunchedEffect( identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, verificationPage: VerificationPage, navController: NavController, cameraManager: IdentityCameraManager, onCameraReady: () -> Unit )</ID>
+    <ID>ComplexMethod:DocumenetScanScreen.kt$@Composable internal fun DocumentScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, frontScanType: IdentityScanState.ScanType, backScanType: IdentityScanState.ScanType?, shouldStartFromBack: Boolean, messageRes: DocumentScanMessageRes, collectedDataParamType: CollectedDataParam.Type, route: String )</ID>
     <ID>ComplexMethod:ErrorFragment.kt$ErrorFragment$private fun String.toFragmentId(): Int</ID>
-    <ID>ComplexMethod:IdentityCameraScanFragment.kt$IdentityCameraScanFragment$internal fun startScanning(scanType: IdentityScanState.ScanType)</ID>
-    <ID>ComplexMethod:IdentityCameraScanFragment.kt$IdentityCameraScanFragment$override fun onViewCreated(view: View, savedInstanceState: Bundle?)</ID>
-    <ID>ComplexMethod:IdentityDocumentScanFragment.kt$IdentityDocumentScanFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? )</ID>
     <ID>ComplexMethod:IdentityFragmentFactory.kt$IdentityFragmentFactory$override fun instantiate(classLoader: ClassLoader, className: String): Fragment</ID>
+    <ID>ComplexMethod:IdentityViewModel.kt$IdentityViewModel$fun updateNewScanType(scanType: IdentityScanState.ScanType)</ID>
     <ID>ComplexMethod:NavigationDestinations.kt$internal fun String.routeToScreenName(): String</ID>
     <ID>ComplexMethod:NavigationUtils.kt$internal fun Int.fragmentIdToScreenName(): String</ID>
-    <ID>ComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( identityViewModel: IdentityViewModel, title: String, context: String, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, onComposeFinish: () -> Unit, onContinueClicked: () -> Unit )</ID>
-    <ID>EmptyFunctionBlock:IdentityCameraScanFragmentTest.kt$IdentityCameraScanFragmentTest.TestFragment${}</ID>
+    <ID>ComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, shouldShowTakePhoto: Boolean, shouldShowChoosePhoto: Boolean )</ID>
     <ID>FunctionOnlyReturningConstant:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$private fun isFaceFocused(): Boolean</ID>
     <ID>LargeClass:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
     <ID>LargeClass:IdentityViewModelTest.kt$IdentityViewModelTest</ID>
-    <ID>LongMethod:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( verificationPageState: Resource&lt;VerificationPage>, onError: (Throwable) -> Unit, onComposeFinish: (VerificationPage) -> Unit, onConfirmed: () -> Unit )</ID>
+    <ID>LongMethod:CameraScreenLaunchedEffect.kt$@Composable internal fun CameraScreenLaunchedEffect( identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, verificationPage: VerificationPage, navController: NavController, cameraManager: IdentityCameraManager, onCameraReady: () -> Unit )</ID>
+    <ID>LongMethod:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( navController: NavController, identityViewModel: IdentityViewModel, verificationFlowFinishable: VerificationFlowFinishable )</ID>
     <ID>LongMethod:ConsentScreen.kt$@Composable private fun SuccessUI( merchantLogoUri: Uri, verificationPage: VerificationPage, onConsentAgreed: () -> Unit, onConsentDeclined: () -> Unit )</ID>
-    <ID>LongMethod:DocSelectionFragment.kt$DocSelectionFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? )</ID>
-    <ID>LongMethod:DocumenetScanScreen.kt$@Composable internal fun DocumentScanScreen( title: String, message: String, newDisplayState: IdentityScanState?, onCameraViewCreated: (CameraView) -> Unit, onContinueClicked: () -> Unit )</ID>
+    <ID>LongMethod:DocSelectionScreen.kt$@Composable internal fun DocSelectionScreen( navController: NavController, identityViewModel: IdentityViewModel, cameraPermissionEnsureable: CameraPermissionEnsureable )</ID>
+    <ID>LongMethod:DocumenetScanScreen.kt$@Composable internal fun DocumentScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, frontScanType: IdentityScanState.ScanType, backScanType: IdentityScanState.ScanType?, shouldStartFromBack: Boolean, messageRes: DocumentScanMessageRes, collectedDataParamType: CollectedDataParam.Type, route: String )</ID>
     <ID>LongMethod:ErrorScreen.kt$@Composable internal fun ErrorScreen( title: String, modifier: Modifier = Modifier, message1: String? = null, message2: String? = null, topButton: ErrorScreenButton? = null, bottomButton: ErrorScreenButton? = null, )</ID>
     <ID>LongMethod:IDDetectorAnalyzer.kt$IDDetectorAnalyzer$override suspend fun analyze( data: AnalyzerInput, state: IdentityScanState ): AnalyzerOutput</ID>
     <ID>LongMethod:IdentityActivity.kt$IdentityActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
-    <ID>LongMethod:IdentityCameraScanFragment.kt$IdentityCameraScanFragment$override fun onViewCreated(view: View, savedInstanceState: Bundle?)</ID>
-    <ID>LongMethod:IdentityDocumentScanFragment.kt$IdentityDocumentScanFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? )</ID>
-    <ID>LongMethod:IdentityDocumentScanFragmentTest.kt$IdentityDocumentScanFragmentTest$@Test fun `front scanned and uploaded - invokes postVerificationPageDataAndMaybeNavigate`()</ID>
-    <ID>LongMethod:IdentityDocumentScanFragmentTest.kt$IdentityDocumentScanFragmentTest$@Test fun `front scanned and uploaded - response is missing back - back scanned and uploaded - invokes postVerificationPageDataAndMaybeNavigate`()</ID>
-    <ID>LongMethod:IdentityUploadFragment.kt$IdentityUploadFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? )</ID>
+    <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$fun postVerificationPageDataForDocSelection( type: CollectedDataParam.Type, navController: NavController, viewLifecycleOwner: LifecycleOwner, cameraPermissionEnsureable: CameraPermissionEnsureable )</ID>
     <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$internal fun uploadScanResult( result: IdentityAggregator.FinalResult, verificationPage: VerificationPage, targetScanType: IdentityScanState.ScanType? )</ID>
     <ID>LongMethod:IdentityViewModel.kt$IdentityViewModel$private fun uploadDocumentImagesAndNotify( imageFile: File, filePurpose: StripeFilePurpose, uploadMethod: UploadMethod, scores: List&lt;Float>? = null, isHighRes: Boolean, isFront: Boolean, scanType: IdentityScanState.ScanType, compressionQuality: Float )</ID>
     <ID>LongMethod:IdentityViewModelTest.kt$IdentityViewModelTest$private fun testUploadDocumentScanSuccessResult(isFront: Boolean)</ID>
     <ID>LongMethod:IdentityViewModelTest.kt$IdentityViewModelTest$private fun testUploadSelfieScanSuccessResult( selfie: FaceDetectorTransitioner.Selfie, isHighRes: Boolean )</ID>
-    <ID>LongMethod:SelfieScreen.kt$@Composable internal fun SelfieScanScreen( title: String, message: String, verificationPageState: Resource&lt;VerificationPage>, onError: (Throwable) -> Unit, newDisplayState: IdentityScanState?, onCameraViewCreated: (CameraView) -> Unit, onContinueClicked: (Boolean) -> Unit )</ID>
-    <ID>LongMethod:UploadScreen.kt$@Composable internal fun UploadScreen( identityViewModel: IdentityViewModel, title: String, context: String, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, onComposeFinish: () -> Unit, onContinueClicked: () -> Unit )</ID>
+    <ID>LongMethod:SelfieScreen.kt$@Composable internal fun SelfieScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, )</ID>
+    <ID>LongMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, shouldShowTakePhoto: Boolean, shouldShowChoosePhoto: Boolean )</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$100</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt$DefaultIdentityIO$5</ID>
     <ID>MagicNumber:FaceDetectorAnalyzer.kt$FaceDetectorAnalyzer$3</ID>
@@ -39,7 +35,6 @@
     <ID>MagicNumber:RoundToMaxDecimals.kt$10</ID>
     <ID>MatchingDeclarationName:ComposeLoadingButton.kt$LoadingButtonState</ID>
     <ID>MaxLineLength:DefaultIdentityRepositoryTest.kt$DefaultIdentityRepositoryTest$fun</ID>
-    <ID>MaxLineLength:DocSelectionFragmentTest.kt$DocSelectionFragmentTest$fun</ID>
     <ID>MaxLineLength:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$return</ID>
     <ID>MaxLineLength:IDDetectorTransitioner.kt$IDDetectorTransitioner$"Scan for ${unsatisfiedState.type} Unsatisfied with reason ${unsatisfiedState.reason}, transition to Initial."</ID>
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$fun</ID>
@@ -48,9 +43,6 @@
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION + 1).milliseconds)</ID>
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION - 1).milliseconds)</ID>
     <ID>MaxLineLength:IdentityActivityTest.kt$IdentityActivityTest$(IdentityActivity, Toolbar, ImageButton, NavController, InjectableActivityScenario&lt;IdentityActivity>) -> Unit</ID>
-    <ID>MaxLineLength:IdentityDocumentScanFragmentTest.kt$IdentityDocumentScanFragmentTest$(params[IdentityAnalyticsRequestFactory.PARAM_EVENT_META_DATA] as Map&lt;*, *>)[IdentityAnalyticsRequestFactory.PARAM_SCAN_TYPE] == IdentityAnalyticsRequestFactory.ID</ID>
-    <ID>MaxLineLength:IdentityDocumentScanFragmentTest.kt$IdentityDocumentScanFragmentTest$(params[IdentityAnalyticsRequestFactory.PARAM_EVENT_META_DATA] as Map&lt;*, *>)[IdentityAnalyticsRequestFactory.PARAM_SCREEN_NAME] == IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_ID</ID>
-    <ID>MaxLineLength:IdentityDocumentScanFragmentTest.kt$IdentityDocumentScanFragmentTest$fun</ID>
     <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$body</ID>
     <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$face_detector_url</ID>
     <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$fallback_url</ID>
@@ -58,7 +50,6 @@
     <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$privacy_policy</ID>
     <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$training_consent_text</ID>
     <ID>MaxLineLength:IdentityScanFlow.kt$IdentityScanFlow$private val aggregateResultListener: AggregateResultListener&lt;IdentityAggregator.InterimResult, IdentityAggregator.FinalResult></ID>
-    <ID>MaxLineLength:IdentityUploadFragmentTest.kt$IdentityUploadFragmentTest$(params[PARAM_EVENT_META_DATA] as Map&lt;*, *>)[PARAM_SCAN_TYPE] == ID</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$?:</ID>
     <ID>MaxLineLength:VerificationPage.kt$VerificationPage$* A VerificationPage contains the static content and initial state that is required for Stripe Identity's native mobile SDKs to render the verification flow.</ID>
     <ID>MaxLineLength:VerificationPageData.kt$VerificationPageData$* VerificationPageData contains the state of a verification, including what information needs to be collected to complete the verification flow.</ID>
@@ -76,6 +67,6 @@
     <ID>UnusedPrivateMember:CameraPermissionDeniedFragmentTest.kt$CameraPermissionDeniedFragmentTest$@StringRes expectedTitleSuffix: Int = 0</ID>
     <ID>UnusedPrivateMember:CouldNotCaptureFragmentTest.kt$CouldNotCaptureFragmentTest$testBlock: (Button, Button, TestNavHostController) -> Unit</ID>
     <ID>UnusedPrivateMember:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$i</ID>
-    <ID>VariableNaming:IdentityViewModel.kt$IdentityViewModel$/** * Response for initial VerificationPage, used for building UI. */ @VisibleForTesting internal val _verificationPage = MutableLiveData&lt;Resource&lt;VerificationPage>>()</ID>
+    <ID>VariableNaming:IdentityViewModel.kt$IdentityViewModel$/** * Response for initial VerificationPage, used for building UI. */ @VisibleForTesting internal val _verificationPage: MutableLiveData&lt;Resource&lt;VerificationPage>> = // No need to write to savedStateHandle for livedata savedStateHandle.getLiveData( key = VERIFICATION_PAGE, initialValue = Resource.idle() )</ID>
   </CurrentIssues>
 </SmellBaseline>
