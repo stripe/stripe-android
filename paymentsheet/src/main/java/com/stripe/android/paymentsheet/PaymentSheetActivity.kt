@@ -25,11 +25,12 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.navigation.NavigationEffect
+import com.stripe.android.paymentsheet.navigation.toNavigationEffect
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.observeEvents
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.AnimationConstants
@@ -123,8 +124,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             linkPaymentLauncher = viewModel.linkLauncher
         }
 
-        viewModel.transition.observeEvents(this) { transitionTarget ->
-            onTransitionTarget(transitionTarget)
+        lifecycleScope.launch {
+            viewModel.backStack.collect(this@PaymentSheetActivity::handleBackStackChanged)
         }
 
         if (savedInstanceState == null) {
@@ -178,6 +179,20 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         earlyExitDueToIllegalState = result.isFailure
         return result
+    }
+
+    private fun handleBackStackChanged(backStack: List<BaseSheetViewModel.TransitionTarget>) {
+        val target = backStack.lastOrNull() ?: return
+        val effect = target.toNavigationEffect(this) ?: return
+
+        when (effect) {
+            is NavigationEffect.Navigate -> {
+                onTransitionTarget(target)
+            }
+            is NavigationEffect.GoBack -> {
+                supportFragmentManager.popBackStack()
+            }
+        }
     }
 
     private fun onTransitionTarget(

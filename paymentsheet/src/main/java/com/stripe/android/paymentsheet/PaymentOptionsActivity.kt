@@ -17,14 +17,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
+import com.stripe.android.paymentsheet.navigation.NavigationEffect
+import com.stripe.android.paymentsheet.navigation.toNavigationEffect
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.observeEvents
 import com.stripe.android.utils.AnimationConstants
+import kotlinx.coroutines.launch
 
 /**
  * An `Activity` for selecting a payment option.
@@ -89,8 +92,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        viewModel.transition.observeEvents(this) { transitionTarget ->
-            onTransitionTarget(transitionTarget)
+        lifecycleScope.launch {
+            viewModel.backStack.collect(this@PaymentOptionsActivity::handleBackStackChanged)
         }
 
         if (savedInstanceState == null) {
@@ -133,6 +136,20 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         viewBinding.continueButton.setOnClickListener {
             viewModel.onUserSelection()
+        }
+    }
+
+    private fun handleBackStackChanged(backStack: List<BaseSheetViewModel.TransitionTarget>) {
+        val target = backStack.lastOrNull() ?: return
+        val effect = target.toNavigationEffect(this) ?: return
+
+        when (effect) {
+            is NavigationEffect.Navigate -> {
+                onTransitionTarget(target)
+            }
+            is NavigationEffect.GoBack -> {
+                supportFragmentManager.popBackStack()
+            }
         }
     }
 

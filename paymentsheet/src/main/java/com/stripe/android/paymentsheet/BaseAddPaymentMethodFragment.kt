@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -82,6 +83,11 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
     ) {
         val isRepositoryReady by sheetViewModel.isResourceRepositoryReady.observeAsState()
         val processing by sheetViewModel.processing.observeAsState(false)
+
+        // TODO: Comment
+        BackHandler(enabled = !processing) {
+            sheetViewModel.handleBackPressed()
+        }
 
         val linkConfig by sheetViewModel.linkConfiguration.observeAsState()
         val linkAccountStatus by linkConfig?.let {
