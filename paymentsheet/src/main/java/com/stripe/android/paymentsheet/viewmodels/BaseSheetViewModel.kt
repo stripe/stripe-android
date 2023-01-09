@@ -51,6 +51,7 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
@@ -176,8 +177,8 @@ internal abstract class BaseSheetViewModel(
     private val _primaryButtonState = MutableLiveData<PrimaryButton.State>()
     val primaryButtonState: LiveData<PrimaryButton.State> = _primaryButtonState
 
-    private val _notesText = MutableLiveData<String?>()
-    internal val notesText: LiveData<String?> = _notesText
+    private val _notesText = MutableStateFlow<String?>(null)
+    internal val notesText: StateFlow<String?> = _notesText
 
     private val _showLinkVerificationDialog = MutableLiveData(false)
     val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog

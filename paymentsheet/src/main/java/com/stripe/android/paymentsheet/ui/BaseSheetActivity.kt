@@ -36,6 +36,7 @@ import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
@@ -288,7 +289,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract fun resetPrimaryButtonState()
 
     private fun setupNotes() {
-        viewModel.notesText.observe(this) { text ->
+        viewModel.notesText.launchAndCollectIn(this) { text ->
             val showNotes = text != null
             text?.let {
                 notesView.setContent {
