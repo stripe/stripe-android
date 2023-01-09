@@ -545,15 +545,13 @@ internal class PaymentSheetViewModelTest {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(selection)
 
-        var stripeIntent: StripeIntent? = null
         viewModel.stripeIntent.test {
-            stripeIntent = awaitItem()
+            viewModel.onPaymentResult(PaymentResult.Failed(Throwable()))
+            verify(eventReporter).onPaymentFailure(selection)
+
+            val stripeIntent = awaitItem()
+            assertThat(stripeIntent).isNull()
         }
-
-        viewModel.onPaymentResult(PaymentResult.Failed(Throwable()))
-        verify(eventReporter).onPaymentFailure(selection)
-
-        assertThat(stripeIntent).isNull()
     }
 
     @Test
