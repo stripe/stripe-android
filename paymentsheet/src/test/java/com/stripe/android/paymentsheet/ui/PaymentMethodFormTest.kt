@@ -7,12 +7,14 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@OptIn(FlowPreview::class)
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodFormTest {
 
@@ -20,7 +22,7 @@ class PaymentMethodFormTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun foo() {
+    fun changingPaymentMethodCodes_emitsOnFormFieldValuesChangedCorrectly() {
         val paymentMethodCodeFlow = MutableStateFlow(PaymentMethod.Type.Card.code)
         val completeFormValuesFlow = MutableStateFlow<FormFieldValues?>(null)
 
@@ -44,21 +46,21 @@ class PaymentMethodFormTest {
 
         assertThat(emissions).containsExactly(null)
 
-        // TODO Comment
+        // Changing the payment method from card to PayPal.
         paymentMethodCodeFlow.value = PaymentMethod.Type.PayPal.code
 
-        // TODO Comment
-        val paypalValues = FormFieldValues(
+        // PayPalValues should only be associated with the PayPal payment method code, not card.
+        val payPalValues = FormFieldValues(
             showsMandate = false,
             userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
-        completeFormValuesFlow.value = paypalValues
+        completeFormValuesFlow.value = payPalValues
 
-        assertThat(emissions).containsExactly(null, paypalValues)
+        assertThat(emissions).containsExactly(null, payPalValues)
 
         paymentMethodCodeFlow.value = PaymentMethod.Type.Card.code
         completeFormValuesFlow.value = null
 
-        assertThat(emissions).containsExactly(null, paypalValues, null)
+        assertThat(emissions).containsExactly(null, payPalValues, null)
     }
 }
