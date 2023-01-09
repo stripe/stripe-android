@@ -72,6 +72,7 @@ dependencies {
     testImplementation "androidx.arch.core:core-testing:$androidxArchCoreVersion"
     testImplementation "androidx.fragment:fragment-testing:$androidxFragmentVersion"
     testImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
+    testImplementation testLibs.turbine
 
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
     testImplementation "androidx.test.espresso:espresso-core:3.5.0"
