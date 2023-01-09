@@ -128,7 +128,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onFatal(throwable: Throwable) {
-        _fatal.value = throwable
+        mostRecentError = throwable
         _paymentOptionResult.value =
             PaymentOptionResult.Failed(
                 error = throwable,
@@ -139,7 +139,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override fun onUserCancel() {
         _paymentOptionResult.value =
             PaymentOptionResult.Canceled(
-                mostRecentError = _fatal.value,
+                mostRecentError = mostRecentError,
                 paymentMethods = _paymentMethods.value
             )
     }
