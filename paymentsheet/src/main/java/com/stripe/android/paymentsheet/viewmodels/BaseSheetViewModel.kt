@@ -170,8 +170,8 @@ internal abstract class BaseSheetViewModel(
      * Use this to override the current UI state of the primary button. The UI state is reset every
      * time the payment selection is changed.
      */
-    private val _primaryButtonUIState = MutableLiveData<PrimaryButton.UIState?>()
-    val primaryButtonUIState: LiveData<PrimaryButton.UIState?> = _primaryButtonUIState
+    private val _primaryButtonUIState = MutableStateFlow<PrimaryButton.UIState?>(null)
+    val primaryButtonUIState: StateFlow<PrimaryButton.UIState?> = _primaryButtonUIState
 
     private val _primaryButtonState = MutableStateFlow<PrimaryButton.State?>(null)
     val primaryButtonState: StateFlow<PrimaryButton.State?> = _primaryButtonState
@@ -211,7 +211,7 @@ internal abstract class BaseSheetViewModel(
 
     val ctaEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
-            primaryButtonUIState,
+            primaryButtonUIState.asLiveData(),
             buttonsEnabled,
             selection
         ).forEach { source ->

@@ -255,7 +255,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
      * Perform the initial setup for the primary button.
      */
     private fun setupPrimaryButton() {
-        viewModel.primaryButtonUIState.observe(this) { state ->
+        viewModel.primaryButtonUIState.launchAndCollectIn(this) { state ->
             state?.let {
                 primaryButton.setOnClickListener {
                     state.onClick?.invoke()
