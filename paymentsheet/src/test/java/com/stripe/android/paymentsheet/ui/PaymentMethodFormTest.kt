@@ -22,7 +22,7 @@ class PaymentMethodFormTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun changingPaymentMethodCodes_emitsOnFormFieldValuesChangedCorrectly() {
+    fun `Changing payment method emits only form values of newly selected payment method`() {
         val paymentMethodCodeFlow = MutableStateFlow(PaymentMethod.Type.Card.code)
         val completeFormValuesFlow = MutableStateFlow<FormFieldValues?>(null)
 
@@ -62,5 +62,39 @@ class PaymentMethodFormTest {
         completeFormValuesFlow.value = null
 
         assertThat(emissions).containsExactly(null, payPalValues, null)
+    }
+
+    @Test
+    fun `Changing completeFormValues emits new FormFieldValues`() {
+        val paymentMethodCodeFlow = MutableStateFlow(PaymentMethod.Type.Card.code)
+        val completeFormValuesFlow = MutableStateFlow<FormFieldValues?>(null)
+
+        val emissions = mutableListOf<FormFieldValues?>()
+
+        composeTestRule.setContent {
+            val code by paymentMethodCodeFlow.collectAsState()
+
+            PaymentMethodForm(
+                paymentMethodCode = code,
+                enabled = true,
+                completeFormValues = completeFormValuesFlow,
+                onFormFieldValuesChanged = {
+                    emissions.add(it)
+                },
+                hiddenIdentifiers = emptySet(),
+                elements = emptyList(),
+                lastTextFieldIdentifier = null,
+            )
+        }
+
+        assertThat(emissions).containsExactly(null)
+
+        val completeValues = FormFieldValues(
+            showsMandate = false,
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+        )
+        completeFormValuesFlow.value = completeValues
+
+        assertThat(emissions).containsExactly(null, completeValues)
     }
 }
