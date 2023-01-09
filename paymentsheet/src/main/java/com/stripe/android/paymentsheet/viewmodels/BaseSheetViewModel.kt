@@ -91,8 +91,7 @@ internal abstract class BaseSheetViewModel(
     internal val merchantName = config?.merchantDisplayName
         ?: application.applicationInfo.loadLabel(application.packageManager).toString()
 
-    // a fatal error
-    protected val _fatal = MutableLiveData<Throwable>()
+    protected var mostRecentError: Throwable? = null
 
     @VisibleForTesting
     internal val _isGooglePayReady = savedStateHandle.getLiveData<Boolean>(SAVE_GOOGLE_PAY_READY)

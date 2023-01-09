@@ -567,7 +567,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onFatal(throwable: Throwable) {
         logger.error("Payment Sheet error", throwable)
-        _fatal.value = throwable
+        mostRecentError = throwable
         _paymentSheetResult.value = PaymentSheetResult.Failed(throwable)
     }
 
