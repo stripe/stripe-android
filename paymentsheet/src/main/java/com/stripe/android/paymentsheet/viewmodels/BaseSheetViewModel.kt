@@ -329,6 +329,7 @@ internal abstract class BaseSheetViewModel(
     abstract fun transitionToFirstScreen()
 
     protected fun transitionTo(target: TransitionTarget) {
+        clearErrorMessages()
         _transition.postValue(Event(target))
     }
 
@@ -387,6 +388,8 @@ internal abstract class BaseSheetViewModel(
             warnUnactivatedIfNeeded(stripeIntent.unactivatedPaymentMethods)
         }
     }
+
+    abstract fun clearErrorMessages()
 
     private fun warnUnactivatedIfNeeded(unactivatedPaymentMethodTypes: List<String>) {
         if (unactivatedPaymentMethodTypes.isEmpty()) {
@@ -589,6 +592,8 @@ internal abstract class BaseSheetViewModel(
     abstract fun onUserCancel()
 
     fun onUserBack() {
+        clearErrorMessages()
+
         // Reset the selection to the one from before opening the add payment method screen
         val paymentOptionsState = paymentOptionsState.value
         updateSelection(paymentOptionsState.selectedItem?.toPaymentSelection())

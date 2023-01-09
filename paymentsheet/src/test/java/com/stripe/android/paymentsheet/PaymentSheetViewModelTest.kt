@@ -156,7 +156,7 @@ internal class PaymentSheetViewModelTest {
 
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(paymentSelection)
-        viewModel.checkout(CheckoutIdentifier.None)
+        viewModel.checkout()
 
         assertThat(confirmParams).hasSize(1)
         assertThat(confirmParams[0].peekContent())
@@ -181,7 +181,7 @@ internal class PaymentSheetViewModelTest {
 
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
         viewModel.updateSelection(paymentSelection)
-        viewModel.checkout(CheckoutIdentifier.None)
+        viewModel.checkout()
 
         assertThat(confirmParams).hasSize(1)
         assertThat(confirmParams[0].peekContent())
@@ -213,7 +213,7 @@ internal class PaymentSheetViewModelTest {
         val paymentSelection =
             PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
         viewModel.updateSelection(paymentSelection)
-        viewModel.checkout(CheckoutIdentifier.None)
+        viewModel.checkout()
 
         assertThat(events).hasSize(1)
         val confirmParams = events[0].peekContent() as ConfirmSetupIntentParams
@@ -235,7 +235,7 @@ internal class PaymentSheetViewModelTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
         )
         viewModel.updateSelection(paymentSelection)
-        viewModel.checkout(CheckoutIdentifier.None)
+        viewModel.checkout()
 
         assertThat(confirmParams).hasSize(1)
         assertThat(confirmParams[0].peekContent())
@@ -277,7 +277,7 @@ internal class PaymentSheetViewModelTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
         )
         viewModel.updateSelection(paymentSelection)
-        viewModel.checkout(CheckoutIdentifier.None)
+        viewModel.checkout()
 
         assertThat(confirmParams).hasSize(1)
         assertThat(confirmParams[0].peekContent())
@@ -360,8 +360,7 @@ internal class PaymentSheetViewModelTest {
     fun `Google Pay checkout cancelled returns to Ready state`() {
         val viewModel = createViewModel()
 
-        viewModel.updateSelection(PaymentSelection.GooglePay)
-        viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
+        viewModel.checkoutWithGooglePay()
 
         val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
@@ -410,7 +409,7 @@ internal class PaymentSheetViewModelTest {
             viewState.add(it)
         }
 
-        viewModel.checkout(CheckoutIdentifier.SheetBottomBuy)
+        viewModel.checkout()
 
         assertThat(googleViewState[0]).isEqualTo(PaymentSheetViewState.Reset(null))
         assertThat(buyViewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
@@ -420,8 +419,7 @@ internal class PaymentSheetViewModelTest {
     fun `Google Pay checkout failed returns to Ready state and shows error`() {
         val viewModel = createViewModel()
 
-        viewModel.updateSelection(PaymentSelection.GooglePay)
-        viewModel.checkout(CheckoutIdentifier.SheetTopGooglePay)
+        viewModel.checkoutWithGooglePay()
 
         val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
         viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
