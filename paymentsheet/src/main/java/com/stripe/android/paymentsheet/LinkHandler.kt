@@ -27,7 +27,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 
-// TODO(linkextraction): Long term this should probably be singleton.
 internal class LinkHandler @Inject constructor(
     val linkLauncher: LinkPaymentLauncher,
     private val savedStateHandle: SavedStateHandle,
@@ -219,6 +218,8 @@ internal class LinkHandler @Inject constructor(
     ) {
         launchedLinkDirectly = launchedDirectly
 
+        // TODO(linkextraction) Should we set the configuration here?
+
         linkLauncher.present(
             configuration,
             paymentMethodCreateParams,
@@ -230,7 +231,7 @@ internal class LinkHandler @Inject constructor(
     /**
      * Method called with the result of launching the Link UI to collect a payment.
      */
-    private fun onLinkActivityResult(result: LinkActivityResult) {
+    fun onLinkActivityResult(result: LinkActivityResult) {
         val completePaymentFlow = result is LinkActivityResult.Completed
         val cancelPaymentFlow = launchedLinkDirectly &&
             result is LinkActivityResult.Canceled && result.reason == LinkActivityResult.Canceled.Reason.BackPressed
