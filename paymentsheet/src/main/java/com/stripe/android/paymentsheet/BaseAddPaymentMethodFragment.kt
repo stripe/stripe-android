@@ -333,8 +333,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         isShowingLinkInlineSignup = showLinkInlineSignup
     )
 
-    @VisibleForTesting
-    internal fun transformToPaymentSelection(
+    private fun transformToPaymentSelection(
         formFieldValues: FormFieldValues?,
         selectedPaymentMethodResources: LpmRepository.SupportedPaymentMethod
     ) = formFieldValues?.let {
