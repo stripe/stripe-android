@@ -62,7 +62,8 @@ internal class FormViewModel @Inject internal constructor(
             return subComponentBuilderProvider.get()
                 .formFragmentArguments(config)
                 .showCheckboxFlow(showCheckboxFlow)
-                .build().viewModel as T
+                .build()
+                .viewModel as T
         }
     }
 
