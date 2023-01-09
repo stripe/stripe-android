@@ -1,3 +1,5 @@
+@file:Suppress("MatchingDeclarationName")
+
 package com.stripe.android.paymentsheet.navigation
 
 import androidx.appcompat.app.AppCompatActivity

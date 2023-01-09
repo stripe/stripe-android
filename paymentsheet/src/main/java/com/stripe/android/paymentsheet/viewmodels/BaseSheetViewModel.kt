@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -668,15 +667,5 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
         internal const val SAVE_STATE_LIVE_MODE = "save_state_live_mode"
         internal const val LINK_CONFIGURATION = "link_configuration"
-    }
-}
-
-internal fun <T> LiveData<BaseSheetViewModel.Event<T>?>.observeEvents(
-    lifecycleOwner: LifecycleOwner,
-    observer: (T) -> Unit
-) {
-    observe(lifecycleOwner) { event ->
-        val content = event?.getContentIfNotHandled() ?: return@observe
-        observer(content)
     }
 }
