@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
@@ -20,6 +21,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
@@ -275,6 +277,19 @@ internal class PaymentOptionsViewModelTest {
         assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link)
         assertThat(viewModel.activeLinkSession.value).isFalse()
         assertThat(viewModel.isLinkEnabled.value).isFalse()
+    }
+
+    @Test
+    fun `updatePrimaryButtonState updates the primary button state`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.primaryButtonState.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
+
+            assertThat(awaitItem()).isEqualTo(PrimaryButton.State.Ready)
+        }
     }
 
     private fun createViewModel(

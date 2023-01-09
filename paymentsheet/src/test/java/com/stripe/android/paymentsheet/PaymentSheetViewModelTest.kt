@@ -883,6 +883,19 @@ internal class PaymentSheetViewModelTest {
             .isEqualTo(null)
     }
 
+    @Test
+    fun `updatePrimaryButtonState updates the primary button state`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.primaryButtonState.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
+
+            assertThat(awaitItem()).isEqualTo(PrimaryButton.State.Ready)
+        }
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,

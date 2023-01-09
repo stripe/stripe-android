@@ -173,8 +173,8 @@ internal abstract class BaseSheetViewModel(
     private val _primaryButtonUIState = MutableLiveData<PrimaryButton.UIState?>()
     val primaryButtonUIState: LiveData<PrimaryButton.UIState?> = _primaryButtonUIState
 
-    private val _primaryButtonState = MutableLiveData<PrimaryButton.State>()
-    val primaryButtonState: LiveData<PrimaryButton.State> = _primaryButtonState
+    private val _primaryButtonState = MutableStateFlow<PrimaryButton.State?>(null)
+    val primaryButtonState: StateFlow<PrimaryButton.State?> = _primaryButtonState
 
     private val _notesText = MutableStateFlow<String?>(null)
     internal val notesText: StateFlow<String?> = _notesText
