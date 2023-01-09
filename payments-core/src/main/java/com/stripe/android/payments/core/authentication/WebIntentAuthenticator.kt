@@ -33,7 +33,8 @@ internal class WebIntentAuthenticator @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(IS_INSTANT_APP) private val isInstantApp: Boolean
+    @Named(IS_INSTANT_APP) private val isInstantApp: Boolean,
+    private val defaultReturnUrl: DefaultReturnUrl,
 ) : PaymentAuthenticator<StripeIntent>() {
 
     override suspend fun performAuthentication(
@@ -85,7 +86,7 @@ internal class WebIntentAuthenticator @Inject constructor(
             }
             is StripeIntent.NextActionData.CashAppRedirect -> {
                 authUrl = nextActionData.mobileAuthUrl
-                returnUrl = DefaultReturnUrl.create(host.context).value
+                returnUrl = defaultReturnUrl.value
                 shouldCancelIntentOnUserNavigation = true // TODO Yay or nay?
             }
             else ->
