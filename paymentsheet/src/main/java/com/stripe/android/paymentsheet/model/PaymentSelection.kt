@@ -41,11 +41,11 @@ internal sealed class PaymentSelection : Parcelable {
             override val customerRequestedSave: CustomerRequestedSave
         ) : New() {
             @IgnoredOnParcel
-            val last4: String = (
-                (paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>)!!
-                ["number"] as String
-                )
-                .takeLast(4)
+            val last4: String
+                get() {
+                    val cardMap = paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>
+                    return (cardMap?.get("number") as? String?)?.takeLast(4) ?: ""
+                }
         }
 
         @Parcelize
