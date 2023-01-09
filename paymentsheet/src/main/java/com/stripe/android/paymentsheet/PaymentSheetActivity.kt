@@ -251,8 +251,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 }
             }
         }
-
-//        buttonContainer.isVisible = true
     }
 
     override fun resetPrimaryButtonState() {

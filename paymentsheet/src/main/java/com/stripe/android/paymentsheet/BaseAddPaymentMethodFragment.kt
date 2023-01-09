@@ -84,7 +84,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         val isRepositoryReady by sheetViewModel.isResourceRepositoryReady.observeAsState()
         val processing by sheetViewModel.processing.observeAsState(false)
 
-        // TODO: Comment
+        // We need to provide this BackHandler to override the FragmentManager one
         BackHandler(enabled = !processing) {
             sheetViewModel.handleBackPressed()
         }
