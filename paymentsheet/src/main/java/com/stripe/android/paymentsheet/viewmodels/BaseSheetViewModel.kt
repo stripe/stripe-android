@@ -10,6 +10,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
@@ -114,8 +115,8 @@ internal abstract class BaseSheetViewModel(
         savedStateHandle.getLiveData<LinkPaymentLauncher.Configuration>(LINK_CONFIGURATION)
     internal val linkConfiguration: LiveData<LinkPaymentLauncher.Configuration> = _linkConfiguration
 
-    private val _stripeIntent = savedStateHandle.getLiveData<StripeIntent>(SAVE_STRIPE_INTENT)
-    internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
+    internal val stripeIntent: StateFlow<StripeIntent?> = savedStateHandle
+        .getStateFlow<StripeIntent?>(SAVE_STRIPE_INTENT, null)
 
     internal var supportedPaymentMethods
         get() = savedStateHandle.get<List<PaymentMethodCode>>(
@@ -294,7 +295,7 @@ internal abstract class BaseSheetViewModel(
     protected val isReadyEvents = MediatorLiveData<Boolean>().apply {
         listOf(
             savedSelection,
-            stripeIntent,
+            stripeIntent.asLiveData(),
             paymentMethods,
             isGooglePayReady,
             isResourceRepositoryReady,
