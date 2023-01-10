@@ -88,33 +88,42 @@ internal class LinkHandler @Inject constructor(
         linkLauncher.unregister()
     }
 
-    fun setupLink(scope: CoroutineScope, state: LinkState?, shouldLaunchEagerly: Boolean) {
+    private fun setupLink(state: LinkState?) {
         _isLinkEnabled.value = state != null
         _activeLinkSession.value = state?.loginState == LinkState.LoginState.LoggedIn
 
         if (state == null) return
 
         _linkConfiguration.value = state.configuration
+    }
 
-        if (shouldLaunchEagerly) {
-            when (state.loginState) {
-                LinkState.LoginState.LoggedIn -> {
-                    launchLink(state.configuration, launchedDirectly = true)
-                }
-                LinkState.LoginState.NeedsVerification -> {
-                    scope.launch {
-                        setupLinkWithVerification(state.configuration)
-                    }
-                }
-                LinkState.LoginState.LoggedOut -> {
-                    // Nothing to do here
+    fun setupLinkLaunchingEagerly(scope: CoroutineScope, state: LinkState?) {
+        setupLink(state)
+
+        when (state?.loginState) {
+            LinkState.LoginState.LoggedIn -> {
+                launchLink(state.configuration, launchedDirectly = true)
+            }
+            LinkState.LoginState.NeedsVerification -> {
+                scope.launch {
+                    setupLinkWithVerification(state.configuration)
                 }
             }
-        } else {
-            if (state.isReadyForUse) {
-                // If account exists, select Link by default
-                savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
+            LinkState.LoginState.LoggedOut -> {
+                // Nothing to do here
             }
+            null -> {
+                // Nothing to do here
+            }
+        }
+    }
+
+    fun prepareLink(state: LinkState?) {
+        setupLink(state)
+
+        if (state?.isReadyForUse == true) {
+            // If account exists, select Link by default
+            savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
         }
     }
 

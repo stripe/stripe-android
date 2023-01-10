@@ -29,10 +29,9 @@ import org.robolectric.RobolectricTestRunner
 class LinkHandlerTest {
     @Test
     fun `setupLink when loginState is loggedIn`() = runLinkTest {
-        handler.setupLink(
+        handler.setupLinkLaunchingEagerly(
             testScope,
             LinkState(configuration, LinkState.LoginState.LoggedIn),
-            shouldLaunchEagerly = true
         )
         assertThat(handler.isLinkEnabled.first()).isTrue()
         assertThat(handler.activeLinkSession.first()).isTrue()
@@ -47,10 +46,9 @@ class LinkHandlerTest {
 
     @Test
     fun `setupLink when loginState is loggedOut`() = runLinkTest {
-        handler.setupLink(
+        handler.setupLinkLaunchingEagerly(
             testScope,
             LinkState(configuration, LinkState.LoginState.LoggedOut),
-            shouldLaunchEagerly = true
         )
         assertThat(handler.isLinkEnabled.first()).isTrue()
         assertThat(handler.activeLinkSession.first()).isFalse()
@@ -64,10 +62,9 @@ class LinkHandlerTest {
     @Test
     fun `setupLink when loginState is NeedsVerification with successful verification`() =
         runLinkTest {
-            handler.setupLink(
+            handler.setupLinkLaunchingEagerly(
                 testScope,
                 LinkState(configuration, LinkState.LoginState.NeedsVerification),
-                shouldLaunchEagerly = true
             )
             assertThat(handler.isLinkEnabled.first()).isTrue()
             assertThat(handler.activeLinkSession.first()).isFalse()
@@ -89,10 +86,9 @@ class LinkHandlerTest {
     @Test
     fun `setupLink when loginState is NeedsVerification with unsuccessful verification`() =
         runLinkTest {
-            handler.setupLink(
+            handler.setupLinkLaunchingEagerly(
                 testScope,
                 LinkState(configuration, LinkState.LoginState.NeedsVerification),
-                shouldLaunchEagerly = true
             )
             assertThat(handler.isLinkEnabled.first()).isTrue()
             assertThat(handler.activeLinkSession.first()).isFalse()
@@ -112,7 +108,7 @@ class LinkHandlerTest {
 
     @Test
     fun `setupLink when linkState is null`() = runLinkTest {
-        handler.setupLink(testScope, null, shouldLaunchEagerly = true)
+        handler.setupLinkLaunchingEagerly(testScope, null)
         assertThat(handler.isLinkEnabled.first()).isFalse()
         assertThat(handler.activeLinkSession.first()).isFalse()
         assertThat(handler.linkConfiguration.first()).isNull()
@@ -122,12 +118,8 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `setupLink when shouldLaunchEagerly is false`() = runLinkTest {
-        handler.setupLink(
-            testScope,
-            LinkState(configuration, LinkState.LoginState.LoggedIn),
-            shouldLaunchEagerly = false
-        )
+    fun `prepareLink when loggedIn`() = runLinkTest {
+        handler.prepareLink(LinkState(configuration, LinkState.LoginState.LoggedIn))
         assertThat(handler.isLinkEnabled.first()).isTrue()
         assertThat(handler.activeLinkSession.first()).isTrue()
         assertThat(handler.linkConfiguration.first()).isEqualTo(configuration)
@@ -139,12 +131,8 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `setupLink when shouldLaunchEagerly is false and not logged in`() = runLinkTest {
-        handler.setupLink(
-            testScope,
-            LinkState(configuration, LinkState.LoginState.LoggedOut),
-            shouldLaunchEagerly = false
-        )
+    fun `prepareLink when not logged in`() = runLinkTest {
+        handler.prepareLink(LinkState(configuration, LinkState.LoginState.LoggedOut))
         assertThat(handler.isLinkEnabled.first()).isTrue()
         assertThat(handler.activeLinkSession.first()).isFalse()
         assertThat(handler.linkConfiguration.first()).isEqualTo(configuration)
@@ -169,10 +157,9 @@ class LinkHandlerTest {
 
     @Test
     fun `test onLinkActivityResult with Completed result`() = runLinkTest {
-        handler.setupLink(
+        handler.setupLinkLaunchingEagerly(
             testScope,
             LinkState(configuration, LinkState.LoginState.LoggedIn),
-            shouldLaunchEagerly = true
         )
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
         handler.onLinkActivityResult(LinkActivityResult.Completed)
@@ -181,10 +168,9 @@ class LinkHandlerTest {
 
     @Test
     fun `test onLinkActivityResult with Cancelled result after back pressed`() = runLinkTest {
-        handler.setupLink(
+        handler.setupLinkLaunchingEagerly(
             testScope,
             LinkState(configuration, LinkState.LoginState.LoggedIn),
-            shouldLaunchEagerly = true
         )
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
         handler.onLinkActivityResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.BackPressed))
@@ -193,10 +179,9 @@ class LinkHandlerTest {
 
     @Test
     fun `test onLinkActivityResult with Cancelled result`() = runLinkTest {
-        handler.setupLink(
+        handler.setupLinkLaunchingEagerly(
             testScope,
             LinkState(configuration, LinkState.LoginState.LoggedIn),
-            shouldLaunchEagerly = true
         )
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
         handler.onLinkActivityResult(LinkActivityResult.Canceled(LinkActivityResult.Canceled.Reason.LoggedOut))
@@ -207,10 +192,9 @@ class LinkHandlerTest {
 
     @Test
     fun `test onLinkActivityResult with CompletedWithPaymentResult result`() = runLinkTest {
-        handler.setupLink(
+        handler.setupLinkLaunchingEagerly(
             testScope,
             LinkState(configuration, LinkState.LoginState.LoggedIn),
-            shouldLaunchEagerly = true
         )
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
         handler.onLinkActivityResult(LinkActivityResult.Failed(AssertionError("Expected payment result error.")))

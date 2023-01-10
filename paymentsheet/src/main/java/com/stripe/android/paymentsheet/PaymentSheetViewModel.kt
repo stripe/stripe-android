@@ -263,7 +263,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         val linkState = state.linkState
 
-        linkHandler.setupLink(viewModelScope, linkState, shouldLaunchEagerly = true)
+        linkHandler.setupLinkLaunchingEagerly(viewModelScope, linkState)
 
         resetViewState()
     }
