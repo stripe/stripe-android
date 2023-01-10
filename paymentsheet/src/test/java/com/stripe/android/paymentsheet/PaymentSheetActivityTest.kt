@@ -67,7 +67,6 @@ import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.getOrAwaitValue
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.utils.TestUtils.observeEventsForever
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityScenarioFactory
@@ -1207,40 +1206,39 @@ internal class PaymentSheetActivityTest {
     fun `Verify if customer has payment methods, display the saved payment methods screen`() {
         val viewModel = createViewModel(paymentMethods = PAYMENT_METHODS)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
         activityScenario(viewModel).launch(intent).use {
             it.onActivity {
                 idleLooper()
+                runTest {
+                    viewModel.transition.test {
+                        assertThat(awaitItem()?.peekContent())
+                            .isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+                    }
+                }
             }
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
     fun `Verify if there are no payment methods, display the add payment method screen`() {
         val viewModel = createViewModel(paymentMethods = emptyList())
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
         activityScenario(viewModel).launch(intent).use {
             it.onActivity {
                 idleLooper()
+                runTest {
+                    viewModel.transition.test {
+                        assertThat(awaitItem()?.peekContent())
+                            .isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+                    }
+                }
             }
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
     fun `Verify doesn't transition to first screen again on activity recreation`() {
         val viewModel = createViewModel(paymentMethods = emptyList())
-
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
 
         activityScenario(viewModel).launch(intent).use {
             it.onActivity {
@@ -1251,10 +1249,15 @@ internal class PaymentSheetActivityTest {
 
             it.onActivity {
                 idleLooper()
+                runTest {
+                    viewModel.transition.test {
+                        assertThat(awaitItem()?.peekContent())
+                            .isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+                        ensureAllEventsConsumed()
+                    }
+                }
             }
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test

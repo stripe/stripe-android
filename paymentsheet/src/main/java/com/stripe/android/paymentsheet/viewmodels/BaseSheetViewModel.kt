@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -57,7 +56,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -152,8 +150,8 @@ internal abstract class BaseSheetViewModel(
         savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val _transition = MutableLiveData<Event<TransitionTarget>?>(null)
-    internal val transition: LiveData<Event<TransitionTarget>?> = _transition
+    private val _transition = MutableStateFlow<Event<TransitionTarget>?>(null)
+    internal val transition: StateFlow<Event<TransitionTarget>?> = _transition
 
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
@@ -330,7 +328,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun transitionTo(target: TransitionTarget) {
         clearErrorMessages()
-        _transition.postValue(Event(target))
+        _transition.value = Event(target)
     }
 
     fun transitionToAddPaymentScreen() {
@@ -649,15 +647,5 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_GOOGLE_PAY_READY = "google_pay_ready"
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
         internal const val LINK_CONFIGURATION = "link_configuration"
-    }
-}
-
-internal fun <T> LiveData<BaseSheetViewModel.Event<T>?>.observeEvents(
-    lifecycleOwner: LifecycleOwner,
-    observer: (T) -> Unit
-) {
-    observe(lifecycleOwner) { event ->
-        val content = event?.getContentIfNotHandled() ?: return@observe
-        observer(content)
     }
 }

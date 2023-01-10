@@ -24,7 +24,6 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.paymentsheet.viewmodels.observeEvents
 import com.stripe.android.utils.AnimationConstants
 
 /**
@@ -90,8 +89,9 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             )
         }
 
-        viewModel.transition.observeEvents(this) { transitionTarget ->
-            onTransitionTarget(transitionTarget)
+        viewModel.transition.launchAndCollectIn(this) { transitionTarget ->
+            val content = transitionTarget?.getContentIfNotHandled() ?: return@launchAndCollectIn
+            onTransitionTarget(content)
         }
 
         if (savedInstanceState == null) {

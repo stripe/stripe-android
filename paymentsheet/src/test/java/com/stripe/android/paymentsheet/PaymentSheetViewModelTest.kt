@@ -50,7 +50,6 @@ import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.utils.TestUtils.observeEventsForever
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -707,14 +706,14 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Transition only happens when view model is ready`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
-        val observedTransitions = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
+        viewModel.transition.test {
+            viewModel.transitionToFirstScreenWhenReady()
+            assertThat(awaitItem()?.peekContent()).isNull()
 
-        viewModel.transitionToFirstScreenWhenReady()
-        assertThat(observedTransitions).isEmpty()
-
-        viewModel._isGooglePayReady.value = true
-        assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+            viewModel._isGooglePayReady.value = true
+            assertThat(awaitItem()?.peekContent())
+                .isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+        }
     }
 
     @Test
@@ -921,12 +920,41 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `transitionToFirstScreen with empty payment methods transitions to add first payment method`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.transition.test {
+            assertThat(awaitItem()?.peekContent())
+                .isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()?.peekContent())
+                .isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+        }
+    }
+
+    @Test
+    fun `transitionToFirstScreen with payment methods transitions to select saved payment methods`() = runTest {
+        val viewModel = createViewModel(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        viewModel.transition.test {
+            assertThat(awaitItem()?.peekContent())
+                .isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()?.peekContent())
+                .isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+        }
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
         customerRepository: CustomerRepository = FakeCustomerRepository(PAYMENT_METHODS),
         shouldFailLoad: Boolean = false,
         linkState: LinkState? = null,
+        paymentMethods: List<PaymentMethod> = listOf()
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return PaymentSheetViewModel(
@@ -940,7 +968,9 @@ internal class PaymentSheetViewModelTest {
                 stripeIntent = stripeIntent,
                 shouldFail = shouldFailLoad,
                 linkState = linkState,
-            ),
+            ).apply {
+                updatePaymentMethods(paymentMethods)
+            },
             customerRepository,
             prefsRepository,
             lpmResourceRepository,
