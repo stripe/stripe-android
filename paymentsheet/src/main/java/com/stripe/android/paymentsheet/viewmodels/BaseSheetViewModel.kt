@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -154,8 +155,8 @@ internal abstract class BaseSheetViewModel(
     private val _transition = MutableLiveData<Event<TransitionTarget>?>(null)
     internal val transition: LiveData<Event<TransitionTarget>?> = _transition
 
-    private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
-    internal val selection: LiveData<PaymentSelection?> = _selection
+    internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
+        .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
 
     private val editing = MutableLiveData(false)
 
@@ -211,7 +212,7 @@ internal abstract class BaseSheetViewModel(
         listOf(
             primaryButtonUIState.asLiveData(),
             buttonsEnabled,
-            selection
+            selection.asLiveData()
         ).forEach { source ->
             addSource(source) {
                 value = if (primaryButtonUIState.value != null) {
@@ -231,7 +232,7 @@ internal abstract class BaseSheetViewModel(
         PaymentOptionsStateMapper(
             paymentMethods = paymentMethods,
             initialSelection = savedSelection,
-            currentSelection = selection,
+            currentSelection = selection.filterNotNull().asLiveData(),
             isGooglePayReady = isGooglePayReady,
             isLinkEnabled = isLinkEnabled,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
@@ -420,9 +421,8 @@ internal abstract class BaseSheetViewModel(
         if (selection is PaymentSelection.New) {
             newPaymentSelection = selection
         }
-
         savedStateHandle[SAVE_SELECTION] = selection
-
+        clearErrorMessages()
         updateBelowButtonText(null)
     }
 
@@ -444,7 +444,8 @@ internal abstract class BaseSheetViewModel(
             if (didRemoveSelectedItem) {
                 // Remove the current selection. The new selection will be set when we're computing
                 // the next PaymentOptionsState.
-                _selection.value = null
+                savedStateHandle[SAVE_SELECTION] = null
+                clearErrorMessages()
             }
 
             savedStateHandle[SAVE_PAYMENT_METHODS] = _paymentMethods.value?.filter {

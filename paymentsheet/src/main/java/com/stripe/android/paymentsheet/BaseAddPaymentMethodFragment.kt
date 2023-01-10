@@ -112,7 +112,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
                 showCheckboxFlow.emit(arguments.showCheckbox)
             }
 
-            val paymentSelection by sheetViewModel.selection.observeAsState()
+            val paymentSelection by sheetViewModel.selection.collectAsState()
             val linkInlineSelection by sheetViewModel.linkInlineSelection.observeAsState()
             var linkSignupState by remember {
                 mutableStateOf<InlineSignupViewState?>(null)

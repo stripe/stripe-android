@@ -186,6 +186,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         if (linkState.isReadyForUse) {
             // If account exists, select Link by default
             savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
+            clearErrorMessages()
         }
     }
 

@@ -268,16 +268,22 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
 
-            viewModel.onError("some error")
-            assertThat(activity.viewBinding.message.isVisible).isTrue()
-            assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
+            runTest {
+                viewModel.selection.test {
+                    assertThat(activity.viewBinding.message.isVisible).isFalse()
 
-            val newSelection = PaymentSelection.Saved(paymentMethod = paymentMethods.last())
-            viewModel.updateSelection(newSelection)
+                    viewModel.onError("some error")
+                    assertThat(activity.viewBinding.message.isVisible).isTrue()
+                    assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
 
-            assertThat(activity.viewBinding.message.isVisible).isFalse()
+                    val newSelection = PaymentSelection.Saved(paymentMethod = paymentMethods.last())
+                    viewModel.updateSelection(newSelection)
+                    assertThat(awaitItem()).isEqualTo(newSelection)
+
+                    assertThat(activity.viewBinding.message.isVisible).isFalse()
+                }
+            }
         }
     }
 
@@ -379,24 +385,34 @@ internal class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             idleLooper()
 
-            // New valid card
-            val initialSelection = PaymentSelection.New.Card(
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                CardBrand.Visa,
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
-            )
-            viewModel.updateSelection(initialSelection)
+            runTest {
+                val initialSelection = PaymentSelection.New.Card(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    CardBrand.Visa,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                )
 
-            viewModel.transitionToAddPaymentScreen()
+                viewModel.selection.test {
+                    // New valid card
+                    assertThat(awaitItem()).isInstanceOf(PaymentSelection.Saved::class.java)
+                    viewModel.updateSelection(initialSelection)
+                    viewModel.transitionToAddPaymentScreen()
+                    assertThat(awaitItem()).isEqualTo(initialSelection)
+                }
 
-            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
+                viewModel.contentVisible.test {
+                    assertThat(awaitItem()).isTrue()
+                    activity.viewBinding.googlePayButton.callOnClick()
+                    assertThat(awaitItem()).isFalse()
+                    viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+                    assertThat(awaitItem()).isTrue()
+                }
 
-            activity.viewBinding.googlePayButton.callOnClick()
-            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
-            assertThat(viewModel.contentVisible.value).isTrue()
-
-            // Still using the initial PaymentSelection
-            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
+                viewModel.selection.test {
+                    // Still using the initial PaymentSelection
+                    assertThat(awaitItem()).isEqualTo(initialSelection)
+                }
+            }
         }
     }
 
