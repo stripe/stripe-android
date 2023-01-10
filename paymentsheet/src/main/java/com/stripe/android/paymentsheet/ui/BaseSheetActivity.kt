@@ -127,7 +127,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
-        viewModel.processing.observe(this) { isProcessing ->
+        viewModel.processing.launchAndCollectIn(this) { isProcessing ->
             updateRootViewClickHandling(isProcessing)
             toolbar.isEnabled = !isProcessing
         }
@@ -195,7 +195,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (viewModel.processing.value == false) {
+        if (!viewModel.processing.value) {
             if (supportFragmentManager.backStackEntryCount > 0) {
                 viewModel.onUserBack()
                 super.onBackPressed()

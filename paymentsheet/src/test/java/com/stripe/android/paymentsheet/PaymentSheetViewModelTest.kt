@@ -358,7 +358,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Google Pay checkout cancelled returns to Ready state`() {
+    fun `Google Pay checkout cancelled returns to Ready state`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.checkoutWithGooglePay()
@@ -369,25 +369,20 @@ internal class PaymentSheetViewModelTest {
                 viewState.add(it)
             }
 
-        val processing: MutableList<Boolean> = mutableListOf()
-        viewModel.processing.observeForever {
-            processing.add(it)
+        viewModel.processing.test {
+            assertThat(viewState.size).isEqualTo(1)
+            assertThat(viewState[0])
+                .isEqualTo(PaymentSheetViewState.StartProcessing)
+            assertThat(awaitItem()).isTrue()
+
+            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            assertThat(viewModel.contentVisible.value).isTrue()
+
+            assertThat(viewState.size).isEqualTo(2)
+            assertThat(viewState[1])
+                .isEqualTo(PaymentSheetViewState.Reset(null))
+            assertThat(awaitItem()).isFalse()
         }
-
-        assertThat(viewState.size).isEqualTo(1)
-        assertThat(processing.size).isEqualTo(1)
-        assertThat(viewState[0])
-            .isEqualTo(PaymentSheetViewState.StartProcessing)
-        assertThat(processing[0]).isTrue()
-
-        viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
-        assertThat(viewModel.contentVisible.value).isTrue()
-
-        assertThat(viewState.size).isEqualTo(2)
-        assertThat(processing.size).isEqualTo(2)
-        assertThat(viewState[1])
-            .isEqualTo(PaymentSheetViewState.Reset(null))
-        assertThat(processing[1]).isFalse()
     }
 
     @Test
@@ -418,7 +413,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Google Pay checkout failed returns to Ready state and shows error`() {
+    fun `Google Pay checkout failed returns to Ready state and shows error`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.checkoutWithGooglePay()
@@ -429,29 +424,24 @@ internal class PaymentSheetViewModelTest {
                 viewState.add(it)
             }
 
-        val processing: MutableList<Boolean> = mutableListOf()
-        viewModel.processing.observeForever {
-            processing.add(it)
-        }
+        viewModel.processing.test {
+            assertThat(viewState.size).isEqualTo(1)
+            assertThat(viewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
+            assertThat(awaitItem()).isTrue()
 
-        assertThat(viewState.size).isEqualTo(1)
-        assertThat(processing.size).isEqualTo(1)
-        assertThat(viewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
-        assertThat(processing[0]).isTrue()
-
-        viewModel.onGooglePayResult(
-            GooglePayPaymentMethodLauncher.Result.Failed(
-                Exception("Test exception"),
-                Status.RESULT_INTERNAL_ERROR.statusCode
+            viewModel.onGooglePayResult(
+                GooglePayPaymentMethodLauncher.Result.Failed(
+                    Exception("Test exception"),
+                    Status.RESULT_INTERNAL_ERROR.statusCode
+                )
             )
-        )
 
-        assertThat(viewModel.contentVisible.value).isTrue()
-        assertThat(processing.size).isEqualTo(2)
-        assertThat(viewState.size).isEqualTo(2)
-        assertThat(viewState[1])
-            .isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage("An internal error occurred.")))
-        assertThat(processing[1]).isFalse()
+            assertThat(viewModel.contentVisible.value).isTrue()
+            assertThat(viewState.size).isEqualTo(2)
+            assertThat(viewState[1])
+                .isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage("An internal error occurred.")))
+            assertThat(awaitItem()).isFalse()
+        }
     }
 
     @Test

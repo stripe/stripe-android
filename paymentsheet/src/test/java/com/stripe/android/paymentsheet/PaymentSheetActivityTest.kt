@@ -9,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -78,6 +79,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
@@ -1237,6 +1239,23 @@ internal class PaymentSheetActivityTest {
         }
 
         assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+    }
+
+    @Test
+    fun `processing should enable after checkout`() {
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            runTest {
+                viewModel.processing.test {
+                    assertThat(awaitItem()).isFalse()
+                    viewModel.checkout()
+                    assertThat(awaitItem()).isTrue()
+                }
+            }
+        }
     }
 
     private fun currentFragment(activity: PaymentSheetActivity) =

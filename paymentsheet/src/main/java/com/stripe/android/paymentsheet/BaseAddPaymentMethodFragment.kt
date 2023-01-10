@@ -81,7 +81,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         showCheckboxFlow: MutableStateFlow<Boolean>
     ) {
         val isRepositoryReady by sheetViewModel.isResourceRepositoryReady.observeAsState()
-        val processing by sheetViewModel.processing.observeAsState(false)
+        val processing by sheetViewModel.processing.collectAsState(false)
 
         val linkConfig by sheetViewModel.linkConfiguration.observeAsState()
         val linkAccountStatus by linkConfig?.let {

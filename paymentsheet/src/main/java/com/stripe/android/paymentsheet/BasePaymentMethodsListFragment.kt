@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
+import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.createTextSpanFromTextStyle
@@ -141,7 +142,7 @@ internal abstract class BasePaymentMethodsListFragment(
             }
         }
 
-        sheetViewModel.processing.observe(viewLifecycleOwner) { isProcessing ->
+        sheetViewModel.processing.launchAndCollectIn(viewLifecycleOwner) { isProcessing ->
             adapter.isEnabled = !isProcessing
             layoutManager.canScroll = !isProcessing
         }
