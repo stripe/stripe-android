@@ -67,7 +67,7 @@ internal fun IdentityTopLevelDestination.DestinationRoute.withParams(
 }
 
 internal class CameraPermissionDeniedDestination(
-    scanType: CollectedDataParam.Type?,
+    scanType: CollectedDataParam.Type = CollectedDataParam.Type.INVALID,
 ) : IdentityTopLevelDestination() {
     override val destinationRoute = ROUTE
     override val routeWithArgs = destinationRoute.withParams(
@@ -75,7 +75,7 @@ internal class CameraPermissionDeniedDestination(
     )
 
     override val destination = R.id.action_camera_permission_denied
-    override val argsBundle = scanType?.let {
+    override val argsBundle = scanType.let {
         bundleOf(
             ARG_SCAN_TYPE to it
         )

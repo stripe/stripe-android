@@ -1241,7 +1241,7 @@ internal class IdentityViewModel constructor(
                             navController.navigateTo(
                                 CameraPermissionDeniedDestination(
                                     if (verificationPage.documentCapture.requireLiveCapture) {
-                                        null
+                                        CollectedDataParam.Type.INVALID
                                     } else {
                                         type
                                     }
@@ -1492,6 +1492,7 @@ internal class IdentityViewModel constructor(
             CollectedDataParam.Type.IDCARD -> IDScanDestination()
             CollectedDataParam.Type.PASSPORT -> PassportScanDestination()
             CollectedDataParam.Type.DRIVINGLICENSE -> DriverLicenseScanDestination()
+            else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
         }
 
     private fun CollectedDataParam.Type.toUploadDestination(
@@ -1514,12 +1515,14 @@ internal class IdentityViewModel constructor(
                     shouldShowTakePhoto,
                     shouldShowChoosePhoto
                 )
+            else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
         }
 
     private fun CollectedDataParam.Type.toAnalyticsScanType() = when (this) {
         CollectedDataParam.Type.DRIVINGLICENSE -> IdentityScanState.ScanType.DL_FRONT
         CollectedDataParam.Type.IDCARD -> IdentityScanState.ScanType.ID_FRONT
         CollectedDataParam.Type.PASSPORT -> IdentityScanState.ScanType.PASSPORT
+        else -> throw IllegalStateException("Invalid CollectedDataParam.Type")
     }
 
     private fun <State> MutableStateFlow<State>.updateStateAndSave(function: (State) -> State) {

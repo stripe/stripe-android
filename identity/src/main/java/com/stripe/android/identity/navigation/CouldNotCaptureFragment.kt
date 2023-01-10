@@ -6,6 +6,8 @@ import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
 import com.stripe.android.identity.R
@@ -15,13 +17,18 @@ import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Compani
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.ErrorScreen
 import com.stripe.android.identity.ui.ErrorScreenButton
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 /**
  * Fragment to indicate live capture failure.
  */
 internal class CouldNotCaptureFragment(
     identityViewModelFactory: ViewModelProvider.Factory
-) : BaseErrorFragment(identityViewModelFactory) {
+) : Fragment() {
+
+    private val identityViewModel: IdentityViewModel by activityViewModels {
+        identityViewModelFactory
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,6 +43,7 @@ internal class CouldNotCaptureFragment(
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
             ErrorScreen(
+                identityViewModel = identityViewModel,
                 title = stringResource(id = R.string.could_not_capture_title),
                 message1 = stringResource(id = R.string.could_not_capture_body1),
                 message2 = if (scanType == IdentityScanState.ScanType.SELFIE) {
