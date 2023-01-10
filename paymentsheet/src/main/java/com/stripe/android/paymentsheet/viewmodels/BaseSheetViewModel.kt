@@ -56,6 +56,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -152,9 +153,6 @@ internal abstract class BaseSheetViewModel(
 
     private val _transition = MutableLiveData<Event<TransitionTarget>?>(null)
     internal val transition: LiveData<Event<TransitionTarget>?> = _transition
-
-    private val _liveMode = savedStateHandle.getLiveData<Boolean>(SAVE_STATE_LIVE_MODE)
-    internal val liveMode: LiveData<Boolean> = _liveMode
 
     private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
     internal val selection: LiveData<PaymentSelection?> = _selection
@@ -385,7 +383,6 @@ internal abstract class BaseSheetViewModel(
         }
 
         if (stripeIntent != null) {
-            _liveMode.postValue(stripeIntent.isLiveMode)
             warnUnactivatedIfNeeded(stripeIntent.unactivatedPaymentMethods)
         }
     }
@@ -650,7 +647,6 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_READY = "google_pay_ready"
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
-        internal const val SAVE_STATE_LIVE_MODE = "save_state_live_mode"
         internal const val LINK_CONFIGURATION = "link_configuration"
     }
 }
