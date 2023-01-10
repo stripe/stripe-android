@@ -188,18 +188,19 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private fun handleBackStackChanged(backStack: List<BaseSheetViewModel.TransitionTarget>) {
         val target = backStack.lastOrNull() ?: return
 
-        buttonContainer.isVisible = true
-
-        val effect = target.toNavigationEffect(this) ?: return
-
-        when (effect) {
+        when (target.toNavigationEffect(this)) {
             is NavigationEffect.Navigate -> {
                 onTransitionTarget(target)
             }
             is NavigationEffect.GoBack -> {
                 supportFragmentManager.popBackStack()
             }
+            null -> {
+                // Nothing to do here
+            }
         }
+
+        buttonContainer.isVisible = true
     }
 
     private fun onTransitionTarget(

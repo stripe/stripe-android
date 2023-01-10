@@ -20,17 +20,15 @@ internal sealed interface NavigationEffect {
 
 internal fun TransitionTarget.toNavigationEffect(host: AppCompatActivity): NavigationEffect? {
     val currentFragment = host.supportFragmentManager.findFragmentById(R.id.fragment_container)
-    val canIgnoreTransition = canIgnoreTransition(currentFragment, target = this)
+    val canIgnoreTransition = currentFragment?.canIgnoreTransition(this) ?: true
 
     if (canIgnoreTransition) {
         return null
     }
 
-    val hasBackStack = host.supportFragmentManager.backStackEntryCount > 0
-
     return when (this) {
         SelectSavedPaymentMethods -> {
-            if (hasBackStack) {
+            if (currentFragment is BaseAddPaymentMethodFragment) {
                 NavigationEffect.GoBack
             } else {
                 NavigationEffect.Navigate(this)
@@ -43,17 +41,16 @@ internal fun TransitionTarget.toNavigationEffect(host: AppCompatActivity): Navig
     }
 }
 
-internal fun canIgnoreTransition(
-    currentFragment: Fragment?,
+internal fun Fragment.canIgnoreTransition(
     target: TransitionTarget,
 ): Boolean {
     return when (target) {
         SelectSavedPaymentMethods -> {
-            currentFragment is BasePaymentMethodsListFragment
+            this is BasePaymentMethodsListFragment
         }
         AddFirstPaymentMethod,
         AddAnotherPaymentMethod -> {
-            currentFragment is BaseAddPaymentMethodFragment
+            this is BaseAddPaymentMethodFragment
         }
     }
 }
