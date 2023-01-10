@@ -161,7 +161,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
-        viewModel.contentVisible.observe(this) {
+        viewModel.contentVisible.launchAndCollectIn(this) {
             scrollView.isVisible = it
         }
 

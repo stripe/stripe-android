@@ -381,6 +381,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(processing[0]).isTrue()
 
         viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+        assertThat(viewModel.contentVisible.value).isTrue()
 
         assertThat(viewState.size).isEqualTo(2)
         assertThat(processing.size).isEqualTo(2)
@@ -445,8 +446,8 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
+        assertThat(viewModel.contentVisible.value).isTrue()
         assertThat(processing.size).isEqualTo(2)
-
         assertThat(viewState.size).isEqualTo(2)
         assertThat(viewState[1])
             .isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage("An internal error occurred.")))
@@ -893,6 +894,24 @@ internal class PaymentSheetViewModelTest {
             viewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
 
             assertThat(awaitItem()).isEqualTo(PrimaryButton.State.Ready)
+        }
+    }
+
+    @Test
+    fun `setContentVisible updates content visible state`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.contentVisible.test {
+            // Initially true
+            assertThat(awaitItem()).isTrue()
+
+            viewModel.setContentVisible(false)
+
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.setContentVisible(true)
+
+            assertThat(awaitItem()).isTrue()
         }
     }
 

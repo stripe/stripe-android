@@ -163,8 +163,8 @@ internal abstract class BaseSheetViewModel(
 
     val processing: LiveData<Boolean> = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
 
-    private val _contentVisible = MutableLiveData(true)
-    internal val contentVisible: LiveData<Boolean> = _contentVisible.distinctUntilChanged()
+    private val _contentVisible = MutableStateFlow(true)
+    internal val contentVisible: StateFlow<Boolean> = _contentVisible
 
     /**
      * Use this to override the current UI state of the primary button. The UI state is reset every

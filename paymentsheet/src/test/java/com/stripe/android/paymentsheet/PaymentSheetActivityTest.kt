@@ -340,7 +340,10 @@ internal class PaymentSheetActivityTest {
             viewModel.checkoutWithGooglePay()
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
             assertThat(activity.viewBinding.buyButton.isEnabled).isFalse()
+            assertThat(viewModel.contentVisible.value).isFalse()
+
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            assertThat(viewModel.contentVisible.value).isTrue()
 
             // Update to saved card
             viewModel.updateSelection(
@@ -388,6 +391,7 @@ internal class PaymentSheetActivityTest {
 
             activity.viewBinding.googlePayButton.callOnClick()
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            assertThat(viewModel.contentVisible.value).isTrue()
 
             // Still using the initial PaymentSelection
             assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
