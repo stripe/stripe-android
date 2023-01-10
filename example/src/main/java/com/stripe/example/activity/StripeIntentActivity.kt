@@ -108,12 +108,16 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     protected fun createAndConfirmSetupIntent(
         country: String,
         params: PaymentMethodCreateParams,
+        supportedPaymentMethods: String? = null,
         stripeAccountId: String? = null,
         onSetupIntentCreated: (String) -> Unit = {}
     ) {
         keyboardController.hide()
 
-        viewModel.createSetupIntent(country).observe(
+        viewModel.createSetupIntent(
+            country = country,
+            supportedPaymentMethods = supportedPaymentMethods,
+        ).observe(
             this
         ) { result ->
             result.onSuccess {
