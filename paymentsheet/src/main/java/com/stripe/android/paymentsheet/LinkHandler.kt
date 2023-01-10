@@ -88,7 +88,7 @@ internal class LinkHandler @Inject constructor(
         linkLauncher.unregister()
     }
 
-    fun setupLink(scope: CoroutineScope, state: LinkState?) {
+    fun setupLink(scope: CoroutineScope, state: LinkState?, shouldLaunchEagerly: Boolean) {
         _isLinkEnabled.value = state != null
         _activeLinkSession.value = state?.loginState == LinkState.LoginState.LoggedIn
 
@@ -96,22 +96,25 @@ internal class LinkHandler @Inject constructor(
 
         _linkConfiguration.value = state.configuration
 
-        when (state.loginState) {
-            LinkState.LoginState.LoggedIn -> {
-                launchLink(state.configuration, launchedDirectly = true)
-            }
-            LinkState.LoginState.NeedsVerification -> {
-                scope.launch {
-                    setupLinkWithVerification(state.configuration)
+        if (shouldLaunchEagerly) {
+            when (state.loginState) {
+                LinkState.LoginState.LoggedIn -> {
+                    launchLink(state.configuration, launchedDirectly = true)
+                }
+                LinkState.LoginState.NeedsVerification -> {
+                    scope.launch {
+                        setupLinkWithVerification(state.configuration)
+                    }
+                }
+                LinkState.LoginState.LoggedOut -> {
+                    // Nothing to do here
                 }
             }
-            LinkState.LoginState.LoggedOut -> {
-                // Nothing to do here
+        } else {
+            if (state.isReadyForUse) {
+                // If account exists, select Link by default
+                savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
             }
-        }
-        if (state.isReadyForUse) {
-            // If account exists, select Link by default
-            savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
         }
     }
 
