@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.AnimationConstants
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
 
@@ -126,14 +127,16 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         lifecycleScope.launch {
-            viewModel.backStack.collect(this@PaymentSheetActivity::handleBackStackChanged)
+            viewModel.currentScreen
+                .filterNotNull()
+                .collect(this@PaymentSheetActivity::handleCurrentScreenChanged)
         }
 
         if (savedInstanceState == null) {
             viewModel.transitionToFirstScreenWhenReady()
         } else {
             val backStack = supportFragmentManager.constructBackStack()
-            viewModel.syncBackStackIfNeeded(backStack = backStack)
+            viewModel.restoreBackStack(backStack = backStack)
         }
 
         viewModel.startConfirm.observe(this) { event ->
@@ -185,12 +188,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         return result
     }
 
-    private fun handleBackStackChanged(backStack: List<BaseSheetViewModel.TransitionTarget>) {
-        val target = backStack.lastOrNull() ?: return
-
-        when (target.toNavigationEffect(this)) {
+    private fun handleCurrentScreenChanged(currentScreen: BaseSheetViewModel.TransitionTarget) {
+        when (currentScreen.toNavigationEffect(this)) {
             is NavigationEffect.Navigate -> {
-                onTransitionTarget(target)
+                onTransitionTarget(currentScreen)
             }
             is NavigationEffect.GoBack -> {
                 supportFragmentManager.popBackStack()

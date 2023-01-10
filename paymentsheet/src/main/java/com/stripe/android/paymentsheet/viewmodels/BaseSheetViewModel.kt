@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -150,8 +151,15 @@ internal abstract class BaseSheetViewModel(
         savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val _backStack = MutableStateFlow<List<TransitionTarget>>(emptyList())
-    internal val backStack: StateFlow<List<TransitionTarget>> = _backStack
+    private val backStack = MutableStateFlow<List<TransitionTarget>>(emptyList())
+
+    internal val currentScreen: StateFlow<TransitionTarget?> = backStack
+        .map { it.lastOrNull() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = null,
+        )
 
     private val _liveMode = savedStateHandle.getLiveData<Boolean>(SAVE_STATE_LIVE_MODE)
     internal val liveMode: LiveData<Boolean> = _liveMode
@@ -331,16 +339,16 @@ internal abstract class BaseSheetViewModel(
 
     protected fun transitionTo(target: TransitionTarget) {
         clearErrorMessages()
-        _backStack.update { it + target }
+        backStack.update { it + target }
     }
 
     fun transitionToAddPaymentScreen() {
         transitionTo(TransitionTarget.AddAnotherPaymentMethod)
     }
 
-    fun syncBackStackIfNeeded(backStack: List<TransitionTarget>) {
-        if (_backStack.value.isEmpty()) {
-            _backStack.value = backStack
+    fun restoreBackStack(backStack: List<TransitionTarget>) {
+        if (this.backStack.value.isEmpty()) {
+            this.backStack.value = backStack
         }
     }
 
@@ -608,7 +616,7 @@ internal abstract class BaseSheetViewModel(
 
     private fun onUserBack() {
         clearErrorMessages()
-        _backStack.update { it.dropLast(1) }
+        backStack.update { it.dropLast(1) }
 
         // Reset the selection to the one from before opening the add payment method screen
         val paymentOptionsState = paymentOptionsState.value

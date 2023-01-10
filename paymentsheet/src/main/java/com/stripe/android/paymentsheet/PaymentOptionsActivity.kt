@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.AnimationConstants
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 /**
@@ -93,7 +94,9 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         lifecycleScope.launch {
-            viewModel.backStack.collect(this@PaymentOptionsActivity::handleBackStackChanged)
+            viewModel.currentScreen
+                .filterNotNull()
+                .collect(this@PaymentOptionsActivity::handleCurrentScreenChanged)
         }
 
         if (savedInstanceState == null) {
@@ -139,16 +142,16 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
     }
 
-    private fun handleBackStackChanged(backStack: List<BaseSheetViewModel.TransitionTarget>) {
-        val target = backStack.lastOrNull() ?: return
-        val effect = target.toNavigationEffect(this) ?: return
-
-        when (effect) {
+    private fun handleCurrentScreenChanged(currentScreen: BaseSheetViewModel.TransitionTarget) {
+        when (currentScreen.toNavigationEffect(this)) {
             is NavigationEffect.Navigate -> {
-                onTransitionTarget(target)
+                onTransitionTarget(currentScreen)
             }
             is NavigationEffect.GoBack -> {
                 supportFragmentManager.popBackStack()
+            }
+            null -> {
+                // Nothing to do here
             }
         }
     }
