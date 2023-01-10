@@ -7,6 +7,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -1194,7 +1195,7 @@ internal class PaymentSheetActivityTest {
             }
         }
 
-        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+        assertThat(viewModel.currentScreen.value).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
@@ -1207,7 +1208,7 @@ internal class PaymentSheetActivityTest {
             }
         }
 
-        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+        assertThat(viewModel.currentScreen.value).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
@@ -1226,7 +1227,22 @@ internal class PaymentSheetActivityTest {
             }
         }
 
-        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+        assertThat(viewModel.currentScreen.value).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+    }
+
+    @Test
+    fun `Transitions to AddPaymentMethod when add button is pressed`() {
+        activityScenario().launch(intent).onActivity {
+            idleLooper()
+
+            val recyclerView = it.findViewById<RecyclerView>(R.id.recycler)
+            val adapter = recyclerView.adapter as PaymentOptionsAdapter
+            adapter.addCardClickListener()
+            idleLooper()
+
+            val currentFragment = it.supportFragmentManager.findFragmentById(R.id.fragment_container)
+            assertThat(currentFragment).isInstanceOf(PaymentSheetAddPaymentMethodFragment::class.java)
+        }
     }
 
     private fun currentFragment(activity: PaymentSheetActivity) =

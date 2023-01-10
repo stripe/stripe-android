@@ -125,11 +125,11 @@ internal class PaymentOptionsViewModelTest {
         // no customer, no new card, no paymentMethods
         viewModel.resolveTransitionTarget()
 
-        assertThat(viewModel.backStack.value).isEmpty()
+        assertThat(viewModel.currentScreen.value).isNull()
     }
 
     @Test
-    fun `resolveTransitionTarget new card saved`() {
+    fun `resolveTransitionTarget new card saved`() = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -139,13 +139,15 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        viewModel.resolveTransitionTarget()
-
-        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
+        viewModel.currentScreen.test {
+            skipItems(1)
+            viewModel.resolveTransitionTarget()
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
+        }
     }
 
     @Test
-    fun `resolveTransitionTarget new card NOT saved`() {
+    fun `resolveTransitionTarget new card NOT saved`() = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -155,11 +157,15 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        viewModel.resolveTransitionTarget()
-        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
+        viewModel.currentScreen.test {
+            skipItems(1)
 
-        viewModel.resolveTransitionTarget()
-        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
+            viewModel.resolveTransitionTarget()
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
+
+            viewModel.resolveTransitionTarget()
+            expectNoEvents()
+        }
     }
 
     @Test

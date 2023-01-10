@@ -268,7 +268,7 @@ internal class PaymentOptionsActivityTest {
             }
         }
 
-        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+        assertThat(viewModel.currentScreen.value).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
@@ -287,7 +287,7 @@ internal class PaymentOptionsActivityTest {
             }
         }
 
-        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+        assertThat(viewModel.currentScreen.value).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
@@ -303,7 +303,7 @@ internal class PaymentOptionsActivityTest {
             idleLooper()
         }
 
-        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+        assertThat(viewModel.currentScreen.value).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
@@ -319,7 +319,7 @@ internal class PaymentOptionsActivityTest {
             idleLooper()
         }
 
-        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+        assertThat(viewModel.currentScreen.value).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
@@ -342,7 +342,7 @@ internal class PaymentOptionsActivityTest {
             }
         }
 
-        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+        assertThat(viewModel.currentScreen.value).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test

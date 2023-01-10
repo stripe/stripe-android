@@ -717,11 +717,15 @@ internal class PaymentSheetViewModelTest {
     fun `Transition only happens when view model is ready`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
 
-        viewModel.transitionToFirstScreenWhenReady()
-        assertThat(viewModel.backStack.value).isEmpty()
+        viewModel.currentScreen.test {
+            skipItems(1)
 
-        viewModel._isGooglePayReady.value = true
-        assertThat(viewModel.backStack.value).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+            viewModel.transitionToFirstScreenWhenReady()
+            expectNoEvents()
+
+            viewModel._isGooglePayReady.value = true
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+        }
     }
 
     @Test
