@@ -6,11 +6,18 @@ import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.model.ConsentPane
 
 internal data class ConsentState(
-    val consent: Async<ConsentPane> = Uninitialized,
+    val consent: Async<Payload> = Uninitialized,
+    val merchantLogos: List<String> = emptyList(),
     val currentBottomSheet: BottomSheetContent = BottomSheetContent.DATA,
     val acceptConsent: Async<Unit> = Uninitialized,
     val viewEffect: ViewEffect? = null
 ) : MavericksState {
+
+    data class Payload(
+        val consent: ConsentPane,
+        val merchantLogos: List<String>,
+        val shouldShowMerchantLogos: Boolean
+    )
 
     enum class BottomSheetContent {
         LEGAL,

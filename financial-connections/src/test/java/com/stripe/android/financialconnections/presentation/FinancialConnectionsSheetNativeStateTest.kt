@@ -20,7 +20,8 @@ internal class FinancialConnectionsSheetNativeStateTest {
             FinancialConnectionsSheetNativeState(
                 args = args(
                     VisualUpdate(
-                        reducedBranding = true
+                        reducedBranding = true,
+                        merchantLogos = emptyList()
                     )
                 )
             ).reducedBranding,
@@ -33,7 +34,8 @@ internal class FinancialConnectionsSheetNativeStateTest {
             FinancialConnectionsSheetNativeState(
                 args = args(
                     VisualUpdate(
-                        reducedBranding = false
+                        reducedBranding = false,
+                        merchantLogos = emptyList()
                     )
                 )
             ).reducedBranding,
@@ -51,7 +53,7 @@ internal class FinancialConnectionsSheetNativeStateTest {
         ).isFalse()
     }
 
-    fun args(visual: VisualUpdate?) = FinancialConnectionsSheetNativeActivityArgs(
+    private fun args(visual: VisualUpdate?) = FinancialConnectionsSheetNativeActivityArgs(
         configuration = configuration,
         initialSyncResponse = ApiKeyFixtures.syncResponse().copy(
             visual = visual

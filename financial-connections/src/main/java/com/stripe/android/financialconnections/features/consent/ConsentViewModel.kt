@@ -22,7 +22,10 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.NavigationDirections
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
 import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.financialconnections.utils.experimentAssignment
+import com.stripe.android.financialconnections.utils.trackExposure
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
@@ -42,7 +45,15 @@ internal class ConsentViewModel @Inject constructor(
         logErrors()
         suspend {
             val sync = getOrFetchSync()
-            MarkdownParser.toHtml(sync.text!!.consent!!)
+            val manifest = sync.manifest
+            val shouldShowMerchantLogos: Boolean = manifest
+                .experimentAssignment(CONNECTIONS_CONSENT_COMBINED_LOGO) == "treatment"
+            eventTracker.trackExposure(CONNECTIONS_CONSENT_COMBINED_LOGO, manifest)
+            ConsentState.Payload(
+                consent = MarkdownParser.toHtml(sync.text!!.consent!!),
+                shouldShowMerchantLogos = shouldShowMerchantLogos,
+                merchantLogos = sync.visual?.merchantLogos ?: emptyList()
+            )
         }.execute { copy(consent = it) }
     }
 
@@ -102,6 +113,7 @@ internal class ConsentViewModel @Inject constructor(
                         )
                     }
                 }
+
                 null -> logger.error("Unrecognized clickable text: $uri")
             }
         }
