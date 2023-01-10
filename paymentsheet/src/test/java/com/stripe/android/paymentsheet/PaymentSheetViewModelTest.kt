@@ -717,7 +717,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem()).isEqualTo(Loading)
 
             viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
     }
 
@@ -841,6 +841,30 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `Resets selection correctly after cancelling Google Pay`() = runTest {
+        val viewModel = createViewModel()
+
+        val initialSelection = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        )
+
+        viewModel.selection.test {
+            // New valid card
+            assertThat(awaitItem()).isInstanceOf(PaymentSelection.Saved::class.java)
+            viewModel.updateSelection(initialSelection)
+            viewModel.transitionToAddPaymentScreen()
+            assertThat(awaitItem()).isEqualTo(initialSelection)
+            viewModel.checkoutWithGooglePay()
+            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+
+            // Still using the initial PaymentSelection
+            expectNoEvents()
+        }
+    }
+
+    @Test
     fun `updateSelection() posts mandate text when selected payment is us_bank_account`() {
         val viewModel = createViewModel()
         viewModel.updateSelection(
@@ -888,6 +912,18 @@ internal class PaymentSheetViewModelTest {
             viewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
 
             assertThat(awaitItem()).isEqualTo(PrimaryButton.State.Ready)
+        }
+    }
+
+    @Test
+    fun `Content should be hidden when Google Pay is visible`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.contentVisible.test {
+            assertThat(awaitItem()).isTrue()
+            viewModel.checkoutWithGooglePay()
+            assertThat(awaitItem()).isFalse()
+            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            assertThat(awaitItem()).isTrue()
         }
     }
 
@@ -991,6 +1027,7 @@ internal class PaymentSheetViewModelTest {
     fun `Sends correct event when navigating to AddFirstPaymentMethod screen`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            customerPaymentMethods = listOf()
         )
         viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
 
@@ -1012,7 +1049,9 @@ internal class PaymentSheetViewModelTest {
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.NeedsVerification,
-            )
+            ),
+            customerPaymentMethods = listOf(),
+            customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
         )
         viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
 
@@ -1034,7 +1073,9 @@ internal class PaymentSheetViewModelTest {
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedIn,
-            )
+            ),
+            customerPaymentMethods = listOf(),
+            customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
         )
         viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
 
@@ -1103,14 +1144,47 @@ internal class PaymentSheetViewModelTest {
         override fun getRepository(): LpmRepository = lpmRepository
     }
 
+    @Test
+    fun `updateSelection with new payment method updates the current selection`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.selection.test {
+            val newSelection = PaymentSelection.New.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            )
+            assertThat(awaitItem())
+                .isInstanceOf(PaymentSelection.Saved::class.java)
+            viewModel.updateSelection(newSelection)
+            assertThat(awaitItem())
+                .isEqualTo(newSelection)
+            assertThat(viewModel.newPaymentSelection).isEqualTo(newSelection)
+        }
+    }
+
+    @Test
+    fun `updateSelection with saved payment method updates the current selection`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.selection.test {
+            val savedSelection = PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+            viewModel.updateSelection(savedSelection)
+            assertThat(awaitItem()).isEqualTo(savedSelection)
+            assertThat(viewModel.newPaymentSelection).isEqualTo(null)
+        }
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
-        customerRepository: CustomerRepository = FakeCustomerRepository(PAYMENT_METHODS),
+        customerPaymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
+        customerRepository: CustomerRepository = FakeCustomerRepository(customerPaymentMethods),
         shouldFailLoad: Boolean = false,
         linkState: LinkState? = null,
         delay: Duration = Duration.ZERO,
-        customerPaymentMethods: List<PaymentMethod> = listOf(),
         lpmResourceRepository: ResourceRepository<LpmRepository> = this.lpmResourceRepository
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)

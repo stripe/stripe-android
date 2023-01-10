@@ -68,7 +68,6 @@ import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
-import com.stripe.android.utils.TestUtils.getOrAwaitValue
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
@@ -265,6 +264,7 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
+
             assertThat(activity.viewBinding.message.isVisible).isFalse()
 
             viewModel.onError("some error")
@@ -273,6 +273,9 @@ internal class PaymentSheetActivityTest {
 
             val newSelection = PaymentSelection.Saved(paymentMethod = paymentMethods.last())
             viewModel.updateSelection(newSelection)
+
+            activity.viewBinding.googlePayButton.performClick()
+            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
             assertThat(activity.viewBinding.message.isVisible).isFalse()
         }
@@ -366,34 +369,6 @@ internal class PaymentSheetActivityTest {
             )
             assertThat(activity.viewBinding.buyButton.isVisible).isTrue()
             assertThat(activity.viewBinding.buyButton.isEnabled).isTrue()
-        }
-    }
-
-    @Test
-    fun `when back to Ready state should update PaymentSelection`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            // wait for bottom sheet to animate in
-            idleLooper()
-
-            // New valid card
-            val initialSelection = PaymentSelection.New.Card(
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                CardBrand.Visa,
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
-            )
-            viewModel.updateSelection(initialSelection)
-
-            viewModel.transitionToAddPaymentScreen()
-
-            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
-
-            activity.viewBinding.googlePayButton.callOnClick()
-            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
-            assertThat(viewModel.contentVisible.value).isTrue()
-
-            // Still using the initial PaymentSelection
-            assertThat(viewModel.selection.getOrAwaitValue()).isEqualTo(initialSelection)
         }
     }
 
@@ -884,7 +859,8 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.topMessage.isVisible).isTrue()
             assertThat(activity.viewBinding.topMessage.text.toString()).isEqualTo(errorMessage)
 
-            viewModel.updateSelection(PaymentSelection.GooglePay)
+            activity.viewBinding.googlePayButton.performClick()
+            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
 
             assertThat(activity.viewBinding.message.isVisible).isFalse()
             assertThat(activity.viewBinding.message.text.isNullOrEmpty()).isTrue()
