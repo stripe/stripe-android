@@ -10,6 +10,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
@@ -50,10 +51,12 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -90,8 +93,7 @@ internal abstract class BaseSheetViewModel(
     internal val merchantName = config?.merchantDisplayName
         ?: application.applicationInfo.loadLabel(application.packageManager).toString()
 
-    // a fatal error
-    protected val _fatal = MutableLiveData<Throwable>()
+    protected var mostRecentError: Throwable? = null
 
     @VisibleForTesting
     internal val _isGooglePayReady = savedStateHandle.getLiveData<Boolean>(SAVE_GOOGLE_PAY_READY)
@@ -114,8 +116,8 @@ internal abstract class BaseSheetViewModel(
         savedStateHandle.getLiveData<LinkPaymentLauncher.Configuration>(LINK_CONFIGURATION)
     internal val linkConfiguration: LiveData<LinkPaymentLauncher.Configuration> = _linkConfiguration
 
-    private val _stripeIntent = savedStateHandle.getLiveData<StripeIntent>(SAVE_STRIPE_INTENT)
-    internal val stripeIntent: LiveData<StripeIntent?> = _stripeIntent
+    internal val stripeIntent: StateFlow<StripeIntent?> = savedStateHandle
+        .getStateFlow<StripeIntent?>(SAVE_STRIPE_INTENT, null)
 
     internal var supportedPaymentMethods
         get() = savedStateHandle.get<List<PaymentMethodCode>>(
@@ -152,9 +154,6 @@ internal abstract class BaseSheetViewModel(
     private val _transition = MutableLiveData<Event<TransitionTarget>?>(null)
     internal val transition: LiveData<Event<TransitionTarget>?> = _transition
 
-    private val _liveMode = savedStateHandle.getLiveData<Boolean>(SAVE_STATE_LIVE_MODE)
-    internal val liveMode: LiveData<Boolean> = _liveMode
-
     private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
     internal val selection: LiveData<PaymentSelection?> = _selection
 
@@ -162,21 +161,21 @@ internal abstract class BaseSheetViewModel(
 
     val processing: LiveData<Boolean> = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
 
-    private val _contentVisible = MutableLiveData(true)
-    internal val contentVisible: LiveData<Boolean> = _contentVisible.distinctUntilChanged()
+    private val _contentVisible = MutableStateFlow(true)
+    internal val contentVisible: StateFlow<Boolean> = _contentVisible
 
     /**
      * Use this to override the current UI state of the primary button. The UI state is reset every
      * time the payment selection is changed.
      */
-    private val _primaryButtonUIState = MutableLiveData<PrimaryButton.UIState?>()
-    val primaryButtonUIState: LiveData<PrimaryButton.UIState?> = _primaryButtonUIState
+    private val _primaryButtonUIState = MutableStateFlow<PrimaryButton.UIState?>(null)
+    val primaryButtonUIState: StateFlow<PrimaryButton.UIState?> = _primaryButtonUIState
 
-    private val _primaryButtonState = MutableLiveData<PrimaryButton.State>()
-    val primaryButtonState: LiveData<PrimaryButton.State> = _primaryButtonState
+    private val _primaryButtonState = MutableStateFlow<PrimaryButton.State?>(null)
+    val primaryButtonState: StateFlow<PrimaryButton.State?> = _primaryButtonState
 
-    private val _notesText = MutableLiveData<String?>()
-    internal val notesText: LiveData<String?> = _notesText
+    private val _notesText = MutableStateFlow<String?>(null)
+    internal val notesText: StateFlow<String?> = _notesText
 
     private val _showLinkVerificationDialog = MutableLiveData(false)
     val showLinkVerificationDialog: LiveData<Boolean> = _showLinkVerificationDialog
@@ -210,7 +209,7 @@ internal abstract class BaseSheetViewModel(
 
     val ctaEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
-            primaryButtonUIState,
+            primaryButtonUIState.asLiveData(),
             buttonsEnabled,
             selection
         ).forEach { source ->
@@ -294,7 +293,7 @@ internal abstract class BaseSheetViewModel(
     protected val isReadyEvents = MediatorLiveData<Boolean>().apply {
         listOf(
             savedSelection,
-            stripeIntent,
+            stripeIntent.asLiveData(),
             paymentMethods,
             isGooglePayReady,
             isResourceRepositoryReady,
@@ -329,6 +328,7 @@ internal abstract class BaseSheetViewModel(
     abstract fun transitionToFirstScreen()
 
     protected fun transitionTo(target: TransitionTarget) {
+        clearErrorMessages()
         _transition.postValue(Event(target))
     }
 
@@ -383,10 +383,11 @@ internal abstract class BaseSheetViewModel(
         }
 
         if (stripeIntent != null) {
-            _liveMode.postValue(stripeIntent.isLiveMode)
             warnUnactivatedIfNeeded(stripeIntent.unactivatedPaymentMethods)
         }
     }
+
+    abstract fun clearErrorMessages()
 
     private fun warnUnactivatedIfNeeded(unactivatedPaymentMethodTypes: List<String>) {
         if (unactivatedPaymentMethodTypes.isEmpty()) {
@@ -589,6 +590,8 @@ internal abstract class BaseSheetViewModel(
     abstract fun onUserCancel()
 
     fun onUserBack() {
+        clearErrorMessages()
+
         // Reset the selection to the one from before opening the add payment method screen
         val paymentOptionsState = paymentOptionsState.value
         updateSelection(paymentOptionsState.selectedItem?.toPaymentSelection())
@@ -644,7 +647,6 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_READY = "google_pay_ready"
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
-        internal const val SAVE_STATE_LIVE_MODE = "save_state_live_mode"
         internal const val LINK_CONFIGURATION = "link_configuration"
     }
 }

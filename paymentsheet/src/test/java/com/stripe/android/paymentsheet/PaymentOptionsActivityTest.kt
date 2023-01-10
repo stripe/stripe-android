@@ -548,6 +548,21 @@ internal class PaymentOptionsActivityTest {
         assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
     }
 
+    @Test
+    fun `Clears error on user selection`() {
+        val scenario = activityScenario()
+        scenario.launch(createIntent()).onActivity { activity ->
+            idleLooper()
+
+            viewModel.onError("some error")
+            assertThat(activity.viewBinding.message.isVisible).isTrue()
+            assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
+
+            viewModel.onUserSelection()
+            assertThat(activity.viewBinding.message.isVisible).isFalse()
+        }
+    }
+
     private fun createIntent(
         args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS
     ): Intent {

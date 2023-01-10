@@ -126,6 +126,7 @@ internal class IdentityActivity :
 
         super.onCreate(savedInstanceState)
         identityViewModel.retrieveAndBufferVerificationPage()
+        identityViewModel.registerActivityResultCaller(this)
         fallbackUrlLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) {

@@ -76,9 +76,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
     internal val paymentOptionResult: LiveData<PaymentOptionResult> = _paymentOptionResult
 
-    private val _error = MutableLiveData<String>()
-    internal val error: LiveData<String>
-        get() = _error
+    private val _error = MutableLiveData<String?>()
+    internal val error: LiveData<String?> = _error
 
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
@@ -129,7 +128,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun onFatal(throwable: Throwable) {
-        _fatal.value = throwable
+        mostRecentError = throwable
         _paymentOptionResult.value =
             PaymentOptionResult.Failed(
                 error = throwable,
@@ -140,7 +139,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override fun onUserCancel() {
         _paymentOptionResult.value =
             PaymentOptionResult.Canceled(
-                mostRecentError = _fatal.value,
+                mostRecentError = mostRecentError,
                 paymentMethods = _paymentMethods.value
             )
     }
@@ -159,6 +158,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     fun onUserSelection() {
+        clearErrorMessages()
+
         selection.value?.let { paymentSelection ->
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
@@ -248,6 +249,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    override fun clearErrorMessages() {
+        _error.value = null
     }
 
     private fun processExistingPaymentMethod(paymentSelection: PaymentSelection) {

@@ -13,7 +13,9 @@ import com.stripe.android.financialconnections.model.LegalDetailsNotice
 
 internal class ConsentStates : PreviewParameterProvider<ConsentState> {
     override val values = sequenceOf(
-        canonical()
+        canonical(),
+        manualEntryPlusMicrodeposits(),
+        withPlatformLogos()
     )
 
     override val count: Int
@@ -21,8 +23,66 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
 
     // TODO@carlosmuvi migrate to PreviewParameterProvider when showkase adds support.
     companion object {
-        fun canonical() = ConsentState(consent = Success(sampleConsent().copy(belowCta = null)))
-        fun manualEntryPlusMicrodeposits() = ConsentState(consent = Success(sampleConsent()))
+        fun canonical() =
+            ConsentState(
+                consent = Success(
+                    ConsentState.Payload(
+                        consent = sampleConsent().copy(belowCta = null),
+                        merchantLogos = emptyList(),
+                        shouldShowMerchantLogos = false
+                    )
+                )
+            )
+
+        fun withNoLogos() =
+            ConsentState(
+                consent = Success(
+                    ConsentState.Payload(
+                        consent = sampleConsent().copy(belowCta = null),
+                        merchantLogos = emptyList(),
+                        shouldShowMerchantLogos = true
+                    )
+                )
+            )
+
+        fun withPlatformLogos() =
+            ConsentState(
+                consent = Success(
+                    ConsentState.Payload(
+                        consent = sampleConsent().copy(belowCta = null),
+                        merchantLogos = listOf(
+                            "www.logo1.com",
+                            "www.logo2.com"
+                        ),
+                        shouldShowMerchantLogos = true
+                    )
+                )
+            )
+
+        fun withConnectedAccountLogos() =
+            ConsentState(
+                consent = Success(
+                    ConsentState.Payload(
+                        consent = sampleConsent().copy(belowCta = null),
+                        merchantLogos = listOf(
+                            "www.logo1.com",
+                            "www.logo2.com",
+                            "www.logo3.com",
+                        ),
+                        shouldShowMerchantLogos = true
+                    )
+                )
+            )
+
+        fun manualEntryPlusMicrodeposits() = ConsentState(
+            consent = Success(
+                ConsentState.Payload(
+                    consent = sampleConsent(),
+                    merchantLogos = emptyList(),
+                    shouldShowMerchantLogos = false
+                )
+            )
+        )
 
         @Suppress("LongMethod")
         fun sampleConsent(): ConsentPane = ConsentPane(

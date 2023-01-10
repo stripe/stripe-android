@@ -82,15 +82,14 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             closeSheet(it)
         }
 
-        viewModel.error.observe(this) {
+        viewModel.error.observe(this) { error ->
             updateErrorMessage(
                 messageView,
-                BaseSheetViewModel.UserErrorMessage(it)
+                error?.let { BaseSheetViewModel.UserErrorMessage(it) }
             )
         }
 
         viewModel.transition.observeEvents(this) { transitionTarget ->
-            clearErrorMessages()
             onTransitionTarget(transitionTarget)
         }
 
@@ -99,7 +98,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         viewModel.selection.observe(this) {
-            clearErrorMessages()
+            viewModel.clearErrorMessages()
             resetPrimaryButtonState()
         }
 
@@ -133,7 +132,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         viewBinding.continueButton.setLabel(label)
 
         viewBinding.continueButton.setOnClickListener {
-            clearErrorMessages()
             viewModel.onUserSelection()
         }
     }

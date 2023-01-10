@@ -1,40 +1,22 @@
 package com.stripe.android.identity.navigation
 
-import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.stringResource
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.stripe.android.camera.CameraAdapter
-import com.stripe.android.camera.CameraPreviewImage
-import com.stripe.android.camera.CameraXAdapter
-import com.stripe.android.camera.DefaultCameraErrorListener
-import com.stripe.android.camera.scanui.CameraView
-import com.stripe.android.camera.scanui.util.startAnimation
-import com.stripe.android.camera.scanui.util.startAnimationIfNotRunning
-import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState
-import com.stripe.android.identity.states.IdentityScanState.Companion.isFront
-import com.stripe.android.identity.states.IdentityScanState.Companion.isNullOrFront
+import com.stripe.android.identity.ui.DocumentScanMessageRes
 import com.stripe.android.identity.ui.DocumentScanScreen
-import com.stripe.android.identity.utils.fragmentIdToScreenName
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import com.stripe.android.identity.viewmodel.IdentityScanViewModel
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 /**
  * Fragment for scanning ID, Passport and Driver's license
@@ -42,10 +24,12 @@ import kotlinx.coroutines.launch
 internal abstract class IdentityDocumentScanFragment(
     identityCameraScanViewModelFactory: ViewModelProvider.Factory,
     identityViewModelFactory: ViewModelProvider.Factory
-) : IdentityCameraScanFragment(
-    identityCameraScanViewModelFactory,
-    identityViewModelFactory
-) {
+) : Fragment() {
+    val identityScanViewModel: IdentityScanViewModel by viewModels { identityCameraScanViewModelFactory }
+    val identityViewModel: IdentityViewModel by activityViewModels { identityViewModelFactory }
+
+    protected abstract val destinationRoute: IdentityTopLevelDestination.DestinationRoute
+
     abstract val frontScanType: IdentityScanState.ScanType
     abstract val backScanType: IdentityScanState.ScanType?
 
@@ -70,121 +54,23 @@ internal abstract class IdentityDocumentScanFragment(
     ) = ComposeView(requireContext()).apply {
         setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
         setContent {
-            val changedDisplayState by identityScanViewModel.displayStateChangedFlow.collectAsState()
-            val newDisplayState by remember {
-                derivedStateOf {
-                    changedDisplayState?.first
-                }
-            }
-            val targetScanType by identityScanViewModel.targetScanTypeFlow.collectAsState()
-
             DocumentScanScreen(
-                title =
-                if (targetScanType.isNullOrFront()) {
-                    stringResource(id = frontTitleStringRes)
-                } else {
-                    stringResource(id = backTitleStringRes)
-                },
-                message = when (newDisplayState) {
-                    is IdentityScanState.Finished -> stringResource(id = R.string.scanned)
-                    is IdentityScanState.Found -> stringResource(id = R.string.hold_still)
-                    is IdentityScanState.Initial -> {
-                        if (targetScanType.isNullOrFront()) {
-                            stringResource(id = frontMessageStringRes)
-                        } else {
-                            stringResource(id = backMessageStringRes)
-                        }
-                    }
-
-                    is IdentityScanState.Satisfied -> stringResource(id = R.string.scanned)
-                    is IdentityScanState.TimeOut -> ""
-                    is IdentityScanState.Unsatisfied -> ""
-                    null -> {
-                        if (targetScanType.isNullOrFront()) {
-                            stringResource(id = frontMessageStringRes)
-                        } else {
-                            stringResource(id = backMessageStringRes)
-                        }
-                    }
-                },
-                newDisplayState = newDisplayState,
-                onCameraViewCreated = {
-                    if (cameraView == null) {
-                        cameraView = it
-                        requireNotNull(cameraView)
-                            .viewFinderWindowView
-                            .setBackgroundResource(
-                                R.drawable.viewfinder_background
-                            )
-                        cameraAdapter = createCameraAdapter()
-                    }
-                },
-                onContinueClicked = {
-                    collectDocumentUploadedStateAndPost(
-                        collectedDataParamType,
-                        requireNotNull(targetScanType) {
-                            "targetScanType is still null"
-                        }.isFront()
-                    )
-                }
+                navController = findNavController(),
+                identityViewModel = identityViewModel,
+                identityScanViewModel = identityScanViewModel,
+                frontScanType = frontScanType,
+                backScanType = backScanType,
+                shouldStartFromBack = shouldStartFromBack(),
+                messageRes = DocumentScanMessageRes(
+                    frontTitleStringRes,
+                    backTitleStringRes,
+                    frontMessageStringRes,
+                    backMessageStringRes
+                ),
+                collectedDataParamType = collectedDataParamType,
+                route = destinationRoute.route
             )
-            LaunchedEffect(newDisplayState) {
-                when (newDisplayState) {
-                    null -> {
-                        requireNotNull(cameraView).toggleInitial()
-                    }
-                    is IdentityScanState.Initial -> {
-                        requireNotNull(cameraView).toggleInitial()
-                    }
-                    is IdentityScanState.Found -> {
-                        requireNotNull(cameraView).toggleFound()
-                    }
-                    is IdentityScanState.Finished -> {
-                        requireNotNull(cameraView).toggleFinished()
-                    }
-                    else -> {} // no-op
-                }
-            }
         }
-    }
-
-    private fun CameraView.toggleInitial() {
-        viewFinderBackgroundView.visibility = View.VISIBLE
-        viewFinderWindowView.visibility = View.VISIBLE
-        viewFinderBorderView.visibility = View.VISIBLE
-        viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
-    }
-
-    private fun CameraView.toggleFound() {
-        viewFinderBorderView.startAnimationIfNotRunning(R.drawable.viewfinder_border_found)
-    }
-
-    private fun CameraView.toggleFinished() {
-        viewFinderBackgroundView.visibility = View.INVISIBLE
-        viewFinderWindowView.visibility = View.INVISIBLE
-        viewFinderBorderView.visibility = View.INVISIBLE
-        viewFinderBorderView.startAnimation(R.drawable.viewfinder_border_initial)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        if (!shouldStartFromBack()) {
-            identityViewModel.resetDocumentUploadedState()
-        }
-        super.onViewCreated(view, savedInstanceState)
-        identityViewModel.observeForVerificationPage(
-            this,
-            onSuccess = {
-                lifecycleScope.launch(identityViewModel.workContext) {
-                    identityViewModel.screenTracker.screenTransitionFinish(fragmentId.fragmentIdToScreenName())
-                }
-                identityViewModel.sendAnalyticsRequest(
-                    identityViewModel.identityAnalyticsRequestFactory.screenPresented(
-                        scanType = frontScanType,
-                        screenName = fragmentId.fragmentIdToScreenName()
-                    )
-                )
-            }
-        )
     }
 
     /**
@@ -192,102 +78,4 @@ internal abstract class IdentityDocumentScanFragment(
      */
     private fun shouldStartFromBack(): Boolean =
         arguments?.getBoolean(ARG_SHOULD_START_FROM_BACK) == true
-
-    override fun onCameraReady() {
-        if (shouldStartFromBack()) {
-            startScanning(
-                requireNotNull(backScanType) {
-                    "$backScanType should not be null when trying to scan from back"
-                }
-            )
-        } else {
-            startScanning(frontScanType)
-        }
-    }
-
-    private fun createCameraAdapter(): CameraAdapter<CameraPreviewImage<Bitmap>> {
-        return CameraXAdapter(
-            requireNotNull(activity),
-            requireNotNull(cameraView).previewFrame,
-            MINIMUM_RESOLUTION,
-            DefaultCameraErrorListener(requireNotNull(activity)) { cause ->
-                Log.e(TAG, "scan fails with exception: $cause")
-                identityViewModel.sendAnalyticsRequest(
-                    identityViewModel.identityAnalyticsRequestFactory.cameraError(
-                        scanType = frontScanType,
-                        throwable = IllegalStateException(cause)
-                    )
-                )
-            }
-        )
-    }
-
-    /**
-     * Check the upload status of the document, post it with VerificationPageData, and decide
-     * next step based on result.
-     *
-     * If result is missing back, then start scanning back of the document,
-     * else if result is missing selfie, then start scanning selfie,
-     * Otherwise submit
-     */
-    @VisibleForTesting
-    internal fun collectDocumentUploadedStateAndPost(
-        type: CollectedDataParam.Type,
-        isFront: Boolean
-    ) = viewLifecycleOwner.lifecycleScope.launch {
-        val navController = findNavController()
-        if (isFront) {
-            identityViewModel.documentFrontUploadedState
-        } else {
-            identityViewModel.documentBackUploadedState
-        }.collectLatest { uploadedState ->
-            if (uploadedState.hasError()) {
-                identityViewModel.errorCause.postValue(uploadedState.getError())
-                navController.navigateToErrorScreenWithDefaultValues(
-                    requireContext()
-                )
-            } else if (uploadedState.isUploaded()) {
-                identityViewModel.requireVerificationPage(
-                    viewLifecycleOwner,
-                    navController
-                ) {
-                    identityViewModel.postVerificationPageDataAndMaybeNavigate(
-                        navController = navController,
-                        collectedDataParam = if (isFront) {
-                            CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
-                                type = type,
-                                frontHighResResult = requireNotNull(uploadedState.highResResult.data),
-                                frontLowResResult = requireNotNull(uploadedState.lowResResult.data)
-                            )
-                        } else {
-                            CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
-                                type = type,
-                                backHighResResult = requireNotNull(uploadedState.highResResult.data),
-                                backLowResResult = requireNotNull(uploadedState.lowResResult.data)
-                            )
-                        },
-                        fromRoute = route,
-                        onMissingBack = {
-                            startScanning(
-                                requireNotNull(backScanType) {
-                                    "backScanType is null while still missing back"
-                                }
-                            )
-                        },
-                        onReadyToSubmit = {
-                            identityViewModel.submitAndNavigate(
-                                navController = navController,
-                                fromRoute = route
-                            )
-                        }
-                    )
-                }
-            }
-        }
-    }
-
-    internal companion object {
-        const val ARG_SHOULD_START_FROM_BACK = "startFromBack"
-        private val TAG: String = IdentityDocumentScanFragment::class.java.simpleName
-    }
 }

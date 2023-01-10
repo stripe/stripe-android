@@ -7,10 +7,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.core.injection.NonFallbackInjector
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.ui.core.FormUI
+import com.stripe.android.ui.core.elements.FormElement
+import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 
@@ -22,26 +25,50 @@ internal fun PaymentMethodForm(
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     showCheckboxFlow: Flow<Boolean>,
     injector: NonFallbackInjector,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val formViewModel: FormViewModel = viewModel(
         key = args.paymentMethodCode,
         factory = FormViewModel.Factory(
             config = args,
             showCheckboxFlow = showCheckboxFlow,
-            injector = injector
+            injector = injector,
         )
     )
-
-    val formValues by formViewModel.completeFormValues.collectAsState(null)
-
-    LaunchedEffect(args.paymentMethodCode, formValues) {
-        onFormFieldValuesChanged(formValues)
-    }
 
     val hiddenIdentifiers by formViewModel.hiddenIdentifiers.collectAsState(emptySet())
     val elements by formViewModel.elementsFlow.collectAsState(null)
     val lastTextFieldIdentifier by formViewModel.lastTextFieldIdentifier.collectAsState(null)
+
+    PaymentMethodForm(
+        paymentMethodCode = args.paymentMethodCode,
+        enabled = enabled,
+        onFormFieldValuesChanged = onFormFieldValuesChanged,
+        completeFormValues = formViewModel.completeFormValues,
+        hiddenIdentifiers = hiddenIdentifiers,
+        elements = elements,
+        lastTextFieldIdentifier = lastTextFieldIdentifier,
+        modifier = modifier,
+    )
+}
+
+@FlowPreview
+@Composable
+internal fun PaymentMethodForm(
+    paymentMethodCode: PaymentMethodCode,
+    enabled: Boolean,
+    onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
+    completeFormValues: Flow<FormFieldValues?>,
+    hiddenIdentifiers: Set<IdentifierSpec>,
+    elements: List<FormElement>?,
+    lastTextFieldIdentifier: IdentifierSpec?,
+    modifier: Modifier = Modifier,
+) {
+    LaunchedEffect(paymentMethodCode) {
+        completeFormValues.collect {
+            onFormFieldValuesChanged(it)
+        }
+    }
 
     FormUI(
         hiddenIdentifiers = hiddenIdentifiers,

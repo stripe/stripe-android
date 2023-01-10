@@ -17,6 +17,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,11 +34,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.google.android.material.composethemeadapter.MdcTheme
+import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
+import com.stripe.android.identity.navigation.ConsentDestination
+import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.isUnsupportedClient
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
+import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.getDrawableFromUri
@@ -56,34 +65,60 @@ internal const val SCROLLABLE_COLUMN_TAG = "ScrollableColumn"
 
 @Composable
 internal fun ConsentScreen(
-    merchantLogoUri: Uri,
-    verificationState: Resource<VerificationPage>,
-    onComposeFinish: (VerificationPage) -> Unit,
-    onFallbackUrl: (String) -> Unit,
-    onError: (Throwable) -> Unit,
-    onConsentAgreed: () -> Unit,
-    onConsentDeclined: () -> Unit
+    navController: NavController,
+    identityViewModel: IdentityViewModel,
+    fallbackUrlLauncher: FallbackUrlLauncher
 ) {
+    val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
+    val context = LocalContext.current
+
     MdcTheme {
         CheckVerificationPageAndCompose(
-            verificationPageResource = verificationState,
-            onError = onError
+            verificationPageResource = verificationPageState,
+            onError = {
+                identityViewModel.errorCause.postValue(it)
+                navController.navigateToErrorScreenWithDefaultValues(context)
+            }
         ) {
             val verificationPage = remember { it }
             if (verificationPage.isUnsupportedClient()) {
                 LaunchedEffect(Unit) {
-                    onFallbackUrl(verificationPage.fallbackUrl)
+                    fallbackUrlLauncher.launchFallbackUrl(verificationPage.fallbackUrl)
                 }
             } else {
-                SuccessUI(
-                    merchantLogoUri,
-                    verificationPage,
-                    onConsentAgreed,
-                    onConsentDeclined
-                )
                 LaunchedEffect(Unit) {
-                    onComposeFinish(verificationPage)
+                    identityViewModel.updateAnalyticsState { oldState ->
+                        oldState.copy(
+                            requireSelfie = verificationPage.requireSelfie()
+                        )
+                    }
                 }
+                ScreenTransitionLaunchedEffect(
+                    identityViewModel = identityViewModel,
+                    screenName = SCREEN_NAME_CONSENT
+                )
+                SuccessUI(
+                    identityViewModel.verificationArgs.brandLogo,
+                    verificationPage,
+                    onConsentAgreed = {
+                        identityViewModel.postVerificationPageDataAndMaybeNavigate(
+                            navController,
+                            CollectedDataParam(
+                                biometricConsent = true
+                            ),
+                            ConsentDestination.ROUTE.route
+                        )
+                    },
+                    onConsentDeclined = {
+                        identityViewModel.postVerificationPageDataAndMaybeNavigate(
+                            navController,
+                            CollectedDataParam(
+                                biometricConsent = false
+                            ),
+                            ConsentDestination.ROUTE.route
+                        )
+                    }
+                )
             }
         }
     }

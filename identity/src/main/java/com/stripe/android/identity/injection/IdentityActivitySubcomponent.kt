@@ -13,6 +13,7 @@ import com.stripe.android.identity.navigation.IdentityFragmentFactory
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.IdentityIO
+import com.stripe.android.identity.utils.IdentityImageHandler
 import dagger.BindsInstance
 import dagger.Subcomponent
 
@@ -27,6 +28,7 @@ internal interface IdentityActivitySubcomponent {
     val fpsTracker: FPSTracker
     val screenTracker: ScreenTracker
     val verificationArgs: IdentityVerificationSheetContract.Args
+    val identityImageHandler: IdentityImageHandler
 
     @Subcomponent.Builder
     interface Builder {

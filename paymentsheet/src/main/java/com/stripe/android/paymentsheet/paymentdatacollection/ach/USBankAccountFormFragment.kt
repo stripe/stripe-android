@@ -49,6 +49,7 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.NameAndEmailCollection
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.H6Text
@@ -155,7 +156,7 @@ internal class USBankAccountFormFragment : Fragment() {
         )
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                sheetViewModel?.primaryButtonState?.observe(viewLifecycleOwner) { state ->
+                sheetViewModel?.primaryButtonState?.launchAndCollectIn(viewLifecycleOwner) { state ->
                     // When the primary button state is StartProcessing or FinishProcessing
                     // we should disable the inputs of this form. StartProcessing shows the loading
                     // spinner, FinishProcessing shows the checkmark animation

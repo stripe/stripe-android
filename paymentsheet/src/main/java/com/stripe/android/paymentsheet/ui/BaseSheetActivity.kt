@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
@@ -36,6 +37,7 @@ import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.PaymentsThemeDefaults
@@ -160,7 +162,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
-        viewModel.contentVisible.observe(this) {
+        viewModel.contentVisible.launchAndCollectIn(this) {
             scrollView.isVisible = it
         }
 
@@ -168,8 +170,9 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // `rootView`'s click listener
         bottomSheet.isClickable = true
 
-        viewModel.liveMode.observe(this) { isLiveMode ->
-            testModeIndicator.visibility = if (isLiveMode) View.GONE else View.VISIBLE
+        viewModel.stripeIntent.launchAndCollectIn(this) { stripeIntent ->
+            val isLiveMode = stripeIntent?.isLiveMode ?: true
+            testModeIndicator.isGone = isLiveMode
         }
 
         val isDark = baseContext.isSystemDarkTheme()
@@ -195,7 +198,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         if (viewModel.processing.value == false) {
             if (supportFragmentManager.backStackEntryCount > 0) {
                 viewModel.onUserBack()
-                clearErrorMessages()
                 super.onBackPressed()
             } else {
                 viewModel.onUserCancel()
@@ -209,10 +211,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // TODO(mlb): Consider if this needs to be an abstract function
         setActivityResult(result)
         bottomSheetController.hide()
-    }
-
-    open fun clearErrorMessages() {
-        updateErrorMessage(messageView)
     }
 
     protected fun updateErrorMessage(
@@ -259,7 +257,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
      * Perform the initial setup for the primary button.
      */
     private fun setupPrimaryButton() {
-        viewModel.primaryButtonUIState.observe(this) { state ->
+        viewModel.primaryButtonUIState.launchAndCollectIn(this) { state ->
             state?.let {
                 primaryButton.setOnClickListener {
                     state.onClick?.invoke()
@@ -271,7 +269,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 resetPrimaryButtonState()
             }
         }
-        viewModel.primaryButtonState.observe(this) { state ->
+        viewModel.primaryButtonState.launchAndCollectIn(this) { state ->
             primaryButton.updateState(state)
         }
         viewModel.ctaEnabled.observe(this) { isEnabled ->
@@ -293,7 +291,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract fun resetPrimaryButtonState()
 
     private fun setupNotes() {
-        viewModel.notesText.observe(this) { text ->
+        viewModel.notesText.launchAndCollectIn(this) { text ->
             val showNotes = text != null
             text?.let {
                 notesView.setContent {
