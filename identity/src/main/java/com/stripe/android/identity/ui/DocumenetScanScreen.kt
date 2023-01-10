@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,6 +58,7 @@ import com.stripe.android.identity.states.IdentityScanState.Companion.isNullOrFr
 import com.stripe.android.identity.utils.startScanning
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.launch
 
 internal const val CONTINUE_BUTTON_TAG = "Continue"
 internal const val SCAN_TITLE_TAG = "Title"
@@ -96,6 +98,7 @@ internal fun DocumentScanScreen(
         }
         val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
         val context = LocalContext.current
+        val coroutineScope = rememberCoroutineScope()
 
         CheckVerificationPageAndCompose(
             verificationPageResource = verificationPageState,
@@ -262,23 +265,24 @@ internal fun DocumentScanScreen(
                 ) {
                     loadingButtonState = LoadingButtonState.Loading
 
-                    identityViewModel.collectDataForDocumentScanScreen(
-                        navController = navController,
-                        lifecycleOwner = lifecycleOwner,
-                        isFront = requireNotNull(targetScanType) {
-                            "targetScanType is still null"
-                        }.isFront(),
-                        collectedDataParamType = collectedDataParamType,
-                        route = route
-                    ) {
-                        startScanning(
-                            scanType = requireNotNull(backScanType) {
-                                "backScanType is null while still missing back"
-                            },
-                            identityViewModel = identityViewModel,
-                            identityScanViewModel = identityScanViewModel,
-                            lifecycleOwner = lifecycleOwner
-                        )
+                    coroutineScope.launch {
+                        identityViewModel.collectDataForDocumentScanScreen(
+                            navController = navController,
+                            isFront = requireNotNull(targetScanType) {
+                                "targetScanType is still null"
+                            }.isFront(),
+                            collectedDataParamType = collectedDataParamType,
+                            route = route
+                        ) {
+                            startScanning(
+                                scanType = requireNotNull(backScanType) {
+                                    "backScanType is null while still missing back"
+                                },
+                                identityViewModel = identityViewModel,
+                                identityScanViewModel = identityScanViewModel,
+                                lifecycleOwner = lifecycleOwner
+                            )
+                        }
                     }
                 }
             }

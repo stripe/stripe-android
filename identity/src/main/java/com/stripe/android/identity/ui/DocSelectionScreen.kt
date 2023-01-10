@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +39,7 @@ import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultVa
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam.Type
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.launch
 
 internal const val docSelectionTitleTag = "Title"
 internal const val singleSelectionTag = "SingleSelection"
@@ -71,7 +73,7 @@ internal fun DocSelectionScreen(
                 screenName = SCREEN_NAME_DOC_SELECT
             )
 
-            val onDocTypeSelected = { type: Type ->
+            val onDocTypeSelected: suspend (Type) -> Unit = { type: Type ->
                 identityViewModel.postVerificationPageDataForDocSelection(
                     type = type,
                     navController = navController,
@@ -123,10 +125,10 @@ internal fun DocSelectionScreen(
 @Composable
 internal fun MultiSelection(
     idDocumentTypeAllowlist: Map<String, String>,
-    onDocTypeSelected: (Type) -> Unit
+    onDocTypeSelected: suspend (Type) -> Unit
 ) {
     var selectedTypeValue by remember { mutableStateOf(SELECTION_NONE) }
-
+    val coroutineScope = rememberCoroutineScope()
     for ((allowedType, allowedTypeValue) in idDocumentTypeAllowlist) {
         val isSelected = selectedTypeValue == allowedTypeValue
         Box(
@@ -142,7 +144,9 @@ internal fun MultiSelection(
         ) {
             TextButton(
                 onClick = {
-                    onDocTypeSelected(Type.fromName(allowedType))
+                    coroutineScope.launch {
+                        onDocTypeSelected(Type.fromName(allowedType))
+                    }
                     selectedTypeValue = allowedTypeValue
                 },
                 colors = ButtonDefaults.textButtonColors(
@@ -177,8 +181,9 @@ internal fun SingleSelection(
     allowedType: String,
     buttonText: String,
     bodyText: String?,
-    onDocTypeSelected: (Type) -> Unit
+    onDocTypeSelected: suspend (Type) -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -189,7 +194,9 @@ internal fun SingleSelection(
         var buttonState by remember { mutableStateOf(LoadingButtonState.Idle) }
         LoadingButton(text = buttonText, state = buttonState) {
             buttonState = LoadingButtonState.Loading
-            onDocTypeSelected(Type.fromName(allowedType))
+            coroutineScope.launch {
+                onDocTypeSelected(Type.fromName(allowedType))
+            }
         }
     }
 }

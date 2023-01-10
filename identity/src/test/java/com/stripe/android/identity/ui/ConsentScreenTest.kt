@@ -20,6 +20,7 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -143,16 +144,18 @@ class ConsentScreenTest {
     fun `when agreed button is clicked correctly navigates`() {
         setComposeTestRuleWith(Resource.success(verificationPageWithTimeAndPolicy)) {
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).performClick()
-            verify(mockIdentityViewModel).postVerificationPageDataAndMaybeNavigate(
-                same(mockNavController),
-                argThat {
-                    biometricConsent == false
-                },
-                eq(ConsentDestination.ROUTE.route),
-                any(),
-                any(),
-                any()
-            )
+            runBlocking {
+                verify(mockIdentityViewModel).postVerificationPageDataAndMaybeNavigate(
+                    same(mockNavController),
+                    argThat {
+                        biometricConsent == false
+                    },
+                    eq(ConsentDestination.ROUTE.route),
+                    any(),
+                    any(),
+                    any()
+                )
+            }
 
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(1)

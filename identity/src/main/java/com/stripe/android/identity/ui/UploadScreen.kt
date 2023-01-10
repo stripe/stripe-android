@@ -32,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
@@ -58,6 +59,7 @@ import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.text.dimensionResourceSp
+import kotlinx.coroutines.launch
 
 internal const val FRONT_ROW_TAG = "frontRow"
 internal const val BACK_ROW_TAG = "backRow"
@@ -93,6 +95,7 @@ internal fun UploadScreen(
     MdcTheme {
         val localContext = LocalContext.current
         val verificationState by identityViewModel.verificationPage.observeAsState(Resource.loading())
+        val coroutineScope = rememberCoroutineScope()
         CheckVerificationPageAndCompose(
             verificationPageResource = verificationState,
             onError = {
@@ -107,11 +110,23 @@ internal fun UploadScreen(
             val collectedData by identityViewModel.collectedData.collectAsState()
             val missings by identityViewModel.missingRequirements.collectAsState()
             LaunchedEffect(Unit) {
-                identityViewModel.collectDataForDocumentUploadScreen(
-                    navController,
-                    collectedDataParamType,
-                    route
-                )
+                launch {
+                    identityViewModel.collectDataForDocumentUploadScreen(
+                        navController,
+                        collectedDataParamType,
+                        route,
+                        isFront = true
+                    )
+                }
+
+                launch {
+                    identityViewModel.collectDataForDocumentUploadScreen(
+                        navController,
+                        collectedDataParamType,
+                        route,
+                        isFront = false
+                    )
+                }
             }
 
             ScreenTransitionLaunchedEffect(
@@ -274,10 +289,12 @@ internal fun UploadScreen(
                     state = continueButtonState
                 ) {
                     continueButtonState = LoadingButtonState.Loading
-                    identityViewModel.navigateToSelfieOrSubmit(
-                        navController,
-                        route
-                    )
+                    coroutineScope.launch {
+                        identityViewModel.navigateToSelfieOrSubmit(
+                            navController,
+                            route
+                        )
+                    }
                 }
             }
         }

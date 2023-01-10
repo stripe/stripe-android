@@ -22,6 +22,7 @@ import com.stripe.android.identity.utils.IdentityImageHandler
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -117,10 +118,12 @@ class UploadScreenTest {
                 continueButton.assertIsEnabled()
                 continueButton.performClick()
 
-                verify(mockIdentityViewModel).navigateToSelfieOrSubmit(
-                    same(mockNavController),
-                    eq(IDUploadDestination.ROUTE.route)
-                )
+                runBlocking {
+                    verify(mockIdentityViewModel).navigateToSelfieOrSubmit(
+                        same(mockNavController),
+                        eq(IDUploadDestination.ROUTE.route)
+                    )
+                }
             }
         }
     }

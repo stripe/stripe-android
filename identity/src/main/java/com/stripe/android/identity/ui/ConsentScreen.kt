@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +53,7 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.getDrawableFromUri
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import com.stripe.android.uicore.text.Html
+import kotlinx.coroutines.launch
 
 internal const val TITLE_TAG = "Title"
 internal const val TIME_ESTIMATE_TAG = "TimeEstimate"
@@ -71,6 +73,7 @@ internal fun ConsentScreen(
 ) {
     val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     MdcTheme {
         CheckVerificationPageAndCompose(
@@ -101,22 +104,26 @@ internal fun ConsentScreen(
                     identityViewModel.verificationArgs.brandLogo,
                     verificationPage,
                     onConsentAgreed = {
-                        identityViewModel.postVerificationPageDataAndMaybeNavigate(
-                            navController,
-                            CollectedDataParam(
-                                biometricConsent = true
-                            ),
-                            ConsentDestination.ROUTE.route
-                        )
+                        coroutineScope.launch {
+                            identityViewModel.postVerificationPageDataAndMaybeNavigate(
+                                navController,
+                                CollectedDataParam(
+                                    biometricConsent = true
+                                ),
+                                ConsentDestination.ROUTE.route
+                            )
+                        }
                     },
                     onConsentDeclined = {
-                        identityViewModel.postVerificationPageDataAndMaybeNavigate(
-                            navController,
-                            CollectedDataParam(
-                                biometricConsent = false
-                            ),
-                            ConsentDestination.ROUTE.route
-                        )
+                        coroutineScope.launch {
+                            identityViewModel.postVerificationPageDataAndMaybeNavigate(
+                                navController,
+                                CollectedDataParam(
+                                    biometricConsent = false
+                                ),
+                                ConsentDestination.ROUTE.route
+                            )
+                        }
                     }
                 )
             }
