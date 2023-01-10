@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
@@ -169,8 +170,9 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         // `rootView`'s click listener
         bottomSheet.isClickable = true
 
-        viewModel.liveMode.observe(this) { isLiveMode ->
-            testModeIndicator.visibility = if (isLiveMode) View.GONE else View.VISIBLE
+        viewModel.stripeIntent.launchAndCollectIn(this) { stripeIntent ->
+            val isLiveMode = stripeIntent?.isLiveMode ?: true
+            testModeIndicator.isGone = isLiveMode
         }
 
         val isDark = baseContext.isSystemDarkTheme()
