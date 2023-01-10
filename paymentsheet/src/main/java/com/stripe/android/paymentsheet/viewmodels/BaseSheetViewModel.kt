@@ -159,7 +159,8 @@ internal abstract class BaseSheetViewModel(
 
     private val editing = MutableLiveData(false)
 
-    val processing: LiveData<Boolean> = savedStateHandle.getLiveData<Boolean>(SAVE_PROCESSING)
+    val processing: StateFlow<Boolean> = savedStateHandle
+        .getStateFlow(SAVE_PROCESSING, false)
 
     private val _contentVisible = MutableStateFlow(true)
     internal val contentVisible: StateFlow<Boolean> = _contentVisible
@@ -197,12 +198,11 @@ internal abstract class BaseSheetViewModel(
 
     val buttonsEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
-            processing,
+            processing.asLiveData(),
             editing
         ).forEach { source ->
             addSource(source) {
-                value = processing.value != true &&
-                    editing.value != true
+                value = processing.value != true && editing.value != true
             }
         }
     }.distinctUntilChanged()
