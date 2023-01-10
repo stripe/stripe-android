@@ -157,7 +157,7 @@ internal abstract class BaseSheetViewModel(
     private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
     internal val selection: LiveData<PaymentSelection?> = _selection
 
-    private val editing = MutableLiveData(false)
+    private val editing = MutableStateFlow(false)
 
     val processing: StateFlow<Boolean> = savedStateHandle
         .getStateFlow(SAVE_PROCESSING, false)
@@ -199,7 +199,7 @@ internal abstract class BaseSheetViewModel(
     val buttonsEnabled = MediatorLiveData<Boolean>().apply {
         listOf(
             processing.asLiveData(),
-            editing
+            editing.asLiveData()
         ).forEach { source ->
             addSource(source) {
                 value = processing.value != true && editing.value != true
