@@ -58,22 +58,6 @@ abstract class MainActivity : AppCompatActivity() {
                 }
             }
 
-        binding.useNative.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                binding.requireIdNumber.isChecked = false
-                binding.requireMatchingSelfie.isChecked = false
-                binding.requireIdNumber.isEnabled = false
-            }
-        }
-
-        binding.useWeb.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked) {
-                binding.requireIdNumber.isChecked = false
-                binding.requireMatchingSelfie.isChecked = false
-                binding.requireIdNumber.isEnabled = true
-            }
-        }
-
         binding.startVerification.setOnClickListener {
             binding.startVerification.isEnabled = false
             binding.resultView.text = ""

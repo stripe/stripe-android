@@ -103,7 +103,8 @@ dependencies {
     // MdcTheme
     implementation "com.google.android.material:compose-theme-adapter:1.2.0"
 
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
+    // TODO(ccen) re-enable and investigate leak in Camera
+    // debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanaryVersion"
 }
 
 task ktlint(type: JavaExec, group: "verification") {

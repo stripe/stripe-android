@@ -21,6 +21,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.RadioButton
@@ -37,10 +38,19 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.takeOrElse
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.kittinunf.result.Result
@@ -189,7 +199,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                     )
                 }
             )
-            ClickableText(
+            StyledClickableText(
                 text = AnnotatedString(getString(R.string.use_native)),
                 onClick = {
                     onSubmissionStateChangedListener(
@@ -197,8 +207,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                             shouldUseNativeSdk = true
                         )
                     )
-                },
-                style = LocalTextStyle.current
+                }
             )
             Spacer(modifier = Modifier.width(40.dp))
 
@@ -212,7 +221,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                     )
                 }
             )
-            ClickableText(
+            StyledClickableText(
                 text = AnnotatedString(getString(R.string.use_web)),
                 onClick = {
                     onSubmissionStateChangedListener(
@@ -220,8 +229,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                             shouldUseNativeSdk = false
                         )
                     )
-                },
-                style = LocalTextStyle.current
+                }
             )
             Spacer(modifier = Modifier.width(40.dp))
         }
@@ -253,7 +261,8 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                     },
                     modifier = Modifier.padding(end = 0.dp)
                 )
-                ClickableText(
+
+                StyledClickableText(
                     text = AnnotatedString(stringResource(id = R.string.driver_license)),
                     onClick = {
                         onSubmissionStateChangedListener(
@@ -261,8 +270,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                                 allowDrivingLicense = !identitySubmissionState.allowDrivingLicense
                             )
                         )
-                    },
-                    style = LocalTextStyle.current
+                    }
                 )
             }
 
@@ -277,7 +285,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                         )
                     )
                 })
-                ClickableText(
+                StyledClickableText(
                     text = AnnotatedString(stringResource(id = R.string.passport)),
                     onClick = {
                         onSubmissionStateChangedListener(
@@ -285,8 +293,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                                 allowPassport = !identitySubmissionState.allowPassport
                             )
                         )
-                    },
-                    style = LocalTextStyle.current
+                    }
                 )
             }
 
@@ -301,7 +308,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                         )
                     )
                 })
-                ClickableText(
+                StyledClickableText(
                     text = AnnotatedString(stringResource(id = R.string.id_card)),
                     onClick = {
                         onSubmissionStateChangedListener(
@@ -309,8 +316,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                                 allowId = !identitySubmissionState.allowId
                             )
                         )
-                    },
-                    style = LocalTextStyle.current
+                    }
                 )
             }
         }
@@ -335,7 +341,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                     )
                 }
             )
-            ClickableText(
+            StyledClickableText(
                 text = AnnotatedString(stringResource(id = R.string.require_live_capture)),
                 onClick = {
                     onSubmissionStateChangedListener(
@@ -343,8 +349,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                             requireLiveCapture = !identitySubmissionState.requireLiveCapture
                         )
                     )
-                },
-                style = LocalTextStyle.current
+                }
             )
         }
 
@@ -352,46 +357,26 @@ abstract class ComposeExampleActivity : ComponentActivity() {
             modifier = Modifier.padding(start = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (identitySubmissionState.shouldUseNativeSdk) {
-                onSubmissionStateChangedListener(
-                    identitySubmissionState.copy(
-                        requireId = false
+            Checkbox(
+                checked = identitySubmissionState.requireId,
+                onCheckedChange = {
+                    onSubmissionStateChangedListener(
+                        identitySubmissionState.copy(
+                            requireId = it
+                        )
                     )
-                )
-                Checkbox(
-                    checked = identitySubmissionState.requireId,
-                    onCheckedChange = {
-                        // no-op
-                    },
-                    enabled = false
-                )
-                Text(
-                    text = stringResource(id = R.string.require_id_number),
-                    color = Color.Unspecified.copy(alpha = 0.5f)
-                )
-            } else {
-                Checkbox(
-                    checked = identitySubmissionState.requireId,
-                    onCheckedChange = {
-                        onSubmissionStateChangedListener(
-                            identitySubmissionState.copy(
-                                requireId = it
-                            )
+                }
+            )
+            StyledClickableText(
+                text = AnnotatedString(stringResource(id = R.string.require_id_number)),
+                onClick = {
+                    onSubmissionStateChangedListener(
+                        identitySubmissionState.copy(
+                            requireId = !identitySubmissionState.requireId
                         )
-                    }
-                )
-                ClickableText(
-                    text = AnnotatedString(stringResource(id = R.string.require_id_number)),
-                    onClick = {
-                        onSubmissionStateChangedListener(
-                            identitySubmissionState.copy(
-                                requireId = !identitySubmissionState.requireId
-                            )
-                        )
-                    },
-                    style = LocalTextStyle.current
-                )
-            }
+                    )
+                }
+            )
         }
 
         Row(
@@ -408,7 +393,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                     )
                 }
             )
-            ClickableText(
+            StyledClickableText(
                 text = AnnotatedString(stringResource(id = R.string.require_matching_selfie)),
                 onClick = {
                     onSubmissionStateChangedListener(
@@ -416,8 +401,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                             requireSelfie = !identitySubmissionState.requireSelfie
                         )
                     )
-                },
-                style = LocalTextStyle.current
+                }
             )
         }
     }
@@ -560,4 +544,55 @@ abstract class ComposeExampleActivity : ComponentActivity() {
             }
         }
     }
+}
+
+@Composable
+private fun StyledClickableText(
+    text: AnnotatedString,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontStyle: FontStyle? = null,
+    fontWeight: FontWeight? = null,
+    fontFamily: FontFamily? = null,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    textAlign: TextAlign? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+    style: TextStyle = LocalTextStyle.current,
+    onClick: (Int) -> Unit
+) {
+    val textColor = color.takeOrElse {
+        style.color.takeOrElse {
+            LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+        }
+    }
+    // NOTE(text-perf-review): It might be worthwhile writing a bespoke merge implementation that
+    // will avoid reallocating if all of the options here are the defaults
+    val mergedStyle = style.merge(
+        TextStyle(
+            color = textColor,
+            fontSize = fontSize,
+            fontWeight = fontWeight,
+            textAlign = textAlign,
+            lineHeight = lineHeight,
+            fontFamily = fontFamily,
+            textDecoration = textDecoration,
+            fontStyle = fontStyle,
+            letterSpacing = letterSpacing
+        )
+    )
+
+    ClickableText(
+        text = text,
+        modifier = modifier,
+        style = mergedStyle,
+        softWrap = softWrap,
+        maxLines = maxLines,
+        onTextLayout = onTextLayout,
+        onClick = onClick
+    )
 }

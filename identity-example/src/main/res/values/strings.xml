@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">Stripe Identity Example</string>
 
-    <string name="theme1">theme1</string>
-    <string name="theme2">theme2</string>
+    <string name="theme1">theme-purple</string>
+    <string name="theme2">theme-red</string>
 
     <string name="start_verification">Start Verification</string>
 
