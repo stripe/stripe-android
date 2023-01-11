@@ -40,9 +40,11 @@ import com.stripe.android.paymentsheet.navigation.TransitionTarget
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_GOOGLE_PAY_STATE
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -668,18 +670,33 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `isGooglePayReady without google pay config should emit false`() {
-        val viewModel = createViewModel(PaymentSheetFixtures.ARGS_CUSTOMER_WITHOUT_GOOGLEPAY)
-        var isReady: Boolean? = null
-        viewModel.isGooglePayReady.observeForever {
-            isReady = it
+    fun `googlePayState without config should emit Indeterminate`() = runTest {
+        val viewModel = createViewModel(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER)
+        viewModel.googlePayState.test {
+            assertThat(awaitItem()).isEqualTo(GooglePayState.Indeterminate)
         }
-        assertThat(isReady)
-            .isFalse()
     }
 
     @Test
-    fun `isGooglePayReady for SetupIntent missing currencyCode should emit false`() {
+    fun `googlePayState with google pay should emit Available`() = runTest {
+        val viewModel = createViewModel(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY)
+        viewModel.googlePayState.test {
+            assertThat(awaitItem()).isEqualTo(GooglePayState.Indeterminate)
+            viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+            assertThat(awaitItem()).isEqualTo(GooglePayState.Available)
+        }
+    }
+
+    @Test
+    fun `googlePayState without google pay config should emit NotAvailable`() = runTest {
+        val viewModel = createViewModel(PaymentSheetFixtures.ARGS_CUSTOMER_WITHOUT_GOOGLEPAY)
+        viewModel.googlePayState.test {
+            assertThat(awaitItem()).isEqualTo(GooglePayState.NotAvailable)
+        }
+    }
+
+    @Test
+    fun `googlePayState for SetupIntent missing currencyCode should emit NotAvailable`() = runTest {
         val viewModel = createViewModel(
             ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
@@ -689,12 +706,9 @@ internal class PaymentSheetViewModelTest {
                 )
             )
         )
-        var isReady: Boolean? = null
-        viewModel.isGooglePayReady.observeForever {
-            isReady = it
+        viewModel.googlePayState.test {
+            assertThat(awaitItem()).isEqualTo(GooglePayState.NotAvailable)
         }
-        assertThat(isReady)
-            .isFalse()
     }
 
     @Test
@@ -713,7 +727,8 @@ internal class PaymentSheetViewModelTest {
         viewModel.transitionToFirstScreenWhenReady()
         assertThat(observedTransitions).isEmpty()
 
-        viewModel._isGooglePayReady.value = true
+        viewModel.savedStateHandle[BaseSheetViewModel.SAVE_GOOGLE_PAY_STATE] =
+            GooglePayState.Available
         assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 

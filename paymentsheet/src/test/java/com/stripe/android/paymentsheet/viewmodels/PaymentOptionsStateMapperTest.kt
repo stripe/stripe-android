@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.state.GooglePayState
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -22,7 +23,7 @@ class PaymentOptionsStateMapperTest {
     private lateinit var paymentMethodsFlow: MutableLiveData<List<PaymentMethod>>
     private lateinit var initialSelectionFlow: MutableLiveData<SavedSelection>
     private lateinit var currentSelectionFlow: MutableLiveData<PaymentSelection?>
-    private lateinit var isGooglePayReadyFlow: MutableLiveData<Boolean>
+    private lateinit var googlePayStateFlow: MutableLiveData<GooglePayState>
     private lateinit var isLinkEnabledFlow: MutableLiveData<Boolean>
 
     @Before
@@ -30,7 +31,7 @@ class PaymentOptionsStateMapperTest {
         paymentMethodsFlow = MutableLiveData()
         initialSelectionFlow = MutableLiveData()
         currentSelectionFlow = MutableLiveData()
-        isGooglePayReadyFlow = MutableLiveData()
+        googlePayStateFlow = MutableLiveData()
         isLinkEnabledFlow = MutableLiveData()
     }
 
@@ -40,7 +41,7 @@ class PaymentOptionsStateMapperTest {
             paymentMethods = paymentMethodsFlow,
             initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
-            isGooglePayReady = isGooglePayReadyFlow,
+            googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
         )
@@ -55,7 +56,7 @@ class PaymentOptionsStateMapperTest {
         initialSelectionFlow.value = SavedSelection.GooglePay
         assertThat(state.value).isNull()
 
-        isGooglePayReadyFlow.value = true
+        googlePayStateFlow.value = GooglePayState.Available
         assertThat(state.value).isNull()
 
         isLinkEnabledFlow.value = true
@@ -68,7 +69,7 @@ class PaymentOptionsStateMapperTest {
             paymentMethods = paymentMethodsFlow,
             initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
-            isGooglePayReady = isGooglePayReadyFlow,
+            googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = false,
         )
@@ -78,7 +79,7 @@ class PaymentOptionsStateMapperTest {
         val cards = PaymentMethodFixtures.createCards(2)
         paymentMethodsFlow.value = cards
         initialSelectionFlow.value = SavedSelection.PaymentMethod(id = cards.first().id!!)
-        isGooglePayReadyFlow.value = true
+        googlePayStateFlow.value = GooglePayState.Available
         isLinkEnabledFlow.value = true
 
         assertThat(state.value?.items).containsNoneOf(
@@ -93,7 +94,7 @@ class PaymentOptionsStateMapperTest {
             paymentMethods = paymentMethodsFlow,
             initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
-            isGooglePayReady = isGooglePayReadyFlow,
+            googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
         )
@@ -105,7 +106,7 @@ class PaymentOptionsStateMapperTest {
         paymentMethodsFlow.value = cards
         initialSelectionFlow.value = SavedSelection.Link
         currentSelectionFlow.value = selectedPaymentMethod
-        isGooglePayReadyFlow.value = true
+        googlePayStateFlow.value = GooglePayState.Available
         isLinkEnabledFlow.value = true
 
         assertThat(state.value).isNotNull()
@@ -126,7 +127,7 @@ class PaymentOptionsStateMapperTest {
             paymentMethods = paymentMethodsFlow,
             initialSelection = initialSelectionFlow,
             currentSelection = currentSelectionFlow,
-            isGooglePayReady = isGooglePayReadyFlow,
+            googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
         )
@@ -138,7 +139,7 @@ class PaymentOptionsStateMapperTest {
         paymentMethodsFlow.value = cards
         initialSelectionFlow.value = SavedSelection.None
         currentSelectionFlow.value = selectedPaymentMethod
-        isGooglePayReadyFlow.value = true
+        googlePayStateFlow.value = GooglePayState.Available
         isLinkEnabledFlow.value = true
 
         assertThat(state.value).isNotNull()

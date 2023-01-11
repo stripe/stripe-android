@@ -22,6 +22,9 @@ import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.state.GooglePayState
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_GOOGLE_PAY_STATE
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SAVED_SELECTION
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.After
 import org.junit.Before
@@ -106,7 +109,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
             fragment.initializePaymentOptions(
-                isGooglePayReady = false,
+                isGooglePayReady = GooglePayState.NotAvailable,
                 isLinkEnabled = false,
             )
         }.moveToState(Lifecycle.State.RESUMED).onFragment {
@@ -279,14 +282,14 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
 
     private fun PaymentSheetListFragment.initializePaymentOptions(
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
-        isGooglePayReady: Boolean = false,
+        isGooglePayReady: GooglePayState = GooglePayState.NotAvailable,
         isLinkEnabled: Boolean = false,
         savedSelection: SavedSelection = SavedSelection.None,
     ) {
         sheetViewModel._paymentMethods.value = paymentMethods
-        sheetViewModel._isGooglePayReady.value = isGooglePayReady
+        sheetViewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = isGooglePayReady
         sheetViewModel._isLinkEnabled.value = isLinkEnabled
-        sheetViewModel.savedStateHandle["saved_selection"] = savedSelection
+        sheetViewModel.savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection
     }
 
     private companion object {

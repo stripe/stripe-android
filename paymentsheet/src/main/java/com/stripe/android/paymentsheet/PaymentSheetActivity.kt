@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -268,7 +269,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         )
         viewModel.showTopContainer.observe(this) { visible ->
             linkButton.isVisible = viewModel.isLinkEnabled.value == true
-            googlePayButton.isVisible = viewModel.isGooglePayReady.value == true
+            googlePayButton.isVisible =
+                viewModel.googlePayState.value == GooglePayState.Available
             topContainer.isVisible = visible
             // We have to set the UI after we know it's visible. Setting UI on a GONE or INVISIBLE
             // view will cause tests to hang indefinitely.
