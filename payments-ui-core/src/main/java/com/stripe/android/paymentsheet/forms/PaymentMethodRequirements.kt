@@ -313,3 +313,9 @@ internal val UpiRequirement = PaymentMethodRequirements(
     siRequirements = null,
     confirmPMFromCustomer = null
 )
+
+internal val CashAppPayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = emptySet(),
+    confirmPMFromCustomer = null, // TODO
+)

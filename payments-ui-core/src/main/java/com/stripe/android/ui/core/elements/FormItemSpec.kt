@@ -49,6 +49,7 @@ object FormItemSpecSerializer :
             "name" -> NameSpec.serializer()
             "mandate" -> MandateTextSpec.serializer()
             "sepa_mandate" -> SepaMandateTextSpec.serializer()
+            "cashapp_mandate" -> CashAppPayMandateTextSpec.serializer()
             "text" -> SimpleTextSpec.serializer()
             "card_details" -> CardDetailsSectionSpec.serializer()
             "card_billing" -> CardBillingSpec.serializer()

@@ -454,6 +454,15 @@
     ]
   },
   {
+    "type": "cashapp",
+    "async": false,
+    "fields": [
+      {
+        "type": "cashapp_mandate"
+      }
+    ]
+  },
+  {
     "async": false,
     "fields": [],
     "next_action_spec": {

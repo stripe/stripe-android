@@ -11,6 +11,7 @@ import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
+import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -87,6 +88,7 @@ class TransformSpecToElements(
                     shippingValues
                 )
                 is SepaMandateTextSpec -> it.transform(merchantName)
+                is CashAppPayMandateTextSpec -> it.transform(merchantName)
                 is UpiSpec -> it.transform()
             }
         }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())

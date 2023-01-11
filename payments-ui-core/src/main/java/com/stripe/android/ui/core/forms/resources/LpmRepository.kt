@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
 import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
 import com.stripe.android.paymentsheet.forms.BancontactRequirement
 import com.stripe.android.paymentsheet.forms.CardRequirement
+import com.stripe.android.paymentsheet.forms.CashAppPayRequirement
 import com.stripe.android.paymentsheet.forms.EpsRequirement
 import com.stripe.android.paymentsheet.forms.GiropayRequirement
 import com.stripe.android.paymentsheet.forms.IdealRequirement
@@ -30,10 +31,12 @@ import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
 import com.stripe.android.paymentsheet.forms.SofortRequirement
 import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
 import com.stripe.android.paymentsheet.forms.UpiRequirement
+import com.stripe.android.ui.core.BuildConfig
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
+import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.EmptyFormSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
@@ -67,7 +70,7 @@ class LpmRepository constructor(
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
 
     val supportedPaymentMethods: List<String> by lazy {
-        listOf(
+        listOfNotNull(
             PaymentMethod.Type.Card.code,
             PaymentMethod.Type.Bancontact.code,
             PaymentMethod.Type.Sofort.code,
@@ -85,6 +88,7 @@ class LpmRepository constructor(
             PaymentMethod.Type.MobilePay.code,
             PaymentMethod.Type.AuBecsDebit.code,
             PaymentMethod.Type.Upi.code,
+            PaymentMethod.Type.CashAppPay.code.takeIf { arguments.isCashAppPayEnabled },
         )
     }
 
@@ -405,6 +409,19 @@ class LpmRepository constructor(
             requirement = UpiRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields)
         )
+        PaymentMethod.Type.CashAppPay.code -> SupportedPaymentMethod(
+            code = "cashapp",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_cashapp,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_cash_app_pay,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = CashAppPayRequirement,
+            formSpec = LayoutSpec(
+                items = listOf(CashAppPayMandateTextSpec()), // TODO: Only for SFU
+            ),
+        )
         else -> null
     }
 
@@ -520,5 +537,6 @@ class LpmRepository constructor(
         val resources: Resources?,
         val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
             DefaultIsFinancialConnectionsAvailable(),
+        val isCashAppPayEnabled: Boolean = BuildConfig.DEBUG,
     )
 }

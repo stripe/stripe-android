@@ -16,12 +16,14 @@ data class MandateTextSpec(
     @StringRes
     val stringResId: Int
 ) : FormItemSpec() {
-    fun transform(merchantName: String): FormElement =
+
+    fun transform(vararg values: String): FormElement {
         // It could be argued that the static text should have a controller, but
         // since it doesn't provide a form field we leave it out for now
-        MandateTextElement(
-            this.apiPath,
-            this.stringResId,
-            merchantName
+        return MandateTextElement(
+            identifier = apiPath,
+            stringResId = stringResId,
+            values = values.toList(),
         )
+    }
 }

@@ -17,11 +17,11 @@ fun MandateTextUI(
     element: MandateTextElement
 ) {
     Text(
-        text = stringResource(element.stringResId, element.merchantName ?: ""),
+        text = stringResource(element.stringResId, *element.values.toTypedArray()),
         style = MaterialTheme.typography.body2,
         color = MaterialTheme.paymentsColors.subtitle,
         modifier = Modifier
             .padding(vertical = 8.dp)
-            .semantics(mergeDescendants = true) {} // makes it a separate accessibile item
+            .semantics(mergeDescendants = true) {} // makes it a separate accessible item
     )
 }
