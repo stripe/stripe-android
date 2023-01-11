@@ -30,16 +30,11 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkActivityResult.Canceled.Reason
-import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -62,10 +57,10 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
-import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -103,7 +98,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @IOContext workContext: CoroutineContext,
     @InjectorKey injectorKey: String,
     savedStateHandle: SavedStateHandle,
-    linkLauncher: LinkPaymentLauncher
+    linkHandler: LinkHandler,
 ) : BaseSheetViewModel(
     application = application,
     config = args.config,
@@ -116,7 +111,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     lpmResourceRepository = lpmResourceRepository,
     addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
-    linkLauncher = linkLauncher,
+    linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = true),
 ) {
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
@@ -154,8 +149,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
 
-    private var launchedLinkDirectly: Boolean = false
-
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
         args.googlePayConfig?.let { config ->
@@ -182,13 +175,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     // Whether the top container, containing Google Pay and Link buttons, should be visible
     internal val showTopContainer = MediatorLiveData<Boolean>().apply {
         listOf(
-            isLinkEnabled,
+            linkHandler.isLinkEnabled.asLiveData(),
             googlePayState.asLiveData(),
             isReadyEvents
         ).forEach {
             addSource(it) {
                 value = (
-                    isLinkEnabled.value == true ||
+                    linkHandler.isLinkEnabled.value ||
                         googlePayState.value == GooglePayState.Available
                     ) && isReadyEvents.value?.peekContent() == true
             }
@@ -198,6 +191,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private var paymentLauncher: StripePaymentLauncher? = null
 
     init {
+        viewModelScope.launch {
+            linkHandler.processingState.collect { processingState ->
+                handleProcessingState(processingState)
+            }
+        }
+
         eventReporter.onInit(config)
         if (googlePayLauncherConfig == null) {
             savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.NotAvailable
@@ -205,6 +204,46 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         viewModelScope.launch {
             loadPaymentSheetState()
+        }
+    }
+
+    private fun handleProcessingState(processingState: LinkHandler.ProcessingState) {
+        when (processingState) {
+            LinkHandler.ProcessingState.Cancelled -> {
+                _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
+            }
+            LinkHandler.ProcessingState.Complete -> {
+                prefsRepository.savePaymentSelection(PaymentSelection.Link)
+                _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
+            }
+            is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
+                setContentVisible(true)
+                onPaymentResult(processingState.result)
+            }
+            is LinkHandler.ProcessingState.Error -> {
+                onError(processingState.message)
+            }
+            LinkHandler.ProcessingState.Launched -> {
+                setContentVisible(false)
+                startProcessing(CheckoutIdentifier.SheetBottomBuy)
+            }
+            is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
+                processingState.details?.let {
+                    // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
+                    updateSelection(PaymentSelection.New.LinkInline(it))
+                    checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
+                } ?: run {
+                    // Link PaymentDetails creating failed, fallback to regular checkout.
+                    // paymentSelection is already set to the card parameters from the form.
+                    checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
+                }
+            }
+            LinkHandler.ProcessingState.Ready -> {
+                updatePrimaryButtonState(PrimaryButton.State.Ready)
+            }
+            LinkHandler.ProcessingState.Started -> {
+                updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+            }
         }
     }
 
@@ -232,12 +271,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         val linkState = state.linkState
 
-        _isLinkEnabled.value = linkState != null
-        activeLinkSession.value = linkState?.loginState == LinkState.LoginState.LoggedIn
-
-        if (linkState != null) {
-            setupLink(linkState)
-        }
+        linkHandler.setupLinkLaunchingEagerly(viewModelScope, linkState)
 
         resetViewState()
     }
@@ -356,10 +390,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * Must be called from the Activity's `onCreate`.
      */
     fun registerFromActivity(activityResultCaller: ActivityResultCaller) {
-        linkLauncher.register(
-            activityResultCaller,
-            ::onLinkActivityResult,
-        )
+        linkHandler.registerFromActivity(activityResultCaller)
 
         paymentLauncher = paymentLauncherFactory.create(
             { lazyPaymentConfig.get().publishableKey },
@@ -380,7 +411,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     fun unregisterFromActivity() {
         paymentLauncher?.unregisterPollingAuthenticator()
         paymentLauncher = null
-        linkLauncher.unregister()
+        linkHandler.unregisterFromActivity()
     }
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
@@ -394,107 +425,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             else -> null
         }?.let { confirmParams ->
             _startConfirm.value = Event(confirmParams)
-        }
-    }
-
-    private fun setupLink(state: LinkState) {
-        _linkConfiguration.value = state.configuration
-
-        when (state.loginState) {
-            LinkState.LoginState.LoggedIn -> {
-                launchLink(state.configuration, launchedDirectly = true)
-            }
-            LinkState.LoginState.NeedsVerification -> {
-                setupLinkWithVerification(state.configuration)
-            }
-            LinkState.LoginState.LoggedOut -> {
-                // Nothing to do here
-            }
-        }
-    }
-
-    private fun setupLinkWithVerification(
-        configuration: LinkPaymentLauncher.Configuration,
-    ) {
-        viewModelScope.launch {
-            val success = requestLinkVerification()
-            if (success) {
-                launchLink(configuration, launchedDirectly = true)
-            }
-        }
-    }
-
-    override fun completeLinkInlinePayment(
-        configuration: LinkPaymentLauncher.Configuration,
-        paymentMethodCreateParams: PaymentMethodCreateParams,
-        isReturningUser: Boolean
-    ) {
-        if (isReturningUser) {
-            launchLink(configuration, launchedDirectly = false, paymentMethodCreateParams)
-        } else {
-            super.completeLinkInlinePayment(
-                configuration,
-                paymentMethodCreateParams,
-                isReturningUser
-            )
-        }
-    }
-
-    fun launchLink(
-        configuration: LinkPaymentLauncher.Configuration,
-        launchedDirectly: Boolean,
-        paymentMethodCreateParams: PaymentMethodCreateParams? = null
-    ) {
-        launchedLinkDirectly = launchedDirectly
-
-        linkLauncher.present(
-            configuration,
-            paymentMethodCreateParams,
-        )
-
-        onLinkLaunched()
-    }
-
-    /**
-     * Method called when the Link UI is launched. Should be used to update the PaymentSheet UI
-     * accordingly.
-     */
-    private fun onLinkLaunched() {
-        setContentVisible(false)
-        startProcessing(CheckoutIdentifier.SheetBottomBuy)
-    }
-
-    /**
-     * Method called with the result of launching the Link UI to collect a payment.
-     */
-    private fun onLinkActivityResult(result: LinkActivityResult) {
-        val completePaymentFlow = result is LinkActivityResult.Completed
-        val cancelPaymentFlow = launchedLinkDirectly &&
-            result is LinkActivityResult.Canceled && result.reason == Reason.BackPressed
-
-        if (completePaymentFlow) {
-            // If payment was completed inside the Link UI, dismiss immediately.
-            eventReporter.onPaymentSuccess(PaymentSelection.Link)
-            prefsRepository.savePaymentSelection(PaymentSelection.Link)
-            _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
-        } else if (cancelPaymentFlow) {
-            // We launched the user straight into Link, but they decided to exit out of it.
-            _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
-        } else {
-            setContentVisible(true)
-            onPaymentResult(result.convertToPaymentResult())
-        }
-    }
-
-    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?) {
-        linkPaymentDetails?.let {
-            // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-            updateSelection(PaymentSelection.New.LinkInline(it))
-            checkout()
-        } ?: run {
-            // Link PaymentDetails creation failed, fallback to regular checkout.
-            // paymentSelection is already set to the card parameters from the form.
-            checkout()
         }
     }
 
@@ -594,13 +524,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         onError(error?.let { getApplication<Application>().resources.getString(it) })
 
     override fun onError(error: String?) = resetViewState(error)
-
-    private fun LinkActivityResult.convertToPaymentResult() =
-        when (this) {
-            is LinkActivityResult.Completed -> PaymentResult.Completed
-            is LinkActivityResult.Canceled -> PaymentResult.Canceled
-            is LinkActivityResult.Failed -> PaymentResult.Failed(error)
-        }
 
     fun transitionToFirstScreenWhenReady() {
         viewModelScope.launch {
