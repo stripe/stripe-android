@@ -18,7 +18,6 @@ internal object TestViewModelFactory {
             linkLauncher = linkLauncher,
             savedStateHandle = savedStateHandle,
             eventReporter = eventReporter,
-            paymentSelectionRepositoryProvider = { viewModel }
         )
         viewModel = viewModelFactory(linkHandler, savedStateHandle)
         return viewModel

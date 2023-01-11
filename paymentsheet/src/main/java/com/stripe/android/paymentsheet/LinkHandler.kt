@@ -13,7 +13,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.LINK_CONFIGURATION
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SELECTION
 import kotlinx.coroutines.CoroutineScope
@@ -25,15 +24,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 
 internal class LinkHandler @Inject constructor(
     val linkLauncher: LinkPaymentLauncher,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
-    private val paymentSelectionRepositoryProvider: Provider<PaymentSelectionRepository>,
 ) {
-    // TODO(linkextraction): Should these states be split into 2 iterations? One for inline, one for other?
     sealed class ProcessingState {
         object Ready : ProcessingState()
 
@@ -70,9 +66,7 @@ internal class LinkHandler @Inject constructor(
     private val _activeLinkSession = MutableStateFlow(false)
     val activeLinkSession: StateFlow<Boolean> = _activeLinkSession
 
-    private val _linkConfiguration = MutableStateFlow(
-        savedStateHandle.get<LinkPaymentLauncher.Configuration>(LINK_CONFIGURATION)
-    )
+    private val _linkConfiguration = MutableStateFlow<LinkPaymentLauncher.Configuration?>(null)
     val linkConfiguration: StateFlow<LinkPaymentLauncher.Configuration?> = _linkConfiguration
 
     private val linkVerificationChannel = Channel<Boolean>(capacity = 1)
@@ -140,10 +134,10 @@ internal class LinkHandler @Inject constructor(
 
     suspend fun payWithLinkInline(
         configuration: LinkPaymentLauncher.Configuration,
-        userInput: UserInput?
+        userInput: UserInput?,
+        paymentSelection: PaymentSelection?,
     ) {
-        val selection = paymentSelectionRepositoryProvider.get().paymentSelection
-        (selection as? PaymentSelection.New.Card?)?.paymentMethodCreateParams?.let { params ->
+        (paymentSelection as? PaymentSelection.New.Card?)?.paymentMethodCreateParams?.let { params ->
             savedStateHandle[SAVE_PROCESSING] = true
             _processingState.emit(ProcessingState.Started)
 
@@ -178,7 +172,7 @@ internal class LinkHandler @Inject constructor(
                         linkLauncher.signInWithUserInput(configuration, userInput).fold(
                             onSuccess = {
                                 // If successful, the account was fetched or created, so try again
-                                payWithLinkInline(configuration, userInput)
+                                payWithLinkInline(configuration, userInput, paymentSelection)
                             },
                             onFailure = {
                                 _processingState.emit(ProcessingState.Error(it.localizedMessage))
@@ -229,8 +223,6 @@ internal class LinkHandler @Inject constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams? = null
     ) {
         launchedLinkDirectly = launchedDirectly
-
-        // TODO(linkextraction) Should we set the configuration here?
 
         linkLauncher.present(
             configuration,

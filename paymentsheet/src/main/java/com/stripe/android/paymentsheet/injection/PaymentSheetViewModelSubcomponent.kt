@@ -6,7 +6,7 @@ import dagger.BindsInstance
 import dagger.Subcomponent
 
 @Subcomponent(
-    modules = [PaymentSheetViewModelModule::class, PaymentSheetLinkModule::class]
+    modules = [PaymentSheetViewModelModule::class]
 )
 internal interface PaymentSheetViewModelSubcomponent {
     val viewModel: PaymentSheetViewModel

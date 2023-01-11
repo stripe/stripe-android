@@ -204,7 +204,7 @@ class LinkHandlerTest {
         assertThat(paymentResult.throwable).hasMessageThat()
             .isEqualTo("Expected payment result error.")
     }
-    // TODO(linkextraction): Add more tests with setup link
+    // TODO(linkextraction): Add more tests with payWithLinkInline
 }
 
 private fun runLinkTest(testBlock: suspend LinkTestData.() -> Unit): Unit = runTest {
@@ -215,7 +215,6 @@ private fun runLinkTest(testBlock: suspend LinkTestData.() -> Unit): Unit = runT
         linkLauncher = linkLauncher,
         savedStateHandle = savedStateHandle,
         eventReporter = eventReporter,
-        paymentSelectionRepositoryProvider = { throw AssertionError("Unexpected") }
     )
     val processingStateTurbine = handler.processingState.testIn(backgroundScope)
     val configuration = LinkPaymentLauncher.Configuration(

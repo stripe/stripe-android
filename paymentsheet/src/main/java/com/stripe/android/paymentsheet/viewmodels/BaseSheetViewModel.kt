@@ -22,7 +22,6 @@ import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
-import com.stripe.android.paymentsheet.PaymentSelectionRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -70,7 +69,7 @@ internal abstract class BaseSheetViewModel(
     val addressResourceRepository: ResourceRepository<AddressRepository>,
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
-) : AndroidViewModel(application), PaymentSelectionRepository {
+) : AndroidViewModel(application) {
     /**
      * This ViewModel exists during the whole user flow, and needs to share the Dagger dependencies
      * with the other, screen-specific ViewModels. So it holds a reference to the injector which is
@@ -134,11 +133,6 @@ internal abstract class BaseSheetViewModel(
 
     internal val selection: StateFlow<PaymentSelection?> =
         savedStateHandle.getStateFlow(SAVE_SELECTION, null)
-
-    override val paymentSelection: PaymentSelection?
-        get() {
-            return selection.value
-        }
 
     private val editing = MutableStateFlow(false)
 
@@ -429,7 +423,7 @@ internal abstract class BaseSheetViewModel(
 
     fun payWithLinkInline(linkConfig: LinkPaymentLauncher.Configuration, userInput: UserInput?) {
         viewModelScope.launch {
-            linkHandler.payWithLinkInline(linkConfig, userInput)
+            linkHandler.payWithLinkInline(linkConfig, userInput, selection.value)
         }
     }
 
@@ -490,6 +484,5 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_GOOGLE_PAY_READY = "google_pay_ready"
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
         internal const val SAVE_STATE_LIVE_MODE = "save_state_live_mode"
-        internal const val LINK_CONFIGURATION = "link_configuration"
     }
 }

@@ -7,7 +7,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
 
-@Subcomponent(modules = [PaymentOptionsLinkModule::class])
+@Subcomponent
 internal interface PaymentOptionsViewModelSubcomponent {
     val viewModel: PaymentOptionsViewModel
 
