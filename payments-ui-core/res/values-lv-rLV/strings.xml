@@ -58,16 +58,13 @@
   <string name="form_label_optional">%s (nav obligāti)</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="iban_incomplete">Ievadītais IBAN nav pilnīgs.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">Ievadītais IBAN nav derīgs.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="iban_invalid_country">Ievadītais IBAN nav derīgs, \"%s\" nav atbalstīts valsts kods.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">IBAN sākumā jābūt divu burtu valsts kodam.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL banka</string>
-  <!-- Error description for incomplete phone number -->
-  <string name="incomplete_phone_number">Nepilnīgs tālruņa numurs</string>
+  <string name="invalid_email_address">Nederīga e-pasta adrese: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Pērciet tagad vai maksājiet vēlāk ar Klarna.</string>
   <!-- Klarna pay later copy -->

@@ -5,6 +5,7 @@ MODULES=(
   "paymentsheet"
   "payments-core"
   "payments-ui-core"
+  "stripe-ui-core"
   "stripe-core"
   "identity"
 )

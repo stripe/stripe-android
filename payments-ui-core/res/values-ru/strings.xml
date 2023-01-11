@@ -58,16 +58,13 @@
   <string name="form_label_optional">%s (необязательно)</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="iban_incomplete">Введенный код IBAN неполон.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">Введенный код IBAN содержит ошибку.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="iban_invalid_country">Введенный код IBAN ошибочен, \"%s\" – неверный код страны.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">Код IBAN должен начинаться с двухбуквенного кода страны.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">Банк в системе iDEAL</string>
-  <!-- Error description for incomplete phone number -->
-  <string name="incomplete_phone_number">Номер телефона введен не полностью</string>
+  <string name="invalid_email_address">Недопустимый эл. адрес: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Купить немедленно или оплатить позже через систему Klarna.</string>
   <!-- Klarna pay later copy -->
