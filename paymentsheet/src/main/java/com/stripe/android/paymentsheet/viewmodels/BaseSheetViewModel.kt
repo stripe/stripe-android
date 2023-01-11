@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
+import com.stripe.android.paymentsheet.navigation.TransitionTarget
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -56,7 +57,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -334,12 +334,6 @@ internal abstract class BaseSheetViewModel(
 
     fun transitionToAddPaymentScreen() {
         transitionTo(TransitionTarget.AddAnotherPaymentMethod)
-    }
-
-    internal sealed class TransitionTarget {
-        object SelectSavedPaymentMethods : TransitionTarget()
-        object AddAnotherPaymentMethod : TransitionTarget()
-        object AddFirstPaymentMethod : TransitionTarget()
     }
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
