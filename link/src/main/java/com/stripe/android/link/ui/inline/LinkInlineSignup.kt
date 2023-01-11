@@ -52,13 +52,13 @@ import com.stripe.android.link.ui.signup.EmailCollectionSection
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
-import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import com.stripe.android.ui.core.elements.TextFieldController
 import com.stripe.android.ui.core.elements.TextFieldSection
 import com.stripe.android.ui.core.elements.menu.Checkbox
 import com.stripe.android.ui.core.getBorderStroke
 import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.elements.PhoneNumberController
 
 @Preview
 @Composable

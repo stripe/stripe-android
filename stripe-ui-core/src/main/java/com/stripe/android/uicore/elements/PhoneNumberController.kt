@@ -32,19 +32,23 @@ class PhoneNumberController constructor(
         tinyMode = true,
         expandedLabelMapper = { country ->
             "${
-                CountryConfig.countryCodeToEmoji(
-                    country.code.value
-                )
+            CountryConfig.countryCodeToEmoji(
+                country.code.value
+            )
             } ${country.name}" +
-                (PhoneNumberFormatter.prefixForCountry(
-                    country.code.value
-                )?.let { " $it" } ?: "")
+                (
+                    PhoneNumberFormatter.prefixForCountry(
+                        country.code.value
+                    )?.let { " $it" } ?: ""
+                    )
         },
         collapsedLabelMapper = { country ->
             CountryConfig.countryCodeToEmoji(country.code.value) +
-                (PhoneNumberFormatter.prefixForCountry(
-                    country.code.value
-                )?.let { "  $it  " } ?: "")
+                (
+                    PhoneNumberFormatter.prefixForCountry(
+                        country.code.value
+                    )?.let { "  $it  " } ?: ""
+                    )
         }
     )
     val countryDropdownController = DropdownFieldController(

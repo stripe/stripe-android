@@ -54,6 +54,7 @@ class CountryConfig(
                 }
             } ?: displayItems.firstOrNull() ?: ""
 
+    @Suppress("MagicNumber")
     companion object {
         /**
          * Convert 2-letter country code to the corresponding flag, using

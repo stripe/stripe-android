@@ -15,8 +15,8 @@ import com.stripe.android.ui.core.elements.AddressType
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.PhoneNumberState
-import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn

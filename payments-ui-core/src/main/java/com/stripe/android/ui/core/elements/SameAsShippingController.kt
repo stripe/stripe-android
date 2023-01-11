@@ -1,9 +1,9 @@
 package com.stripe.android.ui.core.elements
 
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.InputController
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf

@@ -6,8 +6,8 @@ import androidx.compose.ui.text.intl.Locale
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.Controller
-import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.format.CurrencyFormatter
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
