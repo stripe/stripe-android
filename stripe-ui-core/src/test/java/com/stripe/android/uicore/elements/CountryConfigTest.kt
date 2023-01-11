@@ -1,9 +1,8 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.CountryConfig
 import org.junit.Test
+import com.stripe.android.uicore.R
 import java.util.Locale
 
 class CountryConfigTest {

@@ -1,8 +1,7 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.compose.ui.text.AnnotatedString
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.uicore.elements.PhoneNumberFormatter
 import org.junit.Test
 
 internal class PhoneNumberFormatterTest {

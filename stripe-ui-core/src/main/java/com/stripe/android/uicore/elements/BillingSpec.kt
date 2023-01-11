@@ -1,7 +1,10 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
+
+import androidx.annotation.RestrictTo
 
 // This comes from: stripe-js-v3/blob/master/src/lib/shared/checkoutSupportedCountries.js
-internal val supportedBillingCountries = setOf(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val supportedBillingCountries = setOf(
     "AD", "AE", "AF", "AG", "AI", "AL", "AM", "AO", "AQ", "AR", "AT", "AU", "AW", "AX",
     "AZ", "BA", "BB", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BL", "BM", "BN", "BO",
     "BQ", "BR", "BS", "BT", "BV", "BW", "BY", "BZ", "CA", "CD", "CF", "CG", "CH", "CI",

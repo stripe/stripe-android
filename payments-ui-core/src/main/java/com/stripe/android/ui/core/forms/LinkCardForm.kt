@@ -5,7 +5,7 @@ import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.supportedBillingCountries
+import com.stripe.android.uicore.elements.supportedBillingCountries
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LinkCardForm = LayoutSpec(
