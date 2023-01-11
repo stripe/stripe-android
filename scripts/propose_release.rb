@@ -111,13 +111,4 @@ prompt_user "Or press enter to open pre-filled ticket.\nClick 'Request Review' w
 open_url jira_url
 wait_for_enter
 
-puts "Send an email to mobile-sdk-updates@stripe.com with the following information:"
-puts "Subject: [Android SDK] #{version}"
-puts "Body:"
-puts "#{changelog}"
-puts ""
-prompt_user "Press enter to open pre-filled email in your default client...\n(To make Gmail your default email client, visit https://support.google.com/a/users/answer/9308783)"
-open_url "mailto:mobile-sdk-updates@stripe.com?subject=%5BAndroid%20SDK%5D%20#{ERB::Util.url_encode(version)}&body=#{ERB::Util.url_encode(changelog)}"
-wait_for_enter
-
 puts "Release proposed. Please contact your deployer.".green
