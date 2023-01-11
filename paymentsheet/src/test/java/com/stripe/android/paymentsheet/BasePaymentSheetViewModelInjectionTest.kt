@@ -175,6 +175,8 @@ internal open class BasePaymentSheetViewModelInjectionTest {
                     val mockSubComponentBuilderProvider =
                         mock<Provider<FormViewModelSubcomponent.Builder>>()
 
+                    whenever(mockBuilder.formArguments(any())).thenReturn(mockBuilder)
+                    whenever(mockBuilder.showCheckboxFlow(any())).thenReturn(mockBuilder)
                     whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
                     whenever(mockBuilder.formArguments(any())).thenReturn(mockBuilder)
                     whenever(mockSubcomponent.viewModel).thenReturn(formViewModel)

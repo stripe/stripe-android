@@ -37,7 +37,7 @@ internal fun AddPaymentMethod(
     val linkHandler = sheetViewModel.linkHandler
     val showCheckboxFlow = remember { MutableStateFlow(false) }
 
-    val isRepositoryReady by sheetViewModel.isResourceRepositoryReady.observeAsState()
+    val isRepositoryReady by sheetViewModel.isResourceRepositoryReady.collectAsState()
     val processing by sheetViewModel.processing.collectAsState(false)
 
     val linkConfig by linkHandler.linkConfiguration.collectAsState()
