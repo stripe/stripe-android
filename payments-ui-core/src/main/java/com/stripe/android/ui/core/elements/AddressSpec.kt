@@ -5,7 +5,6 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toLowerCase
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressRepository
-import com.stripe.android.ui.core.elements.autocomplete.DefaultIsPlacesAvailable
 import com.stripe.android.ui.core.elements.autocomplete.IsPlacesAvailable
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
@@ -27,7 +26,7 @@ internal interface AutocompleteCapableAddressType {
 
     fun supportsAutoComplete(
         country: String?,
-        isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
+        isPlacesAvailable: IsPlacesAvailable,
     ): Boolean {
         val supportedCountries = autocompleteCountries
         val autocompleteSupportsCountry = supportedCountries

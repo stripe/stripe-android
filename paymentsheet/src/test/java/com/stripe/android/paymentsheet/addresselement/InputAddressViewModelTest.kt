@@ -98,7 +98,10 @@ class InputAddressViewModelTest {
         val viewModel = createViewModel()
         assertThat(viewModel.collectedAddress.value).isEqualTo(usAddress)
 
-        val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "CAN", line1 = "foobar"))
+        val expectedAddress = AddressDetails(
+            name = "skyler",
+            address = PaymentSheet.Address(country = "CAN", line1 = "foobar")
+        )
         flow.tryEmit(expectedAddress)
         assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
     }
