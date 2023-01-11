@@ -58,8 +58,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
@@ -149,8 +151,15 @@ internal abstract class BaseSheetViewModel(
         savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val _transition = MutableLiveData<Event<TransitionTarget>?>(null)
-    internal val transition: LiveData<Event<TransitionTarget>?> = _transition
+    private val backStack = MutableStateFlow<List<TransitionTarget>>(emptyList())
+
+    val currentScreen: StateFlow<TransitionTarget?> = backStack
+        .map { it.lastOrNull() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = null,
+        )
 
     private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
     internal val selection: LiveData<PaymentSelection?> = _selection
@@ -327,7 +336,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun transitionTo(target: TransitionTarget) {
         clearErrorMessages()
-        _transition.postValue(Event(target))
+        backStack.update { it + target }
     }
 
     fun transitionToAddPaymentScreen() {
@@ -579,10 +588,19 @@ internal abstract class BaseSheetViewModel(
      */
     abstract fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?)
 
+    fun handleBackPressed() {
+        if (backStack.value.size > 1) {
+            onUserBack()
+        } else {
+            onUserCancel()
+        }
+    }
+
     abstract fun onUserCancel()
 
-    fun onUserBack() {
+    private fun onUserBack() {
         clearErrorMessages()
+        backStack.update { it.dropLast(1) }
 
         // Reset the selection to the one from before opening the add payment method screen
         val paymentOptionsState = paymentOptionsState.value
@@ -640,15 +658,5 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
         internal const val LINK_CONFIGURATION = "link_configuration"
-    }
-}
-
-internal fun <T> LiveData<BaseSheetViewModel.Event<T>?>.observeEvents(
-    lifecycleOwner: LifecycleOwner,
-    observer: (T) -> Unit
-) {
-    observe(lifecycleOwner) { event ->
-        val content = event?.getContentIfNotHandled() ?: return@observe
-        observer(content)
     }
 }

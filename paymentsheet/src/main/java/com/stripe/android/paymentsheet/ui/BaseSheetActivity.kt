@@ -36,6 +36,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.navigation.TransitionTarget
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -104,8 +105,8 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
-        supportFragmentManager.addOnBackStackChangedListener {
-            updateToolbarButton(supportFragmentManager.backStackEntryCount == 0)
+        viewModel.currentScreen.launchAndCollectIn(this) { currentScreen ->
+            updateToolbarButton(currentScreen)
         }
 
         scrollView.viewTreeObserver.addOnScrollChangedListener {
@@ -138,15 +139,11 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
         toolbar.setNavigationOnClickListener {
             if (toolbar.isEnabled) {
-                if (supportFragmentManager.backStackEntryCount == 0) {
-                    viewModel.onUserCancel()
-                } else {
-                    onUserBack()
-                }
+                keyboardController.hide()
+                viewModel.handleBackPressed()
             }
         }
 
-        updateToolbarButton(supportFragmentManager.backStackEntryCount == 0)
         setupHeader()
         setupPrimaryButton()
         setupNotes()
@@ -196,12 +193,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (!viewModel.processing.value) {
-            if (supportFragmentManager.backStackEntryCount > 0) {
-                viewModel.onUserBack()
-                super.onBackPressed()
-            } else {
-                viewModel.onUserCancel()
-            }
+            viewModel.handleBackPressed()
         }
     }
 
@@ -310,8 +302,10 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
     }
 
-    private fun updateToolbarButton(isStackEmpty: Boolean) {
-        val toolbarResources = if (isStackEmpty) {
+    private fun updateToolbarButton(currentScreen: TransitionTarget?) {
+        val showClose = currentScreen != TransitionTarget.AddAnotherPaymentMethod
+
+        val toolbarResources = if (showClose) {
             ToolbarResources(
                 R.drawable.stripe_paymentsheet_toolbar_close,
                 R.string.stripe_paymentsheet_close
@@ -346,11 +340,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             rootView.setOnClickListener(null)
             rootView.isClickable = false
         }
-    }
-
-    private fun onUserBack() {
-        keyboardController.hide()
-        onBackPressed()
     }
 
     private fun setSheetWidthForTablets() {
