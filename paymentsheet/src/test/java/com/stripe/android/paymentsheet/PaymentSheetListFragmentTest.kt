@@ -6,6 +6,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -183,7 +184,9 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     fun `posts transition when add card clicked`() {
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)
-            assertThat(activityViewModel.transition.value?.peekContent()).isNull()
+
+            val transitionTargets = mutableListOf<TransitionTarget?>()
+            activityViewModel.currentScreen.asLiveData().observeForever { transitionTargets.add(it) }
 
             idleLooper()
 
@@ -191,8 +194,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             adapter.addCardClickListener()
             idleLooper()
 
-            assertThat(activityViewModel.transition.value?.peekContent())
-                .isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
+            assertThat(transitionTargets).containsExactly(null, TransitionTarget.AddAnotherPaymentMethod)
         }
     }
 

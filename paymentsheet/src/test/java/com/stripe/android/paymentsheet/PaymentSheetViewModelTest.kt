@@ -52,7 +52,6 @@ import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.utils.TestUtils.observeEventsForever
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -721,15 +720,14 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Transition only happens when view model is ready`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
-        val observedTransitions = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
 
-        viewModel.transitionToFirstScreenWhenReady()
-        assertThat(observedTransitions).isEmpty()
+        viewModel.currentScreen.test {
+            viewModel.transitionToFirstScreenWhenReady()
+            assertThat(awaitItem()).isNull()
 
-        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] =
-            GooglePayState.Available
-        assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+            viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+        }
     }
 
     @Test
