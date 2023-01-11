@@ -246,12 +246,23 @@ internal class IdentityActivity :
 
     private fun updateTopBarState(destination: NavDestination, args: Bundle?) =
         // Toggle the navigation button UI
-        when {
-            isConsent(destination) -> IdentityTopBarState.CONSENT
-            isConfirmation(destination) -> IdentityTopBarState.CONFIRMATION
-            isErrorThatShouldFail(destination, args) -> IdentityTopBarState.ERROR_SHOULD_FAIL
-            // Otherwise display back arrow icon, clicking it navigates up
-            else -> IdentityTopBarState.DEFAULT
+        when (destination.route) {
+            ConsentDestination.ROUTE.route -> {
+                IdentityTopBarState.CONSENT
+            }
+            ConfirmationDestination.ROUTE.route -> {
+                IdentityTopBarState.CONFIRMATION
+            }
+            ErrorDestination.ROUTE.route -> {
+                if (args?.getBoolean(ARG_SHOULD_FAIL, false) == true) {
+                    IdentityTopBarState.ERROR_SHOULD_FAIL
+                } else {
+                    IdentityTopBarState.DEFAULT
+                }
+            }
+            else -> {
+                IdentityTopBarState.DEFAULT
+            }
         }
 
     /**
@@ -294,22 +305,6 @@ internal class IdentityActivity :
 
         const val KEY_PRESENTED = "presented"
 
-        private fun isConsent(destination: NavDestination?) =
-            destination?.route == ConsentDestination.ROUTE.route
-
-        private fun isConfirmation(destination: NavDestination?) =
-            destination?.route == ConfirmationDestination.ROUTE.route
-
-        /**
-         * Check if this is the final error fragment, which would fail the verification flow when
-         * back button is clicked.
-         */
-        private fun isErrorThatShouldFail(
-            destination: NavDestination?,
-            args: Bundle?
-        ) = destination?.route == ErrorDestination.ROUTE.route &&
-            args?.getBoolean(ARG_SHOULD_FAIL, false) == true
-
         private fun navigateOnDestination(
             navController: NavController,
             identityViewModel: IdentityViewModel,
@@ -321,8 +316,8 @@ internal class IdentityActivity :
             if (identityViewModel.isSubmitting()) {
                 return
             }
-            when {
-                isConsent(destination) -> {
+            when (destination?.route) {
+                ConsentDestination.ROUTE.route -> {
                     identityViewModel.sendAnalyticsRequest(
                         identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
                             isFromFallbackUrl = false,
@@ -334,29 +329,33 @@ internal class IdentityActivity :
                         VerificationFlowResult.Canceled
                     )
                 }
-                isConfirmation(destination) -> {
+                ConfirmationDestination.ROUTE.route -> {
                     identityViewModel.sendSucceededAnalyticsRequestForNative()
                     verificationFlowFinishable.finishWithResult(
                         VerificationFlowResult.Completed
                     )
                 }
-                isErrorThatShouldFail(destination, args) -> {
-                    val failedReason = requireNotNull(
-                        identityViewModel.errorCause.value
-                    ) {
-                        "Failed to get failedReason"
-                    }
+                ErrorDestination.ROUTE.route -> {
+                    if (args?.getBoolean(ARG_SHOULD_FAIL, false) == true) {
+                        val failedReason = requireNotNull(
+                            identityViewModel.errorCause.value
+                        ) {
+                            "Failed to get failedReason"
+                        }
 
-                    identityViewModel.sendAnalyticsRequest(
-                        identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
-                            isFromFallbackUrl = false,
-                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
-                            throwable = failedReason
+                        identityViewModel.sendAnalyticsRequest(
+                            identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
+                                isFromFallbackUrl = false,
+                                requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                                throwable = failedReason
+                            )
                         )
-                    )
-                    verificationFlowFinishable.finishWithResult(
-                        VerificationFlowResult.Failed(failedReason)
-                    )
+                        verificationFlowFinishable.finishWithResult(
+                            VerificationFlowResult.Failed(failedReason)
+                        )
+                    } else {
+                        navController.clearDataAndNavigateUp(identityViewModel)
+                    }
                 }
                 else -> {
                     navController.clearDataAndNavigateUp(identityViewModel)

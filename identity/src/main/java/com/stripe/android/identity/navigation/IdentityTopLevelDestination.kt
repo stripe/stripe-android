@@ -77,79 +77,55 @@ internal fun NavController.navigateTo(destination: IdentityTopLevelDestination) 
 }
 
 internal fun String.routeToScreenName(): String = when (this) {
-    ConsentDestination.ROUTE.route -> {
+    ConsentDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_CONSENT
-    }
-    DocSelectionDestination.ROUTE.route -> {
+    DocSelectionDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_DOC_SELECT
-    }
-    IDScanDestination.ROUTE.route -> {
+    IDScanDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_ID
-    }
-    PassportScanDestination.ROUTE.route -> {
+    PassportScanDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_PASSPORT
-    }
-    DriverLicenseScanDestination.ROUTE.route -> {
+    DriverLicenseScanDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE_DRIVER_LICENSE
-    }
-    IDUploadDestination.ROUTE.route -> {
+    IDUploadDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_ID
-    }
-    PassportUploadDestination.ROUTE.route -> {
+    PassportUploadDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_PASSPORT
-    }
-    DriverLicenseUploadDestination.ROUTE.route -> {
+    DriverLicenseUploadDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_FILE_UPLOAD_DRIVER_LICENSE
-    }
-    SelfieDestination.ROUTE.route -> {
+    SelfieDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE
-    }
-    ConfirmationDestination.ROUTE.route -> {
+    ConfirmationDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_CONFIRMATION
-    }
-    CameraPermissionDeniedDestination.ROUTE.route -> {
+    CameraPermissionDeniedDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
-    }
-    ErrorDestination.ROUTE.route -> {
+    ErrorDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
-    }
-    CouldNotCaptureDestination.ROUTE.route -> {
+    CouldNotCaptureDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
-    }
-    else -> {
+    else ->
         throw IllegalArgumentException("Invalid route: $this")
-    }
 }
 
 internal fun String.routeToRequirement(): List<Requirement> = when (this) {
-    ConsentDestination.ROUTE.route -> {
+    ConsentDestination.ROUTE.route ->
         listOf(Requirement.BIOMETRICCONSENT)
-    }
-    DocSelectionDestination.ROUTE.route -> {
+    DocSelectionDestination.ROUTE.route ->
         listOf(Requirement.IDDOCUMENTTYPE)
-    }
-    IDUploadDestination.ROUTE.route -> {
+    IDUploadDestination.ROUTE.route ->
         listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
-    }
-    PassportUploadDestination.ROUTE.route -> {
+    PassportUploadDestination.ROUTE.route ->
         listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
-    }
-    DriverLicenseUploadDestination.ROUTE.route -> {
+    DriverLicenseUploadDestination.ROUTE.route ->
         listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
-    }
-    IDScanDestination.ROUTE.route -> {
+    IDScanDestination.ROUTE.route ->
         listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
-    }
-    PassportScanDestination.ROUTE.route -> {
+    PassportScanDestination.ROUTE.route ->
         listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
-    }
-    DriverLicenseScanDestination.ROUTE.route -> {
+    DriverLicenseScanDestination.ROUTE.route ->
         listOf(Requirement.IDDOCUMENTFRONT, Requirement.IDDOCUMENTBACK)
-    }
-    SelfieDestination.ROUTE.route -> {
+    SelfieDestination.ROUTE.route ->
         listOf(Requirement.FACE)
-    }
-    else -> {
-        listOf()
-    }
+    else ->
+        emptyList()
 }
