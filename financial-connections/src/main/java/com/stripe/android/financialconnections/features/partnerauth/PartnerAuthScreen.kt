@@ -4,7 +4,6 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
 import android.webkit.WebView
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -158,7 +157,7 @@ private fun PartnerAuthScreenContent(
                     onConfirmModalClick = onConfirmModalClick,
                     onClickableTextClick = onClickableTextClick
                 )
-            } ?: Spacer(modifier = Modifier)
+            } ?: Spacer(modifier = Modifier.size(16.dp))
         },
         content = {
             PartnerAuthScreenMainContent(
@@ -364,14 +363,13 @@ private fun InstitutionalPrePaneContent(
             )
         )
         Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .padding(top = 16.dp, bottom = 16.dp)
                 .weight(1f)
                 .verticalScroll(scrollState)
         ) {
             // CONTENT
-            content.body.entries.forEach { bodyItem ->
+            content.body.entries.forEachIndexed { index, bodyItem ->
                 when (bodyItem) {
                     is Entry.Image -> {
                         GifWebView(bodyItem.content.default!!)
@@ -389,27 +387,29 @@ private fun InstitutionalPrePaneContent(
                         )
                     )
                 }
+                if (index != content.body.entries.lastIndex) {
+                    Spacer(modifier = Modifier.size(16.dp))
+                }
             }
-        }
-        Column {
+            Spacer(modifier = Modifier.weight(1f))
             content.partnerNotice?.let {
                 PartnerCallout(
                     isStripeDirect = isStripeDirect,
-                    content.partnerNotice
-                )
-            }
-            Spacer(modifier = Modifier.size(16.dp))
-            FinancialConnectionsButton(
-                onClick = onContinueClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(
-                    text = stringResource(R.string.stripe_prepane_continue),
-                    textAlign = TextAlign.Center
+                    partnerNotice = content.partnerNotice
                 )
             }
         }
+        FinancialConnectionsButton(
+            onClick = onContinueClick,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(R.string.stripe_prepane_continue),
+                textAlign = TextAlign.Center
+            )
+        }
+
     }
 }
 
@@ -435,7 +435,7 @@ private fun GifWebView(gifUrl: String) {
 internal fun InstitutionalPrepaneContentPreview() {
     FinancialConnectionsPreview {
         val sampleImage =
-            "https://b.stripecdn.com/connections-statics-srv/assets/SailIcon--reserve-primary-3x.png"
+            "https://b.stripecdn.com/connections-statics-srv/assets/PrepaneAsset--account_numbers-capitalone-2x.gif"
         PartnerAuthScreenContent(
             state = PartnerAuthState(
                 payload = Success(
@@ -463,7 +463,8 @@ internal fun InstitutionalPrepaneContentPreview() {
                                         body = Body(
                                             listOf(
                                                 Entry.Text(
-                                                    "Some very large text will most likely go here!"
+                                                    "Some very large text will most likely go here!" +
+                                                        "Some very large text will most likely go here!"
                                                 ),
                                                 Entry.Image(
                                                     Image(sampleImage)
@@ -471,6 +472,12 @@ internal fun InstitutionalPrepaneContentPreview() {
                                                 Entry.Text(
                                                     "Some very large text will most likely go here!"
                                                 ),
+                                                Entry.Text(
+                                                    "Some very large text will most likely go here!"
+                                                ),
+                                                Entry.Text(
+                                                    "Some very large text will most likely go here!"
+                                                )
                                             )
                                         ),
                                         cta = Cta(
@@ -487,6 +494,52 @@ internal fun InstitutionalPrepaneContentPreview() {
                                     )
                                 )
                             )
+                        ),
+                        isStripeDirect = false
+                    )
+                ),
+                authenticationStatus = Uninitialized,
+                viewEffect = null
+            ),
+            onContinueClick = {},
+            onSelectAnotherBank = {},
+            onEnterDetailsManually = {},
+            onCloseClick = {},
+            modalBottomSheetState = rememberModalBottomSheetState(
+                initialValue = ModalBottomSheetValue.Hidden
+            ),
+            onClickableTextClick = {},
+            onCloseFromErrorClick = {},
+            onConfirmModalClick = {}
+        )
+    }
+}
+
+@Composable
+@Preview
+internal fun PrepaneContentPreview() {
+    FinancialConnectionsPreview {
+        PartnerAuthScreenContent(
+            state = PartnerAuthState(
+                payload = Success(
+                    PartnerAuthState.Payload(
+                        institution = FinancialConnectionsInstitution(
+                            id = "id",
+                            name = "name",
+                            url = "url",
+                            featured = true,
+                            icon = null,
+                            logo = null,
+                            featuredOrder = null,
+                            mobileHandoffCapable = false
+                        ),
+                        authSession = FinancialConnectionsAuthorizationSession(
+                            flow = Flow.FINICITY_CONNECT_V2_OAUTH,
+                            showPartnerDisclosure = true,
+                            _isOAuth = true,
+                            nextPane = Pane.PARTNER_AUTH,
+                            id = "1234",
+                            display = null
                         ),
                         isStripeDirect = false
                     )

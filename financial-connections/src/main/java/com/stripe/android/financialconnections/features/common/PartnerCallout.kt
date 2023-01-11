@@ -83,11 +83,12 @@ internal fun PartnerCallout(
 @Composable
 internal fun PartnerCallout(
     isStripeDirect: Boolean,
-    partnerNotice: PartnerNotice
+    partnerNotice: PartnerNotice,
+    modifier: Modifier = Modifier
 ) {
     val uriHandler = LocalUriHandler.current
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(shape = RoundedCornerShape(8.dp))
             .background(color = FinancialConnectionsTheme.colors.backgroundContainer)
