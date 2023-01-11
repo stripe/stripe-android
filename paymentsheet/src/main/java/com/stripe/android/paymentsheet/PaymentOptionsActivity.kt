@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
+import com.stripe.android.paymentsheet.navigation.TransitionTarget
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -137,13 +138,13 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
     }
 
     private fun onTransitionTarget(
-        transitionTarget: BaseSheetViewModel.TransitionTarget,
+        transitionTarget: TransitionTarget,
     ) {
         val fragmentArgs = bundleOf(PaymentSheetActivity.EXTRA_STARTER_ARGS to starterArgs)
 
         supportFragmentManager.commit {
             when (transitionTarget) {
-                is BaseSheetViewModel.TransitionTarget.AddAnotherPaymentMethod -> {
+                is TransitionTarget.AddAnotherPaymentMethod -> {
                     // Once the add fragment has been opened there is never a scenario that
                     // we should back to the add fragment from the select list view.
                     viewModel.hasTransitionToUnsavedLpm = true
@@ -161,14 +162,14 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                         fragmentArgs,
                     )
                 }
-                is BaseSheetViewModel.TransitionTarget.SelectSavedPaymentMethods -> {
+                is TransitionTarget.SelectSavedPaymentMethods -> {
                     replace(
                         fragmentContainerId,
                         PaymentOptionsListFragment::class.java,
                         fragmentArgs,
                     )
                 }
-                is BaseSheetViewModel.TransitionTarget.AddFirstPaymentMethod -> {
+                is TransitionTarget.AddFirstPaymentMethod -> {
                     // Once the add fragment has been opened there is never a scenario that
                     // we should back to the add fragment from the select list view.
                     viewModel.hasTransitionToUnsavedLpm = true

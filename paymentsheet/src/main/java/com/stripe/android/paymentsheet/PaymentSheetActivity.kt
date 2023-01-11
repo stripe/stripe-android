@@ -25,10 +25,10 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.navigation.TransitionTarget
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.observeEvents
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -181,13 +181,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     private fun onTransitionTarget(
-        transitionTarget: BaseSheetViewModel.TransitionTarget,
+        transitionTarget: TransitionTarget,
     ) {
         val fragmentArgs = bundleOf(EXTRA_STARTER_ARGS to starterArgs)
 
         supportFragmentManager.commit {
             when (transitionTarget) {
-                is BaseSheetViewModel.TransitionTarget.AddAnotherPaymentMethod -> {
+                is TransitionTarget.AddAnotherPaymentMethod -> {
                     setCustomAnimations(
                         AnimationConstants.FADE_IN,
                         AnimationConstants.FADE_OUT,
@@ -201,7 +201,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                         fragmentArgs
                     )
                 }
-                is BaseSheetViewModel.TransitionTarget.SelectSavedPaymentMethods -> {
+                is TransitionTarget.SelectSavedPaymentMethods -> {
                     setCustomAnimations(
                         AnimationConstants.FADE_IN,
                         AnimationConstants.FADE_OUT,
@@ -214,7 +214,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                         fragmentArgs
                     )
                 }
-                is BaseSheetViewModel.TransitionTarget.AddFirstPaymentMethod -> {
+                is TransitionTarget.AddFirstPaymentMethod -> {
                     setCustomAnimations(
                         AnimationConstants.FADE_IN,
                         AnimationConstants.FADE_OUT,

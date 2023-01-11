@@ -21,7 +21,7 @@ import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.
 import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.Companion.lpmRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.navigation.TransitionTarget
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.After
 import org.junit.Before
@@ -188,7 +188,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             idleLooper()
 
             assertThat(activityViewModel.transition.value?.peekContent())
-                .isEqualTo(BaseSheetViewModel.TransitionTarget.AddAnotherPaymentMethod)
+                .isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
         }
     }
 
