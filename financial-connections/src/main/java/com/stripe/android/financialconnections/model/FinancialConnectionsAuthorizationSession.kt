@@ -52,7 +52,7 @@ internal data class FinancialConnectionsAuthorizationSession(
     private val _isOAuth: Boolean? = false,
 
     @SerialName(value = "display")
-    val display: Display?
+    val display: Display? = null
 ) : Parcelable {
 
     val isOAuth: Boolean
