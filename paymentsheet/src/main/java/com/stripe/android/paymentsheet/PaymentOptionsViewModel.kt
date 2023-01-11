@@ -125,6 +125,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
             lpmServerSpec =
                 lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
         }
+
+        transitionToFirstScreenWhenReady()
     }
 
     override fun onFatal(throwable: Throwable) {
@@ -284,7 +286,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
-    fun transitionToFirstScreenWhenReady() {
+    private fun transitionToFirstScreenWhenReady() {
         viewModelScope.launch {
             awaitReady()
             awaitRepositoriesReady()

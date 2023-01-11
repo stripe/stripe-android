@@ -48,7 +48,6 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,7 +55,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -260,23 +258,21 @@ internal abstract class BaseSheetViewModel(
         }
 
         if (_isResourceRepositoryReady.value == null) {
-            viewModelScope.launch {
-                // This work should be done on the background
-                CoroutineScope(workContext).launch {
-                    // If we have been killed and are being restored then we need to re-populate
-                    // the lpm repository
-                    stripeIntent.value?.paymentMethodTypes?.let { intentPaymentMethodTypes ->
-                        lpmResourceRepository.getRepository().apply {
-                            if (!isLoaded()) {
-                                update(intentPaymentMethodTypes, lpmServerSpec)
-                            }
+            // This work should be done on the background
+            viewModelScope.launch(workContext) {
+                // If we have been killed and are being restored then we need to re-populate
+                // the lpm repository
+                stripeIntent.value?.paymentMethodTypes?.let { intentPaymentMethodTypes ->
+                    lpmResourceRepository.getRepository().apply {
+                        if (!isLoaded()) {
+                            update(intentPaymentMethodTypes, lpmServerSpec)
                         }
                     }
-
-                    lpmResourceRepository.waitUntilLoaded()
-                    addressResourceRepository.waitUntilLoaded()
-                    _isResourceRepositoryReady.postValue(true)
                 }
+
+                lpmResourceRepository.waitUntilLoaded()
+                addressResourceRepository.waitUntilLoaded()
+                _isResourceRepositoryReady.postValue(true)
             }
         }
 

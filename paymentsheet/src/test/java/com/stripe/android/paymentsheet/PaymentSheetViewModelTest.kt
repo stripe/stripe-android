@@ -706,15 +706,38 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Transition only happens when view model is ready`() = runTest(testDispatcher) {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(customerPaymentMethods = emptyList())
         val observedTransitions = mutableListOf<TransitionTarget>()
         viewModel.transition.observeEventsForever { observedTransitions.add(it) }
 
-        viewModel.transitionToFirstScreenWhenReady()
         assertThat(observedTransitions).isEmpty()
 
         viewModel._isGooglePayReady.value = true
         assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+    }
+
+    @Test
+    fun `Verify if customer has payment methods, display the saved payment methods screen`() {
+        val viewModel = createViewModel().apply {
+            _isGooglePayReady.value = true
+        }
+
+        val transitionTargets = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
+
+        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+    }
+
+    @Test
+    fun `Verify if there are no payment methods, display the add payment method screen`() {
+        val viewModel = createViewModel(customerPaymentMethods = emptyList()).apply {
+            _isGooglePayReady.value = true
+        }
+
+        val transitionTargets = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
+
+        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
@@ -908,7 +931,8 @@ internal class PaymentSheetViewModelTest {
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
-        customerRepository: CustomerRepository = FakeCustomerRepository(PAYMENT_METHODS),
+        customerPaymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
+        customerRepository: CustomerRepository = FakeCustomerRepository(customerPaymentMethods),
         shouldFailLoad: Boolean = false,
         linkState: LinkState? = null,
     ): PaymentSheetViewModel {
@@ -924,6 +948,7 @@ internal class PaymentSheetViewModelTest {
                 stripeIntent = stripeIntent,
                 shouldFail = shouldFailLoad,
                 linkState = linkState,
+                customerPaymentMethods = customerPaymentMethods,
             ),
             customerRepository,
             prefsRepository,

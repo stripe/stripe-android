@@ -199,6 +199,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         viewModelScope.launch {
             loadPaymentSheetState()
         }
+
+        transitionToFirstScreenWhenReady()
     }
 
     private suspend fun loadPaymentSheetState() {
@@ -591,7 +593,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is LinkActivityResult.Failed -> PaymentResult.Failed(error)
         }
 
-    fun transitionToFirstScreenWhenReady() {
+    private fun transitionToFirstScreenWhenReady() {
         viewModelScope.launch {
             awaitReady()
             transitionToFirstScreen()

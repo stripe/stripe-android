@@ -336,32 +336,6 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify doesn't transition to first screen again on activity recreation`() {
-        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-        )
-
-        val viewModel = createViewModel(args)
-
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
-        activityScenario(viewModel).launch(createIntent(args)).use { scenario ->
-            scenario.onActivity {
-                idleLooper()
-            }
-
-            scenario.recreate()
-
-            scenario.onActivity {
-                idleLooper()
-            }
-        }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
-    }
-
-    @Test
     fun `Verify bottom sheet expands on start`() {
         val scenario = activityScenario()
         scenario.launch(
