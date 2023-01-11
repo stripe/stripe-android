@@ -14,7 +14,7 @@ internal data class SynchronizeSessionResponse(
     @SerialName("text")
     val text: TextUpdate? = null,
     @SerialName("visual")
-    val visual: VisualUpdate? = null,
+    val visual: VisualUpdate,
 ) : Parcelable
 
 @Serializable

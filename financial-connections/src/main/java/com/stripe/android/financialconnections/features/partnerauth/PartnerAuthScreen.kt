@@ -4,6 +4,9 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
 import android.webkit.WebView
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,7 +30,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -372,7 +379,33 @@ private fun InstitutionalPrePaneContent(
             content.body.entries.forEachIndexed { index, bodyItem ->
                 when (bodyItem) {
                     is Entry.Image -> {
-                        GifWebView(bodyItem.content.default!!)
+                        Box(
+                            modifier = Modifier.background(
+                                Brush.horizontalGradient(
+                                    listOf(
+                                        Color.Transparent,
+                                        Color.DarkGray,
+                                        Color.Transparent
+                                    )
+                                )
+                            )
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.stripe_prepane_phone_bg),
+                                contentDescription = "Test",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(264.dp)
+                            )
+                            GifWebView(
+                                modifier = Modifier
+                                    .padding(horizontal = 28.dp)
+                                    .fillMaxWidth()
+                                    .height(264.dp),
+                                bodyItem.content.default!!
+                            )
+                        }
                     }
 
                     is Entry.Text -> AnnotatedText(
@@ -391,8 +424,9 @@ private fun InstitutionalPrePaneContent(
                     Spacer(modifier = Modifier.size(16.dp))
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
+            Box(modifier = Modifier.weight(1f))
             content.partnerNotice?.let {
+                Spacer(modifier = Modifier.size(16.dp))
                 PartnerCallout(
                     isStripeDirect = isStripeDirect,
                     partnerNotice = content.partnerNotice
@@ -409,19 +443,19 @@ private fun InstitutionalPrePaneContent(
                 textAlign = TextAlign.Center
             )
         }
-
     }
 }
 
 @Composable
-private fun GifWebView(gifUrl: String) {
+private fun GifWebView(
+    modifier: Modifier,
+    gifUrl: String
+) {
     val state = rememberWebViewStateWithHTMLData(
         "<html><body><img style=\"width: 100%\" src=\"$gifUrl\"></body></html>"
     )
     WebView(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(500.dp),
+        modifier = modifier,
         onCreated = { it: WebView ->
             it.isVerticalScrollBarEnabled = false
             it.isVerticalFadingEdgeEnabled = false
