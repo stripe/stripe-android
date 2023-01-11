@@ -13,10 +13,10 @@ import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetLoadingBi
 internal sealed interface TransitionTarget {
 
     @Composable
-    abstract fun PaymentSheetContent()
+    fun PaymentSheetContent()
 
     @Composable
-    abstract fun PaymentOptionsContent()
+    fun PaymentOptionsContent()
 
     object SelectSavedPaymentMethods : TransitionTarget {
 
