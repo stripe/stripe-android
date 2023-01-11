@@ -242,7 +242,7 @@ open class AddressElement constructor(
             TextFieldIcon.Trailing(
                 idRes = R.drawable.stripe_ic_search,
                 isTintable = true,
-                contentDescription = R.string.stripe_address_search_content_description,
+                contentDescription = R.string.address_search_content_description,
                 onClick = {
                     addressType.onNavigation()
                 }
