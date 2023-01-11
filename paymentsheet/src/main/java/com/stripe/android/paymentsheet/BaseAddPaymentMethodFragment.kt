@@ -250,7 +250,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             getString(R.string.stripe_paymentsheet_add_payment_method_title)
 
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm(
-            linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
+            linkEnabled = sheetViewModel.isLinkEnabled.value,
             activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
         )
     }
@@ -269,7 +269,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         paymentMethodCode: String,
         linkAccountStatus: AccountStatus?
     ): Boolean {
-        return sheetViewModel.isLinkEnabled.value == true &&
+        return sheetViewModel.isLinkEnabled.value &&
             sheetViewModel.stripeIntent.value
             ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
             paymentMethodCode == PaymentMethod.Type.Card.code &&

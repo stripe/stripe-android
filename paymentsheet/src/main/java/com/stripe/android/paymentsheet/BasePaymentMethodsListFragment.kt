@@ -46,7 +46,7 @@ internal abstract class BasePaymentMethodsListFragment(
 
         setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
         sheetViewModel.eventReporter.onShowExistingPaymentOptions(
-            linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
+            linkEnabled = sheetViewModel.isLinkEnabled.value,
             activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
         )
     }

@@ -21,7 +21,7 @@ internal class PaymentSheetListFragment : BasePaymentMethodsListFragment(
 
         sheetViewModel.headerText.value = getString(
             if (
-                sheetViewModel.isLinkEnabled.value == true ||
+                sheetViewModel.isLinkEnabled.value ||
                 sheetViewModel.googlePayState.value == GooglePayState.Available
             ) {
                 R.string.stripe_paymentsheet_pay_using

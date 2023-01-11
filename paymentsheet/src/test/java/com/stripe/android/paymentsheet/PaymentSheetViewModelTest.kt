@@ -720,15 +720,21 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Transition only happens when view model is ready`() = runTest(testDispatcher) {
-        val viewModel = createViewModel()
+        val configuration: LinkPaymentLauncher.Configuration = mock()
+
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = configuration,
+                loginState = LinkState.LoginState.LoggedIn,
+            ),
+        )
         val observedTransitions = mutableListOf<TransitionTarget>()
         viewModel.transition.observeEventsForever { observedTransitions.add(it) }
 
         viewModel.transitionToFirstScreenWhenReady()
         assertThat(observedTransitions).isEmpty()
 
-        viewModel.savedStateHandle[BaseSheetViewModel.SAVE_GOOGLE_PAY_STATE] =
-            GooglePayState.Available
+        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
         assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 

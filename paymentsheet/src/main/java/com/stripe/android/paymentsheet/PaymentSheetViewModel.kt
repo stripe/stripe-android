@@ -178,13 +178,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     // Whether the top container, containing Google Pay and Link buttons, should be visible
     internal val showTopContainer = MediatorLiveData<Boolean>().apply {
         listOf(
-            isLinkEnabled,
+            isLinkEnabled.asLiveData(),
             googlePayState.asLiveData(),
             isReadyEvents
         ).forEach {
             addSource(it) {
                 value = (
-                    isLinkEnabled.value == true ||
+                    isLinkEnabled.value ||
                         googlePayState.value == GooglePayState.Available
                     ) && isReadyEvents.value?.peekContent() == true
             }

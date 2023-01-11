@@ -268,7 +268,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         )
         viewModel.showTopContainer.observe(this) { visible ->
-            linkButton.isVisible = viewModel.isLinkEnabled.value == true
+            linkButton.isVisible = viewModel.isLinkEnabled.value
             googlePayButton.isVisible =
                 viewModel.googlePayState.value == GooglePayState.Available
             topContainer.isVisible = visible

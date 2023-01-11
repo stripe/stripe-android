@@ -107,8 +107,8 @@ internal abstract class BaseSheetViewModel(
         _isResourceRepositoryReady.distinctUntilChanged()
 
     @VisibleForTesting
-    internal val _isLinkEnabled = MutableLiveData<Boolean>()
-    internal val isLinkEnabled: LiveData<Boolean> = _isLinkEnabled
+    internal val _isLinkEnabled = MutableStateFlow(false)
+    internal val isLinkEnabled: StateFlow<Boolean> = _isLinkEnabled
 
     internal val activeLinkSession = MutableLiveData(false)
 
@@ -233,7 +233,7 @@ internal abstract class BaseSheetViewModel(
             initialSelection = savedSelection,
             currentSelection = selection,
             googlePayState = googlePayState.asLiveData(),
-            isLinkEnabled = isLinkEnabled,
+            isLinkEnabled = isLinkEnabled.asLiveData(),
             isNotPaymentFlow = this is PaymentOptionsViewModel,
         )
     }
@@ -252,7 +252,7 @@ internal abstract class BaseSheetViewModel(
                 val savedSelection = withContext(workContext) {
                     prefsRepository.getSavedSelection(
                         googlePayState.first().isReadyForUse,
-                        isLinkEnabled.asFlow().first()
+                        isLinkEnabled.first()
                     )
                 }
                 savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection
@@ -297,7 +297,7 @@ internal abstract class BaseSheetViewModel(
             paymentMethods,
             googlePayState.asLiveData(),
             isResourceRepositoryReady,
-            isLinkEnabled
+            isLinkEnabled.asLiveData()
         ).forEach { source ->
             addSource(source) {
                 value = determineIfReady()
@@ -321,7 +321,7 @@ internal abstract class BaseSheetViewModel(
             paymentMethodsValue != null &&
             isGooglePayReadyValue != GooglePayState.Indeterminate &&
             isResourceRepositoryReadyValue != null &&
-            isLinkReadyValue != null &&
+            isLinkReadyValue &&
             savedSelectionValue != null
     }
 
