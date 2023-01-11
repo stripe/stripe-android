@@ -94,5 +94,5 @@ internal fun TransitionTarget?.PaymentOptionsContent() {
     }
 }
 
-internal val TransitionTarget.testTag: String
+private val TransitionTarget.testTag: String
     get() = this::class.java.simpleName

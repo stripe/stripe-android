@@ -431,7 +431,7 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `handles fragment transitions`() {
+    fun `handles screen transitions correctly`() {
         val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
 
@@ -751,7 +751,7 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `shows add card fragment when no saved payment methods available`() {
+    fun `shows add card screen when no saved payment methods available`() {
         val viewModel = createViewModel(paymentMethods = emptyList())
         val scenario = activityScenario(viewModel)
 
