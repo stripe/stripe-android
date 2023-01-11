@@ -28,6 +28,8 @@ import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFa
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.TransitionTarget.AddFirstPaymentMethod
+import com.stripe.android.paymentsheet.navigation.TransitionTarget.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
@@ -88,16 +90,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override var linkInlineSelection = MutableLiveData<PaymentSelection.New.LinkInline?>(
         args.state.newPaymentSelection as? PaymentSelection.New.LinkInline,
     )
-
-    // This is used in the case where the last card was new and not saved. In this scenario
-    // when the payment options is opened it should jump to the add card, but if the user
-    // presses the back button, they shouldn't transition to it again
-    internal var hasTransitionToUnsavedLpm
-        get() = savedStateHandle.get<Boolean>(SAVE_STATE_HAS_OPEN_SAVED_LPM)
-        set(value) = savedStateHandle.set(SAVE_STATE_HAS_OPEN_SAVED_LPM, value)
-
-    private val shouldTransitionToUnsavedCard: Boolean
-        get() = hasTransitionToUnsavedLpm != true && newPaymentSelection != null
 
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (args.state.isGooglePayReady) {
@@ -279,17 +271,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             )
     }
 
-    fun resolveTransitionTarget() {
-        if (shouldTransitionToUnsavedCard) {
-            hasTransitionToUnsavedLpm = true
-            transitionTo(
-                // Until we add a flag to the transitionTarget to specify if we want to add the item
-                // to the backstack, we need to use the full sheet.
-                TransitionTarget.AddAnotherPaymentMethod
-            )
-        }
-    }
-
     fun transitionToFirstScreenWhenReady() {
         viewModelScope.launch {
             awaitReady()
@@ -308,11 +289,17 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun transitionToFirstScreen() {
         val target = if (args.state.hasPaymentOptions) {
-            TransitionTarget.SelectSavedPaymentMethods
+            SelectSavedPaymentMethods
         } else {
-            TransitionTarget.AddFirstPaymentMethod
+            AddFirstPaymentMethod
         }
         transitionTo(target)
+
+        if (target is SelectSavedPaymentMethods && newPaymentSelection != null) {
+            // The user has previously selected a new payment method. Instead of sending them to the
+            // payment methods screen, we directly launch them into the payment method form again.
+            transitionTo(TransitionTarget.AddAnotherPaymentMethod)
+        }
     }
 
     internal class Factory(
@@ -357,9 +344,5 @@ internal class PaymentOptionsViewModel @Inject constructor(
             component.inject(this)
             return component
         }
-    }
-
-    companion object {
-        const val SAVE_STATE_HAS_OPEN_SAVED_LPM = "hasTransitionToUnsavedLpm"
     }
 }

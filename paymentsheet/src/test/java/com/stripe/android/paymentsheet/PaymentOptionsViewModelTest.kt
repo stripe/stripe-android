@@ -117,21 +117,20 @@ internal class PaymentOptionsViewModelTest {
         }
 
     @Test
-    fun `resolveTransitionTarget no new card`() = runTest {
+    fun `Opens saved payment methods if no new payment method was previously selected`() = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(newPaymentSelection = null)
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isNull()
-            // no customer, no new card, no paymentMethods
-            viewModel.resolveTransitionTarget()
-            expectNoEvents()
+            skipItems(1)
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
     }
 
     @Test
-    fun `resolveTransitionTarget new card saved`() = runTest {
+    fun `Opens previously selected new payment method`() = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -142,31 +141,10 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isNull()
-            viewModel.resolveTransitionTarget()
+            skipItems(1)
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
             assertThat(awaitItem()).isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
-        }
-    }
-
-    @Test
-    fun `resolveTransitionTarget new card NOT saved`() = runTest {
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-                newPaymentSelection = NEW_CARD_PAYMENT_SELECTION.copy(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                )
-            )
-        )
-
-        viewModel.currentScreen.test {
-            assertThat(awaitItem()).isNull()
-
-            viewModel.resolveTransitionTarget()
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
-
-            viewModel.resolveTransitionTarget()
-            expectNoEvents()
         }
     }
 
