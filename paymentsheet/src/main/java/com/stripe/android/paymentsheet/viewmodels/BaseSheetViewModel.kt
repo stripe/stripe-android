@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.TransitionTarget
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
@@ -95,9 +96,8 @@ internal abstract class BaseSheetViewModel(
 
     protected var mostRecentError: Throwable? = null
 
-    @VisibleForTesting
-    internal val _isGooglePayReady = savedStateHandle.getLiveData<Boolean>(SAVE_GOOGLE_PAY_READY)
-    internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
+    internal val googlePayState: StateFlow<GooglePayState> = savedStateHandle
+        .getStateFlow(SAVE_GOOGLE_PAY_STATE, GooglePayState.Indeterminate)
 
     // Don't save the resource repository state because it must be re-initialized
     // with the save server specs when reconstructed.
@@ -232,7 +232,7 @@ internal abstract class BaseSheetViewModel(
             paymentMethods = paymentMethods,
             initialSelection = savedSelection,
             currentSelection = selection,
-            isGooglePayReady = isGooglePayReady,
+            googlePayState = googlePayState.asLiveData(),
             isLinkEnabled = isLinkEnabled,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
         )
@@ -251,7 +251,7 @@ internal abstract class BaseSheetViewModel(
             viewModelScope.launch {
                 val savedSelection = withContext(workContext) {
                     prefsRepository.getSavedSelection(
-                        isGooglePayReady.asFlow().first(),
+                        googlePayState.first().isReadyForUse,
                         isLinkEnabled.asFlow().first()
                     )
                 }
@@ -295,7 +295,7 @@ internal abstract class BaseSheetViewModel(
             savedSelection,
             stripeIntent.asLiveData(),
             paymentMethods,
-            isGooglePayReady,
+            googlePayState.asLiveData(),
             isResourceRepositoryReady,
             isLinkEnabled
         ).forEach { source ->
@@ -309,7 +309,7 @@ internal abstract class BaseSheetViewModel(
 
     private fun determineIfReady(): Boolean {
         val stripeIntentValue = stripeIntent.value
-        val isGooglePayReadyValue = isGooglePayReady.value
+        val isGooglePayReadyValue = googlePayState.value
         val isResourceRepositoryReadyValue = isResourceRepositoryReady.value
         val isLinkReadyValue = isLinkEnabled.value
         val savedSelectionValue = savedSelection.value
@@ -319,7 +319,7 @@ internal abstract class BaseSheetViewModel(
 
         return stripeIntentValue != null &&
             paymentMethodsValue != null &&
-            isGooglePayReadyValue != null &&
+            isGooglePayReadyValue != GooglePayState.Indeterminate &&
             isResourceRepositoryReadyValue != null &&
             isLinkReadyValue != null &&
             savedSelectionValue != null
@@ -639,7 +639,7 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_SAVED_SELECTION = "saved_selection"
         internal const val SAVE_SUPPORTED_PAYMENT_METHOD = "supported_payment_methods"
         internal const val SAVE_PROCESSING = "processing"
-        internal const val SAVE_GOOGLE_PAY_READY = "google_pay_ready"
+        internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
         internal const val LINK_CONFIGURATION = "link_configuration"
     }

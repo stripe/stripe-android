@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.TransitionTarget
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -99,7 +100,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
         get() = hasTransitionToUnsavedLpm != true && newPaymentSelection != null
 
     init {
-        savedStateHandle[SAVE_GOOGLE_PAY_READY] = args.state.isGooglePayReady
+        savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (args.state.isGooglePayReady) {
+            GooglePayState.Available
+        } else {
+            GooglePayState.NotAvailable
+        }
 
         val linkState = args.state.linkState
 
