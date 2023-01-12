@@ -73,6 +73,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.time.Duration
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -939,6 +940,15 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `paymentMethods is null if payment sheet state is not loaded`() = runTest {
+        val viewModel = createViewModel(delay = Duration.INFINITE)
+
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
+    @Test
     fun `current screen is AddFirstPaymentMethod if payment methods is empty`() = runTest {
         val viewModel = createViewModel(customerPaymentMethods = emptyList())
 
@@ -979,7 +989,8 @@ internal class PaymentSheetViewModelTest {
         customerRepository: CustomerRepository = FakeCustomerRepository(PAYMENT_METHODS),
         shouldFailLoad: Boolean = false,
         linkState: LinkState? = null,
-        customerPaymentMethods: List<PaymentMethod> = listOf()
+        customerPaymentMethods: List<PaymentMethod> = listOf(),
+        delay: Duration = Duration.ZERO
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return PaymentSheetViewModel(
@@ -993,7 +1004,8 @@ internal class PaymentSheetViewModelTest {
                 stripeIntent = stripeIntent,
                 shouldFail = shouldFailLoad,
                 linkState = linkState,
-                customerPaymentMethods = customerPaymentMethods
+                customerPaymentMethods = customerPaymentMethods,
+                delay = delay
             ),
             customerRepository,
             prefsRepository,

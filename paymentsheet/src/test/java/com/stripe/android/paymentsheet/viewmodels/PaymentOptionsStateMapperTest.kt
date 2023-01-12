@@ -20,7 +20,7 @@ class PaymentOptionsStateMapperTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private lateinit var paymentMethodsFlow: MutableLiveData<List<PaymentMethod>>
+    private lateinit var paymentMethodsFlow: MutableLiveData<List<PaymentMethod>?>
     private lateinit var initialSelectionFlow: MutableLiveData<SavedSelection>
     private lateinit var currentSelectionFlow: MutableLiveData<PaymentSelection?>
     private lateinit var googlePayStateFlow: MutableLiveData<GooglePayState>
