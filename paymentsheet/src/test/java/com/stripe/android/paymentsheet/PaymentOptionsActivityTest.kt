@@ -12,6 +12,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -50,7 +51,6 @@ import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.utils.TestUtils.observeEventsForever
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
@@ -58,6 +58,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -259,24 +260,19 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify if Google Pay is ready, display the saved payment methods screen`() {
+    fun `Verify if Google Pay is ready, display the saved payment methods screen`() = runTest {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(isGooglePayReady = true)
         val viewModel = createViewModel(args)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
-        activityScenario(viewModel).launch(createIntent(args)).use {
-            it.onActivity {
-                idleLooper()
-            }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            activityScenario(viewModel).launch(createIntent(args))
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
-    fun `Verify if Link is available, display the saved payment methods screen`() {
+    fun `Verify if Link is available, display the saved payment methods screen`() = runTest {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             linkState = LinkState(configuration = mock(), loginState = LoggedIn),
             isGooglePayReady = false,
@@ -285,20 +281,15 @@ internal class PaymentOptionsActivityTest {
 
         val viewModel = createViewModel(args)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
-        activityScenario(viewModel).launch(createIntent(args)).use {
-            it.onActivity {
-                idleLooper()
-            }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            activityScenario(viewModel).launch(createIntent(args))
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
-    fun `Verify if customer has payment methods, display the saved payment methods screen`() {
+    fun `Verify if customer has payment methods, display the saved payment methods screen`() = runTest {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             isGooglePayReady = false,
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -306,18 +297,15 @@ internal class PaymentOptionsActivityTest {
 
         val viewModel = createViewModel(args)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
-        activityScenario(viewModel).launch(createIntent(args)).use {
-            idleLooper()
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            activityScenario(viewModel).launch(createIntent(args))
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
-    fun `Verify if there are no payment methods, display the add payment method screen`() {
+    fun `Verify if there are no payment methods, display the add payment method screen`() = runTest {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             isGooglePayReady = false,
             paymentMethods = emptyList(),
@@ -325,40 +313,31 @@ internal class PaymentOptionsActivityTest {
 
         val viewModel = createViewModel(args)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
-        activityScenario(viewModel).launch(createIntent(args)).use {
-            idleLooper()
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            activityScenario(viewModel).launch(createIntent(args))
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
-    fun `Verify doesn't transition to first screen again on activity recreation`() {
+    fun `Verify doesn't transition to first screen again on activity recreation`() = runTest {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
 
         val viewModel = createViewModel(args)
+        val scenario = activityScenario(viewModel)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
 
-        activityScenario(viewModel).launch(createIntent(args)).use { scenario ->
-            scenario.onActivity {
-                idleLooper()
-            }
+            scenario.launch(createIntent(args))
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
 
             scenario.recreate()
-
-            scenario.onActivity {
-                idleLooper()
-            }
+            expectNoEvents()
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test

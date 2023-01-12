@@ -9,8 +9,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso.pressBack
 import app.cash.turbine.test
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -67,7 +69,6 @@ import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.getOrAwaitValue
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.utils.TestUtils.observeEventsForever
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityScenarioFactory
@@ -166,7 +167,7 @@ internal class PaymentSheetActivityTest {
             // wait for bottom sheet to animate in
             idleLooper()
             assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
+                .isEqualTo(STATE_EXPANDED)
             assertThat(activity.bottomSheetBehavior.isFitToContents)
                 .isFalse()
 
@@ -401,36 +402,22 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `handles fragment transitions`() {
-        val scenario = activityScenario()
-        scenario.launchForResult(intent).onActivity { activity ->
+    fun `Expands bottom sheet on first screen transition`() {
+        activityScenario().launchForResult(intent).onActivity { activity ->
             // wait for bottom sheet to animate in
             idleLooper()
+            assertThat(activity.bottomSheetBehavior.state).isEqualTo(STATE_EXPANDED)
+        }
+    }
 
-            assertThat(currentFragment(activity))
-                .isInstanceOf(PaymentSheetListFragment::class.java)
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
+    @Test
+    fun `Reports canceled result when exiting sheet via back press`() {
+        val scenario = activityScenario()
 
-            viewModel.transitionToAddPaymentScreen()
+        scenario.launchForResult(intent).onActivity {
             idleLooper()
-            assertThat(currentFragment(activity))
-                .isInstanceOf(PaymentSheetAddPaymentMethodFragment::class.java)
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
-
-            activity.onBackPressed()
+            pressBack()
             idleLooper()
-            assertThat(currentFragment(activity))
-                .isInstanceOf(PaymentSheetListFragment::class.java)
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
-
-            activity.onBackPressed()
-            idleLooper()
-            // animating out
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
         }
 
         assertThat(
@@ -441,6 +428,27 @@ internal class PaymentSheetActivityTest {
         ).isEqualTo(
             PaymentSheetResult.Canceled
         )
+    }
+
+    @Test
+    fun `handles screen transitions correctly`() = runTest {
+        val viewModel = createViewModel()
+        val scenario = activityScenario(viewModel)
+
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+
+            scenario.launch(intent)
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+
+            viewModel.transitionToAddPaymentScreen()
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
+
+            pressBack()
+            scenario.launch(intent)
+
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+        }
     }
 
     @Test
@@ -738,37 +746,15 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `shows add card fragment when no saved payment methods available`() {
-        val scenario = activityScenario(
-            createViewModel(
-                paymentMethods = emptyList()
-            )
-        )
-        scenario.launchForResult(intent).onActivity { activity ->
-            // wait for bottom sheet to animate in
-            idleLooper()
+    fun `shows add card screen when no saved payment methods available`() = runTest {
+        val viewModel = createViewModel(paymentMethods = emptyList())
+        val scenario = activityScenario(viewModel)
 
-            assertThat(currentFragment(activity))
-                .isInstanceOf(PaymentSheetAddPaymentMethodFragment::class.java)
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
-
-            // make sure loading fragment isn't in back stack
-            activity.onBackPressed()
-            idleLooper()
-
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_HIDDEN)
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            scenario.launchForResult(intent)
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
         }
-
-        assertThat(
-            contract.parseResult(
-                scenario.getResult().resultCode,
-                scenario.getResult().resultData
-            )
-        ).isEqualTo(
-            PaymentSheetResult.Canceled
-        )
     }
 
     @Test
@@ -819,29 +805,6 @@ internal class PaymentSheetActivityTest {
                 intent.extras?.get(PaymentSheetContract.EXTRA_ARGS) as PaymentSheetContract.Args
             assertThat(args.statusBarColor)
                 .isEqualTo(PaymentSheetFixtures.STATUS_BAR_COLOR)
-        }
-    }
-
-    @Test
-    fun `Complete fragment transactions prior to setting the sheet mode and thus the back button`() {
-        val scenario = activityScenario()
-        scenario.launch(intent).onActivity { activity ->
-            // wait for bottom sheet to animate in
-            idleLooper()
-
-            assertThat(currentFragment(activity))
-                .isInstanceOf(PaymentSheetListFragment::class.java)
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
-
-            viewModel.transitionToAddPaymentScreen()
-
-            idleLooper()
-
-            assertThat(currentFragment(activity))
-                .isInstanceOf(PaymentSheetAddPaymentMethodFragment::class.java)
-            assertThat(activity.bottomSheetBehavior.state)
-                .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
         }
     }
 
@@ -1188,57 +1151,41 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Verify if customer has payment methods, display the saved payment methods screen`() {
+    fun `Verify if customer has payment methods, display the saved payment methods screen`() = runTest {
         val viewModel = createViewModel(paymentMethods = PAYMENT_METHODS)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
-        activityScenario(viewModel).launch(intent).use {
-            it.onActivity {
-                idleLooper()
-            }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            activityScenario(viewModel).launch(intent)
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
-    fun `Verify if there are no payment methods, display the add payment method screen`() {
+    fun `Verify if there are no payment methods, display the add payment method screen`() = runTest {
         val viewModel = createViewModel(paymentMethods = emptyList())
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
-        activityScenario(viewModel).launch(intent).use {
-            it.onActivity {
-                idleLooper()
-            }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            activityScenario(viewModel).launch(intent)
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
-    fun `Verify doesn't transition to first screen again on activity recreation`() {
+    fun `Verify doesn't transition to first screen again on activity recreation`() = runTest {
         val viewModel = createViewModel(paymentMethods = emptyList())
+        val scenario = activityScenario(viewModel)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
 
-        activityScenario(viewModel).launch(intent).use {
-            it.onActivity {
-                idleLooper()
-            }
+            scenario.launch(intent)
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
 
-            it.recreate()
-
-            it.onActivity {
-                idleLooper()
-            }
+            scenario.recreate()
+            expectNoEvents()
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
@@ -1275,9 +1222,6 @@ internal class PaymentSheetActivityTest {
                 .isEqualTo("Pay CA\$99.99")
         }
     }
-
-    private fun currentFragment(activity: PaymentSheetActivity) =
-        activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 
     private fun activityScenario(
         viewModel: PaymentSheetViewModel = this.viewModel

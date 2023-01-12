@@ -5,9 +5,11 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.fragment.app.testing.withFragment
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -27,6 +29,8 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.S
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PAYMENT_METHODS
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SAVED_SELECTION
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -179,20 +183,21 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `posts transition when add card clicked`() {
-        createScenario().onFragment {
-            val activityViewModel = activityViewModel(it)
-            assertThat(activityViewModel.transition.value?.peekContent()).isNull()
+    fun `posts transition when add card clicked`() = runTest {
+        val scenario = createScenario()
 
-            idleLooper()
+        val viewModel = scenario.withFragment { activityViewModel(this) }
+        val recyclerView = scenario.withFragment { recyclerView(this) }
 
-            val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+
+            val adapter = recyclerView.adapter as PaymentOptionsAdapter
             adapter.addCardClickListener()
-            idleLooper()
 
-            assertThat(activityViewModel.transition.value?.peekContent())
-                .isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
         }
     }
 

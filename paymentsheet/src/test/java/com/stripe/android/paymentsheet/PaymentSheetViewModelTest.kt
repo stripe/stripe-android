@@ -52,7 +52,6 @@ import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.utils.TestUtils.observeEventsForever
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -721,15 +720,14 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Transition only happens when view model is ready`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
-        val observedTransitions = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
 
-        viewModel.transitionToFirstScreenWhenReady()
-        assertThat(observedTransitions).isEmpty()
+        viewModel.currentScreen.test {
+            viewModel.transitionToFirstScreenWhenReady()
+            assertThat(awaitItem()).isNull()
 
-        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] =
-            GooglePayState.Available
-        assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+            viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+        }
     }
 
     @Test
@@ -933,9 +931,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `paymentMethods is empty if customer has no payment methods`() = runTest {
-        val viewModel = createViewModel(
-            customerPaymentMethods = listOf()
-        )
+        val viewModel = createViewModel(customerPaymentMethods = emptyList())
 
         viewModel.paymentMethods.test {
             assertThat(awaitItem()).isEmpty()
@@ -943,31 +939,27 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `transition target is AddFirstPaymentMethod if payment methods is empty`() = runTest {
-        val viewModel = createViewModel(
-            customerPaymentMethods = listOf()
-        )
+    fun `current screen is AddFirstPaymentMethod if payment methods is empty`() = runTest {
+        val viewModel = createViewModel(customerPaymentMethods = emptyList())
 
-        val observedTransitions = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
-
-        viewModel.transitionToFirstScreen()
-
-        assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+        }
     }
 
     @Test
-    fun `transition target is SelectSavedPaymentMethods if payment methods is not empty`() = runTest {
+    fun `current screen is SelectSavedPaymentMethods if payment methods is not empty`() = runTest {
         val viewModel = createViewModel(
             customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
 
-        val observedTransitions = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
-
-        viewModel.transitionToFirstScreen()
-
-        assertThat(observedTransitions).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+        }
     }
 
     private fun createViewModel(
