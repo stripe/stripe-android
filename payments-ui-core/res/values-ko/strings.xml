@@ -64,7 +64,6 @@
   <string name="iban_invalid_start">IBAN은 두 글자의 국가 코드로 시작해야 합니다.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL 은행</string>
-  <string name="invalid_email_address">잘못된 이메일 주소: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">지금 구매하거나 Klarna로 나중에 결제</string>
   <!-- Klarna pay later copy -->

@@ -64,7 +64,6 @@
   <string name="iban_invalid_start">El teu IBAN ha de començar amb un codi de país de dues lletres.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">Bank iDeal</string>
-  <string name="invalid_email_address">Adreça electrònica no vàlida: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Compra ara o paga més endavant amb Klarna.</string>
   <!-- Klarna pay later copy -->

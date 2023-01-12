@@ -64,7 +64,6 @@
   <string name="iban_invalid_start">Vaš bi IBAN trebao započeti s kodom države od dva slova.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL Bank</string>
-  <string name="invalid_email_address">Nevažeća adresa e-pošte: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Kupite sada ili platite kasnije pomoću Klarne</string>
   <!-- Klarna pay later copy -->

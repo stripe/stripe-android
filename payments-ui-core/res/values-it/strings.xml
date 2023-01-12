@@ -64,7 +64,6 @@
   <string name="iban_invalid_start">L\'IBAN deve iniziare con un codice di paese di due lettere.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">Banca iDEAL</string>
-  <string name="invalid_email_address">Indirizzo email non valido: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Acquista ora o paga dopo con Klarna.</string>
   <!-- Klarna pay later copy -->
