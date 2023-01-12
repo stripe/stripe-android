@@ -31,24 +31,17 @@ class PhoneNumberController constructor(
         overrideCountryCodes,
         tinyMode = true,
         expandedLabelMapper = { country ->
-            "${
-            CountryConfig.countryCodeToEmoji(
-                country.code.value
-            )
-            } ${country.name}" +
-                (
-                    PhoneNumberFormatter.prefixForCountry(
-                        country.code.value
-                    )?.let { " $it" } ?: ""
-                    )
+            listOfNotNull(
+                CountryConfig.countryCodeToEmoji(country.code.value),
+                country.name,
+                PhoneNumberFormatter.prefixForCountry(country.code.value)
+            ).joinToString(" ")
         },
         collapsedLabelMapper = { country ->
-            CountryConfig.countryCodeToEmoji(country.code.value) +
-                (
-                    PhoneNumberFormatter.prefixForCountry(
-                        country.code.value
-                    )?.let { "  $it  " } ?: ""
-                    )
+            listOfNotNull(
+                CountryConfig.countryCodeToEmoji(country.code.value),
+                PhoneNumberFormatter.prefixForCountry(country.code.value)?.let { "  $it  " }
+            ).joinToString("")
         }
     )
     val countryDropdownController = DropdownFieldController(

@@ -19,8 +19,7 @@ internal fun Throwable.getErrorMessage() = when (this) {
 /**
  * Represents a user-facing error message.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class ErrorMessage : Parcelable {
+internal sealed class ErrorMessage : Parcelable {
     abstract fun getMessage(resources: Resources): String
 
     @Parcelize
