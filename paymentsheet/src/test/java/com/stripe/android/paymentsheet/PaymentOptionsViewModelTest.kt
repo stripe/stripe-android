@@ -301,12 +301,11 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        val observedTransitions = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
-
-        viewModel.transitionToFirstScreen()
-
-        assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+        }
     }
 
     @Test
@@ -319,12 +318,11 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        val observedTransitions = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
-
-        viewModel.transitionToFirstScreen()
-
-        assertThat(observedTransitions).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+        }
     }
 
     private fun createViewModel(

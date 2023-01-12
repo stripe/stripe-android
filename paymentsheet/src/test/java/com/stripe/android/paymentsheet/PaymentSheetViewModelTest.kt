@@ -918,6 +918,50 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `paymentMethods is not empty if customer has payment methods`() = runTest {
+        val viewModel = createViewModel(
+            customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `paymentMethods is empty if customer has no payment methods`() = runTest {
+        val viewModel = createViewModel(customerPaymentMethods = emptyList())
+
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isEmpty()
+        }
+    }
+
+    @Test
+    fun `current screen is AddFirstPaymentMethod if payment methods is empty`() = runTest {
+        val viewModel = createViewModel(customerPaymentMethods = emptyList())
+
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+        }
+    }
+
+    @Test
+    fun `current screen is SelectSavedPaymentMethods if payment methods is not empty`() = runTest {
+        val viewModel = createViewModel(
+            customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+        }
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
