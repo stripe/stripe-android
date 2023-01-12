@@ -127,15 +127,12 @@ internal abstract class BaseSheetViewModel(
         } ?: emptyList()
         set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value.map { it.code })
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    internal val _paymentMethods =
-        savedStateHandle.getLiveData<List<PaymentMethod>>(SAVE_PAYMENT_METHODS)
-
     /**
      * The list of saved payment methods for the current customer.
      * Value is null until it's loaded, and non-null (could be empty) after that.
      */
-    internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
+    internal val paymentMethods: StateFlow<List<PaymentMethod>> = savedStateHandle
+        .getStateFlow(SAVE_PAYMENT_METHODS, listOf())
 
     internal val amount: StateFlow<Amount?> = savedStateHandle
         .getStateFlow(SAVE_AMOUNT, null)
@@ -230,7 +227,7 @@ internal abstract class BaseSheetViewModel(
 
     private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
         PaymentOptionsStateMapper(
-            paymentMethods = paymentMethods,
+            paymentMethods = paymentMethods.asLiveData(),
             initialSelection = savedSelection,
             currentSelection = selection,
             googlePayState = googlePayState.asLiveData(),
@@ -295,7 +292,7 @@ internal abstract class BaseSheetViewModel(
         listOf(
             savedSelection,
             stripeIntent.asLiveData(),
-            paymentMethods,
+            paymentMethods.asLiveData(),
             googlePayState.asLiveData(),
             isResourceRepositoryReady,
             isLinkEnabled
@@ -442,7 +439,7 @@ internal abstract class BaseSheetViewModel(
                 _selection.value = null
             }
 
-            savedStateHandle[SAVE_PAYMENT_METHODS] = _paymentMethods.value?.filter {
+            savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value.filter {
                 it.id != paymentMethodId
             }
 
@@ -453,7 +450,7 @@ internal abstract class BaseSheetViewModel(
                 )
             }
 
-            val hasNoBankAccounts = paymentMethods.value.orEmpty().all { it.type != USBankAccount }
+            val hasNoBankAccounts = paymentMethods.value.all { it.type != USBankAccount }
             if (hasNoBankAccounts) {
                 updatePrimaryButtonUIState(
                     primaryButtonUIState.value?.copy(

@@ -727,7 +727,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.transitionToFirstScreenWhenReady()
         assertThat(observedTransitions).isEmpty()
 
-        viewModel.savedStateHandle[BaseSheetViewModel.SAVE_GOOGLE_PAY_STATE] =
+        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] =
             GooglePayState.Available
         assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
@@ -920,12 +920,63 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `paymentMethods is not empty if customer has payment methods`() = runTest {
+        val viewModel = createViewModel(
+            customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `paymentMethods is empty if customer has no payment methods`() = runTest {
+        val viewModel = createViewModel(
+            customerPaymentMethods = listOf()
+        )
+
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isEmpty()
+        }
+    }
+
+    @Test
+    fun `transition target is AddFirstPaymentMethod if payment methods is empty`() = runTest {
+        val viewModel = createViewModel(
+            customerPaymentMethods = listOf()
+        )
+
+        val observedTransitions = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
+
+        viewModel.transitionToFirstScreen()
+
+        assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+    }
+
+    @Test
+    fun `transition target is SelectSavedPaymentMethods if payment methods is not empty`() = runTest {
+        val viewModel = createViewModel(
+            customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        val observedTransitions = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
+
+        viewModel.transitionToFirstScreen()
+
+        assertThat(observedTransitions).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
         customerRepository: CustomerRepository = FakeCustomerRepository(PAYMENT_METHODS),
         shouldFailLoad: Boolean = false,
         linkState: LinkState? = null,
+        customerPaymentMethods: List<PaymentMethod> = listOf()
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return PaymentSheetViewModel(
@@ -939,6 +990,7 @@ internal class PaymentSheetViewModelTest {
                 stripeIntent = stripeIntent,
                 shouldFail = shouldFailLoad,
                 linkState = linkState,
+                customerPaymentMethods = customerPaymentMethods
             ),
             customerRepository,
             prefsRepository,

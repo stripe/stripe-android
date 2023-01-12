@@ -292,6 +292,68 @@ internal class PaymentOptionsViewModelTest {
         }
     }
 
+    @Test
+    fun `paymentMethods is not empty if customer has payment methods`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
+        )
+
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `paymentMethods is empty if customer has no payment methods`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                paymentMethods = listOf()
+            )
+        )
+
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isEmpty()
+        }
+    }
+
+    @Test
+    fun `transition target is AddFirstPaymentMethod if payment methods is empty`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                paymentMethods = listOf(),
+                isGooglePayReady = false,
+                linkState = null
+            )
+        )
+
+        val observedTransitions = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
+
+        viewModel.transitionToFirstScreen()
+
+        assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+    }
+
+    @Test
+    fun `transition target is SelectSavedPaymentMethods if payment methods is not empty`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                isGooglePayReady = false,
+                linkState = null
+            )
+        )
+
+        val observedTransitions = mutableListOf<TransitionTarget>()
+        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
+
+        viewModel.transitionToFirstScreen()
+
+        assertThat(observedTransitions).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
+    }
+
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,

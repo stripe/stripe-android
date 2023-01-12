@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.TransitionTarget
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_GOOGLE_PAY_STATE
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PAYMENT_METHODS
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SAVED_SELECTION
 import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.After
@@ -286,7 +287,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         isLinkEnabled: Boolean = false,
         savedSelection: SavedSelection = SavedSelection.None,
     ) {
-        sheetViewModel._paymentMethods.value = paymentMethods
+        sheetViewModel.savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods
         sheetViewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = isGooglePayReady
         sheetViewModel._isLinkEnabled.value = isLinkEnabled
         sheetViewModel.savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection

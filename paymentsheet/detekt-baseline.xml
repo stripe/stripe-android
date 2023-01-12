@@ -86,7 +86,6 @@
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$// a fatal error protected val _fatal = MutableLiveData&lt;Throwable>()</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _isGooglePayReady = savedStateHandle.getLiveData&lt;Boolean>(SAVE_GOOGLE_PAY_READY)</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _isLinkEnabled = MutableLiveData&lt;Boolean>()</ID>
-    <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting(otherwise = VisibleForTesting.PROTECTED) internal val _paymentMethods = savedStateHandle.getLiveData&lt;List&lt;PaymentMethod>>(SAVE_PAYMENT_METHODS)</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$protected val _linkConfiguration = savedStateHandle.getLiveData&lt;LinkPaymentLauncher.Configuration>(LINK_CONFIGURATION)</ID>
     <ID>VariableNaming:PaymentOptionsViewModel.kt$PaymentOptionsViewModel$@VisibleForTesting internal val _paymentOptionResult = MutableLiveData&lt;PaymentOptionResult>()</ID>
     <ID>VariableNaming:PaymentSheetViewModel.kt$PaymentSheetViewModel$@VisibleForTesting internal val _viewState = MutableLiveData&lt;PaymentSheetViewState>(null)</ID>
