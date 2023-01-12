@@ -44,7 +44,7 @@ internal abstract class BasePaymentMethodsListFragment(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setHasOptionsMenu(sheetViewModel.paymentMethods.value.isNotEmpty())
+        setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
         sheetViewModel.eventReporter.onShowExistingPaymentOptions(
             linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,
             activeLinkSession = sheetViewModel.activeLinkSession.value ?: false
@@ -137,7 +137,7 @@ internal abstract class BasePaymentMethodsListFragment(
         }
 
         sheetViewModel.paymentMethods.launchAndCollectIn(viewLifecycleOwner) { paymentMethods ->
-            if (isEditing && paymentMethods.isEmpty()) {
+            if (isEditing && paymentMethods.isNullOrEmpty()) {
                 isEditing = false
             }
         }

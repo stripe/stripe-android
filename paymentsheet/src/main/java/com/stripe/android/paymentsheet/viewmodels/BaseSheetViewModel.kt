@@ -132,8 +132,8 @@ internal abstract class BaseSheetViewModel(
      * The list of saved payment methods for the current customer.
      * Value is null until it's loaded, and non-null (could be empty) after that.
      */
-    internal val paymentMethods: StateFlow<List<PaymentMethod>> = savedStateHandle
-        .getStateFlow(SAVE_PAYMENT_METHODS, listOf())
+    internal val paymentMethods: StateFlow<List<PaymentMethod>?> = savedStateHandle
+        .getStateFlow(SAVE_PAYMENT_METHODS, null)
 
     internal val amount: StateFlow<Amount?> = savedStateHandle
         .getStateFlow(SAVE_AMOUNT, null)
@@ -452,7 +452,7 @@ internal abstract class BaseSheetViewModel(
                 _selection.value = null
             }
 
-            savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value.filter {
+            savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value?.filter {
                 it.id != paymentMethodId
             }
 
@@ -463,7 +463,7 @@ internal abstract class BaseSheetViewModel(
                 )
             }
 
-            val hasNoBankAccounts = paymentMethods.value.all { it.type != USBankAccount }
+            val hasNoBankAccounts = paymentMethods.value.orEmpty().all { it.type != USBankAccount }
             if (hasNoBankAccounts) {
                 updatePrimaryButtonUIState(
                     primaryButtonUIState.value?.copy(

@@ -610,7 +610,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override fun transitionToFirstScreen() {
-        val target = if (paymentMethods.value.isEmpty()) {
+        val target = if (paymentMethods.value.isNullOrEmpty()) {
             updateSelection(null)
             TransitionTarget.AddFirstPaymentMethod
         } else {

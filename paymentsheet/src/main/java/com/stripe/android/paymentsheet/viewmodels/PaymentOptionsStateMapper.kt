@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.GooglePayState
 
 internal class PaymentOptionsStateMapper(
-    private val paymentMethods: LiveData<List<PaymentMethod>>,
+    private val paymentMethods: LiveData<List<PaymentMethod>?>,
     private val googlePayState: LiveData<GooglePayState>,
     private val isLinkEnabled: LiveData<Boolean>,
     private val initialSelection: LiveData<SavedSelection>,
