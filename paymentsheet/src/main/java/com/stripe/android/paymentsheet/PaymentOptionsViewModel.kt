@@ -138,7 +138,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.value =
             PaymentOptionResult.Failed(
                 error = throwable,
-                paymentMethods = _paymentMethods.value
+                paymentMethods = paymentMethods.value
             )
     }
 
@@ -146,7 +146,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.value =
             PaymentOptionResult.Canceled(
                 mostRecentError = mostRecentError,
-                paymentMethods = _paymentMethods.value
+                paymentMethods = paymentMethods.value
             )
     }
 
@@ -266,7 +266,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.value =
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
-                paymentMethods = _paymentMethods.value
+                paymentMethods = paymentMethods.value
             )
     }
 
@@ -275,7 +275,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         _paymentOptionResult.value =
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
-                paymentMethods = _paymentMethods.value
+                paymentMethods = paymentMethods.value
             )
     }
 
