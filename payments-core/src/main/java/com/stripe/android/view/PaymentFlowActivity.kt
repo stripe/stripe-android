@@ -105,6 +105,8 @@ class PaymentFlowActivity : StripeActivity() {
         )
 
         viewPager.currentItem = viewModel.currentPage
+        onBackPressedCallback.isEnabled = hasPreviousPage()
+
         title = paymentFlowPagerAdapter.getPageTitle(viewPager.currentItem)
     }
 
