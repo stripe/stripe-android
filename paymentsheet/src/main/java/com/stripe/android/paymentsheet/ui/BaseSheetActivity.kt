@@ -20,7 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -231,8 +231,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         header.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val text = viewModel.headerText.observeAsState()
-
+                val text = viewModel.headerText.collectAsState()
                 text.value?.let {
                     PaymentsTheme {
                         H4Text(

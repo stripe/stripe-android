@@ -962,6 +962,17 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `updateHeaderText updates headerText`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.headerText.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.updateHeaderText("something")
+            assertThat(awaitItem()).isEqualTo("something")
+        }
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,

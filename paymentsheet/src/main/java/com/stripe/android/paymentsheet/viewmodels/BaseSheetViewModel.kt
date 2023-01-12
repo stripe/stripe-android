@@ -138,7 +138,8 @@ internal abstract class BaseSheetViewModel(
     internal val amount: StateFlow<Amount?> = savedStateHandle
         .getStateFlow(SAVE_AMOUNT, null)
 
-    internal val headerText = MutableLiveData<String>()
+    private val _headerText = MutableStateFlow<String?>(null)
+    internal val headerText: StateFlow<String?> = _headerText
 
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
@@ -414,6 +415,10 @@ internal abstract class BaseSheetViewModel(
 
     fun updateBelowButtonText(text: String?) {
         _notesText.value = text
+    }
+
+    fun updateHeaderText(text: String?) {
+        _headerText.value = text
     }
 
     open fun updateSelection(selection: PaymentSelection?) {
