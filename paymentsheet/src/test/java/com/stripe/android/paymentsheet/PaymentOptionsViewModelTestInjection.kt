@@ -26,6 +26,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
@@ -66,10 +67,12 @@ internal open class PaymentOptionsViewModelTestInjection {
     ): PaymentOptionsViewModel = runBlocking {
         val lpmRepository =
             LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources))
-        lpmRepository.forceUpdate(
-            listOf(
-                PaymentMethod.Type.Card.code,
-                PaymentMethod.Type.USBankAccount.code
+        lpmRepository.update(
+            PaymentIntentFactory.create(
+                paymentMethodTypes = listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.USBankAccount.code
+                )
             ),
             null
         )

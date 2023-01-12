@@ -9,6 +9,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.forms.AffirmRequirement
@@ -60,7 +61,9 @@ class LpmRepository constructor(
 ) {
 
     private val lpmSerializer = LpmSerializer()
-    private val serverInitializedLatch = CountDownLatch(1)
+
+    @Volatile
+    private var serverInitializedLatch = CountDownLatch(1)
     var serverSpecLoadingState: ServerSpecState = ServerSpecState.Uninitialized
 
     val supportedPaymentMethods: List<String> by lazy {
@@ -96,8 +99,8 @@ class LpmRepository constructor(
     }
 
     /**
-     * This method will read the expected LPMs and their specs as two separate parameters.
-     * Any spec now found from the server will be read from disk json file.
+     * This method will read the [StripeIntent] and their specs as two separate parameters.
+     * Any spec not found from the server will be read from disk json file.
      *
      * It is still possible that an lpm that is expected cannot be read successfully from
      * the json spec on disk or the server spec.
@@ -110,78 +113,60 @@ class LpmRepository constructor(
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun update(
-        expectedLpms: List<String>,
-        serverLpmSpecs: String?
-    ) = internalUpdate(expectedLpms, serverLpmSpecs, false)
-
-    @VisibleForTesting
-    fun forceUpdate(
-        expectedLpms: List<String>,
-        serverLpmSpecs: String?
-    ) = internalUpdate(expectedLpms, serverLpmSpecs, true)
-
-    /**
-     * Will add the server specs to the repository and load the ones from disk if
-     * server is not parseable.
-     */
-    private fun internalUpdate(
-        expectedLpms: List<String>,
+        stripeIntent: StripeIntent,
         serverLpmSpecs: String?,
-        force: Boolean = false
     ) {
-        val newSpecsToLoad =
-            expectedLpms.firstOrNull { !lpmInitialFormData.containsKey(it) } != null
+        val countDownLatch = CountDownLatch(1)
+        serverInitializedLatch = countDownLatch
+        val expectedLpms = stripeIntent.paymentMethodTypes
 
-        if (!isLoaded() || force || newSpecsToLoad) {
-            serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
-            if (!serverLpmSpecs.isNullOrEmpty()) {
-                serverSpecLoadingState = ServerSpecState.ServerNotParsed(serverLpmSpecs)
-                val serverLpmObjects = lpmSerializer.deserializeList(serverLpmSpecs)
-                if (serverLpmObjects.isNotEmpty()) {
-                    serverSpecLoadingState = ServerSpecState.ServerParsed(serverLpmSpecs)
-                }
-                update(serverLpmObjects)
+        serverSpecLoadingState = ServerSpecState.NoServerSpec(serverLpmSpecs)
+        if (!serverLpmSpecs.isNullOrEmpty()) {
+            serverSpecLoadingState = ServerSpecState.ServerNotParsed(serverLpmSpecs)
+            val serverLpmObjects = lpmSerializer.deserializeList(serverLpmSpecs)
+            if (serverLpmObjects.isNotEmpty()) {
+                serverSpecLoadingState = ServerSpecState.ServerParsed(serverLpmSpecs)
             }
-
-            // If the server does not return specs, or they are not parsed successfully
-            // we will use the LPM on disk if found
-            val lpmsNotParsedFromServerSpec = expectedLpms
-                .filter { !lpmInitialFormData.containsKey(it) }
-                .filter { supportsPaymentMethod(it) }
-
-            if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
-                val mapFromDisk: Map<String, SharedDataSpec>? =
-                    readFromDisk()
-                        ?.associateBy { it.type }
-                        ?.filterKeys { expectedLpms.contains(it) }
-                lpmInitialFormData.putAll(
-                    lpmsNotParsedFromServerSpec
-                        .mapNotNull { mapFromDisk?.get(it) }
-                        .mapNotNull { convertToSupportedPaymentMethod(it) }
-                        .associateBy { it.code }
-                )
-                mapFromDisk
-                    ?.mapValues { it.value.nextActionSpec.transform() }
-                    ?.let {
-                        lpmPostConfirmData.update(
-                            it
-                        )
-                    }
-            }
-
-            serverInitializedLatch.countDown()
+            update(stripeIntent, serverLpmObjects)
         }
+
+        // If the server does not return specs, or they are not parsed successfully
+        // we will use the LPM on disk if found
+        val lpmsNotParsedFromServerSpec = expectedLpms
+            .filter { !lpmInitialFormData.containsKey(it) }
+            .filter { supportsPaymentMethod(it) }
+
+        if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
+            val mapFromDisk: Map<String, SharedDataSpec>? =
+                readFromDisk()
+                    ?.associateBy { it.type }
+                    ?.filterKeys { expectedLpms.contains(it) }
+            lpmInitialFormData.putAll(
+                lpmsNotParsedFromServerSpec
+                    .mapNotNull { mapFromDisk?.get(it) }
+                    .mapNotNull { convertToSupportedPaymentMethod(stripeIntent, it) }
+                    .associateBy { it.code }
+            )
+            mapFromDisk
+                ?.mapValues { it.value.nextActionSpec.transform() }
+                ?.let {
+                    lpmPostConfirmData.update(
+                        it
+                    )
+                }
+        }
+
+        countDownLatch.countDown()
     }
 
     @VisibleForTesting
-    fun updateFromDisk() {
-        update(readFromDisk())
+    fun updateFromDisk(stripeIntent: StripeIntent) {
+        update(stripeIntent, readFromDisk())
     }
 
-    private fun readFromDisk() =
-        parseLpms(arguments.resources?.assets?.open("lpms.json"))
+    private fun readFromDisk() = parseLpms(arguments.resources?.assets?.open("lpms.json"))
 
-    private fun update(lpms: List<SharedDataSpec>?) {
+    private fun update(stripeIntent: StripeIntent, lpms: List<SharedDataSpec>?) {
         val parsedSharedData = lpms
             ?.filter { supportsPaymentMethod(it.type) }
             ?.filterNot {
@@ -191,7 +176,7 @@ class LpmRepository constructor(
 
         // By mapNotNull we will not accept any LPMs that are not known by the platform.
         parsedSharedData
-            ?.mapNotNull { convertToSupportedPaymentMethod(it) }
+            ?.mapNotNull { convertToSupportedPaymentMethod(stripeIntent, it) }
             ?.toMutableList()
             ?.let {
                 lpmInitialFormData.putAll(
@@ -221,205 +206,207 @@ class LpmRepository constructor(
     private fun getJsonStringFromInputStream(inputStream: InputStream?) =
         inputStream?.bufferedReader().use { it?.readText() }
 
-    private fun convertToSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) =
-        when (sharedDataSpec.type) {
-            PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
-                "card",
-                false,
-                R.string.stripe_paymentsheet_payment_method_card,
-                R.drawable.stripe_ic_paymentsheet_pm_card,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                true,
-                CardRequirement,
-                if (sharedDataSpec.fields.isEmpty() || sharedDataSpec.fields == listOf(EmptyFormSpec)) {
-                    HardcodedCard.formSpec
-                } else {
-                    LayoutSpec(sharedDataSpec.fields)
-                }
-            )
-            PaymentMethod.Type.Bancontact.code -> SupportedPaymentMethod(
-                "bancontact",
-                true,
-                R.string.stripe_paymentsheet_payment_method_bancontact,
-                R.drawable.stripe_ic_paymentsheet_pm_bancontact,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                false,
-                BancontactRequirement,
+    private fun convertToSupportedPaymentMethod(
+        @Suppress("UNUSED_PARAMETER") stripeIntent: StripeIntent,
+        sharedDataSpec: SharedDataSpec,
+    ) = when (sharedDataSpec.type) {
+        PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
+            "card",
+            false,
+            R.string.stripe_paymentsheet_payment_method_card,
+            R.drawable.stripe_ic_paymentsheet_pm_card,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            true,
+            CardRequirement,
+            if (sharedDataSpec.fields.isEmpty() || sharedDataSpec.fields == listOf(EmptyFormSpec)) {
+                HardcodedCard.formSpec
+            } else {
                 LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.Sofort.code -> SupportedPaymentMethod(
-                "sofort",
-                true,
-                R.string.stripe_paymentsheet_payment_method_sofort,
-                R.drawable.stripe_ic_paymentsheet_pm_klarna,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                false,
-                SofortRequirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.Ideal.code -> SupportedPaymentMethod(
-                "ideal",
-                true,
-                R.string.stripe_paymentsheet_payment_method_ideal,
-                R.drawable.stripe_ic_paymentsheet_pm_ideal,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                false,
-                IdealRequirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.SepaDebit.code -> SupportedPaymentMethod(
-                "sepa_debit",
-                true,
-                R.string.stripe_paymentsheet_payment_method_sepa_debit,
-                R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                false,
-                SepaDebitRequirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.Eps.code -> SupportedPaymentMethod(
-                "eps",
-                true,
-                R.string.stripe_paymentsheet_payment_method_eps,
-                R.drawable.stripe_ic_paymentsheet_pm_eps,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                false,
-                EpsRequirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.P24.code -> SupportedPaymentMethod(
-                "p24",
-                false,
-                R.string.stripe_paymentsheet_payment_method_p24,
-                R.drawable.stripe_ic_paymentsheet_pm_p24,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                false,
-                P24Requirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.Giropay.code -> SupportedPaymentMethod(
-                "giropay",
-                false,
-                R.string.stripe_paymentsheet_payment_method_giropay,
-                R.drawable.stripe_ic_paymentsheet_pm_giropay,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                false,
-                GiropayRequirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.AfterpayClearpay.code -> SupportedPaymentMethod(
-                "afterpay_clearpay",
-                false,
-                if (isClearpay()) {
-                    R.string.stripe_paymentsheet_payment_method_clearpay
-                } else {
-                    R.string.stripe_paymentsheet_payment_method_afterpay
-                },
-                R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                false,
-                AfterpayClearpayRequirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.Klarna.code -> SupportedPaymentMethod(
-                "klarna",
-                false,
-                R.string.stripe_paymentsheet_payment_method_klarna,
-                R.drawable.stripe_ic_paymentsheet_pm_klarna,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                false,
-                KlarnaRequirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.PayPal.code -> SupportedPaymentMethod(
-                "paypal",
-                false,
-                R.string.stripe_paymentsheet_payment_method_paypal,
-                R.drawable.stripe_ic_paymentsheet_pm_paypal,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                false,
-                PaypalRequirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.Affirm.code -> SupportedPaymentMethod(
-                "affirm",
-                false,
-                R.string.stripe_paymentsheet_payment_method_affirm,
-                R.drawable.stripe_ic_paymentsheet_pm_affirm,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                false,
-                AffirmRequirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.RevolutPay.code -> SupportedPaymentMethod(
-                "revolut_pay",
-                false,
-                R.string.stripe_paymentsheet_payment_method_revolut_pay,
-                R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                false,
-                RevolutPayRequirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.MobilePay.code -> SupportedPaymentMethod(
-                "mobilepay",
-                false,
-                R.string.stripe_paymentsheet_payment_method_mobile_pay,
-                R.drawable.stripe_ic_paymentsheet_pm_mobile_pay,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                false,
-                MobilePayRequirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.AuBecsDebit.code -> SupportedPaymentMethod(
-                "au_becs_debit",
-                true,
-                R.string.stripe_paymentsheet_payment_method_au_becs_debit,
-                R.drawable.stripe_ic_paymentsheet_pm_bank,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                true,
-                AuBecsDebitRequirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.USBankAccount.code -> SupportedPaymentMethod(
-                "us_bank_account",
-                true,
-                R.string.stripe_paymentsheet_payment_method_us_bank_account,
-                R.drawable.stripe_ic_paymentsheet_pm_bank,
-                sharedDataSpec.selectorIcon?.lightThemePng,
-                sharedDataSpec.selectorIcon?.darkThemePng,
-                true,
-                USBankAccountRequirement,
-                LayoutSpec(sharedDataSpec.fields)
-            )
-            PaymentMethod.Type.Upi.code -> SupportedPaymentMethod(
-                code = "upi",
-                requiresMandate = false,
-                displayNameResource = R.string.stripe_paymentsheet_payment_method_upi,
-                iconResource = R.drawable.stripe_ic_paymentsheet_pm_upi,
-                lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-                darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-                tintIconOnSelection = false,
-                requirement = UpiRequirement,
-                formSpec = LayoutSpec(sharedDataSpec.fields)
-            )
-            else -> null
-        }
+            }
+        )
+        PaymentMethod.Type.Bancontact.code -> SupportedPaymentMethod(
+            "bancontact",
+            true,
+            R.string.stripe_paymentsheet_payment_method_bancontact,
+            R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            false,
+            BancontactRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.Sofort.code -> SupportedPaymentMethod(
+            "sofort",
+            true,
+            R.string.stripe_paymentsheet_payment_method_sofort,
+            R.drawable.stripe_ic_paymentsheet_pm_klarna,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            false,
+            SofortRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.Ideal.code -> SupportedPaymentMethod(
+            "ideal",
+            true,
+            R.string.stripe_paymentsheet_payment_method_ideal,
+            R.drawable.stripe_ic_paymentsheet_pm_ideal,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            false,
+            IdealRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.SepaDebit.code -> SupportedPaymentMethod(
+            "sepa_debit",
+            true,
+            R.string.stripe_paymentsheet_payment_method_sepa_debit,
+            R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            false,
+            SepaDebitRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.Eps.code -> SupportedPaymentMethod(
+            "eps",
+            true,
+            R.string.stripe_paymentsheet_payment_method_eps,
+            R.drawable.stripe_ic_paymentsheet_pm_eps,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            false,
+            EpsRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.P24.code -> SupportedPaymentMethod(
+            "p24",
+            false,
+            R.string.stripe_paymentsheet_payment_method_p24,
+            R.drawable.stripe_ic_paymentsheet_pm_p24,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            false,
+            P24Requirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.Giropay.code -> SupportedPaymentMethod(
+            "giropay",
+            false,
+            R.string.stripe_paymentsheet_payment_method_giropay,
+            R.drawable.stripe_ic_paymentsheet_pm_giropay,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            false,
+            GiropayRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.AfterpayClearpay.code -> SupportedPaymentMethod(
+            "afterpay_clearpay",
+            false,
+            if (isClearpay()) {
+                R.string.stripe_paymentsheet_payment_method_clearpay
+            } else {
+                R.string.stripe_paymentsheet_payment_method_afterpay
+            },
+            R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            false,
+            AfterpayClearpayRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.Klarna.code -> SupportedPaymentMethod(
+            "klarna",
+            false,
+            R.string.stripe_paymentsheet_payment_method_klarna,
+            R.drawable.stripe_ic_paymentsheet_pm_klarna,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            false,
+            KlarnaRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.PayPal.code -> SupportedPaymentMethod(
+            "paypal",
+            false,
+            R.string.stripe_paymentsheet_payment_method_paypal,
+            R.drawable.stripe_ic_paymentsheet_pm_paypal,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            false,
+            PaypalRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.Affirm.code -> SupportedPaymentMethod(
+            "affirm",
+            false,
+            R.string.stripe_paymentsheet_payment_method_affirm,
+            R.drawable.stripe_ic_paymentsheet_pm_affirm,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            false,
+            AffirmRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.RevolutPay.code -> SupportedPaymentMethod(
+            "revolut_pay",
+            false,
+            R.string.stripe_paymentsheet_payment_method_revolut_pay,
+            R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            false,
+            RevolutPayRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.MobilePay.code -> SupportedPaymentMethod(
+            "mobilepay",
+            false,
+            R.string.stripe_paymentsheet_payment_method_mobile_pay,
+            R.drawable.stripe_ic_paymentsheet_pm_mobile_pay,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            false,
+            MobilePayRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.AuBecsDebit.code -> SupportedPaymentMethod(
+            "au_becs_debit",
+            true,
+            R.string.stripe_paymentsheet_payment_method_au_becs_debit,
+            R.drawable.stripe_ic_paymentsheet_pm_bank,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            true,
+            AuBecsDebitRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.USBankAccount.code -> SupportedPaymentMethod(
+            "us_bank_account",
+            true,
+            R.string.stripe_paymentsheet_payment_method_us_bank_account,
+            R.drawable.stripe_ic_paymentsheet_pm_bank,
+            sharedDataSpec.selectorIcon?.lightThemePng,
+            sharedDataSpec.selectorIcon?.darkThemePng,
+            true,
+            USBankAccountRequirement,
+            LayoutSpec(sharedDataSpec.fields)
+        )
+        PaymentMethod.Type.Upi.code -> SupportedPaymentMethod(
+            code = "upi",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_upi,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_upi,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = UpiRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
+        )
+        else -> null
+    }
 
     /**
      * Enum defining all payment method types for which Payment Sheet can collect

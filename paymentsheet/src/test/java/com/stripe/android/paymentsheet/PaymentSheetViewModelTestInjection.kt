@@ -34,6 +34,7 @@ import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepositor
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -107,10 +108,12 @@ internal open class PaymentSheetViewModelTestInjection {
                         ApplicationProvider.getApplicationContext<Application>().resources
                     )
                 ).apply {
-                    this.forceUpdate(
-                        listOf(
-                            PaymentMethod.Type.Card.code,
-                            PaymentMethod.Type.USBankAccount.code
+                    this.update(
+                        PaymentIntentFactory.create(
+                            paymentMethodTypes = listOf(
+                                PaymentMethod.Type.Card.code,
+                                PaymentMethod.Type.USBankAccount.code
+                            )
                         ),
                         null
                     )

@@ -11,12 +11,12 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeAndroidKeyStore
+import com.stripe.android.utils.PaymentIntentFactory
 import com.stripe.android.utils.TestUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -31,9 +31,10 @@ import org.robolectric.RobolectricTestRunner
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewModelTestInjection() {
+    private val paymentIntent = PaymentIntentFactory.create()
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(context.resources)).apply {
-        this.forceUpdate(listOf(PaymentMethod.Type.Card.code), null)
+        this.update(paymentIntent, null)
     }
 
     @Before
@@ -102,7 +103,8 @@ internal class PaymentOptionsAddPaymentMethodFragmentTest : PaymentOptionsViewMo
             bundleOf(PaymentOptionsActivity.EXTRA_STARTER_ARGS to args),
             R.style.StripePaymentSheetDefaultTheme
         ).onFragment { fragment ->
-            fragment.sheetViewModel.lpmResourceRepository.getRepository().updateFromDisk()
+            fragment.sheetViewModel.lpmResourceRepository.getRepository()
+                .updateFromDisk(paymentIntent)
             onReady(
                 fragment,
                 viewModel

@@ -52,6 +52,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.PaymentIntentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -90,15 +91,17 @@ internal class PaymentSheetViewModelTest {
     private val lpmRepository = LpmRepository(
         arguments = LpmRepository.LpmRepositoryArguments(application.resources),
     ).apply {
-        this.forceUpdate(
-            listOf(
-                PaymentMethod.Type.Card.code,
-                PaymentMethod.Type.USBankAccount.code,
-                PaymentMethod.Type.Ideal.code,
-                PaymentMethod.Type.SepaDebit.code,
-                PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Affirm.code,
-                PaymentMethod.Type.AfterpayClearpay.code,
+        this.update(
+            PaymentIntentFactory.create(
+                paymentMethodTypes = listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.USBankAccount.code,
+                    PaymentMethod.Type.Ideal.code,
+                    PaymentMethod.Type.SepaDebit.code,
+                    PaymentMethod.Type.Sofort.code,
+                    PaymentMethod.Type.Affirm.code,
+                    PaymentMethod.Type.AfterpayClearpay.code,
+                )
             ),
             null
         )

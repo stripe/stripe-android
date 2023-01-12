@@ -287,11 +287,9 @@ internal abstract class BaseSheetViewModel(
                 CoroutineScope(workContext).launch {
                     // If we have been killed and are being restored then we need to re-populate
                     // the lpm repository
-                    stripeIntent.value?.paymentMethodTypes?.let { intentPaymentMethodTypes ->
+                    stripeIntent.value?.let { intent ->
                         lpmResourceRepository.getRepository().apply {
-                            if (!isLoaded()) {
-                                update(intentPaymentMethodTypes, lpmServerSpec)
-                            }
+                            update(intent, lpmServerSpec)
                         }
                     }
 
