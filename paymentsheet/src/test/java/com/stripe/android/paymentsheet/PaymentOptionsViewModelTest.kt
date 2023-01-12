@@ -123,7 +123,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            skipItems(1)
+            assertThat(awaitItem()).isNull()
             viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
@@ -141,7 +141,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            skipItems(1)
+            assertThat(awaitItem()).isNull()
             viewModel.transitionToFirstScreen()
             assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
             assertThat(awaitItem()).isEqualTo(TransitionTarget.AddAnotherPaymentMethod)

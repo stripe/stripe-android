@@ -7,9 +7,9 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso.pressBack
 import app.cash.turbine.test
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
@@ -416,7 +416,7 @@ internal class PaymentSheetActivityTest {
 
         scenario.launchForResult(intent).onActivity {
             idleLooper()
-            viewModel.handleBackPressed()
+            pressBack()
             idleLooper()
         }
 
@@ -431,29 +431,24 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `handles screen transitions correctly`() {
+    fun `handles screen transitions correctly`() = runTest {
         val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
 
-        val transitionTargets = mutableListOf<TransitionTarget?>()
-        viewModel.currentScreen.asLiveData().observeForever { transitionTargets += it }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
 
-        scenario.launchForResult(intent).onActivity { activity ->
-            idleLooper()
+            scenario.launch(intent).onActivity { idleLooper() }
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
 
             viewModel.transitionToAddPaymentScreen()
-            idleLooper()
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
 
-            viewModel.handleBackPressed()
-            idleLooper()
+            pressBack()
+            scenario.launch(intent).onActivity { idleLooper() }
+
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
-
-        assertThat(transitionTargets).containsExactly(
-            null,
-            TransitionTarget.SelectSavedPaymentMethods,
-            TransitionTarget.AddAnotherPaymentMethod,
-            TransitionTarget.SelectSavedPaymentMethods,
-        )
     }
 
     @Test
@@ -751,19 +746,15 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `shows add card screen when no saved payment methods available`() {
+    fun `shows add card screen when no saved payment methods available`() = runTest {
         val viewModel = createViewModel(paymentMethods = emptyList())
         val scenario = activityScenario(viewModel)
 
-        val transitionTargets = mutableListOf<TransitionTarget?>()
-        viewModel.currentScreen.asLiveData().observeForever { transitionTargets.add(it) }
-
-        scenario.launchForResult(intent).onActivity {
-            // wait for bottom sheet to animate in
-            idleLooper()
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            scenario.launchForResult(intent).onActivity { idleLooper() }
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
         }
-
-        assertThat(transitionTargets).containsExactly(null, TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
@@ -1160,57 +1151,41 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `Verify if customer has payment methods, display the saved payment methods screen`() {
+    fun `Verify if customer has payment methods, display the saved payment methods screen`() = runTest {
         val viewModel = createViewModel(paymentMethods = PAYMENT_METHODS)
 
-        val transitionTargets = mutableListOf<TransitionTarget?>()
-        viewModel.currentScreen.asLiveData().observeForever { transitionTargets.add(it) }
-
-        activityScenario(viewModel).launch(intent).use {
-            it.onActivity {
-                idleLooper()
-            }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            activityScenario(viewModel).launch(intent).onActivity { idleLooper() }
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
-
-        assertThat(transitionTargets).containsExactly(null, TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
-    fun `Verify if there are no payment methods, display the add payment method screen`() {
+    fun `Verify if there are no payment methods, display the add payment method screen`() = runTest {
         val viewModel = createViewModel(paymentMethods = emptyList())
 
-        val transitionTargets = mutableListOf<TransitionTarget?>()
-        viewModel.currentScreen.asLiveData().observeForever { transitionTargets.add(it) }
-
-        activityScenario(viewModel).launch(intent).use {
-            it.onActivity {
-                idleLooper()
-            }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            activityScenario(viewModel).launch(intent).onActivity { idleLooper() }
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
         }
-
-        assertThat(transitionTargets).containsExactly(null, TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
-    fun `Verify doesn't transition to first screen again on activity recreation`() {
+    fun `Verify doesn't transition to first screen again on activity recreation`() = runTest {
         val viewModel = createViewModel(paymentMethods = emptyList())
+        val scenario = activityScenario(viewModel)
 
-        val transitionTargets = mutableListOf<TransitionTarget?>()
-        viewModel.currentScreen.asLiveData().observeForever { transitionTargets.add(it) }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
 
-        activityScenario(viewModel).launch(intent).use {
-            it.onActivity {
-                idleLooper()
-            }
+            scenario.launch(intent).onActivity { idleLooper() }
+            scenario.recreate()
+            scenario.onActivity { idleLooper() }
 
-            it.recreate()
-
-            it.onActivity {
-                idleLooper()
-            }
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
         }
-
-        assertThat(transitionTargets).containsExactly(null, TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
