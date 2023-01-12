@@ -246,8 +246,9 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        sheetViewModel.headerText.value =
+        sheetViewModel.updateHeaderText(
             getString(R.string.stripe_paymentsheet_add_payment_method_title)
+        )
 
         sheetViewModel.eventReporter.onShowNewPaymentOptionForm(
             linkEnabled = sheetViewModel.isLinkEnabled.value ?: false,

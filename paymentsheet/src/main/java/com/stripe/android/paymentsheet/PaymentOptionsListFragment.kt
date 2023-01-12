@@ -18,8 +18,9 @@ internal class PaymentOptionsListFragment : BasePaymentMethodsListFragment(
     override fun onResume() {
         super.onResume()
 
-        sheetViewModel.headerText.value =
+        sheetViewModel.updateHeaderText(
             getString(R.string.stripe_paymentsheet_select_payment_method)
+        )
     }
 
     override fun onPaymentOptionsItemSelected(item: PaymentOptionsItem) {
