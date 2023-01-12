@@ -300,7 +300,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.message.isVisible).isTrue()
             assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
 
-            activity.onBackPressed()
+            pressBack()
 
             assertThat(activity.viewBinding.message.isVisible).isFalse()
         }
@@ -467,13 +467,13 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.toolbar.navigationContentDescription)
                 .isEqualTo(context.getString(R.string.back))
 
-            activity.onBackPressed()
+            pressBack()
             idleLooper()
 
             assertThat(activity.toolbar.navigationContentDescription)
                 .isEqualTo(context.getString(R.string.stripe_paymentsheet_close))
 
-            activity.onBackPressed()
+            pressBack()
             idleLooper()
             // animating out
             assertThat(activity.bottomSheetBehavior.state)

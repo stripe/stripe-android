@@ -239,7 +239,7 @@ class PaymentMethodsActivityTest {
                 paymentMethodsAdapter.selectedPaymentMethodId =
                     PaymentMethodFixtures.CARD_PAYMENT_METHODS[0].id
 
-                activity.onBackPressed()
+                activity.onBackPressedDispatcher.onBackPressed()
 
                 // Now it should be gone.
                 assertEquals(View.GONE, progressBar.visibility)
