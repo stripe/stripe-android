@@ -1258,6 +1258,24 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `amount label should be built from stripe intent`() {
+        val viewModel = createViewModel(
+            paymentIntent = PAYMENT_INTENT.copy(
+                amount = 9999,
+                currency = "CAD"
+            )
+        )
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity { activity ->
+            // wait for bottom sheet to animate in
+            idleLooper()
+
+            assertThat(activity.viewBinding.buyButton.externalLabel)
+                .isEqualTo("Pay CA\$99.99")
+        }
+    }
+
     private fun currentFragment(activity: PaymentSheetActivity) =
         activity.supportFragmentManager.findFragmentById(activity.viewBinding.fragmentContainer.id)
 

@@ -137,7 +137,8 @@ internal abstract class BaseSheetViewModel(
      */
     internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
 
-    internal val amount: LiveData<Amount> = savedStateHandle.getLiveData<Amount>(SAVE_AMOUNT)
+    internal val amount: StateFlow<Amount?> = savedStateHandle
+        .getStateFlow(SAVE_AMOUNT, null)
 
     internal val headerText = MutableLiveData<String>()
 
