@@ -2,11 +2,11 @@ package com.stripe.android.identity.viewmodel
 
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Bundle
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavController
+import androidx.navigation.NavOptionsBuilder
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.CameraPreviewImage
@@ -16,7 +16,6 @@ import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.IdentityVerificationSheetContract
-import com.stripe.android.identity.R
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE
 import com.stripe.android.identity.VERIFICATION_PAGE_DATA_HAS_ERROR
@@ -33,8 +32,10 @@ import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
+import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.DocSelectionDestination
+import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.IdentityTopLevelDestination
 import com.stripe.android.identity.navigation.SelfieDestination
 import com.stripe.android.identity.networking.IdentityModelFetcher
@@ -61,12 +62,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.nullable
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
 import org.mockito.kotlin.times
@@ -375,8 +375,10 @@ internal class IdentityViewModelTest {
         assertThat(viewModel.errorCause.value).isEqualTo(throwable)
         verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
         verify(mockController).navigate(
-            eq(R.id.action_global_errorFragment),
-            any()
+            argWhere {
+                it.startsWith(ErrorDestination.ERROR)
+            },
+            any<NavOptionsBuilder.() -> Unit>()
         )
     }
 
@@ -443,8 +445,8 @@ internal class IdentityViewModelTest {
             ConsentDestination.ROUTE.route
         )
         verify(mockController).navigate(
-            eq(SelfieDestination.destination),
-            eq(SelfieDestination.argsBundle)
+            eq(SelfieDestination.routeWithArgs),
+            any<NavOptionsBuilder.() -> Unit>()
         )
     }
 
@@ -477,8 +479,10 @@ internal class IdentityViewModelTest {
             assertThat(viewModel.verificationPageSubmit.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
 
             verify(mockController).navigate(
-                eq(R.id.action_global_errorFragment),
-                any()
+                argWhere {
+                    it.startsWith(ErrorDestination.ERROR)
+                },
+                any<NavOptionsBuilder.() -> Unit>()
             )
         }
     }
@@ -512,8 +516,8 @@ internal class IdentityViewModelTest {
             assertThat(viewModel.verificationPageSubmit.value).isEqualTo(Resource.success(Resource.DUMMY_RESOURCE))
 
             verify(mockController).navigate(
-                eq(R.id.action_global_confirmationFragment),
-                isNull()
+                eq(ConfirmationDestination.routeWithArgs),
+                any<NavOptionsBuilder.() -> Unit>()
             )
         }
     }
@@ -555,8 +559,8 @@ internal class IdentityViewModelTest {
             verificationPageData.requirements.missings
         )
         verify(mockController).navigate(
-            eq(targetTopLevelDestination.destination),
-            nullable(Bundle::class.java)
+            eq(targetTopLevelDestination.routeWithArgs),
+            any<NavOptionsBuilder.() -> Unit>()
         )
     }
 

@@ -131,14 +131,14 @@ internal fun CameraScreenLaunchedEffect(
 
                 navController.navigateTo(
                     CouldNotCaptureDestination(
-                        scanType = identityScanViewModel.targetScanTypeFlow.value,
+                        scanType = requireNotNull(identityScanViewModel.targetScanTypeFlow.value),
                         requireLiveCapture =
                         if (identityScanViewModel.targetScanTypeFlow.value
                             != IdentityScanState.ScanType.SELFIE
                         ) {
                             verificationPage.documentCapture.requireLiveCapture
                         } else {
-                            null
+                            false
                         }
                     )
                 )

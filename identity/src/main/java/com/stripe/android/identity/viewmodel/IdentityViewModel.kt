@@ -1472,6 +1472,15 @@ internal class IdentityViewModel constructor(
         )
     }
 
+    fun updateImageHandlerScanTypes(
+        frontScanType: IdentityScanState.ScanType,
+        backScanType: IdentityScanState.ScanType?
+    ) {
+        savedStateHandle[IdentityImageHandler.FRONT_SCAN_TYPE] = frontScanType
+        savedStateHandle[IdentityImageHandler.BACK_SCAN_TYPE] = backScanType
+        imageHandler.updateScanTypes(frontScanType, backScanType)
+    }
+
     private fun CollectedDataParam.Type.toScanDestination() =
         when (this) {
             CollectedDataParam.Type.IDCARD -> IDScanDestination()

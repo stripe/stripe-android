@@ -6,7 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
-import com.stripe.android.identity.R
+import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.analytics.AnalyticsState
 import com.stripe.android.identity.analytics.FPSTracker
@@ -16,7 +16,7 @@ import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
-import com.stripe.android.identity.navigation.CouldNotCaptureDestination
+import com.stripe.android.identity.navigation.CouldNotCaptureDestination.Companion.COULD_NOT_CAPTURE
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
@@ -180,10 +180,10 @@ class CameraScreenLaunchedEffectTest {
             verify(mockIdentityAnalyticsRequestFactory).selfieTimeout()
 
             verify(mockNavController).navigate(
-                eq(R.id.action_global_couldNotCaptureFragment),
                 argWhere {
-                    !it.containsKey(CouldNotCaptureDestination.ARG_REQUIRE_LIVE_CAPTURE)
-                }
+                    it.startsWith(COULD_NOT_CAPTURE)
+                },
+                any<NavOptionsBuilder.() -> Unit>()
             )
         }
     }
@@ -254,10 +254,10 @@ class CameraScreenLaunchedEffectTest {
                 eq(IdentityScanState.ScanType.ID_FRONT)
             )
             verify(mockNavController).navigate(
-                eq(R.id.action_global_couldNotCaptureFragment),
                 argWhere {
-                    it.containsKey(CouldNotCaptureDestination.ARG_REQUIRE_LIVE_CAPTURE)
-                }
+                    it.startsWith(COULD_NOT_CAPTURE)
+                },
+                any<NavOptionsBuilder.() -> Unit>()
             )
         }
     }
@@ -328,10 +328,10 @@ class CameraScreenLaunchedEffectTest {
                 eq(IdentityScanState.ScanType.ID_BACK)
             )
             verify(mockNavController).navigate(
-                eq(R.id.action_global_couldNotCaptureFragment),
                 argWhere {
-                    it.containsKey(CouldNotCaptureDestination.ARG_REQUIRE_LIVE_CAPTURE)
-                }
+                    it.startsWith(COULD_NOT_CAPTURE)
+                },
+                any<NavOptionsBuilder.() -> Unit>()
             )
         }
     }

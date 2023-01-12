@@ -6,18 +6,21 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
-import androidx.navigation.fragment.NavHostFragment
-import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.camera.framework.time.asEpochMillisecondsClockMark
 import com.stripe.android.core.injection.IOContext
@@ -27,13 +30,17 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
-import com.stripe.android.identity.databinding.IdentityActivityBinding
 import com.stripe.android.identity.injection.DaggerIdentityActivityFallbackComponent
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
+import com.stripe.android.identity.navigation.ConfirmationDestination
+import com.stripe.android.identity.navigation.ConsentDestination
+import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
+import com.stripe.android.identity.navigation.IdentityNavGraph
 import com.stripe.android.identity.navigation.clearDataAndNavigateUp
-import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
+import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
+import com.stripe.android.identity.ui.IdentityTopBarState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
 import javax.inject.Provider
@@ -50,6 +57,8 @@ internal class IdentityActivity :
     @VisibleForTesting
     internal lateinit var navController: NavController
 
+    private lateinit var onBackPressedCallback: IdentityActivityOnBackPressedCallback
+
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
         IdentityViewModel.IdentityViewModelFactory(
@@ -59,10 +68,6 @@ internal class IdentityActivity :
             { subcomponent }
         )
 
-    private val binding by lazy {
-        IdentityActivityBinding.inflate(layoutInflater)
-    }
-
     private val starterArgs: IdentityVerificationSheetContract.Args by lazy {
         requireNotNull(IdentityVerificationSheetContract.Args.fromIntent(intent)) {
             EMPTY_ARG_ERROR
@@ -71,16 +76,7 @@ internal class IdentityActivity :
 
     private val identityViewModel: IdentityViewModel by viewModels { viewModelFactory }
 
-    private val onBackPressedCallback by lazy {
-        IdentityActivityOnBackPressedCallback(
-            this,
-            navController,
-            identityViewModel
-        )
-    }
     private lateinit var fallbackUrlLauncher: ActivityResultLauncher<Intent>
-
-    private var launchedFallbackUrl: Boolean = false
 
     lateinit var subcomponent: IdentityActivitySubcomponent
 
@@ -104,11 +100,11 @@ internal class IdentityActivity :
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putBoolean(KEY_LAUNCHED_FALLBACK_URL, launchedFallbackUrl)
         outState.putBoolean(KEY_PRESENTED, true)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         injectWithFallback(
             starterArgs.injectorKey,
             this
@@ -121,10 +117,6 @@ internal class IdentityActivity :
             .identityViewModelFactory(viewModelFactory)
             .fallbackUrlLauncher(this)
             .build()
-
-        supportFragmentManager.fragmentFactory = subcomponent.identityFragmentFactory
-
-        super.onCreate(savedInstanceState)
         identityViewModel.retrieveAndBufferVerificationPage()
         identityViewModel.registerActivityResultCaller(this)
         fallbackUrlLauncher = registerForActivityResult(
@@ -173,56 +165,49 @@ internal class IdentityActivity :
                 }
             },
             onFailure = {
-                // This error will trigger lateinit property not initialized error for
-                // IdentityAnalyticsRequestFactory.verificationPage in ErrorFragment
-                // TODO(ccen) don't send analytics request for this case when ErrorFragment is removed.
                 identityViewModel.errorCause.postValue(it)
-                navController.navigateToErrorScreenWithDefaultValues(this)
+                navController.navigateToFinalErrorScreen(this)
             }
         )
 
         identityViewModel.screenTracker.screenTransitionStart(
             startedAt = starterArgs.presentTime.asEpochMillisecondsClockMark()
         )
-
-        if (savedInstanceState == null || !savedInstanceState.getBoolean(
-                KEY_LAUNCHED_FALLBACK_URL,
-                false
-            )
-        ) {
-            // The Activity is newly created, set up navigation flow normally
-            setContentView(binding.root)
-            setUpNavigationController()
-        } else {
-            // The Activity is being recreated after being destroyed by OS.
-            // This happens when a fallback URL Activity is in front and IdentityActivity is destroyed.
-            // In this case, remove the NavHostFragment set earlier and let fallbackUrlLauncher return
-            // the callback to client.
-
-            // Recovered activity should already set up supportFragmentManager with a single NavHostFragment
-            require(supportFragmentManager.fragments.size == 1) {
-                "supportFragmentManager contains more than one fragment"
-            }
-            supportFragmentManager.beginTransaction().remove(supportFragmentManager.fragments[0])
-                .commit()
-        }
-    }
-
-    private fun setUpNavigationController() {
-        // hide supportActionBar and use the customized ToolBar to configure NavController.
-        // supportActionBar is unreliable as it might be null if host app uses a NoActionBar theme.
         supportActionBar?.hide()
 
-        navController =
-            (supportFragmentManager.findFragmentById(R.id.identity_nav_host) as NavHostFragment).navController
+        setContent {
+            var topBarState by remember {
+                mutableStateOf(IdentityTopBarState.DEFAULT)
+            }
+            MdcTheme {
+                IdentityNavGraph(
+                    identityViewModel = identityViewModel,
+                    fallbackUrlLauncher = this,
+                    appSettingsOpenable = this,
+                    cameraPermissionEnsureable = this,
+                    verificationFlowFinishable = this,
+                    identityScanViewModelFactory = subcomponent.identityScanViewModelFactory,
+                    topBarState = topBarState,
+                    onTopBarNavigationClick = {
+                        onBackPressedCallback.handleOnBackPressed()
+                    },
+                ) {
+                    this.navController = it
+                    onBackPressedCallback =
+                        IdentityActivityOnBackPressedCallback(
+                            this,
+                            navController,
+                            identityViewModel
+                        )
+                    onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
-        navController.setGraph(R.navigation.identity_nav_graph)
-
-        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
-
-        navController.addOnDestinationChangedListener { _, destination, args ->
-            onBackPressedCallback.updateState(destination, args)
-            binding.topAppBar.updateState(destination, args)
+                    navController.addOnDestinationChangedListener { _, destination, args ->
+                        // Note: args is a Bundle created from arguments in route
+                        onBackPressedCallback.updateState(destination, args)
+                        topBarState = updateTopBarState(destination, args)
+                    }
+                }
+            }
         }
     }
 
@@ -259,53 +244,26 @@ internal class IdentityActivity :
         // no-op
     }
 
-    /**
-     * Handles Toolbar's navigation button behavior based on current navigation status.
-     */
-    private fun MaterialToolbar.updateState(destination: NavDestination, args: Bundle?) {
-        this.setNavigationOnClickListener {
-            navigateOnDestination(
-                navController,
-                identityViewModel,
-                this@IdentityActivity,
-                destination,
-                args
-            )
-        }
+    private fun updateTopBarState(destination: NavDestination, args: Bundle?) =
         // Toggle the navigation button UI
-        when {
-            // Display cross icon on consent fragment, clicking it finishes the flow with Canceled
-            isConsentFragment(destination) -> {
-                this.navigationIcon =
-                    AppCompatResources.getDrawable(
-                        this@IdentityActivity,
-                        R.drawable.ic_baseline_close_24
-                    )
+        when (destination.route) {
+            ConsentDestination.ROUTE.route -> {
+                IdentityTopBarState.CONSENT
             }
-            isConfirmationFragment(destination) -> {
-                this.navigationIcon =
-                    AppCompatResources.getDrawable(
-                        this@IdentityActivity,
-                        R.drawable.ic_baseline_close_24
-                    )
+            ConfirmationDestination.ROUTE.route -> {
+                IdentityTopBarState.CONFIRMATION
             }
-            // Display cross icon on error fragment that should fail, clicking it finishes the flow with Failed
-            isErrorFragmentThatShouldFail(destination, args) -> {
-                this.navigationIcon = AppCompatResources.getDrawable(
-                    this@IdentityActivity,
-                    R.drawable.ic_baseline_close_24
-                )
+            ErrorDestination.ROUTE.route -> {
+                if (args?.getBoolean(ARG_SHOULD_FAIL, false) == true) {
+                    IdentityTopBarState.ERROR_SHOULD_FAIL
+                } else {
+                    IdentityTopBarState.DEFAULT
+                }
             }
-            // Otherwise display back arrow icon, clicking it navigates up
             else -> {
-                this.navigationIcon =
-                    AppCompatResources.getDrawable(
-                        this@IdentityActivity,
-                        R.drawable.ic_baseline_arrow_back_24
-                    )
+                IdentityTopBarState.DEFAULT
             }
         }
-    }
 
     /**
      * Handles back button behavior based on current navigation status.
@@ -335,7 +293,6 @@ internal class IdentityActivity :
     }
 
     override fun launchFallbackUrl(fallbackUrl: String) {
-        launchedFallbackUrl = true
         val customTabsIntent = CustomTabsIntent.Builder()
             .build()
         customTabsIntent.intent.data = Uri.parse(fallbackUrl)
@@ -346,25 +303,7 @@ internal class IdentityActivity :
         const val EMPTY_ARG_ERROR =
             "IdentityActivity was started without arguments"
 
-        const val KEY_LAUNCHED_FALLBACK_URL = "launched_fallback_url"
-
         const val KEY_PRESENTED = "presented"
-
-        private fun isConsentFragment(destination: NavDestination?) =
-            destination?.id == R.id.consentFragment
-
-        private fun isConfirmationFragment(destination: NavDestination?) =
-            destination?.id == R.id.confirmationFragment
-
-        /**
-         * Check if this is the final error fragment, which would fail the verification flow when
-         * back button is clicked.
-         */
-        private fun isErrorFragmentThatShouldFail(
-            destination: NavDestination?,
-            args: Bundle?
-        ) = destination?.id == R.id.errorFragment &&
-            args?.getBoolean(ARG_SHOULD_FAIL, false) == true
 
         private fun navigateOnDestination(
             navController: NavController,
@@ -377,8 +316,8 @@ internal class IdentityActivity :
             if (identityViewModel.isSubmitting()) {
                 return
             }
-            when {
-                isConsentFragment(destination) -> {
+            when (destination?.route) {
+                ConsentDestination.ROUTE.route -> {
                     identityViewModel.sendAnalyticsRequest(
                         identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
                             isFromFallbackUrl = false,
@@ -390,29 +329,33 @@ internal class IdentityActivity :
                         VerificationFlowResult.Canceled
                     )
                 }
-                isConfirmationFragment(destination) -> {
+                ConfirmationDestination.ROUTE.route -> {
                     identityViewModel.sendSucceededAnalyticsRequestForNative()
                     verificationFlowFinishable.finishWithResult(
                         VerificationFlowResult.Completed
                     )
                 }
-                isErrorFragmentThatShouldFail(destination, args) -> {
-                    val failedReason = requireNotNull(
-                        identityViewModel.errorCause.value
-                    ) {
-                        "Failed to get failedReason"
-                    }
+                ErrorDestination.ROUTE.route -> {
+                    if (args?.getBoolean(ARG_SHOULD_FAIL, false) == true) {
+                        val failedReason = requireNotNull(
+                            identityViewModel.errorCause.value
+                        ) {
+                            "Failed to get failedReason"
+                        }
 
-                    identityViewModel.sendAnalyticsRequest(
-                        identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
-                            isFromFallbackUrl = false,
-                            requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
-                            throwable = failedReason
+                        identityViewModel.sendAnalyticsRequest(
+                            identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
+                                isFromFallbackUrl = false,
+                                requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                                throwable = failedReason
+                            )
                         )
-                    )
-                    verificationFlowFinishable.finishWithResult(
-                        VerificationFlowResult.Failed(failedReason)
-                    )
+                        verificationFlowFinishable.finishWithResult(
+                            VerificationFlowResult.Failed(failedReason)
+                        )
+                    } else {
+                        navController.clearDataAndNavigateUp(identityViewModel)
+                    }
                 }
                 else -> {
                     navController.clearDataAndNavigateUp(identityViewModel)
