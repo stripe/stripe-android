@@ -24,6 +24,7 @@ sealed class ErrorMessage : Parcelable {
     abstract fun getMessage(resources: Resources): String
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class FromResources(
         @StringRes val stringResId: Int
     ) : ErrorMessage() {
@@ -32,6 +33,7 @@ sealed class ErrorMessage : Parcelable {
     }
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Raw(
         val errorMessage: String
     ) : ErrorMessage() {

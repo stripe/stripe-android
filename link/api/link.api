@@ -349,6 +349,9 @@ public final class com/stripe/android/link/ui/verification/VerificationDialogKt 
 	public static final fun LinkVerificationDialog (Lcom/stripe/android/link/LinkPaymentLauncher;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)V
 }
 
+public final class com/stripe/android/link/ui/verification/VerificationScreenKt {
+}
+
 public final class com/stripe/android/link/ui/wallet/ComposableSingletons$ConfirmRemoveDialogKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/wallet/ComposableSingletons$ConfirmRemoveDialogKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;

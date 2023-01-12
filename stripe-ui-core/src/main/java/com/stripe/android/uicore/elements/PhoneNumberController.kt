@@ -122,6 +122,7 @@ class PhoneNumberController constructor(
         _hasFocus.value = newHasFocus
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         /**
          * Instantiate a [PhoneNumberController] with the given initial values.
