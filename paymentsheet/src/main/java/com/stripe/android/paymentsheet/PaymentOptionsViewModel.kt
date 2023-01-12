@@ -293,13 +293,19 @@ internal class PaymentOptionsViewModel @Inject constructor(
         } else {
             AddFirstPaymentMethod
         }
-        transitionTo(target)
 
-        if (target is SelectSavedPaymentMethods && newPaymentSelection != null) {
-            // The user has previously selected a new payment method. Instead of sending them to the
-            // payment methods screen, we directly launch them into the payment method form again.
-            transitionTo(TransitionTarget.AddAnotherPaymentMethod)
+        val initialBackStack = buildList {
+            add(target)
+
+            if (target is SelectSavedPaymentMethods && newPaymentSelection != null) {
+                // The user has previously selected a new payment method. Instead of sending them
+                // to the payment methods screen, we directly launch them into the payment method
+                // form again.
+                add(TransitionTarget.AddAnotherPaymentMethod)
+            }
         }
+
+        backStack.value = initialBackStack
     }
 
     internal class Factory(

@@ -130,7 +130,7 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `Opens previously selected new payment method`() = runTest {
+    fun `Restores backstack when user previously selected a new payment method`() = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -143,8 +143,10 @@ internal class PaymentOptionsViewModelTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
             viewModel.transitionToFirstScreen()
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
             assertThat(awaitItem()).isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
+
+            viewModel.handleBackPressed()
+            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
     }
 

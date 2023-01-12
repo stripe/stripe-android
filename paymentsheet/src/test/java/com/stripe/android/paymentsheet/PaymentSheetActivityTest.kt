@@ -438,14 +438,14 @@ internal class PaymentSheetActivityTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
 
-            scenario.launch(intent).onActivity { idleLooper() }
+            scenario.launch(intent)
             assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
 
             viewModel.transitionToAddPaymentScreen()
             assertThat(awaitItem()).isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
 
             pressBack()
-            scenario.launch(intent).onActivity { idleLooper() }
+            scenario.launch(intent)
 
             assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
@@ -752,7 +752,7 @@ internal class PaymentSheetActivityTest {
 
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
-            scenario.launchForResult(intent).onActivity { idleLooper() }
+            scenario.launchForResult(intent)
             assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
         }
     }
@@ -1156,7 +1156,7 @@ internal class PaymentSheetActivityTest {
 
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
-            activityScenario(viewModel).launch(intent).onActivity { idleLooper() }
+            activityScenario(viewModel).launch(intent)
             assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
     }
@@ -1167,7 +1167,7 @@ internal class PaymentSheetActivityTest {
 
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
-            activityScenario(viewModel).launch(intent).onActivity { idleLooper() }
+            activityScenario(viewModel).launch(intent)
             assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
         }
     }
@@ -1180,11 +1180,11 @@ internal class PaymentSheetActivityTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
 
-            scenario.launch(intent).onActivity { idleLooper() }
-            scenario.recreate()
-            scenario.onActivity { idleLooper() }
-
+            scenario.launch(intent)
             assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+
+            scenario.recreate()
+            expectNoEvents()
         }
     }
 

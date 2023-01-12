@@ -150,7 +150,7 @@ internal abstract class BaseSheetViewModel(
         savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val backStack = MutableStateFlow<List<TransitionTarget>>(emptyList())
+    protected val backStack = MutableStateFlow<List<TransitionTarget>>(emptyList())
 
     val currentScreen: StateFlow<TransitionTarget?> = backStack
         .map { it.lastOrNull() }

@@ -266,7 +266,7 @@ internal class PaymentOptionsActivityTest {
 
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
-            activityScenario(viewModel).launch(createIntent(args)).onActivity { idleLooper() }
+            activityScenario(viewModel).launch(createIntent(args))
             assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
     }
@@ -283,7 +283,7 @@ internal class PaymentOptionsActivityTest {
 
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
-            activityScenario(viewModel).launch(createIntent(args)).onActivity { idleLooper() }
+            activityScenario(viewModel).launch(createIntent(args))
             assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
     }
@@ -299,7 +299,7 @@ internal class PaymentOptionsActivityTest {
 
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
-            activityScenario(viewModel).launch(createIntent(args)).onActivity { idleLooper() }
+            activityScenario(viewModel).launch(createIntent(args))
             assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
         }
     }
@@ -315,7 +315,7 @@ internal class PaymentOptionsActivityTest {
 
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
-            activityScenario(viewModel).launch(createIntent(args)).onActivity { idleLooper() }
+            activityScenario(viewModel).launch(createIntent(args))
             assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
         }
     }
@@ -333,11 +333,10 @@ internal class PaymentOptionsActivityTest {
             assertThat(awaitItem()).isNull()
 
             scenario.launch(createIntent(args))
-                .onActivity { idleLooper() }
-                .recreate()
-                .onActivity { idleLooper() }
-
             assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+
+            scenario.recreate()
+            expectNoEvents()
         }
     }
 
