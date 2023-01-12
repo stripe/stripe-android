@@ -147,9 +147,8 @@ internal abstract class BaseSheetViewModel(
      * Represents what the user last selects (add or buy) on the
      * [PaymentOptionsActivity]/[PaymentSheetActivity], and saved/restored from the preferences.
      */
-    private val _savedSelection =
-        savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
-    private val savedSelection: LiveData<SavedSelection> = _savedSelection
+    private val savedSelection: StateFlow<SavedSelection?> = savedStateHandle
+        .getStateFlow<SavedSelection?>(SAVE_SAVED_SELECTION, null)
 
     protected val backStack = MutableStateFlow<List<TransitionTarget>>(emptyList())
 
@@ -237,10 +236,10 @@ internal abstract class BaseSheetViewModel(
     private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
         PaymentOptionsStateMapper(
             paymentMethods = paymentMethods.asLiveData(),
-            initialSelection = savedSelection,
             currentSelection = selection,
             googlePayState = googlePayState.asLiveData(),
             isLinkEnabled = isLinkEnabled,
+            initialSelection = savedSelection.asLiveData(),
             isNotPaymentFlow = this is PaymentOptionsViewModel,
         )
     }
@@ -254,7 +253,7 @@ internal abstract class BaseSheetViewModel(
         )
 
     init {
-        if (_savedSelection.value == null) {
+        if (savedSelection.value == null) {
             viewModelScope.launch {
                 val savedSelection = withContext(workContext) {
                     prefsRepository.getSavedSelection(
@@ -299,7 +298,7 @@ internal abstract class BaseSheetViewModel(
 
     protected val isReadyEvents = MediatorLiveData<Boolean>().apply {
         listOf(
-            savedSelection,
+            savedSelection.asLiveData(),
             stripeIntent.asLiveData(),
             paymentMethods.asLiveData(),
             googlePayState.asLiveData(),
