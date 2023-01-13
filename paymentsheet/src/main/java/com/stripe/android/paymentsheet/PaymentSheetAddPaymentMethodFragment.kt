@@ -18,11 +18,13 @@ internal class PaymentSheetAddPaymentMethodFragment() : BaseAddPaymentMethodFrag
         super.onViewCreated(view, savedInstanceState)
 
         sheetViewModel.showTopContainer.observe(viewLifecycleOwner) { visible ->
-            sheetViewModel.headerText.value = if (visible) {
-                null
-            } else {
-                getString(R.string.stripe_paymentsheet_add_payment_method_title)
-            }
+            sheetViewModel.updateHeaderText(
+                if (visible) {
+                    null
+                } else {
+                    getString(R.string.stripe_paymentsheet_add_payment_method_title)
+                }
+            )
         }
     }
 }

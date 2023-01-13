@@ -12,6 +12,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asFlow
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
@@ -56,10 +57,11 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -177,13 +179,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val showTopContainer = MediatorLiveData<Boolean>().apply {
         listOf(
             isLinkEnabled,
-            isGooglePayReady,
+            googlePayState.asLiveData(),
             isReadyEvents
         ).forEach {
             addSource(it) {
                 value = (
                     isLinkEnabled.value == true ||
-                        isGooglePayReady.value == true
+                        googlePayState.value == GooglePayState.Available
                     ) && isReadyEvents.value?.peekContent() == true
             }
         }
@@ -194,7 +196,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     init {
         eventReporter.onInit(config)
         if (googlePayLauncherConfig == null) {
-            savedStateHandle[SAVE_GOOGLE_PAY_READY] = false
+            savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.NotAvailable
         }
 
         viewModelScope.launch {
@@ -246,7 +248,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     lifecycleScope = lifecycleScope,
                     config = config,
                     readyCallback = { isReady ->
-                        savedStateHandle[SAVE_GOOGLE_PAY_READY] = isReady
+                        savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (isReady) {
+                            GooglePayState.Available
+                        } else {
+                            GooglePayState.NotAvailable
+                        }
                     },
                     activityResultLauncher = activityResultLauncher
                 )
@@ -606,9 +612,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun transitionToFirstScreen() {
         val target = if (paymentMethods.value.isNullOrEmpty()) {
             updateSelection(null)
-            TransitionTarget.AddFirstPaymentMethod
+            PaymentSheetScreen.AddFirstPaymentMethod
         } else {
-            TransitionTarget.SelectSavedPaymentMethods
+            PaymentSheetScreen.SelectSavedPaymentMethods
         }
         transitionTo(target)
     }

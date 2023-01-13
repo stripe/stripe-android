@@ -134,7 +134,7 @@ class DocumentScanScreenTest {
                     eq(mockNavController),
                     eq(true),
                     eq(CollectedDataParam.Type.IDCARD),
-                    eq(IDScanDestination.ROUTE.routeBase),
+                    eq(IDScanDestination.ROUTE.route),
                     any()
                 )
             }
@@ -166,7 +166,7 @@ class DocumentScanScreenTest {
                     R.string.position_id_back
                 ),
                 collectedDataParamType = CollectedDataParam.Type.IDCARD,
-                route = IDScanDestination.ROUTE.routeBase
+                route = IDScanDestination.ROUTE.route
             )
         }
         with(composeTestRule, testBlock)

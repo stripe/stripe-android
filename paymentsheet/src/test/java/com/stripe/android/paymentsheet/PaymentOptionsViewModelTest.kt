@@ -19,14 +19,13 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.utils.TestUtils.observeEventsForever
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -118,24 +117,20 @@ internal class PaymentOptionsViewModelTest {
         }
 
     @Test
-    fun `resolveTransitionTarget no new card`() {
+    fun `Opens saved payment methods if no new payment method was previously selected`() = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(newPaymentSelection = null)
         )
 
-        var transitionTarget: TransitionTarget? = null
-        viewModel.transition.observeEventsForever {
-            transitionTarget = it
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
         }
-
-        // no customer, no new card, no paymentMethods
-        viewModel.resolveTransitionTarget()
-
-        assertThat(transitionTarget).isNull()
     }
 
     @Test
-    fun `resolveTransitionTarget new card saved`() {
+    fun `Restores backstack when user previously selected a new payment method`() = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
@@ -145,36 +140,14 @@ internal class PaymentOptionsViewModelTest {
             )
         )
 
-        val transitionTarget = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTarget.add(it) }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddAnotherPaymentMethod)
 
-        viewModel.resolveTransitionTarget()
-
-        assertThat(transitionTarget).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
-    }
-
-    @Test
-    fun `resolveTransitionTarget new card NOT saved`() {
-        val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-                newPaymentSelection = NEW_CARD_PAYMENT_SELECTION.copy(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                )
-            )
-        )
-
-        val transitionTarget = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTarget.add(it) }
-
-        viewModel.resolveTransitionTarget()
-        assertThat(transitionTarget).containsExactly(TransitionTarget.AddAnotherPaymentMethod)
-
-        // Reset the list of observed values
-        transitionTarget.clear()
-
-        viewModel.resolveTransitionTarget()
-        assertThat(transitionTarget).isEmpty()
+            viewModel.handleBackPressed()
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
+        }
     }
 
     @Test
@@ -289,6 +262,66 @@ internal class PaymentOptionsViewModelTest {
             viewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
 
             assertThat(awaitItem()).isEqualTo(PrimaryButton.State.Ready)
+        }
+    }
+
+    @Test
+    fun `paymentMethods is not empty if customer has payment methods`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
+        )
+
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `paymentMethods is empty if customer has no payment methods`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                paymentMethods = listOf()
+            )
+        )
+
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isEmpty()
+        }
+    }
+
+    @Test
+    fun `transition target is AddFirstPaymentMethod if payment methods is empty`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                paymentMethods = listOf(),
+                isGooglePayReady = false,
+                linkState = null
+            )
+        )
+
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddFirstPaymentMethod)
+        }
+    }
+
+    @Test
+    fun `transition target is SelectSavedPaymentMethods if payment methods is not empty`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                isGooglePayReady = false,
+                linkState = null
+            )
+        )
+
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
         }
     }
 

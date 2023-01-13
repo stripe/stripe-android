@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -41,8 +40,9 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
@@ -57,8 +57,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.annotations.TestOnly
@@ -95,9 +97,8 @@ internal abstract class BaseSheetViewModel(
 
     protected var mostRecentError: Throwable? = null
 
-    @VisibleForTesting
-    internal val _isGooglePayReady = savedStateHandle.getLiveData<Boolean>(SAVE_GOOGLE_PAY_READY)
-    internal val isGooglePayReady: LiveData<Boolean> = _isGooglePayReady.distinctUntilChanged()
+    internal val googlePayState: StateFlow<GooglePayState> = savedStateHandle
+        .getStateFlow(SAVE_GOOGLE_PAY_STATE, GooglePayState.Indeterminate)
 
     // Don't save the resource repository state because it must be re-initialized
     // with the save server specs when reconstructed.
@@ -127,19 +128,18 @@ internal abstract class BaseSheetViewModel(
         } ?: emptyList()
         set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value.map { it.code })
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    internal val _paymentMethods =
-        savedStateHandle.getLiveData<List<PaymentMethod>>(SAVE_PAYMENT_METHODS)
-
     /**
      * The list of saved payment methods for the current customer.
      * Value is null until it's loaded, and non-null (could be empty) after that.
      */
-    internal val paymentMethods: LiveData<List<PaymentMethod>> = _paymentMethods
+    internal val paymentMethods: StateFlow<List<PaymentMethod>?> = savedStateHandle
+        .getStateFlow(SAVE_PAYMENT_METHODS, null)
 
-    internal val amount: LiveData<Amount> = savedStateHandle.getLiveData<Amount>(SAVE_AMOUNT)
+    internal val amount: StateFlow<Amount?> = savedStateHandle
+        .getStateFlow(SAVE_AMOUNT, null)
 
-    internal val headerText = MutableLiveData<String>()
+    private val _headerText = MutableStateFlow<String?>(null)
+    internal val headerText: StateFlow<String?> = _headerText
 
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
@@ -151,8 +151,15 @@ internal abstract class BaseSheetViewModel(
         savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    private val _transition = MutableLiveData<Event<TransitionTarget>?>(null)
-    internal val transition: LiveData<Event<TransitionTarget>?> = _transition
+    protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(emptyList())
+
+    val currentScreen: StateFlow<PaymentSheetScreen?> = backStack
+        .map { it.lastOrNull() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = null,
+        )
 
     private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
     internal val selection: LiveData<PaymentSelection?> = _selection
@@ -229,10 +236,10 @@ internal abstract class BaseSheetViewModel(
 
     private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
         PaymentOptionsStateMapper(
-            paymentMethods = paymentMethods,
+            paymentMethods = paymentMethods.asLiveData(),
             initialSelection = savedSelection,
             currentSelection = selection,
-            isGooglePayReady = isGooglePayReady,
+            googlePayState = googlePayState.asLiveData(),
             isLinkEnabled = isLinkEnabled,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
         )
@@ -251,7 +258,7 @@ internal abstract class BaseSheetViewModel(
             viewModelScope.launch {
                 val savedSelection = withContext(workContext) {
                     prefsRepository.getSavedSelection(
-                        isGooglePayReady.asFlow().first(),
+                        googlePayState.first().isReadyForUse,
                         isLinkEnabled.asFlow().first()
                     )
                 }
@@ -294,8 +301,8 @@ internal abstract class BaseSheetViewModel(
         listOf(
             savedSelection,
             stripeIntent.asLiveData(),
-            paymentMethods,
-            isGooglePayReady,
+            paymentMethods.asLiveData(),
+            googlePayState.asLiveData(),
             isResourceRepositoryReady,
             isLinkEnabled
         ).forEach { source ->
@@ -309,7 +316,7 @@ internal abstract class BaseSheetViewModel(
 
     private fun determineIfReady(): Boolean {
         val stripeIntentValue = stripeIntent.value
-        val isGooglePayReadyValue = isGooglePayReady.value
+        val isGooglePayReadyValue = googlePayState.value
         val isResourceRepositoryReadyValue = isResourceRepositoryReady.value
         val isLinkReadyValue = isLinkEnabled.value
         val savedSelectionValue = savedSelection.value
@@ -319,7 +326,7 @@ internal abstract class BaseSheetViewModel(
 
         return stripeIntentValue != null &&
             paymentMethodsValue != null &&
-            isGooglePayReadyValue != null &&
+            isGooglePayReadyValue != GooglePayState.Indeterminate &&
             isResourceRepositoryReadyValue != null &&
             isLinkReadyValue != null &&
             savedSelectionValue != null
@@ -327,13 +334,13 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun transitionToFirstScreen()
 
-    protected fun transitionTo(target: TransitionTarget) {
+    protected fun transitionTo(target: PaymentSheetScreen) {
         clearErrorMessages()
-        _transition.postValue(Event(target))
+        backStack.update { it + target }
     }
 
     fun transitionToAddPaymentScreen() {
-        transitionTo(TransitionTarget.AddAnotherPaymentMethod)
+        transitionTo(PaymentSheetScreen.AddAnotherPaymentMethod)
     }
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
@@ -410,6 +417,10 @@ internal abstract class BaseSheetViewModel(
         _notesText.value = text
     }
 
+    fun updateHeaderText(text: String?) {
+        _headerText.value = text
+    }
+
     open fun updateSelection(selection: PaymentSelection?) {
         if (selection is PaymentSelection.New) {
             newPaymentSelection = selection
@@ -441,7 +452,7 @@ internal abstract class BaseSheetViewModel(
                 _selection.value = null
             }
 
-            savedStateHandle[SAVE_PAYMENT_METHODS] = _paymentMethods.value?.filter {
+            savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value?.filter {
                 it.id != paymentMethodId
             }
 
@@ -581,10 +592,19 @@ internal abstract class BaseSheetViewModel(
      */
     abstract fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?)
 
+    fun handleBackPressed() {
+        if (backStack.value.size > 1) {
+            onUserBack()
+        } else {
+            onUserCancel()
+        }
+    }
+
     abstract fun onUserCancel()
 
-    fun onUserBack() {
+    private fun onUserBack() {
         clearErrorMessages()
+        backStack.update { it.dropLast(1) }
 
         // Reset the selection to the one from before opening the add payment method screen
         val paymentOptionsState = paymentOptionsState.value
@@ -639,18 +659,8 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_SAVED_SELECTION = "saved_selection"
         internal const val SAVE_SUPPORTED_PAYMENT_METHOD = "supported_payment_methods"
         internal const val SAVE_PROCESSING = "processing"
-        internal const val SAVE_GOOGLE_PAY_READY = "google_pay_ready"
+        internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
         internal const val SAVE_RESOURCE_REPOSITORY_READY = "resource_repository_ready"
         internal const val LINK_CONFIGURATION = "link_configuration"
-    }
-}
-
-internal fun <T> LiveData<BaseSheetViewModel.Event<T>?>.observeEvents(
-    lifecycleOwner: LifecycleOwner,
-    observer: (T) -> Unit
-) {
-    observe(lifecycleOwner) { event ->
-        val content = event?.getContentIfNotHandled() ?: return@observe
-        observer(content)
     }
 }

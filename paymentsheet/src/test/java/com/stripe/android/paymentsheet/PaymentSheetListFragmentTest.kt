@@ -5,9 +5,11 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.fragment.app.testing.withFragment
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -21,8 +23,14 @@ import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.
 import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.Companion.lpmRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.state.GooglePayState
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_GOOGLE_PAY_STATE
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PAYMENT_METHODS
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SAVED_SELECTION
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -106,7 +114,7 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
             fragment.initializePaymentOptions(
-                isGooglePayReady = false,
+                isGooglePayReady = GooglePayState.NotAvailable,
                 isLinkEnabled = false,
             )
         }.moveToState(Lifecycle.State.RESUMED).onFragment {
@@ -175,20 +183,21 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun `posts transition when add card clicked`() {
-        createScenario().onFragment {
-            val activityViewModel = activityViewModel(it)
-            assertThat(activityViewModel.transition.value?.peekContent()).isNull()
+    fun `posts transition when add card clicked`() = runTest {
+        val scenario = createScenario()
 
-            idleLooper()
+        val viewModel = scenario.withFragment { activityViewModel(this) }
+        val recyclerView = scenario.withFragment { recyclerView(this) }
 
-            val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+
+            val adapter = recyclerView.adapter as PaymentOptionsAdapter
             adapter.addCardClickListener()
-            idleLooper()
 
-            assertThat(activityViewModel.transition.value?.peekContent())
-                .isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddAnotherPaymentMethod)
         }
     }
 
@@ -279,14 +288,14 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
 
     private fun PaymentSheetListFragment.initializePaymentOptions(
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
-        isGooglePayReady: Boolean = false,
+        isGooglePayReady: GooglePayState = GooglePayState.NotAvailable,
         isLinkEnabled: Boolean = false,
         savedSelection: SavedSelection = SavedSelection.None,
     ) {
-        sheetViewModel._paymentMethods.value = paymentMethods
-        sheetViewModel._isGooglePayReady.value = isGooglePayReady
+        sheetViewModel.savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods
+        sheetViewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = isGooglePayReady
         sheetViewModel._isLinkEnabled.value = isLinkEnabled
-        sheetViewModel.savedStateHandle["saved_selection"] = savedSelection
+        sheetViewModel.savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection
     }
 
     private companion object {

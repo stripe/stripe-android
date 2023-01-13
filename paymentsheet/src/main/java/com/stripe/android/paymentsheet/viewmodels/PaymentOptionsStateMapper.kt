@@ -8,10 +8,11 @@ import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.state.GooglePayState
 
 internal class PaymentOptionsStateMapper(
-    private val paymentMethods: LiveData<List<PaymentMethod>>,
-    private val isGooglePayReady: LiveData<Boolean>,
+    private val paymentMethods: LiveData<List<PaymentMethod>?>,
+    private val googlePayState: LiveData<GooglePayState>,
     private val isLinkEnabled: LiveData<Boolean>,
     private val initialSelection: LiveData<SavedSelection>,
     private val currentSelection: LiveData<PaymentSelection?>,
@@ -24,7 +25,7 @@ internal class PaymentOptionsStateMapper(
                 paymentMethods,
                 currentSelection,
                 initialSelection,
-                isGooglePayReady,
+                googlePayState,
                 isLinkEnabled,
             ).forEach { source ->
                 addSource(source) {
@@ -41,14 +42,14 @@ internal class PaymentOptionsStateMapper(
     private fun createPaymentOptionsState(): PaymentOptionsState? {
         val paymentMethods = paymentMethods.value ?: return null
         val initialSelection = initialSelection.value ?: return null
-        val isGooglePayReady = isGooglePayReady.value ?: return null
+        val googlePayState = googlePayState.value ?: return null
         val isLinkEnabled = isLinkEnabled.value ?: return null
 
         val currentSelection = currentSelection.value
 
         return PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
-            showGooglePay = isGooglePayReady && isNotPaymentFlow,
+            showGooglePay = (googlePayState is GooglePayState.Available) && isNotPaymentFlow,
             showLink = isLinkEnabled && isNotPaymentFlow,
             initialSelection = initialSelection,
             currentSelection = currentSelection,

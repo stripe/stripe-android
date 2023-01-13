@@ -9,14 +9,14 @@ import android.view.WindowManager
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.viewModels
-import androidx.annotation.IdRes
 import androidx.annotation.VisibleForTesting
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.os.bundleOf
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
-import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
@@ -25,14 +25,13 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.PaymentSheetContent
+import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.viewmodels.observeEvents
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.utils.AnimationConstants
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
 
@@ -52,10 +51,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private val starterArgs: PaymentSheetContract.Args? by lazy {
         PaymentSheetContract.Args.fromIntent(intent)
     }
-
-    private val fragmentContainerId: Int
-        @IdRes
-        get() = viewBinding.fragmentContainer.id
 
     override val rootView: ViewGroup by lazy { viewBinding.root }
     override val bottomSheet: ViewGroup by lazy { viewBinding.bottomSheet }
@@ -123,8 +118,14 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             linkPaymentLauncher = viewModel.linkLauncher
         }
 
-        viewModel.transition.observeEvents(this) { transitionTarget ->
-            onTransitionTarget(transitionTarget)
+        viewBinding.contentContainer.setContent {
+            val currentScreen by viewModel.currentScreen.collectAsState()
+
+            LaunchedEffect(currentScreen) {
+                buttonContainer.isVisible = currentScreen != null
+            }
+
+            currentScreen.PaymentSheetContent()
         }
 
         if (savedInstanceState == null) {
@@ -180,59 +181,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         return result
     }
 
-    private fun onTransitionTarget(
-        transitionTarget: TransitionTarget,
-    ) {
-        val fragmentArgs = bundleOf(EXTRA_STARTER_ARGS to starterArgs)
-
-        supportFragmentManager.commit {
-            when (transitionTarget) {
-                is TransitionTarget.AddAnotherPaymentMethod -> {
-                    setCustomAnimations(
-                        AnimationConstants.FADE_IN,
-                        AnimationConstants.FADE_OUT,
-                        AnimationConstants.FADE_IN,
-                        AnimationConstants.FADE_OUT
-                    )
-                    addToBackStack(null)
-                    replace(
-                        fragmentContainerId,
-                        PaymentSheetAddPaymentMethodFragment::class.java,
-                        fragmentArgs
-                    )
-                }
-                is TransitionTarget.SelectSavedPaymentMethods -> {
-                    setCustomAnimations(
-                        AnimationConstants.FADE_IN,
-                        AnimationConstants.FADE_OUT,
-                        AnimationConstants.FADE_IN,
-                        AnimationConstants.FADE_OUT
-                    )
-                    replace(
-                        fragmentContainerId,
-                        PaymentSheetListFragment::class.java,
-                        fragmentArgs
-                    )
-                }
-                is TransitionTarget.AddFirstPaymentMethod -> {
-                    setCustomAnimations(
-                        AnimationConstants.FADE_IN,
-                        AnimationConstants.FADE_OUT,
-                        AnimationConstants.FADE_IN,
-                        AnimationConstants.FADE_OUT
-                    )
-                    replace(
-                        fragmentContainerId,
-                        PaymentSheetAddPaymentMethodFragment::class.java,
-                        fragmentArgs
-                    )
-                }
-            }
-        }
-
-        buttonContainer.isVisible = true
-    }
-
     override fun resetPrimaryButtonState() {
         viewBinding.buyButton.updateState(PrimaryButton.State.Ready)
 
@@ -268,7 +216,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         )
         viewModel.showTopContainer.observe(this) { visible ->
             linkButton.isVisible = viewModel.isLinkEnabled.value == true
-            googlePayButton.isVisible = viewModel.isGooglePayReady.value == true
+            googlePayButton.isVisible =
+                viewModel.googlePayState.value == GooglePayState.Available
             topContainer.isVisible = visible
             // We have to set the UI after we know it's visible. Setting UI on a GONE or INVISIBLE
             // view will cause tests to hang indefinitely.

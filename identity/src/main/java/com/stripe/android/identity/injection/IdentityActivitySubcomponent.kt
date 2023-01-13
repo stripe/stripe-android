@@ -9,18 +9,18 @@ import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ScreenTracker
-import com.stripe.android.identity.navigation.IdentityFragmentFactory
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
+import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import dagger.BindsInstance
 import dagger.Subcomponent
 
 @IdentityVerificationScope
 @Subcomponent
 internal interface IdentityActivitySubcomponent {
-    val identityFragmentFactory: IdentityFragmentFactory
+    val identityScanViewModelFactory: IdentityScanViewModel.IdentityScanViewModelFactory
     val identityRepository: IdentityRepository
     val identityModelFetcher: IdentityModelFetcher
     val identityIO: IdentityIO

@@ -36,13 +36,15 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
+import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_GOOGLE_PAY_STATE
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -50,7 +52,6 @@ import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.utils.TestUtils.observeEventsForever
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -72,6 +73,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.time.Duration
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -668,18 +670,33 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `isGooglePayReady without google pay config should emit false`() {
-        val viewModel = createViewModel(PaymentSheetFixtures.ARGS_CUSTOMER_WITHOUT_GOOGLEPAY)
-        var isReady: Boolean? = null
-        viewModel.isGooglePayReady.observeForever {
-            isReady = it
+    fun `googlePayState without config should emit Indeterminate`() = runTest {
+        val viewModel = createViewModel(PaymentSheetFixtures.ARGS_WITHOUT_CUSTOMER)
+        viewModel.googlePayState.test {
+            assertThat(awaitItem()).isEqualTo(GooglePayState.Indeterminate)
         }
-        assertThat(isReady)
-            .isFalse()
     }
 
     @Test
-    fun `isGooglePayReady for SetupIntent missing currencyCode should emit false`() {
+    fun `googlePayState with google pay should emit Available`() = runTest {
+        val viewModel = createViewModel(PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY)
+        viewModel.googlePayState.test {
+            assertThat(awaitItem()).isEqualTo(GooglePayState.Indeterminate)
+            viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+            assertThat(awaitItem()).isEqualTo(GooglePayState.Available)
+        }
+    }
+
+    @Test
+    fun `googlePayState without google pay config should emit NotAvailable`() = runTest {
+        val viewModel = createViewModel(PaymentSheetFixtures.ARGS_CUSTOMER_WITHOUT_GOOGLEPAY)
+        viewModel.googlePayState.test {
+            assertThat(awaitItem()).isEqualTo(GooglePayState.NotAvailable)
+        }
+    }
+
+    @Test
+    fun `googlePayState for SetupIntent missing currencyCode should emit NotAvailable`() = runTest {
         val viewModel = createViewModel(
             ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
@@ -689,12 +706,9 @@ internal class PaymentSheetViewModelTest {
                 )
             )
         )
-        var isReady: Boolean? = null
-        viewModel.isGooglePayReady.observeForever {
-            isReady = it
+        viewModel.googlePayState.test {
+            assertThat(awaitItem()).isEqualTo(GooglePayState.NotAvailable)
         }
-        assertThat(isReady)
-            .isFalse()
     }
 
     @Test
@@ -707,14 +721,14 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Transition only happens when view model is ready`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
-        val observedTransitions = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { observedTransitions.add(it) }
 
-        viewModel.transitionToFirstScreenWhenReady()
-        assertThat(observedTransitions).isEmpty()
+        viewModel.currentScreen.test {
+            viewModel.transitionToFirstScreenWhenReady()
+            assertThat(awaitItem()).isNull()
 
-        viewModel._isGooglePayReady.value = true
-        assertThat(observedTransitions).containsExactly(TransitionTarget.AddFirstPaymentMethod)
+            viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddFirstPaymentMethod)
+        }
     }
 
     @Test
@@ -905,12 +919,78 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `paymentMethods is not empty if customer has payment methods`() = runTest {
+        val viewModel = createViewModel(
+            customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `paymentMethods is empty if customer has no payment methods`() = runTest {
+        val viewModel = createViewModel(customerPaymentMethods = emptyList())
+
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isEmpty()
+        }
+    }
+
+    @Test
+    fun `paymentMethods is null if payment sheet state is not loaded`() = runTest {
+        val viewModel = createViewModel(delay = Duration.INFINITE)
+
+        viewModel.paymentMethods.test {
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
+    @Test
+    fun `current screen is AddFirstPaymentMethod if payment methods is empty`() = runTest {
+        val viewModel = createViewModel(customerPaymentMethods = emptyList())
+
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddFirstPaymentMethod)
+        }
+    }
+
+    @Test
+    fun `current screen is SelectSavedPaymentMethods if payment methods is not empty`() = runTest {
+        val viewModel = createViewModel(
+            customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
+        }
+    }
+
+    @Test
+    fun `updateHeaderText updates headerText`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.headerText.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.updateHeaderText("something")
+            assertThat(awaitItem()).isEqualTo("something")
+        }
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
         customerRepository: CustomerRepository = FakeCustomerRepository(PAYMENT_METHODS),
         shouldFailLoad: Boolean = false,
         linkState: LinkState? = null,
+        customerPaymentMethods: List<PaymentMethod> = listOf(),
+        delay: Duration = Duration.ZERO
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return PaymentSheetViewModel(
@@ -924,6 +1004,8 @@ internal class PaymentSheetViewModelTest {
                 stripeIntent = stripeIntent,
                 shouldFail = shouldFailLoad,
                 linkState = linkState,
+                customerPaymentMethods = customerPaymentMethods,
+                delay = delay
             ),
             customerRepository,
             prefsRepository,

@@ -136,8 +136,8 @@ internal abstract class BasePaymentMethodsListFragment(
             }
         }
 
-        sheetViewModel.paymentMethods.observe(viewLifecycleOwner) { paymentMethods ->
-            if (isEditing && paymentMethods.isEmpty()) {
+        sheetViewModel.paymentMethods.launchAndCollectIn(viewLifecycleOwner) { paymentMethods ->
+            if (isEditing && paymentMethods.isNullOrEmpty()) {
                 isEditing = false
             }
         }

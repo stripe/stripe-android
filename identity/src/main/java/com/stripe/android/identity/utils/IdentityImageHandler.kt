@@ -30,6 +30,9 @@ internal class IdentityImageHandler @Inject constructor(
         onFrontImageChosen: (Uri, IdentityScanState.ScanType?) -> Unit,
         onBackImageChosen: (Uri, IdentityScanState.ScanType?) -> Unit
     ) {
+        frontScanType = savedStateHandle.get<IdentityScanState.ScanType>(FRONT_SCAN_TYPE)
+        backScanType = savedStateHandle.get<IdentityScanState.ScanType>(BACK_SCAN_TYPE)
+
         frontPhotoTaker = PhotoTaker(
             activityResultCaller,
             identityIO,
@@ -99,5 +102,7 @@ internal class IdentityImageHandler @Inject constructor(
     companion object {
         const val FRONT_PHOTO_URI = "front_photo_uri"
         const val BACK_PHOTO_URI = "back_photo_uri"
+        const val FRONT_SCAN_TYPE = "front_scan_type"
+        const val BACK_SCAN_TYPE = "back_scan_type"
     }
 }

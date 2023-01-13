@@ -36,7 +36,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
@@ -75,58 +74,56 @@ internal fun ConsentScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    MdcTheme {
-        CheckVerificationPageAndCompose(
-            verificationPageResource = verificationPageState,
-            onError = {
-                identityViewModel.errorCause.postValue(it)
-                navController.navigateToErrorScreenWithDefaultValues(context)
+    CheckVerificationPageAndCompose(
+        verificationPageResource = verificationPageState,
+        onError = {
+            identityViewModel.errorCause.postValue(it)
+            navController.navigateToErrorScreenWithDefaultValues(context)
+        }
+    ) {
+        val verificationPage = remember { it }
+        if (verificationPage.isUnsupportedClient()) {
+            LaunchedEffect(Unit) {
+                fallbackUrlLauncher.launchFallbackUrl(verificationPage.fallbackUrl)
             }
-        ) {
-            val verificationPage = remember { it }
-            if (verificationPage.isUnsupportedClient()) {
-                LaunchedEffect(Unit) {
-                    fallbackUrlLauncher.launchFallbackUrl(verificationPage.fallbackUrl)
+        } else {
+            LaunchedEffect(Unit) {
+                identityViewModel.updateAnalyticsState { oldState ->
+                    oldState.copy(
+                        requireSelfie = verificationPage.requireSelfie()
+                    )
                 }
-            } else {
-                LaunchedEffect(Unit) {
-                    identityViewModel.updateAnalyticsState { oldState ->
-                        oldState.copy(
-                            requireSelfie = verificationPage.requireSelfie()
+            }
+            ScreenTransitionLaunchedEffect(
+                identityViewModel = identityViewModel,
+                screenName = SCREEN_NAME_CONSENT
+            )
+            SuccessUI(
+                identityViewModel.verificationArgs.brandLogo,
+                verificationPage,
+                onConsentAgreed = {
+                    coroutineScope.launch {
+                        identityViewModel.postVerificationPageDataAndMaybeNavigate(
+                            navController,
+                            CollectedDataParam(
+                                biometricConsent = true
+                            ),
+                            ConsentDestination.ROUTE.route
+                        )
+                    }
+                },
+                onConsentDeclined = {
+                    coroutineScope.launch {
+                        identityViewModel.postVerificationPageDataAndMaybeNavigate(
+                            navController,
+                            CollectedDataParam(
+                                biometricConsent = false
+                            ),
+                            ConsentDestination.ROUTE.route
                         )
                     }
                 }
-                ScreenTransitionLaunchedEffect(
-                    identityViewModel = identityViewModel,
-                    screenName = SCREEN_NAME_CONSENT
-                )
-                SuccessUI(
-                    identityViewModel.verificationArgs.brandLogo,
-                    verificationPage,
-                    onConsentAgreed = {
-                        coroutineScope.launch {
-                            identityViewModel.postVerificationPageDataAndMaybeNavigate(
-                                navController,
-                                CollectedDataParam(
-                                    biometricConsent = true
-                                ),
-                                ConsentDestination.ROUTE.route
-                            )
-                        }
-                    },
-                    onConsentDeclined = {
-                        coroutineScope.launch {
-                            identityViewModel.postVerificationPageDataAndMaybeNavigate(
-                                navController,
-                                CollectedDataParam(
-                                    biometricConsent = false
-                                ),
-                                ConsentDestination.ROUTE.route
-                            )
-                        }
-                    }
-                )
-            }
+            )
         }
     }
 }

@@ -12,4 +12,8 @@
     <string name="description_privacy_policy">privacy policy icon</string>
     <!-- Content description for exclamation icon -->
     <string name="description_exclamation">exclamation icon</string>
+    <!-- Content description for close button -->
+    <string name="description_close">close verification page</string>
+    <!-- Content description for back button -->
+    <string name="description_go_back">go back to the previous screen</string>
 </resources>
