@@ -325,6 +325,35 @@ internal class PaymentOptionsViewModelTest {
         }
     }
 
+    @Test
+    fun `onError updates error`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.error.test {
+            assertThat(awaitItem())
+                .isNull()
+            viewModel.onError("some error")
+            assertThat(awaitItem())
+                .isEqualTo("some error")
+        }
+    }
+
+    @Test
+    fun `clearErrorMessages clears error`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.error.test {
+            assertThat(awaitItem())
+                .isNull()
+            viewModel.onError("some error")
+            assertThat(awaitItem())
+                .isEqualTo("some error")
+            viewModel.clearErrorMessages()
+            assertThat(awaitItem())
+                .isNull()
+        }
+    }
+
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,

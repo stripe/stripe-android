@@ -76,7 +76,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             closeSheet(it)
         }
 
-        viewModel.error.observe(this) { error ->
+        viewModel.error.launchAndCollectIn(this) { error ->
             updateErrorMessage(
                 messageView,
                 error?.let { BaseSheetViewModel.UserErrorMessage(it) }
