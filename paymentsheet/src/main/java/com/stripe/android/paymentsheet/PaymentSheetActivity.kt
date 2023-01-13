@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.launch
@@ -142,8 +143,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        viewModel.paymentSheetResult.observe(this) {
-            closeSheet(it)
+        viewModel.paymentSheetResult.launchAndCollectIn(this) {
+            it?.let {
+                closeSheet(it)
+            }
         }
 
         viewModel.buttonsEnabled.observe(this) { enabled ->

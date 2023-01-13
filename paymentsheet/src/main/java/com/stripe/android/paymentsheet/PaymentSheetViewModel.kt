@@ -72,6 +72,8 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -120,8 +122,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         args.config?.shippingDetails?.toConfirmPaymentIntentShipping()
     )
 
-    private val _paymentSheetResult = MutableLiveData<PaymentSheetResult>()
-    internal val paymentSheetResult: LiveData<PaymentSheetResult> = _paymentSheetResult
+    private val _paymentSheetResult = MutableStateFlow<PaymentSheetResult?>(null)
+    internal val paymentSheetResult: StateFlow<PaymentSheetResult?> = _paymentSheetResult
 
     private val _startConfirm = MutableLiveData<Event<ConfirmStripeIntentParams>>()
     internal val startConfirm: LiveData<Event<ConfirmStripeIntentParams>> = _startConfirm
