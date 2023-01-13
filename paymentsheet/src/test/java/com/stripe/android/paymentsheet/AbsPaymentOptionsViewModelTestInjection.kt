@@ -40,7 +40,8 @@ import org.mockito.kotlin.whenever
 import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
-internal open class PaymentOptionsViewModelTestInjection {
+internal abstract class AbsPaymentOptionsViewModelTestInjection {
+
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
