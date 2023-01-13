@@ -1,22 +1,20 @@
 appId: com.stripe.android.financialconnections.example
 ---
 - launchApp
-# Android specific: Navigate to example (1)
+# Android specific: Navigate to example
 - tapOn: "Playground"
-# Android specific: Navigate to example (2)
 - tapOn:
     id: "Native_checkbox"
 - tapOn:
     id: "Test_checkbox"
 - tapOn:
-    id: "Data_checkbox"
+    id: "PaymentIntent_checkbox"
 - tapOn: "Connect Accounts!"
 # Common: web AuthFlow - connect OAuth institution
 - extendedWaitUntil:
     visible: "Agree"
     timeout: 30000
 - tapOn: "Agree"
-- assertVisible: "Test OAuth Institution"
 # SELECT LEGACY INSTITUTION
 - tapOn: "Test Institution"
 ####### Bypass Chrome on-boarding screen #######
@@ -26,11 +24,11 @@ appId: com.stripe.android.financialconnections.example
       APP_ID: com.stripe.android.financialconnections.example
 ###############################################
 # SELECT ALL ACCOUNTS
-- assertVisible: "Select all accounts"
-- tapOn: "Select all accounts" # select all accounts
-- tapOn: "Link accounts"
+- extendedWaitUntil:
+    visible: "Success"
+    timeout: 60000
+- tapOn: "Success" # select all accounts
+- tapOn: "Confirm"
 # CONFIRM AND COMPLETE
-- assertVisible: "Link another account"
 - tapOn: "Done"
-- assertVisible: ".*Completed!.*"
-- assertVisible: ".*StripeBank.*"
+- assertVisible: ".*Intent Confirmed!.*"
