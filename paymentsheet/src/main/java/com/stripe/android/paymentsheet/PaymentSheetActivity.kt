@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import java.security.InvalidParameterException
 
@@ -143,10 +144,8 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        viewModel.paymentSheetResult.launchAndCollectIn(this) {
-            it?.let {
-                closeSheet(it)
-            }
+        viewModel.paymentSheetResult.filterNotNull().launchAndCollectIn(this) {
+            closeSheet(it)
         }
 
         viewModel.buttonsEnabled.observe(this) { enabled ->

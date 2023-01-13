@@ -72,8 +72,8 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -122,8 +122,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         args.config?.shippingDetails?.toConfirmPaymentIntentShipping()
     )
 
-    private val _paymentSheetResult = MutableStateFlow<PaymentSheetResult?>(null)
-    internal val paymentSheetResult: StateFlow<PaymentSheetResult?> = _paymentSheetResult
+    private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
+    internal val paymentSheetResult: SharedFlow<PaymentSheetResult> = _paymentSheetResult
 
     private val _startConfirm = MutableLiveData<Event<ConfirmStripeIntentParams>>()
     internal val startConfirm: LiveData<Event<ConfirmStripeIntentParams>> = _startConfirm
@@ -474,10 +474,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             // If payment was completed inside the Link UI, dismiss immediately.
             eventReporter.onPaymentSuccess(PaymentSelection.Link)
             prefsRepository.savePaymentSelection(PaymentSelection.Link)
-            _paymentSheetResult.value = PaymentSheetResult.Completed
+            _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
         } else if (cancelPaymentFlow) {
             // We launched the user straight into Link, but they decided to exit out of it.
-            _paymentSheetResult.value = PaymentSheetResult.Canceled
+            _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
         } else {
             setContentVisible(true)
             onPaymentResult(result.convertToPaymentResult())
@@ -526,7 +526,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }
 
                 _viewState.value = PaymentSheetViewState.FinishProcessing {
-                    _paymentSheetResult.value = PaymentSheetResult.Completed
+                    _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
                 }
             }
             else -> {
@@ -577,15 +577,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onFatal(throwable: Throwable) {
         logger.error("Payment Sheet error", throwable)
         mostRecentError = throwable
-        _paymentSheetResult.value = PaymentSheetResult.Failed(throwable)
+        _paymentSheetResult.tryEmit(PaymentSheetResult.Failed(throwable))
     }
 
     override fun onUserCancel() {
-        _paymentSheetResult.value = PaymentSheetResult.Canceled
+        _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
     }
 
     override fun onFinish() {
-        _paymentSheetResult.value = PaymentSheetResult.Completed
+        _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
     }
 
     override fun onError(@IntegerRes error: Int?) =

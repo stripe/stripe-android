@@ -460,7 +460,6 @@ internal class PaymentSheetViewModelTest {
             }
 
             viewModel.paymentSheetResult.test {
-                assertThat(awaitItem()).isNull()
                 viewModel.onPaymentResult(PaymentResult.Completed)
                 assertThat(viewState[1])
                     .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
@@ -498,7 +497,6 @@ internal class PaymentSheetViewModelTest {
             }
 
             viewModel.paymentSheetResult.test {
-                assertThat(awaitItem()).isNull()
                 viewModel.onPaymentResult(PaymentResult.Completed)
                 assertThat(viewState[1])
                     .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
