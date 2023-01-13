@@ -36,7 +36,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -301,8 +301,8 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
     }
 
-    private fun updateToolbarButton(currentScreen: TransitionTarget?) {
-        val showClose = currentScreen != TransitionTarget.AddAnotherPaymentMethod
+    private fun updateToolbarButton(currentScreen: PaymentSheetScreen?) {
+        val showClose = currentScreen != PaymentSheetScreen.AddAnotherPaymentMethod
 
         val toolbarResources = if (showClose) {
             ToolbarResources(

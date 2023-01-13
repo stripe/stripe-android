@@ -10,7 +10,7 @@ import com.stripe.android.paymentsheet.databinding.FragmentPaymentSheetAddPmBind
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentSheetListBinding
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetLoadingBinding
 
-internal sealed interface TransitionTarget {
+internal sealed interface PaymentSheetScreen {
 
     @Composable
     fun PaymentSheetContent()
@@ -18,7 +18,7 @@ internal sealed interface TransitionTarget {
     @Composable
     fun PaymentOptionsContent()
 
-    object SelectSavedPaymentMethods : TransitionTarget {
+    object SelectSavedPaymentMethods : PaymentSheetScreen {
 
         @Composable
         override fun PaymentSheetContent() {
@@ -37,7 +37,7 @@ internal sealed interface TransitionTarget {
         }
     }
 
-    object AddAnotherPaymentMethod : TransitionTarget {
+    object AddAnotherPaymentMethod : PaymentSheetScreen {
 
         @Composable
         override fun PaymentSheetContent() {
@@ -56,7 +56,7 @@ internal sealed interface TransitionTarget {
         }
     }
 
-    object AddFirstPaymentMethod : TransitionTarget {
+    object AddFirstPaymentMethod : PaymentSheetScreen {
 
         @Composable
         override fun PaymentSheetContent() {
@@ -77,7 +77,7 @@ internal sealed interface TransitionTarget {
 }
 
 @Composable
-internal fun TransitionTarget?.PaymentSheetContent() {
+internal fun PaymentSheetScreen?.PaymentSheetContent() {
     if (this == null) {
         AndroidViewBinding(FragmentPaymentsheetLoadingBinding::inflate)
     } else {
@@ -86,7 +86,7 @@ internal fun TransitionTarget?.PaymentSheetContent() {
 }
 
 @Composable
-internal fun TransitionTarget?.PaymentOptionsContent() {
+internal fun PaymentSheetScreen?.PaymentOptionsContent() {
     if (this == null) {
         AndroidViewBinding(FragmentPaymentsheetLoadingBinding::inflate)
     } else {
@@ -94,5 +94,5 @@ internal fun TransitionTarget?.PaymentOptionsContent() {
     }
 }
 
-private val TransitionTarget.testTag: String
+private val PaymentSheetScreen.testTag: String
     get() = this::class.java.simpleName

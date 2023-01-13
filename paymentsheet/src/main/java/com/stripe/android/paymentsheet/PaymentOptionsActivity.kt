@@ -18,7 +18,7 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
 import com.stripe.android.paymentsheet.navigation.PaymentOptionsContent
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
@@ -98,8 +98,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         viewModel.currentScreen.launchAndCollectIn(this) { currentScreen ->
-            val visible = currentScreen is TransitionTarget.AddFirstPaymentMethod ||
-                currentScreen is TransitionTarget.AddAnotherPaymentMethod ||
+            val visible = currentScreen is PaymentSheetScreen.AddFirstPaymentMethod ||
+                currentScreen is PaymentSheetScreen.AddAnotherPaymentMethod ||
                 viewModel.primaryButtonUIState.value?.visible == true
 
             viewBinding.continueButton.isVisible = visible

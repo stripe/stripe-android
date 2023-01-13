@@ -57,7 +57,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -612,9 +612,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun transitionToFirstScreen() {
         val target = if (paymentMethods.value.isNullOrEmpty()) {
             updateSelection(null)
-            TransitionTarget.AddFirstPaymentMethod
+            PaymentSheetScreen.AddFirstPaymentMethod
         } else {
-            TransitionTarget.SelectSavedPaymentMethods
+            PaymentSheetScreen.SelectSavedPaymentMethods
         }
         transitionTo(target)
     }

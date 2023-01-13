@@ -27,9 +27,9 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
-import com.stripe.android.paymentsheet.navigation.TransitionTarget.AddFirstPaymentMethod
-import com.stripe.android.paymentsheet.navigation.TransitionTarget.SelectSavedPaymentMethods
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
@@ -301,7 +301,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 // The user has previously selected a new payment method. Instead of sending them
                 // to the payment methods screen, we directly launch them into the payment method
                 // form again.
-                add(TransitionTarget.AddAnotherPaymentMethod)
+                add(PaymentSheetScreen.AddAnotherPaymentMethod)
             }
         }
 

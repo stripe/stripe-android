@@ -40,7 +40,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.toPaymentSelection
@@ -151,9 +151,9 @@ internal abstract class BaseSheetViewModel(
         savedStateHandle.getLiveData<SavedSelection>(SAVE_SAVED_SELECTION)
     private val savedSelection: LiveData<SavedSelection> = _savedSelection
 
-    protected val backStack = MutableStateFlow<List<TransitionTarget>>(emptyList())
+    protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(emptyList())
 
-    val currentScreen: StateFlow<TransitionTarget?> = backStack
+    val currentScreen: StateFlow<PaymentSheetScreen?> = backStack
         .map { it.lastOrNull() }
         .stateIn(
             scope = viewModelScope,
@@ -334,13 +334,13 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun transitionToFirstScreen()
 
-    protected fun transitionTo(target: TransitionTarget) {
+    protected fun transitionTo(target: PaymentSheetScreen) {
         clearErrorMessages()
         backStack.update { it + target }
     }
 
     fun transitionToAddPaymentScreen() {
-        transitionTo(TransitionTarget.AddAnotherPaymentMethod)
+        transitionTo(PaymentSheetScreen.AddAnotherPaymentMethod)
     }
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
