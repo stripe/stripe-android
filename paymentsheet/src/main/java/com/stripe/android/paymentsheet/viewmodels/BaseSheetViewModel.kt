@@ -59,7 +59,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -162,27 +164,18 @@ internal abstract class BaseSheetViewModel(
             initialValue = null,
         )
 
-    internal val headerText: StateFlow<Int?> = currentScreen.map { screen ->
-        mapToHeaderTextResource(screen)
+    internal val headerText: StateFlow<Int?> = combine(
+        currentScreen,
+        isLinkEnabled.asFlow(),
+        googlePayState,
+        stripeIntent.filterNotNull(),
+    ) { screen, isLinkAvailable, googlePay, intent ->
+        mapToHeaderTextResource(screen, isLinkAvailable, googlePay, intent)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
         initialValue = null,
     )
-
-    private fun mapToHeaderTextResource(screen: PaymentSheetScreen?): Int? {
-        return if (screen != null) {
-            HeaderTextFactory.create(
-                isCompleteFlow = this is PaymentSheetViewModel,
-                screen = screen,
-                isWalletEnabled = isLinkEnabled.value == true || googlePayState.value is GooglePayState.Available,
-                isPaymentIntent = stripeIntent.value is PaymentIntent,
-                types = stripeIntent.value?.paymentMethodTypes.orEmpty(),
-            )
-        } else {
-            null
-        }
-    }
 
     private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
     internal val selection: LiveData<PaymentSelection?> = _selection
@@ -491,6 +484,25 @@ internal abstract class BaseSheetViewModel(
                 )
                 updateBelowButtonText(null)
             }
+        }
+    }
+
+    private fun mapToHeaderTextResource(
+        screen: PaymentSheetScreen?,
+        isLinkAvailable: Boolean,
+        googlePayState: GooglePayState,
+        stripeIntent: StripeIntent,
+    ): Int? {
+        return if (screen != null) {
+            HeaderTextFactory.create(
+                isCompleteFlow = this is PaymentSheetViewModel,
+                screen = screen,
+                isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
+                isPaymentIntent = stripeIntent is PaymentIntent,
+                types = stripeIntent.paymentMethodTypes,
+            )
+        } else {
+            null
         }
     }
 
