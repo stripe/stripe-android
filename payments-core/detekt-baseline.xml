@@ -5,12 +5,12 @@
     <ID>ComplexCondition:AccountRangeJsonParser.kt$AccountRangeJsonParser$accountRangeHigh != null &amp;&amp; accountRangeLow != null &amp;&amp; panLength != null &amp;&amp; brandInfo != null</ID>
     <ID>ComplexCondition:BecsDebitWidget.kt$BecsDebitWidget$name.isBlank() || email.isNullOrBlank() || bsbNumber.isNullOrBlank() || accountNumber.isNullOrBlank()</ID>
     <ID>ComplexCondition:ExpiryDateEditText.kt$ExpiryDateEditText.&lt;no name provided>$expirationDate.month.length == 2 &amp;&amp; latestInsertionSize > 0 &amp;&amp; !inErrorState || rawNumericInput.length > 2</ID>
-    <ID>ComplexMethod:PaymentMethodJsonParser.kt$PaymentMethodJsonParser$override fun parse(json: JSONObject): PaymentMethod</ID>
-    <ID>ComplexMethod:Source.kt$Source.Companion$@SourceType @JvmStatic fun asSourceType(sourceType: String?): String</ID>
-    <ID>ComplexMethod:SourceJsonParser.kt$SourceJsonParser.Companion$@Source.SourceType private fun asSourceType(sourceType: String?): String</ID>
-    <ID>ComplexMethod:SourceJsonParser.kt$SourceJsonParser.Companion$private inline fun &lt;reified T : StripeModel> optStripeJsonModel( jsonObject: JSONObject, @Size(min = 1) key: String ): T?</ID>
     <ID>ConstructorParameterNaming:Source.kt$Source$private val _klarna: Klarna? = null</ID>
     <ID>ConstructorParameterNaming:Source.kt$Source$private val _weChat: WeChat? = null</ID>
+    <ID>CyclomaticComplexMethod:PaymentMethodJsonParser.kt$PaymentMethodJsonParser$override fun parse(json: JSONObject): PaymentMethod</ID>
+    <ID>CyclomaticComplexMethod:Source.kt$Source.Companion$@SourceType @JvmStatic fun asSourceType(sourceType: String?): String</ID>
+    <ID>CyclomaticComplexMethod:SourceJsonParser.kt$SourceJsonParser.Companion$@Source.SourceType private fun asSourceType(sourceType: String?): String</ID>
+    <ID>CyclomaticComplexMethod:SourceJsonParser.kt$SourceJsonParser.Companion$private inline fun &lt;reified T : StripeModel> optStripeJsonModel( jsonObject: JSONObject, @Size(min = 1) key: String ): T?</ID>
     <ID>EmptyFunctionBlock:AbsFakeStripeRepository.kt$AbsFakeStripeRepository${ }</ID>
     <ID>EmptyFunctionBlock:AbsPaymentController.kt$AbsPaymentController${ }</ID>
     <ID>EmptyFunctionBlock:CardWidgetProgressView.kt$CardWidgetProgressView.&lt;no name provided>${ }</ID>
@@ -108,8 +108,6 @@
     <ID>MaxLineLength:CustomerSessionOperationExecutorTest.kt$CustomerSessionOperationExecutorTest$fun</ID>
     <ID>MaxLineLength:DefaultAlipayRepositoryTest.kt$DefaultAlipayRepositoryTest$"https://hooks.stripe.com/adapter/alipay/redirect/complete/src_1HDEFWKlwPmebFhp6tcpln8T/src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K"</ID>
     <ID>MaxLineLength:EphemeralKey.kt$EphemeralKey$*</ID>
-    <ID>MaxLineLength:EphemeralKeyManager.kt$EphemeralKeyManager$ Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details.</ID>
-    <ID>MaxLineLength:EphemeralKeyManager.kt$EphemeralKeyManager$ Received an invalid ephemeral key. See https://stripe.com/docs/mobile/android/basic for more details.</ID>
     <ID>MaxLineLength:EphemeralKeyManagerTest.kt$EphemeralKeyManagerTest$"Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details."</ID>
     <ID>MaxLineLength:GooglePayConfig.kt$GooglePayConfig$*</ID>
     <ID>MaxLineLength:GooglePayJsonFactory.kt$GooglePayJsonFactory$*</ID>
@@ -153,8 +151,6 @@
     <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.SepaDebit$*</ID>
     <ID>MaxLineLength:PaymentMethod.kt$PaymentMethod.USBankAccount$*</ID>
     <ID>MaxLineLength:PaymentMethodCreateParams.kt$PaymentMethodCreateParams.BacsDebit$*</ID>
-    <ID>MaxLineLength:PaymentMethodMessageFixtures.kt$PaymentMethodMessageFixtures$display_l_html</ID>
-    <ID>MaxLineLength:PaymentMethodMessageFixtures.kt$PaymentMethodMessageFixtures$learn_more_modal_url</ID>
     <ID>MaxLineLength:PaymentMethodMessageJsonParserTest.kt$PaymentMethodMessageJsonParserTest$.</ID>
     <ID>MaxLineLength:PaymentMethodsActivityStarter.kt$PaymentMethodsActivityStarter.Args.Builder$*</ID>
     <ID>MaxLineLength:PaymentMethodsActivityTest.kt$PaymentMethodsActivityTest$private val listenerArgumentCaptor: KArgumentCaptor&lt;CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()</ID>

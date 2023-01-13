@@ -2,12 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>ClassNaming:Memoize.kt$CachedFirstResult1$UNINITIALIZED_VALUE</ID>
-    <ID>ClassNaming:Memoize.kt$CachedFirstResult2$UNINITIALIZED_VALUE</ID>
-    <ID>ClassNaming:Memoize.kt$CachedFirstResult3$UNINITIALIZED_VALUE</ID>
-    <ID>ClassNaming:Memoize.kt$CachedFirstResultSuspend1$UNINITIALIZED_VALUE</ID>
-    <ID>ClassNaming:Memoize.kt$CachedFirstResultSuspend2$UNINITIALIZED_VALUE</ID>
-    <ID>ClassNaming:Memoize.kt$CachedFirstResultSuspend3$UNINITIALIZED_VALUE</ID>
     <ID>ComplexCondition:Camera1Adapter.kt$Camera1Adapter$size.height >= h &amp;&amp; ratioDiff &lt;= minDiffRatio &amp;&amp; size.height &lt;= MAXIMUM_RESOLUTION.height &amp;&amp; size.width &lt;= MAXIMUM_RESOLUTION.width</ID>
     <ID>ComplexCondition:NV21Image.kt$NV21Image$left == 0 &amp;&amp; top == 0 &amp;&amp; right == width &amp;&amp; bottom == height</ID>
     <ID>EmptyFunctionBlock:Camera1Adapter.kt$Camera1Adapter.CameraPreview${}</ID>

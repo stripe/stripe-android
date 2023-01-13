@@ -43,14 +43,6 @@
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$viewModel.paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$val d = delegate ?: throw IllegalStateException("Cannot run onActivity since the activity hasn't been launched.")</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$certificate</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$hosted_voucher_url</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$message</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$native_data</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$root_certificate_authorities</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$stripe_js</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$three_ds_method_url</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$url</ID>
     <ID>MaxLineLength:PaymentOptionsViewModelTestInjection.kt$PaymentOptionsViewModelTestInjection$LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext&lt;Application>().resources))</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.Address$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.BillingDetails$*</ID>
@@ -61,8 +53,6 @@
     <ID>MaxLineLength:PaymentSheetEventTest.kt$PaymentSheetEventTest$paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())</ID>
     <ID>MaxLineLength:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$fun</ID>
     <ID>MaxLineLength:PrimaryButtonTest.kt$PrimaryButtonTest$primaryButton.setAppearanceConfiguration(PaymentsThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))</ID>
-    <ID>MaxLineLength:SetupIntentFixtures.kt$SetupIntentFixtures$message</ID>
-    <ID>MaxLineLength:SetupIntentFixtures.kt$SetupIntentFixtures$url</ID>
     <ID>MaxLineLength:StripeIntentRepositoryTest.kt$StripeIntentRepositoryTest$fun</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$* This will generate payment intent scenarios for all combinations of customers, lpm types in the intent, shipping, and SFU states</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())</ID>
@@ -74,7 +64,6 @@
     <ID>NestedBlockDepth:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$private fun generatePaymentIntentScenarios(): List&lt;PaymentIntentTestInput></ID>
     <ID>ReturnCount:AddressUtils.kt$internal fun CharSequence.levenshtein(other: CharSequence): Int</ID>
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
-    <ID>TooManyFunctions:FlowControllerComponent.kt$FlowControllerComponent$Builder</ID>
     <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>
     <ID>TooManyFunctions:PaymentOptionsViewModel.kt$PaymentOptionsViewModel : BaseSheetViewModel</ID>
     <ID>TooManyFunctions:PaymentSheetViewModel.kt$PaymentSheetViewModel : BaseSheetViewModel</ID>
@@ -82,9 +71,6 @@
     <ID>UnnecessaryAbstractClass:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule$PaymentSheetLauncherModule</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
     <ID>UnusedPrivateMember:BillingAddressViewTest.kt$BillingAddressViewTest.Companion$private val FRANCE = CountryCode.create("FR")</ID>
-    <ID>UnusedPrivateMember:PaymentSheetAddPaymentMethodFragmentTest.kt$PaymentSheetAddPaymentMethodFragmentTest$private fun convertPixelsToDp(px: Int, resources: Resources): Dp</ID>
-    <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$// a fatal error protected val _fatal = MutableLiveData&lt;Throwable>()</ID>
-    <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _isGooglePayReady = savedStateHandle.getLiveData&lt;Boolean>(SAVE_GOOGLE_PAY_READY)</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _isLinkEnabled = MutableLiveData&lt;Boolean>()</ID>
     <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$protected val _linkConfiguration = savedStateHandle.getLiveData&lt;LinkPaymentLauncher.Configuration>(LINK_CONFIGURATION)</ID>
     <ID>VariableNaming:PaymentOptionsViewModel.kt$PaymentOptionsViewModel$@VisibleForTesting internal val _paymentOptionResult = MutableLiveData&lt;PaymentOptionResult>()</ID>

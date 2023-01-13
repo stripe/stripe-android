@@ -2,11 +2,11 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>ComplexMethod:CameraScreenLaunchedEffect.kt$@Composable internal fun CameraScreenLaunchedEffect( identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, verificationPage: VerificationPage, navController: NavController, cameraManager: IdentityCameraManager, onCameraReady: () -> Unit )</ID>
-    <ID>ComplexMethod:DocumenetScanScreen.kt$@Composable internal fun DocumentScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, frontScanType: IdentityScanState.ScanType, backScanType: IdentityScanState.ScanType?, shouldStartFromBack: Boolean, messageRes: DocumentScanMessageRes, collectedDataParamType: CollectedDataParam.Type, route: String )</ID>
-    <ID>ComplexMethod:IdentityTopLevelDestination.kt$internal fun String.routeToScreenName(): String</ID>
-    <ID>ComplexMethod:IdentityViewModel.kt$IdentityViewModel$fun updateNewScanType(scanType: IdentityScanState.ScanType)</ID>
-    <ID>ComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, shouldShowTakePhoto: Boolean, shouldShowChoosePhoto: Boolean )</ID>
+    <ID>CyclomaticComplexMethod:CameraScreenLaunchedEffect.kt$@Composable internal fun CameraScreenLaunchedEffect( identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, verificationPage: VerificationPage, navController: NavController, cameraManager: IdentityCameraManager, onCameraReady: () -> Unit )</ID>
+    <ID>CyclomaticComplexMethod:DocumenetScanScreen.kt$@Composable internal fun DocumentScanScreen( navController: NavController, identityViewModel: IdentityViewModel, identityScanViewModel: IdentityScanViewModel, frontScanType: IdentityScanState.ScanType, backScanType: IdentityScanState.ScanType?, shouldStartFromBack: Boolean, messageRes: DocumentScanMessageRes, collectedDataParamType: CollectedDataParam.Type, route: String )</ID>
+    <ID>CyclomaticComplexMethod:IdentityTopLevelDestination.kt$internal fun String.routeToScreenName(): String</ID>
+    <ID>CyclomaticComplexMethod:IdentityViewModel.kt$IdentityViewModel$fun updateNewScanType(scanType: IdentityScanState.ScanType)</ID>
+    <ID>CyclomaticComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, collectedDataParamType: CollectedDataParam.Type, route: String, @StringRes titleRes: Int, @StringRes contextRes: Int, frontInfo: DocumentUploadSideInfo, backInfo: DocumentUploadSideInfo?, shouldShowTakePhoto: Boolean, shouldShowChoosePhoto: Boolean )</ID>
     <ID>FunctionOnlyReturningConstant:FaceDetectorTransitioner.kt$FaceDetectorTransitioner$private fun isFaceFocused(): Boolean</ID>
     <ID>LargeClass:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
     <ID>LargeClass:IdentityViewModelTest.kt$IdentityViewModelTest</ID>
@@ -40,12 +40,6 @@
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION - 1).milliseconds)</ID>
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION + 1).milliseconds)</ID>
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION - 1).milliseconds)</ID>
-    <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$body</ID>
-    <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$face_detector_url</ID>
-    <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$fallback_url</ID>
-    <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$id_detector_url</ID>
-    <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$privacy_policy</ID>
-    <ID>MaxLineLength:IdentityNetworkResponseFixtures.kt$training_consent_text</ID>
     <ID>MaxLineLength:IdentityScanFlow.kt$IdentityScanFlow$private val aggregateResultListener: AggregateResultListener&lt;IdentityAggregator.InterimResult, IdentityAggregator.FinalResult></ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$?:</ID>
     <ID>MaxLineLength:VerificationPage.kt$VerificationPage$* A VerificationPage contains the static content and initial state that is required for Stripe Identity's native mobile SDKs to render the verification flow.</ID>
