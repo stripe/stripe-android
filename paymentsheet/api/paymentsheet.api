@@ -1248,11 +1248,11 @@ public final class com/stripe/android/paymentsheet/model/SetupIntentClientSecret
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/paymentsheet/paymentdatacollection/FormArguments$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/FormArguments;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/FormFragmentArguments;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/paymentdatacollection/FormArguments;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

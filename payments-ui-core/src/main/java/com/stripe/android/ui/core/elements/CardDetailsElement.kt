@@ -29,7 +29,7 @@ internal class CardDetailsElement(
         controller
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
-        // Nothing from formFragmentArguments to populate
+        // Nothing from FormArguments to populate
     }
 
     override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> =
