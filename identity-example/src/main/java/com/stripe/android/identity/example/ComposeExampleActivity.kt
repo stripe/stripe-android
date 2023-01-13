@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.kittinunf.result.Result
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.stripe.android.identity.IdentityVerificationSheet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
