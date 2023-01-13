@@ -5,10 +5,11 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 
-internal object HeaderTextFactory {
+internal class HeaderTextFactory(
+    private val isCompleteFlow: Boolean,
+) {
 
     fun create(
-        isCompleteFlow: Boolean,
         screen: PaymentSheetScreen,
         isWalletEnabled: Boolean,
         isPaymentIntent: Boolean,

@@ -9,8 +9,7 @@ class HeaderTextFactoryTest {
 
     @Test
     fun `Shows the correct header in complete flow if in payment mode and showing wallets`() {
-        val resource = HeaderTextFactory.create(
-            isCompleteFlow = true,
+        val resource = HeaderTextFactory(isCompleteFlow = true).create(
             screen = PaymentSheetScreen.SelectSavedPaymentMethods,
             isWalletEnabled = true,
             isPaymentIntent = true,
@@ -22,8 +21,7 @@ class HeaderTextFactoryTest {
 
     @Test
     fun `Shows the correct header in complete flow if not in payment mode`() {
-        val resource = HeaderTextFactory.create(
-            isCompleteFlow = true,
+        val resource = HeaderTextFactory(isCompleteFlow = true).create(
             screen = PaymentSheetScreen.SelectSavedPaymentMethods,
             isWalletEnabled = true,
             isPaymentIntent = false,
@@ -35,8 +33,7 @@ class HeaderTextFactoryTest {
 
     @Test
     fun `Does not show a header on AddAnotherPaymentMethod screen`() {
-        val resource = HeaderTextFactory.create(
-            isCompleteFlow = true,
+        val resource = HeaderTextFactory(isCompleteFlow = true).create(
             screen = PaymentSheetScreen.AddAnotherPaymentMethod,
             isWalletEnabled = true,
             isPaymentIntent = false,
@@ -48,8 +45,7 @@ class HeaderTextFactoryTest {
 
     @Test
     fun `Shows the correct header if adding the first payment method in complete flow`() {
-        val resource = HeaderTextFactory.create(
-            isCompleteFlow = true,
+        val resource = HeaderTextFactory(isCompleteFlow = true).create(
             screen = PaymentSheetScreen.AddFirstPaymentMethod,
             isWalletEnabled = false,
             isPaymentIntent = false,
@@ -61,8 +57,7 @@ class HeaderTextFactoryTest {
 
     @Test
     fun `Does not show a header if adding the first payment method and wallets are available`() {
-        val resource = HeaderTextFactory.create(
-            isCompleteFlow = true,
+        val resource = HeaderTextFactory(isCompleteFlow = true).create(
             screen = PaymentSheetScreen.AddFirstPaymentMethod,
             isWalletEnabled = true,
             isPaymentIntent = false,
@@ -74,8 +69,7 @@ class HeaderTextFactoryTest {
 
     @Test
     fun `Shows the correct header when displaying saved payment methods in custom flow`() {
-        val resource = HeaderTextFactory.create(
-            isCompleteFlow = false,
+        val resource = HeaderTextFactory(isCompleteFlow = false).create(
             screen = PaymentSheetScreen.SelectSavedPaymentMethods,
             isWalletEnabled = true,
             isPaymentIntent = false,
@@ -87,8 +81,7 @@ class HeaderTextFactoryTest {
 
     @Test
     fun `Shows the correct header when only credit card form is shown in custom flow`() {
-        val resource = HeaderTextFactory.create(
-            isCompleteFlow = false,
+        val resource = HeaderTextFactory(isCompleteFlow = false).create(
             screen = PaymentSheetScreen.AddFirstPaymentMethod,
             isWalletEnabled = false,
             isPaymentIntent = false,
@@ -100,8 +93,7 @@ class HeaderTextFactoryTest {
 
     @Test
     fun `Shows the correct header when multiple LPMs are shown in custom flow`() {
-        val resource = HeaderTextFactory.create(
-            isCompleteFlow = false,
+        val resource = HeaderTextFactory(isCompleteFlow = false).create(
             screen = PaymentSheetScreen.AddFirstPaymentMethod,
             isWalletEnabled = false,
             isPaymentIntent = false,

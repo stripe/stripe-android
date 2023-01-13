@@ -33,7 +33,6 @@ import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
@@ -88,7 +87,8 @@ internal abstract class BaseSheetViewModel(
     val lpmResourceRepository: ResourceRepository<LpmRepository>,
     val addressResourceRepository: ResourceRepository<AddressRepository>,
     val savedStateHandle: SavedStateHandle,
-    val linkLauncher: LinkPaymentLauncher
+    val linkLauncher: LinkPaymentLauncher,
+    private val headerTextFactory: HeaderTextFactory,
 ) : AndroidViewModel(application) {
     /**
      * This ViewModel exists during the whole user flow, and needs to share the Dagger dependencies
@@ -494,8 +494,7 @@ internal abstract class BaseSheetViewModel(
         stripeIntent: StripeIntent,
     ): Int? {
         return if (screen != null) {
-            HeaderTextFactory.create(
-                isCompleteFlow = this is PaymentSheetViewModel,
+            headerTextFactory.create(
                 screen = screen,
                 isWalletEnabled = isLinkAvailable || googlePayState is GooglePayState.Available,
                 isPaymentIntent = stripeIntent is PaymentIntent,

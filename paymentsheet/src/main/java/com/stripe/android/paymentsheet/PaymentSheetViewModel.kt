@@ -65,6 +65,7 @@ import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
@@ -113,7 +114,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     lpmResourceRepository = lpmResourceRepository,
     addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
-    linkLauncher = linkLauncher
+    linkLauncher = linkLauncher,
+    headerTextFactory = HeaderTextFactory(isCompleteFlow = true),
 ) {
     private val confirmParamsFactory = ConfirmStripeIntentParamsFactory.createFactory(
         args.clientSecret,

@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.address.AddressRepository
@@ -74,7 +75,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     lpmResourceRepository = lpmResourceRepository,
     addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
-    linkLauncher = linkLauncher
+    linkLauncher = linkLauncher,
+    headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
 ) {
     @VisibleForTesting
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
