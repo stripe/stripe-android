@@ -12,6 +12,8 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Hinzufügen</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Zahlungsinformationen hinzufügen</string>
+  <!-- Title shown above a carousel containing available payment methods -->
+  <string name="stripe_paymentsheet_choose_payment_method">Zahlungsmethode auswählen </string>
   <string name="stripe_paymentsheet_close">Schließen</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">In ein bis zwei Werktagen wird Stripe Ihrem Konto einen Betrag von 0,01 USD gutschreiben. Danach erhalten Sie eine E-Mail mit weiteren Anweisungen zur Durchführung der Zahlung an %s.</string>

@@ -12,6 +12,8 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Hozzáadás</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Fizetési adatok megadása</string>
+  <!-- Title shown above a carousel containing available payment methods -->
+  <string name="stripe_paymentsheet_choose_payment_method">Fizetési mód választása</string>
   <string name="stripe_paymentsheet_close">Bezárás</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">A Stripe néhány munkanapon belül egy 0,01 $ összegű utalást fog küldeni a bankszámlájára. Ezután e-mailben megkapja az útmutatást a fizetés befejezéséhez a(z) %s felé.</string>

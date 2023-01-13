@@ -12,6 +12,8 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Lisää</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Lisää maksutiedot</string>
+  <!-- Title shown above a carousel containing available payment methods -->
+  <string name="stripe_paymentsheet_choose_payment_method">Valitse maksutapa</string>
   <string name="stripe_paymentsheet_close">Sulje</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe tallettaa 0,01 dollaria tilillesi 1–2 arkipäivän kuluessa. Saat myös sähköpostiisi ohjeet maksun suorittamiseksi loppuun yritykselle %s.</string>
