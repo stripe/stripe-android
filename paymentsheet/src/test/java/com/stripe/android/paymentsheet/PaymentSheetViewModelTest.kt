@@ -47,6 +47,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_GOOGLE_PAY_STATE
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
@@ -981,6 +982,31 @@ internal class PaymentSheetViewModelTest {
             viewModel.updateHeaderText("something")
             assertThat(awaitItem()).isEqualTo("something")
         }
+    }
+
+    @Test
+    fun `Produces the correct form arguments when payment intent is off-session`() {
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION,
+        )
+
+        val observedArgs = viewModel.createFormArguments(
+            selectedItem = LpmRepository.HardcodedCard,
+            showLinkInlineSignup = false,
+        )
+
+        assertThat(observedArgs).isEqualTo(
+            PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS.copy(
+                paymentMethodCode = LpmRepository.HardcodedCard.code,
+                amount = Amount(
+                    value = 1099,
+                    currencyCode = "usd",
+                ),
+                showCheckbox = false,
+                showCheckboxControlledFields = true,
+                billingDetails = null,
+            )
+        )
     }
 
     private fun createViewModel(

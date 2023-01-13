@@ -13,11 +13,8 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentIntentFixtures.PI_OFF_SESSION
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -59,27 +56,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
     }
 
     @Test
-    fun `when payment intent is off session then form arguments are set correctly`() {
-        val args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
-        val stripeIntent = PI_OFF_SESSION
-        createFragment(stripeIntent = stripeIntent, args = args) { fragment, _ ->
-            idleLooper()
-
-            assertThat(
-                fragment.createFormArguments(LpmRepository.HardcodedCard, false)
-            ).isEqualTo(
-                COMPOSE_FRAGMENT_ARGS.copy(
-                    paymentMethodCode = LpmRepository.HardcodedCard.code,
-                    amount = createAmount(PI_OFF_SESSION),
-                    showCheckbox = false,
-                    showCheckboxControlledFields = true,
-                    billingDetails = null
-                )
-            )
-        }
-    }
-
-    @Test
     fun `Factory gets initialized by Injector when Injector is available`() {
         createFragment(registerInjector = true) { fragment, viewModel ->
             assertThat(fragment.sheetViewModel).isEqualTo(viewModel)
@@ -93,9 +69,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 assertThat(fragment.sheetViewModel).isNotEqualTo(viewModel)
             }
         }
-
-    private fun createAmount(paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_WITH_SHIPPING) =
-        Amount(paymentIntent.amount!!, paymentIntent.currency!!)
 
     private fun createFragment(
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(

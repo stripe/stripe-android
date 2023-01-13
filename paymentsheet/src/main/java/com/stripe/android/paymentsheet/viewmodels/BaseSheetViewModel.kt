@@ -37,10 +37,12 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.toPaymentSelection
@@ -591,6 +593,19 @@ internal abstract class BaseSheetViewModel(
      * Method called after completing collection of payment data for a payment with Link.
      */
     abstract fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?)
+
+    fun createFormArguments(
+        selectedItem: LpmRepository.SupportedPaymentMethod,
+        showLinkInlineSignup: Boolean
+    ): FormFragmentArguments = FormArgumentsFactory.create(
+        showPaymentMethod = selectedItem,
+        stripeIntent = requireNotNull(stripeIntent.value),
+        config = config,
+        merchantName = merchantName,
+        amount = amount.value,
+        newLpm = newPaymentSelection,
+        isShowingLinkInlineSignup = showLinkInlineSignup
+    )
 
     fun handleBackPressed() {
         if (backStack.value.size > 1) {

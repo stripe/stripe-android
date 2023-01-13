@@ -31,7 +31,6 @@ import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.databinding.FragmentAchBinding
-import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
@@ -103,7 +102,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             )
 
             val arguments = remember(selectedItem, showLinkInlineSignup) {
-                createFormArguments(selectedItem, showLinkInlineSignup)
+                sheetViewModel.createFormArguments(selectedItem, showLinkInlineSignup)
             }
 
             LaunchedEffect(arguments) {
@@ -317,20 +316,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             }
         )
     }
-
-    @VisibleForTesting
-    internal fun createFormArguments(
-        selectedItem: LpmRepository.SupportedPaymentMethod,
-        showLinkInlineSignup: Boolean
-    ) = FormArgumentsFactory.create(
-        showPaymentMethod = selectedItem,
-        stripeIntent = requireNotNull(sheetViewModel.stripeIntent.value),
-        config = sheetViewModel.config,
-        merchantName = sheetViewModel.merchantName,
-        amount = sheetViewModel.amount.value,
-        newLpm = sheetViewModel.newPaymentSelection,
-        isShowingLinkInlineSignup = showLinkInlineSignup
-    )
 
     @VisibleForTesting
     internal fun transformToPaymentSelection(
