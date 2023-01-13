@@ -974,17 +974,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `updateHeaderText updates headerText`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.headerText.test {
-            assertThat(awaitItem()).isNull()
-            viewModel.updateHeaderText("something")
-            assertThat(awaitItem()).isEqualTo("something")
-        }
-    }
-
-    @Test
     fun `Produces the correct form arguments when payment intent is off-session`() {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION,
