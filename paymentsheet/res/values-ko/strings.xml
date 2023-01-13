@@ -12,7 +12,7 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ 추가</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">결제 정보를 추가하세요.</string>
-  <!-- TODO -->
+  <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">결제 방식 선택</string>
   <string name="stripe_paymentsheet_close">닫기</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->

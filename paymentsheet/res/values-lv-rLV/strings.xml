@@ -12,7 +12,7 @@
   <string name="stripe_paymentsheet_add_payment_method_button_label">+ Pievienot</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">Pievienot maksājuma informāciju</string>
-  <!-- TODO -->
+  <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Izvēlēties maksājuma veidu</string>
   <string name="stripe_paymentsheet_close">Aizvērt</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
