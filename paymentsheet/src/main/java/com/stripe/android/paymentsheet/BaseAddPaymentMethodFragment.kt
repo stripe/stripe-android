@@ -33,7 +33,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.databinding.FragmentAchBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.Loading
 import com.stripe.android.paymentsheet.ui.PaymentMethodForm
@@ -181,7 +181,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
         showCheckboxFlow: Flow<Boolean>,
         onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
         onLinkSignupStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit,
-        formArguments: FormFragmentArguments,
+        formArguments: FormArguments,
         onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     ) {
         val horizontalPadding = dimensionResource(

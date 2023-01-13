@@ -42,7 +42,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.toPaymentSelection
@@ -597,7 +597,7 @@ internal abstract class BaseSheetViewModel(
     fun createFormArguments(
         selectedItem: LpmRepository.SupportedPaymentMethod,
         showLinkInlineSignup: Boolean
-    ): FormFragmentArguments = FormArgumentsFactory.create(
+    ): FormArguments = FormArgumentsFactory.create(
         paymentMethod = selectedItem,
         stripeIntent = requireNotNull(stripeIntent.value),
         config = config,

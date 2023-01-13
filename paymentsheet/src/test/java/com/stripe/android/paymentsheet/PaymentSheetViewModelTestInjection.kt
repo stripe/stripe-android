@@ -24,7 +24,7 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
@@ -137,7 +137,7 @@ internal open class PaymentSheetViewModelTestInjection {
         addressRepository: AddressRepository,
         formViewModel: FormViewModel = FormViewModel(
             context = context,
-            formFragmentArguments = FormFragmentArguments(
+            formArguments = FormArguments(
                 PaymentMethod.Type.Card.code,
                 showCheckbox = true,
                 showCheckboxControlledFields = true,
@@ -172,7 +172,7 @@ internal open class PaymentSheetViewModelTestInjection {
                         mock<Provider<FormViewModelSubcomponent.Builder>>()
 
                     whenever(mockBuilder.build()).thenReturn(mockSubcomponent)
-                    whenever(mockBuilder.formFragmentArguments(any())).thenReturn(mockBuilder)
+                    whenever(mockBuilder.formArguments(any())).thenReturn(mockBuilder)
                     whenever(mockSubcomponent.viewModel).thenReturn(formViewModel)
                     whenever(mockSubComponentBuilderProvider.get()).thenReturn(mockBuilder)
                     injectable.subComponentBuilderProvider = mockSubComponentBuilderProvider

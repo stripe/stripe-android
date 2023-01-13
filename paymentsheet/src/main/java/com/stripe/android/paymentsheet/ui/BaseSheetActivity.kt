@@ -37,7 +37,7 @@ import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.PaymentsTheme
@@ -68,7 +68,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
      * These arguments can't be passed through the Fragment's arguments because the Fragment is
      * added with an [AndroidViewBinding] from Compose, which doesn't allow that.
      */
-    var formArgs: FormFragmentArguments? = null
+    var formArgs: FormArguments? = null
 
     abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup
