@@ -39,7 +39,7 @@ internal class LinkHandler @Inject constructor(
 
         class PaymentDetailsCollected(val details: LinkPaymentDetails.New?) : ProcessingState()
 
-        class Error(val message: String?) : ProcessingState()
+        data class Error(val message: String?) : ProcessingState()
 
         object Cancelled : ProcessingState()
 

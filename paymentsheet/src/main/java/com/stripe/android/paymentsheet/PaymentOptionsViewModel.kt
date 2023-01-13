@@ -127,13 +127,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private fun handleProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
             LinkHandler.ProcessingState.Cancelled -> {
-//                _paymentSheetResult.value = PaymentSheetResult.Canceled
-                TODO() // TODO(linkextraction)
+                onPaymentResult(PaymentResult.Canceled)
             }
             LinkHandler.ProcessingState.Complete -> {
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
-//                _paymentSheetResult.value = PaymentSheetResult.Completed
-                TODO() // TODO(linkextraction)
+                onPaymentResult(PaymentResult.Completed)
             }
             is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
                 setContentVisible(true)
@@ -144,8 +142,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
             LinkHandler.ProcessingState.Launched -> {
                 setContentVisible(false)
-//                startProcessing(CheckoutIdentifier.SheetBottomBuy)
-                TODO() // TODO(linkextraction)
             }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
                 processingState.details?.let {
