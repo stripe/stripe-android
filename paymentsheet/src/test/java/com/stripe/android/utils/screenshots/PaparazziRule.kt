@@ -1,6 +1,5 @@
 package com.stripe.android.utils.screenshots
 
-import android.os.Build
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -19,8 +18,6 @@ import com.stripe.android.ui.core.PaymentsTheme
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import java.lang.reflect.Field
-import java.lang.reflect.Modifier as ReflectionModifier
 
 class PaparazziRule(
     vararg configOptions: Array<out PaparazziConfigOption>,
@@ -105,29 +102,6 @@ class PaparazziRule(
                 compileSdkVersion = 32,
             ),
         )
-    }
-
-    companion object {
-        init {
-            makePaparazziWorkForApi33()
-        }
-    }
-}
-
-private fun makePaparazziWorkForApi33() {
-    // Temporary workaround to fix an issue with Paparazzi on API 33
-    // See: https://github.com/cashapp/paparazzi/issues/631#issuecomment-1326051546
-    val field = Build.VERSION::class.java.getField("CODENAME")
-    val newValue = "REL"
-
-    Field::class.java.getDeclaredField("modifiers").apply {
-        isAccessible = true
-        setInt(field, field.modifiers and ReflectionModifier.FINAL.inv())
-    }
-
-    field.apply {
-        isAccessible = true
-        set(null, newValue)
     }
 }
 
