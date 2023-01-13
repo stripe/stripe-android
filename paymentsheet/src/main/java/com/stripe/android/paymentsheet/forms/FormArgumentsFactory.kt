@@ -11,7 +11,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 internal object FormArgumentsFactory {
 
     fun create(
-        showPaymentMethod: LpmRepository.SupportedPaymentMethod,
+        paymentMethod: LpmRepository.SupportedPaymentMethod,
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration?,
         merchantName: String,
@@ -19,13 +19,13 @@ internal object FormArgumentsFactory {
         newLpm: PaymentSelection.New?,
         isShowingLinkInlineSignup: Boolean = false,
     ): FormFragmentArguments {
-        val layoutFormDescriptor = showPaymentMethod.getPMAddForm(stripeIntent, config)
+        val layoutFormDescriptor = paymentMethod.getPMAddForm(stripeIntent, config)
 
         val initialParams = if (newLpm is PaymentSelection.New.LinkInline) {
             newLpm.linkPaymentDetails.originalParams
         } else {
             newLpm?.paymentMethodCreateParams?.typeCode?.takeIf {
-                it == showPaymentMethod.code
+                it == paymentMethod.code
             }?.let {
                 when (newLpm) {
                     is PaymentSelection.New.GenericPaymentMethod ->
@@ -44,7 +44,7 @@ internal object FormArgumentsFactory {
         }
 
         return FormFragmentArguments(
-            paymentMethodCode = showPaymentMethod.code,
+            paymentMethodCode = paymentMethod.code,
             showCheckbox = layoutFormDescriptor.showCheckbox && !isShowingLinkInlineSignup,
             showCheckboxControlledFields = showCheckboxControlledFields,
             merchantName = merchantName,

@@ -598,7 +598,7 @@ internal abstract class BaseSheetViewModel(
         selectedItem: LpmRepository.SupportedPaymentMethod,
         showLinkInlineSignup: Boolean
     ): FormFragmentArguments = FormArgumentsFactory.create(
-        showPaymentMethod = selectedItem,
+        paymentMethod = selectedItem,
         stripeIntent = requireNotNull(stripeIntent.value),
         config = config,
         merchantName = merchantName,

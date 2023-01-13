@@ -39,7 +39,7 @@ class FormArgumentsFactoryTest {
     }
 
     @Test
-    fun `getFormArguments newLPM with customer requested save and Generic`() {
+    fun `Create correct FormArguments for new generic payment method with customer requested save`() {
         val paymentIntent = mock<PaymentIntent>().also {
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }
@@ -55,7 +55,7 @@ class FormArgumentsFactoryTest {
         )
 
         val actualArgs = FormArgumentsFactory.create(
-            showPaymentMethod = lpmRepository.fromCode("bancontact")!!,
+            paymentMethod = lpmRepository.fromCode("bancontact")!!,
             stripeIntent = paymentIntent,
             config = PaymentSheetFixtures.CONFIG_MINIMUM,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
@@ -76,18 +76,18 @@ class FormArgumentsFactoryTest {
     }
 
     @Test
-    fun `getFormArguments newLPM WITH customer requested save and Card`() {
+    fun `Create correct FormArguments for new card with customer requested save`() {
         val actualFromArguments = testCardFormArguments(
-            PaymentSelection.CustomerRequestedSave.RequestReuse
+            customerReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
         )
 
         assertThat(actualFromArguments.showCheckboxControlledFields).isTrue()
     }
 
     @Test
-    fun `getFormArguments newLPM WITH NO customer requested save and Card`() {
+    fun `Create correct FormArguments for new card with no requested save`() {
         val actualFromArguments = testCardFormArguments(
-            PaymentSelection.CustomerRequestedSave.NoRequest
+            customerReuse = PaymentSelection.CustomerRequestedSave.NoRequest
         )
 
         assertThat(actualFromArguments.showCheckboxControlledFields).isFalse()
@@ -101,9 +101,9 @@ class FormArgumentsFactoryTest {
         }
 
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-            "card",
-            false,
-            mapOf(
+            code = "card",
+            requiresMandate = false,
+            overrideParamMap = mapOf(
                 "type" to "card",
                 "card" to mapOf(
                     "cvc" to "123",
@@ -114,13 +114,13 @@ class FormArgumentsFactoryTest {
                     "address" to mapOf(
                         "country" to "Jenny Rosen"
                     )
-                )
+                ),
             ),
-            emptySet()
+            productUsage = emptySet()
         )
 
         val actualArgs = FormArgumentsFactory.create(
-            showPaymentMethod = LpmRepository.HardcodedCard,
+            paymentMethod = LpmRepository.HardcodedCard,
             stripeIntent = paymentIntent,
             config = PaymentSheetFixtures.CONFIG_MINIMUM,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
