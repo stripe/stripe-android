@@ -211,188 +211,188 @@ class LpmRepository constructor(
         sharedDataSpec: SharedDataSpec,
     ) = when (sharedDataSpec.type) {
         PaymentMethod.Type.Card.code -> SupportedPaymentMethod(
-            "card",
-            false,
-            R.string.stripe_paymentsheet_payment_method_card,
-            R.drawable.stripe_ic_paymentsheet_pm_card,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            true,
-            CardRequirement,
-            if (sharedDataSpec.fields.isEmpty() || sharedDataSpec.fields == listOf(EmptyFormSpec)) {
+            code = "card",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = true,
+            requirement = CardRequirement,
+            formSpec = if (sharedDataSpec.fields.isEmpty() || sharedDataSpec.fields == listOf(EmptyFormSpec)) {
                 HardcodedCard.formSpec
             } else {
                 LayoutSpec(sharedDataSpec.fields)
             }
         )
         PaymentMethod.Type.Bancontact.code -> SupportedPaymentMethod(
-            "bancontact",
-            true,
-            R.string.stripe_paymentsheet_payment_method_bancontact,
-            R.drawable.stripe_ic_paymentsheet_pm_bancontact,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            false,
-            BancontactRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "bancontact",
+            requiresMandate = true,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = BancontactRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.Sofort.code -> SupportedPaymentMethod(
-            "sofort",
-            true,
-            R.string.stripe_paymentsheet_payment_method_sofort,
-            R.drawable.stripe_ic_paymentsheet_pm_klarna,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            false,
-            SofortRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "sofort",
+            requiresMandate = true,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_sofort,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = SofortRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.Ideal.code -> SupportedPaymentMethod(
-            "ideal",
-            true,
-            R.string.stripe_paymentsheet_payment_method_ideal,
-            R.drawable.stripe_ic_paymentsheet_pm_ideal,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            false,
-            IdealRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "ideal",
+            requiresMandate = true,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_ideal,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_ideal,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = IdealRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.SepaDebit.code -> SupportedPaymentMethod(
-            "sepa_debit",
-            true,
-            R.string.stripe_paymentsheet_payment_method_sepa_debit,
-            R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            false,
-            SepaDebitRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "sepa_debit",
+            requiresMandate = true,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_sepa_debit,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_sepa_debit,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = SepaDebitRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.Eps.code -> SupportedPaymentMethod(
-            "eps",
-            true,
-            R.string.stripe_paymentsheet_payment_method_eps,
-            R.drawable.stripe_ic_paymentsheet_pm_eps,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            false,
-            EpsRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "eps",
+            requiresMandate = true,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_eps,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_eps,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = EpsRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.P24.code -> SupportedPaymentMethod(
-            "p24",
-            false,
-            R.string.stripe_paymentsheet_payment_method_p24,
-            R.drawable.stripe_ic_paymentsheet_pm_p24,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            false,
-            P24Requirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "p24",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_p24,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_p24,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = P24Requirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.Giropay.code -> SupportedPaymentMethod(
-            "giropay",
-            false,
-            R.string.stripe_paymentsheet_payment_method_giropay,
-            R.drawable.stripe_ic_paymentsheet_pm_giropay,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            false,
-            GiropayRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "giropay",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_giropay,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_giropay,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = GiropayRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.AfterpayClearpay.code -> SupportedPaymentMethod(
-            "afterpay_clearpay",
-            false,
-            if (isClearpay()) {
+            code = "afterpay_clearpay",
+            requiresMandate = false,
+            displayNameResource = if (isClearpay()) {
                 R.string.stripe_paymentsheet_payment_method_clearpay
             } else {
                 R.string.stripe_paymentsheet_payment_method_afterpay
             },
-            R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            false,
-            AfterpayClearpayRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = AfterpayClearpayRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.Klarna.code -> SupportedPaymentMethod(
-            "klarna",
-            false,
-            R.string.stripe_paymentsheet_payment_method_klarna,
-            R.drawable.stripe_ic_paymentsheet_pm_klarna,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            false,
-            KlarnaRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "klarna",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_klarna,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = KlarnaRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.PayPal.code -> SupportedPaymentMethod(
-            "paypal",
-            false,
-            R.string.stripe_paymentsheet_payment_method_paypal,
-            R.drawable.stripe_ic_paymentsheet_pm_paypal,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            false,
-            PaypalRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "paypal",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = PaypalRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.Affirm.code -> SupportedPaymentMethod(
-            "affirm",
-            false,
-            R.string.stripe_paymentsheet_payment_method_affirm,
-            R.drawable.stripe_ic_paymentsheet_pm_affirm,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            false,
-            AffirmRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "affirm",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_affirm,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_affirm,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = AffirmRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.RevolutPay.code -> SupportedPaymentMethod(
-            "revolut_pay",
-            false,
-            R.string.stripe_paymentsheet_payment_method_revolut_pay,
-            R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            false,
-            RevolutPayRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "revolut_pay",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_revolut_pay,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = RevolutPayRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.MobilePay.code -> SupportedPaymentMethod(
-            "mobilepay",
-            false,
-            R.string.stripe_paymentsheet_payment_method_mobile_pay,
-            R.drawable.stripe_ic_paymentsheet_pm_mobile_pay,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            false,
-            MobilePayRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "mobilepay",
+            requiresMandate = false,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_mobile_pay,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_mobile_pay,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = false,
+            requirement = MobilePayRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.AuBecsDebit.code -> SupportedPaymentMethod(
-            "au_becs_debit",
-            true,
-            R.string.stripe_paymentsheet_payment_method_au_becs_debit,
-            R.drawable.stripe_ic_paymentsheet_pm_bank,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            true,
-            AuBecsDebitRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "au_becs_debit",
+            requiresMandate = true,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_au_becs_debit,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = true,
+            requirement = AuBecsDebitRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.USBankAccount.code -> SupportedPaymentMethod(
-            "us_bank_account",
-            true,
-            R.string.stripe_paymentsheet_payment_method_us_bank_account,
-            R.drawable.stripe_ic_paymentsheet_pm_bank,
-            sharedDataSpec.selectorIcon?.lightThemePng,
-            sharedDataSpec.selectorIcon?.darkThemePng,
-            true,
-            USBankAccountRequirement,
-            LayoutSpec(sharedDataSpec.fields)
+            code = "us_bank_account",
+            requiresMandate = true,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = true,
+            requirement = USBankAccountRequirement,
+            formSpec = LayoutSpec(sharedDataSpec.fields)
         )
         PaymentMethod.Type.Upi.code -> SupportedPaymentMethod(
             code = "upi",
