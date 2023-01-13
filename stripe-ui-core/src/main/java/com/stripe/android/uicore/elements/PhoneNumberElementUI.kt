@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -27,8 +27,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.ui.core.elements.FormLabel
+import com.stripe.android.ui.core.elements.Section
+import com.stripe.android.uicore.R
 
 @Preview
 @Composable
@@ -65,7 +66,8 @@ fun PhoneNumberCollectionSection(
 }
 
 @Composable
-internal fun PhoneNumberElementUI(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PhoneNumberElementUI(
     enabled: Boolean,
     controller: PhoneNumberController,
     requestFocusWhenShown: Boolean = false,

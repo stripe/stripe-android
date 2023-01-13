@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
+import com.stripe.android.uicore.elements.TextField
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

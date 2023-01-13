@@ -6,8 +6,12 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid
+import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.elements.TextFieldConfig
+import com.stripe.android.uicore.elements.TextFieldIcon
+import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.elements.TextFieldStateConstants.Error
+import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.regex.Pattern
@@ -51,6 +55,11 @@ class EmailConfig : TextFieldConfig {
     private fun cannotBecomeValid(str: String) = str.count { it == '@' } > 1
 
     companion object {
+        fun createController(initialValue: String?) = SimpleTextFieldController(
+            EmailConfig(),
+            initialValue = initialValue
+        )
+
         // This is copied from Patterns.EMAIL_ADDRESS because it is not defined for unit tests
         // unless using Robolectric which is quite slow.
         val PATTERN: Pattern = Pattern.compile(

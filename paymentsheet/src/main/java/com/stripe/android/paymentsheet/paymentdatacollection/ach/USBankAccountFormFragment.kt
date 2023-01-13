@@ -55,8 +55,8 @@ import com.stripe.android.ui.core.elements.H6Text
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
-import com.stripe.android.ui.core.elements.TextFieldSection
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.launch

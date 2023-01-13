@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.compose.ui.text.AnnotatedString
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.uicore.elements.TextFieldStateConstants
 import org.junit.Test
 
 class IbanConfigTest {
