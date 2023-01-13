@@ -337,6 +337,7 @@ private fun ResultView(
 
         Html(
             html = allowImageCollectionHtml,
+            color = MaterialTheme.colors.onBackground,
             urlSpanStyle = SpanStyle(
                 textDecoration = TextDecoration.Underline,
                 color = MaterialTheme.colors.secondary
