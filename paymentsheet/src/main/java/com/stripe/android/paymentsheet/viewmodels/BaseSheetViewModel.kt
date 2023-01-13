@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
@@ -46,6 +47,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArgumen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.toPaymentSelection
+import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
@@ -140,9 +142,6 @@ internal abstract class BaseSheetViewModel(
     internal val amount: StateFlow<Amount?> = savedStateHandle
         .getStateFlow(SAVE_AMOUNT, null)
 
-    private val _headerText = MutableStateFlow<String?>(null)
-    internal val headerText: StateFlow<String?> = _headerText
-
     /**
      * Request to retrieve the value from the repository happens when initialize any fragment
      * and any fragment will re-update when the result comes back.
@@ -162,6 +161,28 @@ internal abstract class BaseSheetViewModel(
             started = SharingStarted.WhileSubscribed(),
             initialValue = null,
         )
+
+    internal val headerText: StateFlow<Int?> = currentScreen.map { screen ->
+        mapToHeaderTextResource(screen)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
+
+    private fun mapToHeaderTextResource(screen: PaymentSheetScreen?): Int? {
+        return if (screen != null) {
+            HeaderTextFactory.create(
+                isCompleteFlow = this is PaymentSheetViewModel,
+                screen = screen,
+                isWalletEnabled = isLinkEnabled.value == true || googlePayState.value is GooglePayState.Available,
+                isPaymentIntent = stripeIntent.value is PaymentIntent,
+                types = stripeIntent.value?.paymentMethodTypes.orEmpty(),
+            )
+        } else {
+            null
+        }
+    }
 
     private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
     internal val selection: LiveData<PaymentSelection?> = _selection
@@ -417,10 +438,6 @@ internal abstract class BaseSheetViewModel(
 
     fun updateBelowButtonText(text: String?) {
         _notesText.value = text
-    }
-
-    fun updateHeaderText(text: String?) {
-        _headerText.value = text
     }
 
     open fun updateSelection(selection: PaymentSelection?) {

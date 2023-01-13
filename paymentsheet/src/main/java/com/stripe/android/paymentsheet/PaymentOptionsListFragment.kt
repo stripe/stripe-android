@@ -15,14 +15,6 @@ internal class PaymentOptionsListFragment : BasePaymentMethodsListFragment(
 
     override val sheetViewModel: PaymentOptionsViewModel by lazy { activityViewModel }
 
-    override fun onResume() {
-        super.onResume()
-
-        sheetViewModel.updateHeaderText(
-            getString(R.string.stripe_paymentsheet_select_payment_method)
-        )
-    }
-
     override fun onPaymentOptionsItemSelected(item: PaymentOptionsItem) {
         super.onPaymentOptionsItemSelected(item)
         sheetViewModel.onUserSelection()

@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.view.isGone
@@ -235,7 +236,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 text.value?.let {
                     PaymentsTheme {
                         H4Text(
-                            text = it,
+                            text = stringResource(it),
                             modifier = Modifier.padding(bottom = 2.dp)
                         )
                     }
