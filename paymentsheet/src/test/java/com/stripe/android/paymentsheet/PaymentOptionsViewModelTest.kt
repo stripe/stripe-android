@@ -19,7 +19,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -125,7 +125,7 @@ internal class PaymentOptionsViewModelTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
             viewModel.transitionToFirstScreen()
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
         }
     }
 
@@ -143,10 +143,10 @@ internal class PaymentOptionsViewModelTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
             viewModel.transitionToFirstScreen()
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddAnotherPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddAnotherPaymentMethod)
 
             viewModel.handleBackPressed()
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
         }
     }
 
@@ -304,7 +304,7 @@ internal class PaymentOptionsViewModelTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
             viewModel.transitionToFirstScreen()
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddFirstPaymentMethod)
         }
     }
 
@@ -321,7 +321,7 @@ internal class PaymentOptionsViewModelTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
             viewModel.transitionToFirstScreen()
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
         }
     }
 

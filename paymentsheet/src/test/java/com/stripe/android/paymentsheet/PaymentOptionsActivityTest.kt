@@ -35,7 +35,7 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkState.LoginState.LoggedIn
@@ -267,7 +267,7 @@ internal class PaymentOptionsActivityTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
             activityScenario(viewModel).launch(createIntent(args))
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
         }
     }
 
@@ -284,7 +284,7 @@ internal class PaymentOptionsActivityTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
             activityScenario(viewModel).launch(createIntent(args))
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
         }
     }
 
@@ -300,7 +300,7 @@ internal class PaymentOptionsActivityTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
             activityScenario(viewModel).launch(createIntent(args))
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
         }
     }
 
@@ -316,7 +316,7 @@ internal class PaymentOptionsActivityTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
             activityScenario(viewModel).launch(createIntent(args))
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddFirstPaymentMethod)
         }
     }
 
@@ -333,7 +333,7 @@ internal class PaymentOptionsActivityTest {
             assertThat(awaitItem()).isNull()
 
             scenario.launch(createIntent(args))
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
 
             scenario.recreate()
             expectNoEvents()

@@ -36,7 +36,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.navigation.TransitionTarget
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -727,7 +727,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem()).isNull()
 
             viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddFirstPaymentMethod)
         }
     }
 
@@ -955,7 +955,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
             viewModel.transitionToFirstScreen()
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.AddFirstPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddFirstPaymentMethod)
         }
     }
 
@@ -968,7 +968,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isNull()
             viewModel.transitionToFirstScreen()
-            assertThat(awaitItem()).isEqualTo(TransitionTarget.SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
         }
     }
 
