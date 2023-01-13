@@ -17,7 +17,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.uicore.PaymentsTheme
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 

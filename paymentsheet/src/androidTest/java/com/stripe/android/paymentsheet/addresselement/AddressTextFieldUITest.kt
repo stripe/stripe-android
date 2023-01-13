@@ -7,7 +7,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth
 import com.stripe.android.R
-import com.stripe.android.ui.core.DefaultPaymentsTheme
+import com.stripe.android.uicore.DefaultPaymentsTheme
 import com.stripe.android.ui.core.elements.AddressTextFieldController
 import com.stripe.android.ui.core.elements.AddressTextFieldUI
 import com.stripe.android.ui.core.elements.SimpleTextFieldConfig

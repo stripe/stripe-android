@@ -15,8 +15,8 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.getRawValueFromDimenResource
+import com.stripe.android.uicore.PaymentsThemeDefaults
+import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
 
 /**

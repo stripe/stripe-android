@@ -1,10 +1,11 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
-import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.R
 
-internal class TextFieldStateConstants {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class TextFieldStateConstants {
     sealed class Valid : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean): Boolean = false
         override fun isValid(): Boolean = true
@@ -43,7 +44,9 @@ internal class TextFieldStateConstants {
             override fun isBlank(): Boolean = false
         }
 
-        object Blank : Error(R.string.blank_and_required) {
+        // TODO@carlosmuvi blank_and_required
+
+        object Blank : Error(R.string.address_label_address_line1) {
             override fun shouldShowError(hasFocus: Boolean): Boolean = false
             override fun isBlank(): Boolean = true
         }

@@ -8,7 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth
-import com.stripe.android.ui.core.DefaultPaymentsTheme
+import com.stripe.android.uicore.DefaultPaymentsTheme
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test

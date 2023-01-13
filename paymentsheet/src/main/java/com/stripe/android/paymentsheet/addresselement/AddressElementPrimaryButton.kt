@@ -21,10 +21,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.getBackgroundColor
-import com.stripe.android.ui.core.getBorderStrokeColor
-import com.stripe.android.ui.core.getOnBackgroundColor
+import com.stripe.android.uicore.PaymentsTheme
+import com.stripe.android.uicore.getBackgroundColor
+import com.stripe.android.uicore.getBorderStrokeColor
+import com.stripe.android.uicore.getOnBackgroundColor
 
 @Composable
 internal fun AddressElementPrimaryButton(

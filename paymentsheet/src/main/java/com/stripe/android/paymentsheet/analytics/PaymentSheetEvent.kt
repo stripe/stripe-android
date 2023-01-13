@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.uicore.PaymentsThemeDefaults
 
 internal sealed class PaymentSheetEvent : AnalyticsEvent {
     abstract val additionalParams: Map<String, Any>

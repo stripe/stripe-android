@@ -1,8 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid
+import com.stripe.android.uicore.elements.TextFieldStateConstants.Error
+import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid
 import org.junit.Test
 
 class TextSectionFieldStateConstantsTest {

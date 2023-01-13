@@ -59,8 +59,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupPositionProvider
-import com.stripe.android.ui.core.paymentsColors
-import com.stripe.android.ui.core.paymentsShapes
+import com.stripe.android.uicore.paymentsColors
+import com.stripe.android.uicore.paymentsShapes
 import kotlin.math.max
 import kotlin.math.min
 

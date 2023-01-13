@@ -14,9 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.ui.core.paymentsColors
-import com.stripe.android.ui.core.paymentsShapes
-import com.stripe.android.ui.core.shouldUseDarkDynamicColor
+import com.stripe.android.uicore.paymentsColors
+import com.stripe.android.uicore.paymentsShapes
+import com.stripe.android.uicore.shouldUseDarkDynamicColor
 
 @Composable
 internal fun GooglePayDividerUi(

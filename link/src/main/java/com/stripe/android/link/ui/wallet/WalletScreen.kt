@@ -71,8 +71,8 @@ import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionElementUI
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextElement
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.flow.flowOf
 import java.util.UUID

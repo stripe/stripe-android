@@ -10,7 +10,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.uicore.PaymentsThemeDefaults
 import com.stripe.android.view.ActivityScenarioFactory
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

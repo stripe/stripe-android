@@ -16,9 +16,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.createTextSpanFromTextStyle
-import com.stripe.android.ui.core.isSystemDarkTheme
+import com.stripe.android.uicore.PaymentsThemeDefaults
+import com.stripe.android.uicore.createTextSpanFromTextStyle
+import com.stripe.android.uicore.isSystemDarkTheme
 import kotlinx.coroutines.launch
 
 internal abstract class BasePaymentMethodsListFragment(

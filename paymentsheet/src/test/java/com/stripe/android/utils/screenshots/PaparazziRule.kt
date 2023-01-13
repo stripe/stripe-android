@@ -15,7 +15,7 @@ import app.cash.paparazzi.Paparazzi
 import app.cash.paparazzi.androidHome
 import app.cash.paparazzi.detectEnvironment
 import com.android.ide.common.rendering.api.SessionParams
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.uicore.PaymentsTheme
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement

@@ -5,7 +5,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.paymentsColors
 
 @Composable
 internal fun FormLabel(

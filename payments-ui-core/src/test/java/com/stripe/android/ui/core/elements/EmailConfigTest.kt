@@ -1,10 +1,10 @@
 package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error.Blank
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error.Incomplete
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error.Invalid
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid.Limitless
+import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
+import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Incomplete
+import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Invalid
+import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Limitless
 import org.junit.Test
 
 class EmailConfigTest {

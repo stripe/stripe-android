@@ -20,13 +20,13 @@ import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.PrimaryButtonStyle
-import com.stripe.android.ui.core.convertDpToPx
-import com.stripe.android.ui.core.getBorderStrokeColor
-import com.stripe.android.ui.core.getComposeTextStyle
-import com.stripe.android.ui.core.getOnBackgroundColor
+import com.stripe.android.uicore.PaymentsTheme
+import com.stripe.android.uicore.PaymentsThemeDefaults
+import com.stripe.android.uicore.PrimaryButtonStyle
+import com.stripe.android.uicore.convertDpToPx
+import com.stripe.android.uicore.getBorderStrokeColor
+import com.stripe.android.uicore.getComposeTextStyle
+import com.stripe.android.uicore.getOnBackgroundColor
 
 /**
  * The primary call-to-action for a payment sheet screen.

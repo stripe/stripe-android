@@ -34,10 +34,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
-import com.stripe.android.ui.core.getBorderStroke
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.paymentsColors
 
 private object Spacing {
     val cardLeadingInnerPadding = 12.dp

@@ -8,7 +8,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.link.R
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.paymentsColors
 import com.stripe.android.uicore.text.Html
 
 @Preview

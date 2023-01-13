@@ -6,7 +6,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.uicore.PaymentsTheme
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

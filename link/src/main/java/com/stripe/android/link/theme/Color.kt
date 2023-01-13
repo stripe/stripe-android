@@ -6,9 +6,9 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.elements.OTPElementColors
+import com.stripe.android.uicore.PaymentsTheme
+import com.stripe.android.uicore.PaymentsThemeDefaults
 
 private val LinkTeal = Color(0xFF33DDB3)
 private val ActionLightGreen = Color(0xFF1AC59B)

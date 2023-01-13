@@ -11,7 +11,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.paymentsColors
 
 @Composable
 internal fun AddressOptionsAppBar(

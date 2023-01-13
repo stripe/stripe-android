@@ -25,9 +25,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.linkShapes
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.getBorderStroke
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.PaymentsTheme
+import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.uicore.paymentsColors
 
 @Composable
 fun LinkInlineSignedIn(

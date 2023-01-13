@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.paymentsColors
-import com.stripe.android.ui.core.paymentsShapes
+import com.stripe.android.uicore.paymentsColors
+import com.stripe.android.uicore.paymentsShapes
 
 @Composable
 internal fun CardDetailsElementUI(

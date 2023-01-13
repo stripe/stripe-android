@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth
 import com.stripe.android.core.R
+import com.stripe.android.uicore.elements.TextFieldState
 import org.junit.Test
 
 class PostalCodeConfigTest {

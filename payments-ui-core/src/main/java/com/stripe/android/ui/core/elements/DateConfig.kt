@@ -6,8 +6,11 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid
+import com.stripe.android.uicore.elements.TextFieldConfig
+import com.stripe.android.uicore.elements.TextFieldIcon
+import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.elements.TextFieldStateConstants.Error
+import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.Calendar

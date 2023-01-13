@@ -14,9 +14,9 @@ import com.stripe.android.ui.core.elements.SectionFieldElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldConfig
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.elements.TextFieldConfig
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString

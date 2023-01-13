@@ -103,7 +103,7 @@
     <ID>ThrowingExceptionsWithoutMessageOrCause:TransformAddressToElement.kt$IllegalArgumentException()</ID>
     <ID>TooGenericExceptionCaught:LpmSerializer.kt$LpmSerializer$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PlacesClientProxy.kt$DefaultPlacesClientProxy$e: Exception</ID>
-    <ID>TooManyFunctions:PaymentsTheme.kt$com.stripe.android.ui.core.PaymentsTheme.kt</ID>
+    <ID>TooManyFunctions:PaymentsTheme.kt$com.stripe.android.uicore.PaymentsTheme.kt</ID>
     <ID>UnnecessaryAbstractClass:FormControllerModule.kt$FormControllerModule$FormControllerModule</ID>
     <ID>UnnecessaryAbstractClass:ResourceRepositoryModule.kt$ResourceRepositoryModule$ResourceRepositoryModule</ID>
     <ID>UtilityClassWithPublicConstructor:FieldValuesToParamsMapConverter.kt$FieldValuesToParamsMapConverter</ID>

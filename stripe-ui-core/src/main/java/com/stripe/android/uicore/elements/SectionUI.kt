@@ -14,15 +14,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.getBorderStroke
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.uicore.paymentsColors
 
 /**
  * This is a simple section that holds content in a card view.  It has a label, content specified
  * by the caller, and an error string.
  */
 @Composable
-internal fun Section(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Section(
     @StringRes title: Int?,
     error: String?,
     contentOutsideCard: @Composable () -> Unit = {},

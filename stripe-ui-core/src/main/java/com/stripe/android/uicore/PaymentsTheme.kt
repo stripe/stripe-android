@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core
+package com.stripe.android.uicore
 
 import android.content.Context
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
@@ -353,16 +353,19 @@ val MaterialTheme.paymentsShapes: PaymentsShapes
 
 @Composable
 @ReadOnlyComposable
-internal fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
     if (isSelected) paymentsShapes.borderStrokeWidthSelected.dp else paymentsShapes.borderStrokeWidth.dp
 
 @Composable
 @ReadOnlyComposable
-internal fun MaterialTheme.getBorderStrokeColor(isSelected: Boolean) =
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun MaterialTheme.getBorderStrokeColor(isSelected: Boolean) =
     if (isSelected) paymentsColors.materialColors.primary else paymentsColors.componentBorder
 
 @Composable
 @ReadOnlyComposable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun MaterialTheme.getBorderStroke(isSelected: Boolean): BorderStroke =
     BorderStroke(getBorderStrokeWidth(isSelected), getBorderStrokeColor(isSelected))
 

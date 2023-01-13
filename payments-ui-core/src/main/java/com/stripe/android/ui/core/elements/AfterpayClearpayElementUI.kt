@@ -13,8 +13,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
-import com.stripe.android.ui.core.paymentsColors
-import com.stripe.android.ui.core.shouldUseDarkDynamicColor
+import com.stripe.android.uicore.paymentsColors
+import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
 

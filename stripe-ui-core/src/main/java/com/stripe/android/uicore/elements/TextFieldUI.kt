@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import android.view.KeyEvent
 import androidx.annotation.RestrictTo
@@ -41,8 +41,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.ui.core.elements.FormLabel
+import com.stripe.android.ui.core.elements.Section
+import com.stripe.android.uicore.R
+import com.stripe.android.uicore.paymentsColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -164,7 +166,8 @@ fun TextField(
             FormLabel(
                 text = if (textFieldController.showOptionalLabel) {
                     stringResource(
-                        R.string.form_label_optional,
+                        // TODO@carlosuvi form_label_optional
+                        R.string.address_label_address_line1,
                         label?.let { stringResource(it) } ?: ""
                     )
                 } else {

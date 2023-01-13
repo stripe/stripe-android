@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.PaymentsTheme
+import com.stripe.android.uicore.paymentsColors
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
