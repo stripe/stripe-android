@@ -14,7 +14,7 @@ internal class PaymentOptionsStateMapper(
     private val paymentMethods: LiveData<List<PaymentMethod>?>,
     private val googlePayState: LiveData<GooglePayState>,
     private val isLinkEnabled: LiveData<Boolean>,
-    private val initialSelection: LiveData<SavedSelection>,
+    private val initialSelection: LiveData<SavedSelection?>,
     private val currentSelection: LiveData<PaymentSelection?>,
     private val isNotPaymentFlow: Boolean,
 ) {
