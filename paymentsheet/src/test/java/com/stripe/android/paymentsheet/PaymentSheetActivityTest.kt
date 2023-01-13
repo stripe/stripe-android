@@ -50,7 +50,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -1323,7 +1323,7 @@ internal class PaymentSheetActivityTest {
 
         val formViewModel = FormViewModel(
             context = context,
-            formFragmentArguments = FormFragmentArguments(
+            formArguments = FormArguments(
                 PaymentMethod.Type.Card.code,
                 showCheckbox = true,
                 showCheckboxControlledFields = true,
@@ -1341,7 +1341,7 @@ internal class PaymentSheetActivityTest {
         val mockFormSubComponentBuilderProvider =
             mock<Provider<FormViewModelSubcomponent.Builder>>()
         whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
-        whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormBuilder.formArguments(any())).thenReturn(mockFormBuilder)
         whenever(mockFormBuilder.showCheckboxFlow(any())).thenReturn(mockFormBuilder)
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)

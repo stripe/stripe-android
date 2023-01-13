@@ -11,7 +11,7 @@ import com.stripe.android.ui.core.forms.convertToFormValuesMap
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class FormFragmentArguments(
+internal data class FormArguments(
     val paymentMethodCode: PaymentMethodCode,
     val showCheckbox: Boolean,
     val showCheckboxControlledFields: Boolean,
@@ -22,7 +22,7 @@ internal data class FormFragmentArguments(
     val initialPaymentMethodCreateParams: PaymentMethodCreateParams? = null
 ) : Parcelable
 
-internal fun FormFragmentArguments.getInitialValuesMap(): Map<IdentifierSpec, String?> {
+internal fun FormArguments.getInitialValuesMap(): Map<IdentifierSpec, String?> {
     val initialValues = initialPaymentMethodCreateParams?.let {
         convertToFormValuesMap(it.toParamMap())
     } ?: emptyMap()

@@ -8,7 +8,7 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import org.junit.Test
 
-class FormFragmentArgumentsTest {
+class FormArgumentsTest {
     private val billingDetails = PaymentSheet.BillingDetails(
         PaymentSheet.Address(
             line1 = "123 Main Street",
@@ -54,7 +54,7 @@ class FormFragmentArgumentsTest {
 
     @Test
     fun `Verify payment method parameters overrides any billing address values`() {
-        val formFragmentArguments = FormFragmentArguments(
+        val formArguments = FormArguments(
             PaymentMethod.Type.Card.code,
             showCheckbox = true,
             showCheckboxControlledFields = true,
@@ -64,7 +64,7 @@ class FormFragmentArgumentsTest {
             initialPaymentMethodCreateParams = paymentMethodCreateParams
         )
 
-        assertThat(formFragmentArguments.getInitialValuesMap()).isEqualTo(
+        assertThat(formArguments.getInitialValuesMap()).isEqualTo(
             mapOf(
                 IdentifierSpec.Name to "Jenny Rosen",
                 IdentifierSpec.Email to "jenny.rosen@example.com",
@@ -86,7 +86,7 @@ class FormFragmentArgumentsTest {
 
     @Test
     fun `Verify if only default billing address they appear in the initial values`() {
-        val formFragmentArguments = FormFragmentArguments(
+        val formArguments = FormArguments(
             PaymentMethod.Type.Card.code,
             showCheckbox = true,
             showCheckboxControlledFields = true,
@@ -96,7 +96,7 @@ class FormFragmentArgumentsTest {
             initialPaymentMethodCreateParams = null
         )
 
-        assertThat(formFragmentArguments.getInitialValuesMap()).isEqualTo(
+        assertThat(formArguments.getInitialValuesMap()).isEqualTo(
             mapOf(
                 IdentifierSpec.Name to "Jenny Smith",
                 IdentifierSpec.Email to "email.email.com",

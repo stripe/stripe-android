@@ -34,7 +34,7 @@ import com.stripe.android.paymentsheet.model.ConfirmStripeIntentParamsFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -489,7 +489,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
      * @param clientSecret The client secret for the Stripe Intent being processed
      */
     data class Args(
-        val formArgs: FormFragmentArguments,
+        val formArgs: FormArguments,
         val isCompleteFlow: Boolean,
         val clientSecret: ClientSecret?,
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,

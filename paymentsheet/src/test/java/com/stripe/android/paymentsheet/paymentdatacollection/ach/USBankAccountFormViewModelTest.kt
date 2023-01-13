@@ -19,7 +19,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResu
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -47,7 +47,7 @@ class USBankAccountFormViewModelTest {
     private val onUpdateSelectionAndFinish: (PaymentSelection) -> Unit = mock()
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
-        formArgs = FormFragmentArguments(
+        formArgs = FormArguments(
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
             showCheckbox = false,
             showCheckboxControlledFields = false,

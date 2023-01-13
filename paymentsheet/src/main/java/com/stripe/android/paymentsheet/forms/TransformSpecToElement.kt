@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.forms
 
 import android.content.Context
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.FormItemSpec
@@ -11,23 +11,23 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import javax.inject.Inject
 
 /**
- * Wrapper around [TransformSpecToElements] that uses the parameters from [FormFragmentArguments].
+ * Wrapper around [TransformSpecToElements] that uses the parameters from [FormArguments].
  */
 internal class TransformSpecToElement @Inject constructor(
     addressResourceRepository: ResourceRepository<AddressRepository>,
-    formFragmentArguments: FormFragmentArguments,
+    formArguments: FormArguments,
     context: Context
 ) {
     private val transformSpecToElements =
         TransformSpecToElements(
             addressResourceRepository = addressResourceRepository,
-            initialValues = formFragmentArguments.getInitialValuesMap(),
-            amount = formFragmentArguments.amount,
-            saveForFutureUseInitialValue = formFragmentArguments.showCheckboxControlledFields,
-            merchantName = formFragmentArguments.merchantName,
+            initialValues = formArguments.getInitialValuesMap(),
+            amount = formArguments.amount,
+            saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
+            merchantName = formArguments.merchantName,
             context = context,
-            shippingValues = formFragmentArguments.shippingDetails
-                ?.toIdentifierMap(formFragmentArguments.billingDetails)
+            shippingValues = formArguments.shippingDetails
+                ?.toIdentifierMap(formArguments.billingDetails)
         )
 
     internal fun transform(list: List<FormItemSpec>) = transformSpecToElements.transform(list)

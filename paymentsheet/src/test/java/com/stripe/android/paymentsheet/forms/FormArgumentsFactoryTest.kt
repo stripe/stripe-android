@@ -10,7 +10,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.Test
@@ -95,7 +95,7 @@ class FormArgumentsFactoryTest {
 
     private fun testCardFormArguments(
         customerReuse: PaymentSelection.CustomerRequestedSave,
-    ): FormFragmentArguments {
+    ): FormArguments {
         val paymentIntent = mock<PaymentIntent>().also {
             whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
         }

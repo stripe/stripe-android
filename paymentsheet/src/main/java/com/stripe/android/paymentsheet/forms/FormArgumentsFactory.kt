@@ -4,7 +4,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getPMAddForm
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 
@@ -18,7 +18,7 @@ internal object FormArgumentsFactory {
         amount: Amount? = null,
         newLpm: PaymentSelection.New?,
         isShowingLinkInlineSignup: Boolean = false,
-    ): FormFragmentArguments {
+    ): FormArguments {
         val layoutFormDescriptor = paymentMethod.getPMAddForm(stripeIntent, config)
 
         val initialParams = if (newLpm is PaymentSelection.New.LinkInline) {
@@ -43,7 +43,7 @@ internal object FormArgumentsFactory {
             layoutFormDescriptor.showCheckboxControlledFields
         }
 
-        return FormFragmentArguments(
+        return FormArguments(
             paymentMethodCode = paymentMethod.code,
             showCheckbox = layoutFormDescriptor.showCheckbox && !isShowingLinkInlineSignup,
             showCheckboxControlledFields = showCheckboxControlledFields,

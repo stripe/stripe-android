@@ -18,7 +18,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
@@ -102,7 +102,7 @@ internal open class PaymentOptionsViewModelTestInjection {
         lpmRepository: LpmRepository = mock(),
         formViewModel: FormViewModel = FormViewModel(
             context = context,
-            formFragmentArguments = FormFragmentArguments(
+            formArguments = FormArguments(
                 PaymentMethod.Type.Card.code,
                 showCheckbox = true,
                 showCheckboxControlledFields = true,
@@ -131,7 +131,7 @@ internal open class PaymentOptionsViewModelTestInjection {
         val mockFormSubComponentBuilderProvider =
             mock<Provider<FormViewModelSubcomponent.Builder>>()
         whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
-        whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormBuilder.formArguments(any())).thenReturn(mockFormBuilder)
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
 

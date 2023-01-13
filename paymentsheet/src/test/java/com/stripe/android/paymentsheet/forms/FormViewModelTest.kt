@@ -9,7 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.AddressElement
@@ -600,11 +600,11 @@ internal class FormViewModelTest {
     }
 
     fun createViewModel(
-        arguments: FormFragmentArguments,
+        arguments: FormArguments,
         lpmResourceRepository: ResourceRepository<LpmRepository>
     ) = FormViewModel(
         context = context,
-        formFragmentArguments = arguments,
+        formArguments = arguments,
         lpmResourceRepository = lpmResourceRepository,
         addressResourceRepository = addressResourceRepository,
         showCheckboxFlow = showCheckboxFlow
