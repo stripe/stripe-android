@@ -26,8 +26,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
@@ -46,14 +44,6 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
     @After
     override fun after() {
         super.after()
-    }
-
-    @Test
-    fun `started fragment should report onShowNewPaymentOptionForm() event`() {
-        createFragment { _, _ ->
-            idleLooper()
-            verify(eventReporter).onShowNewPaymentOptionForm(any(), any())
-        }
     }
 
     @Test

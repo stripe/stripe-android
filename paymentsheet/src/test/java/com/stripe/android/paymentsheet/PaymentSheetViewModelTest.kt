@@ -5,6 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
+import app.cash.turbine.testIn
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -983,6 +984,50 @@ internal class PaymentSheetViewModelTest {
                 billingDetails = null,
             )
         )
+    }
+
+    @Test
+    fun `Sends correct event when navigating to AddFirstPaymentMethod screen`() = runTest {
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION,
+        )
+        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+
+        val receiver = viewModel.currentScreen.testIn(this)
+        viewModel.transitionToFirstScreen()
+
+        verify(eventReporter).onShowNewPaymentOptionForm(
+            linkEnabled = eq(viewModel.isLinkEnabled.value!!),
+            activeLinkSession = eq(viewModel.activeLinkSession.value!!),
+        )
+
+        receiver.cancelAndIgnoreRemainingEvents()
+    }
+
+    @Test
+    fun `Sends correct event when navigating to AddAnotherPaymentMethod screen`() = runTest {
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION,
+            customerPaymentMethods = PaymentMethodFixtures.createCards(1),
+        )
+        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+
+        val receiver = viewModel.currentScreen.testIn(this)
+        viewModel.transitionToFirstScreen()
+
+        verify(eventReporter).onShowExistingPaymentOptions(
+            linkEnabled = eq(viewModel.isLinkEnabled.value!!),
+            activeLinkSession = eq(viewModel.activeLinkSession.value!!),
+        )
+
+        viewModel.transitionToAddPaymentScreen()
+
+        verify(eventReporter).onShowNewPaymentOptionForm(
+            linkEnabled = eq(viewModel.isLinkEnabled.value!!),
+            activeLinkSession = eq(viewModel.activeLinkSession.value!!),
+        )
+
+        receiver.cancelAndIgnoreRemainingEvents()
     }
 
     private fun createViewModel(

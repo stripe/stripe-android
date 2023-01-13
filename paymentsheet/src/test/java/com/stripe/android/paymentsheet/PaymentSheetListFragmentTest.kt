@@ -35,8 +35,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
@@ -198,13 +196,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
             adapter.addCardClickListener()
 
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddAnotherPaymentMethod)
-        }
-    }
-
-    @Test
-    fun `started fragment should report onShowExistingPaymentOptions() event`() {
-        createScenario().onFragment {
-            verify(eventReporter).onShowExistingPaymentOptions(any(), any())
         }
     }
 

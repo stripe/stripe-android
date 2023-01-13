@@ -42,6 +42,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
@@ -64,6 +66,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -157,6 +160,11 @@ internal abstract class BaseSheetViewModel(
 
     val currentScreen: StateFlow<PaymentSheetScreen?> = backStack
         .map { it.lastOrNull() }
+        .onEach { screen ->
+            if (screen != null) {
+                reportNavigationEvent(screen)
+            }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(),
@@ -353,7 +361,25 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun transitionToAddPaymentScreen() {
-        transitionTo(PaymentSheetScreen.AddAnotherPaymentMethod)
+        transitionTo(AddAnotherPaymentMethod)
+    }
+
+    private fun reportNavigationEvent(currentScreen: PaymentSheetScreen) {
+        when (currentScreen) {
+            PaymentSheetScreen.SelectSavedPaymentMethods -> {
+                eventReporter.onShowExistingPaymentOptions(
+                    linkEnabled = isLinkEnabled.value ?: false,
+                    activeLinkSession = activeLinkSession.value ?: false
+                )
+            }
+            AddFirstPaymentMethod,
+            AddAnotherPaymentMethod -> {
+                eventReporter.onShowNewPaymentOptionForm(
+                    linkEnabled = isLinkEnabled.value ?: false,
+                    activeLinkSession = activeLinkSession.value ?: false
+                )
+            }
+        }
     }
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
