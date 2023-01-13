@@ -14,6 +14,6 @@
     <ID>TooGenericExceptionCaught:Storage.kt$SharedPreferencesStorage$t: Throwable</ID>
     <ID>TooManyFunctions:Storage.kt$SharedPreferencesStorage : Storage</ID>
     <ID>TooManyFunctions:Storage.kt$Storage</ID>
-    <ID>TooManyFunctions:StripeJsonUtils.kt$StripeJsonUtils$StripeJsonUtils</ID>
+    <ID>TooManyFunctions:StripeJsonUtils.kt$StripeJsonUtils</ID>
   </CurrentIssues>
 </SmellBaseline>
