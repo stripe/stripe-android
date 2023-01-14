@@ -12,8 +12,6 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.FormUI
-import com.stripe.android.ui.core.elements.FormElement
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 
@@ -40,35 +38,11 @@ internal fun PaymentMethodForm(
     val elements by formViewModel.elementsFlow.collectAsState(null)
     val lastTextFieldIdentifier by formViewModel.lastTextFieldIdentifier.collectAsState(null)
 
-    PaymentMethodForm(
+    PaymentMethodFormLaunchedEffect(
         paymentMethodCode = args.paymentMethodCode,
-        enabled = enabled,
-        onFormFieldValuesChanged = onFormFieldValuesChanged,
         completeFormValues = formViewModel.completeFormValues,
-        hiddenIdentifiers = hiddenIdentifiers,
-        elements = elements,
-        lastTextFieldIdentifier = lastTextFieldIdentifier,
-        modifier = modifier,
+        onFormFieldValuesChanged = onFormFieldValuesChanged,
     )
-}
-
-@FlowPreview
-@Composable
-internal fun PaymentMethodForm(
-    paymentMethodCode: PaymentMethodCode,
-    enabled: Boolean,
-    onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
-    completeFormValues: Flow<FormFieldValues?>,
-    hiddenIdentifiers: Set<IdentifierSpec>,
-    elements: List<FormElement>?,
-    lastTextFieldIdentifier: IdentifierSpec?,
-    modifier: Modifier = Modifier,
-) {
-    LaunchedEffect(paymentMethodCode) {
-        completeFormValues.collect {
-            onFormFieldValuesChanged(it)
-        }
-    }
 
     FormUI(
         hiddenIdentifiers = hiddenIdentifiers,
@@ -80,4 +54,18 @@ internal fun PaymentMethodForm(
         },
         modifier = modifier
     )
+}
+
+@FlowPreview
+@Composable
+internal fun PaymentMethodFormLaunchedEffect(
+    paymentMethodCode: PaymentMethodCode,
+    completeFormValues: Flow<FormFieldValues?>,
+    onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
+) {
+    LaunchedEffect(paymentMethodCode) {
+        completeFormValues.collect {
+            onFormFieldValuesChanged(it)
+        }
+    }
 }

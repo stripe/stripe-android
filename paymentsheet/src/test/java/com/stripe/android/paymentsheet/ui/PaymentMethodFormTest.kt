@@ -9,7 +9,6 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,7 +16,6 @@ import org.robolectric.RobolectricTestRunner
 
 @OptIn(FlowPreview::class)
 @RunWith(RobolectricTestRunner::class)
-@Ignore("Tests fail in CI, but pass locally.")
 class PaymentMethodFormTest {
 
     @get:Rule
@@ -33,16 +31,12 @@ class PaymentMethodFormTest {
         composeTestRule.setContent {
             val code by paymentMethodCodeFlow.collectAsState()
 
-            PaymentMethodForm(
+            PaymentMethodFormLaunchedEffect(
                 paymentMethodCode = code,
-                enabled = true,
                 completeFormValues = completeFormValuesFlow,
                 onFormFieldValuesChanged = {
                     emissions.add(it)
                 },
-                hiddenIdentifiers = emptySet(),
-                elements = emptyList(),
-                lastTextFieldIdentifier = null,
             )
         }
 
@@ -76,16 +70,12 @@ class PaymentMethodFormTest {
         composeTestRule.setContent {
             val code by paymentMethodCodeFlow.collectAsState()
 
-            PaymentMethodForm(
+            PaymentMethodFormLaunchedEffect(
                 paymentMethodCode = code,
-                enabled = true,
                 completeFormValues = completeFormValuesFlow,
                 onFormFieldValuesChanged = {
                     emissions.add(it)
                 },
-                hiddenIdentifiers = emptySet(),
-                elements = emptyList(),
-                lastTextFieldIdentifier = null,
             )
         }
 
