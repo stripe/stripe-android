@@ -29,7 +29,7 @@ jobs:
     name: Build PR
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/workflows/stripe_setup.yml
+      - uses: ./.github/actions/stripe_setup
       - name: Build PR branch
         run: ./gradlew :financial-connections-example:assembleRelease && mv financial-connections-example/build/outputs/apk/release/financial-connections-example-release-unsigned.apk financial-connections-example/build/outputs/apk/release/financial-connections-example-release-pr.apk
       - name: Upload APK

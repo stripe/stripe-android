@@ -30,7 +30,7 @@ jobs:
   build-pr:
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/workflows/stripe_setup.yml
+      - uses: ./.github/actions/stripe_setup
       - name: Build from PR
         run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-unsigned.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-pr.apk
       - name: Upload APK
