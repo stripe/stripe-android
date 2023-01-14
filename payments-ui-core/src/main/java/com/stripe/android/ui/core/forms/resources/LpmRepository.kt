@@ -7,8 +7,10 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LuxePostConfirmActionRepository
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
@@ -411,7 +413,7 @@ class LpmRepository constructor(
         )
         PaymentMethod.Type.CashAppPay.code -> SupportedPaymentMethod(
             code = "cashapp",
-            requiresMandate = false,
+            requiresMandate = stripeIntent.requiresMandateForCashAppPay(),
             displayNameResource = R.string.stripe_paymentsheet_payment_method_cashapp,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_cash_app_pay,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -419,10 +421,21 @@ class LpmRepository constructor(
             tintIconOnSelection = false,
             requirement = CashAppPayRequirement,
             formSpec = LayoutSpec(
-                items = listOf(CashAppPayMandateTextSpec()), // TODO: Only for SFU
+                items = if (stripeIntent.requiresMandateForCashAppPay()) {
+                    listOf(CashAppPayMandateTextSpec())
+                } else {
+                    emptyList()
+                }
             ),
         )
         else -> null
+    }
+
+    private fun StripeIntent.requiresMandateForCashAppPay(): Boolean {
+        return when (this) {
+            is PaymentIntent -> setupFutureUsage == StripeIntent.Usage.OffSession
+            is SetupIntent -> true
+        }
     }
 
     /**
