@@ -42,7 +42,6 @@ internal open class CameraViewModel(
     internal val finalResult = SingleLiveEvent<IdentityAggregator.FinalResult>()
     private val reset = MutableLiveData<Unit>()
 
-
     private val _displayStateChangedFlow =
         MutableStateFlow<Pair<IdentityScanState, IdentityScanState?>?>(null)
     internal val displayStateChangedFlow:
