@@ -50,9 +50,9 @@ fun FormUI(
     Column(
         modifier = modifier.fillMaxWidth(1f)
     ) {
-        elements?.let {
-            it.forEachIndexed { _, element ->
-                if (!hiddenIdentifiers.contains(element.identifier)) {
+//        elements?.let {
+//            it.forEachIndexed { _, element ->
+//                if (!hiddenIdentifiers.contains(element.identifier)) {
 //                    when (element) {
 //                        is SectionElement -> SectionElementUI(
 //                            enabled,
@@ -79,8 +79,8 @@ fun FormUI(
 //                        is OTPElement -> OTPElementUI(enabled, element)
 //                        is EmptyFormElement -> {}
 //                    }
-                }
-            }
-        } // ?: loadingComposable()
+//                }
+//            }
+//        } // ?: loadingComposable()
     }
 }
