@@ -9,6 +9,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/stripe_setup
       - name: Instrumentation tests
         uses: reactivecircus/android-emulator-runner@v2.22.0
@@ -38,6 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 55
     steps:
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/stripe_setup
       - name: 'Build'
         run: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug
@@ -59,6 +61,7 @@ jobs:
   screenshot-regression-tests:
     runs-on: macos-latest
     steps:
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/stripe_setup
       - name: run tests
         uses: reactivecircus/android-emulator-runner@v2
