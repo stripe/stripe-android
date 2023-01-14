@@ -19,6 +19,7 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.SingleLiveEvent
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
@@ -41,8 +42,11 @@ internal open class CameraViewModel(
     internal val finalResult = SingleLiveEvent<IdentityAggregator.FinalResult>()
     private val reset = MutableLiveData<Unit>()
 
-    internal val displayStateChangedFlow =
+
+    private val _displayStateChangedFlow =
         MutableStateFlow<Pair<IdentityScanState, IdentityScanState?>?>(null)
+    internal val displayStateChangedFlow:
+        StateFlow<Pair<IdentityScanState, IdentityScanState?>?> = _displayStateChangedFlow
 
     internal var identityScanFlow: IdentityScanFlow? = null
 
@@ -61,6 +65,10 @@ internal open class CameraViewModel(
         )
     }
 
+    internal fun clearDisplayStateChangedFlow() {
+        _displayStateChangedFlow.update { null }
+    }
+
     override var scanState: IdentityScanState? = null
 
     override var scanStatePrevious: IdentityScanState? = null
@@ -68,7 +76,7 @@ internal open class CameraViewModel(
     override val scanErrorListener = ScanErrorListener()
 
     override fun displayState(newState: IdentityScanState, previousState: IdentityScanState?) {
-        displayStateChangedFlow.update {
+        _displayStateChangedFlow.update {
             (newState to previousState)
         }
     }

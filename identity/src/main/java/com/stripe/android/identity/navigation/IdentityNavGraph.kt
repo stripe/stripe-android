@@ -85,37 +85,61 @@ internal fun IdentityNavGraph(
                 )
             }
             screen(IDScanDestination.ROUTE) {
+                val identityScanViewModel: IdentityScanViewModel =
+                    viewModel(factory = identityScanViewModelFactory)
+                ScanDestinationEffect(
+                    lifecycleOwner = it,
+                    identityScanViewModel = identityScanViewModel
+                )
                 DocumentScanScreenContent(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    identityScanViewModel = viewModel(factory = identityScanViewModelFactory),
+                    identityScanViewModel = identityScanViewModel,
                     backStackEntry = it,
                     route = IDScanDestination.ROUTE.route
                 )
             }
             screen(DriverLicenseScanDestination.ROUTE) {
+                val identityScanViewModel: IdentityScanViewModel =
+                    viewModel(factory = identityScanViewModelFactory)
+                ScanDestinationEffect(
+                    lifecycleOwner = it,
+                    identityScanViewModel = identityScanViewModel
+                )
                 DocumentScanScreenContent(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    identityScanViewModel = viewModel(factory = identityScanViewModelFactory),
+                    identityScanViewModel = identityScanViewModel,
                     backStackEntry = it,
                     route = DriverLicenseScanDestination.ROUTE.route
                 )
             }
             screen(PassportScanDestination.ROUTE) {
+                val identityScanViewModel: IdentityScanViewModel =
+                    viewModel(factory = identityScanViewModelFactory)
+                ScanDestinationEffect(
+                    lifecycleOwner = it,
+                    identityScanViewModel = identityScanViewModel
+                )
                 DocumentScanScreenContent(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    identityScanViewModel = viewModel(factory = identityScanViewModelFactory),
+                    identityScanViewModel = identityScanViewModel,
                     backStackEntry = it,
                     route = PassportScanDestination.ROUTE.route
                 )
             }
             screen(SelfieDestination.ROUTE) {
+                val identityScanViewModel: IdentityScanViewModel =
+                    viewModel(factory = identityScanViewModelFactory)
+                ScanDestinationEffect(
+                    lifecycleOwner = it,
+                    identityScanViewModel = identityScanViewModel
+                )
                 SelfieScanScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    identityScanViewModel = viewModel(factory = identityScanViewModelFactory)
+                    identityScanViewModel = identityScanViewModel
                 )
             }
             screen(IDUploadDestination.ROUTE) {

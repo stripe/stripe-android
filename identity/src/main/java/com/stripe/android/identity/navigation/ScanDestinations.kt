@@ -1,12 +1,16 @@
 package com.stripe.android.identity.navigation
 
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 
 internal abstract class DocumentScanDestination(
     shouldStartFromBack: Boolean = false,
@@ -154,6 +158,19 @@ internal class DriverLicenseScanDestination(
     companion object {
         private const val DRIVE_LICENSE_SCAN = "DriverLicenseScan"
         val ROUTE = DocumentScanDestinationRoute(routeBase = DRIVE_LICENSE_SCAN)
+    }
+}
+
+@Composable
+internal fun ScanDestinationEffect(
+    lifecycleOwner: LifecycleOwner,
+    identityScanViewModel: IdentityScanViewModel
+) {
+    DisposableEffect(Unit) {
+        onDispose {
+            identityScanViewModel.clearDisplayStateChangedFlow()
+            identityScanViewModel.stopScan(lifecycleOwner)
+        }
     }
 }
 
