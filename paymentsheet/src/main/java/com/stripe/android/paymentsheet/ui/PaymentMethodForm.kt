@@ -76,7 +76,7 @@ internal fun PaymentMethodForm(
         elements = elements,
         lastTextFieldIdentifier = lastTextFieldIdentifier,
         loadingComposable = {
-            Loading()
+//            Loading()
         },
         modifier = modifier
     )
