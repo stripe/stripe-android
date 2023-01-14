@@ -16,18 +16,7 @@ jobs:
         target: [ default ]
         profile: [ Nexus 6 ]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-
-      - name: Gradle cache
-        uses: gradle/gradle-build-action@v2
-
-      - name: Set Up JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '11'
-
+      - uses: ./.github/workflows/stripe_setup.yml
       - name: AVD cache
         uses: actions/cache@v3
         id: avd-cache

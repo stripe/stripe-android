@@ -29,8 +29,7 @@ jobs:
     name: Build PR
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - uses: ./.github/workflows/stripe_setup.yml
       - name: Build PR branch
         run: ./gradlew :identity-example:assembleRelease && mv identity-example/build/outputs/apk/theme1/release/identity-example-theme1-release-unsigned.apk identity-example/build/outputs/apk/theme1/release/identity-example-release-pr.apk
       - name: Upload APK
@@ -88,7 +87,7 @@ jobs:
   apk-size-analysis:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: ./.github/workflows/stripe_setup.yml
       - name: Generate Android release bundle
         run: ./gradlew :identity-example:bundleRelease
       - name: Upload artifact to Emerge
