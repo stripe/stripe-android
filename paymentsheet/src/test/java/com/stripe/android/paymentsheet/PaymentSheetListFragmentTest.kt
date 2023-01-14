@@ -40,7 +40,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-internal class PaymentSheetListFragmentTest : AbsPaymentSheetViewModelTestInjection() {
+internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjectionTest() {
     @InjectorKey
     private val injectorKey: String = "PaymentSheetListFragmentTest"
 

@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeAndroidKeyStore
 import com.stripe.android.utils.PaymentIntentFactory
-import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.fakeCreationExtras
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -29,7 +28,7 @@ import org.robolectric.RobolectricTestRunner
 @OptIn(FlowPreview::class)
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-internal class PaymentOptionsViewModelInjectionTest : AbsPaymentOptionsViewModelTestInjection() {
+internal class PaymentOptionsViewModelInjectionTest : BasePaymentOptionsViewModelInjectionTest() {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 

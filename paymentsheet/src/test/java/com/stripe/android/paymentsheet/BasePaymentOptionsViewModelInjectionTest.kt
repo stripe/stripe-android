@@ -40,7 +40,7 @@ import org.mockito.kotlin.whenever
 import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
-internal abstract class AbsPaymentOptionsViewModelTestInjection {
+internal open class BasePaymentOptionsViewModelInjectionTest {
 
     @get:Rule
     val rule = InstantTaskExecutorRule()
@@ -66,8 +66,11 @@ internal abstract class AbsPaymentOptionsViewModelTestInjection {
         @InjectorKey injectorKey: String,
         args: PaymentOptionContract.Args = PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
     ): PaymentOptionsViewModel = runBlocking {
-        val lpmRepository =
-            LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources))
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+        )
         lpmRepository.update(
             PaymentIntentFactory.create(
                 paymentMethodTypes = listOf(

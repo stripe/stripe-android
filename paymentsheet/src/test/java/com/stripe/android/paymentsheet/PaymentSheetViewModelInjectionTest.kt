@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.PaymentIntentFactory
 import com.stripe.android.utils.fakeCreationExtras
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -21,7 +22,7 @@ import org.robolectric.RobolectricTestRunner
 @OptIn(FlowPreview::class)
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
-internal class PaymentSheetViewModelInjectionTest : AbsPaymentSheetViewModelTestInjection() {
+internal class PaymentSheetViewModelInjectionTest : BasePaymentSheetViewModelInjectionTest() {
 
     @After
     override fun after() {
@@ -73,19 +74,26 @@ internal class PaymentSheetViewModelInjectionTest : AbsPaymentSheetViewModelTest
     }
 
     companion object {
-        val addressRepository =
-            AddressRepository(ApplicationProvider.getApplicationContext<Context>().resources)
-        val lpmRepository =
-            LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)).apply {
-                this.forceUpdate(
-                    listOf(
+        val addressRepository = AddressRepository(
+            resources = ApplicationProvider.getApplicationContext<Context>().resources
+        )
+
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+        ).apply {
+            this.update(
+                PaymentIntentFactory.create(
+                    paymentMethodTypes = listOf(
                         PaymentMethod.Type.Card.code,
                         PaymentMethod.Type.USBankAccount.code,
                         PaymentMethod.Type.SepaDebit.code,
                         PaymentMethod.Type.Bancontact.code
-                    ),
-                    null
-                )
-            }
+                    )
+                ),
+                null
+            )
+        }
     }
 }
