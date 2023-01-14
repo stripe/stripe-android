@@ -17,6 +17,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.PaymentIntentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -98,8 +99,8 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
                 idleLooper()
                 registerViewModel(args.injectorKey, viewModel, lpmRepository, addressRepository)
             } else {
-                it.sheetViewModel.lpmResourceRepository.getRepository().forceUpdate(
-                    stripeIntent.paymentMethodTypes,
+                it.sheetViewModel.lpmResourceRepository.getRepository().update(
+                    stripeIntent,
                     null
                 )
                 idleLooper()
@@ -117,12 +118,14 @@ internal class PaymentSheetAddPaymentMethodFragmentTest : PaymentSheetViewModelT
             AddressRepository(ApplicationProvider.getApplicationContext<Context>().resources)
         val lpmRepository =
             LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext<Application>().resources)).apply {
-                this.forceUpdate(
-                    listOf(
-                        PaymentMethod.Type.Card.code,
-                        PaymentMethod.Type.USBankAccount.code,
-                        PaymentMethod.Type.SepaDebit.code,
-                        PaymentMethod.Type.Bancontact.code
+                this.update(
+                    PaymentIntentFactory.create(
+                        paymentMethodTypes = listOf(
+                            PaymentMethod.Type.Card.code,
+                            PaymentMethod.Type.USBankAccount.code,
+                            PaymentMethod.Type.SepaDebit.code,
+                            PaymentMethod.Type.Bancontact.code
+                        )
                     ),
                     null
                 )

@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.EmptyFormSpec
+import com.stripe.android.utils.PaymentIntentFactory
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -28,7 +29,7 @@ class LpmRepositoryTest {
                 ApplicationProvider.getApplicationContext<Application>().resources
             )
         )
-        lpmRepository.updateFromDisk()
+        lpmRepository.updateFromDisk(PaymentIntentFactory.create())
         assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
             .isEqualTo(R.string.stripe_paymentsheet_payment_method_clearpay)
 
@@ -43,15 +44,15 @@ class LpmRepositoryTest {
                 ApplicationProvider.getApplicationContext<Application>().resources
             )
         )
-        lpmRepository.updateFromDisk()
+        lpmRepository.updateFromDisk(PaymentIntentFactory.create())
         assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
             .isEqualTo(R.string.stripe_paymentsheet_payment_method_afterpay)
     }
 
     @Test
     fun `Verify failing to read server schema reads from disk`() {
-        lpmRepository.forceUpdate(
-            listOf("affirm"),
+        lpmRepository.update(
+            PaymentIntentFactory.create(paymentMethodTypes = listOf("affirm")),
             """
           [
             {
@@ -66,8 +67,8 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify field not found in schema is read from disk`() {
-        lpmRepository.forceUpdate(
-            listOf("card", "afterpay_clearpay"),
+        lpmRepository.update(
+            PaymentIntentFactory.create(paymentMethodTypes = listOf("card", "afterpay_clearpay")),
             """
           [
             {
@@ -88,8 +89,10 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify latest server spec`() {
-        lpmRepository.forceUpdate(
-            listOf("bancontact", "sofort", "ideal", "sepa_debit", "p24", "eps", "giropay"),
+        lpmRepository.update(
+            PaymentIntentFactory.create(
+                paymentMethodTypes = listOf("bancontact", "sofort", "ideal", "sepa_debit", "p24", "eps", "giropay")
+            ),
             """
                 [
                   {
@@ -115,8 +118,8 @@ class LpmRepositoryTest {
 
     @Test
     fun `Repository will contain LPMs in ordered and schema`() {
-        lpmRepository.forceUpdate(
-            listOf("afterpay_clearpay"),
+        lpmRepository.update(
+            PaymentIntentFactory.create(paymentMethodTypes = listOf("afterpay_clearpay")),
             """
           [
             {
@@ -146,7 +149,7 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify no fields in the default json are ignored the lpms package should be correct`() {
-        lpmRepository.updateFromDisk()
+        lpmRepository.updateFromDisk(PaymentIntentFactory.create())
         // If this test fails, check to make sure the spec's serializer is added to
         // FormItemSpecSerializer
         lpmRepository.supportedPaymentMethods.forEach { code ->
@@ -178,8 +181,8 @@ class LpmRepositoryTest {
         )
 
         assertThat(lpmRepository.fromCode("card")).isNull()
-        lpmRepository.forceUpdate(
-            emptyList(),
+        lpmRepository.update(
+            PaymentIntentFactory.create(paymentMethodTypes = emptyList()),
             """
           [
             {
@@ -199,8 +202,8 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify that unknown LPMs are not shown because not listed as exposed`() {
-        lpmRepository.forceUpdate(
-            emptyList(),
+        lpmRepository.update(
+            PaymentIntentFactory.create(paymentMethodTypes = emptyList()),
             """
               [
                 {
@@ -229,13 +232,14 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify that payment methods hardcoded to delayed remain regardless of json`() {
-        lpmRepository.updateFromDisk()
+        val stripeIntent = PaymentIntentFactory.create()
+        lpmRepository.updateFromDisk(stripeIntent)
         assertThat(
             lpmRepository.fromCode("sofort")?.requirement?.piRequirements
         ).contains(Delayed)
 
-        lpmRepository.forceUpdate(
-            emptyList(),
+        lpmRepository.update(
+            stripeIntent,
             """
               [
                 {
@@ -253,8 +257,8 @@ class LpmRepositoryTest {
 
     @Test
     fun `Verify that us_bank_account is supported when financial connections sdk available`() {
-        lpmRepository.forceUpdate(
-            emptyList(),
+        lpmRepository.update(
+            PaymentIntentFactory.create(paymentMethodTypes = emptyList()),
             """
               [
                 {
@@ -277,8 +281,8 @@ class LpmRepositoryTest {
             )
         )
 
-        lpmRepository.forceUpdate(
-            emptyList(),
+        lpmRepository.update(
+            PaymentIntentFactory.create(paymentMethodTypes = emptyList()),
             """
               [
                 {
@@ -301,8 +305,8 @@ class LpmRepositoryTest {
             )
         )
 
-        lpmRepository.forceUpdate(
-            expectedLpms = listOf("upi"),
+        lpmRepository.update(
+            stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("upi")),
             serverLpmSpecs = "[]" // UPI doesn't come from the backend; we rely on the local specs
         )
 

@@ -10,7 +10,7 @@
     <ID>CyclomaticComplexMethod:FormItemSpec.kt$FormItemSpecSerializer$override fun selectDeserializer(element: JsonElement): DeserializationStrategy&lt;out FormItemSpec></ID>
     <ID>CyclomaticComplexMethod:FormUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun FormUI( hiddenIdentifiers: Set&lt;IdentifierSpec>, enabled: Boolean, elements: List&lt;FormElement>?, lastTextFieldIdentifier: IdentifierSpec?, loadingComposable: @Composable ColumnScope.() -> Unit, modifier: Modifier = Modifier )</ID>
     <ID>CyclomaticComplexMethod:IdentifierSpec.kt$IdentifierSpec.Companion$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) fun get(value: String)</ID>
-    <ID>CyclomaticComplexMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod(sharedDataSpec: SharedDataSpec)</ID>
+    <ID>CyclomaticComplexMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod( @Suppress("UNUSED_PARAMETER") stripeIntent: StripeIntent, sharedDataSpec: SharedDataSpec, )</ID>
     <ID>CyclomaticComplexMethod:TextFieldUI.kt$@Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
     <ID>CyclomaticComplexMethod:TransformGoogleToStripeAddress.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Place.transformGoogleToStripeAddress( context: Context ): com.stripe.android.model.Address</ID>
     <ID>CyclomaticComplexMethod:TransformSpecToElements.kt$TransformSpecToElements$fun transform(list: List&lt;FormItemSpec>): List&lt;FormElement></ID>
@@ -18,7 +18,7 @@
     <ID>ForbiddenComment:Menu.kt$// TODO: Make sure this gets the rounded corner values</ID>
     <ID>FunctionParameterNaming:IdentifierSpec.kt$IdentifierSpec.Companion$_value: String</ID>
     <ID>LongMethod:DropdownFieldUI.kt$@Composable internal fun DropDown( controller: DropdownFieldController, enabled: Boolean, modifier: Modifier = Modifier )</ID>
-    <ID>LongMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod(sharedDataSpec: SharedDataSpec)</ID>
+    <ID>LongMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod( @Suppress("UNUSED_PARAMETER") stripeIntent: StripeIntent, sharedDataSpec: SharedDataSpec, )</ID>
     <ID>LongMethod:Menu.kt$@Suppress("ModifierParameter") @Composable internal fun DropdownMenuContent( expandedStates: MutableTransitionState&lt;Boolean>, transformOriginState: MutableState&lt;TransformOrigin>, initialFirstVisibleItemIndex: Int, modifier: Modifier = Modifier, content: LazyListScope.() -> Unit )</ID>
     <ID>LongMethod:OTPElementUI.kt$@OptIn(ExperimentalMaterialApi::class) @Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun OTPElementUI( enabled: Boolean, element: OTPElement, modifier: Modifier = Modifier, colors: OTPElementColors = OTPElementColors( selectedBorder = MaterialTheme.colors.primary, placeholder = MaterialTheme.paymentsColors.placeholderText ), focusRequester: FocusRequester = remember { FocusRequester() } )</ID>
     <ID>LongMethod:PhoneNumberElementUI.kt$@Composable internal fun PhoneNumberElementUI( enabled: Boolean, controller: PhoneNumberController, requestFocusWhenShown: Boolean = false, imeAction: ImeAction = ImeAction.Done )</ID>
