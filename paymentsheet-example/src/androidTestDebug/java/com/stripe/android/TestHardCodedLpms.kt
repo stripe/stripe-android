@@ -23,6 +23,7 @@ import com.stripe.android.test.core.Shipping
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.initializedLpmRepository
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
@@ -52,13 +53,9 @@ class TestHardCodedLpms {
         // their files in the same directory.
         private val screenshotProcessor = MyScreenCaptureProcessor()
 
-        private val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
-                InstrumentationRegistry.getInstrumentation().targetContext.resources
-            )
-        ).apply {
-            forceUpdate(this.supportedPaymentMethods, null)
-        }
+        private val lpmRepository = initializedLpmRepository(
+            context = InstrumentationRegistry.getInstrumentation().targetContext,
+        )
     }
 
     @Before
