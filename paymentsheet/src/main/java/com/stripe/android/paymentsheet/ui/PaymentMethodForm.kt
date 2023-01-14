@@ -11,7 +11,6 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import kotlinx.coroutines.FlowPreview
@@ -70,14 +69,14 @@ internal fun PaymentMethodForm(
         }
     }
 
-    FormUI(
-        hiddenIdentifiers = hiddenIdentifiers,
-        enabled = enabled,
-        elements = elements,
-        lastTextFieldIdentifier = lastTextFieldIdentifier,
-        loadingComposable = {
+//    FormUI(
+//        hiddenIdentifiers = hiddenIdentifiers,
+//        enabled = enabled,
+//        elements = elements,
+//        lastTextFieldIdentifier = lastTextFieldIdentifier,
+//        loadingComposable = {
 //            Loading()
-        },
-        modifier = modifier
-    )
+//        },
+//        modifier = modifier
+//    )
 }
