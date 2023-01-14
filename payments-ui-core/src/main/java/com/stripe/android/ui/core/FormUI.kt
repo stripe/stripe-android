@@ -47,9 +47,9 @@ fun FormUI(
     loadingComposable: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth(1f)
-    ) {
+//    Column(
+//        modifier = modifier.fillMaxWidth(1f)
+//    ) {
 //        elements?.let {
 //            it.forEachIndexed { _, element ->
 //                if (!hiddenIdentifiers.contains(element.identifier)) {
@@ -82,5 +82,5 @@ fun FormUI(
 //                }
 //            }
 //        } // ?: loadingComposable()
-    }
+//    }
 }
