@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsAdapter.Companion.PM_OPTIONS_DEFAULT_PADDING
 import com.stripe.android.paymentsheet.PaymentOptionsItem.ViewType
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
@@ -51,7 +52,6 @@ import com.stripe.android.paymentsheet.ui.getLabelIcon
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
@@ -59,8 +59,7 @@ import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
 internal class PaymentOptionsAdapter(
-    private val lpmRepository: LpmRepository,
-    private val canClickSelectedItem: Boolean,
+    private val nameProvider: (PaymentMethodCode?) -> String,
     val paymentOptionSelected: (PaymentOptionsItem) -> Unit,
     val paymentMethodDeleteListener: (PaymentOptionsItem.SavedPaymentMethod) -> Unit,
     val addCardClickListener: () -> Unit,
@@ -97,15 +96,9 @@ internal class PaymentOptionsAdapter(
         notifyDataSetChanged()
     }
 
-    fun hasSavedItems(): Boolean {
-        return items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().isNotEmpty()
-    }
-
     @VisibleForTesting
     internal fun onItemSelected(position: Int) {
-        val isAllowed = canClickSelectedItem || position != selectedItemPosition
-
-        if (position != NO_POSITION && isAllowed && !isEditing) {
+        if (position != NO_POSITION && !isEditing) {
             val item = items[position]
             paymentOptionSelected(item)
         }
@@ -134,7 +127,7 @@ internal class PaymentOptionsAdapter(
                 SavedPaymentMethodViewHolder(
                     parent,
                     width,
-                    lpmRepository,
+                    nameProvider,
                     onItemSelectedListener = ::onItemSelected,
                     onRemoveListener = { position ->
                         val removedItem = items[position] as PaymentOptionsItem.SavedPaymentMethod
@@ -174,8 +167,8 @@ internal class PaymentOptionsAdapter(
     internal class SavedPaymentMethodViewHolder(
         private val composeView: ComposeView,
         private val width: Dp,
-        private val lpmRepository: LpmRepository,
-        @get:VisibleForTesting internal val onRemoveListener: (Int) -> Unit,
+        private val nameProvider: (PaymentMethodCode?) -> String,
+        private val onRemoveListener: (Int) -> Unit,
         private val onItemSelectedListener: (Int) -> Unit
     ) : PaymentOptionViewHolder(
         composeView
@@ -183,13 +176,13 @@ internal class PaymentOptionsAdapter(
         constructor(
             parent: ViewGroup,
             width: Dp,
-            lpmRepository: LpmRepository,
+            nameProvider: (PaymentMethodCode?) -> String,
             onItemSelectedListener: (Int) -> Unit,
             onRemoveListener: (Int) -> Unit
         ) : this(
             composeView = ComposeView(parent.context),
             width = width,
-            lpmRepository = lpmRepository,
+            nameProvider = nameProvider,
             onRemoveListener = onRemoveListener,
             onItemSelectedListener = onItemSelectedListener
         )
@@ -206,12 +199,7 @@ internal class PaymentOptionsAdapter(
             val labelText = savedPaymentMethod.paymentMethod.getLabel(itemView.resources) ?: return
             val removeTitle = itemView.resources.getString(
                 R.string.stripe_paymentsheet_remove_pm,
-                lpmRepository.fromCode(item.paymentMethod.type?.code)
-                    ?.run {
-                        itemView.resources.getString(
-                            displayNameResource
-                        )
-                    }
+                nameProvider(item.paymentMethod.type?.code),
             )
 
             composeView.setContent {

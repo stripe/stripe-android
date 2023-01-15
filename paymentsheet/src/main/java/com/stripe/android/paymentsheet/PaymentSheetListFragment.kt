@@ -2,9 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.fragment.app.activityViewModels
 
-internal class PaymentSheetListFragment : BasePaymentMethodsListFragment(
-    canClickSelectedItem = false
-) {
+internal class PaymentSheetListFragment : BasePaymentMethodsListFragment() {
     private val activityViewModel by activityViewModels<PaymentSheetViewModel> {
         PaymentSheetViewModel.Factory {
             requireNotNull(
