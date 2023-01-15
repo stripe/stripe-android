@@ -989,7 +989,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Sends correct event when navigating to AddFirstPaymentMethod screen`() = runTest {
         val viewModel = createViewModel(
-            stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         )
         viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
 
@@ -997,8 +997,52 @@ internal class PaymentSheetViewModelTest {
         viewModel.transitionToFirstScreen()
 
         verify(eventReporter).onShowNewPaymentOptionForm(
-            linkEnabled = eq(viewModel.isLinkEnabled.value!!),
-            activeLinkSession = eq(viewModel.activeLinkSession.value!!),
+            linkEnabled = eq(false),
+            activeLinkSession = eq(false),
+        )
+
+        receiver.cancelAndIgnoreRemainingEvents()
+    }
+
+    @Test
+    fun `Sends correct event when navigating to AddFirstPaymentMethod screen with Link enabled`() = runTest {
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.NeedsVerification,
+            )
+        )
+        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+
+        val receiver = viewModel.currentScreen.testIn(this)
+        viewModel.transitionToFirstScreen()
+
+        verify(eventReporter).onShowNewPaymentOptionForm(
+            linkEnabled = eq(true),
+            activeLinkSession = eq(false),
+        )
+
+        receiver.cancelAndIgnoreRemainingEvents()
+    }
+
+    @Test
+    fun `Sends correct event when navigating to AddFirstPaymentMethod screen with active Link session`() = runTest {
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.LoggedIn,
+            )
+        )
+        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+
+        val receiver = viewModel.currentScreen.testIn(this)
+        viewModel.transitionToFirstScreen()
+
+        verify(eventReporter).onShowNewPaymentOptionForm(
+            linkEnabled = eq(true),
+            activeLinkSession = eq(true),
         )
 
         receiver.cancelAndIgnoreRemainingEvents()
@@ -1007,7 +1051,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Sends correct event when navigating to AddAnotherPaymentMethod screen`() = runTest {
         val viewModel = createViewModel(
-            stripeIntent = PaymentIntentFixtures.PI_OFF_SESSION,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             customerPaymentMethods = PaymentMethodFixtures.createCards(1),
         )
         viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
@@ -1016,15 +1060,15 @@ internal class PaymentSheetViewModelTest {
         viewModel.transitionToFirstScreen()
 
         verify(eventReporter).onShowExistingPaymentOptions(
-            linkEnabled = eq(viewModel.isLinkEnabled.value!!),
-            activeLinkSession = eq(viewModel.activeLinkSession.value!!),
+            linkEnabled = eq(false),
+            activeLinkSession = eq(false),
         )
 
         viewModel.transitionToAddPaymentScreen()
 
         verify(eventReporter).onShowNewPaymentOptionForm(
-            linkEnabled = eq(viewModel.isLinkEnabled.value!!),
-            activeLinkSession = eq(viewModel.activeLinkSession.value!!),
+            linkEnabled = eq(false),
+            activeLinkSession = eq(false),
         )
 
         receiver.cancelAndIgnoreRemainingEvents()
