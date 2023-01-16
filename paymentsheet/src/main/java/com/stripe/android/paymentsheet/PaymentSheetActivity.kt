@@ -120,13 +120,15 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewBinding.contentContainer.setContent {
-            val currentScreen by viewModel.currentScreen.collectAsState()
+            PaymentsTheme {
+                val currentScreen by viewModel.currentScreen.collectAsState()
 
-            LaunchedEffect(currentScreen) {
-                buttonContainer.isVisible = currentScreen.showsBuyButton
+                LaunchedEffect(currentScreen) {
+                    buttonContainer.isVisible = currentScreen.showsBuyButton
+                }
+
+                currentScreen.PaymentSheetContent(requireNotNull(starterArgs))
             }
-
-            currentScreen.PaymentSheetContent()
         }
 
         if (savedInstanceState == null) {

@@ -15,12 +15,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.PaymentOptionContract
+import com.stripe.android.paymentsheet.PaymentOptionsViewModel
+import com.stripe.android.paymentsheet.PaymentSheetContract
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -30,7 +35,23 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-internal fun AddPaymentMethod(
+internal fun AddPaymentMethod(args: PaymentOptionContract.Args) {
+    val viewModel = viewModel<PaymentOptionsViewModel>(
+        factory = PaymentOptionsViewModel.Factory { args }
+    )
+    AddPaymentMethod(viewModel)
+}
+
+@Composable
+internal fun AddPaymentMethod(args: PaymentSheetContract.Args) {
+    val viewModel = viewModel<PaymentSheetViewModel>(
+        factory = PaymentSheetViewModel.Factory { args }
+    )
+    AddPaymentMethod(viewModel)
+}
+
+@Composable
+private fun AddPaymentMethod(
     sheetViewModel: BaseSheetViewModel,
 ) {
     val context = LocalContext.current
