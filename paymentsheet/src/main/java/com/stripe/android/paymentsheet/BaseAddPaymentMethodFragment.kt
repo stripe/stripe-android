@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,24 +17,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.fragment.app.Fragment
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
-import com.stripe.android.link.ui.inline.LinkInlineSignedIn
-import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.databinding.FragmentAchBinding
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.Loading
-import com.stripe.android.paymentsheet.ui.PaymentMethodForm
+import com.stripe.android.paymentsheet.ui.PaymentElement
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
@@ -44,7 +35,6 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @FlowPreview
@@ -144,6 +134,7 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
 
             Column(modifier = Modifier.fillMaxWidth()) {
                 PaymentElement(
+                    sheetViewModel = sheetViewModel,
                     enabled = !processing,
                     supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
                     selectedItem = selectedItem,
@@ -172,78 +163,6 @@ internal abstract class BaseAddPaymentMethodFragment : Fragment() {
             }
         } else {
             Loading()
-        }
-    }
-
-    @Composable
-    internal fun PaymentElement(
-        enabled: Boolean,
-        supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
-        selectedItem: LpmRepository.SupportedPaymentMethod,
-        showLinkInlineSignup: Boolean,
-        linkPaymentLauncher: LinkPaymentLauncher,
-        showCheckboxFlow: Flow<Boolean>,
-        onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
-        onLinkSignupStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit,
-        formArguments: FormArguments,
-        onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
-    ) {
-        val horizontalPadding = dimensionResource(
-            id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-        )
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-            if (supportedPaymentMethods.size > 1) {
-                PaymentMethodsUI(
-                    selectedIndex = supportedPaymentMethods.indexOf(selectedItem),
-                    isEnabled = enabled,
-                    paymentMethods = supportedPaymentMethods,
-                    onItemSelectedListener = onItemSelectedListener,
-                    imageLoader = imageLoader,
-                    modifier = Modifier.padding(top = 26.dp, bottom = 12.dp),
-                )
-            }
-
-            if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
-                (activity as BaseSheetActivity<*>).formArgs = formArguments
-                Column(modifier = Modifier.padding(horizontal = horizontalPadding)) {
-                    AndroidViewBinding(FragmentAchBinding::inflate)
-                }
-            } else {
-                PaymentMethodForm(
-                    args = formArguments,
-                    enabled = enabled,
-                    onFormFieldValuesChanged = onFormFieldValuesChanged,
-                    showCheckboxFlow = showCheckboxFlow,
-                    injector = sheetViewModel.injector,
-                    modifier = Modifier.padding(horizontal = horizontalPadding)
-                )
-            }
-
-            val linkInlineSelection = sheetViewModel.linkHandler.linkInlineSelection.collectAsState()
-
-            if (showLinkInlineSignup) {
-                if (linkInlineSelection.value != null) {
-                    LinkInlineSignedIn(
-                        linkPaymentLauncher = linkPaymentLauncher,
-                        onLogout = {
-                            linkHandler.linkInlineSelection.value = null
-                        },
-                        modifier = Modifier
-                            .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                            .fillMaxWidth()
-                    )
-                } else {
-                    LinkInlineSignup(
-                        linkPaymentLauncher = linkPaymentLauncher,
-                        enabled = enabled,
-                        onStateChanged = onLinkSignupStateChanged,
-                        modifier = Modifier
-                            .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                            .fillMaxWidth()
-                    )
-                }
-            }
         }
     }
 
