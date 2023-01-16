@@ -57,7 +57,6 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -463,19 +462,14 @@ internal class PaymentSheetViewModelTest {
                 viewState.add(it)
             }
 
-            var paymentSheetResult: PaymentSheetResult? = null
-            viewModel.paymentSheetResult.observeForever {
-                paymentSheetResult = it
+            viewModel.paymentSheetResult.test {
+                viewModel.onPaymentResult(PaymentResult.Completed)
+                assertThat(viewState[1])
+                    .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+                (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
+                assertThat(awaitItem())
+                    .isEqualTo(PaymentSheetResult.Completed)
             }
-
-            viewModel.onPaymentResult(PaymentResult.Completed)
-
-            assertThat(viewState[1])
-                .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
-
-            (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
-
-            assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
                 .onPaymentSuccess(selection)
@@ -505,19 +499,13 @@ internal class PaymentSheetViewModelTest {
                 viewState.add(it)
             }
 
-            var paymentSheetResult: PaymentSheetResult? = null
-            viewModel.paymentSheetResult.observeForever {
-                paymentSheetResult = it
+            viewModel.paymentSheetResult.test {
+                viewModel.onPaymentResult(PaymentResult.Completed)
+                assertThat(viewState[1])
+                    .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+                (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
+                assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed)
             }
-
-            viewModel.onPaymentResult(PaymentResult.Completed)
-
-            assertThat(viewState[1])
-                .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
-
-            (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
-
-            assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
                 .onPaymentSuccess(selection)
@@ -591,33 +579,29 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Loading payment sheet state should propagate errors`() = runBlocking {
+    fun `Loading payment sheet state should propagate errors`() = runTest {
         val viewModel = createViewModel(shouldFailLoad = true)
-        var result: PaymentSheetResult? = null
-        viewModel.paymentSheetResult.observeForever {
-            result = it
+        viewModel.paymentSheetResult.test {
+            assertThat(awaitItem())
+                .isInstanceOf(PaymentSheetResult.Failed::class.java)
         }
-        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
     }
 
     @Test
-    fun `when StripeIntent does not accept any of the supported payment methods should return error`() {
+    fun `when StripeIntent does not accept any of the supported payment methods should return error`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PAYMENT_INTENT.copy(
                 paymentMethodTypes = listOf("unsupported_payment_type"),
             ),
         )
 
-        var result: PaymentSheetResult? = null
-        viewModel.paymentSheetResult.observeForever {
-            result = it
+        viewModel.paymentSheetResult.test {
+            assertThat((awaitItem() as? PaymentSheetResult.Failed)?.error?.message)
+                .startsWith(
+                    "None of the requested payment methods ([unsupported_payment_type]) " +
+                        "match the supported payment types "
+                )
         }
-
-        assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
-            .startsWith(
-                "None of the requested payment methods ([unsupported_payment_type]) " +
-                    "match the supported payment types "
-            )
     }
 
     @Test
