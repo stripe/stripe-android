@@ -55,3 +55,20 @@ jobs:
         with:
           name: unit-test-report
           path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/
+
+  build-paymentsheet-example-project:
+    name: Build paymentsheet example project
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/stripe_setup
+      - name: Build example projects
+        run: ./gradlew :paymentsheet-example:assembleAndroidTest
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: test-failures
+          path: |
+            **/build/reports/tests/
+            **/out/failures/
