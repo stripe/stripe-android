@@ -14,7 +14,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1'
+        classpath 'com.android.tools.build:gradle:7.4.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
@@ -42,19 +42,6 @@ allprojects {
         mavenCentral()
         google()
         gradlePluginPortal()
-    }
-
-    task checkstyle(type: Checkstyle) {
-        showViolations = true
-        configFile file("../settings/checkstyle.xml")
-        source 'src/main/java'
-        include '**/*.java'
-        exclude '**/gen/**'
-        exclude '**/R.java'
-        exclude '**/BuildConfig.java'
-
-        // empty classpath
-        classpath = files()
     }
 }
 

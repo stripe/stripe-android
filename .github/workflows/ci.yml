@@ -31,8 +31,8 @@ jobs:
             ${{ runner.os }}-gradle-
       # Check if there has been a binary incompatible change to the API.
       # If this change is intentional, run `./gradlew apiDump` and commit the new API files.
-      - name: Run gradle tasks (ktlint detekt checkstyle lintRelease apiCheck)
-        run: bash scripts/execute_task_for_changed_modules.sh ktlint detekt checkstyle lintRelease apiCheck
+      - name: Run gradle tasks (ktlint detekt lintRelease apiCheck)
+        run: bash scripts/execute_task_for_changed_modules.sh ktlint detekt lintRelease apiCheck
 
   unit-tests:
     name: Unit tests
