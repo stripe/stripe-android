@@ -42,6 +42,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
@@ -350,10 +352,29 @@ internal abstract class BaseSheetViewModel(
     protected fun transitionTo(target: PaymentSheetScreen) {
         clearErrorMessages()
         backStack.update { it + target }
+        reportNavigationEvent(target)
     }
 
     fun transitionToAddPaymentScreen() {
-        transitionTo(PaymentSheetScreen.AddAnotherPaymentMethod)
+        transitionTo(AddAnotherPaymentMethod)
+    }
+
+    protected fun reportNavigationEvent(currentScreen: PaymentSheetScreen) {
+        when (currentScreen) {
+            PaymentSheetScreen.SelectSavedPaymentMethods -> {
+                eventReporter.onShowExistingPaymentOptions(
+                    linkEnabled = isLinkEnabled.value ?: false,
+                    activeLinkSession = activeLinkSession.value ?: false
+                )
+            }
+            AddFirstPaymentMethod,
+            AddAnotherPaymentMethod -> {
+                eventReporter.onShowNewPaymentOptionForm(
+                    linkEnabled = isLinkEnabled.value ?: false,
+                    activeLinkSession = activeLinkSession.value ?: false
+                )
+            }
+        }
     }
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {

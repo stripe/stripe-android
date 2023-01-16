@@ -308,6 +308,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
 
         backStack.value = initialBackStack
+        reportNavigationEvent(initialBackStack.last())
     }
 
     internal class Factory(
