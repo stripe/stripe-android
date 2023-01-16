@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">전화번호</string>
+  <!-- Error description for incomplete phone number -->
+  <string name="incomplete_phone_number">불완전한 전화번호</string>
+</resources>

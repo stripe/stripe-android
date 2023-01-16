@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.uicore.elements.FieldError
 
 /**
  * This represents the different states a field can be in,

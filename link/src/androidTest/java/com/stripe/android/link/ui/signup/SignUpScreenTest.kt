@@ -11,7 +11,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.progressIndicatorTestTag
-import com.stripe.android.ui.core.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.ui.core.elements.SimpleTextFieldController
 import org.junit.Rule
 import org.junit.Test

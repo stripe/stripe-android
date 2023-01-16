@@ -32,8 +32,6 @@
   <string name="address_label_city_optional">Ciutat (opcional)</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">País (opcional)</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="address_label_phone_number">Número de telèfon</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Número de telèfon (opcional)</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->

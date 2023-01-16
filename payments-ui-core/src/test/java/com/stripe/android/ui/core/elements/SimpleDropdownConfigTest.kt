@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.elements.DropdownConfig
 import org.junit.Test
 
 class SimpleDropdownConfigTest {

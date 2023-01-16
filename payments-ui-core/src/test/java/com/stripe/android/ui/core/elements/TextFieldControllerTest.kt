@@ -10,6 +10,7 @@ import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error.Invalid
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid.Full
 import com.stripe.android.ui.core.elements.TextFieldStateConstants.Valid.Limitless
+import com.stripe.android.uicore.elements.FieldError
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

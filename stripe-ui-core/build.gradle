@@ -24,6 +24,7 @@ dependencies {
     implementation project(":stripe-core")
     implementation "androidx.annotation:annotation:$androidxAnnotationVersion"
     implementation "androidx.compose.ui:ui:$androidxComposeVersion"
+    implementation "androidx.compose.ui:ui-tooling-preview:$androidxComposeVersion"
     implementation "androidx.compose.foundation:foundation:$androidxComposeVersion"
     // used by StripeImageLoader's disk cache.
     implementation "com.jakewharton:disklrucache:2.0.2"
@@ -31,6 +32,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinCoroutinesVersion"
     implementation "androidx.compose.material:material:$androidxComposeVersion"
     implementation "androidx.core:core-ktx:$androidxCoreVersion"
+
+    debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"
 
     testImplementation "junit:junit:$junitVersion"
     testImplementation "com.google.truth:truth:$truthVersion"

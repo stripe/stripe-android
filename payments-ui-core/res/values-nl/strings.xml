@@ -58,16 +58,12 @@
   <string name="form_label_optional">%s (optioneel)</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="iban_incomplete">Het opgegeven IBAN-nummer is onvolledig.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">Het opgegeven IBAN-nummer is ongeldig.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="iban_invalid_country">Het opgegeven IBAN-nummer is ongeldig: \"%s\" is geen ondersteunde landcode.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">Het IBAN-nummer moet beginnen met een landcode van twee letters.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL-bank</string>
-  <!-- Error description for incomplete phone number -->
-  <string name="incomplete_phone_number">Onvolledig telefoonnummer</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Koop nu of betaal later met Klarna.</string>
   <!-- Klarna pay later copy -->

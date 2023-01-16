@@ -42,6 +42,8 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMaxWidth
 import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMinHeight
 import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.DropdownFieldController
 import kotlin.math.max
 import kotlin.math.min
 
