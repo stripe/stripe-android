@@ -57,7 +57,7 @@ jobs:
           path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/
 
   build-paymentsheet-example-project:
-    name: End-to-end tests
+    name: Build paymentsheet example project
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
