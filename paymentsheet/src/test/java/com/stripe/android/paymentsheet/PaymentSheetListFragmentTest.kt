@@ -113,7 +113,6 @@ internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjection
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
             fragment.initializePaymentOptions(
                 isGooglePayReady = GooglePayState.NotAvailable,
-                isLinkEnabled = false,
             )
         }.moveToState(Lifecycle.State.RESUMED).onFragment {
             idleLooper()
@@ -280,12 +279,10 @@ internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjection
     private fun PaymentSheetListFragment.initializePaymentOptions(
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
         isGooglePayReady: GooglePayState = GooglePayState.NotAvailable,
-        isLinkEnabled: Boolean = false,
         savedSelection: SavedSelection = SavedSelection.None,
     ) {
         sheetViewModel.savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods
         sheetViewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = isGooglePayReady
-        sheetViewModel.linkHandler._isLinkEnabled.value = isLinkEnabled
         sheetViewModel.savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection
     }
 

@@ -174,7 +174,7 @@ class LinkHandlerTest {
         )
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
         handler.onLinkActivityResult(LinkActivityResult.Completed)
-        assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Complete)
+        assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Completed)
     }
 
     @Test

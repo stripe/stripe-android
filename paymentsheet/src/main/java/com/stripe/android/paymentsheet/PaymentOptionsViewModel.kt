@@ -99,7 +99,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         viewModelScope.launch {
             linkHandler.processingState.collect { processingState ->
-                handleProcessingState(processingState)
+                handleLinkProcessingState(processingState)
             }
         }
 
@@ -124,12 +124,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
-    private fun handleProcessingState(processingState: LinkHandler.ProcessingState) {
+    private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
             LinkHandler.ProcessingState.Cancelled -> {
                 onPaymentResult(PaymentResult.Canceled)
             }
-            LinkHandler.ProcessingState.Complete -> {
+            LinkHandler.ProcessingState.Completed -> {
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 onPaymentResult(PaymentResult.Completed)
             }

@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.activity.result.ActivityResultCaller
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
@@ -43,7 +42,7 @@ internal class LinkHandler @Inject constructor(
 
         object Cancelled : ProcessingState()
 
-        object Complete : ProcessingState()
+        object Completed : ProcessingState()
 
         class CompletedWithPaymentResult(val result: PaymentResult) : ProcessingState()
     }
@@ -59,9 +58,7 @@ internal class LinkHandler @Inject constructor(
     private val _showLinkVerificationDialog = MutableStateFlow(false)
     val showLinkVerificationDialog: StateFlow<Boolean> = _showLinkVerificationDialog
 
-    @VisibleForTesting
-    @Suppress("VariableNaming")
-    val _isLinkEnabled = MutableStateFlow(false)
+    private val _isLinkEnabled = MutableStateFlow(false)
     val isLinkEnabled: StateFlow<Boolean> = _isLinkEnabled
 
     private val _activeLinkSession = MutableStateFlow(false)
@@ -244,7 +241,7 @@ internal class LinkHandler @Inject constructor(
         if (completePaymentFlow) {
             // If payment was completed inside the Link UI, dismiss immediately.
             eventReporter.onPaymentSuccess(PaymentSelection.Link)
-            _processingState.tryEmit(ProcessingState.Complete)
+            _processingState.tryEmit(ProcessingState.Completed)
         } else if (cancelPaymentFlow) {
             // We launched the user straight into Link, but they decided to exit out of it.
             _processingState.tryEmit(ProcessingState.Cancelled)

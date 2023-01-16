@@ -193,7 +193,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     init {
         viewModelScope.launch {
             linkHandler.processingState.collect { processingState ->
-                handleProcessingState(processingState)
+                handleLinkProcessingState(processingState)
             }
         }
 
@@ -207,12 +207,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun handleProcessingState(processingState: LinkHandler.ProcessingState) {
+    private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
             LinkHandler.ProcessingState.Cancelled -> {
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
             }
-            LinkHandler.ProcessingState.Complete -> {
+            LinkHandler.ProcessingState.Completed -> {
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
             }

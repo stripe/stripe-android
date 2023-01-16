@@ -28,9 +28,6 @@ internal abstract class BasePaymentMethodsListFragment(
 ) {
     abstract val sheetViewModel: BaseSheetViewModel
 
-    val linkHandler: LinkHandler
-        get() = sheetViewModel.linkHandler
-
     @VisibleForTesting
     lateinit var adapter: PaymentOptionsAdapter
     private var editMenuItem: MenuItem? = null
