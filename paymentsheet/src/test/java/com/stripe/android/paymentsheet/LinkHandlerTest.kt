@@ -39,7 +39,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class LinkHandlerTest {
     @Test
-    fun `setupLink when loginState is loggedIn`() = runLinkTest {
+    fun `Sets up state correctly for logged in user`() = runLinkTest {
         handler.setupLinkLaunchingEagerly(
             testScope,
             LinkState(configuration, LinkState.LoginState.LoggedIn),
@@ -56,7 +56,7 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `setupLink when loginState is loggedOut`() = runLinkTest {
+    fun `Sets up state correctly for logged out user`() = runLinkTest {
         handler.setupLinkLaunchingEagerly(
             testScope,
             LinkState(configuration, LinkState.LoginState.LoggedOut),
@@ -71,8 +71,7 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `setupLink when loginState is NeedsVerification with successful verification`() =
-        runLinkTest {
+    fun `Sets up state correctly for a user that needs verification`() = runLinkTest {
             handler.setupLinkLaunchingEagerly(
                 testScope,
                 LinkState(configuration, LinkState.LoginState.NeedsVerification),
@@ -95,8 +94,7 @@ class LinkHandlerTest {
         }
 
     @Test
-    fun `setupLink when loginState is NeedsVerification with unsuccessful verification`() =
-        runLinkTest {
+    fun `Sets up state correctly for user that fails verification`() = runLinkTest {
             handler.setupLinkLaunchingEagerly(
                 testScope,
                 LinkState(configuration, LinkState.LoginState.NeedsVerification),
@@ -118,7 +116,7 @@ class LinkHandlerTest {
         }
 
     @Test
-    fun `setupLink when linkState is null`() = runLinkTest {
+    fun `Sets up state correctly for null LinkState`() = runLinkTest {
         handler.setupLinkLaunchingEagerly(testScope, null)
         assertThat(handler.isLinkEnabled.first()).isFalse()
         assertThat(handler.activeLinkSession.first()).isFalse()
@@ -129,7 +127,7 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `prepareLink when loggedIn`() = runLinkTest {
+    fun `Prepares state correctly for logged in user`() = runLinkTest {
         handler.prepareLink(LinkState(configuration, LinkState.LoginState.LoggedIn))
         assertThat(handler.isLinkEnabled.first()).isTrue()
         assertThat(handler.activeLinkSession.first()).isTrue()
@@ -142,7 +140,7 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `prepareLink when not logged in`() = runLinkTest {
+    fun `Prepares state correctly for logged out user`() = runLinkTest {
         handler.prepareLink(LinkState(configuration, LinkState.LoginState.LoggedOut))
         assertThat(handler.isLinkEnabled.first()).isTrue()
         assertThat(handler.activeLinkSession.first()).isFalse()
@@ -155,7 +153,7 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `test launchLink`() = runLinkTest {
+    fun `launchLink presents with configuration`() = runLinkTest {
         handler.launchLink(configuration, launchedDirectly = false)
 
         assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
@@ -167,7 +165,7 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `test onLinkActivityResult with Completed result`() = runLinkTest {
+    fun `Completed result sets processing state to Completed`() = runLinkTest {
         handler.setupLinkLaunchingEagerly(
             testScope,
             LinkState(configuration, LinkState.LoginState.LoggedIn),
@@ -178,7 +176,7 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `test onLinkActivityResult with Cancelled result after back pressed`() = runLinkTest {
+    fun `Back pressed result sets processing state to Cancelled`() = runLinkTest {
         handler.setupLinkLaunchingEagerly(
             testScope,
             LinkState(configuration, LinkState.LoginState.LoggedIn),
@@ -189,7 +187,7 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `test onLinkActivityResult with Cancelled result`() = runLinkTest {
+    fun `Cancelled result sets processing state to Cancelled`() = runLinkTest {
         handler.setupLinkLaunchingEagerly(
             testScope,
             LinkState(configuration, LinkState.LoginState.LoggedIn),
@@ -202,7 +200,7 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `test onLinkActivityResult with CompletedWithPaymentResult result`() = runLinkTest {
+    fun `exception causes processing state to be CompletedWithPaymentResult`() = runLinkTest {
         handler.setupLinkLaunchingEagerly(
             testScope,
             LinkState(configuration, LinkState.LoginState.LoggedIn),
