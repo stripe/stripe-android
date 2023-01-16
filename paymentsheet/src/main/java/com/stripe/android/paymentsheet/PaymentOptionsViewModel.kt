@@ -41,6 +41,8 @@ import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -82,8 +84,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
     internal val paymentOptionResult: LiveData<PaymentOptionResult> = _paymentOptionResult
 
-    private val _error = MutableLiveData<String?>()
-    internal val error: LiveData<String?> = _error
+    private val _error = MutableStateFlow<String?>(null)
+    internal val error: StateFlow<String?> = _error
 
     // Only used to determine if we should skip the list and go to the add card view.
     // and how to populate that view.
@@ -152,9 +154,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         onError(error?.let { getApplication<Application>().getString(it) })
 
     override fun onError(error: String?) {
-        error?.let {
-            _error.value = it
-        }
+        _error.value = error
     }
 
     fun onUserSelection() {
