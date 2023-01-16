@@ -19,8 +19,8 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.Companion.addressRepository
-import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.Companion.lpmRepository
+import com.stripe.android.paymentsheet.PaymentSheetViewModelInjectionTest.Companion.addressRepository
+import com.stripe.android.paymentsheet.PaymentSheetViewModelInjectionTest.Companion.lpmRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -40,7 +40,7 @@ import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection() {
+internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjectionTest() {
     @InjectorKey
     private val injectorKey: String = "PaymentSheetListFragmentTest"
 

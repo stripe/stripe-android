@@ -48,14 +48,14 @@ import org.mockito.kotlin.whenever
 import javax.inject.Provider
 
 @ExperimentalCoroutinesApi
-internal open class PaymentSheetViewModelTestInjection {
+internal open class BasePaymentSheetViewModelInjectionTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    val eventReporter = mock<EventReporter>()
+    private val eventReporter = mock<EventReporter>()
     private val googlePayPaymentMethodLauncherFactory =
         createGooglePayPaymentMethodLauncherFactory()
     private val stripePaymentLauncherAssistedFactory = mock<StripePaymentLauncherAssistedFactory>()
