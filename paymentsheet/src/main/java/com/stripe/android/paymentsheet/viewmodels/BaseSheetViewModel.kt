@@ -359,7 +359,7 @@ internal abstract class BaseSheetViewModel(
         transitionTo(AddAnotherPaymentMethod)
     }
 
-    private fun reportNavigationEvent(currentScreen: PaymentSheetScreen) {
+    protected fun reportNavigationEvent(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
             PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions(
