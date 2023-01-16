@@ -66,7 +66,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -160,11 +159,6 @@ internal abstract class BaseSheetViewModel(
 
     val currentScreen: StateFlow<PaymentSheetScreen?> = backStack
         .map { it.lastOrNull() }
-        .onEach { screen ->
-            if (screen != null) {
-                reportNavigationEvent(screen)
-            }
-        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(),
@@ -358,6 +352,7 @@ internal abstract class BaseSheetViewModel(
     protected fun transitionTo(target: PaymentSheetScreen) {
         clearErrorMessages()
         backStack.update { it + target }
+        reportNavigationEvent(target)
     }
 
     fun transitionToAddPaymentScreen() {
