@@ -13,8 +13,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
-import com.stripe.android.ui.core.paymentsColors
-import com.stripe.android.ui.core.shouldUseDarkDynamicColor
+import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
 
@@ -51,7 +51,7 @@ fun AfterpayClearpayElementUI(
             )
         ),
         modifier = Modifier.padding(4.dp, 8.dp, 4.dp, 4.dp),
-        color = MaterialTheme.paymentsColors.subtitle,
+        color = MaterialTheme.stripeColors.subtitle,
         style = MaterialTheme.typography.h6,
         urlSpanStyle = SpanStyle(),
         imageAlign = PlaceholderVerticalAlign.Bottom

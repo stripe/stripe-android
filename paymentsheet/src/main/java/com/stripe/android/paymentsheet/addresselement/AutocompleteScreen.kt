@@ -42,10 +42,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
-import com.stripe.android.ui.core.darken
+import com.stripe.android.uicore.darken
 import com.stripe.android.ui.core.elements.TextFieldSection
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
 
 @VisibleForTesting
@@ -95,9 +95,9 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
         },
         bottomBar = {
             val background = if (isSystemInDarkTheme()) {
-                MaterialTheme.paymentsColors.component
+                MaterialTheme.stripeColors.component
             } else {
-                MaterialTheme.paymentsColors.materialColors.surface.darken(0.07f)
+                MaterialTheme.stripeColors.materialColors.surface.darken(0.07f)
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -183,12 +183,12 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                                         }
                                         Text(
                                             text = annotatedStringResource(text = text),
-                                            color = MaterialTheme.paymentsColors.onComponent,
+                                            color = MaterialTheme.stripeColors.onComponent,
                                             style = MaterialTheme.typography.body1
                                         )
                                         Text(
                                             text = secondaryText.toString(),
-                                            color = MaterialTheme.paymentsColors.onComponent,
+                                            color = MaterialTheme.stripeColors.onComponent,
                                             style = MaterialTheme.typography.body1
                                         )
                                     }
@@ -207,7 +207,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                                     text = stringResource(
                                         R.string.stripe_paymentsheet_autocomplete_no_results_found
                                     ),
-                                    color = MaterialTheme.paymentsColors.onComponent,
+                                    color = MaterialTheme.stripeColors.onComponent,
                                     style = MaterialTheme.typography.body1
                                 )
                             }

@@ -25,9 +25,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.linkShapes
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.getBorderStroke
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.uicore.stripeColors
 
 @Composable
 fun LinkInlineSignedIn(
@@ -42,7 +42,7 @@ fun LinkInlineSignedIn(
 
         val accountEmail = viewModel.accountEmail.collectAsState(initial = "")
 
-        PaymentsTheme {
+        StripeTheme {
             Box(
                 modifier = modifier
                     .border(
@@ -50,7 +50,7 @@ fun LinkInlineSignedIn(
                         shape = MaterialTheme.linkShapes.small
                     )
                     .background(
-                        color = MaterialTheme.paymentsColors.component,
+                        color = MaterialTheme.stripeColors.component,
                         shape = MaterialTheme.linkShapes.small
                     )
                     .semantics {
@@ -67,7 +67,7 @@ fun LinkInlineSignedIn(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     Divider(
-                        color = MaterialTheme.paymentsColors.componentBorder.copy(alpha = 0.1f),
+                        color = MaterialTheme.stripeColors.componentBorder.copy(alpha = 0.1f),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                     Row(
@@ -76,7 +76,7 @@ fun LinkInlineSignedIn(
                     ) {
                         Text(
                             text = accountEmail.value ?: "",
-                            color = MaterialTheme.paymentsColors.subtitle
+                            color = MaterialTheme.stripeColors.subtitle
                         )
                         ClickableText(
                             text = AnnotatedString(text = stringResource(id = R.string.logout)),

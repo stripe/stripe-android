@@ -31,7 +31,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
@@ -229,7 +229,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                         ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
                     )
                     setContent {
-                        PaymentsTheme {
+                        StripeTheme {
                             GooglePayDividerUi(dividerText)
                         }
                     }

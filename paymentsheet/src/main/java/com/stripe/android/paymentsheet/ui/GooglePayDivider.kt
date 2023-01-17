@@ -14,9 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.ui.core.paymentsColors
-import com.stripe.android.ui.core.paymentsShapes
-import com.stripe.android.ui.core.shouldUseDarkDynamicColor
+import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeShapes
+import com.stripe.android.uicore.shouldUseDarkDynamicColor
 
 @Composable
 internal fun GooglePayDividerUi(
@@ -32,7 +32,7 @@ internal fun GooglePayDividerUi(
         Text(
             text = text,
             style = MaterialTheme.typography.body1,
-            color = MaterialTheme.paymentsColors.subtitle,
+            color = MaterialTheme.stripeColors.subtitle,
             modifier = Modifier
                 .background(MaterialTheme.colors.surface)
                 .padding(horizontal = 8.dp)
@@ -50,7 +50,7 @@ internal fun GooglePayDividerLine() {
     Box(
         Modifier
             .background(color)
-            .height(MaterialTheme.paymentsShapes.borderStrokeWidth.dp)
+            .height(MaterialTheme.stripeShapes.borderStrokeWidth.dp)
             .fillMaxWidth()
     )
 }

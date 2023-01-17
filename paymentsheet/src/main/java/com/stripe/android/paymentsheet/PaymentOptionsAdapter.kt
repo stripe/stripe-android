@@ -49,12 +49,12 @@ import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getLabelIcon
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.paymentsColors
-import com.stripe.android.ui.core.shouldUseDarkDynamicColor
+import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
@@ -215,7 +215,7 @@ internal class PaymentOptionsAdapter(
             )
 
             composeView.setContent {
-                PaymentsTheme {
+                StripeTheme {
                     PaymentOptionUi(
                         viewWidth = width,
                         isEditing = isEditing,
@@ -258,9 +258,9 @@ internal class PaymentOptionsAdapter(
             position: Int
         ) {
             composeView.setContent {
-                PaymentsTheme {
+                StripeTheme {
                     val iconRes = if (
-                        MaterialTheme.paymentsColors.component.shouldUseDarkDynamicColor()
+                        MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()
                     ) {
                         R.drawable.stripe_ic_paymentsheet_add_dark
                     } else {
@@ -310,7 +310,7 @@ internal class PaymentOptionsAdapter(
             position: Int
         ) {
             composeView.setContent {
-                PaymentsTheme {
+                StripeTheme {
                     PaymentOptionUi(
                         viewWidth = width,
                         isEditing = false,
@@ -352,7 +352,7 @@ internal class PaymentOptionsAdapter(
             position: Int
         ) {
             composeView.setContent {
-                PaymentsTheme {
+                StripeTheme {
                     PaymentOptionUi(
                         viewWidth = width,
                         isEditing = false,

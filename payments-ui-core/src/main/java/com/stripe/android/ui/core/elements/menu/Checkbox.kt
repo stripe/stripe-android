@@ -5,7 +5,7 @@ import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.stripeColors
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -17,7 +17,7 @@ fun Checkbox(
 ) {
     val checkboxColors = CheckboxDefaults.colors(
         checkedColor = MaterialTheme.colors.primary,
-        uncheckedColor = MaterialTheme.paymentsColors.subtitle,
+        uncheckedColor = MaterialTheme.stripeColors.subtitle,
         checkmarkColor = MaterialTheme.colors.surface
     )
 
