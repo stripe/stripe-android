@@ -2,7 +2,7 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
-## 20.17.1 - 2023-01-17
+## 20.18.0 - 2023-01-17
 ### Payments
 * [ADDED][6012](https://github.com/stripe/stripe-android/pull/6012) Support for the predictive back gesture.
 
