@@ -12,7 +12,9 @@ import androidx.compose.ui.res.dimensionResource
 import com.stripe.android.paymentsheet.R
 
 @Composable
-internal fun PaymentSheetLoading() {
+internal fun PaymentSheetLoading(
+    modifier: Modifier = Modifier,
+) {
     val height = dimensionResource(R.dimen.stripe_paymentsheet_loading_container_height)
     val indicatorSize = dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_size)
     val strokeWidth = dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_stroke_width)
@@ -24,7 +26,7 @@ internal fun PaymentSheetLoading() {
         CircularProgressIndicator(
             color = MaterialTheme.colors.onSurface,
             strokeWidth = strokeWidth,
-            modifier = Modifier.size(indicatorSize),
+            modifier = modifier.size(indicatorSize),
         )
     }
 }
