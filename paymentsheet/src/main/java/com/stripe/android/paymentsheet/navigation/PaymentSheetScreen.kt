@@ -8,7 +8,7 @@ import com.stripe.android.paymentsheet.databinding.FragmentPaymentOptionsAddPmBi
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentOptionsListBinding
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentSheetAddPmBinding
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentSheetListBinding
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetLoadingBinding
+import com.stripe.android.paymentsheet.ui.PaymentSheetLoading
 
 internal sealed interface PaymentSheetScreen {
 
@@ -17,6 +17,19 @@ internal sealed interface PaymentSheetScreen {
 
     @Composable
     fun PaymentOptionsContent()
+
+    object Loading : PaymentSheetScreen {
+
+        @Composable
+        override fun PaymentSheetContent() {
+            PaymentSheetLoading()
+        }
+
+        @Composable
+        override fun PaymentOptionsContent() {
+            PaymentSheetLoading()
+        }
+    }
 
     object SelectSavedPaymentMethods : PaymentSheetScreen {
 
@@ -73,24 +86,6 @@ internal sealed interface PaymentSheetScreen {
                 modifier = Modifier.testTag(testTag),
             )
         }
-    }
-}
-
-@Composable
-internal fun PaymentSheetScreen?.PaymentSheetContent() {
-    if (this == null) {
-        AndroidViewBinding(FragmentPaymentsheetLoadingBinding::inflate)
-    } else {
-        PaymentSheetContent()
-    }
-}
-
-@Composable
-internal fun PaymentSheetScreen?.PaymentOptionsContent() {
-    if (this == null) {
-        AndroidViewBinding(FragmentPaymentsheetLoadingBinding::inflate)
-    } else {
-        PaymentOptionsContent()
     }
 }
 
