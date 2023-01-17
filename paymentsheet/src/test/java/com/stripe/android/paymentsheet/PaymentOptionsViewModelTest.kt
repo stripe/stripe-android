@@ -354,9 +354,7 @@ internal class PaymentOptionsViewModelTest {
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
-    ) = TestViewModelFactory.create(
-        eventReporter = eventReporter,
-    ) { linkHandler, savedStateHandle ->
+    ) = TestViewModelFactory.create { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(state = args.state.copy(linkState = linkState)),
             prefsRepositoryFactory = { prefsRepository },

@@ -7214,7 +7214,6 @@ public final class com/stripe/android/view/ExpiryDateEditText : com/stripe/andro
 public final class com/stripe/android/view/PaymentAuthWebViewActivity : androidx/appcompat/app/AppCompatActivity {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun onBackPressed ()V
 	public fun onCreateOptionsMenu (Landroid/view/Menu;)Z
 	public fun onOptionsItemSelected (Landroid/view/MenuItem;)Z
 }
@@ -7223,7 +7222,6 @@ public final class com/stripe/android/view/PaymentFlowActivity : com/stripe/andr
 	public static final field $stable I
 	public fun <init> ()V
 	public fun onActionSave ()V
-	public fun onBackPressed ()V
 }
 
 public final class com/stripe/android/view/PaymentFlowActivityStarter : com/stripe/android/view/ActivityStarter {
@@ -7287,7 +7285,6 @@ public final class com/stripe/android/view/PaymentFlowViewPager : androidx/viewp
 public final class com/stripe/android/view/PaymentMethodsActivity : androidx/appcompat/app/AppCompatActivity {
 	public static final field $stable I
 	public fun <init> ()V
-	public fun onBackPressed ()V
 	public fun onSupportNavigateUp ()Z
 }
 

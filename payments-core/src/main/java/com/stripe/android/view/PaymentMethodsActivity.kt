@@ -9,6 +9,7 @@ import android.text.util.Linkify
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
@@ -98,6 +99,10 @@ class PaymentMethodsActivity : AppCompatActivity() {
 
         args.windowFlags?.let {
             window.addFlags(it)
+        }
+
+        onBackPressedDispatcher.addCallback {
+            finishWithResult(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
         }
 
         viewModel.snackbarData.observe(this) { snackbarText ->
@@ -211,10 +216,6 @@ class PaymentMethodsActivity : AppCompatActivity() {
             // Payment Method.
             finishWithResult(paymentMethod)
         }
-    }
-
-    override fun onBackPressed() {
-        finishWithResult(adapter.selectedPaymentMethod, Activity.RESULT_CANCELED)
     }
 
     private fun fetchCustomerPaymentMethods() {

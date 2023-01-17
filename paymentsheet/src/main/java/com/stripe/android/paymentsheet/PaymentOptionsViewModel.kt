@@ -130,6 +130,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onPaymentResult(PaymentResult.Canceled)
             }
             LinkHandler.ProcessingState.Completed -> {
+                eventReporter.onPaymentSuccess(PaymentSelection.Link)
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 onPaymentResult(PaymentResult.Completed)
             }
