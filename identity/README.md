@@ -1,7 +1,7 @@
 # Stripe Android SDK Identity module (Beta)
 The Stripe Identity Android SDK makes it quick and easy to verify your user's identity in your Android app. We provide a prebuilt UI to collect your user's ID documents, match photo ID with selfies, and validate ID numbers.
 
-> To get access to the Identity React Native SDK, visit the [Identity Settings](https://dashboard.stripe.com/settings/identity) page and click **Enable**.
+> To get access to the Identity Android SDK, visit the [Identity Settings](https://dashboard.stripe.com/settings/identity) page and click **Enable**.
 
 # Table of contents
 
