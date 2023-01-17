@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import com.airbnb.mvrx.Mavericks
@@ -42,16 +43,15 @@ internal class FinancialConnectionsSheetActivity :
             viewModel.onEach { postInvalidate() }
             if (savedInstanceState != null) viewModel.onActivityRecreated()
         }
+
+        onBackPressedDispatcher.addCallback {
+            finishWithResult(FinancialConnectionsSheetActivityResult.Canceled)
+        }
     }
 
     override fun onResume() {
         super.onResume()
         viewModel.onResume()
-    }
-
-    override fun onBackPressed() {
-        super.onBackPressed()
-        finishWithResult(FinancialConnectionsSheetActivityResult.Canceled)
     }
 
     /**

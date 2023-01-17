@@ -13,6 +13,7 @@ import android.view.WindowInsets
 import android.view.WindowMetrics
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
@@ -136,9 +137,14 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
+        val onBackPressedCallback = onBackPressedDispatcher.addCallback {
+            viewModel.handleBackPressed()
+        }
+
         viewModel.processing.launchAndCollectIn(this) { isProcessing ->
             updateRootViewClickHandling(isProcessing)
             toolbar.isEnabled = !isProcessing
+            onBackPressedCallback.isEnabled = !isProcessing
         }
 
         // Set Toolbar to act as the ActionBar so it displays the menu items.
@@ -196,13 +202,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     override fun finish() {
         super.finish()
         overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (!viewModel.processing.value) {
-            viewModel.handleBackPressed()
-        }
     }
 
     protected fun closeSheet(

@@ -66,7 +66,7 @@ abstract class StripeActivity : AppCompatActivity() {
         } else {
             val handled = super.onOptionsItemSelected(item)
             if (!handled) {
-                onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
             }
             handled
         }

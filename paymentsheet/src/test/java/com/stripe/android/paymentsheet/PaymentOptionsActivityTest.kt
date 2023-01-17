@@ -11,6 +11,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso.pressBack
 import app.cash.turbine.test
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
@@ -227,7 +228,7 @@ internal class PaymentOptionsActivityTest {
                     .isTrue()
 
                 // Navigate back to payment options list
-                activity.onBackPressed()
+                pressBack()
                 idleLooper()
 
                 assertThat(activity.viewBinding.continueButton.isVisible)
