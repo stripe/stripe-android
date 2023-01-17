@@ -12,6 +12,8 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetLoading
 
 internal sealed interface PaymentSheetScreen {
 
+    val showsBuyButton: Boolean
+
     @Composable
     fun PaymentSheetContent()
 
@@ -19,6 +21,8 @@ internal sealed interface PaymentSheetScreen {
     fun PaymentOptionsContent()
 
     object Loading : PaymentSheetScreen {
+
+        override val showsBuyButton: Boolean = false
 
         @Composable
         override fun PaymentSheetContent() {
@@ -32,6 +36,8 @@ internal sealed interface PaymentSheetScreen {
     }
 
     object SelectSavedPaymentMethods : PaymentSheetScreen {
+
+        override val showsBuyButton: Boolean = true
 
         @Composable
         override fun PaymentSheetContent() {
@@ -52,6 +58,8 @@ internal sealed interface PaymentSheetScreen {
 
     object AddAnotherPaymentMethod : PaymentSheetScreen {
 
+        override val showsBuyButton: Boolean = true
+
         @Composable
         override fun PaymentSheetContent() {
             AndroidViewBinding(
@@ -70,6 +78,8 @@ internal sealed interface PaymentSheetScreen {
     }
 
     object AddFirstPaymentMethod : PaymentSheetScreen {
+
+        override val showsBuyButton: Boolean = true
 
         @Composable
         override fun PaymentSheetContent() {
