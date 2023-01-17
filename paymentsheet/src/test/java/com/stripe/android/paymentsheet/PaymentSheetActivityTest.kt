@@ -445,9 +445,10 @@ internal class PaymentSheetActivityTest {
             assertThat(awaitItem()).isEqualTo(AddAnotherPaymentMethod)
 
             pressBack()
-            scenario.launch(intent)
-
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+
+            pressBack()
+            expectNoEvents()
         }
     }
 
