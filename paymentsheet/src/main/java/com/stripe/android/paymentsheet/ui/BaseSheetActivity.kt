@@ -43,10 +43,10 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.createTextSpanFromTextStyle
-import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.stripeColors

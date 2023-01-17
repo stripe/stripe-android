@@ -10,8 +10,8 @@ import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessageMapper
 import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingData
 import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingView
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.isSystemDarkTheme
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope

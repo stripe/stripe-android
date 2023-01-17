@@ -20,9 +20,9 @@ import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
+import com.stripe.android.uicore.PrimaryButtonStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
-import com.stripe.android.uicore.PrimaryButtonStyle
 import com.stripe.android.uicore.convertDpToPx
 import com.stripe.android.uicore.getBorderStrokeColor
 import com.stripe.android.uicore.getComposeTextStyle

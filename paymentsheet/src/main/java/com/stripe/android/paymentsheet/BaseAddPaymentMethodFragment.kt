@@ -39,9 +39,9 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow

@@ -4,11 +4,11 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
-import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.PrimaryButtonColors
 import com.stripe.android.uicore.PrimaryButtonShape
 import com.stripe.android.uicore.PrimaryButtonTypography
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.StripeThemeDefaults
 import java.security.InvalidParameterException
 
 internal fun PaymentSheet.Configuration.validate() {
