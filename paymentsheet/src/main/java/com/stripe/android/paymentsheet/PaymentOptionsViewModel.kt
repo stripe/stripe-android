@@ -19,8 +19,6 @@ import com.stripe.android.core.injection.Injector
 import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.core.injection.injectWithFallback
-import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -33,7 +31,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
-import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -64,7 +61,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     lpmResourceRepository: ResourceRepository<LpmRepository>,
     addressResourceRepository: ResourceRepository<AddressRepository>,
     savedStateHandle: SavedStateHandle,
-    linkLauncher: LinkPaymentLauncher
+    linkHandler: LinkHandler,
 ) : BaseSheetViewModel(
     application = application,
     config = args.state.config,
@@ -77,7 +74,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     lpmResourceRepository = lpmResourceRepository,
     addressResourceRepository = addressResourceRepository,
     savedStateHandle = savedStateHandle,
-    linkLauncher = linkLauncher,
+    linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
 ) {
     @VisibleForTesting
@@ -91,10 +88,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     // and how to populate that view.
     override var newPaymentSelection = args.state.newPaymentSelection
 
-    override var linkInlineSelection = MutableLiveData<PaymentSelection.New.LinkInline?>(
-        args.state.newPaymentSelection as? PaymentSelection.New.LinkInline,
-    )
-
     init {
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (args.state.isGooglePayReady) {
             GooglePayState.Available
@@ -104,12 +97,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
         val linkState = args.state.linkState
 
-        _isLinkEnabled.value = linkState != null
-        activeLinkSession.value = linkState?.loginState == LinkState.LoginState.LoggedIn
-
-        if (linkState != null) {
-            setupLink(linkState)
+        viewModelScope.launch {
+            linkHandler.processingState.collect { processingState ->
+                handleLinkProcessingState(processingState)
+            }
         }
+
+        linkHandler.linkInlineSelection.value = args.state.newPaymentSelection as? PaymentSelection.New.LinkInline
+        linkHandler.prepareLink(linkState)
 
         // After recovering from don't keep activities the stripe intent will be saved,
         // calling setStripeIntent would require the repository be initialized, which
@@ -126,6 +121,45 @@ internal class PaymentOptionsViewModel @Inject constructor(
         if (lpmResourceRepository.getRepository().isLoaded()) {
             lpmServerSpec =
                 lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
+        }
+    }
+
+    private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
+        when (processingState) {
+            LinkHandler.ProcessingState.Cancelled -> {
+                onPaymentResult(PaymentResult.Canceled)
+            }
+            LinkHandler.ProcessingState.Completed -> {
+                prefsRepository.savePaymentSelection(PaymentSelection.Link)
+                onPaymentResult(PaymentResult.Completed)
+            }
+            is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
+                setContentVisible(true)
+                onPaymentResult(processingState.result)
+            }
+            is LinkHandler.ProcessingState.Error -> {
+                onError(processingState.message)
+            }
+            LinkHandler.ProcessingState.Launched -> {
+                setContentVisible(false)
+            }
+            is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
+                processingState.details?.let {
+                    // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
+                    updateSelection(PaymentSelection.New.LinkInline(it))
+                    onUserSelection()
+                } ?: run {
+                    // Creating Link PaymentDetails failed, fallback to regular checkout.
+                    // paymentSelection is already set to the card parameters from the form.
+                    onUserSelection()
+                }
+            }
+            LinkHandler.ProcessingState.Ready -> {
+                updatePrimaryButtonState(PrimaryButton.State.Ready)
+            }
+            LinkHandler.ProcessingState.Started -> {
+                updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+            }
         }
     }
 
@@ -177,27 +211,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 is PaymentSelection.Link -> processExistingPaymentMethod(paymentSelection)
                 is PaymentSelection.New -> processNewPaymentMethod(paymentSelection)
             }
-        }
-    }
-
-    private fun setupLink(linkState: LinkState) {
-        _linkConfiguration.value = linkState.configuration
-
-        if (linkState.isReadyForUse) {
-            // If account exists, select Link by default
-            savedStateHandle[SAVE_SELECTION] = PaymentSelection.Link
-        }
-    }
-
-    override fun onLinkPaymentDetailsCollected(linkPaymentDetails: LinkPaymentDetails.New?) {
-        linkPaymentDetails?.let {
-            // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-            updateSelection(PaymentSelection.New.LinkInline(it))
-            onUserSelection()
-        } ?: run {
-            // Creating Link PaymentDetails failed, fallback to regular checkout.
-            // paymentSelection is already set to the card parameters from the form.
-            onUserSelection()
         }
     }
 

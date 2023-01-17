@@ -115,9 +115,9 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         linkButton.apply {
             onClick = { config ->
-                viewModel.launchLink(config, launchedDirectly = false)
+                linkHandler.launchLink(config, launchedDirectly = false)
             }
-            linkPaymentLauncher = viewModel.linkLauncher
+            linkPaymentLauncher = linkLauncher
         }
 
         viewBinding.contentContainer.setContent {
@@ -217,7 +217,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         )
         viewModel.showTopContainer.observe(this) { visible ->
-            linkButton.isVisible = viewModel.isLinkEnabled.value == true
+            linkButton.isVisible = linkHandler.isLinkEnabled.value == true
             googlePayButton.isVisible =
                 viewModel.googlePayState.value == GooglePayState.Available
             topContainer.isVisible = visible

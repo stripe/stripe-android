@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -89,47 +88,51 @@ internal open class BasePaymentSheetViewModelInjectionTest {
         @InjectorKey injectorKey: String,
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): PaymentSheetViewModel = runBlocking {
-        PaymentSheetViewModel(
-            ApplicationProvider.getApplicationContext(),
-            args,
-            eventReporter,
-            { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-            StripeIntentRepository.Static(stripeIntent),
-            StripeIntentValidator(),
-            FakePaymentSheetLoader(
-                stripeIntent = stripeIntent,
-                customerPaymentMethods = customerRepositoryPMs,
-            ),
-            FakeCustomerRepository(customerRepositoryPMs),
-            FakePrefsRepository(),
-            lpmResourceRepository = StaticLpmResourceRepository(
-                LpmRepository(
-                    LpmRepository.LpmRepositoryArguments(
-                        ApplicationProvider.getApplicationContext<Application>().resources
-                    )
-                ).apply {
-                    this.update(
-                        PaymentIntentFactory.create(
-                            paymentMethodTypes = listOf(
-                                PaymentMethod.Type.Card.code,
-                                PaymentMethod.Type.USBankAccount.code
-                            )
-                        ),
-                        null
-                    )
-                }
-            ),
-            mock(),
-            stripePaymentLauncherAssistedFactory,
-            googlePayPaymentMethodLauncherFactory,
-            Logger.noop(),
-            testDispatcher,
-            injectorKey,
-            savedStateHandle = SavedStateHandle().apply {
-                set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
-            },
-            linkLauncher = mock()
-        )
+        TestViewModelFactory.create(
+            eventReporter = eventReporter,
+        ) { linkHandler, savedStateHandle ->
+            PaymentSheetViewModel(
+                ApplicationProvider.getApplicationContext(),
+                args,
+                eventReporter,
+                { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
+                StripeIntentRepository.Static(stripeIntent),
+                StripeIntentValidator(),
+                FakePaymentSheetLoader(
+                    stripeIntent = stripeIntent,
+                    customerPaymentMethods = customerRepositoryPMs,
+                ),
+                FakeCustomerRepository(customerRepositoryPMs),
+                FakePrefsRepository(),
+                lpmResourceRepository = StaticLpmResourceRepository(
+                    LpmRepository(
+                        LpmRepository.LpmRepositoryArguments(
+                            ApplicationProvider.getApplicationContext<Application>().resources
+                        )
+                    ).apply {
+                        this.update(
+                            PaymentIntentFactory.create(
+                                paymentMethodTypes = listOf(
+                                    PaymentMethod.Type.Card.code,
+                                    PaymentMethod.Type.USBankAccount.code
+                                )
+                            ),
+                            null
+                        )
+                    }
+                ),
+                mock(),
+                stripePaymentLauncherAssistedFactory,
+                googlePayPaymentMethodLauncherFactory,
+                Logger.noop(),
+                testDispatcher,
+                injectorKey,
+                savedStateHandle = savedStateHandle.apply {
+                    set(BaseSheetViewModel.SAVE_RESOURCE_REPOSITORY_READY, true)
+                },
+                linkHandler = linkHandler,
+            )
+        }
     }
 
     @FlowPreview

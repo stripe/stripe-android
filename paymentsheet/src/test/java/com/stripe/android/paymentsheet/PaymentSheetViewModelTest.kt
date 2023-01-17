@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.testIn
@@ -316,9 +315,9 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.showLinkVerificationDialog.value).isFalse()
-        assertThat(viewModel.activeLinkSession.value).isTrue()
-        assertThat(viewModel.isLinkEnabled.value).isTrue()
+        assertThat(viewModel.linkHandler.showLinkVerificationDialog.value).isFalse()
+        assertThat(viewModel.linkHandler.activeLinkSession.value).isTrue()
+        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
 
         verify(linkLauncher).present(
             configuration = eq(configuration),
@@ -335,9 +334,9 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.showLinkVerificationDialog.value).isTrue()
-        assertThat(viewModel.activeLinkSession.value).isFalse()
-        assertThat(viewModel.isLinkEnabled.value).isTrue()
+        assertThat(viewModel.linkHandler.showLinkVerificationDialog.value).isTrue()
+        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
+        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
     @Test
@@ -349,8 +348,8 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.activeLinkSession.value).isFalse()
-        assertThat(viewModel.isLinkEnabled.value).isTrue()
+        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
+        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
     @Test
@@ -359,8 +358,8 @@ internal class PaymentSheetViewModelTest {
             linkState = null,
         )
 
-        assertThat(viewModel.activeLinkSession.value).isFalse()
-        assertThat(viewModel.isLinkEnabled.value).isFalse()
+        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
+        assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
     }
 
     @Test
@@ -1084,32 +1083,37 @@ internal class PaymentSheetViewModelTest {
         delay: Duration = Duration.ZERO
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        return PaymentSheetViewModel(
-            application,
-            args,
-            eventReporter,
-            { paymentConfiguration },
-            StripeIntentRepository.Static(stripeIntent),
-            StripeIntentValidator(),
-            FakePaymentSheetLoader(
-                stripeIntent = stripeIntent,
-                shouldFail = shouldFailLoad,
-                linkState = linkState,
-                customerPaymentMethods = customerPaymentMethods,
-                delay = delay
-            ),
-            customerRepository,
-            prefsRepository,
-            lpmResourceRepository,
-            mock(),
-            mock(),
-            mock(),
-            Logger.noop(),
-            testDispatcher,
-            DUMMY_INJECTOR_KEY,
-            savedStateHandle = SavedStateHandle(),
-            linkLauncher
-        )
+        return TestViewModelFactory.create(
+            linkLauncher = linkLauncher,
+            eventReporter = eventReporter,
+        ) { linkHandler, savedStateHandle ->
+            PaymentSheetViewModel(
+                application,
+                args,
+                eventReporter,
+                { paymentConfiguration },
+                StripeIntentRepository.Static(stripeIntent),
+                StripeIntentValidator(),
+                FakePaymentSheetLoader(
+                    stripeIntent = stripeIntent,
+                    shouldFail = shouldFailLoad,
+                    linkState = linkState,
+                    customerPaymentMethods = customerPaymentMethods,
+                    delay = delay,
+                ),
+                customerRepository,
+                prefsRepository,
+                lpmResourceRepository,
+                mock(),
+                mock(),
+                mock(),
+                Logger.noop(),
+                testDispatcher,
+                DUMMY_INJECTOR_KEY,
+                savedStateHandle = savedStateHandle,
+                linkHandler
+            )
+        }
     }
 
     private companion object {
