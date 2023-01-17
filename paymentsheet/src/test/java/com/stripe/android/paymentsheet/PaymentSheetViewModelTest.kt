@@ -1093,6 +1093,23 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `Sets editing to false when removing the last payment method while editing`() = runTest {
+        val customerPaymentMethods = PaymentMethodFixtures.createCards(1)
+        val viewModel = createViewModel(customerPaymentMethods = customerPaymentMethods)
+        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+
+        viewModel.editing.test {
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.setEditing(true)
+            assertThat(awaitItem()).isTrue()
+
+            viewModel.removePaymentMethod(customerPaymentMethods.single())
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
     private class NonLoadingLpmRepository(
         val lpmRepository: LpmRepository
     ) : ResourceRepository<LpmRepository> {
