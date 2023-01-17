@@ -13,7 +13,7 @@ jobs:
       matrix:
         api-level: [ 28 ]
         arch: [ x86_64 ]
-        target: [ default ]
+        target: [ playstore ]
         profile: [ Nexus 6 ]
     steps:
       - uses: actions/checkout@v3
