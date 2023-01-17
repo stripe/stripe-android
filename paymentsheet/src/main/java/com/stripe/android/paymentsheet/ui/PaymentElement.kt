@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -65,15 +64,11 @@ internal fun PaymentElement(
             )
         }
 
-        LaunchedEffect(selectedItem.code) {
-            // A temporary workaround until the USBankAccountFragment is migrated to Compose
-            if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
-                val activity = context.requireActivity()
-                (activity as BaseSheetActivity<*>).formArgs = formArguments
-            }
-        }
-
         if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
+            // A temporary workaround until the USBankAccountFragment is migrated to Compose
+            val activity = context.requireActivity()
+            (activity as BaseSheetActivity<*>).formArgs = formArguments
+
             Column(modifier = Modifier.padding(horizontal = horizontalPadding)) {
                 AndroidViewBinding(FragmentAchBinding::inflate)
             }
