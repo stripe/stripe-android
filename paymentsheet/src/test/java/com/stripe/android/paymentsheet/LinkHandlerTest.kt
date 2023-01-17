@@ -72,48 +72,48 @@ class LinkHandlerTest {
 
     @Test
     fun `Sets up state correctly for a user that needs verification`() = runLinkTest {
-            handler.setupLinkLaunchingEagerly(
-                testScope,
-                LinkState(configuration, LinkState.LoginState.NeedsVerification),
-            )
-            assertThat(handler.isLinkEnabled.first()).isTrue()
-            assertThat(handler.activeLinkSession.first()).isFalse()
-            assertThat(handler.linkConfiguration.first()).isEqualTo(configuration)
-            processingStateTurbine.ensureAllEventsConsumed()
-            assertThat(handler.showLinkVerificationDialog.first()).isFalse()
-            verifyNoInteractions(linkLauncher)
-            verifyNoInteractions(eventReporter)
+        handler.setupLinkLaunchingEagerly(
+            testScope,
+            LinkState(configuration, LinkState.LoginState.NeedsVerification),
+        )
+        assertThat(handler.isLinkEnabled.first()).isTrue()
+        assertThat(handler.activeLinkSession.first()).isFalse()
+        assertThat(handler.linkConfiguration.first()).isEqualTo(configuration)
+        processingStateTurbine.ensureAllEventsConsumed()
+        assertThat(handler.showLinkVerificationDialog.first()).isFalse()
+        verifyNoInteractions(linkLauncher)
+        verifyNoInteractions(eventReporter)
 
-            handler.handleLinkVerificationResult(true)
+        handler.handleLinkVerificationResult(true)
 
-            assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
-            assertThat(handler.showLinkVerificationDialog.first()).isTrue()
-            assertThat(handler.activeLinkSession.first()).isTrue()
+        assertThat(processingStateTurbine.awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
+        assertThat(handler.showLinkVerificationDialog.first()).isTrue()
+        assertThat(handler.activeLinkSession.first()).isTrue()
 
-            verify(linkLauncher).present(configuration, null)
-        }
+        verify(linkLauncher).present(configuration, null)
+    }
 
     @Test
     fun `Sets up state correctly for user that fails verification`() = runLinkTest {
-            handler.setupLinkLaunchingEagerly(
-                testScope,
-                LinkState(configuration, LinkState.LoginState.NeedsVerification),
-            )
-            assertThat(handler.isLinkEnabled.first()).isTrue()
-            assertThat(handler.activeLinkSession.first()).isFalse()
-            assertThat(handler.linkConfiguration.first()).isEqualTo(configuration)
-            processingStateTurbine.ensureAllEventsConsumed()
-            assertThat(handler.showLinkVerificationDialog.first()).isFalse()
-            verifyNoInteractions(linkLauncher)
-            verifyNoInteractions(eventReporter)
+        handler.setupLinkLaunchingEagerly(
+            testScope,
+            LinkState(configuration, LinkState.LoginState.NeedsVerification),
+        )
+        assertThat(handler.isLinkEnabled.first()).isTrue()
+        assertThat(handler.activeLinkSession.first()).isFalse()
+        assertThat(handler.linkConfiguration.first()).isEqualTo(configuration)
+        processingStateTurbine.ensureAllEventsConsumed()
+        assertThat(handler.showLinkVerificationDialog.first()).isFalse()
+        verifyNoInteractions(linkLauncher)
+        verifyNoInteractions(eventReporter)
 
-            handler.handleLinkVerificationResult(false)
+        handler.handleLinkVerificationResult(false)
 
-            assertThat(handler.activeLinkSession.first()).isFalse()
-            assertThat(handler.showLinkVerificationDialog.first()).isFalse()
+        assertThat(handler.activeLinkSession.first()).isFalse()
+        assertThat(handler.showLinkVerificationDialog.first()).isFalse()
 
-            verifyNoInteractions(linkLauncher)
-        }
+        verifyNoInteractions(linkLauncher)
+    }
 
     @Test
     fun `Sets up state correctly for null LinkState`() = runLinkTest {
