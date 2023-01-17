@@ -6,7 +6,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
@@ -52,7 +51,6 @@ import com.stripe.android.paymentsheet.model.StripeIntentValidator
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
-import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -254,8 +252,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.message.isVisible).isTrue()
             assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
 
-            val linkConfig = viewModel.linkConfiguration.getOrAwaitValue()
-            activity.viewBinding.linkButton.onClick(linkConfig)
+            activity.viewBinding.linkButton.onClick(mock())
             assertThat(activity.viewBinding.message.isVisible).isFalse()
         }
     }
@@ -300,7 +297,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.message.isVisible).isTrue()
             assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
 
-            activity.onBackPressed()
+            pressBack()
 
             assertThat(activity.viewBinding.message.isVisible).isFalse()
         }
@@ -467,13 +464,13 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.toolbar.navigationContentDescription)
                 .isEqualTo(context.getString(R.string.back))
 
-            activity.onBackPressed()
+            pressBack()
             idleLooper()
 
             assertThat(activity.toolbar.navigationContentDescription)
                 .isEqualTo(context.getString(R.string.stripe_paymentsheet_close))
 
-            activity.onBackPressed()
+            pressBack()
             idleLooper()
             // animating out
             assertThat(activity.bottomSheetBehavior.state)
@@ -1247,42 +1244,34 @@ internal class PaymentSheetActivityTest {
 
         registerFormViewModelInjector()
 
-        PaymentSheetViewModel(
-            ApplicationProvider.getApplicationContext(),
-            PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-            eventReporter,
-            { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-            StripeIntentRepository.Static(paymentIntent),
-            StripeIntentValidator(),
-            FakePaymentSheetLoader(
-                stripeIntent = paymentIntent,
-                customerPaymentMethods = paymentMethods,
-                linkState = LinkState(
-                    configuration = LinkPaymentLauncher.Configuration(
-                        stripeIntent = paymentIntent,
-                        merchantName = "Merchant",
-                        customerEmail = null,
-                        customerName = null,
-                        customerPhone = null,
-                        customerBillingCountryCode = null,
-                        shippingValues = null,
-                    ),
-                    loginState = LinkState.LoginState.LoggedOut,
-                ).takeIf { paymentIntent.paymentMethodTypes.contains("link") },
-            ),
-            FakeCustomerRepository(paymentMethods),
-            FakePrefsRepository(),
-            StaticLpmResourceRepository(lpmRepository),
-            mock(),
-            stripePaymentLauncherAssistedFactory,
-            googlePayPaymentMethodLauncherFactory,
-            Logger.noop(),
-            testDispatcher,
-            DUMMY_INJECTOR_KEY,
-            savedStateHandle = SavedStateHandle(),
-            linkLauncher = linkPaymentLauncher
-        ).also {
-            it.injector = injector
+        TestViewModelFactory.create(
+            linkLauncher = linkPaymentLauncher,
+        ) { linkHandler, savedStateHandle ->
+            PaymentSheetViewModel(
+                ApplicationProvider.getApplicationContext(),
+                PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+                eventReporter,
+                { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
+                StripeIntentRepository.Static(paymentIntent),
+                StripeIntentValidator(),
+                FakePaymentSheetLoader(
+                    stripeIntent = paymentIntent,
+                    customerPaymentMethods = paymentMethods,
+                ),
+                FakeCustomerRepository(paymentMethods),
+                FakePrefsRepository(),
+                StaticLpmResourceRepository(lpmRepository),
+                mock(),
+                stripePaymentLauncherAssistedFactory,
+                googlePayPaymentMethodLauncherFactory,
+                Logger.noop(),
+                testDispatcher,
+                DUMMY_INJECTOR_KEY,
+                savedStateHandle = savedStateHandle,
+                linkHandler = linkHandler
+            ).also {
+                it.injector = injector
+            }
         }
     }
 

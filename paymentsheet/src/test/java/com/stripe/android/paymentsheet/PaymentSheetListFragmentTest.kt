@@ -19,8 +19,8 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.Companion.addressRepository
-import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.Companion.lpmRepository
+import com.stripe.android.paymentsheet.PaymentSheetViewModelInjectionTest.Companion.addressRepository
+import com.stripe.android.paymentsheet.PaymentSheetViewModelInjectionTest.Companion.lpmRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -35,14 +35,12 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection() {
+internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjectionTest() {
     @InjectorKey
     private val injectorKey: String = "PaymentSheetListFragmentTest"
 
@@ -115,7 +113,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
             fragment.initializePaymentOptions(
                 isGooglePayReady = GooglePayState.NotAvailable,
-                isLinkEnabled = false,
             )
         }.moveToState(Lifecycle.State.RESUMED).onFragment {
             idleLooper()
@@ -202,13 +199,6 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     }
 
     @Test
-    fun `started fragment should report onShowExistingPaymentOptions() event`() {
-        createScenario().onFragment {
-            verify(eventReporter).onShowExistingPaymentOptions(any(), any())
-        }
-    }
-
-    @Test
     fun `total amount label correctly displays amount`() {
         createScenario().onFragment { fragment ->
             shadowOf(getMainLooper()).idle()
@@ -289,12 +279,10 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     private fun PaymentSheetListFragment.initializePaymentOptions(
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
         isGooglePayReady: GooglePayState = GooglePayState.NotAvailable,
-        isLinkEnabled: Boolean = false,
         savedSelection: SavedSelection = SavedSelection.None,
     ) {
         sheetViewModel.savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods
         sheetViewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = isGooglePayReady
-        sheetViewModel._isLinkEnabled.value = isLinkEnabled
         sheetViewModel.savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection
     }
 

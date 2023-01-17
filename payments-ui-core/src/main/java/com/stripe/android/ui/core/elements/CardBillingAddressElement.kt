@@ -3,6 +3,8 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.address.FieldType
+import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.DropdownFieldController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 

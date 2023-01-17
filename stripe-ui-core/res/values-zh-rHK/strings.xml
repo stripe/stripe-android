@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Label for input requesting phone number, used for all locations -->
+  <string name="address_label_phone_number">電話號碼</string>
+  <!-- Error description for incomplete phone number -->
+  <string name="incomplete_phone_number">電話號碼不完整</string>
+</resources>

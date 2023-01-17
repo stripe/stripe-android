@@ -5,7 +5,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.forms.FormFieldEntry
 
 /**
  * This class converts the fields in a form into a structure as defined by a map.

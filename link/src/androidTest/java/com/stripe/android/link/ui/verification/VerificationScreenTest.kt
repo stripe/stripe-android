@@ -27,7 +27,7 @@ import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.OTPController
 import com.stripe.android.ui.core.elements.OTPElement
 import com.stripe.android.ui.core.elements.OTPSpec
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.forms.FormFieldEntry
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -189,6 +189,7 @@ internal class VerificationScreenTest {
                 messageStringResId = R.string.verification_message,
                 showChangeEmailMessage = true,
                 redactedPhoneNumber = redactedPhoneNumber,
+                isSendingNewCode = true,
                 email = email,
                 otpElement = otpElement,
                 isProcessing = isProcessing,

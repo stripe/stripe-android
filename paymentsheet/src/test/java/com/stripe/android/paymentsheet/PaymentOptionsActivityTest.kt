@@ -9,9 +9,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso.pressBack
 import app.cash.turbine.test
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
@@ -228,7 +228,7 @@ internal class PaymentOptionsActivityTest {
                     .isTrue()
 
                 // Navigate back to payment options list
-                activity.onBackPressed()
+                pressBack()
                 idleLooper()
 
                 assertThat(activity.viewBinding.continueButton.isVisible)
@@ -569,22 +569,26 @@ internal class PaymentOptionsActivityTest {
         val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
             onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
         }
-        registerFormViewModelInjector()
-        return PaymentOptionsViewModel(
-            args = args,
-            prefsRepositoryFactory = { FakePrefsRepository() },
-            eventReporter = eventReporter,
-            customerRepository = FakeCustomerRepository(),
-            workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY,
-            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
-            savedStateHandle = SavedStateHandle(),
-            linkLauncher = linkPaymentLauncher
-        ).also {
-            it.injector = injector
+        return TestViewModelFactory.create(
+            linkLauncher = linkPaymentLauncher,
+        ) { linkHandler, savedStateHandle ->
+            registerFormViewModelInjector()
+            PaymentOptionsViewModel(
+                args = args,
+                prefsRepositoryFactory = { FakePrefsRepository() },
+                eventReporter = eventReporter,
+                customerRepository = FakeCustomerRepository(),
+                workContext = testDispatcher,
+                application = ApplicationProvider.getApplicationContext(),
+                logger = Logger.noop(),
+                injectorKey = DUMMY_INJECTOR_KEY,
+                lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
+                addressResourceRepository = StaticAddressResourceRepository(addressRepository),
+                savedStateHandle = savedStateHandle,
+                linkHandler = linkHandler,
+            ).also {
+                it.injector = injector
+            }
         }
     }
 

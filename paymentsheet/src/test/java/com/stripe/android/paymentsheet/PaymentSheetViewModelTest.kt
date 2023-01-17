@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
+import app.cash.turbine.testIn
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -57,7 +57,6 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -316,9 +315,9 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.showLinkVerificationDialog.value).isFalse()
-        assertThat(viewModel.activeLinkSession.value).isTrue()
-        assertThat(viewModel.isLinkEnabled.value).isTrue()
+        assertThat(viewModel.linkHandler.showLinkVerificationDialog.value).isFalse()
+        assertThat(viewModel.linkHandler.activeLinkSession.value).isTrue()
+        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
 
         verify(linkLauncher).present(
             configuration = eq(configuration),
@@ -335,9 +334,9 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.showLinkVerificationDialog.value).isTrue()
-        assertThat(viewModel.activeLinkSession.value).isFalse()
-        assertThat(viewModel.isLinkEnabled.value).isTrue()
+        assertThat(viewModel.linkHandler.showLinkVerificationDialog.value).isTrue()
+        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
+        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
     @Test
@@ -349,8 +348,8 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.activeLinkSession.value).isFalse()
-        assertThat(viewModel.isLinkEnabled.value).isTrue()
+        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
+        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
     @Test
@@ -359,8 +358,8 @@ internal class PaymentSheetViewModelTest {
             linkState = null,
         )
 
-        assertThat(viewModel.activeLinkSession.value).isFalse()
-        assertThat(viewModel.isLinkEnabled.value).isFalse()
+        assertThat(viewModel.linkHandler.activeLinkSession.value).isFalse()
+        assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
     }
 
     @Test
@@ -463,19 +462,14 @@ internal class PaymentSheetViewModelTest {
                 viewState.add(it)
             }
 
-            var paymentSheetResult: PaymentSheetResult? = null
-            viewModel.paymentSheetResult.observeForever {
-                paymentSheetResult = it
+            viewModel.paymentSheetResult.test {
+                viewModel.onPaymentResult(PaymentResult.Completed)
+                assertThat(viewState[1])
+                    .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+                (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
+                assertThat(awaitItem())
+                    .isEqualTo(PaymentSheetResult.Completed)
             }
-
-            viewModel.onPaymentResult(PaymentResult.Completed)
-
-            assertThat(viewState[1])
-                .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
-
-            (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
-
-            assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
                 .onPaymentSuccess(selection)
@@ -505,19 +499,13 @@ internal class PaymentSheetViewModelTest {
                 viewState.add(it)
             }
 
-            var paymentSheetResult: PaymentSheetResult? = null
-            viewModel.paymentSheetResult.observeForever {
-                paymentSheetResult = it
+            viewModel.paymentSheetResult.test {
+                viewModel.onPaymentResult(PaymentResult.Completed)
+                assertThat(viewState[1])
+                    .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+                (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
+                assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed)
             }
-
-            viewModel.onPaymentResult(PaymentResult.Completed)
-
-            assertThat(viewState[1])
-                .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
-
-            (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
-
-            assertThat(paymentSheetResult).isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
                 .onPaymentSuccess(selection)
@@ -591,33 +579,29 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Loading payment sheet state should propagate errors`() = runBlocking {
+    fun `Loading payment sheet state should propagate errors`() = runTest {
         val viewModel = createViewModel(shouldFailLoad = true)
-        var result: PaymentSheetResult? = null
-        viewModel.paymentSheetResult.observeForever {
-            result = it
+        viewModel.paymentSheetResult.test {
+            assertThat(awaitItem())
+                .isInstanceOf(PaymentSheetResult.Failed::class.java)
         }
-        assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
     }
 
     @Test
-    fun `when StripeIntent does not accept any of the supported payment methods should return error`() {
+    fun `when StripeIntent does not accept any of the supported payment methods should return error`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PAYMENT_INTENT.copy(
                 paymentMethodTypes = listOf("unsupported_payment_type"),
             ),
         )
 
-        var result: PaymentSheetResult? = null
-        viewModel.paymentSheetResult.observeForever {
-            result = it
+        viewModel.paymentSheetResult.test {
+            assertThat((awaitItem() as? PaymentSheetResult.Failed)?.error?.message)
+                .startsWith(
+                    "None of the requested payment methods ([unsupported_payment_type]) " +
+                        "match the supported payment types "
+                )
         }
-
-        assertThat((result as? PaymentSheetResult.Failed)?.error?.message)
-            .startsWith(
-                "None of the requested payment methods ([unsupported_payment_type]) " +
-                    "match the supported payment types "
-            )
     }
 
     @Test
@@ -1001,6 +985,94 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
+    @Test
+    fun `Sends correct event when navigating to AddFirstPaymentMethod screen`() = runTest {
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+
+        val receiver = viewModel.currentScreen.testIn(this)
+        viewModel.transitionToFirstScreen()
+
+        verify(eventReporter).onShowNewPaymentOptionForm(
+            linkEnabled = eq(false),
+            activeLinkSession = eq(false),
+        )
+
+        receiver.cancelAndIgnoreRemainingEvents()
+    }
+
+    @Test
+    fun `Sends correct event when navigating to AddFirstPaymentMethod screen with Link enabled`() = runTest {
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.NeedsVerification,
+            )
+        )
+        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+
+        val receiver = viewModel.currentScreen.testIn(this)
+        viewModel.transitionToFirstScreen()
+
+        verify(eventReporter).onShowNewPaymentOptionForm(
+            linkEnabled = eq(true),
+            activeLinkSession = eq(false),
+        )
+
+        receiver.cancelAndIgnoreRemainingEvents()
+    }
+
+    @Test
+    fun `Sends correct event when navigating to AddFirstPaymentMethod screen with active Link session`() = runTest {
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.LoggedIn,
+            )
+        )
+        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+
+        val receiver = viewModel.currentScreen.testIn(this)
+        viewModel.transitionToFirstScreen()
+
+        verify(eventReporter).onShowNewPaymentOptionForm(
+            linkEnabled = eq(true),
+            activeLinkSession = eq(true),
+        )
+
+        receiver.cancelAndIgnoreRemainingEvents()
+    }
+
+    @Test
+    fun `Sends correct event when navigating to AddAnotherPaymentMethod screen`() = runTest {
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            customerPaymentMethods = PaymentMethodFixtures.createCards(1),
+        )
+        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+
+        val receiver = viewModel.currentScreen.testIn(this)
+        viewModel.transitionToFirstScreen()
+
+        verify(eventReporter).onShowExistingPaymentOptions(
+            linkEnabled = eq(false),
+            activeLinkSession = eq(false),
+        )
+
+        viewModel.transitionToAddPaymentScreen()
+
+        verify(eventReporter).onShowNewPaymentOptionForm(
+            linkEnabled = eq(false),
+            activeLinkSession = eq(false),
+        )
+
+        receiver.cancelAndIgnoreRemainingEvents()
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
@@ -1011,32 +1083,36 @@ internal class PaymentSheetViewModelTest {
         delay: Duration = Duration.ZERO
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        return PaymentSheetViewModel(
-            application,
-            args,
-            eventReporter,
-            { paymentConfiguration },
-            StripeIntentRepository.Static(stripeIntent),
-            StripeIntentValidator(),
-            FakePaymentSheetLoader(
-                stripeIntent = stripeIntent,
-                shouldFail = shouldFailLoad,
-                linkState = linkState,
-                customerPaymentMethods = customerPaymentMethods,
-                delay = delay
-            ),
-            customerRepository,
-            prefsRepository,
-            lpmResourceRepository,
-            mock(),
-            mock(),
-            mock(),
-            Logger.noop(),
-            testDispatcher,
-            DUMMY_INJECTOR_KEY,
-            savedStateHandle = SavedStateHandle(),
-            linkLauncher
-        )
+        return TestViewModelFactory.create(
+            linkLauncher = linkLauncher,
+        ) { linkHandler, savedStateHandle ->
+            PaymentSheetViewModel(
+                application,
+                args,
+                eventReporter,
+                { paymentConfiguration },
+                StripeIntentRepository.Static(stripeIntent),
+                StripeIntentValidator(),
+                FakePaymentSheetLoader(
+                    stripeIntent = stripeIntent,
+                    shouldFail = shouldFailLoad,
+                    linkState = linkState,
+                    customerPaymentMethods = customerPaymentMethods,
+                    delay = delay,
+                ),
+                customerRepository,
+                prefsRepository,
+                lpmResourceRepository,
+                mock(),
+                mock(),
+                mock(),
+                Logger.noop(),
+                testDispatcher,
+                DUMMY_INJECTOR_KEY,
+                savedStateHandle = savedStateHandle,
+                linkHandler
+            )
+        }
     }
 
     private companion object {

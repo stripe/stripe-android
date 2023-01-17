@@ -7,7 +7,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.BankAccount
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.forms.FormFieldEntry
 
 internal data class WalletUiState(
     val supportedTypes: Set<String>,

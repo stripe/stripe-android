@@ -15,9 +15,10 @@ jobs:
   build-master:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
         with:
           ref: master
+      - uses: ./.github/actions/stripe_setup
       - name: Build in master
         run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-unsigned.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-master.apk
       - name: Upload APK
@@ -30,7 +31,8 @@ jobs:
   build-pr:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/stripe_setup
       - name: Build from PR
         run: ./gradlew :paymentsheet-example:assembleRelease && mv paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-unsigned.apk paymentsheet-example/build/outputs/apk/release/paymentsheet-example-release-pr.apk
       - name: Upload APK
@@ -46,7 +48,7 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: Download APKs
         uses: actions/download-artifact@v1
         with:

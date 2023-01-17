@@ -32,8 +32,6 @@
   <string name="address_label_city_optional">Cidade (opcional)</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Condado (opcional)</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="address_label_phone_number">Telefone</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Telefone (opcional)</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->

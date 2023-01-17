@@ -32,8 +32,6 @@
   <string name="address_label_city_optional">Ort (optional)</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Kreis/Bezirk (optional)</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="address_label_phone_number">Telefonnummer</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Telefonnummer (optional)</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
