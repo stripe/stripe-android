@@ -29,12 +29,16 @@ internal class HeaderTextFactory(
                         isWalletEnabled
                     }
                 }
+                PaymentSheetScreen.Loading,
                 PaymentSheetScreen.AddAnotherPaymentMethod -> {
                     null
                 }
             }
         } else {
             when (screen) {
+                PaymentSheetScreen.Loading, -> {
+                    null
+                }
                 PaymentSheetScreen.SelectSavedPaymentMethods -> {
                     R.string.stripe_paymentsheet_select_payment_method
                 }

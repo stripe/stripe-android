@@ -139,14 +139,16 @@ internal abstract class BaseSheetViewModel(
     private val savedSelection: StateFlow<SavedSelection?> = savedStateHandle
         .getStateFlow<SavedSelection?>(SAVE_SAVED_SELECTION, null)
 
-    protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(emptyList())
+    protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
+        value = listOf(PaymentSheetScreen.Loading),
+    )
 
-    val currentScreen: StateFlow<PaymentSheetScreen?> = backStack
-        .map { it.lastOrNull() }
+    val currentScreen: StateFlow<PaymentSheetScreen> = backStack
+        .map { it.last() }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(),
-            initialValue = null,
+            initialValue = PaymentSheetScreen.Loading,
         )
 
     internal val headerText: StateFlow<Int?> = combine(
@@ -328,7 +330,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun transitionTo(target: PaymentSheetScreen) {
         clearErrorMessages()
-        backStack.update { it + target }
+        backStack.update { (it - PaymentSheetScreen.Loading) + target }
         reportNavigationEvent(target)
     }
 
@@ -338,6 +340,9 @@ internal abstract class BaseSheetViewModel(
 
     protected fun reportNavigationEvent(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
+            PaymentSheetScreen.Loading -> {
+                // Nothing to do here
+            }
             PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions(
                     linkEnabled = linkHandler.isLinkEnabled.value,

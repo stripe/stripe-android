@@ -23,7 +23,8 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModelInjectionTest.Compan
 import com.stripe.android.paymentsheet.PaymentSheetViewModelInjectionTest.Companion.lpmRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.Loading
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_GOOGLE_PAY_STATE
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PAYMENT_METHODS
@@ -189,12 +190,12 @@ internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjection
         val recyclerView = scenario.withFragment { recyclerView(this) }
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isEqualTo(Loading)
 
             val adapter = recyclerView.adapter as PaymentOptionsAdapter
             adapter.addCardClickListener()
 
-            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddAnotherPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(AddAnotherPaymentMethod)
         }
     }
 

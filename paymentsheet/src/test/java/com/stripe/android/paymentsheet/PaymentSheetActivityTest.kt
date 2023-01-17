@@ -48,7 +48,10 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.Loading
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -433,18 +436,19 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isEqualTo(Loading)
 
             scenario.launch(intent)
-            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
 
             viewModel.transitionToAddPaymentScreen()
-            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddAnotherPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(AddAnotherPaymentMethod)
 
             pressBack()
-            scenario.launch(intent)
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
 
-            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
+            pressBack()
+            expectNoEvents()
         }
     }
 
@@ -748,9 +752,9 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isEqualTo(Loading)
             scenario.launchForResult(intent)
-            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddFirstPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
         }
     }
 
@@ -1152,9 +1156,9 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel(paymentMethods = PAYMENT_METHODS)
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isEqualTo(Loading)
             activityScenario(viewModel).launch(intent)
-            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
     }
 
@@ -1163,9 +1167,9 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel(paymentMethods = emptyList())
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isEqualTo(Loading)
             activityScenario(viewModel).launch(intent)
-            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddFirstPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
         }
     }
 
@@ -1175,10 +1179,10 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isEqualTo(Loading)
 
             scenario.launch(intent)
-            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddFirstPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
 
             scenario.recreate()
             expectNoEvents()

@@ -17,7 +17,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
-import com.stripe.android.paymentsheet.navigation.PaymentOptionsContent
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -105,13 +104,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             viewBinding.continueButton.isVisible = visible
             viewBinding.bottomSpacer.isVisible = visible
 
-            if (currentScreen != null) {
-                rootView.doOnNextLayout {
-                    // Expand sheet only after the first fragment is attached so that it
-                    // animates in. Further calls to expand() are no-op if the sheet is already
-                    // expanded.
-                    bottomSheetController.expand()
-                }
+            rootView.doOnNextLayout {
+                // Expand sheet only after the first fragment is attached so that it
+                // animates in. Further calls to expand() are no-op if the sheet is already
+                // expanded.
+                bottomSheetController.expand()
             }
         }
     }

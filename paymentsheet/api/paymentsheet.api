@@ -1040,14 +1040,6 @@ public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentSh
 	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentSheetListBinding;
 }
 
-public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetLoadingBinding : androidx/viewbinding/ViewBinding {
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetLoadingBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/FrameLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetLoadingBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetLoadingBinding;
-}
-
 public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding : androidx/viewbinding/ViewBinding {
 	public final field recycler Landroidx/recyclerview/widget/RecyclerView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding;

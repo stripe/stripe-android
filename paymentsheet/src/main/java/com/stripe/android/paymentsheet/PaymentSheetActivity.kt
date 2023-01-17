@@ -25,7 +25,6 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.navigation.PaymentSheetContent
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
@@ -124,7 +123,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             val currentScreen by viewModel.currentScreen.collectAsState()
 
             LaunchedEffect(currentScreen) {
-                buttonContainer.isVisible = currentScreen != null
+                buttonContainer.isVisible = currentScreen.showsBuyButton
             }
 
             currentScreen.PaymentSheetContent()
