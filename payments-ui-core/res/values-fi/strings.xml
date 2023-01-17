@@ -58,16 +58,12 @@
   <string name="form_label_optional">%s (valinnainen)</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="iban_incomplete">IBAN on puutteellinen.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">Antamasi IBAN on virheellinen.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="iban_invalid_country">Antamasi IBAN on virheellinen, \"%s\" ei ole tuettu maakoodi.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">IBAN-tilinumero alkaa kaksikirjaimisella maakoodilla.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL-pankki</string>
-  <!-- Error description for incomplete phone number -->
-  <string name="incomplete_phone_number">Puutteellinen puhelinnumero</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Osta nyt tai maksa myöhemmin Klarnalla.</string>
   <!-- Klarna pay later copy -->

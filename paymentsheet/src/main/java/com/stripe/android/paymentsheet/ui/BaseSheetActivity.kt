@@ -34,8 +34,10 @@ import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
+import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -55,6 +57,11 @@ import kotlin.math.roundToInt
 
 internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val viewModel: BaseSheetViewModel
+
+    val linkHandler: LinkHandler
+        get() = viewModel.linkHandler
+    val linkLauncher: LinkPaymentLauncher
+        get() = linkHandler.linkLauncher
 
     @VisibleForTesting
     internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
@@ -149,12 +156,12 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         setupPrimaryButton()
         setupNotes()
 
-        viewModel.showLinkVerificationDialog.observe(this) { show ->
+        viewModel.linkHandler.showLinkVerificationDialog.launchAndCollectIn(this) { show ->
             linkAuthView.setContent {
                 if (show) {
                     LinkVerificationDialog(
-                        linkLauncher = viewModel.linkLauncher,
-                        onResult = viewModel::handleLinkVerificationResult,
+                        linkLauncher = linkLauncher,
+                        onResult = linkHandler::handleLinkVerificationResult,
                     )
                 }
             }

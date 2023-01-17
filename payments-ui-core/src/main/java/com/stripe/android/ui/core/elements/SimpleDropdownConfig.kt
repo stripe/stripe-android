@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import com.stripe.android.uicore.elements.DropdownConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SimpleDropdownConfig(

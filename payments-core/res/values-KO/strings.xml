@@ -32,8 +32,6 @@
   <string name="address_label_city_optional">도시(선택 사항)</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">구/군(선택 사항)</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="address_label_phone_number">전화번호</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">전화번호(선택 사항)</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->

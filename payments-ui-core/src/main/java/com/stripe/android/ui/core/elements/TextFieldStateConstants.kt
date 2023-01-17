@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.StringRes
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.elements.FieldError
 
 internal class TextFieldStateConstants {
     sealed class Valid : TextFieldState {

@@ -267,7 +267,7 @@ public final class com/stripe/android/ui/core/elements/CardDetailsSectionSpec$Co
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public abstract class com/stripe/android/ui/core/elements/CardNumberController : com/stripe/android/ui/core/elements/SectionFieldErrorController, com/stripe/android/ui/core/elements/TextFieldController {
+public abstract class com/stripe/android/ui/core/elements/CardNumberController : com/stripe/android/ui/core/elements/TextFieldController, com/stripe/android/uicore/elements/SectionFieldErrorController {
 	public static final field $stable I
 	public abstract fun getCardBrandFlow ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun getCardScanEnabled ()Z
@@ -392,9 +392,6 @@ public final class com/stripe/android/ui/core/elements/ConfirmStatusSpecAssociat
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/CountryConfig$Companion {
-}
-
 public final class com/stripe/android/ui/core/elements/CountrySpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/CountrySpec$$serializer;
@@ -425,10 +422,6 @@ public final class com/stripe/android/ui/core/elements/DisplayField : java/lang/
 
 public final class com/stripe/android/ui/core/elements/DisplayField$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/DropdownConfig$DefaultImpls {
-	public static fun getTinyMode (Lcom/stripe/android/ui/core/elements/DropdownConfig;)Z
 }
 
 public final class com/stripe/android/ui/core/elements/DropdownItemSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -692,11 +685,6 @@ public final class com/stripe/android/ui/core/elements/NextActionSpecKt {
 public final class com/stripe/android/ui/core/elements/OTPElementUIKt {
 }
 
-public final class com/stripe/android/ui/core/elements/PhoneNumberController$Companion {
-	public final fun createPhoneNumberController (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/PhoneNumberController;
-	public static synthetic fun createPhoneNumberController$default (Lcom/stripe/android/ui/core/elements/PhoneNumberController$Companion;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/PhoneNumberController;
-}
-
 public final class com/stripe/android/ui/core/elements/PhoneNumberElementUIKt {
 }
 
@@ -784,7 +772,7 @@ public final class com/stripe/android/ui/core/elements/PostConfirmStatusSpecAsso
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/SameAsShippingController : com/stripe/android/ui/core/elements/InputController {
+public final class com/stripe/android/ui/core/elements/SameAsShippingController : com/stripe/android/uicore/elements/InputController {
 	public static final field $stable I
 	public fun <init> (Z)V
 	public fun getError ()Lkotlinx/coroutines/flow/Flow;

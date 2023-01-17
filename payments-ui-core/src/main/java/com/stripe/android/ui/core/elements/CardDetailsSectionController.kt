@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.DefaultIsStripeCardScanAvailable
+import com.stripe.android.uicore.elements.SectionFieldErrorController
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardDetailsSectionController(
