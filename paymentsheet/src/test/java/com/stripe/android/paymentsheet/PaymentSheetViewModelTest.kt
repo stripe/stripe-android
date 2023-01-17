@@ -1085,7 +1085,6 @@ internal class PaymentSheetViewModelTest {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return TestViewModelFactory.create(
             linkLauncher = linkLauncher,
-            eventReporter = eventReporter,
         ) { linkHandler, savedStateHandle ->
             PaymentSheetViewModel(
                 application,

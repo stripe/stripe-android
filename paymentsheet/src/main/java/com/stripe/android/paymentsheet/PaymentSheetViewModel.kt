@@ -213,6 +213,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Canceled)
             }
             LinkHandler.ProcessingState.Completed -> {
+                eventReporter.onPaymentSuccess(PaymentSelection.Link)
                 prefsRepository.savePaymentSelection(PaymentSelection.Link)
                 _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
             }

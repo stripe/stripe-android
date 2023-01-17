@@ -14,7 +14,6 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SELECTION
@@ -52,7 +51,6 @@ class LinkHandlerTest {
 
         verify(linkLauncher).present(configuration, null)
         verifyNoMoreInteractions(linkLauncher)
-        verifyNoInteractions(eventReporter)
     }
 
     @Test
@@ -67,7 +65,6 @@ class LinkHandlerTest {
         assertThat(handler.showLinkVerificationDialog.first()).isFalse()
 
         verifyNoInteractions(linkLauncher)
-        verifyNoInteractions(eventReporter)
     }
 
     @Test
@@ -82,7 +79,6 @@ class LinkHandlerTest {
         processingStateTurbine.ensureAllEventsConsumed()
         assertThat(handler.showLinkVerificationDialog.first()).isFalse()
         verifyNoInteractions(linkLauncher)
-        verifyNoInteractions(eventReporter)
 
         handler.handleLinkVerificationResult(true)
 
@@ -105,7 +101,6 @@ class LinkHandlerTest {
         processingStateTurbine.ensureAllEventsConsumed()
         assertThat(handler.showLinkVerificationDialog.first()).isFalse()
         verifyNoInteractions(linkLauncher)
-        verifyNoInteractions(eventReporter)
 
         handler.handleLinkVerificationResult(false)
 
@@ -123,7 +118,6 @@ class LinkHandlerTest {
         assertThat(handler.linkConfiguration.first()).isNull()
         assertThat(handler.showLinkVerificationDialog.first()).isFalse()
         verifyNoInteractions(linkLauncher)
-        verifyNoInteractions(eventReporter)
     }
 
     @Test
@@ -136,7 +130,6 @@ class LinkHandlerTest {
         assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION))
             .isEqualTo(PaymentSelection.Link)
         verifyNoInteractions(linkLauncher)
-        verifyNoInteractions(eventReporter)
     }
 
     @Test
@@ -149,7 +142,6 @@ class LinkHandlerTest {
         assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION))
             .isNull()
         verifyNoInteractions(linkLauncher)
-        verifyNoInteractions(eventReporter)
     }
 
     @Test
@@ -161,7 +153,6 @@ class LinkHandlerTest {
 
         verify(linkLauncher).present(configuration, null)
         verifyNoMoreInteractions(linkLauncher)
-        verifyNoInteractions(eventReporter)
     }
 
     @Test
@@ -356,12 +347,10 @@ private fun runLinkTest(
     testBlock: suspend LinkTestData.() -> Unit
 ): Unit = runTest {
     val linkLauncher = mock<LinkPaymentLauncher>()
-    val eventReporter = mock<EventReporter>()
     val savedStateHandle = SavedStateHandle()
     val handler = LinkHandler(
         linkLauncher = linkLauncher,
         savedStateHandle = savedStateHandle,
-        eventReporter = eventReporter,
     )
     val processingStateTurbine = handler.processingState.testIn(backgroundScope)
     val configuration = LinkPaymentLauncher.Configuration(
@@ -381,7 +370,6 @@ private fun runLinkTest(
             testScope = this,
             handler = handler,
             linkLauncher = linkLauncher,
-            eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
             configuration = configuration,
             accountStatusFlow = accountStatusFlow,
@@ -412,7 +400,6 @@ private data class LinkTestData(
     val testScope: TestScope,
     val handler: LinkHandler,
     val linkLauncher: LinkPaymentLauncher,
-    val eventReporter: EventReporter,
     val savedStateHandle: SavedStateHandle,
     val configuration: LinkPaymentLauncher.Configuration,
     val accountStatusFlow: MutableSharedFlow<AccountStatus>,

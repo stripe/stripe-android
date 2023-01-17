@@ -571,7 +571,6 @@ internal class PaymentOptionsActivityTest {
         }
         return TestViewModelFactory.create(
             linkLauncher = linkPaymentLauncher,
-            eventReporter = eventReporter,
         ) { linkHandler, savedStateHandle ->
             registerFormViewModelInjector()
             PaymentOptionsViewModel(

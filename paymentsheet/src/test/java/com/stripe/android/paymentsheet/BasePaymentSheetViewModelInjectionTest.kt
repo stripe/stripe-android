@@ -88,9 +88,7 @@ internal open class BasePaymentSheetViewModelInjectionTest {
         @InjectorKey injectorKey: String,
         args: PaymentSheetContract.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY
     ): PaymentSheetViewModel = runBlocking {
-        TestViewModelFactory.create(
-            eventReporter = eventReporter,
-        ) { linkHandler, savedStateHandle ->
+        TestViewModelFactory.create { linkHandler, savedStateHandle ->
             PaymentSheetViewModel(
                 ApplicationProvider.getApplicationContext(),
                 args,
