@@ -145,9 +145,10 @@ private fun BaseSheetViewModel.showLinkInlineSignupView(
     linkAccountStatus: AccountStatus?
 ): Boolean {
     val validStatusStates = setOf(
+        AccountStatus.Verified,
         AccountStatus.NeedsVerification,
         AccountStatus.VerificationStarted,
-        AccountStatus.SignedOut
+        AccountStatus.SignedOut,
     )
     val linkInlineSelectionValid = linkHandler.linkInlineSelection.value != null
     return linkHandler.isLinkEnabled.value && stripeIntent.value
