@@ -9,7 +9,6 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
@@ -27,7 +26,6 @@ import javax.inject.Inject
 internal class LinkHandler @Inject constructor(
     val linkLauncher: LinkPaymentLauncher,
     private val savedStateHandle: SavedStateHandle,
-    private val eventReporter: EventReporter,
 ) {
     sealed class ProcessingState {
         object Ready : ProcessingState()
@@ -240,7 +238,6 @@ internal class LinkHandler @Inject constructor(
 
         if (completePaymentFlow) {
             // If payment was completed inside the Link UI, dismiss immediately.
-            eventReporter.onPaymentSuccess(PaymentSelection.Link)
             _processingState.tryEmit(ProcessingState.Completed)
         } else if (cancelPaymentFlow) {
             // We launched the user straight into Link, but they decided to exit out of it.

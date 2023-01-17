@@ -83,7 +83,6 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
             linkLauncher = mock<LinkPaymentLauncher>().apply {
                 whenever(getAccountStatusFlow(any())).thenReturn(flowOf(AccountStatus.Verified))
             },
-            eventReporter = eventReporter
         ) { linkHandler, savedStateHandle ->
             PaymentOptionsViewModel(
                 args,

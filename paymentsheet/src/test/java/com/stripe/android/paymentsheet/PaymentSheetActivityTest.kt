@@ -1246,7 +1246,6 @@ internal class PaymentSheetActivityTest {
 
         TestViewModelFactory.create(
             linkLauncher = linkPaymentLauncher,
-            eventReporter = eventReporter,
         ) { linkHandler, savedStateHandle ->
             PaymentSheetViewModel(
                 ApplicationProvider.getApplicationContext(),
