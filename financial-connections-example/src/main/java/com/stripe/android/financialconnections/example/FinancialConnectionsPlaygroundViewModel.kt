@@ -195,7 +195,10 @@ class FinancialConnectionsPlaygroundViewModel(
 }
 
 enum class Mode(val flow: String) {
-    Test("testmode"), Live("mx"), App2App("app2app")
+    Test("testmode"),
+    Live("mx"),
+    App2App("app2app"),
+    Networking("networking")
 }
 
 enum class Flow {
