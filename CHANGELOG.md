@@ -2,9 +2,19 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Payments
+* [ADDED][6012](https://github.com/stripe/stripe-android/pull/6012) Support for the predictive back gesture.
+
 ### PaymentSheet
 * [DEPRECATED][5928](https://github.com/stripe/stripe-android/pull/5928) Deprecated `PaymentOption` public constructor, and `drawableResourceId` property.
 * [ADDED][5928](https://github.com/stripe/stripe-android/pull/5928) Added `PaymentOption.icon()`, which returns a `Drawable`, and replaces `PaymentOption.drawableResourceId`.
+* [ADDED][6012](https://github.com/stripe/stripe-android/pull/6012) Support for the predictive back gesture.
+
+### Financial Connections
+* [ADDED][6012](https://github.com/stripe/stripe-android/pull/6012) Support for the predictive back gesture.
+
+### CardScan
+* [ADDED][6012](https://github.com/stripe/stripe-android/pull/6012) Support for the predictive back gesture.
 
 ## 20.17.0 - 2022-12-12
 
