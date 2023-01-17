@@ -2,6 +2,7 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.17.1 - 2023-01-17
 ### Payments
 * [ADDED][6012](https://github.com/stripe/stripe-android/pull/6012) Support for the predictive back gesture.
 
@@ -15,6 +16,9 @@
 
 ### CardScan
 * [ADDED][6012](https://github.com/stripe/stripe-android/pull/6012) Support for the predictive back gesture.
+
+### Identity
+* [CHANGED][5981](https://github.com/stripe/stripe-android/pull/5981) Fully migrate to Jetpack Compose.
 
 ## 20.17.0 - 2022-12-12
 
