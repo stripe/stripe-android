@@ -234,6 +234,12 @@ internal abstract class BaseSheetViewModel(
             isLinkEnabled = linkHandler.isLinkEnabled,
             initialSelection = savedSelection,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
+            nameProvider = { code ->
+                val paymentMethod = lpmResourceRepository.getRepository().fromCode(code)
+                paymentMethod?.displayNameResource?.let {
+                    application.getString(it)
+                }.orEmpty()
+            }
         )
     }
 

@@ -102,10 +102,6 @@ internal abstract class BasePaymentMethodsListFragment : Fragment() {
         }
 
         adapter = PaymentOptionsAdapter(
-            nameProvider = {
-                val paymentMethod = sheetViewModel.lpmResourceRepository.getRepository().fromCode(it)
-                resources.getString(paymentMethod?.displayNameResource!!)
-            },
             paymentOptionSelected = { sheetViewModel.handlePaymentMethodSelected(it.toPaymentSelection()) },
             paymentMethodDeleteListener = { sheetViewModel.removePaymentMethod(it.paymentMethod) },
             addCardClickListener = sheetViewModel::transitionToAddPaymentScreen,

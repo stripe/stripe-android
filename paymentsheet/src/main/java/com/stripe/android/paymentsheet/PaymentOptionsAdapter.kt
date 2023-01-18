@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.NO_POSITION
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsAdapter.Companion.PM_OPTIONS_DEFAULT_PADDING
 import com.stripe.android.paymentsheet.PaymentOptionsItem.ViewType
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
@@ -59,7 +58,6 @@ import kotlin.properties.Delegates
 
 @SuppressLint("NotifyDataSetChanged")
 internal class PaymentOptionsAdapter(
-    private val nameProvider: (PaymentMethodCode?) -> String,
     val paymentOptionSelected: (PaymentOptionsItem) -> Unit,
     val paymentMethodDeleteListener: (PaymentOptionsItem.SavedPaymentMethod) -> Unit,
     val addCardClickListener: () -> Unit,
@@ -125,7 +123,6 @@ internal class PaymentOptionsAdapter(
                 SavedPaymentMethodViewHolder(
                     parent,
                     width,
-                    nameProvider,
                     onItemSelectedListener = ::onItemSelected,
                     onRemoveListener = { position ->
                         val removedItem = items[position] as PaymentOptionsItem.SavedPaymentMethod
@@ -165,7 +162,6 @@ internal class PaymentOptionsAdapter(
     internal class SavedPaymentMethodViewHolder(
         private val composeView: ComposeView,
         private val width: Dp,
-        private val nameProvider: (PaymentMethodCode?) -> String,
         private val onRemoveListener: (Int) -> Unit,
         private val onItemSelectedListener: (Int) -> Unit
     ) : PaymentOptionViewHolder(
@@ -174,13 +170,11 @@ internal class PaymentOptionsAdapter(
         constructor(
             parent: ViewGroup,
             width: Dp,
-            nameProvider: (PaymentMethodCode?) -> String,
             onItemSelectedListener: (Int) -> Unit,
             onRemoveListener: (Int) -> Unit
         ) : this(
             composeView = ComposeView(parent.context),
             width = width,
-            nameProvider = nameProvider,
             onRemoveListener = onRemoveListener,
             onItemSelectedListener = onItemSelectedListener
         )
@@ -197,7 +191,7 @@ internal class PaymentOptionsAdapter(
             val labelText = savedPaymentMethod.paymentMethod.getLabel(itemView.resources) ?: return
             val removeTitle = itemView.resources.getString(
                 R.string.stripe_paymentsheet_remove_pm,
-                nameProvider(item.paymentMethod.type?.code),
+                item.displayName,
             )
 
             composeView.setContent {

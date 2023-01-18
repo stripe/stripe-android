@@ -137,7 +137,10 @@ internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjection
     @Test
     fun `updates selection on click`() {
         val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val selectedItem = PaymentOptionsItem.SavedPaymentMethod(savedPaymentMethod)
+        val selectedItem = PaymentOptionsItem.SavedPaymentMethod(
+            displayName = "Card",
+            paymentMethod = savedPaymentMethod,
+        )
 
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)

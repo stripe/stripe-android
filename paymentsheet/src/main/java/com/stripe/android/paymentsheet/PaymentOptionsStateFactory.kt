@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 
@@ -21,13 +22,17 @@ internal object PaymentOptionsStateFactory {
         showLink: Boolean,
         initialSelection: SavedSelection,
         currentSelection: PaymentSelection? = null,
+        nameProvider: (PaymentMethodCode?) -> String,
     ): PaymentOptionsState {
         val items = listOfNotNull(
             PaymentOptionsItem.AddCard,
             PaymentOptionsItem.GooglePay.takeIf { showGooglePay },
             PaymentOptionsItem.Link.takeIf { showLink }
         ) + sortedPaymentMethods(paymentMethods, initialSelection).map {
-            PaymentOptionsItem.SavedPaymentMethod(it)
+            PaymentOptionsItem.SavedPaymentMethod(
+                displayName = nameProvider(it.type?.code),
+                paymentMethod = it,
+            )
         }
 
         val currentSelectionIndex = currentSelection?.let {
