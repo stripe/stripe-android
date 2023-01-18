@@ -19,17 +19,17 @@ appId: com.stripe.android.financialconnections.example
 - tapOn:
     id: "RoutingInput"
 - inputText: "110000000"
+- back
 - scroll
-- hideKeyboard
 - tapOn:
     id: "AccountInput"
 - inputText: "000123456789"
+- back
 - scroll
-- hideKeyboard
 - tapOn:
     id: "ConfirmAccountInput"
 - inputText: "000123456789"
-- hideKeyboard
+- back
 - tapOn: "Continue"
 - tapOn: "Done"
 - assertVisible: ".*Completed!.*"

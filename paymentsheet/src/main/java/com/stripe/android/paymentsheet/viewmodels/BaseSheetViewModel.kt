@@ -5,7 +5,6 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
@@ -23,7 +22,6 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsState
@@ -104,10 +102,8 @@ internal abstract class BaseSheetViewModel(
 
     // Don't save the resource repository state because it must be re-initialized
     // with the save server specs when reconstructed.
-    private var _isResourceRepositoryReady = MutableLiveData<Boolean>(null)
-
-    internal val isResourceRepositoryReady: LiveData<Boolean?> =
-        _isResourceRepositoryReady.distinctUntilChanged()
+    private val _isResourceRepositoryReady = MutableStateFlow(false)
+    internal val isResourceRepositoryReady: StateFlow<Boolean> = _isResourceRepositoryReady
 
     internal val stripeIntent: StateFlow<StripeIntent?> = savedStateHandle
         .getStateFlow<StripeIntent?>(SAVE_STRIPE_INTENT, null)
@@ -139,14 +135,16 @@ internal abstract class BaseSheetViewModel(
     private val savedSelection: StateFlow<SavedSelection?> = savedStateHandle
         .getStateFlow<SavedSelection?>(SAVE_SAVED_SELECTION, null)
 
-    protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(emptyList())
+    protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
+        value = listOf(PaymentSheetScreen.Loading),
+    )
 
-    val currentScreen: StateFlow<PaymentSheetScreen?> = backStack
-        .map { it.lastOrNull() }
+    val currentScreen: StateFlow<PaymentSheetScreen> = backStack
+        .map { it.last() }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(),
-            initialValue = null,
+            initialValue = PaymentSheetScreen.Loading,
         )
 
     internal val headerText: StateFlow<Int?> = combine(
@@ -260,7 +258,7 @@ internal abstract class BaseSheetViewModel(
             }
         }
 
-        if (_isResourceRepositoryReady.value == null) {
+        if (!_isResourceRepositoryReady.value) {
             viewModelScope.launch {
                 // This work should be done on the background
                 CoroutineScope(workContext).launch {
@@ -274,7 +272,7 @@ internal abstract class BaseSheetViewModel(
 
                     lpmResourceRepository.waitUntilLoaded()
                     addressResourceRepository.waitUntilLoaded()
-                    _isResourceRepositoryReady.postValue(true)
+                    _isResourceRepositoryReady.value = true
                 }
             }
         }
@@ -295,8 +293,8 @@ internal abstract class BaseSheetViewModel(
             stripeIntent.asLiveData(),
             paymentMethods.asLiveData(),
             googlePayState.asLiveData(),
-            isResourceRepositoryReady,
-            linkHandler.isLinkEnabled.asLiveData()
+            linkHandler.isLinkEnabled.asLiveData(),
+            isResourceRepositoryReady.asLiveData()
         ).forEach { source ->
             addSource(source) {
                 value = determineIfReady()
@@ -319,7 +317,7 @@ internal abstract class BaseSheetViewModel(
         return stripeIntentValue != null &&
             paymentMethodsValue != null &&
             isGooglePayReadyValue != GooglePayState.Indeterminate &&
-            isResourceRepositoryReadyValue != null &&
+            isResourceRepositoryReadyValue &&
             isLinkReadyValue != null &&
             savedSelectionValue != null
     }
@@ -328,7 +326,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun transitionTo(target: PaymentSheetScreen) {
         clearErrorMessages()
-        backStack.update { it + target }
+        backStack.update { (it - PaymentSheetScreen.Loading) + target }
         reportNavigationEvent(target)
     }
 
@@ -338,6 +336,9 @@ internal abstract class BaseSheetViewModel(
 
     protected fun reportNavigationEvent(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
+            PaymentSheetScreen.Loading -> {
+                // Nothing to do here
+            }
             PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions(
                     linkEnabled = linkHandler.isLinkEnabled.value,
@@ -357,11 +358,6 @@ internal abstract class BaseSheetViewModel(
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
         savedStateHandle[SAVE_STRIPE_INTENT] = stripeIntent
 
-        /**
-         * The settings of values in this function is so that
-         * they will be ready in the onViewCreated method of
-         * the [BaseAddPaymentMethodFragment]
-         */
         val pmsToAdd = getPMsToAdd(stripeIntent, config, lpmResourceRepository.getRepository())
         supportedPaymentMethods = pmsToAdd
 

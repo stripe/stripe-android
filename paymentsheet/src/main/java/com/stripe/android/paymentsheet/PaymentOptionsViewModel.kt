@@ -41,7 +41,6 @@ import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -300,7 +299,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private suspend fun awaitRepositoriesReady() {
-        isResourceRepositoryReady.asFlow().filterNotNull().filter { it }.first()
+        isResourceRepositoryReady.filter { it }.first()
     }
 
     override fun transitionToFirstScreen() {

@@ -36,7 +36,9 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.StripeIntentValidator
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.Loading
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
@@ -49,6 +51,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.S
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
@@ -56,6 +59,7 @@ import com.stripe.android.utils.PaymentIntentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -712,10 +716,10 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.currentScreen.test {
             viewModel.transitionToFirstScreenWhenReady()
-            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isEqualTo(Loading)
 
             viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
-            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddFirstPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
         }
     }
 
@@ -941,9 +945,9 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(customerPaymentMethods = emptyList())
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isEqualTo(Loading)
             viewModel.transitionToFirstScreen()
-            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddFirstPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
         }
     }
 
@@ -954,9 +958,9 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isEqualTo(Loading)
             viewModel.transitionToFirstScreen()
-            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
     }
 
@@ -1073,14 +1077,43 @@ internal class PaymentSheetViewModelTest {
         receiver.cancelAndIgnoreRemainingEvents()
     }
 
+    @Test
+    fun `isResourceRepositoryReady emits true on initialize`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.isResourceRepositoryReady.test {
+            assertThat(awaitItem()).isTrue()
+        }
+    }
+
+    @Test
+    fun `isResourceRepositoryReady emits false`() = runTest {
+        val viewModel = createViewModel(
+            lpmResourceRepository = NonLoadingLpmRepository(lpmRepository)
+        )
+        viewModel.isResourceRepositoryReady.test {
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    private class NonLoadingLpmRepository(
+        val lpmRepository: LpmRepository
+    ) : ResourceRepository<LpmRepository> {
+        override suspend fun waitUntilLoaded() {
+            while (true) { delay(1000) }
+        }
+        override fun isLoaded(): Boolean = false
+        override fun getRepository(): LpmRepository = lpmRepository
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
         customerRepository: CustomerRepository = FakeCustomerRepository(PAYMENT_METHODS),
         shouldFailLoad: Boolean = false,
         linkState: LinkState? = null,
+        delay: Duration = Duration.ZERO,
         customerPaymentMethods: List<PaymentMethod> = listOf(),
-        delay: Duration = Duration.ZERO
+        lpmResourceRepository: ResourceRepository<LpmRepository> = this.lpmResourceRepository
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return TestViewModelFactory.create(

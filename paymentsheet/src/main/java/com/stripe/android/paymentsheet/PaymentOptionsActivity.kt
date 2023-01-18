@@ -17,12 +17,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
-import com.stripe.android.paymentsheet.navigation.PaymentOptionsContent
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.PaymentsTheme
 
 /**
  * An `Activity` for selecting a payment option.
@@ -84,8 +84,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         viewBinding.contentContainer.setContent {
-            val currentScreen by viewModel.currentScreen.collectAsState()
-            currentScreen.PaymentOptionsContent()
+            PaymentsTheme {
+                val currentScreen by viewModel.currentScreen.collectAsState()
+                currentScreen.PaymentOptionsContent(starterArgs)
+            }
         }
 
         if (savedInstanceState == null) {
@@ -105,13 +107,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             viewBinding.continueButton.isVisible = visible
             viewBinding.bottomSpacer.isVisible = visible
 
-            if (currentScreen != null) {
-                rootView.doOnNextLayout {
-                    // Expand sheet only after the first fragment is attached so that it
-                    // animates in. Further calls to expand() are no-op if the sheet is already
-                    // expanded.
-                    bottomSheetController.expand()
-                }
+            rootView.doOnNextLayout {
+                // Expand sheet only after the first fragment is attached so that it
+                // animates in. Further calls to expand() are no-op if the sheet is already
+                // expanded.
+                bottomSheetController.expand()
             }
         }
     }
