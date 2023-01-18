@@ -366,10 +366,9 @@ internal class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
-                viewModel._paymentOptionResult.value = PaymentOptionResult.Succeeded(
-                    paymentSelectionMock
-                )
+                val paymentSelection = PaymentSelection.GooglePay
+                viewModel.updateSelection(paymentSelection)
+                viewModel.onUserSelection()
                 idleLooper()
 
                 assertThat(activity.bottomSheetBehavior.state)
