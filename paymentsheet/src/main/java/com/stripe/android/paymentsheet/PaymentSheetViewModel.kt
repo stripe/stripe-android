@@ -374,6 +374,31 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
+    override fun generateDefaultButtonUiState(): PrimaryButton.UIState {
+        val resources = getApplication<Application>().resources
+        val amount = amount.value
+
+        val label = if (config?.primaryButtonLabel != null) {
+            config.primaryButtonLabel
+        } else if (amount != null) {
+            amount.buildPayButtonLabel(resources)
+        } else {
+            resources.getString(R.string.stripe_setup_button_label)
+        }
+
+        val isEnabled = !processing.value && !editing.value && selection.value != null
+
+        return PrimaryButton.UIState(
+            processingState = PrimaryButton.State.Ready,
+            label = label,
+            onClick = {
+                (this as? PaymentSheetViewModel)?.checkout()
+            },
+            enabled = isEnabled,
+            visible = true,
+        )
+    }
+
     override fun updateSelection(selection: PaymentSelection?) {
         super.updateSelection(selection)
 

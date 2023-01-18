@@ -12,12 +12,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.doOnNextLayout
-import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentOptionsBinding
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
@@ -96,16 +94,20 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         viewModel.selection.launchAndCollectIn(this) {
             viewModel.clearErrorMessages()
-            resetPrimaryButtonState()
+//            resetPrimaryButtonState()
         }
 
-        viewModel.currentScreen.launchAndCollectIn(this) { currentScreen ->
-            val visible = currentScreen is PaymentSheetScreen.AddFirstPaymentMethod ||
-                currentScreen is PaymentSheetScreen.AddAnotherPaymentMethod ||
-                viewModel.primaryButtonUIState.value?.visible == true
+//        viewModel.primaryButtonUIState.launchAndCollectIn(this) { uiState ->
+//            viewBinding.continueButton.isVisible = uiState.visible
+//            viewBinding.bottomSpacer.isVisible = uiState.visible
+//        }
 
-            viewBinding.continueButton.isVisible = visible
-            viewBinding.bottomSpacer.isVisible = visible
+        viewModel.currentScreen.launchAndCollectIn(this) { currentScreen ->
+//            val visible = currentScreen is PaymentSheetScreen.AddFirstPaymentMethod ||
+//                currentScreen is PaymentSheetScreen.AddAnotherPaymentMethod
+//
+//            viewBinding.continueButton.isVisible = visible
+//            viewBinding.bottomSpacer.isVisible = visible
 
             rootView.doOnNextLayout {
                 // Expand sheet only after the first fragment is attached so that it

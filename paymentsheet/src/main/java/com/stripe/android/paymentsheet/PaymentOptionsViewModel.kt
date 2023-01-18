@@ -39,8 +39,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -86,6 +88,19 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override var newPaymentSelection = args.state.newPaymentSelection
 
     init {
+        viewModelScope.launch {
+            currentScreen.onEach { screen ->
+                val visible = screen is PaymentSheetScreen.AddFirstPaymentMethod ||
+                    screen is PaymentSheetScreen.AddAnotherPaymentMethod
+
+                updatePrimaryButtonUIState(
+                    state = primaryButtonUIState.value.copy(
+                        visible = visible,
+                    )
+                )
+            }.collect()
+        }
+
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (args.state.isGooglePayReady) {
             GooglePayState.Available
         } else {
@@ -249,24 +264,39 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 )
             }
             else -> {
-                updatePrimaryButtonUIState(
-                    primaryButtonUIState.value.copy(
-                        label = getApplication<Application>().getString(
-                            R.string.stripe_continue_button_label
-                        ),
-                        visible = true,
-                        enabled = true,
-                        onClick = {
-                            onUserSelection()
-                        }
-                    )
-                )
+                // TODO
+//                updatePrimaryButtonUIState(
+//                    primaryButtonUIState.value.copy(
+//                        label = getApplication<Application>().getString(
+//                            R.string.stripe_continue_button_label
+//                        ),
+//                        visible = true,
+//                        enabled = true,
+//                        onClick = {
+//                            onUserSelection()
+//                        }
+//                    )
+//                )
             }
         }
     }
 
     override fun clearErrorMessages() {
         _error.value = null
+    }
+
+    override fun generateDefaultButtonUiState(): PrimaryButton.UIState {
+        val resources = getApplication<Application>().resources
+        val customLabel = runCatching { args.state.config?.primaryButtonLabel }.getOrDefault("")
+        val label = customLabel ?: resources.getString(R.string.stripe_continue_button_label)
+
+        return PrimaryButton.UIState(
+            processingState = PrimaryButton.State.Ready,
+            label = label,
+            onClick = this::onUserSelection,
+            enabled = false,
+            visible = false,
+        )
     }
 
     private fun processExistingPaymentMethod(paymentSelection: PaymentSelection) {
