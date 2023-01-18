@@ -75,8 +75,6 @@ import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -96,8 +94,6 @@ import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
-@ExperimentalCoroutinesApi
-@FlowPreview
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSheetActivityTest {
     @get:Rule
@@ -1192,7 +1188,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `processing should enable after checkout`() {
         val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             // wait for bottom sheet to animate in
             idleLooper()
 

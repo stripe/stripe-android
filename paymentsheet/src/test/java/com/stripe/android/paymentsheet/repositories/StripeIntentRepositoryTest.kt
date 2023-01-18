@@ -8,7 +8,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodPreference
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -23,7 +22,6 @@ import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 import kotlin.test.Test
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class StripeIntentRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()

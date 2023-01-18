@@ -26,8 +26,6 @@ import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepositor
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.PaymentIntentFactory
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -38,7 +36,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import javax.inject.Provider
 
-@ExperimentalCoroutinesApi
 internal open class BasePaymentOptionsViewModelInjectionTest {
 
     @get:Rule
@@ -59,7 +56,6 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
         WeakMapInjectorRegistry.clear()
     }
 
-    @ExperimentalCoroutinesApi
     fun createViewModel(
         paymentMethods: List<PaymentMethod> = emptyList(),
         @InjectorKey injectorKey: String,
@@ -105,7 +101,6 @@ internal open class BasePaymentOptionsViewModelInjectionTest {
         }
     }
 
-    @FlowPreview
     fun registerViewModel(
         @InjectorKey injectorKey: String,
         viewModel: PaymentOptionsViewModel,
