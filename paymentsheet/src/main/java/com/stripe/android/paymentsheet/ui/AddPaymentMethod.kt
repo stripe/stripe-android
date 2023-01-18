@@ -101,20 +101,7 @@ private fun AddPaymentMethod(
                 sheetViewModel.onLinkSignupStateChanged(linkConfig!!, state, paymentSelection)
             } else if (linkInlineSelection != null) {
                 (paymentSelection as? PaymentSelection.New.Card)?.let {
-                    sheetViewModel.updatePrimaryButtonUIState(
-                        PrimaryButton.UIState(
-                            label = "",
-                            onClick = {
-                                sheetViewModel.payWithLinkInline(
-                                    linkConfig!!,
-                                    null
-                                )
-                            },
-                            enabled = true,
-                            visible = true,
-                            processingState = PrimaryButton.State.Ready,
-                        )
-                    )
+                    sheetViewModel.updatePrimaryButtonForLink()
                 }
             }
         }
@@ -130,7 +117,7 @@ private fun AddPaymentMethod(
                 showCheckboxFlow = showCheckboxFlow,
                 onItemSelectedListener = { selectedLpm ->
                     if (selectedItem != selectedLpm) {
-                        sheetViewModel.updatePrimaryButtonUIState(null)
+                        sheetViewModel.resetPrimaryButtonUiState()
                         selectedPaymentMethodCode = selectedLpm.code
                     }
                 },
@@ -183,32 +170,11 @@ private fun BaseSheetViewModel.onLinkSignupStateChanged(
     viewState: InlineSignupViewState,
     paymentSelection: PaymentSelection?
 ) {
-    updatePrimaryButtonUIState(
-        if (viewState.useLink) {
-            val userInput = viewState.userInput
-            if (userInput != null &&
-                paymentSelection != null
-            ) {
-                PrimaryButton.UIState(
-                    label = "",
-                    onClick = { payWithLinkInline(config, userInput) },
-                    enabled = true,
-                    visible = true,
-                    processingState = PrimaryButton.State.Ready,
-                )
-            } else {
-                PrimaryButton.UIState(
-                    label = "",
-                    onClick = null,
-                    enabled = false,
-                    visible = true,
-                    processingState = PrimaryButton.State.Ready,
-                )
-            }
-        } else {
-            null
-        }
-    )
+    if (viewState.useLink) {
+        updatePrimaryButtonForLink(config, viewState.userInput, paymentSelection)
+    } else {
+        resetPrimaryButtonUiState()
+    }
 }
 
 @VisibleForTesting

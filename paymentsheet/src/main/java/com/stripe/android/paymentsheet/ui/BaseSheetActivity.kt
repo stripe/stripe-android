@@ -266,24 +266,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             primaryButton.isEnabled = state.enabled
 
             primaryButton.updateState(state.processingState)
-
-//            state?.let {
-//                primaryButton.setOnClickListener {
-//                    state.onClick?.invoke()
-//                }
-//                primaryButton.setLabel(state.label)
-//                primaryButton.isVisible = state.visible
-//                bottomSpacer.isVisible = state.visible
-//            } ?: run {
-//                resetPrimaryButtonState()
-//            }
         }
-//        viewModel.primaryButtonState.launchAndCollectIn(this) { state ->
-//            primaryButton.updateState(state)
-//        }
-//        viewModel.ctaEnabled.observe(this) { isEnabled ->
-//            primaryButton.isEnabled = isEnabled
-//        }
 
         primaryButton.setAppearanceConfiguration(
             StripeTheme.primaryButtonStyle,
@@ -294,11 +277,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         
         bottomSpacer.isVisible = true
     }
-
-    /**
-     * Reset the primary button to its default state.
-     */
-    abstract fun resetPrimaryButtonState()
 
     private fun setupNotes() {
         viewModel.notesText.launchAndCollectIn(this) { text ->

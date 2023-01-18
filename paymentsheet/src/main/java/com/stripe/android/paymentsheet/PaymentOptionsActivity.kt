@@ -94,21 +94,10 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
 
         viewModel.selection.launchAndCollectIn(this) {
             viewModel.clearErrorMessages()
-//            resetPrimaryButtonState()
         }
 
-//        viewModel.primaryButtonUIState.launchAndCollectIn(this) { uiState ->
-//            viewBinding.continueButton.isVisible = uiState.visible
-//            viewBinding.bottomSpacer.isVisible = uiState.visible
-//        }
-
-        viewModel.currentScreen.launchAndCollectIn(this) { currentScreen ->
-//            val visible = currentScreen is PaymentSheetScreen.AddFirstPaymentMethod ||
-//                currentScreen is PaymentSheetScreen.AddAnotherPaymentMethod
-//
-//            viewBinding.continueButton.isVisible = visible
-//            viewBinding.bottomSpacer.isVisible = visible
-
+        viewModel.currentScreen.launchAndCollectIn(this) {
+            // TODO
             rootView.doOnNextLayout {
                 // Expand sheet only after the first fragment is attached so that it
                 // animates in. Further calls to expand() are no-op if the sheet is already
@@ -122,20 +111,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         starterArgs?.state?.config?.appearance?.parseAppearance()
         earlyExitDueToIllegalState = starterArgs == null
         return starterArgs
-    }
-
-    override fun resetPrimaryButtonState() {
-        viewBinding.continueButton.lockVisible = false
-        viewBinding.continueButton.updateState(PrimaryButton.State.Ready)
-
-        val customLabel = starterArgs?.state?.config?.primaryButtonLabel
-        val label = customLabel ?: getString(R.string.stripe_continue_button_label)
-
-        viewBinding.continueButton.setLabel(label)
-
-        viewBinding.continueButton.setOnClickListener {
-            viewModel.onUserSelection()
-        }
     }
 
     override fun setActivityResult(result: PaymentOptionResult) {

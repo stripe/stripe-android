@@ -171,11 +171,7 @@ internal class USBankAccountFormFragment : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.requiredFields.collect {
-                    sheetViewModel?.updatePrimaryButtonUIState(
-                        sheetViewModel?.primaryButtonUIState?.value?.copy(
-                            enabled = it
-                        )
-                    )
+                    sheetViewModel?.setPrimaryButtonEnabled(it)
                 }
             }
         }
@@ -247,7 +243,7 @@ internal class USBankAccountFormFragment : Fragment() {
 
     override fun onDetach() {
         sheetViewModel?.updateBelowButtonText(null)
-        sheetViewModel?.updatePrimaryButtonUIState(null)
+        sheetViewModel?.resetPrimaryButtonUiState()
         viewModel.onDestroy()
         super.onDetach()
     }

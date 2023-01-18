@@ -174,7 +174,7 @@ internal abstract class BaseSheetViewModel(
      * Use this to override the current UI state of the primary button. The UI state is reset every
      * time the payment selection is changed.
      */
-    private val _primaryButtonUIState = MutableStateFlow(
+    protected val _primaryButtonUIState = MutableStateFlow(
         value = PrimaryButton.UIState(
             processingState = PrimaryButton.State.Ready,
             label = "",
@@ -430,12 +430,65 @@ internal abstract class BaseSheetViewModel(
         logger.warning(message)
     }
 
+    @Deprecated(message = "")
     fun updatePrimaryButtonUIState(state: PrimaryButton.UIState?) {
         _primaryButtonUIState.value = state ?: generateDefaultButtonUiState()
     }
 
+    fun updatePrimaryButtonForLink() {
+        val linkConfig = linkHandler.linkConfiguration.value ?: return
+        _primaryButtonUIState.value = PrimaryButton.UIState(
+            label = "",
+            onClick = {
+                payWithLinkInline(linkConfig, userInput = null)
+            },
+            enabled = true,
+            visible = true,
+            processingState = PrimaryButton.State.Ready,
+        )
+    }
+
+    fun updatePrimaryButtonForLink(
+        config: LinkPaymentLauncher.Configuration,
+        userInput: UserInput?,
+        paymentSelection: PaymentSelection?
+    ) {
+        _primaryButtonUIState.value = if (userInput != null && paymentSelection != null) {
+            PrimaryButton.UIState(
+                label = "",
+                onClick = { payWithLinkInline(config, userInput) },
+                enabled = true,
+                visible = true,
+                processingState = PrimaryButton.State.Ready,
+            )
+        } else {
+            PrimaryButton.UIState(
+                label = "",
+                onClick = null,
+                enabled = false,
+                visible = true,
+                processingState = PrimaryButton.State.Ready,
+            )
+        }
+    }
+
+    fun setPrimaryButtonVisible(isVisible: Boolean) {
+        _primaryButtonUIState.update {
+            it.copy(visible = isVisible)
+        }
+    }
+
+    fun setPrimaryButtonEnabled(isEnabled: Boolean) {
+        _primaryButtonUIState.update {
+            it.copy(enabled = isEnabled)
+        }
+    }
+
     fun resetPrimaryButtonUiState() {
-        // TODO
+        _primaryButtonUIState.value = generateDefaultButtonUiState().copy(
+            visible = _primaryButtonUIState.value.visible,
+            enabled = _primaryButtonUIState.value.enabled,
+        )
     }
 
     fun updatePrimaryButtonState(state: PrimaryButton.State) {
@@ -492,11 +545,7 @@ internal abstract class BaseSheetViewModel(
 
             val hasNoBankAccounts = paymentMethods.value.orEmpty().all { it.type != USBankAccount }
             if (hasNoBankAccounts) {
-                updatePrimaryButtonUIState(
-                    primaryButtonUIState.value.copy(
-                        visible = false
-                    )
-                )
+                setPrimaryButtonVisible(false)
                 updateBelowButtonText(null)
             }
         }

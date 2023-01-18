@@ -172,26 +172,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         return result
     }
 
-    override fun resetPrimaryButtonState() {
-        viewBinding.buyButton.updateState(PrimaryButton.State.Ready)
-
-        val customLabel = starterArgs?.config?.primaryButtonLabel
-
-        val label = if (customLabel != null) {
-            starterArgs?.config?.primaryButtonLabel
-        } else if (viewModel.isProcessingPaymentIntent) {
-            viewModel.amount.value?.buildPayButtonLabel(resources)
-        } else {
-            getString(R.string.stripe_setup_button_label)
-        }
-
-        viewBinding.buyButton.setLabel(label)
-
-        viewBinding.buyButton.setOnClickListener {
-            viewModel.checkout()
-        }
-    }
-
     private fun setupTopContainer() {
         setupGooglePayButton()
         val dividerText = resources.getString(

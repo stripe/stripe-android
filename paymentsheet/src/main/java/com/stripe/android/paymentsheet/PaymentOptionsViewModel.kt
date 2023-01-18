@@ -92,12 +92,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             currentScreen.onEach { screen ->
                 val visible = screen is PaymentSheetScreen.AddFirstPaymentMethod ||
                     screen is PaymentSheetScreen.AddAnotherPaymentMethod
-
-                updatePrimaryButtonUIState(
-                    state = primaryButtonUIState.value.copy(
-                        visible = visible,
-                    )
-                )
+                setPrimaryButtonVisible(visible)
             }.collect()
         }
 
@@ -233,6 +228,20 @@ internal class PaymentOptionsViewModel @Inject constructor(
         savedStateHandle[SAVE_PROCESSING] = false
     }
 
+    private fun setPrimaryButtonForPaymentSelection(selection: PaymentSelection) {
+        _primaryButtonUIState.value = PrimaryButton.UIState(
+            label = getApplication<Application>().getString(
+                R.string.stripe_continue_button_label
+            ),
+            visible = true,
+            enabled = true,
+            onClick = {
+                processExistingPaymentMethod(selection)
+            },
+            processingState = PrimaryButton.State.Ready,
+        )
+    }
+
     override fun updateSelection(selection: PaymentSelection?) {
         super.updateSelection(selection)
         when {
@@ -241,42 +250,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 updateBelowButtonText(
                     ACHText.getContinueMandateText(getApplication())
                 )
-                updatePrimaryButtonUIState(
-                    PrimaryButton.UIState(
-                        label = getApplication<Application>().getString(
-                            R.string.stripe_continue_button_label
-                        ),
-                        visible = true,
-                        enabled = true,
-                        onClick = {
-                            processExistingPaymentMethod(selection)
-                        },
-                        processingState = PrimaryButton.State.Ready,
-                    )
-                )
+                setPrimaryButtonForPaymentSelection(selection)
             }
-            selection is PaymentSelection.Saved ||
-                selection is PaymentSelection.GooglePay -> {
-                updatePrimaryButtonUIState(
-                    primaryButtonUIState.value.copy(
-                        visible = false
-                    )
-                )
+            selection is PaymentSelection.Saved || selection is PaymentSelection.GooglePay -> {
+                setPrimaryButtonVisible(false)
             }
             else -> {
                 // TODO
-//                updatePrimaryButtonUIState(
-//                    primaryButtonUIState.value.copy(
-//                        label = getApplication<Application>().getString(
-//                            R.string.stripe_continue_button_label
-//                        ),
-//                        visible = true,
-//                        enabled = true,
-//                        onClick = {
-//                            onUserSelection()
-//                        }
-//                    )
-//                )
+                // Nothing to do here
             }
         }
     }
