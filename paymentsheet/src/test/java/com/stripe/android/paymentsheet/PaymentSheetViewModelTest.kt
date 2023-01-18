@@ -811,7 +811,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.selection.test {
             // New valid card
-            assertThat(awaitItem()).isInstanceOf(PaymentSelection.Saved::class.java)
+            assertThat(awaitItem()).isNull()
             viewModel.updateSelection(initialSelection)
             viewModel.transitionToAddPaymentScreen()
             assertThat(awaitItem()).isEqualTo(initialSelection)
@@ -1113,8 +1113,7 @@ internal class PaymentSheetViewModelTest {
                 CardBrand.Visa,
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
             )
-            assertThat(awaitItem())
-                .isInstanceOf(PaymentSelection.Saved::class.java)
+            assertThat(awaitItem()).isNull()
             viewModel.updateSelection(newSelection)
             assertThat(awaitItem())
                 .isEqualTo(newSelection)
@@ -1130,6 +1129,7 @@ internal class PaymentSheetViewModelTest {
             val savedSelection = PaymentSelection.Saved(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
+            assertThat(awaitItem()).isNull()
             viewModel.updateSelection(savedSelection)
             assertThat(awaitItem()).isEqualTo(savedSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(null)
