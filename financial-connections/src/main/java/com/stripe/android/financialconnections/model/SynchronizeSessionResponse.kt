@@ -84,6 +84,8 @@ internal data class DataAccessNotice(
     val body: DataAccessNoticeBody,
     @SerialName("title")
     val title: String,
+    @SerialName("subtitle")
+    val subtitle: String? = null,
     @SerialName("cta")
     val cta: String,
     @SerialName("learn_more")
