@@ -74,8 +74,6 @@ import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
-import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.image.StripeImage
 import kotlinx.coroutines.launch
 
@@ -184,10 +182,6 @@ private fun ConsentMainContent(
                         bottom = 24.dp
                     )
             ) {
-                PhoneNumberCollectionSection(
-                    enabled = true,
-                    phoneNumberController = PhoneNumberController.createPhoneNumberController()
-                )
                 if (payload.shouldShowMerchantLogos) {
                     // Merchant logos: Control
                     ConsentLogoHeader(
