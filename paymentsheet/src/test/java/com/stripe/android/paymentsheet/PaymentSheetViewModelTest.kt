@@ -328,48 +328,44 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.checkoutWithGooglePay()
 
-        val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
-            .observeForever {
-                viewState.add(it)
-            }
+        val googlePayButtonTurbine = viewModel.googlePayButtonState.testIn(this)
+        val processingTurbine = viewModel.processing.testIn(this)
 
-        viewModel.processing.test {
-            assertThat(viewState.size).isEqualTo(1)
-            assertThat(viewState[0])
-                .isEqualTo(PaymentSheetViewState.StartProcessing)
-            assertThat(awaitItem()).isTrue()
+        assertThat(googlePayButtonTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.StartProcessing)
+        assertThat(processingTurbine.awaitItem()).isTrue()
 
-            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
-            assertThat(viewModel.contentVisible.value).isTrue()
+        viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+        assertThat(viewModel.contentVisible.value).isTrue()
 
-            assertThat(viewState.size).isEqualTo(2)
-            assertThat(viewState[1])
-                .isEqualTo(PaymentSheetViewState.Reset(null))
-            assertThat(awaitItem()).isFalse()
-        }
+        assertThat(googlePayButtonTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.Reset(null))
+        assertThat(processingTurbine.awaitItem()).isFalse()
+
+        googlePayButtonTurbine.cancel()
+        processingTurbine.cancel()
     }
 
     @Test
-    fun `On checkout clear the previous view state error`() {
+    fun `On checkout clear the previous view state error`() = runTest {
         val viewModel = createViewModel()
-        val googleViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
         viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
-            .observeForever {
-                googleViewState.add(it)
-            }
 
-        val buyViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
-            .observeForever {
-                buyViewState.add(it)
-            }
+        val googlePayButtonTurbine = viewModel.googlePayButtonState.testIn(this)
+        val buyButtonTurbine = viewModel.buyPayButtonState.testIn(this)
+
+        assertThat(buyButtonTurbine.awaitItem()).isNull()
+        assertThat(googlePayButtonTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.Reset(null))
 
         viewModel.checkout()
 
-        assertThat(googleViewState[0]).isEqualTo(PaymentSheetViewState.Reset(null))
-        assertThat(buyViewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
+        googlePayButtonTurbine.expectNoEvents()
+        assertThat(buyButtonTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.StartProcessing)
+
+        googlePayButtonTurbine.cancel()
+        buyButtonTurbine.cancel()
     }
 
     @Test
@@ -378,30 +374,27 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.checkoutWithGooglePay()
 
-        val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
-            .observeForever {
-                viewState.add(it)
-            }
+        val googlePayButtonTurbine = viewModel.googlePayButtonState.testIn(this)
+        val processingTurbine = viewModel.processing.testIn(this)
 
-        viewModel.processing.test {
-            assertThat(viewState.size).isEqualTo(1)
-            assertThat(viewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
-            assertThat(awaitItem()).isTrue()
+        assertThat(googlePayButtonTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.StartProcessing)
+        assertThat(processingTurbine.awaitItem()).isTrue()
 
-            viewModel.onGooglePayResult(
-                GooglePayPaymentMethodLauncher.Result.Failed(
-                    Exception("Test exception"),
-                    Status.RESULT_INTERNAL_ERROR.statusCode
-                )
+        viewModel.onGooglePayResult(
+            GooglePayPaymentMethodLauncher.Result.Failed(
+                Exception("Test exception"),
+                Status.RESULT_INTERNAL_ERROR.statusCode
             )
+        )
 
-            assertThat(viewModel.contentVisible.value).isTrue()
-            assertThat(viewState.size).isEqualTo(2)
-            assertThat(viewState[1])
-                .isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage("An internal error occurred.")))
-            assertThat(awaitItem()).isFalse()
-        }
+        assertThat(viewModel.contentVisible.value).isTrue()
+        assertThat(googlePayButtonTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage("An internal error occurred.")))
+        assertThat(processingTurbine.awaitItem()).isFalse()
+
+        googlePayButtonTurbine.cancel()
+        processingTurbine.cancel()
     }
 
     @Test
