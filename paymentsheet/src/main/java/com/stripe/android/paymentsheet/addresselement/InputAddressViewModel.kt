@@ -10,11 +10,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.ui.core.FormController
-import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.ui.core.elements.AddressType
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.PhoneNumberState
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,14 +45,7 @@ internal class InputAddressViewModel @Inject constructor(
                 val oldAddress = _collectedAddress.value
                 val autocompleteAddress = AddressDetails(
                     name = oldAddress?.name ?: it?.name,
-                    address = oldAddress?.address?.copy(
-                        city = oldAddress.address.city ?: it?.address?.city,
-                        country = oldAddress.address.country ?: it?.address?.country,
-                        line1 = oldAddress.address.line1 ?: it?.address?.line1,
-                        line2 = oldAddress.address.line2 ?: it?.address?.line2,
-                        postalCode = oldAddress.address.postalCode ?: it?.address?.postalCode,
-                        state = oldAddress.address.state ?: it?.address?.state
-                    ) ?: it?.address,
+                    address = it?.address ?: oldAddress?.address,
                     phoneNumber = oldAddress?.phoneNumber ?: it?.phoneNumber,
                     isCheckboxSelected = oldAddress?.isCheckboxSelected
                         ?: it?.isCheckboxSelected
@@ -109,48 +99,9 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     private fun buildFormSpec(condensedForm: Boolean): LayoutSpec {
-        val phoneNumberState = parsePhoneNumberConfig(args.config?.additionalFields?.phone)
-        val addressSpec = if (condensedForm) {
-            AddressSpec(
-                showLabel = false,
-                type = AddressType.ShippingCondensed(
-                    googleApiKey = args.config?.googlePlacesApiKey,
-                    autocompleteCountries = args.config?.autocompleteCountries,
-                    phoneNumberState = phoneNumberState
-                ) {
-                    viewModelScope.launch {
-                        val addressDetails = getCurrentAddress()
-                        addressDetails?.let {
-                            _collectedAddress.emit(it)
-                        }
-                        addressDetails?.address?.country?.let {
-                            navigator.navigateTo(
-                                AddressElementScreen.Autocomplete(
-                                    country = it
-                                )
-                            )
-                        }
-                    }
-                }
-            )
-        } else {
-            AddressSpec(
-                showLabel = false,
-                type = AddressType.ShippingExpanded(
-                    phoneNumberState = phoneNumberState
-                )
-            )
-        }
-
-        val addressSpecWithAllowedCountries = args.config?.allowedCountries?.run {
-            addressSpec.copy(allowedCountryCodes = this)
-        }
-
-        return LayoutSpec(
-            listOf(
-                addressSpecWithAllowedCountries ?: addressSpec
-            )
-        )
+        val config = args.config
+        val spec = AddressSpecFactory.create(condensedForm, config, ::navigateToAutocompleteScreen)
+        return LayoutSpec(listOf(spec))
     }
 
     fun clickPrimaryButton(
@@ -193,6 +144,22 @@ internal class InputAddressViewModel @Inject constructor(
         _checkboxChecked.value = newValue
     }
 
+    private fun navigateToAutocompleteScreen() {
+        viewModelScope.launch {
+            val addressDetails = getCurrentAddress()
+            addressDetails?.let {
+                _collectedAddress.emit(it)
+            }
+            addressDetails?.address?.country?.let {
+                navigator.navigateTo(
+                    AddressElementScreen.Autocomplete(
+                        country = it
+                    )
+                )
+            }
+        }
+    }
+
     internal class Factory(
         private val injector: NonFallbackInjector
     ) : ViewModelProvider.Factory, NonFallbackInjectable {
@@ -206,23 +173,6 @@ internal class InputAddressViewModel @Inject constructor(
             injector.inject(this)
             return subComponentBuilderProvider.get()
                 .build().inputAddressViewModel as T
-        }
-    }
-
-    internal companion object {
-        // This mapping is required to prevent merchants from depending on ui-core
-        fun parsePhoneNumberConfig(
-            configuration: AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration?
-        ): PhoneNumberState {
-            return when (configuration) {
-                AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN ->
-                    PhoneNumberState.HIDDEN
-                AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.OPTIONAL ->
-                    PhoneNumberState.OPTIONAL
-                AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.REQUIRED ->
-                    PhoneNumberState.REQUIRED
-                null -> PhoneNumberState.OPTIONAL
-            }
         }
     }
 }

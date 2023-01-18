@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [CHANGED][5927](https://github.com/stripe/stripe-android/pull/5927) Customers can now re-enter the autocomplete flow of the Address Element by tapping an icon in the line 1 text field.
+
 ## 20.18.0 - 2023-01-17
 ### Payments
 * [ADDED][6012](https://github.com/stripe/stripe-android/pull/6012) Support for the predictive back gesture.

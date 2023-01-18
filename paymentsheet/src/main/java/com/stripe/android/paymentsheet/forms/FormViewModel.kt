@@ -20,7 +20,6 @@ import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -40,7 +39,6 @@ import javax.inject.Provider
  * @param: layout - this contains the visual layout of the fields on the screen used by [Form]
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
-@FlowPreview
 internal class FormViewModel @Inject internal constructor(
     context: Context,
     formArguments: FormArguments,
@@ -132,9 +130,7 @@ internal class FormViewModel @Inject internal constructor(
     private val showingMandate =
         combine(
             hiddenIdentifiers,
-            elementsFlow.map {
-                it ?: emptyList()
-            }
+            elementsFlow,
         ) { hiddenIdentifiers, formElements ->
             formElements.filterIsInstance<MandateTextElement>().firstOrNull()?.let { mandate ->
                 !hiddenIdentifiers.contains(mandate.identifier)

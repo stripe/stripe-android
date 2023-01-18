@@ -35,8 +35,6 @@ import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.PaymentIntentFactory
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
@@ -46,7 +44,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import javax.inject.Provider
 
-@ExperimentalCoroutinesApi
 internal open class BasePaymentSheetViewModelInjectionTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
@@ -81,7 +78,6 @@ internal open class BasePaymentSheetViewModelInjectionTest {
             }
         }
 
-    @ExperimentalCoroutinesApi
     fun createViewModel(
         stripeIntent: StripeIntent,
         customerRepositoryPMs: List<PaymentMethod> = emptyList(),
@@ -133,7 +129,6 @@ internal open class BasePaymentSheetViewModelInjectionTest {
         }
     }
 
-    @FlowPreview
     fun registerViewModel(
         @InjectorKey injectorKey: String,
         viewModel: PaymentSheetViewModel,

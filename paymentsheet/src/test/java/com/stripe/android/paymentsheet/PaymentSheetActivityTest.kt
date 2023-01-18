@@ -26,13 +26,11 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
@@ -75,8 +73,6 @@ import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -96,8 +92,6 @@ import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
-@ExperimentalCoroutinesApi
-@FlowPreview
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSheetActivityTest {
     @get:Rule
@@ -500,17 +494,6 @@ internal class PaymentSheetActivityTest {
 
             assertThat(activity.viewBinding.buyButton.isEnabled)
                 .isFalse()
-
-            assertThat(viewModel.startConfirm.value?.peekContent())
-                .isEqualTo(
-                    ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                        paymentMethodId = "pm_123456789",
-                        clientSecret = "client_secret",
-                        paymentMethodOptions = PaymentMethodOptionsParams.Card(
-                            setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                        )
-                    )
-                )
         }
     }
 
@@ -1192,7 +1175,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `processing should enable after checkout`() {
         val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             // wait for bottom sheet to animate in
             idleLooper()
 

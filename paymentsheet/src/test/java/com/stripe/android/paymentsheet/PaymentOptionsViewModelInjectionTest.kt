@@ -16,8 +16,6 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeAndroidKeyStore
 import com.stripe.android.utils.PaymentIntentFactory
 import com.stripe.android.utils.fakeCreationExtras
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -25,8 +23,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(FlowPreview::class)
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsViewModelInjectionTest : BasePaymentOptionsViewModelInjectionTest() {
 

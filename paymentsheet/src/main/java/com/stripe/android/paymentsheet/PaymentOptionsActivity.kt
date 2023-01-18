@@ -72,7 +72,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
         setContentView(viewBinding.root)
 
-        viewModel.paymentOptionResult.observe(this) {
+        viewModel.paymentOptionResult.launchAndCollectIn(this) {
             closeSheet(it)
         }
 

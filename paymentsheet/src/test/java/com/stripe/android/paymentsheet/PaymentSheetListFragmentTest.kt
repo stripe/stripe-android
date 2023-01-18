@@ -30,7 +30,6 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.S
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PAYMENT_METHODS
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SAVED_SELECTION
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -181,7 +180,6 @@ internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjection
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `posts transition when add card clicked`() = runTest {
         val scenario = createScenario()

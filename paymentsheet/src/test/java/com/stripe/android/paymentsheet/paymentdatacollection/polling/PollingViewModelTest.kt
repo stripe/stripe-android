@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.polling.IntentStatusPoller
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -17,7 +16,6 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class PollingViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -203,7 +201,6 @@ class PollingViewModelTest {
     }
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 private fun createPollingViewModel(
     timeLimit: Duration = 5.minutes,
     initialDelay: Duration = 5.seconds,
@@ -227,7 +224,6 @@ private fun createPollingViewModel(
     )
 }
 
-@OptIn(ExperimentalCoroutinesApi::class)
 private fun TestScope.advanceTimeBy(duration: Duration) {
     advanceTimeBy(duration.inWholeMilliseconds)
 }

@@ -38,6 +38,8 @@
   <string name="address_label_suburb">ชานเมือง</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">หมู่บ้านหรือเขตการปกครองท้องถิ่น</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="address_search_content_description">ค้นหา</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[ผ่อนชำระ <num_installments/> งวดแบบปลอดดอกเบี้ย งวดละ <installment_price/> ด้วย <img/>]]></string>
   <!-- Text for back button -->
@@ -64,6 +66,7 @@
   <string name="iban_invalid_start">IBAN ควรเริ่มต้นด้วยรหัสประเทศ 2 ตัวอักษร</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">ธนาคารที่รองรับ iDEAL</string>
+  <string name="invalid_email_address">ที่อยู่อีเมลไม่ถูกต้อง: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">ซื้อตอนนี้หรือจ่ายทีหลังด้วย Klarna</string>
   <!-- Klarna pay later copy -->

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Application
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
@@ -8,6 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
@@ -24,10 +26,12 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.PaymentIntentFactory
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -37,7 +41,6 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsViewModelTest {
     @get:Rule
@@ -48,49 +51,43 @@ internal class PaymentOptionsViewModelTest {
     private val prefsRepository = FakePrefsRepository()
     private val customerRepository = FakeCustomerRepository()
     private val paymentMethodRepository = FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
-    private val lpmResourceRepository = StaticLpmResourceRepository(mock())
 
     @Test
-    fun `onUserSelection() when selection has been made should set the view state to process result`() {
-        var paymentOptionResult: PaymentOptionResult? = null
-
+    fun `onUserSelection() when selection has been made should set the view state to process result`() = runTest {
         val viewModel = createViewModel()
-        viewModel.paymentOptionResult.observeForever {
-            paymentOptionResult = it
-        }
-        viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
-        viewModel.onUserSelection()
-
-        assertThat(paymentOptionResult).isEqualTo(
-            PaymentOptionResult.Succeeded(
-                SELECTION_SAVED_PAYMENT_METHOD,
-                listOf()
+        viewModel.paymentOptionResult.test {
+            viewModel.updateSelection(SELECTION_SAVED_PAYMENT_METHOD)
+            viewModel.onUserSelection()
+            assertThat(awaitItem()).isEqualTo(
+                PaymentOptionResult.Succeeded(
+                    SELECTION_SAVED_PAYMENT_METHOD,
+                    listOf()
+                )
             )
-        )
+            ensureAllEventsConsumed()
+        }
+
         verify(eventReporter).onSelectPaymentOption(SELECTION_SAVED_PAYMENT_METHOD)
     }
 
     @Test
     fun `onUserSelection() when new card selection with no save should set the view state to process result`() =
         runTest {
-            var paymentOptionResult: PaymentOptionResult? = null
-
             val viewModel = createViewModel()
-            viewModel.paymentOptionResult.observeForever {
-                paymentOptionResult = it
-            }
-            viewModel.updateSelection(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
-            viewModel.onUserSelection()
-
-            assertThat(paymentOptionResult)
-                .isEqualTo(
-                    PaymentOptionResult.Succeeded(
-                        NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
-                        listOf()
+            viewModel.paymentOptionResult.test {
+                viewModel.updateSelection(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
+                viewModel.onUserSelection()
+                assertThat(awaitItem())
+                    .isEqualTo(
+                        PaymentOptionResult.Succeeded(
+                            NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
+                            listOf()
+                        )
                     )
-                )
-            verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
+                ensureAllEventsConsumed()
+            }
 
+            verify(eventReporter).onSelectPaymentOption(NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION)
             assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(SavedSelection.None)
         }
@@ -99,21 +96,17 @@ internal class PaymentOptionsViewModelTest {
     fun `onUserSelection() new card with save should complete with succeeded view state`() =
         runTest {
             paymentMethodRepository.savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
-            var paymentOptionResult: PaymentOptionResult? = null
-
             val viewModel = createViewModel()
-            viewModel.paymentOptionResult.observeForever {
-                paymentOptionResult = it
+            viewModel.paymentOptionResult.test {
+                viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
+                viewModel.onUserSelection()
+                val paymentOptionResultSucceeded =
+                    awaitItem() as PaymentOptionResult.Succeeded
+                assertThat((paymentOptionResultSucceeded).paymentSelection)
+                    .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
+                verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)
+                ensureAllEventsConsumed()
             }
-            viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
-            viewModel.onUserSelection()
-
-            val paymentOptionResultSucceeded =
-                paymentOptionResult as PaymentOptionResult.Succeeded
-            assertThat((paymentOptionResultSucceeded).paymentSelection)
-                .isEqualTo(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
-            verify(eventReporter).onSelectPaymentOption(paymentOptionResultSucceeded.paymentSelection)
         }
 
     @Test
@@ -357,6 +350,7 @@ internal class PaymentOptionsViewModelTest {
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
+        lpmResourceRepository: ResourceRepository<LpmRepository> = createLpmResourceRepository()
     ) = TestViewModelFactory.create { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(state = args.state.copy(linkState = linkState)),
@@ -374,7 +368,20 @@ internal class PaymentOptionsViewModelTest {
         )
     }
 
+    private fun createLpmResourceRepository(
+        paymentIntent: PaymentIntent = PAYMENT_INTENT
+    ) = StaticLpmResourceRepository(
+        LpmRepository(
+            LpmRepository.LpmRepositoryArguments(
+                ApplicationProvider.getApplicationContext<Application>().resources
+            )
+        ).apply {
+            this.update(paymentIntent, null)
+        }
+    )
+
     private companion object {
+        private val PAYMENT_INTENT = PaymentIntentFactory.create()
         private val SELECTION_SAVED_PAYMENT_METHOD = PaymentSelection.Saved(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
@@ -398,8 +405,8 @@ internal class PaymentOptionsViewModelTest {
         )
         private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                clientSecret = PaymentIntentClientSecret("very secret stuff"),
+                stripeIntent = PAYMENT_INTENT,
+                clientSecret = PaymentIntentClientSecret("secret"),
                 customerPaymentMethods = emptyList(),
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                 isGooglePayReady = true,
