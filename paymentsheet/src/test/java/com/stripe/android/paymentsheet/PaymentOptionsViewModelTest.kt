@@ -379,6 +379,22 @@ internal class PaymentOptionsViewModelTest {
         }
     }
 
+    @Test
+    fun `Ignores payment selection while in edit mode`() = runTest {
+        val viewModel = createViewModel().apply {
+            updateSelection(PaymentSelection.Link)
+        }
+
+        viewModel.setEditing(true)
+        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
+
+        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
+
+        viewModel.setEditing(false)
+        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
+        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
+    }
+
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,

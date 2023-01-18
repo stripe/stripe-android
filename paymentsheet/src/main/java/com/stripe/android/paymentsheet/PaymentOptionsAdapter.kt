@@ -98,10 +98,8 @@ internal class PaymentOptionsAdapter(
 
     @VisibleForTesting
     internal fun onItemSelected(position: Int) {
-        if (position != NO_POSITION && !isEditing) {
-            val item = items[position]
-            paymentOptionSelected(item)
-        }
+        val item = items.getOrNull(position) ?: return
+        paymentOptionSelected(item)
     }
 
     override fun getItemId(position: Int): Long = items[position].hashCode().toLong()

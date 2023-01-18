@@ -436,7 +436,7 @@ internal abstract class BaseSheetViewModel(
         _notesText.value = text
     }
 
-    abstract fun handleSelected(selection: PaymentSelection?)
+    abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
 
     open fun updateSelection(selection: PaymentSelection?) {
         if (selection is PaymentSelection.New) {
