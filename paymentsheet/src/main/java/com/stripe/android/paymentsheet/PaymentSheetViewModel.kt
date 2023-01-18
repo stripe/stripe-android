@@ -122,9 +122,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
     internal val paymentSheetResult: SharedFlow<PaymentSheetResult> = _paymentSheetResult
 
-    private val _startConfirm = MutableLiveData<Event<ConfirmStripeIntentParams>>()
-    internal val startConfirm: LiveData<Event<ConfirmStripeIntentParams>> = _startConfirm
-
     @VisibleForTesting
     internal val _viewState = MutableLiveData<PaymentSheetViewState>(null)
     internal val viewState: LiveData<PaymentSheetViewState> = _viewState.distinctUntilChanged()
@@ -425,7 +422,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
             else -> null
         }?.let { confirmParams ->
-            _startConfirm.value = Event(confirmParams)
+            confirmStripeIntent(confirmParams)
         }
     }
 

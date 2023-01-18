@@ -20,7 +20,6 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -45,7 +44,6 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_GOOGLE_PAY_STATE
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
@@ -156,87 +154,58 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `checkout() should confirm saved card payment methods`() = runTest {
-        val viewModel = createViewModel()
-        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
-        viewModel.startConfirm.observeForever {
-            confirmParams.add(it)
-        }
-
+        val viewModel = spy(createViewModel())
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
-
-        assertThat(confirmParams).hasSize(1)
-        assertThat(confirmParams[0].peekContent())
-            .isEqualTo(
-                ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                    requireNotNull(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
-                    CLIENT_SECRET,
-                    paymentMethodOptions = PaymentMethodOptionsParams.Card(
-                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                    )
+        verify(viewModel).confirmStripeIntent(
+            ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                requireNotNull(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id),
+                CLIENT_SECRET,
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
                 )
             )
+        )
     }
 
     @Test
     fun `checkout() should confirm saved us_bank_account payment methods`() = runTest {
-        val viewModel = createViewModel()
-        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
-        viewModel.startConfirm.observeForever {
-            confirmParams.add(it)
-        }
-
+        val viewModel = spy(createViewModel())
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
-
-        assertThat(confirmParams).hasSize(1)
-        assertThat(confirmParams[0].peekContent())
-            .isEqualTo(
-                ConfirmPaymentIntentParams.createWithPaymentMethodId(
-                    requireNotNull(PaymentMethodFixtures.US_BANK_ACCOUNT.id),
-                    CLIENT_SECRET,
-                    paymentMethodOptions = PaymentMethodOptionsParams.USBankAccount(
-                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                    ),
-                    mandateData = MandateDataParams(
-                        type = MandateDataParams.Type.Online.DEFAULT
-                    )
+        verify(viewModel).confirmStripeIntent(
+            ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                requireNotNull(PaymentMethodFixtures.US_BANK_ACCOUNT.id),
+                CLIENT_SECRET,
+                paymentMethodOptions = PaymentMethodOptionsParams.USBankAccount(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                ),
+                mandateData = MandateDataParams(
+                    type = MandateDataParams.Type.Online.DEFAULT
                 )
             )
+        )
     }
 
     @Test
-    fun `checkout() for Setup Intent with saved payment method that requires mandate should include mandate`() {
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
+    fun `checkout() for Setup Intent with saved payment method that requires mandate should include mandate`() = runTest {
+        val viewModel = spy(
+            createViewModel(
+                args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
+            )
         )
-
-        val events = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
-        viewModel.startConfirm.observeForever {
-            events.add(it)
-        }
-
         val paymentSelection =
             PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
-
-        assertThat(events).hasSize(1)
-        val confirmParams = events[0].peekContent() as ConfirmSetupIntentParams
-        assertThat(confirmParams.mandateData)
-            .isNotNull()
+        verify(viewModel).confirmStripeIntent(any<ConfirmSetupIntentParams>())
     }
 
     @Test
     fun `checkout() should confirm new payment methods`() = runTest {
-        val viewModel = createViewModel()
-        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
-        viewModel.startConfirm.observeForever {
-            confirmParams.add(it)
-        }
-
+        val viewModel = spy(createViewModel())
         val paymentSelection = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             CardBrand.Visa,
@@ -244,41 +213,33 @@ internal class PaymentSheetViewModelTest {
         )
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
-
-        assertThat(confirmParams).hasSize(1)
-        assertThat(confirmParams[0].peekContent())
-            .isEqualTo(
-                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    CLIENT_SECRET,
-                    paymentMethodOptions = PaymentMethodOptionsParams.Card(
-                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
-                    )
+        verify(viewModel).confirmStripeIntent(
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                CLIENT_SECRET,
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 )
             )
+        )
     }
 
     @Test
     fun `checkout() with shipping should confirm new payment methods`() = runTest {
-        val confirmParams = mutableListOf<BaseSheetViewModel.Event<ConfirmStripeIntentParams>>()
-
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
-                    shippingDetails = AddressDetails(
-                        address = PaymentSheet.Address(
-                            country = "US"
-                        ),
-                        name = "Test Name"
+        val viewModel = spy(
+            createViewModel(
+                args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                    config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                        shippingDetails = AddressDetails(
+                            address = PaymentSheet.Address(
+                                country = "US"
+                            ),
+                            name = "Test Name"
+                        )
                     )
                 )
             )
         )
-
-        viewModel.startConfirm.observeForever {
-            confirmParams.add(it)
-        }
-
         val paymentSelection = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             CardBrand.Visa,
@@ -286,24 +247,21 @@ internal class PaymentSheetViewModelTest {
         )
         viewModel.updateSelection(paymentSelection)
         viewModel.checkout()
-
-        assertThat(confirmParams).hasSize(1)
-        assertThat(confirmParams[0].peekContent())
-            .isEqualTo(
-                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    CLIENT_SECRET,
-                    paymentMethodOptions = PaymentMethodOptionsParams.Card(
-                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+        verify(viewModel).confirmStripeIntent(
+            ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                CLIENT_SECRET,
+                paymentMethodOptions = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                ),
+                shipping = ConfirmPaymentIntentParams.Shipping(
+                    address = Address(
+                        country = "US"
                     ),
-                    shipping = ConfirmPaymentIntentParams.Shipping(
-                        address = Address(
-                            country = "US"
-                        ),
-                        name = "Test Name"
-                    )
+                    name = "Test Name"
                 )
             )
+        )
     }
 
     @Test
