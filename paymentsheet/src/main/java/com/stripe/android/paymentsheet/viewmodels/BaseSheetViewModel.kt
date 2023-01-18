@@ -5,7 +5,6 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
@@ -227,17 +226,17 @@ internal abstract class BaseSheetViewModel(
 
     private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
         PaymentOptionsStateMapper(
-            paymentMethods = paymentMethods.asLiveData(),
-            currentSelection = selection.filterNotNull().asLiveData(),
-            googlePayState = googlePayState.asLiveData(),
-            isLinkEnabled = linkHandler.isLinkEnabled.filterNotNull().asLiveData(),
-            initialSelection = savedSelection.asLiveData(),
+            paymentMethods = paymentMethods,
+            currentSelection = selection,
+            googlePayState = googlePayState,
+            isLinkEnabled = linkHandler.isLinkEnabled,
+            initialSelection = savedSelection,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
         )
     }
 
     val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()
-        .asFlow()
+        .filterNotNull()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(),
