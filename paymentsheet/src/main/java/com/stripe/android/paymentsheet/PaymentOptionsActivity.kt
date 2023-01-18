@@ -94,7 +94,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             viewModel.transitionToFirstScreenWhenReady()
         }
 
-        viewModel.selection.observe(this) {
+        viewModel.selection.launchAndCollectIn(this) {
             viewModel.clearErrorMessages()
             resetPrimaryButtonState()
         }

@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asFlow
@@ -160,8 +159,8 @@ internal abstract class BaseSheetViewModel(
         initialValue = null,
     )
 
-    private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
-    internal val selection: LiveData<PaymentSelection?> = _selection
+    internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
+        .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
 
     private val editing = MutableStateFlow(false)
 
@@ -210,7 +209,7 @@ internal abstract class BaseSheetViewModel(
         listOf(
             primaryButtonUIState.asLiveData(),
             buttonsEnabled,
-            selection
+            selection.asLiveData()
         ).forEach { source ->
             addSource(source) {
                 value = if (primaryButtonUIState.value != null) {
@@ -229,7 +228,7 @@ internal abstract class BaseSheetViewModel(
     private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
         PaymentOptionsStateMapper(
             paymentMethods = paymentMethods.asLiveData(),
-            currentSelection = selection,
+            currentSelection = selection.filterNotNull().asLiveData(),
             googlePayState = googlePayState.asLiveData(),
             isLinkEnabled = linkHandler.isLinkEnabled.filterNotNull().asLiveData(),
             initialSelection = savedSelection.asLiveData(),
@@ -281,8 +280,12 @@ internal abstract class BaseSheetViewModel(
             // If the currently selected payment option has been removed, we set it to the one
             // determined in the payment options state.
             paymentOptionsState
-                .mapNotNull { it.selectedItem?.toPaymentSelection() }
-                .filter { it != selection.value }
+                .mapNotNull {
+                    it.selectedItem?.toPaymentSelection()
+                }
+                .filter {
+                    it != selection.value
+                }
                 .collect { updateSelection(it) }
         }
     }
@@ -452,7 +455,7 @@ internal abstract class BaseSheetViewModel(
             if (didRemoveSelectedItem) {
                 // Remove the current selection. The new selection will be set when we're computing
                 // the next PaymentOptionsState.
-                _selection.value = null
+                savedStateHandle[SAVE_SELECTION] = null
             }
 
             savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value?.filter {
