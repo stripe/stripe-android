@@ -80,13 +80,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val validatedArgs = initializeArgs()
+        val validationResult = initializeArgs()
         super.onCreate(savedInstanceState)
 
-        val error = validatedArgs.exceptionOrNull()
-        if (error != null) {
-            setActivityResult(PaymentSheetResult.Failed(error))
-            finish()
+        val validatedArgs = validationResult.getOrNull()
+        if (validatedArgs == null) {
+            finishWithError(error = validationResult.exceptionOrNull())
             return
         }
 
@@ -127,7 +126,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     buttonContainer.isVisible = currentScreen.showsBuyButton
                 }
 
-                currentScreen.PaymentSheetContent(requireNotNull(starterArgs))
+                currentScreen.PaymentSheetContent(validatedArgs)
             }
         }
 
@@ -167,8 +166,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         val starterArgs = this.starterArgs
 
         val result = if (starterArgs == null) {
-            val error = IllegalArgumentException("PaymentSheet started without arguments.")
-            Result.failure(error)
+            Result.failure(defaultInitializationError())
         } else {
             try {
                 starterArgs.config?.validate()
@@ -278,6 +276,16 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             is PaymentSheetViewState.FinishProcessing ->
                 PrimaryButton.State.FinishProcessing(this.onComplete)
         }
+    }
+
+    private fun finishWithError(error: Throwable?) {
+        val e = error ?: defaultInitializationError()
+        setActivityResult(PaymentSheetResult.Failed(e))
+        finish()
+    }
+
+    private fun defaultInitializationError(): IllegalArgumentException {
+        return IllegalArgumentException("PaymentSheet started without arguments.")
     }
 
     internal companion object {
