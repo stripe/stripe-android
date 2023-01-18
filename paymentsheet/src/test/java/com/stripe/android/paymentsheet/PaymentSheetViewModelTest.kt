@@ -366,11 +366,6 @@ internal class PaymentSheetViewModelTest {
                 buyViewState.add(it)
             }
 
-        val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.viewState.observeForever {
-            viewState.add(it)
-        }
-
         viewModel.checkout()
 
         assertThat(googleViewState[0]).isEqualTo(PaymentSheetViewState.Reset(null))
@@ -417,29 +412,38 @@ internal class PaymentSheetViewModelTest {
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             viewModel.updateSelection(selection)
 
-            val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-            viewModel.viewState.observeForever {
-                viewState.add(it)
-            }
+            val resultTurbine = viewModel.paymentSheetResult.testIn(this)
+            val viewStateTurbine = viewModel.viewState.testIn(this)
 
-            viewModel.paymentSheetResult.test {
-                viewModel.onPaymentResult(PaymentResult.Completed)
-                assertThat(viewState[1])
-                    .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
-                (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
-                assertThat(awaitItem())
-                    .isEqualTo(PaymentSheetResult.Completed)
-            }
+            viewModel.onPaymentResult(PaymentResult.Completed)
+
+            assertThat(viewStateTurbine.awaitItem())
+                .isEqualTo(PaymentSheetViewState.Reset(null))
+
+            val finishedProcessingState = viewStateTurbine.awaitItem()
+            assertThat(finishedProcessingState)
+                .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+
+            (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
+
+            assertThat(resultTurbine.awaitItem())
+                .isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
                 .onPaymentSuccess(selection)
-
             assertThat(prefsRepository.paymentSelectionArgs)
                 .containsExactly(selection)
-            assertThat(prefsRepository.getSavedSelection(true, true))
-                .isEqualTo(
-                    SavedSelection.PaymentMethod(selection.paymentMethod.id.orEmpty())
+            assertThat(
+                prefsRepository.getSavedSelection(
+                    isGooglePayAvailable = true,
+                    isLinkAvailable = true
                 )
+            ).isEqualTo(
+                SavedSelection.PaymentMethod(selection.paymentMethod.id.orEmpty())
+            )
+
+            resultTurbine.cancel()
+            viewStateTurbine.cancel()
         }
 
     @Test
@@ -454,18 +458,21 @@ internal class PaymentSheetViewModelTest {
             )
             viewModel.updateSelection(selection)
 
-            val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-            viewModel.viewState.observeForever {
-                viewState.add(it)
-            }
+            val resultTurbine = viewModel.paymentSheetResult.testIn(this)
+            val viewStateTurbine = viewModel.viewState.testIn(this)
 
-            viewModel.paymentSheetResult.test {
-                viewModel.onPaymentResult(PaymentResult.Completed)
-                assertThat(viewState[1])
-                    .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
-                (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
-                assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed)
-            }
+            viewModel.onPaymentResult(PaymentResult.Completed)
+
+            assertThat(viewStateTurbine.awaitItem())
+                .isEqualTo(PaymentSheetViewState.Reset(null))
+
+            val finishedProcessingState = viewStateTurbine.awaitItem()
+            assertThat(finishedProcessingState)
+                .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+
+            (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
+
+            assertThat(resultTurbine.awaitItem()).isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
                 .onPaymentSuccess(selection)
@@ -476,12 +483,19 @@ internal class PaymentSheetViewModelTest {
                         PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!
                     )
                 )
-            assertThat(prefsRepository.getSavedSelection(true, true))
-                .isEqualTo(
-                    SavedSelection.PaymentMethod(
-                        PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!.id!!
-                    )
+            assertThat(
+                prefsRepository.getSavedSelection(
+                    isGooglePayAvailable = true,
+                    isLinkAvailable = true
                 )
+            ).isEqualTo(
+                SavedSelection.PaymentMethod(
+                    PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!.id!!
+                )
+            )
+
+            resultTurbine.cancel()
+            viewStateTurbine.cancel()
         }
 
     @Test
@@ -504,38 +518,32 @@ internal class PaymentSheetViewModelTest {
         runTest {
             val viewModel = createViewModel()
 
-            val viewStateList = mutableListOf<PaymentSheetViewState>()
-            viewModel.viewState.observeForever {
-                viewStateList.add(it)
-            }
+            viewModel.viewState.test {
+                val errorMessage = "very helpful error message"
+                viewModel.onPaymentResult(PaymentResult.Failed(Throwable(errorMessage)))
 
-            val errorMessage = "very helpful error message"
-            viewModel.onPaymentResult(PaymentResult.Failed(Throwable(errorMessage)))
-
-            assertThat(viewStateList[0])
-                .isEqualTo(
-                    PaymentSheetViewState.Reset(null)
-                )
-            assertThat(viewStateList[1])
-                .isEqualTo(
-                    PaymentSheetViewState.Reset(
-                        UserErrorMessage(errorMessage)
+                assertThat(awaitItem())
+                    .isEqualTo(
+                        PaymentSheetViewState.Reset(null)
                     )
-                )
+                assertThat(awaitItem())
+                    .isEqualTo(
+                        PaymentSheetViewState.Reset(
+                            UserErrorMessage(errorMessage)
+                        )
+                    )
+            }
         }
 
     @Test
-    fun `fetchPaymentIntent() should update ViewState LiveData`() {
+    fun `fetchPaymentIntent() should update ViewState LiveData`() = runTest {
         val viewModel = createViewModel()
-        var viewState: PaymentSheetViewState? = null
-        viewModel.viewState.observeForever {
-            viewState = it
+        viewModel.viewState.test {
+            assertThat(awaitItem())
+                .isEqualTo(
+                    PaymentSheetViewState.Reset(null)
+                )
         }
-
-        assertThat(viewState)
-            .isEqualTo(
-                PaymentSheetViewState.Reset(null)
-            )
     }
 
     @Test

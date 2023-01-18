@@ -5,16 +5,13 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.createSavedStateHandle
-import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
@@ -69,6 +66,7 @@ import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
@@ -123,15 +121,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val paymentSheetResult: SharedFlow<PaymentSheetResult> = _paymentSheetResult
 
     @VisibleForTesting
-    internal val _viewState = MutableLiveData<PaymentSheetViewState>(null)
-    internal val viewState: LiveData<PaymentSheetViewState> = _viewState.distinctUntilChanged()
+    internal val viewState = MutableStateFlow<PaymentSheetViewState?>(null)
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
     internal fun getButtonStateObservable(
         checkoutIdentifier: CheckoutIdentifier
     ): MediatorLiveData<PaymentSheetViewState?> {
         val outputLiveData = MediatorLiveData<PaymentSheetViewState?>()
-        outputLiveData.addSource(viewState) { currentValue ->
+        outputLiveData.addSource(viewState.asLiveData()) { currentValue ->
             if (this.checkoutIdentifier == checkoutIdentifier) {
                 outputLiveData.value = currentValue
             }
@@ -296,7 +293,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun resetViewState(userErrorMessage: String? = null) {
-        _viewState.value =
+        viewState.value =
             PaymentSheetViewState.Reset(userErrorMessage?.let { UserErrorMessage(it) })
         savedStateHandle[SAVE_PROCESSING] = false
     }
@@ -304,12 +301,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun startProcessing(checkoutIdentifier: CheckoutIdentifier) {
         if (this.checkoutIdentifier != checkoutIdentifier) {
             // Clear out any previous errors before setting the new button to get updates.
-            _viewState.value = PaymentSheetViewState.Reset()
+            viewState.value = PaymentSheetViewState.Reset()
         }
 
         this.checkoutIdentifier = checkoutIdentifier
         savedStateHandle[SAVE_PROCESSING] = true
-        _viewState.value = PaymentSheetViewState.StartProcessing
+        viewState.value = PaymentSheetViewState.StartProcessing
     }
 
     fun checkout() {
@@ -378,8 +375,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override fun clearErrorMessages() {
-        if (_viewState.value is PaymentSheetViewState.Reset) {
-            _viewState.value = PaymentSheetViewState.Reset(message = null)
+        if (viewState.value is PaymentSheetViewState.Reset) {
+            viewState.value = PaymentSheetViewState.Reset(message = null)
         }
     }
 
@@ -455,7 +452,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     prefsRepository.savePaymentSelection(it)
                 }
 
-                _viewState.value = PaymentSheetViewState.FinishProcessing {
+                viewState.value = PaymentSheetViewState.FinishProcessing {
                     _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
                 }
             }
