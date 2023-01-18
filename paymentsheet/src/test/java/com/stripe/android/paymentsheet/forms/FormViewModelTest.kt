@@ -32,8 +32,6 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -45,8 +43,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
 
-@ExperimentalCoroutinesApi
-@FlowPreview
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
     private val emailSection = EmailSpec()
@@ -164,7 +160,6 @@ internal class FormViewModelTest {
         )
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify if there are no text fields, there is no last text field id`() = runTest {
         // Here we have just a country, no text fields.
@@ -187,7 +182,6 @@ internal class FormViewModelTest {
         )
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify if the last text field is hidden the second to last text field is the last text field id`() =
         runTest {
@@ -216,7 +210,6 @@ internal class FormViewModelTest {
             )
         }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify if a field is hidden and valid it is not in the completeFormValues`() = runTest {
         // Here we have one hidden (email) and one required field (name), bank will always be in the result,
@@ -253,7 +246,6 @@ internal class FormViewModelTest {
             .doesNotContainKey(IdentifierSpec.Email)
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Hidden invalid fields arent in the formViewValue and has no effect on complete state`() =
         runTest {
@@ -300,7 +292,6 @@ internal class FormViewModelTest {
      * This is serving as more of an integration test of forms from
      * spec to FormFieldValues.
      */
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify params are set when element flows are complete`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
@@ -358,7 +349,6 @@ internal class FormViewModelTest {
         ).isNull()
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify params are set when element address fields are complete`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
@@ -442,7 +432,6 @@ internal class FormViewModelTest {
         )
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify params are set when required address fields are complete`() = runTest {
         /**
@@ -533,7 +522,7 @@ internal class FormViewModelTest {
         formViewModel: FormViewModel,
         @StringRes label: Int
     ) =
-        formViewModel.elementsFlow.first()!!
+        formViewModel.elementsFlow.first()
             .filterIsInstance<SectionElement>()
             .flatMap { it.fields }
             .filterIsInstance<SectionSingleFieldElement>()
@@ -578,7 +567,7 @@ internal class FormViewModelTest {
             formViewModel: FormViewModel,
             @StringRes label: Int
         ): TextFieldController? {
-            val addressElementFields = formViewModel.elementsFlow.first()!!
+            val addressElementFields = formViewModel.elementsFlow.first()
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<AddressElement>()
@@ -611,7 +600,6 @@ internal class FormViewModelTest {
     )
 }
 
-@OptIn(FlowPreview::class)
 internal suspend fun FormViewModel.setSaveForFutureUse(value: Boolean) {
     elementsFlow
         .firstOrNull()

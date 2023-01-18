@@ -5,7 +5,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -25,7 +24,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class InputAddressViewModelTest {
     private val args = mock<AddressElementActivityContract.Args>()
     private val config = mock<AddressLauncher.Configuration>()

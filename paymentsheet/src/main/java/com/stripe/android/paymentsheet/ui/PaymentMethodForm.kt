@@ -14,10 +14,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 
-@FlowPreview
 @Composable
 internal fun PaymentMethodForm(
     args: FormArguments,
@@ -52,7 +50,6 @@ internal fun PaymentMethodForm(
     )
 }
 
-@FlowPreview
 @Composable
 internal fun PaymentMethodForm(
     paymentMethodCode: PaymentMethodCode,

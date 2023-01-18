@@ -10,7 +10,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.utils.any
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -25,7 +24,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.security.InvalidParameterException
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CustomerRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
