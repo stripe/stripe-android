@@ -119,7 +119,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewBinding.contentContainer.setContent {
-            PaymentsTheme {
+            StripeTheme {
                 val currentScreen by viewModel.currentScreen.collectAsState()
 
                 LaunchedEffect(currentScreen) {

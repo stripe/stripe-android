@@ -320,7 +320,7 @@ fun StripeTheme(
  */
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun DefaultPaymentsTheme(
+fun DefaultStripeTheme(
     content: @Composable () -> Unit
 ) {
     val colors = StripeThemeDefaults.colors(isSystemInDarkTheme())

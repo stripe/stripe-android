@@ -49,7 +49,7 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.ui.core.elements.OTPElement
 import com.stripe.android.ui.core.elements.OTPElementUI
 import com.stripe.android.ui.core.elements.OTPSpec
-import com.stripe.android.uicore.DefaultPaymentsTheme
+import com.stripe.android.uicore.DefaultStripeTheme
 import kotlinx.coroutines.delay
 
 @Preview
@@ -196,7 +196,7 @@ internal fun VerificationBody(
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSecondary
         )
-        DefaultPaymentsTheme {
+        DefaultStripeTheme {
             OTPElementUI(
                 enabled = !isProcessing,
                 element = otpElement,

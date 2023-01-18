@@ -13,7 +13,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.uicore.DefaultPaymentsTheme
+import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
@@ -87,7 +87,7 @@ class AutocompleteScreenTest {
         mockClient: FakeGooglePlacesClient = FakeGooglePlacesClient()
     ) =
         composeTestRule.setContent {
-            DefaultPaymentsTheme {
+            DefaultStripeTheme {
                 AutocompleteScreenUI(
                     viewModel = AutocompleteViewModel(
                         args,
