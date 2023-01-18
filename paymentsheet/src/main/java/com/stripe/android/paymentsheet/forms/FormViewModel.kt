@@ -130,9 +130,7 @@ internal class FormViewModel @Inject internal constructor(
     private val showingMandate =
         combine(
             hiddenIdentifiers,
-            elementsFlow.map {
-                it
-            }
+            elementsFlow,
         ) { hiddenIdentifiers, formElements ->
             formElements.filterIsInstance<MandateTextElement>().firstOrNull()?.let { mandate ->
                 !hiddenIdentifiers.contains(mandate.identifier)
