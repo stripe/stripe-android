@@ -149,7 +149,7 @@ internal abstract class BaseSheetViewModel(
 
     internal val headerText: StateFlow<Int?> = combine(
         currentScreen,
-        linkHandler.isLinkEnabled,
+        linkHandler.isLinkEnabled.filterNotNull(),
         googlePayState,
         stripeIntent.filterNotNull(),
     ) { screen, isLinkAvailable, googlePay, intent ->
@@ -231,7 +231,7 @@ internal abstract class BaseSheetViewModel(
             paymentMethods = paymentMethods.asLiveData(),
             currentSelection = selection,
             googlePayState = googlePayState.asLiveData(),
-            isLinkEnabled = linkHandler.isLinkEnabled.asLiveData(),
+            isLinkEnabled = linkHandler.isLinkEnabled.filterNotNull().asLiveData(),
             initialSelection = savedSelection.asLiveData(),
             isNotPaymentFlow = this is PaymentOptionsViewModel,
         )
@@ -251,7 +251,7 @@ internal abstract class BaseSheetViewModel(
                 val savedSelection = withContext(workContext) {
                     prefsRepository.getSavedSelection(
                         googlePayState.first().isReadyForUse,
-                        linkHandler.isLinkEnabled.first()
+                        linkHandler.isLinkEnabled.filterNotNull().first()
                     )
                 }
                 savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection
@@ -341,14 +341,14 @@ internal abstract class BaseSheetViewModel(
             }
             PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions(
-                    linkEnabled = linkHandler.isLinkEnabled.value,
+                    linkEnabled = linkHandler.isLinkEnabled.value == true,
                     activeLinkSession = linkHandler.activeLinkSession.value,
                 )
             }
             AddFirstPaymentMethod,
             AddAnotherPaymentMethod -> {
                 eventReporter.onShowNewPaymentOptionForm(
-                    linkEnabled = linkHandler.isLinkEnabled.value,
+                    linkEnabled = linkHandler.isLinkEnabled.value == true,
                     activeLinkSession = linkHandler.activeLinkSession.value,
                 )
             }

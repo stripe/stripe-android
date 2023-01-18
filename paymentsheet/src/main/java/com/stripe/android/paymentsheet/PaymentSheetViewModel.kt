@@ -175,7 +175,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         ).forEach {
             addSource(it) {
                 value = (
-                    linkHandler.isLinkEnabled.value ||
+                    linkHandler.isLinkEnabled.value == true ||
                         googlePayState.value == GooglePayState.Available
                     ) && isReadyEvents.value?.peekContent() == true
             }
