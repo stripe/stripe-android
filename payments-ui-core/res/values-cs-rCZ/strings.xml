@@ -38,6 +38,8 @@
   <string name="address_label_suburb">Předměstí</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">Vesnice nebo předměstí</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="address_search_content_description">Hledat</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Platbu proveďte v <num_installments/> bezúročných splátkách, každou ve výši <installment_price/>, splácených přes <img/>]]></string>
   <!-- Text for back button -->
@@ -64,6 +66,7 @@
   <string name="iban_invalid_start">Číslo IBAN by mělo začínat dvěma písmeny kódu země.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">Banka iDEAL</string>
+  <string name="invalid_email_address">Neplatná e-mailová adresa: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Kupte nyní nebo zaplaťte později pomocí Klarna</string>
   <!-- Klarna pay later copy -->

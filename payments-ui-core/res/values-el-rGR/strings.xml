@@ -38,6 +38,8 @@
   <string name="address_label_suburb">Προάστιο</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">Χωριό ή κοινότητα</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="address_search_content_description">Αναζήτηση</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Πληρώστε σε <num_installments/> άτοκες δόσεις των <installment_price/> με <img/>]]></string>
   <!-- Text for back button -->
@@ -64,6 +66,7 @@
   <string name="iban_invalid_start">Ο κωδικός IBAN σας πρέπει να αρχίζει με έναν διψήφιο κωδικό χώρας.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL Bank</string>
+  <string name="invalid_email_address">Μη έγκυρη διεύθυνση email: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Αγορά τώρα ή πληρωμή αργότερα με Klarna.</string>
   <!-- Klarna pay later copy -->
