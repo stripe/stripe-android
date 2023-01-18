@@ -1248,8 +1248,9 @@ internal object PaymentIntentFixtures {
         requireNotNull(PARSER.parse(OXXO_REQUIRES_ACTION_JSON))
     }
 
-    val CASH_APP_PAY_REQUIRES_ACTION_JSON by lazy {
-        JSONObject("""
+    private val CASH_APP_PAY_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+            """
             {
               "id": "pi_3MRdj6Lu5o3P18Zp0LlnrKVz",
               "object": "payment_intent",
@@ -1292,7 +1293,8 @@ internal object PaymentIntentFixtures {
               "source": null,
               "status": "requires_action"
             }
-        """.trimIndent())
+            """.trimIndent()
+        )
     }
 
     val CASH_APP_PAY_REQUIRES_ACTION by lazy {
