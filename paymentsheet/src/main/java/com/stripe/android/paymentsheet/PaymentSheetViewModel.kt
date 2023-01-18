@@ -68,8 +68,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -124,17 +127,22 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val viewState = MutableStateFlow<PaymentSheetViewState?>(null)
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-    internal fun getButtonStateObservable(
-        checkoutIdentifier: CheckoutIdentifier
-    ): MediatorLiveData<PaymentSheetViewState?> {
-        val outputLiveData = MediatorLiveData<PaymentSheetViewState?>()
-        outputLiveData.addSource(viewState.asLiveData()) { currentValue ->
-            if (this.checkoutIdentifier == checkoutIdentifier) {
-                outputLiveData.value = currentValue
-            }
-        }
-        return outputLiveData
-    }
+
+    val googlePayButtonState: StateFlow<PaymentSheetViewState?> = viewState.filter {
+        checkoutIdentifier == CheckoutIdentifier.SheetTopGooglePay
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
+
+    val buyPayButtonState: StateFlow<PaymentSheetViewState?> = viewState.filter {
+        checkoutIdentifier == CheckoutIdentifier.SheetBottomBuy
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
 
     internal val isProcessingPaymentIntent
         get() = args.clientSecret is PaymentIntentClientSecret
