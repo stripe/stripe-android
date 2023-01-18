@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes

@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme

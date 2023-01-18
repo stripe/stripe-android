@@ -16,6 +16,7 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.menu.Checkbox
+import com.stripe.android.uicore.elements.H6Text
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
