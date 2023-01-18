@@ -5,7 +5,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.stripeColors
 
 @Composable
 internal fun FormLabel(
@@ -13,7 +13,7 @@ internal fun FormLabel(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
-    val color = MaterialTheme.paymentsColors.placeholderText
+    val color = MaterialTheme.stripeColors.placeholderText
     Text(
         text = text,
         modifier = modifier,

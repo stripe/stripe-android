@@ -30,8 +30,8 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
-import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import java.security.InvalidParameterException
@@ -119,7 +119,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewBinding.contentContainer.setContent {
-            PaymentsTheme {
+            StripeTheme {
                 val currentScreen by viewModel.currentScreen.collectAsState()
 
                 LaunchedEffect(currentScreen) {
@@ -222,7 +222,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                         ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
                     )
                     setContent {
-                        PaymentsTheme {
+                        StripeTheme {
                             GooglePayDividerUi(dividerText)
                         }
                     }

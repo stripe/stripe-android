@@ -17,7 +17,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
@@ -47,7 +47,7 @@ internal class PollingFragment : BottomSheetDialogFragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                PaymentsTheme {
+                StripeTheme {
                     Surface(
                         color = MaterialTheme.colors.surface,
                     ) {

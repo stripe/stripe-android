@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core
+package com.stripe.android.uicore
 
 import android.content.Context
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
@@ -41,7 +41,7 @@ import androidx.core.graphics.ColorUtils
 import java.lang.Float.max
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class PaymentsColors(
+data class StripeColors(
     val component: Color,
     val componentBorder: Color,
     val componentDivider: Color,
@@ -54,14 +54,14 @@ data class PaymentsColors(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class PaymentsShapes(
+data class StripeShapes(
     val cornerRadius: Float,
     val borderStrokeWidth: Float,
     val borderStrokeWidthSelected: Float
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class PaymentsTypography(
+data class StripeTypography(
     val fontWeightNormal: Int,
     val fontWeightMedium: Int,
     val fontWeightBold: Int,
@@ -105,12 +105,12 @@ data class PrimaryButtonTypography(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object PaymentsThemeDefaults {
-    fun colors(isDark: Boolean): PaymentsColors {
+object StripeThemeDefaults {
+    fun colors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDark else colorsLight
     }
 
-    val colorsLight = PaymentsColors(
+    val colorsLight = StripeColors(
         component = Color.White,
         componentBorder = Color(0x33787880),
         componentDivider = Color(0x33787880),
@@ -127,7 +127,7 @@ object PaymentsThemeDefaults {
         )
     )
 
-    val colorsDark = PaymentsColors(
+    val colorsDark = StripeColors(
         component = Color.DarkGray,
         componentBorder = Color(0xFF787880),
         componentDivider = Color(0xFF787880),
@@ -144,13 +144,13 @@ object PaymentsThemeDefaults {
         )
     )
 
-    val shapes = PaymentsShapes(
+    val shapes = StripeShapes(
         cornerRadius = 6.0f,
         borderStrokeWidth = 1.0f,
         borderStrokeWidthSelected = 2.0f
     )
 
-    val typography = PaymentsTypography(
+    val typography = StripeTypography(
         fontWeightNormal = FontWeight.Normal.weight,
         fontWeightMedium = FontWeight.Medium.weight,
         fontWeightBold = FontWeight.Bold.weight,
@@ -187,7 +187,7 @@ object PaymentsThemeDefaults {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class PaymentsComposeShapes(
+data class StripeComposeShapes(
     val borderStrokeWidth: Dp,
     val borderStrokeWidthSelected: Dp,
     val material: Shapes
@@ -196,8 +196,8 @@ data class PaymentsComposeShapes(
 @Composable
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PaymentsShapes.toComposeShapes(): PaymentsComposeShapes {
-    return PaymentsComposeShapes(
+fun StripeShapes.toComposeShapes(): StripeComposeShapes {
+    return StripeComposeShapes(
         borderStrokeWidth = borderStrokeWidth.dp,
         borderStrokeWidthSelected = borderStrokeWidthSelected.dp,
         material = MaterialTheme.shapes.copy(
@@ -210,7 +210,7 @@ fun PaymentsShapes.toComposeShapes(): PaymentsComposeShapes {
 @Composable
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PaymentsTypography.toComposeTypography(): Typography {
+fun StripeTypography.toComposeTypography(): Typography {
     val fontFamily = if (fontFamily != null) FontFamily(Font(fontFamily)) else FontFamily.Default
     // h4 is our largest headline. It is used for the most important labels in our UI
     // ex: "Select your payment method" in Payment Sheet.
@@ -283,21 +283,21 @@ fun PaymentsTypography.toComposeTypography(): Typography {
     )
 }
 
-val LocalColors = staticCompositionLocalOf { PaymentsTheme.getColors(false) }
-val LocalShapes = staticCompositionLocalOf { PaymentsTheme.shapesMutable }
-val LocalTypography = staticCompositionLocalOf { PaymentsTheme.typographyMutable }
+val LocalColors = staticCompositionLocalOf { StripeTheme.getColors(false) }
+val LocalShapes = staticCompositionLocalOf { StripeTheme.shapesMutable }
+val LocalTypography = staticCompositionLocalOf { StripeTheme.typographyMutable }
 
 /**
- * Base Theme for Payments Composables.
+ * Base Theme for Stripe Composables.
  * CAUTION: This theme is mutable by merchant configurations. You shouldn't be passing colors,
  * shapes, typography to this theme outside of tests.
  */
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PaymentsTheme(
-    colors: PaymentsColors = PaymentsTheme.getColors(isSystemInDarkTheme()),
-    shapes: PaymentsShapes = PaymentsTheme.shapesMutable,
-    typography: PaymentsTypography = PaymentsTheme.typographyMutable,
+fun StripeTheme(
+    colors: StripeColors = StripeTheme.getColors(isSystemInDarkTheme()),
+    shapes: StripeShapes = StripeTheme.shapesMutable,
+    typography: StripeTypography = StripeTheme.typographyMutable,
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(
@@ -320,12 +320,12 @@ fun PaymentsTheme(
  */
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun DefaultPaymentsTheme(
+fun DefaultStripeTheme(
     content: @Composable () -> Unit
 ) {
-    val colors = PaymentsThemeDefaults.colors(isSystemInDarkTheme())
-    val shapes = PaymentsThemeDefaults.shapes
-    val typography = PaymentsThemeDefaults.typography
+    val colors = StripeThemeDefaults.colors(isSystemInDarkTheme())
+    val shapes = StripeThemeDefaults.shapes
+    val typography = StripeThemeDefaults.typography
 
     CompositionLocalProvider(
         LocalColors provides colors,
@@ -341,25 +341,27 @@ fun DefaultPaymentsTheme(
     }
 }
 
-val MaterialTheme.paymentsColors: PaymentsColors
+val MaterialTheme.stripeColors: StripeColors
     @Composable
     @ReadOnlyComposable
     get() = LocalColors.current
 
-val MaterialTheme.paymentsShapes: PaymentsShapes
+val MaterialTheme.stripeShapes: StripeShapes
     @Composable
     @ReadOnlyComposable
     get() = LocalShapes.current
 
 @Composable
 @ReadOnlyComposable
-internal fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
-    if (isSelected) paymentsShapes.borderStrokeWidthSelected.dp else paymentsShapes.borderStrokeWidth.dp
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
+    if (isSelected) stripeShapes.borderStrokeWidthSelected.dp else stripeShapes.borderStrokeWidth.dp
 
 @Composable
 @ReadOnlyComposable
-internal fun MaterialTheme.getBorderStrokeColor(isSelected: Boolean) =
-    if (isSelected) paymentsColors.materialColors.primary else paymentsColors.componentBorder
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun MaterialTheme.getBorderStrokeColor(isSelected: Boolean) =
+    if (isSelected) stripeColors.materialColors.primary else stripeColors.componentBorder
 
 @Composable
 @ReadOnlyComposable
@@ -367,18 +369,18 @@ fun MaterialTheme.getBorderStroke(isSelected: Boolean): BorderStroke =
     BorderStroke(getBorderStrokeWidth(isSelected), getBorderStrokeColor(isSelected))
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object PaymentsTheme {
+object StripeTheme {
     const val minContrastForWhite = 2.2
-    var colorsDarkMutable = PaymentsThemeDefaults.colorsDark
-    var colorsLightMutable = PaymentsThemeDefaults.colorsLight
+    var colorsDarkMutable = StripeThemeDefaults.colorsDark
+    var colorsLightMutable = StripeThemeDefaults.colorsLight
 
-    var shapesMutable = PaymentsThemeDefaults.shapes
+    var shapesMutable = StripeThemeDefaults.shapes
 
-    var typographyMutable = PaymentsThemeDefaults.typography
+    var typographyMutable = StripeThemeDefaults.typography
 
-    var primaryButtonStyle = PaymentsThemeDefaults.primaryButtonStyle
+    var primaryButtonStyle = StripeThemeDefaults.primaryButtonStyle
 
-    fun getColors(isDark: Boolean): PaymentsColors {
+    fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable
     }
 }
@@ -448,7 +450,7 @@ fun Color.shouldUseDarkDynamicColor(): Boolean {
     val contrastRatioToWhite = ColorUtils.calculateContrast(this.toArgb(), Color.White.toArgb())
 
     // Prefer white as long as the min contrast has been met.
-    return if (contrastRatioToWhite > PaymentsTheme.minContrastForWhite) {
+    return if (contrastRatioToWhite > StripeTheme.minContrastForWhite) {
         false
     } else {
         contrastRatioToBlack > contrastRatioToWhite

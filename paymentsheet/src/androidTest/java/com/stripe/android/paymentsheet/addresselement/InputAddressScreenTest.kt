@@ -8,7 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth
-import com.stripe.android.ui.core.DefaultPaymentsTheme
+import com.stripe.android.uicore.DefaultStripeTheme
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
@@ -51,7 +51,7 @@ class InputAddressScreenTest {
         onCloseCallback: () -> Unit = {}
     ) {
         composeTestRule.setContent {
-            DefaultPaymentsTheme {
+            DefaultStripeTheme {
                 InputAddressScreen(
                     primaryButtonEnabled = primaryButtonEnabled,
                     primaryButtonText = "Save Address",

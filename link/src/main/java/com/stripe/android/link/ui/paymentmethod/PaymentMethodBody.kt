@@ -44,7 +44,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.link.R
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.PaymentsThemeForLink
+import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorMessage
@@ -193,7 +193,7 @@ internal fun PaymentMethodBody(
         }
         if (selectedPaymentMethod.showsForm) {
             Spacer(modifier = Modifier.height(4.dp))
-            PaymentsThemeForLink {
+            StripeThemeForLink {
                 formContent()
             }
             Spacer(modifier = Modifier.height(8.dp))

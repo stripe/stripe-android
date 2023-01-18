@@ -15,7 +15,7 @@ import app.cash.paparazzi.Paparazzi
 import app.cash.paparazzi.androidHome
 import app.cash.paparazzi.detectEnvironment
 import com.android.ide.common.rendering.api.SessionParams
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.uicore.StripeTheme
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -69,7 +69,7 @@ class PaparazziRule(
                 }
 
                 paparazzi.snapshot {
-                    PaymentsTheme(colors = PaymentsTheme.getColors(testCase.isDarkTheme)) {
+                    StripeTheme(colors = StripeTheme.getColors(testCase.isDarkTheme)) {
                         Surface(color = MaterialTheme.colors.surface) {
                             Box(
                                 contentAlignment = Alignment.Center,

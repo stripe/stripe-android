@@ -51,13 +51,13 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.elements.H6Text
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.ui.core.elements.TextFieldSection
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.launch
 
@@ -199,7 +199,7 @@ internal class USBankAccountFormFragment : Fragment() {
         }
 
         setContent {
-            PaymentsTheme {
+            StripeTheme {
                 val currentScreenState by viewModel.currentScreenState.collectAsState()
 
                 LaunchedEffect(currentScreenState) {
@@ -382,7 +382,7 @@ internal class USBankAccountFormFragment : Fragment() {
                         Text(
                             text = "$bankName ••••$last4",
                             modifier = Modifier.alpha(if (processing.value) 0.5f else 1f),
-                            color = MaterialTheme.paymentsColors.onComponent
+                            color = MaterialTheme.stripeColors.onComponent
                         )
                     }
                     Image(

@@ -20,7 +20,7 @@
     <ID>LongMethod:DropdownFieldUI.kt$@Composable internal fun DropDown( controller: DropdownFieldController, enabled: Boolean, modifier: Modifier = Modifier )</ID>
     <ID>LongMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod( @Suppress("UNUSED_PARAMETER") stripeIntent: StripeIntent, sharedDataSpec: SharedDataSpec, )</ID>
     <ID>LongMethod:Menu.kt$@Suppress("ModifierParameter") @Composable internal fun DropdownMenuContent( expandedStates: MutableTransitionState&lt;Boolean>, transformOriginState: MutableState&lt;TransformOrigin>, initialFirstVisibleItemIndex: Int, modifier: Modifier = Modifier, content: LazyListScope.() -> Unit )</ID>
-    <ID>LongMethod:OTPElementUI.kt$@OptIn(ExperimentalMaterialApi::class) @Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun OTPElementUI( enabled: Boolean, element: OTPElement, modifier: Modifier = Modifier, colors: OTPElementColors = OTPElementColors( selectedBorder = MaterialTheme.colors.primary, placeholder = MaterialTheme.paymentsColors.placeholderText ), focusRequester: FocusRequester = remember { FocusRequester() } )</ID>
+    <ID>LongMethod:OTPElementUI.kt$@OptIn(ExperimentalMaterialApi::class) @Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun OTPElementUI( enabled: Boolean, element: OTPElement, modifier: Modifier = Modifier, colors: OTPElementColors = OTPElementColors( selectedBorder = MaterialTheme.colors.primary, placeholder = MaterialTheme.stripeColors.placeholderText ), focusRequester: FocusRequester = remember { FocusRequester() } )</ID>
     <ID>LongMethod:PhoneNumberElementUI.kt$@Composable internal fun PhoneNumberElementUI( enabled: Boolean, controller: PhoneNumberController, requestFocusWhenShown: Boolean = false, imeAction: ImeAction = ImeAction.Done )</ID>
     <ID>LongMethod:SectionFieldElementUI.kt$@Composable internal fun SectionFieldElementUI( enabled: Boolean, field: SectionFieldElement, modifier: Modifier = Modifier, hiddenIdentifiers: Set&lt;IdentifierSpec> = emptySet(), lastTextFieldIdentifier: IdentifierSpec?, nextFocusDirection: FocusDirection = FocusDirection.Down, previousFocusDirection: FocusDirection = FocusDirection.Up )</ID>
     <ID>LongMethod:TextFieldUI.kt$@Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
@@ -49,8 +49,6 @@
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$4</ID>
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$7</ID>
     <ID>MagicNumber:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$9</ID>
-    <ID>MagicNumber:CountryConfig.kt$CountryConfig.Companion$0x1F1E6</ID>
-    <ID>MagicNumber:CountryConfig.kt$CountryConfig.Companion$0x41</ID>
     <ID>MagicNumber:DateConfig.kt$DateConfig$4</ID>
     <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$100</ID>
     <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$12</ID>
@@ -62,9 +60,6 @@
     <ID>MagicNumber:IbanConfig.kt$IbanConfig$4</ID>
     <ID>MagicNumber:LpmRepository.kt$LpmRepository$20</ID>
     <ID>MagicNumber:Menu.kt$0.8f</ID>
-    <ID>MagicNumber:PaymentsTheme.kt$0.15</ID>
-    <ID>MagicNumber:PaymentsTheme.kt$0.32</ID>
-    <ID>MagicNumber:PaymentsTheme.kt$3</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$3</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$5</ID>
     <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$6</ID>
@@ -103,7 +98,6 @@
     <ID>ThrowingExceptionsWithoutMessageOrCause:TransformAddressToElement.kt$IllegalArgumentException()</ID>
     <ID>TooGenericExceptionCaught:LpmSerializer.kt$LpmSerializer$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PlacesClientProxy.kt$DefaultPlacesClientProxy$e: Exception</ID>
-    <ID>TooManyFunctions:PaymentsTheme.kt$com.stripe.android.ui.core.PaymentsTheme.kt</ID>
     <ID>UnnecessaryAbstractClass:FormControllerModule.kt$FormControllerModule$FormControllerModule</ID>
     <ID>UnnecessaryAbstractClass:ResourceRepositoryModule.kt$ResourceRepositoryModule$ResourceRepositoryModule</ID>
     <ID>UtilityClassWithPublicConstructor:FieldValuesToParamsMapConverter.kt$FieldValuesToParamsMapConverter</ID>
