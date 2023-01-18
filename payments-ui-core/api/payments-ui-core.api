@@ -81,50 +81,6 @@ public final class com/stripe/android/ui/core/elements/AddressSpec$Companion {
 public final class com/stripe/android/ui/core/elements/AddressTextFieldUIKt {
 }
 
-public final class com/stripe/android/ui/core/elements/AddressType$Normal : com/stripe/android/ui/core/elements/AddressType {
-	public static final field $stable I
-	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/ui/core/elements/PhoneNumberState;)V
-	public synthetic fun <init> (Lcom/stripe/android/ui/core/elements/PhoneNumberState;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
-	public final fun copy (Lcom/stripe/android/ui/core/elements/PhoneNumberState;)Lcom/stripe/android/ui/core/elements/AddressType$Normal;
-	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AddressType$Normal;Lcom/stripe/android/ui/core/elements/PhoneNumberState;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AddressType$Normal;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getPhoneNumberState ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/ui/core/elements/AddressType$ShippingCondensed : com/stripe/android/ui/core/elements/AddressType {
-	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/util/Set;
-	public final fun component3 ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
-	public final fun component4 ()Lkotlin/jvm/functions/Function0;
-	public final fun copy (Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
-	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/ui/core/elements/PhoneNumberState;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingCondensed;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAutocompleteCountries ()Ljava/util/Set;
-	public final fun getGoogleApiKey ()Ljava/lang/String;
-	public final fun getOnNavigation ()Lkotlin/jvm/functions/Function0;
-	public fun getPhoneNumberState ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/ui/core/elements/AddressType$ShippingExpanded : com/stripe/android/ui/core/elements/AddressType {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/ui/core/elements/PhoneNumberState;)V
-	public final fun component1 ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
-	public final fun copy (Lcom/stripe/android/ui/core/elements/PhoneNumberState;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingExpanded;
-	public static synthetic fun copy$default (Lcom/stripe/android/ui/core/elements/AddressType$ShippingExpanded;Lcom/stripe/android/ui/core/elements/PhoneNumberState;ILjava/lang/Object;)Lcom/stripe/android/ui/core/elements/AddressType$ShippingExpanded;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun getPhoneNumberState ()Lcom/stripe/android/ui/core/elements/PhoneNumberState;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public abstract class com/stripe/android/ui/core/elements/AdministrativeAreaConfig$Country {
 	public static final field $stable I
 	public synthetic fun <init> (ILjava/util/List;Lkotlin/jvm/internal/DefaultConstructorMarker;)V

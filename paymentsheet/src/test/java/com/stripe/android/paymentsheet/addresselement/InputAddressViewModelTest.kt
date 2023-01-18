@@ -88,6 +88,23 @@ class InputAddressViewModelTest {
     }
 
     @Test
+    fun `takes only fields in new address`() = runTest(UnconfinedTestDispatcher()) {
+        val usAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
+        val flow = MutableStateFlow<AddressDetails?>(usAddress)
+        whenever(navigator.getResultFlow<AddressDetails?>(any())).thenReturn(flow)
+
+        val viewModel = createViewModel()
+        assertThat(viewModel.collectedAddress.value).isEqualTo(usAddress)
+
+        val expectedAddress = AddressDetails(
+            name = "skyler",
+            address = PaymentSheet.Address(country = "CAN", line1 = "foobar")
+        )
+        flow.tryEmit(expectedAddress)
+        assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
+    }
+
+    @Test
     fun `default address from merchant is parsed`() = runTest(UnconfinedTestDispatcher()) {
         val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
 
