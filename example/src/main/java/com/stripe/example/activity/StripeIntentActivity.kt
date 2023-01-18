@@ -110,12 +110,15 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         params: PaymentMethodCreateParams,
         supportedPaymentMethods: String? = null,
         stripeAccountId: String? = null,
+        customerId: String? = null,
+        mandateData: MandateDataParams? = null,
         onSetupIntentCreated: (String) -> Unit = {}
     ) {
         keyboardController.hide()
 
         viewModel.createSetupIntent(
             country = country,
+            customerId = customerId,
             supportedPaymentMethods = supportedPaymentMethods,
         ).observe(
             this
@@ -125,6 +128,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                     it,
                     params,
                     stripeAccountId,
+                    mandateData,
                     onSetupIntentCreated
                 )
             }
@@ -175,6 +179,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         responseData: JSONObject,
         params: PaymentMethodCreateParams,
         stripeAccountId: String?,
+        mandateData: MandateDataParams?,
         onSetupIntentCreated: (String) -> Unit = {}
     ) {
         val secret = responseData.getString("secret")
@@ -190,7 +195,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         confirmSetupIntent(
             ConfirmSetupIntentParams.create(
                 paymentMethodCreateParams = params,
-                clientSecret = secret
+                clientSecret = secret,
+                mandateData = mandateData,
             )
         )
     }
