@@ -166,8 +166,7 @@ fun TextField(
             FormLabel(
                 text = if (textFieldController.showOptionalLabel) {
                     stringResource(
-                        // TODO@carlosuvi form_label_optional
-                        R.string.address_label_address_line1,
+                        R.string.form_label_optional,
                         label?.let { stringResource(it) } ?: ""
                     )
                 } else {

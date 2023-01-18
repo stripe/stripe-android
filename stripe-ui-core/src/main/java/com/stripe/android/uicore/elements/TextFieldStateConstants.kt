@@ -44,9 +44,7 @@ class TextFieldStateConstants {
             override fun isBlank(): Boolean = false
         }
 
-        // TODO@carlosmuvi blank_and_required
-
-        object Blank : Error(R.string.address_label_address_line1) {
+        object Blank : Error(R.string.blank_and_required) {
             override fun shouldShowError(hasFocus: Boolean): Boolean = false
             override fun isBlank(): Boolean = true
         }

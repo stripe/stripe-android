@@ -8,4 +8,6 @@
   <string name="change">Change</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="form_label_optional">%s (optional)</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="blank_and_required">This field cannot be blank.</string>
 </resources>
