@@ -235,21 +235,22 @@ internal class PaymentOptionsViewModel @Inject constructor(
                         enabled = true,
                         onClick = {
                             processExistingPaymentMethod(selection)
-                        }
+                        },
+                        processingState = PrimaryButton.State.Ready,
                     )
                 )
             }
             selection is PaymentSelection.Saved ||
                 selection is PaymentSelection.GooglePay -> {
                 updatePrimaryButtonUIState(
-                    primaryButtonUIState.value?.copy(
+                    primaryButtonUIState.value.copy(
                         visible = false
                     )
                 )
             }
             else -> {
                 updatePrimaryButtonUIState(
-                    primaryButtonUIState.value?.copy(
+                    primaryButtonUIState.value.copy(
                         label = getApplication<Application>().getString(
                             R.string.stripe_continue_button_label
                         ),

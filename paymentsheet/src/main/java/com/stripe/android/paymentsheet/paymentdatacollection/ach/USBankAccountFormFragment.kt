@@ -156,10 +156,11 @@ internal class USBankAccountFormFragment : Fragment() {
         )
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                sheetViewModel?.primaryButtonState?.launchAndCollectIn(viewLifecycleOwner) { state ->
+                sheetViewModel?.primaryButtonUIState?.launchAndCollectIn(viewLifecycleOwner) { uiState ->
                     // When the primary button state is StartProcessing or FinishProcessing
                     // we should disable the inputs of this form. StartProcessing shows the loading
                     // spinner, FinishProcessing shows the checkmark animation
+                    val state = uiState.processingState
                     viewModel.setProcessing(
                         state is PrimaryButton.State.StartProcessing ||
                             state is PrimaryButton.State.FinishProcessing
@@ -444,10 +445,10 @@ internal class USBankAccountFormFragment : Fragment() {
         enabled: Boolean = true,
         visible: Boolean = true
     ) {
-        sheetViewModel?.updatePrimaryButtonState(PrimaryButton.State.Ready)
+//        sheetViewModel?.updatePrimaryButtonState(PrimaryButton.State.Ready)
         sheetViewModel?.updatePrimaryButtonUIState(
             PrimaryButton.UIState(
-                label = text,
+                label = text ?: "",
                 onClick = {
                     if (shouldShowProcessingWhenClicked) {
                         sheetViewModel?.updatePrimaryButtonState(
@@ -462,7 +463,8 @@ internal class USBankAccountFormFragment : Fragment() {
                     )
                 },
                 enabled = enabled,
-                visible = visible
+                visible = visible,
+                processingState = PrimaryButton.State.Ready,
             )
         )
     }

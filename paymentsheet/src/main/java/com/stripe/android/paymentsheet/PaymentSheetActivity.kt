@@ -143,12 +143,12 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewModel.selection.filterNotNull().launchAndCollectIn(this) {
             viewModel.clearErrorMessages()
-            resetPrimaryButtonState()
+//            resetPrimaryButtonState()
         }
 
         viewModel.buyPayButtonState.launchAndCollectIn(this) { viewState ->
             updateErrorMessage(messageView, viewState?.errorMessage)
-            viewBinding.buyButton.updateState(viewState?.convert())
+//            viewBinding.buyButton.updateState(viewState?.convert())
         }
     }
 
@@ -253,20 +253,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         super.onDestroy()
     }
 
-    /**
-     * Convert a [PaymentSheetViewState] to a [PrimaryButton.State]
-     */
-    private fun PaymentSheetViewState.convert(): PrimaryButton.State {
-        return when (this) {
-            is PaymentSheetViewState.Reset ->
-                PrimaryButton.State.Ready
-            is PaymentSheetViewState.StartProcessing ->
-                PrimaryButton.State.StartProcessing
-            is PaymentSheetViewState.FinishProcessing ->
-                PrimaryButton.State.FinishProcessing(this.onComplete)
-        }
-    }
-
     private fun finishWithError(error: Throwable?) {
         val e = error ?: defaultInitializationError()
         setActivityResult(PaymentSheetResult.Failed(e))
@@ -279,5 +265,19 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     internal companion object {
         internal const val EXTRA_STARTER_ARGS = BaseSheetActivity.EXTRA_STARTER_ARGS
+    }
+}
+
+/**
+ * Convert a [PaymentSheetViewState] to a [PrimaryButton.State]
+ */
+internal fun PaymentSheetViewState.convert(): PrimaryButton.State {
+    return when (this) {
+        is PaymentSheetViewState.Reset ->
+            PrimaryButton.State.Ready
+        is PaymentSheetViewState.StartProcessing ->
+            PrimaryButton.State.StartProcessing
+        is PaymentSheetViewState.FinishProcessing ->
+            PrimaryButton.State.FinishProcessing(this.onComplete)
     }
 }

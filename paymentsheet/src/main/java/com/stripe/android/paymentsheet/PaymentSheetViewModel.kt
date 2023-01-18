@@ -70,8 +70,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -193,6 +195,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private var paymentLauncher: StripePaymentLauncher? = null
 
     init {
+        viewModelScope.launch {
+            buyPayButtonState.onEach { state ->
+                val newUiState = primaryButtonUIState.value.copy(processingState = state?.convert() ?: PrimaryButton.State.Ready)
+                updatePrimaryButtonUIState(newUiState)
+            }.collect()
+        }
+
         viewModelScope.launch {
             linkHandler.processingState.collect { processingState ->
                 handleLinkProcessingState(processingState)

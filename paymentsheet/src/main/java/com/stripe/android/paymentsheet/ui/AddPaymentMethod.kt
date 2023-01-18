@@ -103,7 +103,7 @@ private fun AddPaymentMethod(
                 (paymentSelection as? PaymentSelection.New.Card)?.let {
                     sheetViewModel.updatePrimaryButtonUIState(
                         PrimaryButton.UIState(
-                            label = null,
+                            label = "",
                             onClick = {
                                 sheetViewModel.payWithLinkInline(
                                     linkConfig!!,
@@ -111,7 +111,8 @@ private fun AddPaymentMethod(
                                 )
                             },
                             enabled = true,
-                            visible = true
+                            visible = true,
+                            processingState = PrimaryButton.State.Ready,
                         )
                     )
                 }
@@ -189,17 +190,19 @@ private fun BaseSheetViewModel.onLinkSignupStateChanged(
                 paymentSelection != null
             ) {
                 PrimaryButton.UIState(
-                    label = null,
+                    label = "",
                     onClick = { payWithLinkInline(config, userInput) },
                     enabled = true,
-                    visible = true
+                    visible = true,
+                    processingState = PrimaryButton.State.Ready,
                 )
             } else {
                 PrimaryButton.UIState(
-                    label = null,
+                    label = "",
                     onClick = null,
                     enabled = false,
-                    visible = true
+                    visible = true,
+                    processingState = PrimaryButton.State.Ready,
                 )
             }
         } else {

@@ -256,23 +256,34 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
      */
     private fun setupPrimaryButton() {
         viewModel.primaryButtonUIState.launchAndCollectIn(this) { state ->
-            state?.let {
-                primaryButton.setOnClickListener {
-                    state.onClick?.invoke()
-                }
-                primaryButton.setLabel(state.label)
-                primaryButton.isVisible = state.visible
-                bottomSpacer.isVisible = state.visible
-            } ?: run {
-                resetPrimaryButtonState()
+            primaryButton.setOnClickListener {
+                state.onClick?.invoke()
             }
+            primaryButton.setLabel(state.label)
+            primaryButton.isVisible = state.visible
+            bottomSpacer.isVisible = state.visible
+
+            primaryButton.isEnabled = state.enabled
+
+            primaryButton.updateState(state.processingState)
+
+//            state?.let {
+//                primaryButton.setOnClickListener {
+//                    state.onClick?.invoke()
+//                }
+//                primaryButton.setLabel(state.label)
+//                primaryButton.isVisible = state.visible
+//                bottomSpacer.isVisible = state.visible
+//            } ?: run {
+//                resetPrimaryButtonState()
+//            }
         }
-        viewModel.primaryButtonState.launchAndCollectIn(this) { state ->
-            primaryButton.updateState(state)
-        }
-        viewModel.ctaEnabled.observe(this) { isEnabled ->
-            primaryButton.isEnabled = isEnabled
-        }
+//        viewModel.primaryButtonState.launchAndCollectIn(this) { state ->
+//            primaryButton.updateState(state)
+//        }
+//        viewModel.ctaEnabled.observe(this) { isEnabled ->
+//            primaryButton.isEnabled = isEnabled
+//        }
 
         primaryButton.setAppearanceConfiguration(
             StripeTheme.primaryButtonStyle,
@@ -280,6 +291,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 StripeTheme.primaryButtonStyle.getBackgroundColor(baseContext)
             )
         )
+        
         bottomSpacer.isVisible = true
     }
 

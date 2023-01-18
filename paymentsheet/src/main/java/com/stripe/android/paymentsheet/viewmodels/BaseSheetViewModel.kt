@@ -27,7 +27,9 @@ import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
+import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -174,11 +176,11 @@ internal abstract class BaseSheetViewModel(
      * Use this to override the current UI state of the primary button. The UI state is reset every
      * time the payment selection is changed.
      */
-    private val _primaryButtonUIState = MutableStateFlow<PrimaryButton.UIState?>(null)
-    val primaryButtonUIState: StateFlow<PrimaryButton.UIState?> = _primaryButtonUIState
+    private val _primaryButtonUIState = MutableStateFlow(defaultButtonUiState(isFirstTry = true))
+    val primaryButtonUIState: StateFlow<PrimaryButton.UIState> = _primaryButtonUIState
 
-    private val _primaryButtonState = MutableStateFlow<PrimaryButton.State?>(null)
-    val primaryButtonState: StateFlow<PrimaryButton.State?> = _primaryButtonState
+//    private val _primaryButtonState = MutableStateFlow<PrimaryButton.State?>(null)
+//    val primaryButtonState: StateFlow<PrimaryButton.State?> = _primaryButtonState
 
     private val _notesText = MutableStateFlow<String?>(null)
     internal val notesText: StateFlow<String?> = _notesText
@@ -219,7 +221,34 @@ internal abstract class BaseSheetViewModel(
                 }
             }
         }
-    }.distinctUntilChanged()
+    }
+
+    private fun defaultButtonUiState(isFirstTry: Boolean = false): PrimaryButton.UIState {
+        val resources = getApplication<Application>().resources
+        val amount = amount.value
+
+        val label = if (config?.primaryButtonLabel != null) {
+            config.primaryButtonLabel
+        } else if (amount != null) {
+            amount.buildPayButtonLabel(resources)
+        } else {
+            resources.getString(R.string.stripe_setup_button_label)
+        }
+
+        return PrimaryButton.UIState(
+            processingState = PrimaryButton.State.Ready,
+            label = label,
+            onClick = {
+                (this as? PaymentSheetViewModel)?.checkout()
+            },
+            enabled = if (!isFirstTry) {
+                buttonsEnabled.value == true && selection.value != null
+            } else {
+                false
+            },
+            visible = true,
+        )
+    }
 
     internal var lpmServerSpec
         get() = savedStateHandle.get<String>(LPM_SERVER_SPEC_STRING)
@@ -385,7 +414,7 @@ internal abstract class BaseSheetViewModel(
                     requireNotNull(stripeIntent.currency)
                 )
                 // Reset the primary button state to display the amount
-                _primaryButtonUIState.value = null
+                _primaryButtonUIState.value = defaultButtonUiState()
             }.onFailure {
                 onFatal(
                     IllegalStateException("PaymentIntent must contain amount and currency.")
@@ -416,11 +445,13 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun updatePrimaryButtonUIState(state: PrimaryButton.UIState?) {
-        _primaryButtonUIState.value = state
+        _primaryButtonUIState.value = state ?: defaultButtonUiState()
     }
 
     fun updatePrimaryButtonState(state: PrimaryButton.State) {
-        _primaryButtonState.value = state
+        _primaryButtonUIState.update {
+            it.copy(processingState = state)
+        }
     }
 
     fun updateBelowButtonText(text: String?) {
