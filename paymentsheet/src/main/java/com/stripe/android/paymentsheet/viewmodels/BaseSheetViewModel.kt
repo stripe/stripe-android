@@ -5,7 +5,6 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
@@ -195,20 +194,16 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun onFatal(throwable: Throwable)
 
-    val buttonsEnabled = MediatorLiveData<Boolean>().apply {
-        listOf(
-            processing.asLiveData(),
-            editing.asLiveData()
-        ).forEach { source ->
-            addSource(source) {
-                value = processing.value != true && editing.value != true
-            }
-        }
+    val buttonsEnabled = combine(
+        processing,
+        editing
+    ) { isProcessing, isEditing ->
+        !isProcessing && !isEditing
     }.distinctUntilChanged()
 
     val isPrimaryButtonEnabled = combine(
         primaryButtonUIState,
-        buttonsEnabled.asFlow(),
+        buttonsEnabled,
         selection,
     ) { uiState, buttonsEnabled, selection ->
         if (uiState != null) {
