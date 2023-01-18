@@ -32,10 +32,9 @@ open class AddressElement constructor(
         rawValuesMap[IdentifierSpec.Country]
     ),
     sameAsShippingElement: SameAsShippingElement?,
-    shippingValuesMap: Map<IdentifierSpec, String?>?
+    shippingValuesMap: Map<IdentifierSpec, String?>?,
+    private val isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
 ) : SectionMultiFieldElement(_identifier) {
-    @VisibleForTesting
-    internal var isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable()
 
     @VisibleForTesting
     val countryElement = CountryElement(

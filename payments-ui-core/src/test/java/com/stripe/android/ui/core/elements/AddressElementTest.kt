@@ -5,7 +5,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressRepository
-import com.stripe.android.ui.core.elements.autocomplete.IsPlacesAvailable
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -366,9 +365,9 @@ class AddressElementTest {
                 PhoneNumberState.OPTIONAL
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
-            shippingValuesMap = null
+            shippingValuesMap = null,
+            isPlacesAvailable = { false },
         )
-        addressElement.isPlacesAvailable = IsPlacesAvailable { false }
         val identifierSpecs = addressElement.fields.first().map {
             it.identifier
         }
@@ -390,9 +389,9 @@ class AddressElementTest {
                 PhoneNumberState.OPTIONAL
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
-            shippingValuesMap = null
+            shippingValuesMap = null,
+            isPlacesAvailable = { false },
         )
-        addressElement.isPlacesAvailable = IsPlacesAvailable { false }
         countryDropdownFieldController.onValueChange(1)
 
         val trailingIcon = addressElement.trailingIconFor(IdentifierSpec.Line1)
@@ -415,9 +414,9 @@ class AddressElementTest {
                 PhoneNumberState.OPTIONAL
             ) { onNavigationCounter.getAndIncrement() },
             sameAsShippingElement = null,
-            shippingValuesMap = null
+            shippingValuesMap = null,
+            isPlacesAvailable = { true },
         )
-        addressElement.isPlacesAvailable = IsPlacesAvailable { true }
         countryDropdownFieldController.onValueChange(1)
 
         val line1TrailingIcon = addressElement.trailingIconFor(IdentifierSpec.Line1)
