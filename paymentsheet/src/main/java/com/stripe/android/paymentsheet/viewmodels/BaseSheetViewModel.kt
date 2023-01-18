@@ -308,6 +308,7 @@ internal abstract class BaseSheetViewModel(
         val stripeIntentValue = stripeIntent.value
         val isGooglePayReadyValue = googlePayState.value
         val isResourceRepositoryReadyValue = isResourceRepositoryReady.value
+        val isLinkReadyValue = linkHandler.isLinkEnabled.value
         val savedSelectionValue = savedSelection.value
         // List of Payment Methods is not passed in the config but we still wait for it to be loaded
         // before adding the Fragment.
@@ -317,6 +318,7 @@ internal abstract class BaseSheetViewModel(
             paymentMethodsValue != null &&
             isGooglePayReadyValue != GooglePayState.Indeterminate &&
             isResourceRepositoryReadyValue &&
+            isLinkReadyValue != null &&
             savedSelectionValue != null
     }
 
