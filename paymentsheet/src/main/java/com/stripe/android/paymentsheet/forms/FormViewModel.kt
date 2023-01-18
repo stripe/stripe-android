@@ -131,7 +131,7 @@ internal class FormViewModel @Inject internal constructor(
         combine(
             hiddenIdentifiers,
             elementsFlow.map {
-                it ?: emptyList() // TODO(warnings)
+                it
             }
         ) { hiddenIdentifiers, formElements ->
             formElements.filterIsInstance<MandateTextElement>().firstOrNull()?.let { mandate ->
