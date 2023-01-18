@@ -22,7 +22,6 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.BaseAddPaymentMethodFragment
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentOptionsState
@@ -359,11 +358,6 @@ internal abstract class BaseSheetViewModel(
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {
         savedStateHandle[SAVE_STRIPE_INTENT] = stripeIntent
 
-        /**
-         * The settings of values in this function is so that
-         * they will be ready in the onViewCreated method of
-         * the [BaseAddPaymentMethodFragment]
-         */
         val pmsToAdd = getPMsToAdd(stripeIntent, config, lpmResourceRepository.getRepository())
         supportedPaymentMethods = pmsToAdd
 
