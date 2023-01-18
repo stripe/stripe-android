@@ -192,7 +192,7 @@ internal class PaymentSheetActivityTest {
             assertThat(activity.viewBinding.buyButton.isEnabled)
                 .isTrue()
 
-            viewModel.setEditing(true)
+            viewModel.toggleEditing()
 
             assertThat(activity.viewBinding.buyButton.isEnabled)
                 .isFalse()

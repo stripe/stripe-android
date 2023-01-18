@@ -691,8 +691,6 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.savedStateHandle[SAVE_PROCESSING] = false
         viewModel.updateSelection(PaymentSelection.GooglePay)
-        viewModel.setEditing(false)
-
         assertThat(isEnabled).isTrue()
 
         viewModel.updateSelection(null)
@@ -713,10 +711,10 @@ internal class PaymentSheetViewModelTest {
         viewModel.savedStateHandle[SAVE_PROCESSING] = false
         assertThat(isEnabled).isTrue()
 
-        viewModel.setEditing(true)
+        viewModel.toggleEditing()
         assertThat(isEnabled).isFalse()
 
-        viewModel.setEditing(false)
+        viewModel.toggleEditing()
         assertThat(isEnabled).isTrue()
     }
 
@@ -1102,7 +1100,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.editing.test {
             assertThat(awaitItem()).isFalse()
 
-            viewModel.setEditing(true)
+            viewModel.toggleEditing()
             assertThat(awaitItem()).isTrue()
 
             viewModel.removePaymentMethod(customerPaymentMethods.single())
@@ -1116,12 +1114,12 @@ internal class PaymentSheetViewModelTest {
             updateSelection(PaymentSelection.Link)
         }
 
-        viewModel.setEditing(true)
+        viewModel.toggleEditing()
         viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
 
         assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
 
-        viewModel.setEditing(false)
+        viewModel.toggleEditing()
         viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
         assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
     }

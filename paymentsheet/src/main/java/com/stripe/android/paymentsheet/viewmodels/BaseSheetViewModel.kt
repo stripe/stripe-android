@@ -163,7 +163,8 @@ internal abstract class BaseSheetViewModel(
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
 
-    internal val editing = MutableStateFlow(false)
+    private val _editing = MutableStateFlow(false)
+    internal val editing: StateFlow<Boolean> = _editing
 
     val processing: StateFlow<Boolean> = savedStateHandle
         .getStateFlow(SAVE_PROCESSING, false)
@@ -255,7 +256,7 @@ internal abstract class BaseSheetViewModel(
         viewModelScope.launch {
             paymentMethods.onEach { paymentMethods ->
                 if (paymentMethods.isNullOrEmpty() && editing.value) {
-                    setEditing(false)
+                    toggleEditing()
                 }
             }.collect()
         }
@@ -454,12 +455,8 @@ internal abstract class BaseSheetViewModel(
         updateBelowButtonText(null)
     }
 
-    fun setEditing(isEditing: Boolean) {
-        editing.value = isEditing
-    }
-
     fun toggleEditing() {
-        editing.value = !editing.value
+        _editing.value = !editing.value
     }
 
     fun setContentVisible(visible: Boolean) {
