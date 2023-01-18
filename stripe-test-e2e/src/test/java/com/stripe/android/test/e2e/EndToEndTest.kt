@@ -261,7 +261,7 @@ internal class EndToEndTest {
     }
 
     @Test
-    fun `test us_bank_account payment intent flow with desciptor code`() = runTest {
+    fun `test us_bank_account payment intent flow with descriptor code`() = runTest {
         val stripe = Stripe(context, settings.publishableKey)
 
         // Create a PaymentIntent on the backend

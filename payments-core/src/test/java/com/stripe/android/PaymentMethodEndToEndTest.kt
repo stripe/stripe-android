@@ -439,4 +439,13 @@ internal class PaymentMethodEndToEndTest {
         assertThat(paymentMethod?.type)
             .isEqualTo(PaymentMethod.Type.Affirm)
     }
+
+    @Test
+    fun createPaymentMethod_withCashAppPay_shouldCreateObject() {
+        val stripe = Stripe(context, ApiKeyFixtures.CASH_APP_PAY_PUBLISHABLE_KEY)
+        val params = PaymentMethodCreateParamsFixtures.CASH_APP_PAY
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod?.type).isEqualTo(PaymentMethod.Type.CashAppPay)
+    }
 }
