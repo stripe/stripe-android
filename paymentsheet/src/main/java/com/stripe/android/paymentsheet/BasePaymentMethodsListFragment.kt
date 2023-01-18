@@ -8,7 +8,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -27,9 +26,7 @@ internal abstract class BasePaymentMethodsListFragment : Fragment() {
     private var layoutManager: PaymentMethodsLayoutManager? = null
     private var adapter: PaymentOptionsAdapter? = null
 
-    @VisibleForTesting
-    var editMenuItem: MenuItem? = null
-
+    private var editMenuItem: MenuItem? = null
     private var viewBinding: FragmentPaymentsheetPaymentMethodsListBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
