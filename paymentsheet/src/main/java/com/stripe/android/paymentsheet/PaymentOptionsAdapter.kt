@@ -49,10 +49,10 @@ import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getLabelIcon
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
-import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import kotlin.properties.Delegates

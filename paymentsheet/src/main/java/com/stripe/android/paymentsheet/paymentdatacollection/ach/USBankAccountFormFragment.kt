@@ -51,11 +51,11 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.uicore.elements.H6Text
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
-import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.H6Text
+import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.flow.filterNot
