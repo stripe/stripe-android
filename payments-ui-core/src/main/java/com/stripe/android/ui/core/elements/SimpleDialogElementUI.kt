@@ -6,7 +6,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.uicore.StripeTheme
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -20,7 +20,7 @@ fun SimpleDialogElementUI(
     onDismissListener: (() -> Unit) = {}
 ) {
     if (openDialog.value) {
-        PaymentsTheme {
+        StripeTheme {
             AlertDialog(
                 onDismissRequest = {
                     openDialog.value = false

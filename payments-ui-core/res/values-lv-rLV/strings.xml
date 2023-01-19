@@ -38,6 +38,8 @@
   <string name="address_label_suburb">Priekšpilsēta</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">Ciems vai apdzīvota vieta</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="address_search_content_description">Meklēšana</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Maksāt ar <num_installments/> bezprocentu maksājumiem <installment_price/> ar <img/>]]></string>
   <!-- Text for back button -->
@@ -64,6 +66,7 @@
   <string name="iban_invalid_start">IBAN sākumā jābūt divu burtu valsts kodam.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL banka</string>
+  <string name="invalid_email_address">Nederīga e-pasta adrese: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Pērciet tagad vai maksājiet vēlāk ar Klarna.</string>
   <!-- Klarna pay later copy -->

@@ -38,6 +38,8 @@
   <string name="address_label_suburb">Subúrbio</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">Município ou localidade</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="address_search_content_description">Pesquisar</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Pagar em <num_installments/> pagamentos sem juros de <installment_price/> com <img/>]]></string>
   <!-- Text for back button -->
@@ -64,6 +66,7 @@
   <string name="iban_invalid_start">O seu IBAN deve começar por um código de duas letras correspondente ao país.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">Banco iDEAL</string>
+  <string name="invalid_email_address">Endereço de email inválido: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Comprar agora ou pagar mais tarde com Klarna.</string>
   <!-- Klarna pay later copy -->

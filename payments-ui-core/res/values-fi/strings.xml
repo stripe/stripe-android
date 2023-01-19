@@ -38,6 +38,8 @@
   <string name="address_label_suburb">Esikaupunki</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">Kylä tai kaupunkikunta</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="address_search_content_description">Etsi</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Maksu <num_installments/> korottomassa <installment_price/> osassa maksutavalla <img/>]]></string>
   <!-- Text for back button -->
@@ -64,6 +66,7 @@
   <string name="iban_invalid_start">IBAN-tilinumero alkaa kaksikirjaimisella maakoodilla.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL-pankki</string>
+  <string name="invalid_email_address">Virheellinen sähköpostiosoite: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Osta nyt tai maksa myöhemmin Klarnalla.</string>
   <!-- Klarna pay later copy -->

@@ -42,7 +42,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -244,16 +244,16 @@ fun TextFieldColors(
     textColor = if (shouldShowError) {
         MaterialTheme.colors.error
     } else {
-        MaterialTheme.paymentsColors.onComponent
+        MaterialTheme.stripeColors.onComponent
     },
-    unfocusedLabelColor = MaterialTheme.paymentsColors.placeholderText,
-    focusedLabelColor = MaterialTheme.paymentsColors.placeholderText,
-    placeholderColor = MaterialTheme.paymentsColors.placeholderText,
-    backgroundColor = MaterialTheme.paymentsColors.component,
+    unfocusedLabelColor = MaterialTheme.stripeColors.placeholderText,
+    focusedLabelColor = MaterialTheme.stripeColors.placeholderText,
+    placeholderColor = MaterialTheme.stripeColors.placeholderText,
+    backgroundColor = MaterialTheme.stripeColors.component,
     focusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent,
-    cursorColor = MaterialTheme.paymentsColors.textCursor
+    cursorColor = MaterialTheme.stripeColors.textCursor
 )
 
 @Composable

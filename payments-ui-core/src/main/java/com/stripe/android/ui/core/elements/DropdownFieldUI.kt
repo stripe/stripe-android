@@ -41,9 +41,9 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMaxWidth
 import com.stripe.android.ui.core.elements.menu.DropdownMenuItemDefaultMinHeight
-import com.stripe.android.ui.core.paymentsColors
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.uicore.stripeColors
 import kotlin.math.max
 import kotlin.math.min
 
@@ -83,7 +83,7 @@ internal fun DropDown(
     val selectedItemLabel = controller.getSelectedItemLabel(selectedIndex)
     val interactionSource = remember { MutableInteractionSource() }
     val currentTextColor = if (enabled) {
-        MaterialTheme.paymentsColors.onComponent
+        MaterialTheme.stripeColors.onComponent
     } else {
         TextFieldDefaults
             .textFieldColors()
@@ -95,7 +95,7 @@ internal fun DropDown(
     Box(
         modifier = modifier
             .wrapContentSize(Alignment.TopStart)
-            .background(MaterialTheme.paymentsColors.component)
+            .background(MaterialTheme.stripeColors.component)
     ) {
         // Click handling happens on the box, so that it is a single accessible item
         Box(
@@ -120,7 +120,7 @@ internal fun DropDown(
                         painter = painterResource(id = R.drawable.ic_chevron_down),
                         contentDescription = null,
                         modifier = Modifier.height(24.dp),
-                        tint = MaterialTheme.paymentsColors.placeholderText
+                        tint = MaterialTheme.stripeColors.placeholderText
                     )
                 }
             } else {
@@ -174,7 +174,7 @@ internal fun DropDown(
             },
             onDismissRequest = { expanded = false },
             modifier = Modifier
-                .background(color = MaterialTheme.paymentsColors.component)
+                .background(color = MaterialTheme.stripeColors.component)
                 .width(DropdownMenuItemDefaultMaxWidth)
                 .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
         ) {

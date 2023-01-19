@@ -30,7 +30,6 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.S
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PAYMENT_METHODS
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SAVED_SELECTION
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -76,34 +75,6 @@ internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjection
         scenario.onFragment {
             assertThat(activityViewModel(it).selection.value)
                 .isEqualTo(paymentSelection)
-        }
-    }
-
-    @Test
-    fun `recovers edit state when shown`() {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
-        createScenario(
-            initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions(paymentMethods = listOf(paymentMethod))
-        }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
-            assertThat(fragment.isEditing).isFalse()
-            fragment.isEditing = true
-        }.recreate().onFragment {
-            assertThat(it.isEditing).isTrue()
-        }
-    }
-
-    @Test
-    fun `When last item is deleted then edit menu item is hidden`() {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
-        createScenario().onFragment { fragment ->
-            fragment.isEditing = true
-            fragment.adapter.items = fragment.adapter.items.dropLast(1)
-            fragment.deletePaymentMethod(PaymentOptionsItem.SavedPaymentMethod(paymentMethod))
-            assertThat(fragment.isEditing).isFalse()
         }
     }
 
@@ -166,7 +137,10 @@ internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjection
     @Test
     fun `updates selection on click`() {
         val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val selectedItem = PaymentOptionsItem.SavedPaymentMethod(savedPaymentMethod)
+        val selectedItem = PaymentOptionsItem.SavedPaymentMethod(
+            displayName = "Card",
+            paymentMethod = savedPaymentMethod,
+        )
 
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)
@@ -181,7 +155,6 @@ internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjection
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `posts transition when add card clicked`() = runTest {
         val scenario = createScenario()

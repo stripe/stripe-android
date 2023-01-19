@@ -127,6 +127,10 @@ android {
                 maxHeapSize = "1024m"
             }
         }
+
+        kotlinOptions {
+            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+        }
     }
 
     composeOptions {
@@ -135,6 +139,10 @@ android {
 
     lintOptions {
         disable "UnrememberedMutableState"
+    }
+
+    kotlinOptions {
+        freeCompilerArgs += ["-opt-in=kotlinx.coroutines.FlowPreview"]
     }
 }
 

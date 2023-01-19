@@ -38,6 +38,8 @@
   <string name="address_label_suburb">Predgrađe</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">Selo ili grad</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="address_search_content_description">Pretraži</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Platite u <num_installments/> beskamatnih obroka po <installment_price/> koristeći <img/>]]></string>
   <!-- Text for back button -->
@@ -64,6 +66,7 @@
   <string name="iban_invalid_start">Vaš bi IBAN trebao započeti s kodom države od dva slova.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL Bank</string>
+  <string name="invalid_email_address">Nevažeća adresa e-pošte: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Kupite sada ili platite kasnije pomoću Klarne</string>
   <!-- Klarna pay later copy -->

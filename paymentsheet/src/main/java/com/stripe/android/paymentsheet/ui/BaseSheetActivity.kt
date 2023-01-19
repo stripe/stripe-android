@@ -44,13 +44,13 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.ui.core.getBackgroundColor
-import com.stripe.android.ui.core.isSystemDarkTheme
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.createTextSpanFromTextStyle
+import com.stripe.android.uicore.getBackgroundColor
+import com.stripe.android.uicore.isSystemDarkTheme
+import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.KeyboardController
@@ -223,7 +223,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                     context = this,
                     fontSizeDp = (
                         it.typography.sizeScaleFactor
-                            * PaymentsThemeDefaults.typography.smallFontSize.value
+                            * StripeThemeDefaults.typography.smallFontSize.value
                         ).dp,
                     color = Color(it.getColors(this.isSystemDarkTheme()).error),
                     fontFamily = it.typography.fontResId
@@ -240,7 +240,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             setContent {
                 val text = viewModel.headerText.collectAsState()
                 text.value?.let {
-                    PaymentsTheme {
+                    StripeTheme {
                         H4Text(
                             text = stringResource(it),
                             modifier = Modifier.padding(bottom = 2.dp)
@@ -275,9 +275,9 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
 
         primaryButton.setAppearanceConfiguration(
-            PaymentsTheme.primaryButtonStyle,
+            StripeTheme.primaryButtonStyle,
             tintList = viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
-                PaymentsTheme.primaryButtonStyle.getBackgroundColor(baseContext)
+                StripeTheme.primaryButtonStyle.getBackgroundColor(baseContext)
             )
         )
         bottomSpacer.isVisible = true
@@ -293,10 +293,10 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             val showNotes = text != null
             text?.let {
                 notesView.setContent {
-                    PaymentsTheme {
+                    StripeTheme {
                         Html(
                             html = text,
-                            color = MaterialTheme.paymentsColors.subtitle,
+                            color = MaterialTheme.stripeColors.subtitle,
                             style = MaterialTheme.typography.body1.copy(
                                 textAlign = TextAlign.Center
                             )

@@ -6,13 +6,11 @@ import com.stripe.android.model.StripeIntent.Status.RequiresCapture
 import com.stripe.android.model.StripeIntent.Status.RequiresConfirmation
 import com.stripe.android.model.StripeIntent.Status.RequiresPaymentMethod
 import com.stripe.android.model.StripeIntent.Status.Succeeded
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class DefaultIntentStatusPollerTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()

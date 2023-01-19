@@ -169,7 +169,7 @@ internal class UnsupportedPlacesClientProxy : PlacesClientProxy {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface IsPlacesAvailable {
+fun interface IsPlacesAvailable {
     operator fun invoke(): Boolean
 }
 

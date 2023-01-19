@@ -27,7 +27,7 @@ import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.R
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.PaymentsThemeForLink
+import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
@@ -134,7 +134,7 @@ internal fun CardEditBody(
             style = MaterialTheme.typography.h2,
             color = MaterialTheme.colors.onPrimary
         )
-        PaymentsThemeForLink {
+        StripeThemeForLink {
             formContent()
 
             Spacer(modifier = Modifier.height(8.dp))

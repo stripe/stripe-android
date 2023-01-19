@@ -15,7 +15,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_SUCCEEDED
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarterHost
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -27,7 +26,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class UnsupportedAuthenticatorTest {
     private val paymentRelayStarterFactory =
         mock<(AuthActivityStarterHost) -> PaymentRelayStarter>()

@@ -38,6 +38,8 @@
   <string name="address_label_suburb">Ngoại ô</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">Làng hoặc thị trấn</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="address_search_content_description">Tìm kiếm</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Trả bằng <num_installments/> khoản thanh toán không lãi suất là <installment_price/> bằng <img/>]]></string>
   <!-- Text for back button -->
@@ -64,6 +66,7 @@
   <string name="iban_invalid_start">IBAN của quý vị phải bắt đầu bằng mã quốc gia gồm hai chữ cái.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">Ngân hàng iDEAL</string>
+  <string name="invalid_email_address">Địa chỉ email không hợp lệ: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Mua ngay hoặc thanh toán sau bằng Klarna.</string>
   <!-- Klarna pay later copy -->
