@@ -20,7 +20,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.view.AuthActivityStarterHost
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -36,7 +35,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class WebIntentAuthenticatorTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val paymentBrowserAuthStarterFactory =

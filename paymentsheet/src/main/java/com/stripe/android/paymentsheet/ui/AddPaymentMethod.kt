@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -90,7 +89,7 @@ private fun AddPaymentMethod(
             showCheckboxFlow.emit(arguments.showCheckbox)
         }
 
-        val paymentSelection by sheetViewModel.selection.observeAsState()
+        val paymentSelection by sheetViewModel.selection.collectAsState()
         val linkInlineSelection by linkHandler.linkInlineSelection.collectAsState()
         var linkSignupState by remember {
             mutableStateOf<InlineSignupViewState?>(null)
@@ -172,7 +171,7 @@ private fun BaseSheetViewModel.showLinkInlineSignupView(
         AccountStatus.SignedOut,
     )
     val linkInlineSelectionValid = linkHandler.linkInlineSelection.value != null
-    return linkHandler.isLinkEnabled.value && stripeIntent.value
+    return linkHandler.isLinkEnabled.value == true && stripeIntent.value
         ?.linkFundingSources?.contains(PaymentMethod.Type.Card.code) == true &&
         paymentMethodCode == PaymentMethod.Type.Card.code &&
         (linkAccountStatus in validStatusStates || linkInlineSelectionValid)

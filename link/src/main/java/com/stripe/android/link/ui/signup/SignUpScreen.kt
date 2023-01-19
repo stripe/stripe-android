@@ -32,7 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.PaymentsThemeForLink
+import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
@@ -125,7 +125,7 @@ internal fun SignUpBody(
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSecondary
         )
-        PaymentsThemeForLink {
+        StripeThemeForLink {
             EmailCollectionSection(
                 enabled = true,
                 emailController = emailController,
@@ -143,7 +143,7 @@ internal fun SignUpBody(
         }
         AnimatedVisibility(visible = signUpState == SignUpState.InputtingPhoneOrName) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                PaymentsThemeForLink {
+                StripeThemeForLink {
                     PhoneNumberCollectionSection(
                         enabled = true,
                         phoneNumberController = phoneNumberController,

@@ -17,6 +17,7 @@ class PaymentOptionsStateFactoryTest {
             showLink = true,
             initialSelection = SavedSelection.None,
             currentSelection = null,
+            nameProvider = { it!! },
         )
         assertThat(state.selectedItem).isEqualTo(PaymentOptionsItem.GooglePay)
     }
@@ -30,6 +31,7 @@ class PaymentOptionsStateFactoryTest {
             showLink = true,
             initialSelection = SavedSelection.None,
             currentSelection = null,
+            nameProvider = { it!! },
         )
         assertThat(state.selectedItem).isEqualTo(PaymentOptionsItem.Link)
     }
@@ -43,9 +45,13 @@ class PaymentOptionsStateFactoryTest {
             showLink = false,
             initialSelection = SavedSelection.None,
             currentSelection = null,
+            nameProvider = { it!! },
         )
 
-        val expectedItem = PaymentOptionsItem.SavedPaymentMethod(paymentMethods.first())
+        val expectedItem = PaymentOptionsItem.SavedPaymentMethod(
+            displayName = "card",
+            paymentMethod = paymentMethods.first(),
+        )
         assertThat(state.selectedItem).isEqualTo(expectedItem)
     }
 
@@ -60,9 +66,13 @@ class PaymentOptionsStateFactoryTest {
             showLink = false,
             initialSelection = savedPaymentMethod,
             currentSelection = null,
+            nameProvider = { it!! },
         )
 
-        val expectedItem = PaymentOptionsItem.SavedPaymentMethod(paymentMethods[1])
+        val expectedItem = PaymentOptionsItem.SavedPaymentMethod(
+            displayName = "card",
+            paymentMethod = paymentMethods[1],
+        )
         assertThat(state.selectedItem).isEqualTo(expectedItem)
     }
 
@@ -76,6 +86,7 @@ class PaymentOptionsStateFactoryTest {
             showLink = true,
             initialSelection = SavedSelection.GooglePay,
             currentSelection = PaymentSelection.Link,
+            nameProvider = { it!! },
         )
 
         assertThat(state.selectedItem).isEqualTo(PaymentOptionsItem.Link)

@@ -328,53 +328,44 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.checkoutWithGooglePay()
 
-        val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
-            .observeForever {
-                viewState.add(it)
-            }
+        val googlePayButtonTurbine = viewModel.googlePayButtonState.testIn(this)
+        val processingTurbine = viewModel.processing.testIn(this)
 
-        viewModel.processing.test {
-            assertThat(viewState.size).isEqualTo(1)
-            assertThat(viewState[0])
-                .isEqualTo(PaymentSheetViewState.StartProcessing)
-            assertThat(awaitItem()).isTrue()
+        assertThat(googlePayButtonTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.StartProcessing)
+        assertThat(processingTurbine.awaitItem()).isTrue()
 
-            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
-            assertThat(viewModel.contentVisible.value).isTrue()
+        viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+        assertThat(viewModel.contentVisible.value).isTrue()
 
-            assertThat(viewState.size).isEqualTo(2)
-            assertThat(viewState[1])
-                .isEqualTo(PaymentSheetViewState.Reset(null))
-            assertThat(awaitItem()).isFalse()
-        }
+        assertThat(googlePayButtonTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.Reset(null))
+        assertThat(processingTurbine.awaitItem()).isFalse()
+
+        googlePayButtonTurbine.cancel()
+        processingTurbine.cancel()
     }
 
     @Test
-    fun `On checkout clear the previous view state error`() {
+    fun `On checkout clear the previous view state error`() = runTest {
         val viewModel = createViewModel()
-        val googleViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
         viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
-            .observeForever {
-                googleViewState.add(it)
-            }
 
-        val buyViewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
-            .observeForever {
-                buyViewState.add(it)
-            }
+        val googlePayButtonTurbine = viewModel.googlePayButtonState.testIn(this)
+        val buyButtonTurbine = viewModel.buyPayButtonState.testIn(this)
 
-        val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.viewState.observeForever {
-            viewState.add(it)
-        }
+        assertThat(buyButtonTurbine.awaitItem()).isNull()
+        assertThat(googlePayButtonTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.Reset(null))
 
         viewModel.checkout()
 
-        assertThat(googleViewState[0]).isEqualTo(PaymentSheetViewState.Reset(null))
-        assertThat(buyViewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
+        googlePayButtonTurbine.expectNoEvents()
+        assertThat(buyButtonTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.StartProcessing)
+
+        googlePayButtonTurbine.cancel()
+        buyButtonTurbine.cancel()
     }
 
     @Test
@@ -383,30 +374,27 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.checkoutWithGooglePay()
 
-        val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
-            .observeForever {
-                viewState.add(it)
-            }
+        val googlePayButtonTurbine = viewModel.googlePayButtonState.testIn(this)
+        val processingTurbine = viewModel.processing.testIn(this)
 
-        viewModel.processing.test {
-            assertThat(viewState.size).isEqualTo(1)
-            assertThat(viewState[0]).isEqualTo(PaymentSheetViewState.StartProcessing)
-            assertThat(awaitItem()).isTrue()
+        assertThat(googlePayButtonTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.StartProcessing)
+        assertThat(processingTurbine.awaitItem()).isTrue()
 
-            viewModel.onGooglePayResult(
-                GooglePayPaymentMethodLauncher.Result.Failed(
-                    Exception("Test exception"),
-                    Status.RESULT_INTERNAL_ERROR.statusCode
-                )
+        viewModel.onGooglePayResult(
+            GooglePayPaymentMethodLauncher.Result.Failed(
+                Exception("Test exception"),
+                Status.RESULT_INTERNAL_ERROR.statusCode
             )
+        )
 
-            assertThat(viewModel.contentVisible.value).isTrue()
-            assertThat(viewState.size).isEqualTo(2)
-            assertThat(viewState[1])
-                .isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage("An internal error occurred.")))
-            assertThat(awaitItem()).isFalse()
-        }
+        assertThat(viewModel.contentVisible.value).isTrue()
+        assertThat(googlePayButtonTurbine.awaitItem())
+            .isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage("An internal error occurred.")))
+        assertThat(processingTurbine.awaitItem()).isFalse()
+
+        googlePayButtonTurbine.cancel()
+        processingTurbine.cancel()
     }
 
     @Test
@@ -417,29 +405,38 @@ internal class PaymentSheetViewModelTest {
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             viewModel.updateSelection(selection)
 
-            val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-            viewModel.viewState.observeForever {
-                viewState.add(it)
-            }
+            val resultTurbine = viewModel.paymentSheetResult.testIn(this)
+            val viewStateTurbine = viewModel.viewState.testIn(this)
 
-            viewModel.paymentSheetResult.test {
-                viewModel.onPaymentResult(PaymentResult.Completed)
-                assertThat(viewState[1])
-                    .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
-                (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
-                assertThat(awaitItem())
-                    .isEqualTo(PaymentSheetResult.Completed)
-            }
+            viewModel.onPaymentResult(PaymentResult.Completed)
+
+            assertThat(viewStateTurbine.awaitItem())
+                .isEqualTo(PaymentSheetViewState.Reset(null))
+
+            val finishedProcessingState = viewStateTurbine.awaitItem()
+            assertThat(finishedProcessingState)
+                .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+
+            (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
+
+            assertThat(resultTurbine.awaitItem())
+                .isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
                 .onPaymentSuccess(selection)
-
             assertThat(prefsRepository.paymentSelectionArgs)
                 .containsExactly(selection)
-            assertThat(prefsRepository.getSavedSelection(true, true))
-                .isEqualTo(
-                    SavedSelection.PaymentMethod(selection.paymentMethod.id.orEmpty())
+            assertThat(
+                prefsRepository.getSavedSelection(
+                    isGooglePayAvailable = true,
+                    isLinkAvailable = true
                 )
+            ).isEqualTo(
+                SavedSelection.PaymentMethod(selection.paymentMethod.id.orEmpty())
+            )
+
+            resultTurbine.cancel()
+            viewStateTurbine.cancel()
         }
 
     @Test
@@ -454,18 +451,21 @@ internal class PaymentSheetViewModelTest {
             )
             viewModel.updateSelection(selection)
 
-            val viewState: MutableList<PaymentSheetViewState?> = mutableListOf()
-            viewModel.viewState.observeForever {
-                viewState.add(it)
-            }
+            val resultTurbine = viewModel.paymentSheetResult.testIn(this)
+            val viewStateTurbine = viewModel.viewState.testIn(this)
 
-            viewModel.paymentSheetResult.test {
-                viewModel.onPaymentResult(PaymentResult.Completed)
-                assertThat(viewState[1])
-                    .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
-                (viewState[1] as PaymentSheetViewState.FinishProcessing).onComplete()
-                assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed)
-            }
+            viewModel.onPaymentResult(PaymentResult.Completed)
+
+            assertThat(viewStateTurbine.awaitItem())
+                .isEqualTo(PaymentSheetViewState.Reset(null))
+
+            val finishedProcessingState = viewStateTurbine.awaitItem()
+            assertThat(finishedProcessingState)
+                .isInstanceOf(PaymentSheetViewState.FinishProcessing::class.java)
+
+            (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
+
+            assertThat(resultTurbine.awaitItem()).isEqualTo(PaymentSheetResult.Completed)
 
             verify(eventReporter)
                 .onPaymentSuccess(selection)
@@ -476,12 +476,19 @@ internal class PaymentSheetViewModelTest {
                         PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!
                     )
                 )
-            assertThat(prefsRepository.getSavedSelection(true, true))
-                .isEqualTo(
-                    SavedSelection.PaymentMethod(
-                        PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!.id!!
-                    )
+            assertThat(
+                prefsRepository.getSavedSelection(
+                    isGooglePayAvailable = true,
+                    isLinkAvailable = true
                 )
+            ).isEqualTo(
+                SavedSelection.PaymentMethod(
+                    PAYMENT_INTENT_RESULT_WITH_PM.intent.paymentMethod!!.id!!
+                )
+            )
+
+            resultTurbine.cancel()
+            viewStateTurbine.cancel()
         }
 
     @Test
@@ -504,38 +511,32 @@ internal class PaymentSheetViewModelTest {
         runTest {
             val viewModel = createViewModel()
 
-            val viewStateList = mutableListOf<PaymentSheetViewState>()
-            viewModel.viewState.observeForever {
-                viewStateList.add(it)
-            }
+            viewModel.viewState.test {
+                val errorMessage = "very helpful error message"
+                viewModel.onPaymentResult(PaymentResult.Failed(Throwable(errorMessage)))
 
-            val errorMessage = "very helpful error message"
-            viewModel.onPaymentResult(PaymentResult.Failed(Throwable(errorMessage)))
-
-            assertThat(viewStateList[0])
-                .isEqualTo(
-                    PaymentSheetViewState.Reset(null)
-                )
-            assertThat(viewStateList[1])
-                .isEqualTo(
-                    PaymentSheetViewState.Reset(
-                        UserErrorMessage(errorMessage)
+                assertThat(awaitItem())
+                    .isEqualTo(
+                        PaymentSheetViewState.Reset(null)
                     )
-                )
+                assertThat(awaitItem())
+                    .isEqualTo(
+                        PaymentSheetViewState.Reset(
+                            UserErrorMessage(errorMessage)
+                        )
+                    )
+            }
         }
 
     @Test
-    fun `fetchPaymentIntent() should update ViewState LiveData`() {
+    fun `fetchPaymentIntent() should update ViewState LiveData`() = runTest {
         val viewModel = createViewModel()
-        var viewState: PaymentSheetViewState? = null
-        viewModel.viewState.observeForever {
-            viewState = it
+        viewModel.viewState.test {
+            assertThat(awaitItem())
+                .isEqualTo(
+                    PaymentSheetViewState.Reset(null)
+                )
         }
-
-        assertThat(viewState)
-            .isEqualTo(
-                PaymentSheetViewState.Reset(null)
-            )
     }
 
     @Test
@@ -675,7 +676,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem()).isEqualTo(Loading)
 
             viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
-            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
     }
 
@@ -690,8 +691,6 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.savedStateHandle[SAVE_PROCESSING] = false
         viewModel.updateSelection(PaymentSelection.GooglePay)
-        viewModel.setEditing(false)
-
         assertThat(isEnabled).isTrue()
 
         viewModel.updateSelection(null)
@@ -712,10 +711,10 @@ internal class PaymentSheetViewModelTest {
         viewModel.savedStateHandle[SAVE_PROCESSING] = false
         assertThat(isEnabled).isTrue()
 
-        viewModel.setEditing(true)
+        viewModel.toggleEditing()
         assertThat(isEnabled).isFalse()
 
-        viewModel.setEditing(false)
+        viewModel.toggleEditing()
         assertThat(isEnabled).isTrue()
     }
 
@@ -799,6 +798,30 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `Resets selection correctly after cancelling Google Pay`() = runTest {
+        val viewModel = createViewModel()
+
+        val initialSelection = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        )
+
+        viewModel.selection.test {
+            // New valid card
+            assertThat(awaitItem()).isNull()
+            viewModel.updateSelection(initialSelection)
+            viewModel.transitionToAddPaymentScreen()
+            assertThat(awaitItem()).isEqualTo(initialSelection)
+            viewModel.checkoutWithGooglePay()
+            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+
+            // Still using the initial PaymentSelection
+            expectNoEvents()
+        }
+    }
+
+    @Test
     fun `updateSelection() posts mandate text when selected payment is us_bank_account`() {
         val viewModel = createViewModel()
         viewModel.updateSelection(
@@ -846,6 +869,18 @@ internal class PaymentSheetViewModelTest {
             viewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
 
             assertThat(awaitItem()).isEqualTo(PrimaryButton.State.Ready)
+        }
+    }
+
+    @Test
+    fun `Content should be hidden when Google Pay is visible`() = runTest {
+        val viewModel = createViewModel()
+        viewModel.contentVisible.test {
+            assertThat(awaitItem()).isTrue()
+            viewModel.checkoutWithGooglePay()
+            assertThat(awaitItem()).isFalse()
+            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            assertThat(awaitItem()).isTrue()
         }
     }
 
@@ -949,6 +984,7 @@ internal class PaymentSheetViewModelTest {
     fun `Sends correct event when navigating to AddFirstPaymentMethod screen`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            customerPaymentMethods = listOf()
         )
         viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
 
@@ -970,7 +1006,9 @@ internal class PaymentSheetViewModelTest {
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.NeedsVerification,
-            )
+            ),
+            customerPaymentMethods = listOf(),
+            customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
         )
         viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
 
@@ -992,7 +1030,9 @@ internal class PaymentSheetViewModelTest {
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedIn,
-            )
+            ),
+            customerPaymentMethods = listOf(),
+            customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
         )
         viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
 
@@ -1051,6 +1091,39 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `Sets editing to false when removing the last payment method while editing`() = runTest {
+        val customerPaymentMethods = PaymentMethodFixtures.createCards(1)
+        val viewModel = createViewModel(customerPaymentMethods = customerPaymentMethods)
+        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+
+        viewModel.editing.test {
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.toggleEditing()
+            assertThat(awaitItem()).isTrue()
+
+            viewModel.removePaymentMethod(customerPaymentMethods.single())
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun `Ignores payment selection while in edit mode`() = runTest {
+        val viewModel = createViewModel().apply {
+            updateSelection(PaymentSelection.Link)
+        }
+
+        viewModel.toggleEditing()
+        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
+
+        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
+
+        viewModel.toggleEditing()
+        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
+        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
+    }
+
     private class NonLoadingLpmRepository(
         val lpmRepository: LpmRepository
     ) : ResourceRepository<LpmRepository> {
@@ -1061,14 +1134,63 @@ internal class PaymentSheetViewModelTest {
         override fun getRepository(): LpmRepository = lpmRepository
     }
 
+    @Test
+    fun `updateSelection with new payment method updates the current selection`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.selection.test {
+            val newSelection = PaymentSelection.New.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            )
+            assertThat(awaitItem()).isNull()
+            viewModel.updateSelection(newSelection)
+            assertThat(awaitItem())
+                .isEqualTo(newSelection)
+            assertThat(viewModel.newPaymentSelection).isEqualTo(newSelection)
+        }
+    }
+
+    @Test
+    fun `updateSelection with saved payment method updates the current selection`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.selection.test {
+            val savedSelection = PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+            assertThat(awaitItem()).isNull()
+            viewModel.updateSelection(savedSelection)
+            assertThat(awaitItem()).isEqualTo(savedSelection)
+            assertThat(viewModel.newPaymentSelection).isEqualTo(null)
+        }
+    }
+
+    @Test
+    fun `Resets the backstack if the last customer payment method is removed`() = runTest {
+        val paymentMethods = PaymentMethodFixtures.createCards(1)
+        val viewModel = createViewModel(customerPaymentMethods = paymentMethods)
+
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(Loading)
+
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+
+            viewModel.removePaymentMethod(paymentMethods.single())
+            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+        }
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
-        customerRepository: CustomerRepository = FakeCustomerRepository(PAYMENT_METHODS),
+        customerPaymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
+        customerRepository: CustomerRepository = FakeCustomerRepository(customerPaymentMethods),
         shouldFailLoad: Boolean = false,
         linkState: LinkState? = null,
         delay: Duration = Duration.ZERO,
-        customerPaymentMethods: List<PaymentMethod> = listOf(),
         lpmResourceRepository: ResourceRepository<LpmRepository> = this.lpmResourceRepository
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)

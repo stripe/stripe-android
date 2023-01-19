@@ -11,7 +11,6 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -54,7 +53,6 @@ class PaymentLauncherConfirmationActivityTest {
         }
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `start should call register`() {
         val confirmStripeIntentParams = mock<ConfirmStripeIntentParams>()
@@ -81,7 +79,6 @@ class PaymentLauncherConfirmationActivityTest {
         }
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `start with IntentConfirmationArgs should confirmStripeIntent`() {
         val confirmStripeIntentParams = mock<ConfirmStripeIntentParams>()
@@ -108,7 +105,6 @@ class PaymentLauncherConfirmationActivityTest {
         }
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `start with PaymentIntentNextActionArgs should handleNextActionForStripeIntent`() {
         mockViewModelActivityScenario().launch(
@@ -127,7 +123,6 @@ class PaymentLauncherConfirmationActivityTest {
         }
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `start with SetupIntentNextActionArgs should handleNextActionForStripeIntent`() {
         mockViewModelActivityScenario().launch(

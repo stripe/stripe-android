@@ -21,10 +21,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.getBackgroundColor
-import com.stripe.android.ui.core.getBorderStrokeColor
-import com.stripe.android.ui.core.getOnBackgroundColor
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getBackgroundColor
+import com.stripe.android.uicore.getBorderStrokeColor
+import com.stripe.android.uicore.getOnBackgroundColor
 
 @Composable
 internal fun AddressElementPrimaryButton(
@@ -35,19 +35,19 @@ internal fun AddressElementPrimaryButton(
     // We need to use PaymentsTheme.primaryButtonStyle instead of MaterialTheme
     // because of the rules API for primary button.
     val context = LocalContext.current
-    val background = Color(PaymentsTheme.primaryButtonStyle.getBackgroundColor(context))
-    val onBackground = Color(PaymentsTheme.primaryButtonStyle.getOnBackgroundColor(context))
+    val background = Color(StripeTheme.primaryButtonStyle.getBackgroundColor(context))
+    val onBackground = Color(StripeTheme.primaryButtonStyle.getOnBackgroundColor(context))
     val borderStroke = BorderStroke(
-        PaymentsTheme.primaryButtonStyle.shape.borderStrokeWidth.dp,
-        Color(PaymentsTheme.primaryButtonStyle.getBorderStrokeColor(context))
+        StripeTheme.primaryButtonStyle.shape.borderStrokeWidth.dp,
+        Color(StripeTheme.primaryButtonStyle.getBorderStrokeColor(context))
     )
     val shape = RoundedCornerShape(
-        PaymentsTheme.primaryButtonStyle.shape.cornerRadius
+        StripeTheme.primaryButtonStyle.shape.cornerRadius
     )
-    val fontFamily = PaymentsTheme.primaryButtonStyle.typography.fontFamily
+    val fontFamily = StripeTheme.primaryButtonStyle.typography.fontFamily
     val textStyle = TextStyle(
         fontFamily = if (fontFamily != null) FontFamily(Font(fontFamily)) else FontFamily.Default,
-        fontSize = PaymentsTheme.primaryButtonStyle.typography.fontSize
+        fontSize = StripeTheme.primaryButtonStyle.typography.fontSize
     )
 
     CompositionLocalProvider(

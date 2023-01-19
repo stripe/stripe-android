@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.stripeColors
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -112,7 +112,7 @@ private fun ActivePolling(
     ) {
         CircularProgressIndicator(
             modifier = Modifier.padding(bottom = Spacing.extended),
-            color = MaterialTheme.paymentsColors.appBarIcon,
+            color = MaterialTheme.stripeColors.appBarIcon,
         )
 
         Text(
@@ -230,7 +230,7 @@ private class PollingLifecycleObserver(
 @Preview(heightDp = 400)
 @Composable
 private fun ActivePollingScreenPreview() {
-    PaymentsTheme {
+    StripeTheme {
         Surface {
             PollingScreen(
                 uiState = PollingUiState(
@@ -246,7 +246,7 @@ private fun ActivePollingScreenPreview() {
 @Preview(heightDp = 400)
 @Composable
 private fun FailedPollingScreenPreview() {
-    PaymentsTheme {
+    StripeTheme {
         Surface {
             PollingScreen(
                 uiState = PollingUiState(

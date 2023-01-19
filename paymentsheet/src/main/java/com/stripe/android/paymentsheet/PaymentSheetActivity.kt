@@ -22,7 +22,6 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
-import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.state.GooglePayState
@@ -30,8 +29,8 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
-import com.stripe.android.ui.core.PaymentsTheme
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import java.security.InvalidParameterException
@@ -74,11 +73,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private val topMessage by lazy { viewBinding.topMessage }
     private val googlePayDivider by lazy { viewBinding.googlePayDivider }
 
-    private val buyButtonStateObserver = { viewState: PaymentSheetViewState? ->
-        updateErrorMessage(messageView, viewState?.errorMessage)
-        viewBinding.buyButton.updateState(viewState?.convert())
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         val validationResult = initializeArgs()
         super.onCreate(savedInstanceState)
@@ -119,7 +113,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         viewBinding.contentContainer.setContent {
-            PaymentsTheme {
+            StripeTheme {
                 val currentScreen by viewModel.currentScreen.collectAsState()
 
                 LaunchedEffect(currentScreen) {
@@ -147,13 +141,15 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             googlePayButton.isEnabled = enabled
         }
 
-        viewModel.selection.observe(this) {
+        viewModel.selection.filterNotNull().launchAndCollectIn(this) {
             viewModel.clearErrorMessages()
             resetPrimaryButtonState()
         }
 
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetBottomBuy)
-            .observe(this, buyButtonStateObserver)
+        viewModel.buyPayButtonState.launchAndCollectIn(this) { viewState ->
+            updateErrorMessage(messageView, viewState?.errorMessage)
+            viewBinding.buyButton.updateState(viewState?.convert())
+        }
     }
 
     private fun initializeArgs(): Result<PaymentSheetContract.Args?> {
@@ -222,7 +218,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                         ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
                     )
                     setContent {
-                        PaymentsTheme {
+                        StripeTheme {
                             GooglePayDividerUi(dividerText)
                         }
                     }
@@ -236,11 +232,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             viewModel.checkoutWithGooglePay()
         }
 
-        viewModel.getButtonStateObservable(CheckoutIdentifier.SheetTopGooglePay)
-            .observe(this) { viewState ->
-                updateErrorMessage(topMessage, viewState?.errorMessage)
-                googlePayButton.updateState(viewState?.convert())
-            }
+        viewModel.googlePayButtonState.launchAndCollectIn(this) { viewState ->
+            updateErrorMessage(topMessage, viewState?.errorMessage)
+            googlePayButton.updateState(viewState?.convert())
+        }
     }
 
     override fun setActivityResult(result: PaymentSheetResult) {

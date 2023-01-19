@@ -21,7 +21,6 @@ import com.stripe.android.stripe3ds2.transaction.ChallengeResult
 import com.stripe.android.stripe3ds2.transaction.IntentData
 import com.stripe.android.stripe3ds2.transactions.UiType
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -33,7 +32,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class DefaultStripe3ds2ChallengeResultProcessorTest {
     private val testDispatcher = UnconfinedTestDispatcher()

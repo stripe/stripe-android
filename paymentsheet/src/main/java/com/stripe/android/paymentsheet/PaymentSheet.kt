@@ -15,8 +15,8 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.getRawValueFromDimenResource
+import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -384,31 +384,31 @@ class PaymentSheet internal constructor(
 
         companion object {
             val defaultLight = Colors(
-                primary = PaymentsThemeDefaults.colorsLight.materialColors.primary,
-                surface = PaymentsThemeDefaults.colorsLight.materialColors.surface,
-                component = PaymentsThemeDefaults.colorsLight.component,
-                componentBorder = PaymentsThemeDefaults.colorsLight.componentBorder,
-                componentDivider = PaymentsThemeDefaults.colorsLight.componentDivider,
-                onComponent = PaymentsThemeDefaults.colorsLight.onComponent,
-                subtitle = PaymentsThemeDefaults.colorsLight.subtitle,
-                placeholderText = PaymentsThemeDefaults.colorsLight.placeholderText,
-                onSurface = PaymentsThemeDefaults.colorsLight.materialColors.onSurface,
-                appBarIcon = PaymentsThemeDefaults.colorsLight.appBarIcon,
-                error = PaymentsThemeDefaults.colorsLight.materialColors.error
+                primary = StripeThemeDefaults.colorsLight.materialColors.primary,
+                surface = StripeThemeDefaults.colorsLight.materialColors.surface,
+                component = StripeThemeDefaults.colorsLight.component,
+                componentBorder = StripeThemeDefaults.colorsLight.componentBorder,
+                componentDivider = StripeThemeDefaults.colorsLight.componentDivider,
+                onComponent = StripeThemeDefaults.colorsLight.onComponent,
+                subtitle = StripeThemeDefaults.colorsLight.subtitle,
+                placeholderText = StripeThemeDefaults.colorsLight.placeholderText,
+                onSurface = StripeThemeDefaults.colorsLight.materialColors.onSurface,
+                appBarIcon = StripeThemeDefaults.colorsLight.appBarIcon,
+                error = StripeThemeDefaults.colorsLight.materialColors.error
             )
 
             val defaultDark = Colors(
-                primary = PaymentsThemeDefaults.colorsDark.materialColors.primary,
-                surface = PaymentsThemeDefaults.colorsDark.materialColors.surface,
-                component = PaymentsThemeDefaults.colorsDark.component,
-                componentBorder = PaymentsThemeDefaults.colorsDark.componentBorder,
-                componentDivider = PaymentsThemeDefaults.colorsDark.componentDivider,
-                onComponent = PaymentsThemeDefaults.colorsDark.onComponent,
-                subtitle = PaymentsThemeDefaults.colorsDark.subtitle,
-                placeholderText = PaymentsThemeDefaults.colorsDark.placeholderText,
-                onSurface = PaymentsThemeDefaults.colorsDark.materialColors.onSurface,
-                appBarIcon = PaymentsThemeDefaults.colorsDark.appBarIcon,
-                error = PaymentsThemeDefaults.colorsDark.materialColors.error
+                primary = StripeThemeDefaults.colorsDark.materialColors.primary,
+                surface = StripeThemeDefaults.colorsDark.materialColors.surface,
+                component = StripeThemeDefaults.colorsDark.component,
+                componentBorder = StripeThemeDefaults.colorsDark.componentBorder,
+                componentDivider = StripeThemeDefaults.colorsDark.componentDivider,
+                onComponent = StripeThemeDefaults.colorsDark.onComponent,
+                subtitle = StripeThemeDefaults.colorsDark.subtitle,
+                placeholderText = StripeThemeDefaults.colorsDark.placeholderText,
+                onSurface = StripeThemeDefaults.colorsDark.materialColors.onSurface,
+                appBarIcon = StripeThemeDefaults.colorsDark.appBarIcon,
+                error = StripeThemeDefaults.colorsDark.materialColors.error
             )
         }
     }
@@ -432,8 +432,8 @@ class PaymentSheet internal constructor(
 
         companion object {
             val default = Shapes(
-                cornerRadiusDp = PaymentsThemeDefaults.shapes.cornerRadius,
-                borderStrokeWidthDp = PaymentsThemeDefaults.shapes.borderStrokeWidth
+                cornerRadiusDp = StripeThemeDefaults.shapes.cornerRadius,
+                borderStrokeWidthDp = StripeThemeDefaults.shapes.borderStrokeWidth
             )
         }
     }
@@ -454,8 +454,8 @@ class PaymentSheet internal constructor(
     ) : Parcelable {
         companion object {
             val default = Typography(
-                sizeScaleFactor = PaymentsThemeDefaults.typography.fontSizeMultiplier,
-                fontResId = PaymentsThemeDefaults.typography.fontFamily
+                sizeScaleFactor = StripeThemeDefaults.typography.fontSizeMultiplier,
+                fontResId = StripeThemeDefaults.typography.fontFamily
             )
         }
     }
@@ -513,14 +513,14 @@ class PaymentSheet internal constructor(
             val defaultLight = PrimaryButtonColors(
                 background = null,
                 onBackground =
-                PaymentsThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                border = PaymentsThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb()
+                StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb()
             )
             val defaultDark = PrimaryButtonColors(
                 background = null,
                 onBackground =
-                PaymentsThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                border = PaymentsThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb()
+                StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb()
             )
         }
     }

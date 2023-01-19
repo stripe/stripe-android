@@ -37,15 +37,6 @@ public final class com/stripe/android/ui/core/FieldValuesToParamsMapConverter$Co
 public final class com/stripe/android/ui/core/FormUIKt {
 }
 
-public final class com/stripe/android/ui/core/PaymentsThemeKt {
-	public static final fun getBorderStroke (Landroidx/compose/material/MaterialTheme;ZLandroidx/compose/runtime/Composer;I)Landroidx/compose/foundation/BorderStroke;
-	public static final fun getLocalColors ()Landroidx/compose/runtime/ProvidableCompositionLocal;
-	public static final fun getLocalShapes ()Landroidx/compose/runtime/ProvidableCompositionLocal;
-	public static final fun getLocalTypography ()Landroidx/compose/runtime/ProvidableCompositionLocal;
-	public static final fun getPaymentsColors (Landroidx/compose/material/MaterialTheme;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/ui/core/PaymentsColors;
-	public static final fun getPaymentsShapes (Landroidx/compose/material/MaterialTheme;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/ui/core/PaymentsShapes;
-}
-
 public final class com/stripe/android/ui/core/address/AddressRepository$Companion {
 }
 

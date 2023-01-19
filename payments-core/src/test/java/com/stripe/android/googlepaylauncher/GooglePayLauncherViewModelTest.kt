@@ -26,7 +26,6 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.AbsPaymentController
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
@@ -36,11 +35,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import java.lang.Exception
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class GooglePayLauncherViewModelTest {
     private val stripeRepository = FakeStripeRepository()
