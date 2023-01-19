@@ -15,12 +15,12 @@
 /stripecardscan-example/ @awush-stripe @ccen-stripe
 
 # Identity SDK
-/identity/ @ccen-stripe @awush-stripe
-/identity-example/ @ccen-stripe @awush-stripe
+/identity/ @ccen-stripe @awush-stripe @carlosmuvi-stripe
+/identity-example/ @ccen-stripe @awush-stripe @carlosmuvi-stripe
 
 # Financial Connections SDK
-/financial-connections/ @carlosmuvi-stripe
-/financial-connections-example/ @carlosmuvi-stripe
+/financial-connections/ @carlosmuvi-stripe @ccen-stripe
+/financial-connections-example/ @carlosmuvi-stripe @ccen-stripe
 
 # Shared modules
 /camera-core/ @ccen-stripe @awush-stripe
