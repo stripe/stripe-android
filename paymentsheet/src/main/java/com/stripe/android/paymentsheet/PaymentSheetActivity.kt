@@ -146,7 +146,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             resetPrimaryButtonState()
         }
 
-        viewModel.buyPayButtonState.launchAndCollectIn(this) { viewState ->
+        viewModel.buyButtonState.launchAndCollectIn(this) { viewState ->
             updateErrorMessage(messageView, viewState?.errorMessage)
             viewBinding.buyButton.updateState(viewState?.convert())
         }

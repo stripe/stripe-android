@@ -350,7 +350,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
 
         val googlePayButtonTurbine = viewModel.googlePayButtonState.testIn(this)
-        val buyButtonTurbine = viewModel.buyPayButtonState.testIn(this)
+        val buyButtonTurbine = viewModel.buyButtonState.testIn(this)
 
         assertThat(googlePayButtonTurbine.awaitItem())
             .isEqualTo(PaymentSheetViewState.Reset(null))
