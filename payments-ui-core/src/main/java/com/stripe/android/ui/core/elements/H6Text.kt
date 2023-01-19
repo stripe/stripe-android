@@ -5,7 +5,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.stripeColors
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -15,7 +15,7 @@ fun H6Text(
 ) {
     Text(
         text = text,
-        color = MaterialTheme.paymentsColors.subtitle,
+        color = MaterialTheme.stripeColors.subtitle,
         style = MaterialTheme.typography.h6,
         modifier = modifier
     )

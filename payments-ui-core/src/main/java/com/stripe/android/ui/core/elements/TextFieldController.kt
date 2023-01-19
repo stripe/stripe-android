@@ -70,7 +70,7 @@ sealed class TextFieldIcon {
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class SimpleTextFieldController constructor(
-    private val textFieldConfig: TextFieldConfig,
+    val textFieldConfig: TextFieldConfig,
     override val showOptionalLabel: Boolean = false,
     initialValue: String? = null
 ) : TextFieldController, SectionFieldErrorController {

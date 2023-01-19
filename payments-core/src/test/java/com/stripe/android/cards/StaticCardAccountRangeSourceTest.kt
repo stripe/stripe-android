@@ -3,11 +3,9 @@ package com.stripe.android.cards
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.model.CardBrand
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-@ExperimentalCoroutinesApi
 internal class StaticCardAccountRangeSourceTest {
     private val source = StaticCardAccountRangeSource()
 

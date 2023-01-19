@@ -14,8 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.getBorderStroke
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.uicore.stripeColors
 
 /**
  * This is a simple section that holds content in a card view.  It has a label, content specified
@@ -73,7 +73,7 @@ fun SectionCard(
         border = border,
         // TODO(skyler-stripe): this will change when we add shadow configurations.
         elevation = if (isSelected) 1.5.dp else 0.dp,
-        backgroundColor = MaterialTheme.paymentsColors.component,
+        backgroundColor = MaterialTheme.stripeColors.component,
         shape = MaterialTheme.shapes.medium,
         modifier = modifier
     ) {

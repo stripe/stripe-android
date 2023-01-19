@@ -4,11 +4,11 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.PrimaryButtonColors
-import com.stripe.android.ui.core.PrimaryButtonShape
-import com.stripe.android.ui.core.PrimaryButtonTypography
+import com.stripe.android.uicore.PrimaryButtonColors
+import com.stripe.android.uicore.PrimaryButtonShape
+import com.stripe.android.uicore.PrimaryButtonTypography
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.StripeThemeDefaults
 import java.security.InvalidParameterException
 
 internal fun PaymentSheet.Configuration.validate() {
@@ -36,7 +36,7 @@ internal fun PaymentSheet.Configuration.validate() {
 }
 
 internal fun PaymentSheet.Appearance.parseAppearance() {
-    PaymentsTheme.colorsLightMutable = PaymentsThemeDefaults.colorsLight.copy(
+    StripeTheme.colorsLightMutable = StripeThemeDefaults.colorsLight.copy(
         component = Color(colorsLight.component),
         componentBorder = Color(colorsLight.componentBorder),
         componentDivider = Color(colorsLight.componentDivider),
@@ -52,7 +52,7 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         )
     )
 
-    PaymentsTheme.colorsDarkMutable = PaymentsThemeDefaults.colorsDark.copy(
+    StripeTheme.colorsDarkMutable = StripeThemeDefaults.colorsDark.copy(
         component = Color(colorsDark.component),
         componentBorder = Color(colorsDark.componentBorder),
         componentDivider = Color(colorsDark.componentDivider),
@@ -68,17 +68,17 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         )
     )
 
-    PaymentsTheme.shapesMutable = PaymentsThemeDefaults.shapes.copy(
+    StripeTheme.shapesMutable = StripeThemeDefaults.shapes.copy(
         cornerRadius = shapes.cornerRadiusDp,
         borderStrokeWidth = shapes.borderStrokeWidthDp
     )
 
-    PaymentsTheme.typographyMutable = PaymentsThemeDefaults.typography.copy(
+    StripeTheme.typographyMutable = StripeThemeDefaults.typography.copy(
         fontFamily = typography.fontResId,
         fontSizeMultiplier = typography.sizeScaleFactor
     )
 
-    PaymentsTheme.primaryButtonStyle = PaymentsThemeDefaults.primaryButtonStyle.copy(
+    StripeTheme.primaryButtonStyle = StripeThemeDefaults.primaryButtonStyle.copy(
         colorsLight = PrimaryButtonColors(
             background = Color(primaryButton.colorsLight.background ?: colorsLight.primary),
             onBackground = Color(primaryButton.colorsLight.onBackground),
@@ -97,7 +97,7 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         typography = PrimaryButtonTypography(
             fontFamily = primaryButton.typography.fontResId ?: typography.fontResId,
             fontSize = primaryButton.typography.fontSizeSp?.sp
-                ?: (PaymentsThemeDefaults.typography.largeFontSize * typography.sizeScaleFactor)
+                ?: (StripeThemeDefaults.typography.largeFontSize * typography.sizeScaleFactor)
         )
     )
 }

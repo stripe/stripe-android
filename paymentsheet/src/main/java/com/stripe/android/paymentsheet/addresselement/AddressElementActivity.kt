@@ -28,7 +28,7 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.stripe.android.paymentsheet.parseAppearance
-import com.stripe.android.ui.core.PaymentsTheme
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.AnimationConstants
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
@@ -102,7 +102,7 @@ internal class AddressElementActivity : ComponentActivity() {
                 }
             }
 
-            PaymentsTheme {
+            StripeTheme {
                 ModalBottomSheetLayout(
                     sheetState = modalBottomSheetState,
                     sheetContent = {

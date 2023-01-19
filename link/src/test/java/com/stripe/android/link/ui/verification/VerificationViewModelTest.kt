@@ -18,7 +18,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.ui.ErrorMessage
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -37,7 +36,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class VerificationViewModelTest {
     private val linkAccountManager = mock<LinkAccountManager>()

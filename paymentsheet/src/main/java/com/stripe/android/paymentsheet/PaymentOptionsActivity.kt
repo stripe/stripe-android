@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.uicore.StripeTheme
 
 /**
  * An `Activity` for selecting a payment option.
@@ -71,7 +72,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
         setContentView(viewBinding.root)
 
-        viewModel.paymentOptionResult.observe(this) {
+        viewModel.paymentOptionResult.launchAndCollectIn(this) {
             closeSheet(it)
         }
 
@@ -83,15 +84,17 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         viewBinding.contentContainer.setContent {
-            val currentScreen by viewModel.currentScreen.collectAsState()
-            currentScreen.PaymentOptionsContent()
+            StripeTheme {
+                val currentScreen by viewModel.currentScreen.collectAsState()
+                currentScreen.PaymentOptionsContent(starterArgs)
+            }
         }
 
         if (savedInstanceState == null) {
             viewModel.transitionToFirstScreenWhenReady()
         }
 
-        viewModel.selection.observe(this) {
+        viewModel.selection.launchAndCollectIn(this) {
             viewModel.clearErrorMessages()
             resetPrimaryButtonState()
         }

@@ -6,9 +6,9 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.PaymentsThemeDefaults
 import com.stripe.android.ui.core.elements.OTPElementColors
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.StripeThemeDefaults
 
 private val LinkTeal = Color(0xFF33DDB3)
 private val ActionLightGreen = Color(0xFF1AC59B)
@@ -69,21 +69,21 @@ internal data class LinkColors(
 )
 
 @Composable
-internal fun PaymentsThemeForLink(
+internal fun StripeThemeForLink(
     content: @Composable () -> Unit
 ) {
-    val paymentsColors = PaymentsThemeDefaults.colors(isSystemInDarkTheme())
+    val stripeDefaultColors = StripeThemeDefaults.colors(isSystemInDarkTheme())
 
-    PaymentsTheme(
-        colors = paymentsColors.copy(
-            materialColors = paymentsColors.materialColors.copy(
+    StripeTheme(
+        colors = stripeDefaultColors.copy(
+            materialColors = stripeDefaultColors.materialColors.copy(
                 primary = ActionGreen
             )
         ),
-        shapes = PaymentsThemeDefaults.shapes.copy(
+        shapes = StripeThemeDefaults.shapes.copy(
             cornerRadius = 9f
         ),
-        typography = PaymentsThemeDefaults.typography
+        typography = StripeThemeDefaults.typography
     ) {
         content()
     }

@@ -5,6 +5,15 @@ public final class com/stripe/android/uicore/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/uicore/StripeThemeKt {
+	public static final fun getBorderStroke (Landroidx/compose/material/MaterialTheme;ZLandroidx/compose/runtime/Composer;I)Landroidx/compose/foundation/BorderStroke;
+	public static final fun getLocalColors ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun getLocalShapes ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun getLocalTypography ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun getStripeColors (Landroidx/compose/material/MaterialTheme;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/uicore/StripeColors;
+	public static final fun getStripeShapes (Landroidx/compose/material/MaterialTheme;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/uicore/StripeShapes;
+}
+
 public final class com/stripe/android/uicore/elements/BillingSpecKt {
 }
 

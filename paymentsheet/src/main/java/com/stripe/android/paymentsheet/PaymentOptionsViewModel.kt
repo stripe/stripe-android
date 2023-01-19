@@ -2,9 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -38,10 +35,11 @@ import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -77,9 +75,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkHandler = linkHandler,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
 ) {
-    @VisibleForTesting
-    internal val _paymentOptionResult = MutableLiveData<PaymentOptionResult>()
-    internal val paymentOptionResult: LiveData<PaymentOptionResult> = _paymentOptionResult
+    private val _paymentOptionResult = MutableSharedFlow<PaymentOptionResult>(replay = 1)
+    internal val paymentOptionResult: SharedFlow<PaymentOptionResult> = _paymentOptionResult
 
     private val _error = MutableStateFlow<String?>(null)
     internal val error: StateFlow<String?> = _error
@@ -166,19 +163,21 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun onFatal(throwable: Throwable) {
         mostRecentError = throwable
-        _paymentOptionResult.value =
+        _paymentOptionResult.tryEmit(
             PaymentOptionResult.Failed(
                 error = throwable,
                 paymentMethods = paymentMethods.value
             )
+        )
     }
 
     override fun onUserCancel() {
-        _paymentOptionResult.value =
+        _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
                 mostRecentError = mostRecentError,
                 paymentMethods = paymentMethods.value
             )
+        )
     }
 
     override fun onFinish() {
@@ -217,6 +216,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun onPaymentResult(paymentResult: PaymentResult) {
         savedStateHandle[SAVE_PROCESSING] = false
+    }
+
+    override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
+        if (!editing.value) {
+            updateSelection(selection)
+            onUserSelection()
+        }
     }
 
     override fun updateSelection(selection: PaymentSelection?) {
@@ -271,20 +277,22 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     private fun processExistingPaymentMethod(paymentSelection: PaymentSelection) {
         prefsRepository.savePaymentSelection(paymentSelection)
-        _paymentOptionResult.value =
+        _paymentOptionResult.tryEmit(
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
                 paymentMethods = paymentMethods.value
             )
+        )
     }
 
     private fun processNewPaymentMethod(paymentSelection: PaymentSelection) {
         prefsRepository.savePaymentSelection(paymentSelection)
-        _paymentOptionResult.value =
+        _paymentOptionResult.tryEmit(
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,
                 paymentMethods = paymentMethods.value
             )
+        )
     }
 
     fun transitionToFirstScreenWhenReady() {
@@ -300,7 +308,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private suspend fun awaitRepositoriesReady() {
-        isResourceRepositoryReady.asFlow().filterNotNull().filter { it }.first()
+        isResourceRepositoryReady.filter { it }.first()
     }
 
     override fun transitionToFirstScreen() {

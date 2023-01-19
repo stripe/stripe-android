@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
 
@@ -23,7 +23,7 @@ fun AffirmElementUI() {
                 R.string.stripe_paymentsheet_payment_method_affirm
             )
         ),
-        color = MaterialTheme.paymentsColors.subtitle,
+        color = MaterialTheme.stripeColors.subtitle,
         style = MaterialTheme.typography.h6,
         modifier = Modifier.padding(vertical = 8.dp)
     )

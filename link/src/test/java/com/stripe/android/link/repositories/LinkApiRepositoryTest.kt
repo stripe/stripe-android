@@ -18,7 +18,6 @@ import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,7 +31,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class LinkApiRepositoryTest {
     private val stripeRepository = mock<StripeRepository>()

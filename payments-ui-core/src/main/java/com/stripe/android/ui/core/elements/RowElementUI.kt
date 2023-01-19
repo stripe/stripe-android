@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.paymentsColors
-import com.stripe.android.ui.core.paymentsShapes
+import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeShapes
 
 @Composable
 internal fun RowElementUI(
@@ -62,8 +62,8 @@ internal fun RowElementUI(
                     Divider(
                         modifier = Modifier
                             .height(dividerHeight.value)
-                            .width(MaterialTheme.paymentsShapes.borderStrokeWidth.dp),
-                        color = MaterialTheme.paymentsColors.componentDivider
+                            .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
+                        color = MaterialTheme.stripeColors.componentDivider
                     )
                 }
             }

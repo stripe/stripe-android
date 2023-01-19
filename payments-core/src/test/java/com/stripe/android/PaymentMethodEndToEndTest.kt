@@ -10,7 +10,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.networking.StripeApiRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -18,7 +17,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodEndToEndTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()

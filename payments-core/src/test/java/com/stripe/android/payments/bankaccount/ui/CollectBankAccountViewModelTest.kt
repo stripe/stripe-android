@@ -21,7 +21,6 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResu
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult.Failed
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -35,7 +34,6 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession as PaymentsFinancialConnectionsSession
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class CollectBankAccountViewModelTest {
 

@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.paymentsColors
-import com.stripe.android.ui.core.paymentsShapes
+import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeShapes
 
 @Composable
 internal fun CardDetailsElementUI(
@@ -37,10 +37,10 @@ internal fun CardDetailsElementUI(
         )
         if (index != controller.fields.lastIndex) {
             Divider(
-                color = MaterialTheme.paymentsColors.componentDivider,
-                thickness = MaterialTheme.paymentsShapes.borderStrokeWidth.dp,
+                color = MaterialTheme.stripeColors.componentDivider,
+                thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
                 modifier = Modifier.padding(
-                    horizontal = MaterialTheme.paymentsShapes.borderStrokeWidth.dp
+                    horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
                 )
             )
         }
