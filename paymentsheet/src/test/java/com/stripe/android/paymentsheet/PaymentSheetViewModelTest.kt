@@ -54,7 +54,6 @@ import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.PaymentIntentFactory
-import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
@@ -144,7 +143,6 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.removePaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        idleLooper()
 
         verify(customerRepository).detachPaymentMethod(
             any(),

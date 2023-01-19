@@ -220,14 +220,12 @@ internal class PaymentOptionsActivityTest {
 
                 // Navigate to "Add Payment Method" fragment
                 viewModel.transitionToAddPaymentScreen()
-                idleLooper()
 
                 assertThat(activity.viewBinding.continueButton.isVisible)
                     .isTrue()
 
                 // Navigate back to payment options list
                 pressBack()
-                idleLooper()
 
                 assertThat(activity.viewBinding.continueButton.isVisible)
                     .isFalse()
@@ -242,8 +240,6 @@ internal class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                idleLooper()
-
                 val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.continueButton)
 
                 assertThat(addBinding.confirmedIcon.isVisible)
@@ -345,8 +341,6 @@ internal class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                idleLooper()
-
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
                 assertThat(activity.bottomSheetBehavior.isFitToContents)
@@ -470,7 +464,6 @@ internal class PaymentOptionsActivityTest {
         scenario.launch(
             createIntent()
         ).use {
-            idleLooper()
             it.onActivity { activity ->
                 viewModel.updateBelowButtonText(null)
                 assertThat(activity.viewBinding.notes.isVisible).isFalse()
@@ -507,7 +500,6 @@ internal class PaymentOptionsActivityTest {
                 )
             )
         ).use {
-            idleLooper()
             it.onActivity { activity ->
                 assertThat(activity.viewBinding.continueButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.continueButton.defaultTintList).isEqualTo(
@@ -528,8 +520,6 @@ internal class PaymentOptionsActivityTest {
     fun `Clears error on user selection`() {
         val scenario = activityScenario()
         scenario.launch(createIntent()).onActivity { activity ->
-            idleLooper()
-
             viewModel.onError("some error")
             assertThat(activity.viewBinding.message.isVisible).isTrue()
             assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
