@@ -47,6 +47,7 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -147,18 +148,14 @@ internal abstract class BaseSheetViewModel(
             initialValue = PaymentSheetScreen.Loading,
         )
 
-    internal val headerText: StateFlow<Int?> = combine(
+    internal val headerText: Flow<Int?> = combine(
         currentScreen,
         linkHandler.isLinkEnabled.filterNotNull(),
         googlePayState,
         stripeIntent.filterNotNull(),
     ) { screen, isLinkAvailable, googlePay, intent ->
         mapToHeaderTextResource(screen, isLinkAvailable, googlePay, intent)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    }
 
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)

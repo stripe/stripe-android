@@ -65,14 +65,12 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -128,21 +126,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
 
-    val googlePayButtonState: StateFlow<PaymentSheetViewState?> = viewState.filter {
+    val googlePayButtonState: Flow<PaymentSheetViewState?> = viewState.filter {
         checkoutIdentifier == CheckoutIdentifier.SheetTopGooglePay
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    }
 
-    val buyPayButtonState: StateFlow<PaymentSheetViewState?> = viewState.filter {
+    val buyPayButtonState: Flow<PaymentSheetViewState?> = viewState.filter {
         checkoutIdentifier == CheckoutIdentifier.SheetBottomBuy
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    }
 
     internal val isProcessingPaymentIntent
         get() = args.clientSecret is PaymentIntentClientSecret
