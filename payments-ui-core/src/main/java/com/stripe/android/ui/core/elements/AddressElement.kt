@@ -10,8 +10,6 @@ import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SectionFieldErrorController
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -123,7 +121,6 @@ open class AddressElement constructor(
         }
     }
 
-    @OptIn(FlowPreview::class)
     private val fieldsUpdatedFlow =
         combine(
             countryElement.controller.rawFieldValue,
@@ -198,7 +195,6 @@ open class AddressElement constructor(
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getFormFieldValueFlow() = fields.flatMapLatest { fieldElements ->
         combine(
             fieldElements

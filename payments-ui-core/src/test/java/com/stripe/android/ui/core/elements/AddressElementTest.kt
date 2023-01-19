@@ -8,7 +8,6 @@ import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -18,7 +17,6 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
 import java.util.concurrent.atomic.AtomicInteger
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class AddressElementTest {
     private val addressRepository = AddressRepository(
