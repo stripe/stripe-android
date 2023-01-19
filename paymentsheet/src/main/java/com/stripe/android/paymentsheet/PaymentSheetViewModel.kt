@@ -130,7 +130,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         checkoutIdentifier == CheckoutIdentifier.SheetTopGooglePay
     }
 
-    val buyPayButtonState: Flow<PaymentSheetViewState?> = viewState.filter {
+    val buyButtonState: Flow<PaymentSheetViewState?> = viewState.filter {
         checkoutIdentifier == CheckoutIdentifier.SheetBottomBuy
     }
 
