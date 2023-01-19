@@ -34,6 +34,7 @@ class PaymentOptionsStateMapperTest {
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
+            nameProvider = { it!! },
         )
 
         mapper().test {
@@ -62,6 +63,7 @@ class PaymentOptionsStateMapperTest {
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = false,
+            nameProvider = { it!! },
         )
 
         mapper().test {
@@ -87,6 +89,7 @@ class PaymentOptionsStateMapperTest {
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
+            nameProvider = { it!! },
         )
 
         mapper().test {
@@ -99,7 +102,10 @@ class PaymentOptionsStateMapperTest {
             isLinkEnabledFlow.value = true
 
             assertThat(expectMostRecentItem()?.selectedItem).isEqualTo(
-                PaymentOptionsItem.SavedPaymentMethod(selectedPaymentMethod.paymentMethod)
+                PaymentOptionsItem.SavedPaymentMethod(
+                    displayName = "card",
+                    paymentMethod = selectedPaymentMethod.paymentMethod,
+                )
             )
 
             // Remove the currently selected payment option
@@ -119,6 +125,7 @@ class PaymentOptionsStateMapperTest {
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
+            nameProvider = { it!! },
         )
 
         mapper().test {
@@ -131,7 +138,10 @@ class PaymentOptionsStateMapperTest {
             isLinkEnabledFlow.value = true
 
             assertThat(expectMostRecentItem()?.selectedItem).isEqualTo(
-                PaymentOptionsItem.SavedPaymentMethod(selectedPaymentMethod.paymentMethod)
+                PaymentOptionsItem.SavedPaymentMethod(
+                    displayName = "card",
+                    paymentMethod = selectedPaymentMethod.paymentMethod,
+                )
             )
 
             // Remove the currently selected payment option

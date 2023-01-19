@@ -691,8 +691,6 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.savedStateHandle[SAVE_PROCESSING] = false
         viewModel.updateSelection(PaymentSelection.GooglePay)
-        viewModel.setEditing(false)
-
         assertThat(isEnabled).isTrue()
 
         viewModel.updateSelection(null)
@@ -713,10 +711,10 @@ internal class PaymentSheetViewModelTest {
         viewModel.savedStateHandle[SAVE_PROCESSING] = false
         assertThat(isEnabled).isTrue()
 
-        viewModel.setEditing(true)
+        viewModel.toggleEditing()
         assertThat(isEnabled).isFalse()
 
-        viewModel.setEditing(false)
+        viewModel.toggleEditing()
         assertThat(isEnabled).isTrue()
     }
 
@@ -1091,6 +1089,39 @@ internal class PaymentSheetViewModelTest {
         viewModel.isResourceRepositoryReady.test {
             assertThat(awaitItem()).isFalse()
         }
+    }
+
+    @Test
+    fun `Sets editing to false when removing the last payment method while editing`() = runTest {
+        val customerPaymentMethods = PaymentMethodFixtures.createCards(1)
+        val viewModel = createViewModel(customerPaymentMethods = customerPaymentMethods)
+        viewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+
+        viewModel.editing.test {
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.toggleEditing()
+            assertThat(awaitItem()).isTrue()
+
+            viewModel.removePaymentMethod(customerPaymentMethods.single())
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun `Ignores payment selection while in edit mode`() = runTest {
+        val viewModel = createViewModel().apply {
+            updateSelection(PaymentSelection.Link)
+        }
+
+        viewModel.toggleEditing()
+        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
+
+        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
+
+        viewModel.toggleEditing()
+        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
+        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
     }
 
     private class NonLoadingLpmRepository(

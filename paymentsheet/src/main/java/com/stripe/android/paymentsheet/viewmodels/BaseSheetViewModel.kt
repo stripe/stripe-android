@@ -50,12 +50,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -161,7 +163,8 @@ internal abstract class BaseSheetViewModel(
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
 
-    private val editing = MutableStateFlow(false)
+    private val _editing = MutableStateFlow(false)
+    internal val editing: StateFlow<Boolean> = _editing
 
     val processing: StateFlow<Boolean> = savedStateHandle
         .getStateFlow(SAVE_PROCESSING, false)
@@ -232,6 +235,12 @@ internal abstract class BaseSheetViewModel(
             isLinkEnabled = linkHandler.isLinkEnabled,
             initialSelection = savedSelection,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
+            nameProvider = { code ->
+                val paymentMethod = lpmResourceRepository.getRepository().fromCode(code)
+                paymentMethod?.displayNameResource?.let {
+                    application.getString(it)
+                }.orEmpty()
+            }
         )
     }
 
@@ -244,6 +253,14 @@ internal abstract class BaseSheetViewModel(
         )
 
     init {
+        viewModelScope.launch {
+            paymentMethods.onEach { paymentMethods ->
+                if (paymentMethods.isNullOrEmpty() && editing.value) {
+                    toggleEditing()
+                }
+            }.collect()
+        }
+
         if (savedSelection.value == null) {
             viewModelScope.launch {
                 val savedSelection = withContext(workContext) {
@@ -426,6 +443,8 @@ internal abstract class BaseSheetViewModel(
         _notesText.value = text
     }
 
+    abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
+
     open fun updateSelection(selection: PaymentSelection?) {
         if (selection is PaymentSelection.New) {
             newPaymentSelection = selection
@@ -436,8 +455,8 @@ internal abstract class BaseSheetViewModel(
         updateBelowButtonText(null)
     }
 
-    fun setEditing(isEditing: Boolean) {
-        editing.value = isEditing
+    fun toggleEditing() {
+        _editing.value = !editing.value
     }
 
     fun setContentVisible(visible: Boolean) {

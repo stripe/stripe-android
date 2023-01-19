@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -16,6 +17,7 @@ internal class PaymentOptionsStateMapper(
     private val isLinkEnabled: StateFlow<Boolean?>,
     private val initialSelection: StateFlow<SavedSelection?>,
     private val currentSelection: StateFlow<PaymentSelection?>,
+    private val nameProvider: (PaymentMethodCode?) -> String,
     private val isNotPaymentFlow: Boolean,
 ) {
 
@@ -52,6 +54,7 @@ internal class PaymentOptionsStateMapper(
             showLink = isLinkEnabled && isNotPaymentFlow,
             initialSelection = initialSelection,
             currentSelection = currentSelection,
+            nameProvider = nameProvider,
         )
     }
 }
