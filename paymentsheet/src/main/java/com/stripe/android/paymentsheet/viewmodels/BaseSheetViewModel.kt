@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
@@ -207,21 +208,17 @@ internal abstract class BaseSheetViewModel(
         }
     }.distinctUntilChanged()
 
-    val ctaEnabled = MediatorLiveData<Boolean>().apply {
-        listOf(
-            primaryButtonUIState.asLiveData(),
-            buttonsEnabled,
-            selection.asLiveData()
-        ).forEach { source ->
-            addSource(source) {
-                value = if (primaryButtonUIState.value != null) {
-                    primaryButtonUIState.value?.enabled == true && buttonsEnabled.value == true
-                } else {
-                    buttonsEnabled.value == true && selection.value != null
-                }
-            }
+    val isPrimaryButtonEnabled = combine(
+        primaryButtonUIState,
+        buttonsEnabled.asFlow(),
+        selection,
+    ) { uiState, buttonsEnabled, selection ->
+        if (uiState != null) {
+            uiState.enabled && buttonsEnabled
+        } else {
+            buttonsEnabled && selection != null
         }
-    }.distinctUntilChanged()
+    }
 
     internal var lpmServerSpec
         get() = savedStateHandle.get<String>(LPM_SERVER_SPEC_STRING)

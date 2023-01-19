@@ -267,10 +267,12 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 resetPrimaryButtonState()
             }
         }
+
         viewModel.primaryButtonState.launchAndCollectIn(this) { state ->
             primaryButton.updateState(state)
         }
-        viewModel.ctaEnabled.observe(this) { isEnabled ->
+
+        viewModel.isPrimaryButtonEnabled.launchAndCollectIn(this) { isEnabled ->
             primaryButton.isEnabled = isEnabled
         }
 
