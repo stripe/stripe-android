@@ -15,7 +15,6 @@ import com.stripe.android.model.SourceFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.view.AuthActivityStarterHost
 import com.stripe.android.view.PaymentRelayActivity
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -28,7 +27,6 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class SourceAuthenticatorTest {
     private val activity: ComponentActivity = mock {
         on { lifecycle } doReturn LifecycleRegistry(mock).apply {

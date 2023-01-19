@@ -8,7 +8,6 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.networking.DefaultFraudDetectionDataRequestFactory
 import com.stripe.android.networking.FraudDetectionData
 import com.stripe.android.networking.FraudDetectionDataRequestFactory
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -26,7 +25,6 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class FraudDetectionDataRepositoryTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()

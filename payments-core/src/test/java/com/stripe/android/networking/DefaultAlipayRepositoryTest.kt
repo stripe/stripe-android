@@ -7,7 +7,6 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.PaymentIntentFixtures
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -16,7 +15,6 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFailsWith
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultAlipayRepositoryTest {
     private val stripeRepository: StripeRepository = mock()

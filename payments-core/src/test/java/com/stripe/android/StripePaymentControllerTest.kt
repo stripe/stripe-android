@@ -26,7 +26,6 @@ import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.utils.ParcelUtils
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -43,7 +42,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 internal class StripePaymentControllerTest {
     private val activity: ComponentActivity = mock()
     private val sdkTransactionId = mock<SdkTransactionId>().also {

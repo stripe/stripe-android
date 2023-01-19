@@ -37,7 +37,6 @@ import com.stripe.android.payments.core.authentication.PaymentAuthenticatorRegis
 import com.stripe.android.payments.core.injection.PaymentLauncherViewModelSubcomponent
 import com.stripe.android.utils.fakeCreationExtras
 import com.stripe.android.view.AuthActivityStarterHost
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -57,7 +56,6 @@ import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
 import kotlin.test.assertNotNull
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class PaymentLauncherViewModelTest {
     @get:Rule
