@@ -238,7 +238,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         header.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val text = viewModel.headerText.collectAsState()
+                val text = viewModel.headerText.collectAsState(null)
                 text.value?.let {
                     StripeTheme {
                         H4Text(

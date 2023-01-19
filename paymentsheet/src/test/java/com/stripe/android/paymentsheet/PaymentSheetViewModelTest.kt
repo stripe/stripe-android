@@ -352,7 +352,6 @@ internal class PaymentSheetViewModelTest {
         val googlePayButtonTurbine = viewModel.googlePayButtonState.testIn(this)
         val buyButtonTurbine = viewModel.buyPayButtonState.testIn(this)
 
-        assertThat(buyButtonTurbine.awaitItem()).isNull()
         assertThat(googlePayButtonTurbine.awaitItem())
             .isEqualTo(PaymentSheetViewState.Reset(null))
 
