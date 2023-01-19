@@ -225,7 +225,17 @@ internal class PrimaryButton @JvmOverloads constructor(
         val onClick: (() -> Unit)?,
         val enabled: Boolean,
         val visible: Boolean
-    )
+    ) {
+        companion object {
+            fun default(): UIState = UIState(
+                processingState = State.Ready,
+                label = "",
+                onClick = null,
+                enabled = false,
+                visible = false,
+            )
+        }
+    }
 }
 
 @Composable

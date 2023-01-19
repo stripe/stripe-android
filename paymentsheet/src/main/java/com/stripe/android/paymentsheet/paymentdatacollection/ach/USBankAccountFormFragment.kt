@@ -441,27 +441,12 @@ internal class USBankAccountFormFragment : Fragment() {
         enabled: Boolean = true,
         visible: Boolean = true
     ) {
-//        sheetViewModel?.updatePrimaryButtonState(PrimaryButton.State.Ready)
-        sheetViewModel?.updatePrimaryButtonUIState(
-            PrimaryButton.UIState(
-                label = text ?: "",
-                onClick = {
-                    if (shouldShowProcessingWhenClicked) {
-                        sheetViewModel?.updatePrimaryButtonState(
-                            PrimaryButton.State.StartProcessing
-                        )
-                    }
-                    onClick()
-                    sheetViewModel?.updatePrimaryButtonUIState(
-                        sheetViewModel?.primaryButtonUIState?.value?.copy(
-                            onClick = null
-                        )
-                    )
-                },
-                enabled = enabled,
-                visible = visible,
-                processingState = PrimaryButton.State.Ready,
-            )
+        sheetViewModel?.updatePrimaryButtonForACH(
+            text = text,
+            onClick = onClick,
+            shouldShowProcessingWhenClicked = shouldShowProcessingWhenClicked,
+            enabled = enabled,
+            visible = visible,
         )
     }
 

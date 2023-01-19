@@ -197,8 +197,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     init {
         viewModelScope.launch {
             buyPayButtonState.onEach { state ->
-                val newUiState = primaryButtonUIState.value.copy(processingState = state?.convert() ?: PrimaryButton.State.Ready)
-                updatePrimaryButtonUIState(newUiState)
+                val processingState = state?.convert() ?: PrimaryButton.State.Ready
+                updatePrimaryButtonState(processingState)
             }.collect()
         }
 

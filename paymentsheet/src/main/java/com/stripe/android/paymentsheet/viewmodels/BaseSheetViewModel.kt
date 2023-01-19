@@ -175,15 +175,26 @@ internal abstract class BaseSheetViewModel(
      * time the payment selection is changed.
      */
     protected val _primaryButtonUIState = MutableStateFlow(
-        value = PrimaryButton.UIState(
-            processingState = PrimaryButton.State.Ready,
-            label = "",
-            onClick = null,
-            enabled = false,
-            visible = false,
-        )
+        value = PrimaryButton.UIState.default(),
     )
-    val primaryButtonUIState: StateFlow<PrimaryButton.UIState> = _primaryButtonUIState
+
+    private val _customPrimaryButtonUiState = MutableStateFlow<PrimaryButton.UIState?>(null)
+
+    private val currentPrimaryButtonUiState: PrimaryButton.UIState
+        get() = _customPrimaryButtonUiState.value ?: _primaryButtonUIState.value
+
+    val primaryButtonUIState: StateFlow<PrimaryButton.UIState> = combine(
+        _primaryButtonUIState,
+        _customPrimaryButtonUiState,
+    ) { uiState, customUiState ->
+        customUiState ?: uiState
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = PrimaryButton.UIState.default(),
+    )
+
+    // TODO Add a queue that allows us to revert to previous UiState?
 
 //    private val _primaryButtonState = MutableStateFlow<PrimaryButton.State?>(null)
 //    val primaryButtonState: StateFlow<PrimaryButton.State?> = _primaryButtonState
@@ -430,9 +441,36 @@ internal abstract class BaseSheetViewModel(
         logger.warning(message)
     }
 
-    @Deprecated(message = "")
-    fun updatePrimaryButtonUIState(state: PrimaryButton.UIState?) {
-        _primaryButtonUIState.value = state ?: generateDefaultButtonUiState()
+//    @Deprecated(message = "")
+//    fun updatePrimaryButtonUIState(state: PrimaryButton.UIState?) {
+//        _primaryButtonUIState.value = state ?: generateDefaultButtonUiState()
+//    }
+
+    fun updatePrimaryButtonForACH(
+        text: String?,
+        onClick: () -> Unit,
+        shouldShowProcessingWhenClicked: Boolean = true,
+        enabled: Boolean = true,
+        visible: Boolean = true,
+    ) {
+        _customPrimaryButtonUiState.value = PrimaryButton.UIState(
+            label = text ?: "",
+            onClick = {
+                if (shouldShowProcessingWhenClicked) {
+                    _customPrimaryButtonUiState.update {
+                        it?.copy(processingState = PrimaryButton.State.StartProcessing)
+                    }
+                }
+                onClick()
+
+                _customPrimaryButtonUiState.update {
+                    it?.copy(onClick = null)
+                }
+            },
+            enabled = enabled,
+            visible = visible,
+            processingState = PrimaryButton.State.Ready,
+        )
     }
 
     fun updatePrimaryButtonForLink() {
@@ -453,9 +491,9 @@ internal abstract class BaseSheetViewModel(
         userInput: UserInput?,
         paymentSelection: PaymentSelection?
     ) {
-        _primaryButtonUIState.value = if (userInput != null && paymentSelection != null) {
+        _customPrimaryButtonUiState.value = if (userInput != null && paymentSelection != null) {
             PrimaryButton.UIState(
-                label = "",
+                label = "Link enabled",
                 onClick = { payWithLinkInline(config, userInput) },
                 enabled = true,
                 visible = true,
@@ -463,7 +501,7 @@ internal abstract class BaseSheetViewModel(
             )
         } else {
             PrimaryButton.UIState(
-                label = "",
+                label = "Link disabled",
                 onClick = null,
                 enabled = false,
                 visible = true,
@@ -479,16 +517,18 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun setPrimaryButtonEnabled(isEnabled: Boolean) {
-        _primaryButtonUIState.update {
-            it.copy(enabled = isEnabled)
-        }
+        _customPrimaryButtonUiState.value = currentPrimaryButtonUiState.copy(
+            enabled = isEnabled,
+        )
     }
 
     fun resetPrimaryButtonUiState() {
-        _primaryButtonUIState.value = generateDefaultButtonUiState().copy(
-            visible = _primaryButtonUIState.value.visible,
-            enabled = _primaryButtonUIState.value.enabled,
-        )
+        _customPrimaryButtonUiState.value = null
+        _primaryButtonUIState.update {
+            it.copy(
+                enabled = selection.value != null,
+            )
+        }
     }
 
     fun updatePrimaryButtonState(state: PrimaryButton.State) {
@@ -508,6 +548,7 @@ internal abstract class BaseSheetViewModel(
 
         savedStateHandle[SAVE_SELECTION] = selection
 
+        resetPrimaryButtonUiState()
         updateBelowButtonText(null)
     }
 

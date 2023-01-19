@@ -90,9 +90,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             currentScreen.onEach { screen ->
-                val visible = screen is PaymentSheetScreen.AddFirstPaymentMethod ||
-                    screen is PaymentSheetScreen.AddAnotherPaymentMethod
-                setPrimaryButtonVisible(visible)
+                setPrimaryButtonVisible(
+                    isVisible = screen.showsContinueButton,
+                )
             }.collect()
         }
 
