@@ -17,7 +17,6 @@ import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.utils.FakeAndroidKeyStore
 import com.stripe.android.model.StripeIntent
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,7 +33,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertNotNull
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class LinkActivityViewModelTest {
 

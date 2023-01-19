@@ -23,7 +23,6 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -47,7 +46,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class SignUpViewModelTest {
     private val config = LinkPaymentLauncher.Configuration(

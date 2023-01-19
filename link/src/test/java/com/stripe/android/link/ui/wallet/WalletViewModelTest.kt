@@ -35,7 +35,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -62,7 +61,6 @@ import java.util.Calendar
 import javax.inject.Provider
 import kotlin.random.Random
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class WalletViewModelTest {
     private val args = mock<LinkActivityContract.Args>()
