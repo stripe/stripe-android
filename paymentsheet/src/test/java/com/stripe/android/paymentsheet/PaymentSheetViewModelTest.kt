@@ -1186,7 +1186,7 @@ internal class PaymentSheetViewModelTest {
             savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
         }
 
-        viewModel.topContainerState.test {
+        viewModel.walletsContainerState.test {
             assertThat(awaitItem().showGooglePay).isTrue()
         }
     }
@@ -1197,7 +1197,7 @@ internal class PaymentSheetViewModelTest {
             savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.NotAvailable
         }
 
-        viewModel.topContainerState.test {
+        viewModel.walletsContainerState.test {
             assertThat(awaitItem().showGooglePay).isFalse()
         }
     }
@@ -1214,7 +1214,7 @@ internal class PaymentSheetViewModelTest {
             savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.NotAvailable
         }
 
-        viewModel.topContainerState.test {
+        viewModel.walletsContainerState.test {
             assertThat(awaitItem().showLink).isTrue()
             expectNoEvents()
         }
@@ -1225,7 +1225,7 @@ internal class PaymentSheetViewModelTest {
         val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card"))
         val viewModel = createViewModel(stripeIntent = intent)
 
-        viewModel.topContainerState.test {
+        viewModel.walletsContainerState.test {
             assertThat(awaitItem().showLink).isFalse()
         }
     }
@@ -1235,7 +1235,7 @@ internal class PaymentSheetViewModelTest {
         val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card"))
         val viewModel = createViewModel(stripeIntent = intent)
 
-        viewModel.topContainerState.test {
+        viewModel.walletsContainerState.test {
             val textResource = awaitItem().dividerTextResource
             assertThat(textResource).isEqualTo(R.string.stripe_paymentsheet_or_pay_with_card)
         }
@@ -1253,7 +1253,7 @@ internal class PaymentSheetViewModelTest {
             stripeIntent = intent,
         )
 
-        viewModel.topContainerState.test {
+        viewModel.walletsContainerState.test {
             val textResource = awaitItem().dividerTextResource
             assertThat(textResource).isEqualTo(R.string.stripe_paymentsheet_or_pay_using)
         }

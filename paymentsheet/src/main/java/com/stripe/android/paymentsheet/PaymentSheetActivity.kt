@@ -193,14 +193,14 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     private fun setupTopContainer() {
         setupGooglePayButton()
 
-        viewModel.topContainerState.launchAndCollectIn(this) { config ->
+        viewModel.walletsContainerState.launchAndCollectIn(this) { config ->
             linkButton.isVisible = config.showLink
             googlePayButton.isVisible = config.showGooglePay
             topContainer.isVisible = config.shouldShow
         }
 
         googlePayDivider.setContent {
-            val topContainerState by viewModel.topContainerState.collectAsState()
+            val topContainerState by viewModel.walletsContainerState.collectAsState()
 
             StripeTheme {
                 if (topContainerState.shouldShow) {

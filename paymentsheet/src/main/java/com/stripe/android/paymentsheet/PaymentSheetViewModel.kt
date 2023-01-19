@@ -55,7 +55,7 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.paymentsheet.state.TopContainerState
+import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -168,13 +168,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-    internal val topContainerState: StateFlow<TopContainerState> = combine(
+    internal val walletsContainerState: StateFlow<WalletsContainerState> = combine(
         linkHandler.isLinkEnabled,
         googlePayState,
         isReadyEvents.asFlow(),
         supportedPaymentMethodsFlow,
     ) { isLinkAvailable, googlePayState, isReady, paymentMethodTypes ->
-        TopContainerState(
+        WalletsContainerState(
             showLink = isLinkAvailable == true && isReady.peekContent() == true,
             showGooglePay = googlePayState.isReadyForUse && isReady.peekContent() == true,
             dividerTextResource = if (paymentMethodTypes.singleOrNull() == Card.code) {
@@ -186,7 +186,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
-        initialValue = TopContainerState(),
+        initialValue = WalletsContainerState(),
     )
 
     private var paymentLauncher: StripePaymentLauncher? = null
