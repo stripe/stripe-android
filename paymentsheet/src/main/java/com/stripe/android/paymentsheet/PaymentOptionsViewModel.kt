@@ -218,6 +218,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
         savedStateHandle[SAVE_PROCESSING] = false
     }
 
+    override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
+        if (!editing.value) {
+            updateSelection(selection)
+            onUserSelection()
+        }
+    }
+
     override fun updateSelection(selection: PaymentSelection?) {
         super.updateSelection(selection)
         when {

@@ -50,7 +50,6 @@ class FormControllerTest {
         shippingValues = null
     )
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify params are set when element flows are complete`() = runTest {
         // Using Sofort as a complex enough example to test the form view model class.

@@ -79,34 +79,6 @@ internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjection
     }
 
     @Test
-    fun `recovers edit state when shown`() {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
-        createScenario(
-            initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions(paymentMethods = listOf(paymentMethod))
-        }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
-            assertThat(fragment.isEditing).isFalse()
-            fragment.isEditing = true
-        }.recreate().onFragment {
-            assertThat(it.isEditing).isTrue()
-        }
-    }
-
-    @Test
-    fun `When last item is deleted then edit menu item is hidden`() {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
-        createScenario().onFragment { fragment ->
-            fragment.isEditing = true
-            fragment.adapter.items = fragment.adapter.items.dropLast(1)
-            fragment.deletePaymentMethod(PaymentOptionsItem.SavedPaymentMethod(paymentMethod))
-            assertThat(fragment.isEditing).isFalse()
-        }
-    }
-
-    @Test
     fun `sets up adapter`() {
         createScenario(
             initialState = Lifecycle.State.INITIALIZED
@@ -165,7 +137,10 @@ internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjection
     @Test
     fun `updates selection on click`() {
         val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val selectedItem = PaymentOptionsItem.SavedPaymentMethod(savedPaymentMethod)
+        val selectedItem = PaymentOptionsItem.SavedPaymentMethod(
+            displayName = "Card",
+            paymentMethod = savedPaymentMethod,
+        )
 
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)

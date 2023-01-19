@@ -13,7 +13,6 @@ import com.stripe.android.model.CardMetadata
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -24,7 +23,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 internal class RemoteCardAccountRangeSourceTest {
     private val cardAccountRangeStore = mock<CardAccountRangeStore>()
 

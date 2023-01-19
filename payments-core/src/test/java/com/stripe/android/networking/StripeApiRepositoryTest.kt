@@ -52,7 +52,6 @@ import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.model.StripeFileFixtures
 import com.stripe.android.model.TokenFixtures
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -85,7 +84,6 @@ import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 @Suppress("MaximumLineLength")
-@ExperimentalCoroutinesApi
 internal class StripeApiRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 

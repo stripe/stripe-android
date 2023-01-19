@@ -347,6 +347,54 @@ internal class PaymentOptionsViewModelTest {
         }
     }
 
+    @Test
+    fun `updateSelection with new payment method updates the current selection`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.selection.test {
+            val newSelection = PaymentSelection.New.Card(
+                DEFAULT_CARD,
+                CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            )
+            assertThat(awaitItem()).isNull()
+            viewModel.updateSelection(newSelection)
+            assertThat(awaitItem()).isEqualTo(newSelection)
+            assertThat(viewModel.newPaymentSelection).isEqualTo(newSelection)
+        }
+    }
+
+    @Test
+    fun `updateSelection with saved payment method updates the current selection`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.selection.test {
+            val savedSelection = PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+            assertThat(awaitItem()).isNull()
+            viewModel.updateSelection(savedSelection)
+            assertThat(awaitItem()).isEqualTo(savedSelection)
+            assertThat(viewModel.newPaymentSelection).isEqualTo(null)
+        }
+    }
+
+    @Test
+    fun `Ignores payment selection while in edit mode`() = runTest {
+        val viewModel = createViewModel().apply {
+            updateSelection(PaymentSelection.Link)
+        }
+
+        viewModel.toggleEditing()
+        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
+
+        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.Link)
+
+        viewModel.toggleEditing()
+        viewModel.handlePaymentMethodSelected(PaymentSelection.GooglePay)
+        assertThat(viewModel.selection.value).isEqualTo(PaymentSelection.GooglePay)
+    }
+
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,

@@ -7,7 +7,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -23,7 +22,6 @@ import kotlin.test.Test
 /**
  * Test class for [IssuingCardPinService].
  */
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class IssuingCardPinServiceTest {
     private val retrievalListener: IssuingCardPinService.IssuingCardPinRetrievalListener = mock()

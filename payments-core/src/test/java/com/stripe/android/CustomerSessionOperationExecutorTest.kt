@@ -10,7 +10,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.networking.AbsFakeStripeRepository
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -21,7 +20,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@ExperimentalCoroutinesApi
 internal class CustomerSessionOperationExecutorTest {
     private val testDispatcher = StandardTestDispatcher()
 

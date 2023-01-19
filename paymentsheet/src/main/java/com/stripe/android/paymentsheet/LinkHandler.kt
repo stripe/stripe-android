@@ -56,8 +56,8 @@ internal class LinkHandler @Inject constructor(
     private val _showLinkVerificationDialog = MutableStateFlow(false)
     val showLinkVerificationDialog: StateFlow<Boolean> = _showLinkVerificationDialog
 
-    private val _isLinkEnabled = MutableStateFlow(false)
-    val isLinkEnabled: StateFlow<Boolean> = _isLinkEnabled
+    private val _isLinkEnabled = MutableStateFlow<Boolean?>(null)
+    val isLinkEnabled: StateFlow<Boolean?> = _isLinkEnabled
 
     private val _activeLinkSession = MutableStateFlow(false)
     val activeLinkSession: StateFlow<Boolean> = _activeLinkSession

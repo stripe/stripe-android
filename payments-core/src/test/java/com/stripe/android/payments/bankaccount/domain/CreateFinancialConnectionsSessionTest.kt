@@ -6,7 +6,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -15,7 +14,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import kotlin.test.assertTrue
 
-@ExperimentalCoroutinesApi
 class CreateFinancialConnectionsSessionTest {
 
     private val stripeRepository = mock<StripeRepository>()

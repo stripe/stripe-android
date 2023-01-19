@@ -3,10 +3,8 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
@@ -52,12 +50,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -149,7 +149,7 @@ internal abstract class BaseSheetViewModel(
 
     internal val headerText: StateFlow<Int?> = combine(
         currentScreen,
-        linkHandler.isLinkEnabled,
+        linkHandler.isLinkEnabled.filterNotNull(),
         googlePayState,
         stripeIntent.filterNotNull(),
     ) { screen, isLinkAvailable, googlePay, intent ->
@@ -160,10 +160,11 @@ internal abstract class BaseSheetViewModel(
         initialValue = null,
     )
 
-    private val _selection = savedStateHandle.getLiveData<PaymentSelection>(SAVE_SELECTION)
-    internal val selection: LiveData<PaymentSelection?> = _selection
+    internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
+        .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
 
-    private val editing = MutableStateFlow(false)
+    private val _editing = MutableStateFlow(false)
+    internal val editing: StateFlow<Boolean> = _editing
 
     val processing: StateFlow<Boolean> = savedStateHandle
         .getStateFlow(SAVE_PROCESSING, false)
@@ -210,7 +211,7 @@ internal abstract class BaseSheetViewModel(
         listOf(
             primaryButtonUIState.asLiveData(),
             buttonsEnabled,
-            selection
+            selection.asLiveData()
         ).forEach { source ->
             addSource(source) {
                 value = if (primaryButtonUIState.value != null) {
@@ -228,17 +229,23 @@ internal abstract class BaseSheetViewModel(
 
     private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
         PaymentOptionsStateMapper(
-            paymentMethods = paymentMethods.asLiveData(),
+            paymentMethods = paymentMethods,
             currentSelection = selection,
-            googlePayState = googlePayState.asLiveData(),
-            isLinkEnabled = linkHandler.isLinkEnabled.asLiveData(),
-            initialSelection = savedSelection.asLiveData(),
+            googlePayState = googlePayState,
+            isLinkEnabled = linkHandler.isLinkEnabled,
+            initialSelection = savedSelection,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
+            nameProvider = { code ->
+                val paymentMethod = lpmResourceRepository.getRepository().fromCode(code)
+                paymentMethod?.displayNameResource?.let {
+                    application.getString(it)
+                }.orEmpty()
+            }
         )
     }
 
     val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()
-        .asFlow()
+        .filterNotNull()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(),
@@ -246,12 +253,20 @@ internal abstract class BaseSheetViewModel(
         )
 
     init {
+        viewModelScope.launch {
+            paymentMethods.onEach { paymentMethods ->
+                if (paymentMethods.isNullOrEmpty() && editing.value) {
+                    toggleEditing()
+                }
+            }.collect()
+        }
+
         if (savedSelection.value == null) {
             viewModelScope.launch {
                 val savedSelection = withContext(workContext) {
                     prefsRepository.getSavedSelection(
                         googlePayState.first().isReadyForUse,
-                        linkHandler.isLinkEnabled.first()
+                        linkHandler.isLinkEnabled.filterNotNull().first()
                     )
                 }
                 savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection
@@ -281,8 +296,12 @@ internal abstract class BaseSheetViewModel(
             // If the currently selected payment option has been removed, we set it to the one
             // determined in the payment options state.
             paymentOptionsState
-                .mapNotNull { it.selectedItem?.toPaymentSelection() }
-                .filter { it != selection.value }
+                .mapNotNull {
+                    it.selectedItem?.toPaymentSelection()
+                }
+                .filter {
+                    it != selection.value
+                }
                 .collect { updateSelection(it) }
         }
     }
@@ -341,14 +360,14 @@ internal abstract class BaseSheetViewModel(
             }
             PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions(
-                    linkEnabled = linkHandler.isLinkEnabled.value,
+                    linkEnabled = linkHandler.isLinkEnabled.value == true,
                     activeLinkSession = linkHandler.activeLinkSession.value,
                 )
             }
             AddFirstPaymentMethod,
             AddAnotherPaymentMethod -> {
                 eventReporter.onShowNewPaymentOptionForm(
-                    linkEnabled = linkHandler.isLinkEnabled.value,
+                    linkEnabled = linkHandler.isLinkEnabled.value == true,
                     activeLinkSession = linkHandler.activeLinkSession.value,
                 )
             }
@@ -424,6 +443,8 @@ internal abstract class BaseSheetViewModel(
         _notesText.value = text
     }
 
+    abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
+
     open fun updateSelection(selection: PaymentSelection?) {
         if (selection is PaymentSelection.New) {
             newPaymentSelection = selection
@@ -434,8 +455,8 @@ internal abstract class BaseSheetViewModel(
         updateBelowButtonText(null)
     }
 
-    fun setEditing(isEditing: Boolean) {
-        editing.value = isEditing
+    fun toggleEditing() {
+        _editing.value = !editing.value
     }
 
     fun setContentVisible(visible: Boolean) {
@@ -452,7 +473,7 @@ internal abstract class BaseSheetViewModel(
             if (didRemoveSelectedItem) {
                 // Remove the current selection. The new selection will be set when we're computing
                 // the next PaymentOptionsState.
-                _selection.value = null
+                savedStateHandle[SAVE_SELECTION] = null
             }
 
             savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value?.filter {
@@ -464,6 +485,13 @@ internal abstract class BaseSheetViewModel(
                     it,
                     paymentMethodId
                 )
+            }
+
+            val shouldResetToAddPaymentMethodForm = paymentMethods.value.isNullOrEmpty() &&
+                currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
+
+            if (shouldResetToAddPaymentMethodForm) {
+                backStack.value = listOf(AddFirstPaymentMethod)
             }
 
             val hasNoBankAccounts = paymentMethods.value.orEmpty().all { it.type != USBankAccount }

@@ -1,17 +1,16 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import androidx.annotation.VisibleForTesting
+import android.view.ViewGroup
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
@@ -19,37 +18,56 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.createTextSpanFromTextStyle
 import com.stripe.android.uicore.isSystemDarkTheme
-import kotlinx.coroutines.launch
 
-internal abstract class BasePaymentMethodsListFragment(
-    private val canClickSelectedItem: Boolean
-) : Fragment(
-    R.layout.fragment_paymentsheet_payment_methods_list
-) {
+internal abstract class BasePaymentMethodsListFragment : Fragment() {
+
     abstract val sheetViewModel: BaseSheetViewModel
 
-    @VisibleForTesting
-    lateinit var adapter: PaymentOptionsAdapter
-    private var editMenuItem: MenuItem? = null
+    private var layoutManager: PaymentMethodsLayoutManager? = null
+    private var adapter: PaymentOptionsAdapter? = null
 
-    @VisibleForTesting
-    internal var isEditing = false
-        set(value) {
-            field = value
-            adapter.setEditing(value)
-            setEditMenuText()
-            sheetViewModel.setEditing(value)
-        }
+    private var editMenuItem: MenuItem? = null
+    private var viewBinding: FragmentPaymentsheetPaymentMethodsListBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
+
+        sheetViewModel.paymentOptionsState.launchAndCollectIn(this) { state ->
+            adapter?.update(
+                items = state.items,
+                selectedIndex = state.selectedIndex,
+            )
+        }
+
+        sheetViewModel.paymentMethods.launchAndCollectIn(this) { paymentMethods ->
+            val hasPaymentMethods = paymentMethods.orEmpty().isNotEmpty()
+            editMenuItem?.isVisible = hasPaymentMethods
+        }
+
+        sheetViewModel.editing.launchAndCollectIn(this) { isEditing ->
+            adapter?.setEditing(isEditing)
+            setEditMenuText(isEditing)
+        }
+
+        sheetViewModel.processing.launchAndCollectIn(this) { isProcessing ->
+            adapter?.isEnabled = !isProcessing
+            layoutManager?.canScroll = !isProcessing
+        }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        viewBinding = FragmentPaymentsheetPaymentMethodsListBinding
+            .inflate(inflater, container, false)
+        return viewBinding?.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setupRecyclerView(FragmentPaymentsheetPaymentMethodsListBinding.bind(view))
-        isEditing = savedInstanceState?.getBoolean(IS_EDITING) ?: false
+        setupRecyclerView(viewBinding!!)
     }
 
     @Deprecated("Deprecated in Java")
@@ -57,11 +75,11 @@ internal abstract class BasePaymentMethodsListFragment(
         inflater.inflate(R.menu.paymentsheet_payment_methods_list, menu)
         // Menu is created after view state is restored, so we need to update the title here
         editMenuItem = menu.findItem(R.id.edit)
-        setEditMenuText()
+        setEditMenuText(isEditing = false)
         super.onCreateOptionsMenu(menu, inflater)
     }
 
-    private fun setEditMenuText() {
+    private fun setEditMenuText(isEditing: Boolean) {
         val context = context ?: return
         val appearance = sheetViewModel.config?.appearance ?: return
         editMenuItem?.apply {
@@ -75,7 +93,20 @@ internal abstract class BasePaymentMethodsListFragment(
                 color = Color(appearance.getColors(context.isSystemDarkTheme()).appBarIcon),
                 fontFamily = appearance.typography.fontResId
             )
-            isVisible = adapter.hasSavedItems()
+        }
+    }
+
+    private fun setupRecyclerView(viewBinding: FragmentPaymentsheetPaymentMethodsListBinding) {
+        layoutManager = PaymentMethodsLayoutManager(requireContext()).also {
+            viewBinding.recycler.layoutManager = it
+        }
+
+        adapter = PaymentOptionsAdapter(
+            paymentOptionSelected = { sheetViewModel.handlePaymentMethodSelected(it.toPaymentSelection()) },
+            paymentMethodDeleteListener = { sheetViewModel.removePaymentMethod(it.paymentMethod) },
+            addCardClickListener = sheetViewModel::transitionToAddPaymentScreen,
+        ).also {
+            viewBinding.recycler.adapter = it
         }
     }
 
@@ -83,81 +114,29 @@ internal abstract class BasePaymentMethodsListFragment(
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.edit -> {
-                isEditing = !isEditing
+                sheetViewModel.toggleEditing()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putBoolean(IS_EDITING, isEditing)
-        super.onSaveInstanceState(outState)
+    override fun onDestroyView() {
+        viewBinding = null
+        super.onDestroyView()
     }
 
-    private fun setupRecyclerView(viewBinding: FragmentPaymentsheetPaymentMethodsListBinding) {
-        val layoutManager = object : LinearLayoutManager(
-            activity,
-            HORIZONTAL,
-            false
-        ) {
-            var canScroll = true
+    private class PaymentMethodsLayoutManager(
+        context: Context,
+    ) : LinearLayoutManager(
+        context,
+        HORIZONTAL,
+        false
+    ) {
+        var canScroll = true
 
-            override fun canScrollHorizontally(): Boolean {
-                return canScroll && super.canScrollHorizontally()
-            }
-        }.also {
-            viewBinding.recycler.layoutManager = it
+        override fun canScrollHorizontally(): Boolean {
+            return canScroll && super.canScrollHorizontally()
         }
-
-        adapter = PaymentOptionsAdapter(
-            lpmRepository = sheetViewModel.lpmResourceRepository.getRepository(),
-            canClickSelectedItem = canClickSelectedItem,
-            paymentOptionSelected = ::onPaymentOptionsItemSelected,
-            paymentMethodDeleteListener = ::deletePaymentMethod,
-            addCardClickListener = ::transitionToAddPaymentMethod
-        ).also {
-            viewBinding.recycler.adapter = it
-        }
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                sheetViewModel.paymentOptionsState.collect { paymentOptionsState ->
-                    adapter.update(
-                        items = paymentOptionsState.items,
-                        selectedIndex = paymentOptionsState.selectedIndex,
-                    )
-                }
-            }
-        }
-
-        sheetViewModel.paymentMethods.launchAndCollectIn(viewLifecycleOwner) { paymentMethods ->
-            if (isEditing && paymentMethods.isNullOrEmpty()) {
-                isEditing = false
-            }
-        }
-
-        sheetViewModel.processing.launchAndCollectIn(viewLifecycleOwner) { isProcessing ->
-            adapter.isEnabled = !isProcessing
-            layoutManager.canScroll = !isProcessing
-        }
-    }
-
-    private fun transitionToAddPaymentMethod() {
-        sheetViewModel.transitionToAddPaymentScreen()
-    }
-
-    open fun onPaymentOptionsItemSelected(item: PaymentOptionsItem) {
-        val paymentSelection = item.toPaymentSelection()
-        sheetViewModel.updateSelection(paymentSelection)
-    }
-
-    @VisibleForTesting
-    fun deletePaymentMethod(item: PaymentOptionsItem.SavedPaymentMethod) {
-        sheetViewModel.removePaymentMethod(item.paymentMethod)
-    }
-
-    private companion object {
-        private const val IS_EDITING = "is_editing"
     }
 }
