@@ -9,6 +9,7 @@ import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
