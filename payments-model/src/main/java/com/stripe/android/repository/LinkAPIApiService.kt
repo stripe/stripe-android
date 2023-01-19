@@ -2,18 +2,16 @@ package com.stripe.android.repository
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.AppInfo
-import com.stripe.android.core.Logger
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithModelJsonParser
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
-import kotlinx.coroutines.Dispatchers
-import kotlin.coroutines.CoroutineContext
 
-interface LinkRepository {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+interface LinkApiService {
 
     suspend fun lookupConsumerSession(
         email: String?,
@@ -23,19 +21,14 @@ interface LinkRepository {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-class LinkAPIRepository(
-    private val appInfo: AppInfo,
-    private val workContext: CoroutineContext = Dispatchers.IO,
-    private val logger: Logger = Logger.noop(),
-    private val productUsageTokens: Set<String> = emptySet(),
-    private val stripeNetworkClient: StripeNetworkClient = DefaultStripeNetworkClient(
-        workContext = workContext,
-        logger = logger
-    )
-) : LinkRepository {
+class LinkApiServiceImpl(
+    private val stripeNetworkClient: StripeNetworkClient,
+    apiVersion: String,
+    sdkVersion: String = StripeSdkVersion.VERSION,
+    appInfo: AppInfo?
+) : LinkApiService {
 
     private val stripeErrorJsonParser = StripeErrorJsonParser()
-
 
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = appInfo,
@@ -52,7 +45,7 @@ class LinkAPIRepository(
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup {
         return executeRequestWithModelJsonParser(
-            stripeErrorJsonParser = StripeErrorJsonParser(),
+            stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
             request = apiRequestFactory.createPost(
                 consumerSessionLookupUrl,
@@ -78,7 +71,6 @@ class LinkAPIRepository(
         )
     }
 
-
     internal companion object {
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/lookup`
@@ -91,5 +83,4 @@ class LinkAPIRepository(
             return "${ApiRequest.API_HOST}/v1/$path"
         }
     }
-
 }

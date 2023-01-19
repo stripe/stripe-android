@@ -7,7 +7,6 @@ import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConsumerSessionLookup
 import org.json.JSONObject
 
-
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class ConsumerSessionLookupJsonParser : ModelJsonParser<ConsumerSessionLookup> {
     override fun parse(json: JSONObject): ConsumerSessionLookup {

@@ -20,7 +20,6 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
@@ -400,14 +399,6 @@ abstract class StripeRepository {
     ): RadarSession?
 
     // Link endpoints
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    abstract suspend fun lookupConsumerSession(
-        email: String?,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSessionLookup?
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Suppress("LongParameterList")
     abstract suspend fun consumerSignUp(
