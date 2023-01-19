@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -218,7 +219,7 @@ internal abstract class BaseSheetViewModel(
         } else {
             buttonsEnabled && selection != null
         }
-    }
+    }.distinctUntilChanged()
 
     internal var lpmServerSpec
         get() = savedStateHandle.get<String>(LPM_SERVER_SPEC_STRING)
