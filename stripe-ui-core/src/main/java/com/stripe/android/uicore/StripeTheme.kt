@@ -341,17 +341,26 @@ fun DefaultStripeTheme(
     }
 }
 
-@Composable
-@ReadOnlyComposable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
-    if (isSelected) LocalShapes.current.borderStrokeWidthSelected.dp else LocalShapes.current.borderStrokeWidth.dp
+val MaterialTheme.stripeColors: StripeColors
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalColors.current
+
+val MaterialTheme.stripeShapes: StripeShapes
+    @Composable
+    @ReadOnlyComposable
+    get() = LocalShapes.current
 
 @Composable
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
+    if (isSelected) stripeShapes.borderStrokeWidthSelected.dp else stripeShapes.borderStrokeWidth.dp
+@Composable
+@ReadOnlyComposable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun MaterialTheme.getBorderStrokeColor(isSelected: Boolean) =
-    if (isSelected) LocalColors.current.materialColors.primary else LocalColors.current.componentBorder
+    if (isSelected) stripeColors.materialColors.primary else stripeColors.componentBorder
 
 @Composable
 @ReadOnlyComposable
