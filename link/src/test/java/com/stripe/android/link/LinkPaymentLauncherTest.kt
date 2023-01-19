@@ -7,14 +7,12 @@ import com.stripe.android.link.model.StripeIntentFixtures
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.FakeAndroidKeyStore
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class LinkPaymentLauncherTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()

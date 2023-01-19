@@ -63,14 +63,6 @@ dependencies {
 }
 
 android {
-    kotlinOptions {
-        freeCompilerArgs = [
-                "-Xuse-experimental=androidx.compose.ui.ExperimentalComposeUiApi",
-                "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
-                "-Xopt-in=kotlin.RequiresOptIn"
-        ]
-    }
-
     buildFeatures {
         compose = true
     }
@@ -82,6 +74,9 @@ android {
             all {
                 maxHeapSize = "1024m"
             }
+        }
+        kotlinOptions {
+            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
         }
     }
 
