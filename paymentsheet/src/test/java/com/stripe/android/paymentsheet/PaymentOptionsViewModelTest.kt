@@ -31,7 +31,6 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.PaymentIntentFactory
-import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -151,7 +150,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.removePaymentMethod(cards[1])
-        idleLooper()
 
         assertThat(viewModel.paymentMethods.value)
             .containsExactly(cards[0], cards[2])
@@ -169,7 +167,6 @@ internal class PaymentOptionsViewModelTest {
         assertThat(viewModel.selection.value).isEqualTo(selection)
 
         viewModel.removePaymentMethod(selection.paymentMethod)
-        idleLooper()
 
         assertThat(viewModel.selection.value).isNull()
     }
@@ -184,7 +181,6 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.removePaymentMethod(paymentMethod)
-        idleLooper()
 
         assertThat(viewModel.paymentMethods.value)
             .isEmpty()
