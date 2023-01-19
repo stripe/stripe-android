@@ -1136,6 +1136,22 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `Resets the backstack if the last customer payment method is removed`() = runTest {
+        val paymentMethods = PaymentMethodFixtures.createCards(1)
+        val viewModel = createViewModel(customerPaymentMethods = paymentMethods)
+
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(Loading)
+
+            viewModel.transitionToFirstScreen()
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+
+            viewModel.removePaymentMethod(paymentMethods.single())
+            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+        }
+    }
+
     private fun createViewModel(
         args: PaymentSheetContract.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
