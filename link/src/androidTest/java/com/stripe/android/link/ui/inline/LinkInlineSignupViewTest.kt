@@ -12,8 +12,10 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.progressIndicatorTestTag
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.ui.core.elements.EmailConfig
+import com.stripe.android.ui.core.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.uicore.elements.SimpleTextFieldController
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -119,10 +121,10 @@ internal class LinkInlineSignupViewTest {
     private fun setContent(
         merchantName: String = "Example, Inc.",
         emailElement: SimpleTextFieldController =
-            SimpleTextFieldController.createEmailSectionController("email@me.co"),
+            EmailConfig.createController("email@me.co"),
         phoneController: PhoneNumberController = PhoneNumberController.createPhoneNumberController(),
         nameController: SimpleTextFieldController =
-            SimpleTextFieldController.createNameSectionController(null),
+            NameConfig.createController(null),
         signUpState: SignUpState = SignUpState.InputtingEmail,
         enabled: Boolean = true,
         expanded: Boolean = true,

@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -22,7 +22,8 @@ import com.stripe.android.uicore.stripeColors
  * by the caller, and an error string.
  */
 @Composable
-internal fun Section(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Section(
     @StringRes title: Int?,
     error: String?,
     contentOutsideCard: @Composable () -> Unit = {},

@@ -37,10 +37,11 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.USBankAccountFormViewModelSubcomponent
+import com.stripe.android.ui.core.elements.EmailConfig
+import com.stripe.android.ui.core.elements.NameConfig
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -61,15 +62,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val nameController: TextFieldController = SimpleTextFieldController
-        .createNameSectionController(args.formArgs.billingDetails?.name)
+    val nameController: TextFieldController = NameConfig
+        .createController(args.formArgs.billingDetails?.name)
 
     val name: StateFlow<String> = nameController.formFieldValue.map { formFieldEntry ->
         formFieldEntry.takeIf { it.isComplete }?.value ?: ""
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    val emailController: TextFieldController = SimpleTextFieldController
-        .createEmailSectionController(args.formArgs.billingDetails?.email)
+    val emailController: TextFieldController = EmailConfig
+        .createController(args.formArgs.billingDetails?.email)
 
     val email: StateFlow<String?> = emailController.formFieldValue.map { formFieldEntry ->
         formFieldEntry.takeIf { it.isComplete }?.value

@@ -12,7 +12,7 @@ import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.RowElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
-import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.uicore.elements.TextFieldController
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test

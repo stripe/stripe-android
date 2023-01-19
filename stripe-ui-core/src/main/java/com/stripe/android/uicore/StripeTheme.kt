@@ -365,6 +365,7 @@ fun MaterialTheme.getBorderStrokeColor(isSelected: Boolean) =
 
 @Composable
 @ReadOnlyComposable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun MaterialTheme.getBorderStroke(isSelected: Boolean): BorderStroke =
     BorderStroke(getBorderStrokeWidth(isSelected), getBorderStrokeColor(isSelected))
 

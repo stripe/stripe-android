@@ -1,7 +1,6 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.uicore.elements.FieldError
 
 /**
  * This represents the different states a field can be in,
@@ -46,7 +45,8 @@ interface TextFieldState {
     fun isBlank(): Boolean
 }
 
-internal fun TextFieldState.canAcceptInput(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun TextFieldState.canAcceptInput(
     currentValue: String,
     proposedValue: String
 ): Boolean {

@@ -46,18 +46,12 @@
   <string name="back">Retour</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Adresse de facturation</string>
-  <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">Ce champ ne peut être vide.</string>
-  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Modifier</string>
   <!-- Caption for Email field on address form -->
   <string name="email">E-mail</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">Votre adresse e-mail n\'est pas valide.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">Banque EPS</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="form_label_optional">%s (facultatif)</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="iban_incomplete">L\'IBAN que vous avez saisi est incomplet.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
