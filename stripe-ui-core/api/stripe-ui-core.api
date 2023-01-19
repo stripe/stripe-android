@@ -1,16 +1,3 @@
-public final class com/stripe/android/ui/core/elements/ComposableSingletons$SectionUIKt {
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/ComposableSingletons$SectionUIKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
-}
-
-public final class com/stripe/android/ui/core/elements/H6TextKt {
-}
-
-public final class com/stripe/android/ui/core/elements/SectionUIKt {
-}
-
 public final class com/stripe/android/uicore/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
@@ -29,6 +16,13 @@ public final class com/stripe/android/uicore/StripeThemeKt {
 public final class com/stripe/android/uicore/elements/BillingSpecKt {
 }
 
+public final class com/stripe/android/uicore/elements/ComposableSingletons$SectionUIKt {
+	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$SectionUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/uicore/elements/DropdownConfig$DefaultImpls {
 	public static fun getTinyMode (Lcom/stripe/android/uicore/elements/DropdownConfig;)Z
 }
@@ -36,7 +30,13 @@ public final class com/stripe/android/uicore/elements/DropdownConfig$DefaultImpl
 public final class com/stripe/android/uicore/elements/DropdownFieldUIKt {
 }
 
+public final class com/stripe/android/uicore/elements/H6TextKt {
+}
+
 public final class com/stripe/android/uicore/elements/PhoneNumberElementUIKt {
+}
+
+public final class com/stripe/android/uicore/elements/SectionUIKt {
 }
 
 public final class com/stripe/android/uicore/elements/TextFieldController$DefaultImpls {
