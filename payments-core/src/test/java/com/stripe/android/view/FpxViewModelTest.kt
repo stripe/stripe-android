@@ -6,14 +6,12 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.networking.AbsFakeStripeRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class FpxViewModelTest {
     private val viewModel = FpxViewModel(
         ApplicationProvider.getApplicationContext(),

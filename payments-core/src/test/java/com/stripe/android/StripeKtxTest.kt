@@ -13,7 +13,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.StripeParamsModel
 import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.StripeApiRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -32,7 +31,6 @@ import kotlin.test.assertSame
 /**
  * Test for [Stripe] suspend functions.
  */
-@ExperimentalCoroutinesApi
 @RunWith(JUnit4::class)
 internal class StripeKtxTest {
     private val mockApiRepository: StripeApiRepository = mock()

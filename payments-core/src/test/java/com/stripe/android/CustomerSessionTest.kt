@@ -17,7 +17,6 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.view.AddPaymentMethodActivity
 import com.stripe.android.view.PaymentMethodsActivity
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -40,7 +39,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class CustomerSessionTest {
     private val testDispatcher = UnconfinedTestDispatcher()

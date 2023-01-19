@@ -10,7 +10,6 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -21,7 +20,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 internal class StripePaymentAuthTest {
     private val testDispatcher = UnconfinedTestDispatcher()
