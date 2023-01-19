@@ -198,7 +198,8 @@ enum class Mode(val flow: String) {
     Test("testmode"),
     Live("mx"),
     App2App("app2app"),
-    Networking("networking")
+    Networking("networking"),
+    NetworkingTestMode("networking_testmode")
 }
 
 enum class Flow {
