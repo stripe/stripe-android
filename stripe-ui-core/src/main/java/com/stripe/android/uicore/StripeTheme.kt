@@ -356,6 +356,7 @@ val MaterialTheme.stripeShapes: StripeShapes
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
     if (isSelected) stripeShapes.borderStrokeWidthSelected.dp else stripeShapes.borderStrokeWidth.dp
+
 @Composable
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
