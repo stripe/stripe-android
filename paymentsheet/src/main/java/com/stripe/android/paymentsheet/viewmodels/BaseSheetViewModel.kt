@@ -468,6 +468,13 @@ internal abstract class BaseSheetViewModel(
                 )
             }
 
+            val shouldResetToAddPaymentMethodForm = paymentMethods.value.isNullOrEmpty() &&
+                currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
+
+            if (shouldResetToAddPaymentMethodForm) {
+                backStack.value = listOf(AddFirstPaymentMethod)
+            }
+
             val hasNoBankAccounts = paymentMethods.value.orEmpty().all { it.type != USBankAccount }
             if (hasNoBankAccounts) {
                 updatePrimaryButtonUIState(
