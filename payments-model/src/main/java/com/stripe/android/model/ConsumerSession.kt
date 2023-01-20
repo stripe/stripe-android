@@ -20,6 +20,7 @@ data class ConsumerSession internal constructor(
 ) : StripeModel {
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class VerificationSession internal constructor(
         val type: SessionType,
         val state: SessionState
