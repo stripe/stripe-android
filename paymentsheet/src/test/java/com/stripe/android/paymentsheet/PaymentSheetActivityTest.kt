@@ -306,6 +306,8 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `updates buy button state on add payment`() {
+        Dispatchers.setMain(testDispatcher)
+
         val viewModel = createViewModel(paymentMethods = emptyList())
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
@@ -861,6 +863,8 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Buy button should go back to initial state after resetPrimaryButton called`() {
+        Dispatchers.setMain(testDispatcher)
+
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             viewModel.viewState.value = PaymentSheetViewState.Reset(null)

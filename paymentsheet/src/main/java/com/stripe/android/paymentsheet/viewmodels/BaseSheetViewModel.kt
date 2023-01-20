@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.distinctUntilChanged
 import androidx.lifecycle.map
@@ -53,6 +54,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -204,19 +206,15 @@ internal abstract class BaseSheetViewModel(
         }
     }.distinctUntilChanged()
 
-    val ctaEnabled = MediatorLiveData<Boolean>().apply {
-        listOf(
-            primaryButtonUIState.asLiveData(),
-            buttonsEnabled,
-            selection.asLiveData()
-        ).forEach { source ->
-            addSource(source) {
-                value = if (primaryButtonUIState.value != null) {
-                    primaryButtonUIState.value?.enabled == true && buttonsEnabled.value == true
-                } else {
-                    buttonsEnabled.value == true && selection.value != null
-                }
-            }
+    val isPrimaryButtonEnabled = combine(
+        primaryButtonUIState,
+        buttonsEnabled.asFlow(),
+        selection,
+    ) { uiState, buttonsEnabled, selection ->
+        if (uiState != null) {
+            uiState.enabled && buttonsEnabled
+        } else {
+            buttonsEnabled && selection != null
         }
     }.distinctUntilChanged()
 
