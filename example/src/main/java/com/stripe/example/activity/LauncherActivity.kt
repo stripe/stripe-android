@@ -166,7 +166,7 @@ class LauncherActivity : AppCompatActivity() {
                 ManualUSBankAccountPaymentMethodActivity::class.java
             ),
             Item(
-                "Cash App Pay",
+                activity.getString(R.string.cash_app_pay_example),
                 CashAppPayActivity::class.java
             ),
             // This is for internal use so as not to confuse the user.
