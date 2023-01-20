@@ -135,7 +135,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             closeSheet(it)
         }
 
-        viewModel.buttonsEnabled.observe(this) { enabled ->
+        viewModel.buttonsEnabled.launchAndCollectIn(this) { enabled ->
             linkButton.isEnabled = enabled
             googlePayButton.isEnabled = enabled
         }

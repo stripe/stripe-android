@@ -715,6 +715,27 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `buttonsEnabled should be true when not processing and not editing`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.buttonsEnabled.test {
+            assertThat(awaitItem()).isTrue()
+
+            viewModel.toggleEditing()
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.toggleEditing()
+            assertThat(awaitItem()).isTrue()
+
+            viewModel.savedStateHandle[SAVE_PROCESSING] = true
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.savedStateHandle[SAVE_PROCESSING] = false
+            assertThat(awaitItem()).isTrue()
+        }
+    }
+
+    @Test
     fun `Should show amount is true for PaymentIntent`() {
         val viewModel = createViewModel()
 
