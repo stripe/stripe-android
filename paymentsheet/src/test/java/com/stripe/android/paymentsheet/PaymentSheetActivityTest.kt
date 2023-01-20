@@ -195,6 +195,54 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
+    fun `google pay button should not be enabled when editing`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            assertThat(activity.viewBinding.googlePayButton.isEnabled).isTrue()
+
+            viewModel.toggleEditing()
+
+            assertThat(activity.viewBinding.googlePayButton.isEnabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `google pay button should not be enabled when processing`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            assertThat(activity.viewBinding.googlePayButton.isEnabled).isTrue()
+
+            activity.viewBinding.buyButton.callOnClick()
+
+            assertThat(activity.viewBinding.googlePayButton.isEnabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `link button should not be enabled when editing`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            assertThat(activity.viewBinding.linkButton.isEnabled).isTrue()
+
+            viewModel.toggleEditing()
+
+            assertThat(activity.viewBinding.linkButton.isEnabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `link button should not be enabled when processing`() {
+        val scenario = activityScenario()
+        scenario.launch(intent).onActivity { activity ->
+            assertThat(activity.viewBinding.linkButton.isEnabled).isTrue()
+
+            activity.viewBinding.buyButton.callOnClick()
+
+            assertThat(activity.viewBinding.linkButton.isEnabled).isFalse()
+        }
+    }
+
+    @Test
     fun `Errors are cleared when checking out with a generic payment method`() {
         val scenario = activityScenario()
 
@@ -306,6 +354,8 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `updates buy button state on add payment`() {
+        Dispatchers.setMain(testDispatcher)
+
         val viewModel = createViewModel(paymentMethods = emptyList())
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
@@ -861,6 +911,8 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Buy button should go back to initial state after resetPrimaryButton called`() {
+        Dispatchers.setMain(testDispatcher)
+
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             viewModel.viewState.value = PaymentSheetViewState.Reset(null)
