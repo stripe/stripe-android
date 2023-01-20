@@ -1,12 +1,11 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed interface SectionFieldElement {
+interface SectionFieldElement {
     val identifier: IdentifierSpec
     val shouldRenderOutsideCard: Boolean
         get() = false

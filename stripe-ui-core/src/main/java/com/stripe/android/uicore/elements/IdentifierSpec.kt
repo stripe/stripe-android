@@ -1,8 +1,9 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 /**
  * This uniquely identifies a element in the form.  The vals here are for identifier
@@ -11,7 +12,7 @@ import kotlinx.parcelize.Parcelize
  * when making a Stripe request. Used in [FieldValuesToParamsMapConverter.kt]
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@kotlinx.serialization.Serializable
+@Serializable
 @Parcelize
 data class IdentifierSpec(
     val v1: String,

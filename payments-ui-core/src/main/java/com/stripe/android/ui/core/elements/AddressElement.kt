@@ -8,7 +8,9 @@ import com.stripe.android.ui.core.elements.autocomplete.DefaultIsPlacesAvailable
 import com.stripe.android.ui.core.elements.autocomplete.IsPlacesAvailable
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon

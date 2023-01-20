@@ -8,9 +8,9 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
+import com.stripe.android.uicore.elements.IdentifierSpec
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named

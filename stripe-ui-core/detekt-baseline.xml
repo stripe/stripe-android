@@ -3,8 +3,10 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>CyclomaticComplexMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
+    <ID>CyclomaticComplexMethod:IdentifierSpec.kt$IdentifierSpec.Companion$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) fun get(value: String)</ID>
     <ID>CyclomaticComplexMethod:TextFieldUI.kt$@Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
     <ID>EmptyFunctionBlock:DrawablePainter.kt$EmptyPainter${}</ID>
+    <ID>FunctionParameterNaming:IdentifierSpec.kt$IdentifierSpec.Companion$_value: String</ID>
     <ID>LongMethod:DropdownFieldUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun DropDown( controller: DropdownFieldController, enabled: Boolean, modifier: Modifier = Modifier )</ID>
     <ID>LongMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
     <ID>LongMethod:PhoneNumberElementUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun PhoneNumberElementUI( enabled: Boolean, controller: PhoneNumberController, requestFocusWhenShown: Boolean = false, imeAction: ImeAction = ImeAction.Done )</ID>

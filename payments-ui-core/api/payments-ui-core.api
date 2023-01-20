@@ -216,6 +216,7 @@ public final class com/stripe/android/ui/core/elements/CardDetailsSectionSpec$Co
 
 public abstract class com/stripe/android/ui/core/elements/CardNumberController : com/stripe/android/uicore/elements/SectionFieldErrorController, com/stripe/android/uicore/elements/TextFieldController {
 	public static final field $stable I
+	public fun ComposeUI-MxjM1cc (ZLcom/stripe/android/uicore/elements/SectionFieldElement;Landroidx/compose/ui/Modifier;Ljava/util/Set;Lcom/stripe/android/uicore/elements/IdentifierSpec;IILandroidx/compose/runtime/Composer;I)V
 	public abstract fun getCardBrandFlow ()Lkotlinx/coroutines/flow/Flow;
 	public abstract fun getCardScanEnabled ()Z
 	public fun getEnabled ()Z
@@ -452,53 +453,6 @@ public final class com/stripe/android/ui/core/elements/IbanSpec$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/IdentifierSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/IdentifierSpec$$serializer;
-	public static final synthetic field descriptor Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/ui/core/elements/IdentifierSpec;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/IdentifierSpec$Companion {
-	public final fun Generic (Ljava/lang/String;)Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getCardBrand ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getCardCvc ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getCardExpMonth ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getCardExpYear ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getCardNumber ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getCity ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getCountry ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getDependentLocality ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getEmail ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getLine1 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getLine2 ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getName ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getOneLineAddress ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getPhone ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getPostalCode ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getSameAsShipping ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getSaveForFutureUse ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getSortingCode ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getState ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getUpi ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun getVpa ()Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/ui/core/elements/IdentifierSpec$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/ui/core/elements/IdentifierSpec;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/ui/core/elements/KeyboardType : java/lang/Enum {
 	public static final field Ascii Lcom/stripe/android/ui/core/elements/KeyboardType;
 	public static final field Companion Lcom/stripe/android/ui/core/elements/KeyboardType$Companion;
@@ -711,9 +665,10 @@ public final class com/stripe/android/ui/core/elements/PostConfirmStatusSpecAsso
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/ui/core/elements/SameAsShippingController : com/stripe/android/uicore/elements/InputController {
+public final class com/stripe/android/ui/core/elements/SameAsShippingController : com/stripe/android/uicore/elements/InputController, com/stripe/android/uicore/elements/SectionFieldComposable {
 	public static final field $stable I
 	public fun <init> (Z)V
+	public fun ComposeUI-MxjM1cc (ZLcom/stripe/android/uicore/elements/SectionFieldElement;Landroidx/compose/ui/Modifier;Ljava/util/Set;Lcom/stripe/android/uicore/elements/IdentifierSpec;IILandroidx/compose/runtime/Composer;I)V
 	public fun getError ()Lkotlinx/coroutines/flow/Flow;
 	public fun getFieldValue ()Lkotlinx/coroutines/flow/Flow;
 	public fun getFormFieldValue ()Lkotlinx/coroutines/flow/Flow;
@@ -752,10 +707,6 @@ public final class com/stripe/android/ui/core/elements/SaveForFutureUseSpec$Comp
 }
 
 public final class com/stripe/android/ui/core/elements/SectionElementUIKt {
-}
-
-public final class com/stripe/android/ui/core/elements/SectionFieldElement$DefaultImpls {
-	public static fun getShouldRenderOutsideCard (Lcom/stripe/android/ui/core/elements/SectionFieldElement;)Z
 }
 
 public final class com/stripe/android/ui/core/elements/SimpleDialogElementUIKt {

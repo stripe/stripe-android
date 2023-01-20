@@ -4,7 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

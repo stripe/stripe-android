@@ -4,7 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 
 /**

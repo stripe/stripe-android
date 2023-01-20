@@ -16,7 +16,6 @@ import com.stripe.android.ui.core.elements.EmailConfig
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.EmptyFormElement
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.NameConfig
 import com.stripe.android.ui.core.elements.NameSpec
@@ -32,6 +31,7 @@ import com.stripe.android.ui.core.elements.UpiSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.StaticAddressResourceRepository
 import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Before

@@ -1,6 +1,9 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +20,7 @@ import kotlinx.coroutines.flow.map
 class DropdownFieldController(
     private val config: DropdownConfig,
     initialValue: String? = null
-) : InputController, SectionFieldErrorController {
+) : InputController, SectionFieldErrorController, SectionFieldComposable {
     val displayItems: List<String> = config.displayItems
     private val _selectedIndex = MutableStateFlow(0)
     val selectedIndex: StateFlow<Int> = _selectedIndex
@@ -56,5 +59,21 @@ class DropdownFieldController(
     override fun onRawValueChange(rawValue: String) {
         _selectedIndex.value =
             displayItems.indexOf(config.convertFromRaw(rawValue)).takeUnless { it == -1 } ?: 0
+    }
+
+    @Composable
+    override fun ComposeUI(
+        enabled: Boolean,
+        field: SectionFieldElement,
+        modifier: Modifier,
+        hiddenIdentifiers: Set<IdentifierSpec>,
+        lastTextFieldIdentifier: IdentifierSpec?,
+        nextFocusDirection: FocusDirection,
+        previousFocusDirection: FocusDirection
+    ) {
+        DropDown(
+            this,
+            enabled
+        )
     }
 }
