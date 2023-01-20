@@ -8,14 +8,21 @@ require 'base64'
 env_sdk_failure_notif_endpoint = ARGV[0]
 env_sdk_failure_notif_endpoint_hmac_key = ARGV[1]
 github_run_id = ARGV[2]
+jira_project = ARGV[3]
+
 
 if !env_sdk_failure_notif_endpoint || !env_sdk_failure_notif_endpoint_hmac_key
-  puts "Three environment variables required: `SDK_FAILURE_NOTIFICATION_ENDPOINT` and `SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY`"
+  puts "SDK_FAILURE_NOTIFICATION_ENDPOINT` or `SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY` not found"
   exit 102
 end
 
 if !github_run_id
   puts "github_run_id not found"
+  exit 102
+end
+
+if !jira_project
+  puts "jira_project not found"
   exit 102
 end
 
@@ -28,7 +35,7 @@ end
 req = Net::HTTP::Post.new(uri, 'Content-Type' => 'application/json')
 
 params = {
-  project: "RUN_MOBILESDK",
+  project: jira_project,
 }
 
 params[:summary] = "stripe-android E2E test failed"

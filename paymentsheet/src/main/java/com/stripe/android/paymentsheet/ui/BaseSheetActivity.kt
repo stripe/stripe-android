@@ -238,7 +238,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         header.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val text = viewModel.headerText.collectAsState()
+                val text = viewModel.headerText.collectAsState(null)
                 text.value?.let {
                     StripeTheme {
                         H4Text(
@@ -267,10 +267,12 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 resetPrimaryButtonState()
             }
         }
+
         viewModel.primaryButtonState.launchAndCollectIn(this) { state ->
             primaryButton.updateState(state)
         }
-        viewModel.ctaEnabled.observe(this) { isEnabled ->
+
+        viewModel.isPrimaryButtonEnabled.launchAndCollectIn(this) { isEnabled ->
             primaryButton.isEnabled = isEnabled
         }
 

@@ -5,7 +5,7 @@ package com.stripe.android.ui.core.address
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.ui.core.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.IdentifierSpec
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Map<IdentifierSpec, String?>.toConfirmPaymentIntentShipping():

@@ -5,12 +5,10 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.asFlow
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -32,6 +30,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -56,6 +55,7 @@ import com.stripe.android.paymentsheet.repositories.StripeIntentRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -65,14 +65,13 @@ import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -128,21 +127,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
 
-    val googlePayButtonState: StateFlow<PaymentSheetViewState?> = viewState.filter {
+    val googlePayButtonState: Flow<PaymentSheetViewState?> = viewState.filter {
         checkoutIdentifier == CheckoutIdentifier.SheetTopGooglePay
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    }
 
-    val buyPayButtonState: StateFlow<PaymentSheetViewState?> = viewState.filter {
+    val buyButtonState: Flow<PaymentSheetViewState?> = viewState.filter {
         checkoutIdentifier == CheckoutIdentifier.SheetBottomBuy
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    }
 
     internal val isProcessingPaymentIntent
         get() = args.clientSecret is PaymentIntentClientSecret
@@ -174,20 +165,21 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-    // Whether the top container, containing Google Pay and Link buttons, should be visible
-    internal val showTopContainer = MediatorLiveData<Boolean>().apply {
-        listOf(
-            linkHandler.isLinkEnabled.asLiveData(),
-            googlePayState.asLiveData(),
-            isReadyEvents
-        ).forEach {
-            addSource(it) {
-                value = (
-                    linkHandler.isLinkEnabled.value == true ||
-                        googlePayState.value == GooglePayState.Available
-                    ) && isReadyEvents.value?.peekContent() == true
-            }
-        }
+    internal val walletsContainerState: Flow<WalletsContainerState> = combine(
+        linkHandler.isLinkEnabled,
+        googlePayState,
+        isReadyEvents.asFlow(),
+        supportedPaymentMethodsFlow,
+    ) { isLinkAvailable, googlePayState, isReady, paymentMethodTypes ->
+        WalletsContainerState(
+            showLink = isLinkAvailable == true && isReady.peekContent() == true,
+            showGooglePay = googlePayState.isReadyForUse && isReady.peekContent() == true,
+            dividerTextResource = if (paymentMethodTypes.singleOrNull() == Card.code) {
+                R.string.stripe_paymentsheet_or_pay_with_card
+            } else {
+                R.string.stripe_paymentsheet_or_pay_using
+            },
+        )
     }
 
     private var paymentLauncher: StripePaymentLauncher? = null
@@ -208,6 +200,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             loadPaymentSheetState()
         }
     }
+
+    override val shouldCompleteLinkFlowInline: Boolean = true
 
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {

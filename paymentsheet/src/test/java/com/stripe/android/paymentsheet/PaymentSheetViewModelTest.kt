@@ -54,7 +54,6 @@ import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.PaymentIntentFactory
-import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flowOf
@@ -144,7 +143,6 @@ internal class PaymentSheetViewModelTest {
         )
 
         viewModel.removePaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        idleLooper()
 
         verify(customerRepository).detachPaymentMethod(
             any(),
@@ -352,9 +350,8 @@ internal class PaymentSheetViewModelTest {
         viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
 
         val googlePayButtonTurbine = viewModel.googlePayButtonState.testIn(this)
-        val buyButtonTurbine = viewModel.buyPayButtonState.testIn(this)
+        val buyButtonTurbine = viewModel.buyButtonState.testIn(this)
 
-        assertThat(buyButtonTurbine.awaitItem()).isNull()
         assertThat(googlePayButtonTurbine.awaitItem())
             .isEqualTo(PaymentSheetViewState.Reset(null))
 
@@ -683,39 +680,59 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `buyButton is enabled when primaryButtonEnabled is true, else not processing, not editing, and a selection has been made`() = runTest(testDispatcher) {
         val viewModel = createViewModel()
-        var isEnabled = false
 
-        viewModel.ctaEnabled.observeForever {
-            isEnabled = it
+        viewModel.isPrimaryButtonEnabled.test {
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.savedStateHandle[SAVE_PROCESSING] = false
+            viewModel.updateSelection(PaymentSelection.GooglePay)
+            assertThat(awaitItem()).isTrue()
+
+            viewModel.updateSelection(null)
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.updateSelection(PaymentSelection.GooglePay)
+            assertThat(awaitItem()).isTrue()
+
+            viewModel.updatePrimaryButtonUIState(primaryButtonUIState.copy(enabled = false))
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.updatePrimaryButtonUIState(primaryButtonUIState.copy(enabled = true))
+            assertThat(awaitItem()).isTrue()
+
+            viewModel.savedStateHandle[SAVE_PROCESSING] = true
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.savedStateHandle[SAVE_PROCESSING] = false
+            assertThat(awaitItem()).isTrue()
+
+            viewModel.toggleEditing()
+            assertThat(awaitItem()).isFalse()
+
+            viewModel.toggleEditing()
+            assertThat(awaitItem()).isTrue()
         }
+    }
 
-        viewModel.savedStateHandle[SAVE_PROCESSING] = false
-        viewModel.updateSelection(PaymentSelection.GooglePay)
-        assertThat(isEnabled).isTrue()
+    @Test
+    fun `buttonsEnabled should be true when not processing and not editing`() = runTest {
+        val viewModel = createViewModel()
 
-        viewModel.updateSelection(null)
-        assertThat(isEnabled).isFalse()
+        viewModel.buttonsEnabled.test {
+            assertThat(awaitItem()).isTrue()
 
-        viewModel.updateSelection(PaymentSelection.GooglePay)
-        assertThat(isEnabled).isTrue()
+            viewModel.toggleEditing()
+            assertThat(awaitItem()).isFalse()
 
-        viewModel.updatePrimaryButtonUIState(primaryButtonUIState.copy(enabled = false))
-        assertThat(isEnabled).isFalse()
+            viewModel.toggleEditing()
+            assertThat(awaitItem()).isTrue()
 
-        viewModel.updatePrimaryButtonUIState(primaryButtonUIState.copy(enabled = true))
-        assertThat(isEnabled).isTrue()
+            viewModel.savedStateHandle[SAVE_PROCESSING] = true
+            assertThat(awaitItem()).isFalse()
 
-        viewModel.savedStateHandle[SAVE_PROCESSING] = true
-        assertThat(isEnabled).isFalse()
-
-        viewModel.savedStateHandle[SAVE_PROCESSING] = false
-        assertThat(isEnabled).isTrue()
-
-        viewModel.toggleEditing()
-        assertThat(isEnabled).isFalse()
-
-        viewModel.toggleEditing()
-        assertThat(isEnabled).isTrue()
+            viewModel.savedStateHandle[SAVE_PROCESSING] = false
+            assertThat(awaitItem()).isTrue()
+        }
     }
 
     @Test
@@ -1180,6 +1197,85 @@ internal class PaymentSheetViewModelTest {
 
             viewModel.removePaymentMethod(paymentMethods.single())
             assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
+        }
+    }
+
+    @Test
+    fun `Shows Google Pay wallet button if Link is available`() = runTest {
+        val viewModel = createViewModel().apply {
+            savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.Available
+        }
+
+        viewModel.walletsContainerState.test {
+            assertThat(awaitItem().showGooglePay).isTrue()
+        }
+    }
+
+    @Test
+    fun `Hides Google Pay wallet button if Link is not available`() = runTest {
+        val viewModel = createViewModel().apply {
+            savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.NotAvailable
+        }
+
+        viewModel.walletsContainerState.test {
+            assertThat(awaitItem().showGooglePay).isFalse()
+        }
+    }
+
+    @Test
+    fun `Shows Link wallet button if Link is available`() = runTest {
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.LoggedOut,
+            )
+        ).apply {
+            // This is to satisfy the isReady requirement
+            savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.NotAvailable
+        }
+
+        viewModel.walletsContainerState.test {
+            assertThat(awaitItem().showLink).isTrue()
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `Hides Link wallet button if Link is not available`() = runTest {
+        val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card"))
+        val viewModel = createViewModel(stripeIntent = intent)
+
+        viewModel.walletsContainerState.test {
+            assertThat(awaitItem().showLink).isFalse()
+        }
+    }
+
+    @Test
+    fun `Shows the correct divider text if intent only supports card`() = runTest {
+        val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card"))
+        val viewModel = createViewModel(stripeIntent = intent)
+
+        viewModel.walletsContainerState.test {
+            val textResource = awaitItem().dividerTextResource
+            assertThat(textResource).isEqualTo(R.string.stripe_paymentsheet_or_pay_with_card)
+        }
+    }
+
+    @Test
+    fun `Shows the correct divider text if intent supports multiple payment method types`() = runTest {
+        val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card", "us_bank_account"))
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config?.copy(
+                    allowsDelayedPaymentMethods = true,
+                ),
+            ),
+            stripeIntent = intent,
+        )
+
+        viewModel.walletsContainerState.test {
+            val textResource = awaitItem().dividerTextResource
+            assertThat(textResource).isEqualTo(R.string.stripe_paymentsheet_or_pay_using)
         }
     }
 

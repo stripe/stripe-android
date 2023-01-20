@@ -1,12 +1,23 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.InputController
+import com.stripe.android.uicore.elements.SectionFieldComposable
+import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionFieldErrorController
+import com.stripe.android.uicore.elements.TextFieldConfig
+import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.elements.TextFieldIcon
+import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +29,7 @@ class AddressTextFieldController(
     private val config: TextFieldConfig,
     private val onNavigation: (() -> Unit)? = null,
     initialValue: String? = null
-) : TextFieldController, InputController, SectionFieldErrorController {
+) : TextFieldController, InputController, SectionFieldErrorController, SectionFieldComposable {
 
     init {
         initialValue?.let { onRawValueChange(it) }
@@ -93,6 +104,19 @@ class AddressTextFieldController(
 
     override fun onRawValueChange(rawValue: String) {
         onValueChange(config.convertFromRaw(rawValue))
+    }
+
+    @Composable
+    override fun ComposeUI(
+        enabled: Boolean,
+        field: SectionFieldElement,
+        modifier: Modifier,
+        hiddenIdentifiers: Set<IdentifierSpec>,
+        lastTextFieldIdentifier: IdentifierSpec?,
+        nextFocusDirection: FocusDirection,
+        previousFocusDirection: FocusDirection
+    ) {
+        AddressTextFieldUI(this)
     }
 
     fun launchAutocompleteScreen() {

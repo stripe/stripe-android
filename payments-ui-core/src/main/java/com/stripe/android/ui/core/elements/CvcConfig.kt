@@ -6,6 +6,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.elements.TextFieldStateConstants
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CvcConfig : CardDetailsTextFieldConfig {

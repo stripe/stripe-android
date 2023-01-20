@@ -6,6 +6,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.CardUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.elements.TextFieldStateConstants
 
 internal class CardNumberConfig : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None

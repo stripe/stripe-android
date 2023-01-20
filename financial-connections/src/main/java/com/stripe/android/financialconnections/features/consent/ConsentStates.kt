@@ -112,6 +112,7 @@ internal class ConsentStates : PreviewParameterProvider<ConsentState> {
             cta = "Agree",
             dataAccessNotice = DataAccessNotice(
                 title = "Goldilocks works with Stripe to link your accounts",
+                subtitle = "Goldilocks will use your account and routing number, balances and transactions:",
                 body = DataAccessNoticeBody(
                     bullets = listOf(
                         Bullet(

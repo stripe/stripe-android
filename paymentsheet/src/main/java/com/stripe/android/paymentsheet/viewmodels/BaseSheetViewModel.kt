@@ -47,11 +47,13 @@ import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -116,6 +118,9 @@ internal abstract class BaseSheetViewModel(
         } ?: emptyList()
         set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value.map { it.code })
 
+    protected val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> = savedStateHandle
+        .getStateFlow(SAVE_SUPPORTED_PAYMENT_METHOD, initialValue = emptyList())
+
     /**
      * The list of saved payment methods for the current customer.
      * Value is null until it's loaded, and non-null (could be empty) after that.
@@ -147,18 +152,14 @@ internal abstract class BaseSheetViewModel(
             initialValue = PaymentSheetScreen.Loading,
         )
 
-    internal val headerText: StateFlow<Int?> = combine(
+    internal val headerText: Flow<Int?> = combine(
         currentScreen,
         linkHandler.isLinkEnabled.filterNotNull(),
         googlePayState,
         stripeIntent.filterNotNull(),
     ) { screen, isLinkAvailable, googlePay, intent ->
         mapToHeaderTextResource(screen, isLinkAvailable, googlePay, intent)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    }
 
     internal val selection: StateFlow<PaymentSelection?> = savedStateHandle
         .getStateFlow<PaymentSelection?>(SAVE_SELECTION, null)
@@ -196,30 +197,22 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun onFatal(throwable: Throwable)
 
-    val buttonsEnabled = MediatorLiveData<Boolean>().apply {
-        listOf(
-            processing.asLiveData(),
-            editing.asLiveData()
-        ).forEach { source ->
-            addSource(source) {
-                value = processing.value != true && editing.value != true
-            }
-        }
+    val buttonsEnabled = combine(
+        processing,
+        editing
+    ) { isProcessing, isEditing ->
+        !isProcessing && !isEditing
     }.distinctUntilChanged()
 
-    val ctaEnabled = MediatorLiveData<Boolean>().apply {
-        listOf(
-            primaryButtonUIState.asLiveData(),
-            buttonsEnabled,
-            selection.asLiveData()
-        ).forEach { source ->
-            addSource(source) {
-                value = if (primaryButtonUIState.value != null) {
-                    primaryButtonUIState.value?.enabled == true && buttonsEnabled.value == true
-                } else {
-                    buttonsEnabled.value == true && selection.value != null
-                }
-            }
+    val isPrimaryButtonEnabled = combine(
+        primaryButtonUIState,
+        buttonsEnabled,
+        selection,
+    ) { uiState, buttonsEnabled, selection ->
+        if (uiState != null) {
+            uiState.enabled && buttonsEnabled
+        } else {
+            buttonsEnabled && selection != null
         }
     }.distinctUntilChanged()
 
@@ -524,9 +517,16 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
+    abstract val shouldCompleteLinkFlowInline: Boolean
+
     fun payWithLinkInline(linkConfig: LinkPaymentLauncher.Configuration, userInput: UserInput?) {
         viewModelScope.launch {
-            linkHandler.payWithLinkInline(linkConfig, userInput, selection.value)
+            linkHandler.payWithLinkInline(
+                configuration = linkConfig,
+                userInput = userInput,
+                paymentSelection = selection.value,
+                shouldCompleteLinkInlineFlow = shouldCompleteLinkFlowInline,
+            )
         }
     }
 

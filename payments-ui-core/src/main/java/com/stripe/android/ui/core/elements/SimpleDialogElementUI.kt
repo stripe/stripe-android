@@ -7,6 +7,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.H6Text
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

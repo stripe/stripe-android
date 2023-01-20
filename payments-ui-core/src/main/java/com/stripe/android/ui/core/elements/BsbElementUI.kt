@@ -9,6 +9,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.Section
+import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.stripeColors
 
 @Composable

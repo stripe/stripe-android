@@ -10,6 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.Section
+import com.stripe.android.uicore.elements.SectionFieldElementUI
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 

@@ -41,11 +41,12 @@ import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.progressIndicatorTestTag
-import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldController
-import com.stripe.android.ui.core.elements.TextFieldSection
+import com.stripe.android.ui.core.elements.EmailConfig
+import com.stripe.android.ui.core.elements.NameConfig
+import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.elements.TextFieldSection
 
 @Preview
 @Composable
@@ -54,9 +55,9 @@ private fun SignUpBodyPreview() {
         Surface {
             SignUpBody(
                 merchantName = "Example, Inc.",
-                emailController = SimpleTextFieldController.createEmailSectionController("email"),
+                emailController = EmailConfig.createController("email"),
                 phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
-                nameController = SimpleTextFieldController.createNameSectionController("My Name"),
+                nameController = NameConfig.createController("My Name"),
                 signUpState = SignUpState.InputtingPhoneOrName,
                 isReadyToSignUp = false,
                 requiresNameCollection = true,

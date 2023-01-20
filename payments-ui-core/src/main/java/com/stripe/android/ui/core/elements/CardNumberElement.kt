@@ -1,5 +1,7 @@
 package com.stripe.android.ui.core.elements
 
+import com.stripe.android.uicore.elements.IdentifierSpec
+
 internal data class CardNumberElement(
     val _identifier: IdentifierSpec,
     override val controller: CardNumberController

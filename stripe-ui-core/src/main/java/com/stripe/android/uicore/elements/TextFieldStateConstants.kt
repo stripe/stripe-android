@@ -1,10 +1,11 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
-import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.R
 
-internal class TextFieldStateConstants {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class TextFieldStateConstants {
     sealed class Valid : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean): Boolean = false
         override fun isValid(): Boolean = true

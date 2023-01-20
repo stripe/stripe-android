@@ -42,6 +42,7 @@ internal object MarkdownParser {
         cta = toHtml(pane.cta),
         dataAccessNotice = DataAccessNotice(
             title = toHtml(pane.dataAccessNotice.title),
+            subtitle = pane.dataAccessNotice.subtitle?.let { toHtml(it) },
             body = DataAccessNoticeBody(
                 bullets = pane.dataAccessNotice.body.bullets.map { bullet ->
                     Bullet(

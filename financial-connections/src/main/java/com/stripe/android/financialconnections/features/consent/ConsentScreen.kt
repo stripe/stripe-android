@@ -430,6 +430,7 @@ private fun LegalDetailsBottomSheetContent(
     }
     ConsentBottomSheetContent(
         title = title,
+        subtitle = null,
         onClickableTextClick = onClickableTextClick,
         bullets = bullets,
         connectedAccountNotice = null,
@@ -448,6 +449,9 @@ private fun DataAccessBottomSheetContent(
     val title = remember(dataDialog.title) {
         TextResource.Text(fromHtml(dataDialog.title))
     }
+    val subtitle = remember(dataDialog.subtitle) {
+        dataDialog.subtitle?.let { TextResource.Text(fromHtml(it)) }
+    }
     val learnMore = remember(dataDialog.learnMore) {
         TextResource.Text(fromHtml(dataDialog.learnMore))
     }
@@ -459,6 +463,7 @@ private fun DataAccessBottomSheetContent(
     }
     ConsentBottomSheetContent(
         title = title,
+        subtitle = subtitle,
         onClickableTextClick = onClickableTextClick,
         bullets = bullets,
         connectedAccountNotice = connectedAccountNotice,
@@ -471,6 +476,7 @@ private fun DataAccessBottomSheetContent(
 @Composable
 private fun ConsentBottomSheetContent(
     title: TextResource.Text,
+    subtitle: TextResource.Text?,
     onClickableTextClick: (String) -> Unit,
     bullets: List<BulletUI>,
     connectedAccountNotice: TextResource?,
@@ -493,6 +499,24 @@ private fun ConsentBottomSheetContent(
                 annotationStyles = emptyMap(),
                 onClickableTextClick = onClickableTextClick
             )
+            subtitle?.let {
+                Spacer(modifier = Modifier.size(4.dp))
+                AnnotatedText(
+                    text = it,
+                    defaultStyle = typography.body.copy(
+                        color = colors.textPrimary
+                    ),
+                    annotationStyles = mapOf(
+                        StringAnnotation.CLICKABLE to typography.detail
+                            .toSpanStyle()
+                            .copy(color = colors.textBrand),
+                        StringAnnotation.BOLD to typography.detailEmphasized
+                            .toSpanStyle()
+                            .copy(color = colors.textPrimary),
+                    ),
+                    onClickableTextClick = onClickableTextClick
+                )
+            }
             bullets.forEach {
                 Spacer(modifier = Modifier.size(16.dp))
                 ConsentBottomSheetBullet(

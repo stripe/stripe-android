@@ -203,13 +203,15 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `payWithLinkInline completes successfully for existing verified user`() = runLinkTest {
+    fun `payWithLinkInline completes successfully for existing verified user in complete flow`() = runLinkInlineTest(
+        shouldCompleteLinkFlowValues = listOf(true),
+    ) {
         val userInput = UserInput.SignIn("example@example.com")
         handler.processingState.test {
             accountStatusFlow.emit(AccountStatus.Verified)
             ensureAllEventsConsumed() // Begin with no events.
             testScope.launch {
-                handler.payWithLinkInline(configuration, userInput, cardSelection())
+                handler.payWithLinkInline(configuration, userInput, cardSelection(), shouldCompleteLinkFlow)
             }
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Launched)
@@ -220,7 +222,26 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `payWithLinkInline completes successfully for new user`() = runLinkTest {
+    fun `payWithLinkInline completes successfully for existing verified user in custom flow`() = runLinkInlineTest(
+        shouldCompleteLinkFlowValues = listOf(false),
+    ) {
+        val userInput = UserInput.SignIn("example@example.com")
+        handler.processingState.test {
+            accountStatusFlow.emit(AccountStatus.Verified)
+            ensureAllEventsConsumed() // Begin with no events.
+            testScope.launch {
+                handler.payWithLinkInline(configuration, userInput, cardSelection(), shouldCompleteLinkFlow)
+            }
+            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
+            assertThat(awaitItem()).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
+            assertThat(handler.activeLinkSession.value).isTrue()
+            verify(linkLauncher, never()).present(eq(configuration), any())
+        }
+        processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
+    }
+
+    @Test
+    fun `payWithLinkInline completes successfully for new user`() = runLinkInlineTest {
         val userInput = UserInput.SignUp(
             email = "example@example.com",
             phone = "5555555555",
@@ -235,7 +256,7 @@ class LinkHandlerTest {
             handler.showLinkVerificationDialog.test {
                 assertThat(awaitItem()).isFalse()
                 testScope.launch {
-                    handler.payWithLinkInline(configuration, userInput, cardSelection())
+                    handler.payWithLinkInline(configuration, userInput, cardSelection(), shouldCompleteLinkFlow)
                 }
                 assertThat(awaitItem()).isTrue()
                 handler.handleLinkVerificationResult(true)
@@ -251,7 +272,7 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `payWithLinkInline fails when verification fails`() = runLinkTest {
+    fun `payWithLinkInline fails when verification fails`() = runLinkInlineTest {
         val userInput = UserInput.SignUp(
             email = "example@example.com",
             phone = "5555555555",
@@ -266,7 +287,7 @@ class LinkHandlerTest {
             handler.showLinkVerificationDialog.test {
                 assertThat(awaitItem()).isFalse()
                 testScope.launch {
-                    handler.payWithLinkInline(configuration, userInput, cardSelection())
+                    handler.payWithLinkInline(configuration, userInput, cardSelection(), shouldCompleteLinkFlow)
                 }
                 assertThat(awaitItem()).isTrue()
                 handler.handleLinkVerificationResult(false)
@@ -281,8 +302,9 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `payWithLinkInline completes successfully for signedOut user`() = runLinkTest(
-        MutableSharedFlow(replay = 0)
+    fun `payWithLinkInline completes successfully for signedOut user in complete flow`() = runLinkInlineTest(
+        MutableSharedFlow(replay = 0),
+        shouldCompleteLinkFlowValues = listOf(true),
     ) {
         val userInput = UserInput.SignIn(email = "example@example.com")
         handler.processingState.test {
@@ -290,7 +312,7 @@ class LinkHandlerTest {
             whenever(linkLauncher.signInWithUserInput(any(), any()))
                 .thenReturn(Result.success(true))
             testScope.launch {
-                handler.payWithLinkInline(configuration, userInput, cardSelection())
+                handler.payWithLinkInline(configuration, userInput, cardSelection(), shouldCompleteLinkFlow)
             }
             accountStatusFlow.emit(AccountStatus.SignedOut)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
@@ -303,7 +325,31 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `payWithLinkInline fails for signedOut user`() = runLinkTest {
+    fun `payWithLinkInline collects payment details for signedOut user in custom flow`() = runLinkInlineTest(
+        accountStatusFlow = MutableSharedFlow(replay = 0),
+        shouldCompleteLinkFlowValues = listOf(false),
+    ) {
+        val userInput = UserInput.SignIn(email = "example@example.com")
+        handler.processingState.test {
+            ensureAllEventsConsumed() // Begin with no events.
+            whenever(linkLauncher.signInWithUserInput(any(), any()))
+                .thenReturn(Result.success(true))
+            testScope.launch {
+                handler.payWithLinkInline(configuration, userInput, cardSelection(), shouldCompleteLinkFlow)
+            }
+            accountStatusFlow.emit(AccountStatus.SignedOut)
+            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
+            accountStatusFlow.emit(AccountStatus.Verified)
+            assertThat(awaitItem())
+                .isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
+            assertThat(handler.activeLinkSession.value).isTrue()
+            verify(linkLauncher, never()).present(eq(configuration), any())
+        }
+        processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
+    }
+
+    @Test
+    fun `payWithLinkInline fails for signedOut user`() = runLinkInlineTest {
         val userInput = UserInput.SignIn(email = "example@example.com")
         handler.processingState.test {
             accountStatusFlow.emit(AccountStatus.SignedOut)
@@ -311,7 +357,7 @@ class LinkHandlerTest {
             whenever(linkLauncher.signInWithUserInput(any(), any()))
                 .thenReturn(Result.failure(IllegalStateException("Whoops")))
             testScope.launch {
-                handler.payWithLinkInline(configuration, userInput, cardSelection())
+                handler.payWithLinkInline(configuration, userInput, cardSelection(), shouldCompleteLinkFlow)
             }
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Error("Whoops"))
@@ -323,12 +369,12 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `payWithLinkInline fails for signedOut user without userInput`() = runLinkTest {
+    fun `payWithLinkInline fails for signedOut user without userInput`() = runLinkInlineTest {
         handler.processingState.test {
             accountStatusFlow.emit(AccountStatus.SignedOut)
             ensureAllEventsConsumed() // Begin with no events.
             testScope.launch {
-                handler.payWithLinkInline(configuration, null, cardSelection())
+                handler.payWithLinkInline(configuration, null, cardSelection(), shouldCompleteLinkFlow)
             }
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Ready)
@@ -336,6 +382,21 @@ class LinkHandlerTest {
             verify(linkLauncher, never()).present(eq(configuration), any())
         }
         processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
+    }
+}
+
+// Used to run through both complete flow, and custom flow for link inline tests.
+private fun runLinkInlineTest(
+    accountStatusFlow: MutableSharedFlow<AccountStatus> = MutableSharedFlow(replay = 1),
+    shouldCompleteLinkFlowValues: List<Boolean> = listOf(true, false),
+    testBlock: suspend LinkInlineTestData.() -> Unit,
+) {
+    for (shouldCompleteLinkFlowValue in shouldCompleteLinkFlowValues) {
+        runLinkTest(accountStatusFlow) {
+            with(LinkInlineTestData(shouldCompleteLinkFlowValue, this)) {
+                testBlock()
+            }
+        }
     }
 }
 
@@ -363,7 +424,7 @@ private fun runLinkTest(
     whenever(linkLauncher.getAccountStatusFlow(eq(configuration))).thenReturn(accountStatusFlow)
 
     with(
-        LinkTestData(
+        LinkTestDataImpl(
             testScope = this,
             handler = handler,
             linkLauncher = linkLauncher,
@@ -393,12 +454,27 @@ private fun cardSelection(): PaymentSelection.New.Card {
     )
 }
 
-private data class LinkTestData(
-    val testScope: TestScope,
-    val handler: LinkHandler,
-    val linkLauncher: LinkPaymentLauncher,
-    val savedStateHandle: SavedStateHandle,
-    val configuration: LinkPaymentLauncher.Configuration,
-    val accountStatusFlow: MutableSharedFlow<AccountStatus>,
-    val processingStateTurbine: ReceiveTurbine<LinkHandler.ProcessingState>,
-)
+private class LinkTestDataImpl(
+    override val testScope: TestScope,
+    override val handler: LinkHandler,
+    override val linkLauncher: LinkPaymentLauncher,
+    override val savedStateHandle: SavedStateHandle,
+    override val configuration: LinkPaymentLauncher.Configuration,
+    override val accountStatusFlow: MutableSharedFlow<AccountStatus>,
+    override val processingStateTurbine: ReceiveTurbine<LinkHandler.ProcessingState>,
+) : LinkTestData
+
+private interface LinkTestData {
+    val testScope: TestScope
+    val handler: LinkHandler
+    val linkLauncher: LinkPaymentLauncher
+    val savedStateHandle: SavedStateHandle
+    val configuration: LinkPaymentLauncher.Configuration
+    val accountStatusFlow: MutableSharedFlow<AccountStatus>
+    val processingStateTurbine: ReceiveTurbine<LinkHandler.ProcessingState>
+}
+
+private class LinkInlineTestData(
+    val shouldCompleteLinkFlow: Boolean,
+    linkTestData: LinkTestData,
+) : LinkTestData by linkTestData

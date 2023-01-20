@@ -2,6 +2,12 @@
 <resources>
   <!-- Label for input requesting phone number, used for all locations -->
   <string name="address_label_phone_number">전화번호</string>
+  <!-- Used when a required field is blank and submit is clicked. -->
+  <string name="blank_and_required">이 필드는 공란으로 비워둘 수 없습니다.</string>
+  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
+  <string name="change">변경</string>
+  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
+  <string name="form_label_optional">%s(선택 사항)</string>
   <!-- Error description for incomplete phone number -->
   <string name="incomplete_phone_number">불완전한 전화번호</string>
 </resources>

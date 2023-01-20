@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.compose.ui.text.AnnotatedString
 import com.google.common.truth.Truth
+import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.view.BecsDebitBanks
 import org.junit.Test
 

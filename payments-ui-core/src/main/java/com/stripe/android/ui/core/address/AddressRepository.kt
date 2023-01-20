@@ -3,7 +3,7 @@ package com.stripe.android.ui.core.address
 import android.content.res.Resources
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.ui.core.elements.SectionFieldElement
+import com.stripe.android.uicore.elements.SectionFieldElement
 import java.io.ByteArrayInputStream
 import javax.inject.Inject
 import javax.inject.Singleton

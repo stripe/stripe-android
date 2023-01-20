@@ -1,15 +1,16 @@
-package com.stripe.android.ui.core.elements
+package com.stripe.android.uicore.elements
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import com.stripe.android.ui.core.elements.TextFieldStateConstants.Error.Blank
-import com.stripe.android.uicore.elements.FieldError
-import com.stripe.android.uicore.elements.InputController
-import com.stripe.android.uicore.elements.SectionFieldErrorController
+import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-interface TextFieldController : InputController {
+interface TextFieldController : InputController, SectionFieldComposable {
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
 
@@ -40,6 +41,30 @@ interface TextFieldController : InputController {
     // This dictates how the accessibility reader reads the text in the field.
     // Default this to _fieldValue to read the field normally
     val contentDescription: Flow<String>
+
+    @Composable
+    override fun ComposeUI(
+        enabled: Boolean,
+        field: SectionFieldElement,
+        modifier: Modifier,
+        hiddenIdentifiers: Set<IdentifierSpec>,
+        lastTextFieldIdentifier: IdentifierSpec?,
+        nextFocusDirection: FocusDirection,
+        previousFocusDirection: FocusDirection
+    ) {
+        TextField(
+            textFieldController = this,
+            enabled = enabled,
+            imeAction = if (lastTextFieldIdentifier == field.identifier) {
+                ImeAction.Done
+            } else {
+                ImeAction.Next
+            },
+            modifier = modifier,
+            nextFocusDirection = nextFocusDirection,
+            previousFocusDirection = previousFocusDirection
+        )
+    }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -149,17 +174,5 @@ class SimpleTextFieldController constructor(
 
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
-    }
-
-    companion object {
-        fun createEmailSectionController(initialValue: String?) = SimpleTextFieldController(
-            EmailConfig(),
-            initialValue = initialValue
-        )
-
-        fun createNameSectionController(initialValue: String?) = SimpleTextFieldController(
-            NameConfig(),
-            initialValue = initialValue
-        )
     }
 }
