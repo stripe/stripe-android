@@ -112,7 +112,7 @@ private fun ModalBottomSheetContent(
             )
             bullets.forEach {
                 Spacer(modifier = Modifier.size(16.dp))
-                ModalBottomSheetBullet(
+                BulletItem(
                     bullet = it,
                     onClickableTextClick = onClickableTextClick
                 )
@@ -170,12 +170,12 @@ private fun ModalBottomSheetContent(
 }
 
 @Composable
-internal fun ModalBottomSheetBullet(
+internal fun BulletItem(
     bullet: BulletUI,
     onClickableTextClick: (String) -> Unit
 ) {
     Row {
-        ConsentBulletIcon(iconUrl = bullet.icon)
+        BulletIcon(iconUrl = bullet.icon)
         Spacer(modifier = Modifier.size(8.dp))
         Column {
             when {
@@ -255,7 +255,7 @@ internal fun ModalBottomSheetBullet(
 }
 
 @Composable
-private fun ConsentBulletIcon(iconUrl: String?) {
+private fun BulletIcon(iconUrl: String?) {
     val modifier = Modifier
         .size(16.dp)
         .offset(y = 2.dp)
