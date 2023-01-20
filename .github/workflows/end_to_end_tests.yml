@@ -24,4 +24,9 @@ jobs:
       - name: Notify failure endpoint
         id: notifyFailureEndpoint
         if: failure()
-        run: ./scripts/notify_failure_enpiont.rb ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} ${{ github.run_id }}
+        run: |
+          ./scripts/notify_failure_endpoint.rb \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT }} \
+          ${{ secrets.SDK_FAILURE_NOTIFICATION_ENDPOINT_HMAC_KEY }} \
+          ${{ github.run_id }} \
+          RUN_MOBILESDK
