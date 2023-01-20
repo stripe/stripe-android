@@ -2,7 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.stripe.android.uicore.elements.SimpleTextFieldController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -36,7 +36,6 @@ class AddressControllerTest {
         sectionFieldElementFlow
     )
 
-    @ExperimentalCoroutinesApi
     @Test
     fun `Verify the first error field is the error published`() {
         runBlocking {

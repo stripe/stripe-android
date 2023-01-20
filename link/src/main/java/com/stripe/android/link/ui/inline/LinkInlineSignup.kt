@@ -50,15 +50,16 @@ import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.EmailCollectionSection
 import com.stripe.android.link.ui.signup.SignUpState
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
-import com.stripe.android.ui.core.elements.PhoneNumberController
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldController
-import com.stripe.android.ui.core.elements.TextFieldSection
+import com.stripe.android.ui.core.elements.EmailConfig
+import com.stripe.android.ui.core.elements.NameConfig
 import com.stripe.android.ui.core.elements.menu.Checkbox
-import com.stripe.android.ui.core.getBorderStroke
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
+import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.elements.TextFieldSection
+import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.uicore.stripeColors
 
 @Preview
 @Composable
@@ -67,9 +68,9 @@ private fun Preview() {
         Surface {
             LinkInlineSignup(
                 merchantName = "Example, Inc.",
-                emailController = SimpleTextFieldController.createEmailSectionController("email@me.co"),
+                emailController = EmailConfig.createController("email@me.co"),
                 phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
-                nameController = SimpleTextFieldController.createNameSectionController("My Name"),
+                nameController = NameConfig.createController("My Name"),
                 signUpState = SignUpState.InputtingEmail,
                 enabled = true,
                 expanded = true,
@@ -152,7 +153,7 @@ internal fun LinkInlineSignup(
     CompositionLocalProvider(
         LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
     ) {
-        PaymentsTheme {
+        StripeTheme {
             Box(
                 modifier = modifier
                     .border(
@@ -160,7 +161,7 @@ internal fun LinkInlineSignup(
                         shape = MaterialTheme.linkShapes.small
                     )
                     .background(
-                        color = MaterialTheme.paymentsColors.component,
+                        color = MaterialTheme.stripeColors.component,
                         shape = MaterialTheme.linkShapes.small
                     )
             ) {
@@ -207,7 +208,7 @@ internal fun LinkInlineSignup(
                         Column {
                             Divider(
                                 color =
-                                MaterialTheme.paymentsColors.componentBorder.copy(alpha = 0.1f)
+                                MaterialTheme.stripeColors.componentBorder.copy(alpha = 0.1f)
                             )
                             Column(
                                 modifier = Modifier
@@ -275,7 +276,7 @@ internal fun LinkInlineSignup(
                             }
                             Divider(
                                 color =
-                                MaterialTheme.paymentsColors.componentBorder.copy(alpha = 0.1f)
+                                MaterialTheme.stripeColors.componentBorder.copy(alpha = 0.1f)
                             )
                             Row(modifier = Modifier.padding(16.dp)) {
                                 Icon(

@@ -13,6 +13,7 @@ import android.view.WindowInsets
 import android.view.WindowMetrics
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
@@ -20,12 +21,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.view.isGone
@@ -33,19 +35,22 @@ import androidx.core.view.isVisible
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.ui.verification.LinkVerificationDialog
 import com.stripe.android.paymentsheet.BottomSheetController
+import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.createTextSpanFromTextStyle
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.ui.core.getBackgroundColor
-import com.stripe.android.ui.core.isSystemDarkTheme
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.createTextSpanFromTextStyle
+import com.stripe.android.uicore.getBackgroundColor
+import com.stripe.android.uicore.isSystemDarkTheme
+import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.utils.AnimationConstants
 import com.stripe.android.view.KeyboardController
@@ -53,6 +58,11 @@ import kotlin.math.roundToInt
 
 internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
     abstract val viewModel: BaseSheetViewModel
+
+    val linkHandler: LinkHandler
+        get() = viewModel.linkHandler
+    val linkLauncher: LinkPaymentLauncher
+        get() = linkHandler.linkLauncher
 
     @VisibleForTesting
     internal val bottomSheetBehavior by lazy { BottomSheetBehavior.from(bottomSheet) }
@@ -67,7 +77,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
      * These arguments can't be passed through the Fragment's arguments because the Fragment is
      * added with an [AndroidViewBinding] from Compose, which doesn't allow that.
      */
-    var formArgs: FormFragmentArguments? = null
+    var formArgs: FormArguments? = null
 
     abstract val rootView: ViewGroup
     abstract val bottomSheet: ViewGroup
@@ -104,8 +114,8 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
-        supportFragmentManager.addOnBackStackChangedListener {
-            updateToolbarButton(supportFragmentManager.backStackEntryCount == 0)
+        viewModel.currentScreen.launchAndCollectIn(this) { currentScreen ->
+            updateToolbarButton(currentScreen)
         }
 
         scrollView.viewTreeObserver.addOnScrollChangedListener {
@@ -127,9 +137,14 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             }
         }
 
-        viewModel.processing.observe(this) { isProcessing ->
+        val onBackPressedCallback = onBackPressedDispatcher.addCallback {
+            viewModel.handleBackPressed()
+        }
+
+        viewModel.processing.launchAndCollectIn(this) { isProcessing ->
             updateRootViewClickHandling(isProcessing)
             toolbar.isEnabled = !isProcessing
+            onBackPressedCallback.isEnabled = !isProcessing
         }
 
         // Set Toolbar to act as the ActionBar so it displays the menu items.
@@ -138,25 +153,21 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
         toolbar.setNavigationOnClickListener {
             if (toolbar.isEnabled) {
-                if (supportFragmentManager.backStackEntryCount == 0) {
-                    viewModel.onUserCancel()
-                } else {
-                    onUserBack()
-                }
+                keyboardController.hide()
+                viewModel.handleBackPressed()
             }
         }
 
-        updateToolbarButton(supportFragmentManager.backStackEntryCount == 0)
         setupHeader()
         setupPrimaryButton()
         setupNotes()
 
-        viewModel.showLinkVerificationDialog.observe(this) { show ->
+        viewModel.linkHandler.showLinkVerificationDialog.launchAndCollectIn(this) { show ->
             linkAuthView.setContent {
                 if (show) {
                     LinkVerificationDialog(
-                        linkLauncher = viewModel.linkLauncher,
-                        onResult = viewModel::handleLinkVerificationResult,
+                        linkLauncher = linkLauncher,
+                        onResult = linkHandler::handleLinkVerificationResult,
                     )
                 }
             }
@@ -193,18 +204,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (viewModel.processing.value == false) {
-            if (supportFragmentManager.backStackEntryCount > 0) {
-                viewModel.onUserBack()
-                super.onBackPressed()
-            } else {
-                viewModel.onUserCancel()
-            }
-        }
-    }
-
     protected fun closeSheet(
         result: ResultType
     ) {
@@ -224,7 +223,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                     context = this,
                     fontSizeDp = (
                         it.typography.sizeScaleFactor
-                            * PaymentsThemeDefaults.typography.smallFontSize.value
+                            * StripeThemeDefaults.typography.smallFontSize.value
                         ).dp,
                     color = Color(it.getColors(this.isSystemDarkTheme()).error),
                     fontFamily = it.typography.fontResId
@@ -239,12 +238,11 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         header.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val text = viewModel.headerText.observeAsState()
-
+                val text = viewModel.headerText.collectAsState(null)
                 text.value?.let {
-                    PaymentsTheme {
+                    StripeTheme {
                         H4Text(
-                            text = it,
+                            text = stringResource(it),
                             modifier = Modifier.padding(bottom = 2.dp)
                         )
                     }
@@ -269,17 +267,19 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
                 resetPrimaryButtonState()
             }
         }
+
         viewModel.primaryButtonState.launchAndCollectIn(this) { state ->
             primaryButton.updateState(state)
         }
-        viewModel.ctaEnabled.observe(this) { isEnabled ->
+
+        viewModel.isPrimaryButtonEnabled.launchAndCollectIn(this) { isEnabled ->
             primaryButton.isEnabled = isEnabled
         }
 
         primaryButton.setAppearanceConfiguration(
-            PaymentsTheme.primaryButtonStyle,
+            StripeTheme.primaryButtonStyle,
             tintList = viewModel.config?.primaryButtonColor ?: ColorStateList.valueOf(
-                PaymentsTheme.primaryButtonStyle.getBackgroundColor(baseContext)
+                StripeTheme.primaryButtonStyle.getBackgroundColor(baseContext)
             )
         )
         bottomSpacer.isVisible = true
@@ -295,10 +295,10 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             val showNotes = text != null
             text?.let {
                 notesView.setContent {
-                    PaymentsTheme {
+                    StripeTheme {
                         Html(
                             html = text,
-                            color = MaterialTheme.paymentsColors.subtitle,
+                            color = MaterialTheme.stripeColors.subtitle,
                             style = MaterialTheme.typography.body1.copy(
                                 textAlign = TextAlign.Center
                             )
@@ -310,8 +310,10 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
         }
     }
 
-    private fun updateToolbarButton(isStackEmpty: Boolean) {
-        val toolbarResources = if (isStackEmpty) {
+    private fun updateToolbarButton(currentScreen: PaymentSheetScreen?) {
+        val showClose = currentScreen != PaymentSheetScreen.AddAnotherPaymentMethod
+
+        val toolbarResources = if (showClose) {
             ToolbarResources(
                 R.drawable.stripe_paymentsheet_toolbar_close,
                 R.string.stripe_paymentsheet_close
@@ -346,11 +348,6 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
             rootView.setOnClickListener(null)
             rootView.isClickable = false
         }
-    }
-
-    private fun onUserBack() {
-        keyboardController.hide()
-        onBackPressed()
     }
 
     private fun setSheetWidthForTablets() {

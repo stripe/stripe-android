@@ -228,7 +228,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val lpmRepository = lpmResourceRepository.getRepository()
 
         lpmRepository.update(
-            expectedLpms = paymentMethodPreference.intent.paymentMethodTypes,
+            stripeIntent = paymentMethodPreference.intent,
             serverLpmSpecs = paymentMethodPreference.formUI,
         )
 

@@ -7,16 +7,14 @@ import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.SectionController
 import com.stripe.android.ui.core.elements.SectionElement
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.forms.FormFieldEntry
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-@ExperimentalCoroutinesApi
 class CompleteFormFieldValueFilterTest {
 
     private val emailController = SimpleTextFieldController(EmailConfig())

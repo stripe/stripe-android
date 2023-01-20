@@ -14,6 +14,7 @@ import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanActivity
+import com.stripe.android.uicore.elements.H6Text
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

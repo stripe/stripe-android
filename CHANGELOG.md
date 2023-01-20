@@ -3,8 +3,26 @@
 ## XX.XX.XX - 2023-XX-XX
 
 ### PaymentSheet
+* [CHANGED][5927](https://github.com/stripe/stripe-android/pull/5927) Customers can now re-enter the autocomplete flow of the Address Element by tapping an icon in the line 1 text field.
+* [FIXED][6090](https://github.com/stripe/stripe-android/pull/6090) Fixed an issue where adding a payment method to a Link account didn’t work when using `PaymentSheet.FlowController`.
+
+## 20.18.0 - 2023-01-17
+### Payments
+* [ADDED][6012](https://github.com/stripe/stripe-android/pull/6012) Support for the predictive back gesture.
+
+### PaymentSheet
 * [DEPRECATED][5928](https://github.com/stripe/stripe-android/pull/5928) Deprecated `PaymentOption` public constructor, and `drawableResourceId` property.
 * [ADDED][5928](https://github.com/stripe/stripe-android/pull/5928) Added `PaymentOption.icon()`, which returns a `Drawable`, and replaces `PaymentOption.drawableResourceId`.
+* [ADDED][6012](https://github.com/stripe/stripe-android/pull/6012) Support for the predictive back gesture.
+
+### Financial Connections
+* [ADDED][6012](https://github.com/stripe/stripe-android/pull/6012) Support for the predictive back gesture.
+
+### CardScan
+* [ADDED][6012](https://github.com/stripe/stripe-android/pull/6012) Support for the predictive back gesture.
+
+### Identity
+* [CHANGED][5981](https://github.com/stripe/stripe-android/pull/5981) Fully migrate to Jetpack Compose.
 
 ## 20.17.0 - 2022-12-12
 

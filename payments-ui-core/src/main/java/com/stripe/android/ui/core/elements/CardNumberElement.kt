@@ -5,6 +5,6 @@ internal data class CardNumberElement(
     override val controller: CardNumberController
 ) : SectionSingleFieldElement(_identifier) {
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
-        // Nothing from formFragmentArguments to populate
+        // Nothing from FormArguments to populate
     }
 }

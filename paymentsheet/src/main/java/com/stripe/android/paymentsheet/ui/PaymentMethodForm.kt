@@ -10,17 +10,15 @@ import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.FormElement
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 
-@FlowPreview
 @Composable
 internal fun PaymentMethodForm(
-    args: FormFragmentArguments,
+    args: FormArguments,
     enabled: Boolean,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     showCheckboxFlow: Flow<Boolean>,
@@ -52,7 +50,6 @@ internal fun PaymentMethodForm(
     )
 }
 
-@FlowPreview
 @Composable
 internal fun PaymentMethodForm(
     paymentMethodCode: PaymentMethodCode,

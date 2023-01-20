@@ -75,9 +75,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/stripe_paymentsheet_outer_spacing_horizontal"/>
 
-                <androidx.fragment.app.FragmentContainerView
-                    android:id="@+id/fragment_container"
-                    android:name="com.stripe.android.paymentsheet.PaymentSheetLoadingFragment"
+                <androidx.compose.ui.platform.ComposeView
+                    android:id="@+id/content_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 

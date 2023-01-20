@@ -9,9 +9,10 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso.pressBack
+import app.cash.turbine.test
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -34,11 +35,13 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.Loading
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkState.LoginState.LoggedIn
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.TransitionTarget
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -50,14 +53,15 @@ import com.stripe.android.ui.core.forms.resources.StaticLpmResourceRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
-import com.stripe.android.utils.TestUtils.observeEventsForever
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -70,8 +74,6 @@ import javax.inject.Provider
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
-@ExperimentalCoroutinesApi
-@FlowPreview
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsActivityTest {
     @get:Rule
@@ -121,6 +123,7 @@ internal class PaymentOptionsActivityTest {
 
     @AfterTest
     fun cleanup() {
+        Dispatchers.resetMain()
         WeakMapInjectorRegistry.clear()
     }
 
@@ -221,14 +224,12 @@ internal class PaymentOptionsActivityTest {
 
                 // Navigate to "Add Payment Method" fragment
                 viewModel.transitionToAddPaymentScreen()
-                idleLooper()
 
                 assertThat(activity.viewBinding.continueButton.isVisible)
                     .isTrue()
 
                 // Navigate back to payment options list
-                activity.onBackPressed()
-                idleLooper()
+                pressBack()
 
                 assertThat(activity.viewBinding.continueButton.isVisible)
                     .isFalse()
@@ -243,8 +244,6 @@ internal class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                idleLooper()
-
                 val addBinding = PrimaryButtonBinding.bind(activity.viewBinding.continueButton)
 
                 assertThat(addBinding.confirmedIcon.isVisible)
@@ -259,24 +258,19 @@ internal class PaymentOptionsActivityTest {
     }
 
     @Test
-    fun `Verify if Google Pay is ready, display the saved payment methods screen`() {
+    fun `Verify if Google Pay is ready, display the saved payment methods screen`() = runTest {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(isGooglePayReady = true)
         val viewModel = createViewModel(args)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
-        activityScenario(viewModel).launch(createIntent(args)).use {
-            it.onActivity {
-                idleLooper()
-            }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(Loading)
+            activityScenario(viewModel).launch(createIntent(args))
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
-    fun `Verify if Link is available, display the saved payment methods screen`() {
+    fun `Verify if Link is available, display the saved payment methods screen`() = runTest {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             linkState = LinkState(configuration = mock(), loginState = LoggedIn),
             isGooglePayReady = false,
@@ -285,20 +279,15 @@ internal class PaymentOptionsActivityTest {
 
         val viewModel = createViewModel(args)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
-        activityScenario(viewModel).launch(createIntent(args)).use {
-            it.onActivity {
-                idleLooper()
-            }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(Loading)
+            activityScenario(viewModel).launch(createIntent(args))
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
-    fun `Verify if customer has payment methods, display the saved payment methods screen`() {
+    fun `Verify if customer has payment methods, display the saved payment methods screen`() = runTest {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             isGooglePayReady = false,
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -306,18 +295,15 @@ internal class PaymentOptionsActivityTest {
 
         val viewModel = createViewModel(args)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
-        activityScenario(viewModel).launch(createIntent(args)).use {
-            idleLooper()
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(Loading)
+            activityScenario(viewModel).launch(createIntent(args))
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
-    fun `Verify if there are no payment methods, display the add payment method screen`() {
+    fun `Verify if there are no payment methods, display the add payment method screen`() = runTest {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             isGooglePayReady = false,
             paymentMethods = emptyList(),
@@ -325,40 +311,31 @@ internal class PaymentOptionsActivityTest {
 
         val viewModel = createViewModel(args)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
-
-        activityScenario(viewModel).launch(createIntent(args)).use {
-            idleLooper()
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(Loading)
+            activityScenario(viewModel).launch(createIntent(args))
+            assertThat(awaitItem()).isEqualTo(AddFirstPaymentMethod)
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.AddFirstPaymentMethod)
     }
 
     @Test
-    fun `Verify doesn't transition to first screen again on activity recreation`() {
+    fun `Verify doesn't transition to first screen again on activity recreation`() = runTest {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
 
         val viewModel = createViewModel(args)
+        val scenario = activityScenario(viewModel)
 
-        val transitionTargets = mutableListOf<TransitionTarget>()
-        viewModel.transition.observeEventsForever { transitionTargets.add(it) }
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(Loading)
 
-        activityScenario(viewModel).launch(createIntent(args)).use { scenario ->
-            scenario.onActivity {
-                idleLooper()
-            }
+            scenario.launch(createIntent(args))
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
 
             scenario.recreate()
-
-            scenario.onActivity {
-                idleLooper()
-            }
+            expectNoEvents()
         }
-
-        assertThat(transitionTargets).containsExactly(TransitionTarget.SelectSavedPaymentMethods)
     }
 
     @Test
@@ -368,8 +345,6 @@ internal class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                idleLooper()
-
                 assertThat(activity.bottomSheetBehavior.state)
                     .isEqualTo(BottomSheetBehavior.STATE_EXPANDED)
                 assertThat(activity.bottomSheetBehavior.isFitToContents)
@@ -385,10 +360,9 @@ internal class PaymentOptionsActivityTest {
             createIntent()
         ).use {
             it.onActivity { activity ->
-                val paymentSelectionMock: PaymentSelection = PaymentSelection.GooglePay
-                viewModel._paymentOptionResult.value = PaymentOptionResult.Succeeded(
-                    paymentSelectionMock
-                )
+                val paymentSelection = PaymentSelection.GooglePay
+                viewModel.updateSelection(paymentSelection)
+                viewModel.onUserSelection()
                 idleLooper()
 
                 assertThat(activity.bottomSheetBehavior.state)
@@ -450,6 +424,8 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `ContinueButton should go back to initial state after updating selection`() {
+        Dispatchers.setMain(testDispatcher)
+
         val scenario = activityScenario()
         scenario.launch(
             createIntent()
@@ -494,7 +470,6 @@ internal class PaymentOptionsActivityTest {
         scenario.launch(
             createIntent()
         ).use {
-            idleLooper()
             it.onActivity { activity ->
                 viewModel.updateBelowButtonText(null)
                 assertThat(activity.viewBinding.notes.isVisible).isFalse()
@@ -531,7 +506,6 @@ internal class PaymentOptionsActivityTest {
                 )
             )
         ).use {
-            idleLooper()
             it.onActivity { activity ->
                 assertThat(activity.viewBinding.continueButton.isVisible).isTrue()
                 assertThat(activity.viewBinding.continueButton.defaultTintList).isEqualTo(
@@ -552,8 +526,6 @@ internal class PaymentOptionsActivityTest {
     fun `Clears error on user selection`() {
         val scenario = activityScenario()
         scenario.launch(createIntent()).onActivity { activity ->
-            idleLooper()
-
             viewModel.onError("some error")
             assertThat(activity.viewBinding.message.isVisible).isTrue()
             assertThat(activity.viewBinding.message.text.toString()).isEqualTo("some error")
@@ -590,29 +562,33 @@ internal class PaymentOptionsActivityTest {
         val linkPaymentLauncher = mock<LinkPaymentLauncher>().stub {
             onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
         }
-        registerFormViewModelInjector()
-        return PaymentOptionsViewModel(
-            args = args,
-            prefsRepositoryFactory = { FakePrefsRepository() },
-            eventReporter = eventReporter,
-            customerRepository = FakeCustomerRepository(),
-            workContext = testDispatcher,
-            application = ApplicationProvider.getApplicationContext(),
-            logger = Logger.noop(),
-            injectorKey = DUMMY_INJECTOR_KEY,
-            lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
-            addressResourceRepository = StaticAddressResourceRepository(addressRepository),
-            savedStateHandle = SavedStateHandle(),
-            linkLauncher = linkPaymentLauncher
-        ).also {
-            it.injector = injector
+        return TestViewModelFactory.create(
+            linkLauncher = linkPaymentLauncher,
+        ) { linkHandler, savedStateHandle ->
+            registerFormViewModelInjector()
+            PaymentOptionsViewModel(
+                args = args,
+                prefsRepositoryFactory = { FakePrefsRepository() },
+                eventReporter = eventReporter,
+                customerRepository = FakeCustomerRepository(),
+                workContext = testDispatcher,
+                application = ApplicationProvider.getApplicationContext(),
+                logger = Logger.noop(),
+                injectorKey = DUMMY_INJECTOR_KEY,
+                lpmResourceRepository = StaticLpmResourceRepository(lpmRepository),
+                addressResourceRepository = StaticAddressResourceRepository(addressRepository),
+                savedStateHandle = savedStateHandle,
+                linkHandler = linkHandler,
+            ).also {
+                it.injector = injector
+            }
         }
     }
 
     fun registerFormViewModelInjector() {
         val formViewModel = FormViewModel(
             context = context,
-            formFragmentArguments = FormFragmentArguments(
+            formArguments = FormArguments(
                 PaymentMethod.Type.Card.code,
                 showCheckbox = true,
                 showCheckboxControlledFields = true,
@@ -630,7 +606,7 @@ internal class PaymentOptionsActivityTest {
         val mockFormSubComponentBuilderProvider =
             mock<Provider<FormViewModelSubcomponent.Builder>>()
         whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
-        whenever(mockFormBuilder.formFragmentArguments(any())).thenReturn(mockFormBuilder)
+        whenever(mockFormBuilder.formArguments(any())).thenReturn(mockFormBuilder)
         whenever(mockFormBuilder.showCheckboxFlow(any())).thenReturn(mockFormBuilder)
         whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
         whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)

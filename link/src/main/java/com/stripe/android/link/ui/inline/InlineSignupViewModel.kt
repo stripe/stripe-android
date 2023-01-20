@@ -17,8 +17,9 @@ import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.ui.core.elements.PhoneNumberController
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.EmailConfig
+import com.stripe.android.ui.core.elements.NameConfig
+import com.stripe.android.uicore.elements.PhoneNumberController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -42,14 +43,14 @@ internal class InlineSignupViewModel @Inject constructor(
     private val prefilledPhone = config.customerPhone?.takeUnless { isLoggedOut }.orEmpty()
     private val prefilledName = config.customerName?.takeUnless { isLoggedOut }
 
-    val emailController = SimpleTextFieldController.createEmailSectionController(prefilledEmail)
+    val emailController = EmailConfig.createController(prefilledEmail)
 
     val phoneController = PhoneNumberController.createPhoneNumberController(
         initialValue = prefilledPhone,
         initiallySelectedCountryCode = config.customerBillingCountryCode,
     )
 
-    val nameController = SimpleTextFieldController.createNameSectionController(prefilledName)
+    val nameController = NameConfig.createController(prefilledName)
 
     /**
      * Emits the email entered in the form if valid, null otherwise.

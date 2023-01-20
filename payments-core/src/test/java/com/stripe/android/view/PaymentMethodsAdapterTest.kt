@@ -8,7 +8,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.mockito.kotlin.mock
@@ -20,7 +19,6 @@ import kotlin.test.Test
  * Test class for [PaymentMethodsAdapter]
  */
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class PaymentMethodsAdapterTest {
     private val adapterDataObserver: RecyclerView.AdapterDataObserver = mock()
     private val listener: PaymentMethodsAdapter.Listener = mock()

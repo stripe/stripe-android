@@ -20,13 +20,13 @@ import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.PrimaryButtonBinding
-import com.stripe.android.ui.core.PaymentsTheme
-import com.stripe.android.ui.core.PaymentsThemeDefaults
-import com.stripe.android.ui.core.PrimaryButtonStyle
-import com.stripe.android.ui.core.convertDpToPx
-import com.stripe.android.ui.core.getBorderStrokeColor
-import com.stripe.android.ui.core.getComposeTextStyle
-import com.stripe.android.ui.core.getOnBackgroundColor
+import com.stripe.android.uicore.PrimaryButtonStyle
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.convertDpToPx
+import com.stripe.android.uicore.getBorderStrokeColor
+import com.stripe.android.uicore.getComposeTextStyle
+import com.stripe.android.uicore.getOnBackgroundColor
 
 /**
  * The primary call-to-action for a payment sheet screen.
@@ -59,13 +59,13 @@ internal class PrimaryButton @JvmOverloads constructor(
     private val confirmedIcon = viewBinding.confirmedIcon
 
     private var cornerRadius = context.convertDpToPx(
-        PaymentsThemeDefaults.primaryButtonStyle.shape.cornerRadius.dp
+        StripeThemeDefaults.primaryButtonStyle.shape.cornerRadius.dp
     )
     private var borderStrokeWidth = context.convertDpToPx(
-        PaymentsThemeDefaults.primaryButtonStyle.shape.borderStrokeWidth.dp
+        StripeThemeDefaults.primaryButtonStyle.shape.borderStrokeWidth.dp
     )
     private var borderStrokeColor =
-        PaymentsThemeDefaults.primaryButtonStyle.getBorderStrokeColor(context)
+        StripeThemeDefaults.primaryButtonStyle.getBorderStrokeColor(context)
 
     internal var finishedBackgroundColor =
         ContextCompat.getColor(
@@ -229,11 +229,11 @@ internal class PrimaryButton @JvmOverloads constructor(
 
 @Composable
 private fun LabelUI(label: String) {
-    PaymentsTheme {
+    StripeTheme {
         Text(
             text = label,
             textAlign = TextAlign.Center,
-            style = PaymentsTheme.primaryButtonStyle.getComposeTextStyle(),
+            style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
             modifier = Modifier
                 .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
         )

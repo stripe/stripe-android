@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,7 +31,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DOC_SELECT
@@ -38,6 +38,7 @@ import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultVa
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam.Type
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.launch
 
 internal const val docSelectionTitleTag = "Title"
 internal const val singleSelectionTag = "SingleSelection"
@@ -53,68 +54,66 @@ internal fun DocSelectionScreen(
     identityViewModel: IdentityViewModel,
     cameraPermissionEnsureable: CameraPermissionEnsureable
 ) {
-    MdcTheme {
-        val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
-        val context = LocalContext.current
-        val viewLifecycleOwner = LocalLifecycleOwner.current
-        CheckVerificationPageAndCompose(
-            verificationPageResource = verificationPageState,
-            onError = {
-                identityViewModel.errorCause.postValue(it)
-                navController.navigateToErrorScreenWithDefaultValues(context)
-            }
-        ) {
-            val documentSelect = remember { it.documentSelect }
+    val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
+    val context = LocalContext.current
+    val viewLifecycleOwner = LocalLifecycleOwner.current
+    CheckVerificationPageAndCompose(
+        verificationPageResource = verificationPageState,
+        onError = {
+            identityViewModel.errorCause.postValue(it)
+            navController.navigateToErrorScreenWithDefaultValues(context)
+        }
+    ) {
+        val documentSelect = remember { it.documentSelect }
 
-            ScreenTransitionLaunchedEffect(
-                identityViewModel = identityViewModel,
-                screenName = SCREEN_NAME_DOC_SELECT
+        ScreenTransitionLaunchedEffect(
+            identityViewModel = identityViewModel,
+            screenName = SCREEN_NAME_DOC_SELECT
+        )
+
+        val onDocTypeSelected: suspend (Type) -> Unit = { type: Type ->
+            identityViewModel.postVerificationPageDataForDocSelection(
+                type = type,
+                navController = navController,
+                viewLifecycleOwner = viewLifecycleOwner,
+                cameraPermissionEnsureable = cameraPermissionEnsureable
             )
+        }
 
-            val onDocTypeSelected = { type: Type ->
-                identityViewModel.postVerificationPageDataForDocSelection(
-                    type = type,
-                    navController = navController,
-                    viewLifecycleOwner = viewLifecycleOwner,
-                    cameraPermissionEnsureable = cameraPermissionEnsureable
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    horizontal = dimensionResource(id = R.dimen.page_horizontal_margin),
+                    vertical = dimensionResource(id = R.dimen.page_vertical_margin)
                 )
-            }
-
-            Column(
+        ) {
+            Text(
+                text = documentSelect.title,
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(
-                        horizontal = dimensionResource(id = R.dimen.page_horizontal_margin),
-                        vertical = dimensionResource(id = R.dimen.page_vertical_margin)
+                        top = 58.dp,
+                        bottom = 32.dp
                     )
-            ) {
-                Text(
-                    text = documentSelect.title,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            top = 58.dp,
-                            bottom = 32.dp
-                        )
-                        .semantics {
-                            testTag = docSelectionTitleTag
-                        },
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                    .semantics {
+                        testTag = docSelectionTitleTag
+                    },
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold
+            )
+            if (documentSelect.idDocumentTypeAllowlist.count() > 1) {
+                MultiSelection(
+                    documentSelect.idDocumentTypeAllowlist,
+                    onDocTypeSelected = onDocTypeSelected
                 )
-                if (documentSelect.idDocumentTypeAllowlist.count() > 1) {
-                    MultiSelection(
-                        documentSelect.idDocumentTypeAllowlist,
-                        onDocTypeSelected = onDocTypeSelected
-                    )
-                } else {
-                    SingleSelection(
-                        allowedType = documentSelect.idDocumentTypeAllowlist.entries.first().key,
-                        buttonText = documentSelect.buttonText,
-                        bodyText = documentSelect.body,
-                        onDocTypeSelected = onDocTypeSelected
-                    )
-                }
+            } else {
+                SingleSelection(
+                    allowedType = documentSelect.idDocumentTypeAllowlist.entries.first().key,
+                    buttonText = documentSelect.buttonText,
+                    bodyText = documentSelect.body,
+                    onDocTypeSelected = onDocTypeSelected
+                )
             }
         }
     }
@@ -123,10 +122,10 @@ internal fun DocSelectionScreen(
 @Composable
 internal fun MultiSelection(
     idDocumentTypeAllowlist: Map<String, String>,
-    onDocTypeSelected: (Type) -> Unit
+    onDocTypeSelected: suspend (Type) -> Unit
 ) {
     var selectedTypeValue by remember { mutableStateOf(SELECTION_NONE) }
-
+    val coroutineScope = rememberCoroutineScope()
     for ((allowedType, allowedTypeValue) in idDocumentTypeAllowlist) {
         val isSelected = selectedTypeValue == allowedTypeValue
         Box(
@@ -142,7 +141,9 @@ internal fun MultiSelection(
         ) {
             TextButton(
                 onClick = {
-                    onDocTypeSelected(Type.fromName(allowedType))
+                    coroutineScope.launch {
+                        onDocTypeSelected(Type.fromName(allowedType))
+                    }
                     selectedTypeValue = allowedTypeValue
                 },
                 colors = ButtonDefaults.textButtonColors(
@@ -177,8 +178,9 @@ internal fun SingleSelection(
     allowedType: String,
     buttonText: String,
     bodyText: String?,
-    onDocTypeSelected: (Type) -> Unit
+    onDocTypeSelected: suspend (Type) -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -189,7 +191,9 @@ internal fun SingleSelection(
         var buttonState by remember { mutableStateOf(LoadingButtonState.Idle) }
         LoadingButton(text = buttonText, state = buttonState) {
             buttonState = LoadingButtonState.Loading
-            onDocTypeSelected(Type.fromName(allowedType))
+            coroutineScope.launch {
+                onDocTypeSelected(Type.fromName(allowedType))
+            }
         }
     }
 }

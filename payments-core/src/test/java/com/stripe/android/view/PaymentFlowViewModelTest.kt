@@ -10,7 +10,6 @@ import com.stripe.android.model.CustomerFixtures
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import com.stripe.android.utils.TestUtils.idleLooper
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argumentCaptor
@@ -21,7 +20,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-@ExperimentalCoroutinesApi
 class PaymentFlowViewModelTest {
     private val customerSession: CustomerSession = mock()
     private val customerRetrievalListener = argumentCaptor<CustomerSession.CustomerRetrievalListener>()

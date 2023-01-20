@@ -2,13 +2,16 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.text.toLowerCase
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.autocomplete.DefaultIsPlacesAvailable
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
+import com.stripe.android.ui.core.elements.autocomplete.IsPlacesAvailable
+import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.SectionFieldErrorController
+import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.elements.TextFieldIcon
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -16,7 +19,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 open class AddressElement constructor(
@@ -30,7 +32,8 @@ open class AddressElement constructor(
         rawValuesMap[IdentifierSpec.Country]
     ),
     sameAsShippingElement: SameAsShippingElement?,
-    shippingValuesMap: Map<IdentifierSpec, String?>?
+    shippingValuesMap: Map<IdentifierSpec, String?>?,
+    private val isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
 ) : SectionMultiFieldElement(_identifier) {
 
     @VisibleForTesting
@@ -71,11 +74,13 @@ open class AddressElement constructor(
             countryCode?.let {
                 phoneNumberElement.controller.countryDropdownController.onRawValueChange(it)
             }
-            addressRepository.get(countryCode)
-                ?: emptyList()
-        }
-        .onEach { fields ->
-            fields.forEach { field ->
+            (addressRepository.get(countryCode) ?: emptyList()).onEach { field ->
+                updateLine1WithAutocompleteAffordance(
+                    field = field,
+                    countryCode = countryCode,
+                    addressType = addressType,
+                    isPlacesAvailable = isPlacesAvailable,
+                )
                 field.setRawValue(rawValuesMap)
             }
         }
@@ -118,7 +123,6 @@ open class AddressElement constructor(
         }
     }
 
-    @OptIn(FlowPreview::class)
     private val fieldsUpdatedFlow =
         combine(
             countryElement.controller.rawFieldValue,
@@ -162,13 +166,7 @@ open class AddressElement constructor(
             is AddressType.ShippingCondensed -> {
                 // If the merchant has supplied Google Places API key, Google Places SDK is
                 // available, and country is supported, use autocomplete
-                val supportedCountries = addressType.autocompleteCountries
-                val autocompleteSupportsCountry = supportedCountries
-                    ?.map { it.toLowerCase(Locale.current) }
-                    ?.contains(country?.toLowerCase(Locale.current)) == true
-                val autocompleteAvailable = DefaultIsPlacesAvailable().invoke() &&
-                    !addressType.googleApiKey.isNullOrBlank()
-                if (autocompleteSupportsCountry && autocompleteAvailable) {
+                if (addressType.supportsAutoComplete(country, isPlacesAvailable)) {
                     condensed
                 } else {
                     expanded
@@ -199,7 +197,6 @@ open class AddressElement constructor(
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getFormFieldValueFlow() = fields.flatMapLatest { fieldElements ->
         combine(
             fieldElements
@@ -225,4 +222,48 @@ open class AddressElement constructor(
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         this.rawValuesMap = rawValuesMap
     }
+}
+
+internal suspend fun updateLine1WithAutocompleteAffordance(
+    field: SectionFieldElement,
+    countryCode: String?,
+    addressType: AddressType,
+    isPlacesAvailable: IsPlacesAvailable,
+) {
+    if (field.identifier == IdentifierSpec.Line1) {
+        val fieldController = (field as? SimpleTextElement)?.controller
+        val config = (fieldController as? SimpleTextFieldController?)?.textFieldConfig
+        val textConfig = config as? SimpleTextFieldConfig?
+        if (textConfig != null) {
+            updateLine1ConfigForAutocompleteAffordance(
+                textConfig = textConfig,
+                countryCode = countryCode,
+                addressType = addressType,
+                isPlacesAvailable = isPlacesAvailable,
+            )
+        }
+    }
+}
+
+private suspend fun updateLine1ConfigForAutocompleteAffordance(
+    textConfig: SimpleTextFieldConfig,
+    countryCode: String?,
+    addressType: AddressType,
+    isPlacesAvailable: IsPlacesAvailable,
+) {
+    val supportsAutocomplete = (addressType as? AutocompleteCapableAddressType)
+        ?.supportsAutoComplete(countryCode, isPlacesAvailable)
+    val icon: TextFieldIcon.Trailing? = if (supportsAutocomplete == true) {
+        TextFieldIcon.Trailing(
+            idRes = R.drawable.stripe_ic_search,
+            isTintable = true,
+            contentDescription = R.string.address_search_content_description,
+            onClick = {
+                addressType.onNavigation()
+            }
+        )
+    } else {
+        null
+    }
+    textConfig.trailingIcon.emit(icon)
 }

@@ -5,6 +5,13 @@ import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
+import com.stripe.android.identity.navigation.DriverLicenseScanDestination
+import com.stripe.android.identity.navigation.DriverLicenseUploadDestination
+import com.stripe.android.identity.navigation.IDScanDestination
+import com.stripe.android.identity.navigation.IDUploadDestination
+import com.stripe.android.identity.navigation.PassportScanDestination
+import com.stripe.android.identity.navigation.PassportUploadDestination
+import com.stripe.android.identity.navigation.SelfieDestination
 
 /**
  * States during scanning a document.
@@ -134,5 +141,56 @@ internal sealed class IdentityScanState(
             this == ScanType.ID_BACK || this == ScanType.DL_BACK
 
         fun ScanType?.isNullOrFront() = this == null || this.isFront()
+
+        fun ScanType.toUploadDestination(
+            shouldShowTakePhoto: Boolean,
+            shouldShowChoosePhoto: Boolean
+        ) =
+            when (this) {
+                ScanType.ID_FRONT ->
+                    IDUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
+                ScanType.ID_BACK ->
+                    IDUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
+                ScanType.DL_FRONT ->
+                    DriverLicenseUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
+                ScanType.DL_BACK ->
+                    DriverLicenseUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
+                ScanType.PASSPORT ->
+                    PassportUploadDestination(shouldShowTakePhoto, shouldShowChoosePhoto, true)
+                ScanType.SELFIE -> {
+                    throw IllegalArgumentException("SELFIE doesn't support upload")
+                }
+            }
+
+        fun ScanType.toScanDestination() =
+            when (this) {
+                ScanType.ID_FRONT ->
+                    IDScanDestination(
+                        shouldStartFromBack = false,
+                        shouldPopUpToDocSelection = true
+                    )
+                ScanType.ID_BACK ->
+                    IDScanDestination(
+                        shouldStartFromBack = true,
+                        shouldPopUpToDocSelection = true
+                    )
+                ScanType.DL_FRONT ->
+                    DriverLicenseScanDestination(
+                        shouldStartFromBack = false,
+                        shouldPopUpToDocSelection = true
+                    )
+                ScanType.DL_BACK ->
+                    DriverLicenseScanDestination(
+                        shouldStartFromBack = true,
+                        shouldPopUpToDocSelection = true
+                    )
+                ScanType.PASSPORT ->
+                    PassportScanDestination(
+                        shouldStartFromBack = false,
+                        shouldPopUpToDocSelection = true
+                    )
+                ScanType.SELFIE ->
+                    SelfieDestination
+            }
     }
 }

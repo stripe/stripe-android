@@ -12,7 +12,7 @@ import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import org.mockito.kotlin.mock
@@ -161,7 +161,7 @@ internal object PaymentSheetFixtures {
         )
 
     internal val COMPOSE_FRAGMENT_ARGS
-        get() = FormFragmentArguments(
+        get() = FormArguments(
             PaymentMethod.Type.Bancontact.code,
             showCheckbox = true,
             showCheckboxControlledFields = true,

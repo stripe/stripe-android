@@ -43,8 +43,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.getBorderStrokeWidth
-import com.stripe.android.ui.core.paymentsColors
+import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.getBorderStrokeWidth
+import com.stripe.android.uicore.stripeColors
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -55,7 +56,7 @@ fun OTPElementUI(
     modifier: Modifier = Modifier,
     colors: OTPElementColors = OTPElementColors(
         selectedBorder = MaterialTheme.colors.primary,
-        placeholder = MaterialTheme.paymentsColors.placeholderText
+        placeholder = MaterialTheme.stripeColors.placeholderText
     ),
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
@@ -84,7 +85,7 @@ fun OTPElementUI(
                     color = if (isSelected) {
                         colors.selectedBorder
                     } else {
-                        MaterialTheme.paymentsColors.componentBorder
+                        MaterialTheme.stripeColors.componentBorder
                     }
                 )
             ) {
@@ -139,10 +140,10 @@ fun OTPElementUI(
                     modifier = textFieldModifier,
                     enabled = enabled,
                     textStyle = MaterialTheme.typography.h2.copy(
-                        color = MaterialTheme.paymentsColors.onComponent,
+                        color = MaterialTheme.stripeColors.onComponent,
                         textAlign = TextAlign.Center
                     ),
-                    cursorBrush = SolidColor(MaterialTheme.paymentsColors.textCursor),
+                    cursorBrush = SolidColor(MaterialTheme.stripeColors.textCursor),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = element.controller.keyboardType
                     ),
@@ -171,9 +172,9 @@ fun OTPElementUI(
                             enabled = enabled,
                             interactionSource = remember { MutableInteractionSource() },
                             colors = TextFieldDefaults.textFieldColors(
-                                textColor = MaterialTheme.paymentsColors.onComponent,
+                                textColor = MaterialTheme.stripeColors.onComponent,
                                 backgroundColor = Color.Transparent,
-                                cursorColor = MaterialTheme.paymentsColors.textCursor,
+                                cursorColor = MaterialTheme.stripeColors.textCursor,
                                 focusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,

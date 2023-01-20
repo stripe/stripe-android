@@ -32,7 +32,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.PaymentsThemeForLink
+import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
@@ -41,11 +41,12 @@ import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.progressIndicatorTestTag
-import com.stripe.android.ui.core.elements.PhoneNumberCollectionSection
-import com.stripe.android.ui.core.elements.PhoneNumberController
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldController
-import com.stripe.android.ui.core.elements.TextFieldSection
+import com.stripe.android.ui.core.elements.EmailConfig
+import com.stripe.android.ui.core.elements.NameConfig
+import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
+import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.elements.TextFieldSection
 
 @Preview
 @Composable
@@ -54,9 +55,9 @@ private fun SignUpBodyPreview() {
         Surface {
             SignUpBody(
                 merchantName = "Example, Inc.",
-                emailController = SimpleTextFieldController.createEmailSectionController("email"),
+                emailController = EmailConfig.createController("email"),
                 phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
-                nameController = SimpleTextFieldController.createNameSectionController("My Name"),
+                nameController = NameConfig.createController("My Name"),
                 signUpState = SignUpState.InputtingPhoneOrName,
                 isReadyToSignUp = false,
                 requiresNameCollection = true,
@@ -125,7 +126,7 @@ internal fun SignUpBody(
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onSecondary
         )
-        PaymentsThemeForLink {
+        StripeThemeForLink {
             EmailCollectionSection(
                 enabled = true,
                 emailController = emailController,
@@ -143,7 +144,7 @@ internal fun SignUpBody(
         }
         AnimatedVisibility(visible = signUpState == SignUpState.InputtingPhoneOrName) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                PaymentsThemeForLink {
+                StripeThemeForLink {
                     PhoneNumberCollectionSection(
                         enabled = true,
                         phoneNumberController = phoneNumberController,

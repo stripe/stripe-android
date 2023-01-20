@@ -9,9 +9,8 @@ import com.stripe.android.link.model.Navigator
 import com.stripe.android.link.model.PaymentDetailsFixtures
 import com.stripe.android.link.ui.wallet.PaymentDetailsResult
 import com.stripe.android.ui.core.elements.IdentifierSpec
-import com.stripe.android.ui.core.forms.FormFieldEntry
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -27,7 +26,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class CardEditViewModelTest {
     private val linkAccount = mock<LinkAccount>().apply {

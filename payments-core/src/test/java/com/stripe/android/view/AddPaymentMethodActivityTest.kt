@@ -23,7 +23,6 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
@@ -41,7 +40,6 @@ import kotlin.test.Test
 /**
  * Test class for [AddPaymentMethodActivity].
  */
-@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class AddPaymentMethodActivityTest {
     private val testDispatcher = StandardTestDispatcher()

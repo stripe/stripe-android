@@ -4,7 +4,15 @@ import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.InputController
+import com.stripe.android.uicore.elements.SectionFieldErrorController
+import com.stripe.android.uicore.elements.TextFieldConfig
+import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.elements.TextFieldIcon
+import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.elements.TextFieldStateConstants
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine

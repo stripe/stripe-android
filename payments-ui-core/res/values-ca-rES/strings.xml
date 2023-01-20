@@ -38,36 +38,29 @@
   <string name="address_label_suburb">Suburbi</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">Poble o municipi</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="address_search_content_description">Cerca</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Feu <num_installments/> pagaments sense interessos de <installment_price/> amb <img/>]]></string>
   <!-- Text for back button -->
   <string name="back">Tornar</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Adreça de facturació</string>
-  <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">Aquest camp no pot estar en blanc.</string>
-  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Canviar</string>
   <!-- Caption for Email field on address form -->
   <string name="email">Correu electrònic</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">L\'adreça electrònica no és vàlida.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">Banc EPS</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="form_label_optional">%s (opcional)</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="iban_incomplete">L\'BAN és incomplet.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">L\'IBAN és incorrecte.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="iban_invalid_country">L\'IBAN no és vàlid, %s no és un codi de país compatible.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">El teu IBAN ha de començar amb un codi de país de dues lletres.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">Bank iDeal</string>
-  <!-- Error description for incomplete phone number -->
-  <string name="incomplete_phone_number">Número de telèfon incomplet</string>
+  <string name="invalid_email_address">Adreça electrònica no vàlida: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Compra ara o paga més endavant amb Klarna.</string>
   <!-- Klarna pay later copy -->

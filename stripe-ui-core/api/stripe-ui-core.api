@@ -5,6 +5,106 @@ public final class com/stripe/android/uicore/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/uicore/StripeThemeKt {
+	public static final fun getLocalColors ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun getLocalShapes ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun getLocalTypography ()Landroidx/compose/runtime/ProvidableCompositionLocal;
+	public static final fun getStripeColors (Landroidx/compose/material/MaterialTheme;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/uicore/StripeColors;
+	public static final fun getStripeShapes (Landroidx/compose/material/MaterialTheme;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/uicore/StripeShapes;
+}
+
+public final class com/stripe/android/uicore/elements/BillingSpecKt {
+}
+
+public final class com/stripe/android/uicore/elements/ComposableSingletons$SectionUIKt {
+	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$SectionUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/uicore/elements/DropdownConfig$DefaultImpls {
+	public static fun getTinyMode (Lcom/stripe/android/uicore/elements/DropdownConfig;)Z
+}
+
+public final class com/stripe/android/uicore/elements/DropdownFieldUIKt {
+}
+
+public final class com/stripe/android/uicore/elements/H6TextKt {
+}
+
+public final class com/stripe/android/uicore/elements/PhoneNumberElementUIKt {
+}
+
+public final class com/stripe/android/uicore/elements/SectionUIKt {
+}
+
+public final class com/stripe/android/uicore/elements/TextFieldController$DefaultImpls {
+	public static fun getEnabled (Lcom/stripe/android/uicore/elements/TextFieldController;)Z
+}
+
+public abstract class com/stripe/android/uicore/elements/TextFieldStateConstants$Error : com/stripe/android/uicore/elements/TextFieldState {
+	public static final field $stable I
+	public synthetic fun <init> (I[Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (I[Ljava/lang/Object;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getError ()Lcom/stripe/android/uicore/elements/FieldError;
+	protected fun getErrorMessageResId ()I
+	protected fun getFormatArgs ()[Ljava/lang/Object;
+	public fun isFull ()Z
+	public fun isValid ()Z
+}
+
+public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Blank : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/uicore/elements/TextFieldStateConstants$Error$Blank;
+	public fun isBlank ()Z
+	public fun shouldShowError (Z)Z
+}
+
+public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Incomplete : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
+	public static final field $stable I
+	public fun <init> (I)V
+	public fun isBlank ()Z
+	public fun shouldShowError (Z)Z
+}
+
+public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Invalid : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
+	public static final field $stable I
+	public fun <init> (I[Ljava/lang/Object;)V
+	public synthetic fun <init> (I[Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun isBlank ()Z
+	public fun shouldShowError (Z)Z
+}
+
+public abstract class com/stripe/android/uicore/elements/TextFieldStateConstants$Valid : com/stripe/android/uicore/elements/TextFieldState {
+	public static final field $stable I
+	public fun getError ()Lcom/stripe/android/uicore/elements/FieldError;
+	public fun isBlank ()Z
+	public fun isValid ()Z
+	public fun shouldShowError (Z)Z
+}
+
+public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Valid$Full : com/stripe/android/uicore/elements/TextFieldStateConstants$Valid {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/uicore/elements/TextFieldStateConstants$Valid$Full;
+	public fun isFull ()Z
+}
+
+public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Valid$Limitless : com/stripe/android/uicore/elements/TextFieldStateConstants$Valid {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/uicore/elements/TextFieldStateConstants$Valid$Limitless;
+	public fun isFull ()Z
+}
+
+public final class com/stripe/android/uicore/elements/TextFieldStateKt {
+}
+
+public final class com/stripe/android/uicore/elements/TextFieldUIKt {
+	public static final fun AnimatedIcons (Ljava/util/List;ZLandroidx/compose/runtime/Composer;I)V
+	public static final fun TextField-ndPIYpw (Lcom/stripe/android/uicore/elements/TextFieldController;ZILandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;IILandroidx/compose/runtime/Composer;II)V
+	public static final fun TextFieldSection-uGujYS0 (Lcom/stripe/android/uicore/elements/TextFieldController;IZLandroidx/compose/ui/Modifier;Ljava/lang/Integer;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+}
+
 public final class com/stripe/android/uicore/image/ComposableSingletons$StripeImageKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/image/ComposableSingletons$StripeImageKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;

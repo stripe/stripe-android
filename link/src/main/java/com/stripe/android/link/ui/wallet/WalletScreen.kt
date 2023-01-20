@@ -47,7 +47,7 @@ import com.stripe.android.link.R
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.HorizontalPadding
-import com.stripe.android.link.theme.PaymentsThemeForLink
+import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.BottomSheetContent
@@ -71,8 +71,8 @@ import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionElementUI
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextElement
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldController
+import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.text.Html
 import kotlinx.coroutines.flow.flowOf
 import java.util.UUID
@@ -379,7 +379,7 @@ internal fun CardDetailsRecollectionForm(
         R.string.wallet_recollect_cvc_error
     }
 
-    PaymentsThemeForLink {
+    StripeThemeForLink {
         Column(modifier) {
             ErrorText(
                 text = stringResource(errorTextResId),

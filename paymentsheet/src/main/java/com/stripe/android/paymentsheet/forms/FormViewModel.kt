@@ -9,7 +9,7 @@ import com.stripe.android.core.injection.NonFallbackInjector
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.FormFragmentArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
 import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
@@ -20,7 +20,6 @@ import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.ui.core.forms.resources.ResourceRepository
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -40,16 +39,15 @@ import javax.inject.Provider
  * @param: layout - this contains the visual layout of the fields on the screen used by [Form]
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
-@FlowPreview
 internal class FormViewModel @Inject internal constructor(
     context: Context,
-    formFragmentArguments: FormFragmentArguments,
+    formArguments: FormArguments,
     lpmResourceRepository: ResourceRepository<LpmRepository>,
     addressResourceRepository: ResourceRepository<AddressRepository>,
     val showCheckboxFlow: Flow<Boolean>
 ) : ViewModel() {
     internal class Factory(
-        val config: FormFragmentArguments,
+        val config: FormArguments,
         val showCheckboxFlow: Flow<Boolean>,
         private val injector: NonFallbackInjector
     ) : ViewModelProvider.Factory, NonFallbackInjectable {
@@ -60,7 +58,7 @@ internal class FormViewModel @Inject internal constructor(
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             injector.inject(this)
             return subComponentBuilderProvider.get()
-                .formFragmentArguments(config)
+                .formArguments(config)
                 .showCheckboxFlow(showCheckboxFlow)
                 .build().viewModel as T
         }
@@ -69,17 +67,17 @@ internal class FormViewModel @Inject internal constructor(
     val elementsFlow = flowOf(
         TransformSpecToElements(
             addressResourceRepository = addressResourceRepository,
-            initialValues = formFragmentArguments.getInitialValuesMap(),
-            amount = formFragmentArguments.amount,
-            saveForFutureUseInitialValue = formFragmentArguments.showCheckboxControlledFields,
-            merchantName = formFragmentArguments.merchantName,
+            initialValues = formArguments.getInitialValuesMap(),
+            amount = formArguments.amount,
+            saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
+            merchantName = formArguments.merchantName,
             context = context,
-            shippingValues = formFragmentArguments.shippingDetails
-                ?.toIdentifierMap(formFragmentArguments.billingDetails)
+            shippingValues = formArguments.shippingDetails
+                ?.toIdentifierMap(formArguments.billingDetails)
         ).transform(
             requireNotNull(
                 lpmResourceRepository.getRepository()
-                    .fromCode(formFragmentArguments.paymentMethodCode)
+                    .fromCode(formArguments.paymentMethodCode)
             ).formSpec.items
         )
     )
@@ -132,9 +130,7 @@ internal class FormViewModel @Inject internal constructor(
     private val showingMandate =
         combine(
             hiddenIdentifiers,
-            elementsFlow.map {
-                it ?: emptyList()
-            }
+            elementsFlow,
         ) { hiddenIdentifiers, formElements ->
             formElements.filterIsInstance<MandateTextElement>().firstOrNull()?.let { mandate ->
                 !hiddenIdentifiers.contains(mandate.identifier)

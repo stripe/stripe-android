@@ -1,7 +1,10 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.forms.FormFieldEntry
+import com.stripe.android.uicore.elements.InputController
+import com.stripe.android.uicore.elements.SectionFieldErrorController
+import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map

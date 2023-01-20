@@ -11,8 +11,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.progressIndicatorTestTag
-import com.stripe.android.ui.core.elements.PhoneNumberController
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
+import com.stripe.android.ui.core.elements.EmailConfig
+import com.stripe.android.ui.core.elements.NameConfig
+import com.stripe.android.uicore.elements.PhoneNumberController
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -123,11 +124,11 @@ internal class SignUpScreenTest {
         DefaultLinkTheme {
             SignUpBody(
                 merchantName = "Example, Inc.",
-                emailController = SimpleTextFieldController
-                    .createEmailSectionController(""),
+                emailController = EmailConfig
+                    .createController(""),
                 phoneNumberController = PhoneNumberController.createPhoneNumberController(),
-                nameController = SimpleTextFieldController
-                    .createNameSectionController(null),
+                nameController = NameConfig
+                    .createController(null),
                 signUpState = signUpState,
                 isReadyToSignUp = isReadyToSignUp,
                 requiresNameCollection = requiresNameCollection,

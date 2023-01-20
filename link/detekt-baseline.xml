@@ -26,7 +26,6 @@
     <ID>MatchingDeclarationName:WalletPaymentMethodMenu.kt$WalletPaymentMethodMenuItem : LinkMenuItem</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$val d = delegate ?: throw IllegalStateException("Cannot run onActivity since the activity hasn't been launched.")</ID>
-    <ID>MaxLineLength:StripeIntentFixtures.kt$StripeIntentFixtures$url</ID>
     <ID>TooManyFunctions:DefaultLinkEventsReporter.kt$DefaultLinkEventsReporter : LinkEventsReporter</ID>
     <ID>TooManyFunctions:LinkAccountManager.kt$LinkAccountManager</ID>
     <ID>TooManyFunctions:LinkApiRepository.kt$LinkApiRepository : LinkRepository</ID>

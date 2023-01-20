@@ -1,0 +1,35 @@
+appId: com.stripe.android.financialconnections.example
+---
+- launchApp
+# Android specific: Navigate to example
+- tapOn: "Playground"
+- tapOn:
+      id: "Native_checkbox"
+- tapOn:
+      id: "Test_checkbox"
+- tapOn:
+      id: "Token_checkbox"
+- tapOn: "Connect Accounts!"
+# Common: web AuthFlow - connect OAuth institution
+- extendedWaitUntil:
+    visible: "Agree"
+    timeout: 30000
+- tapOn: "Enter account details manually instead"
+- assertVisible: "Enter bank account details"
+- tapOn:
+    id: "RoutingInput"
+- inputText: "110000000"
+- back
+- scroll
+- tapOn:
+    id: "AccountInput"
+- inputText: "000123456789"
+- back
+- scroll
+- tapOn:
+    id: "ConfirmAccountInput"
+- inputText: "000123456789"
+- back
+- tapOn: "Continue"
+- tapOn: "Done"
+- assertVisible: ".*Completed!.*"

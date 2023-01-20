@@ -38,36 +38,29 @@
   <string name="address_label_suburb">Ngoại ô</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">Làng hoặc thị trấn</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="address_search_content_description">Tìm kiếm</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[Trả bằng <num_installments/> khoản thanh toán không lãi suất là <installment_price/> bằng <img/>]]></string>
   <!-- Text for back button -->
   <string name="back">Quay lại</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Địa chỉ thanh toán</string>
-  <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">Trường này không được bỏ trống.</string>
-  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Thay đổi</string>
   <!-- Caption for Email field on address form -->
   <string name="email">Email</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">Email của quý vị không hợp lệ.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">Ngân hàng EPS</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="form_label_optional">%s (tùy chọn)</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="iban_incomplete">IBAN quý vị đã nhập chưa đầy đủ.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">IBAN quý vị đã nhập không hợp lệ.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="iban_invalid_country">IBAN quý vị đã nhập không hợp lệ, \"%s\" không phải là mã quốc gia được hỗ trợ.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">IBAN của quý vị phải bắt đầu bằng mã quốc gia gồm hai chữ cái.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">Ngân hàng iDEAL</string>
-  <!-- Error description for incomplete phone number -->
-  <string name="incomplete_phone_number">Số điện thoại chưa đầy đủ</string>
+  <string name="invalid_email_address">Địa chỉ email không hợp lệ: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Mua ngay hoặc thanh toán sau bằng Klarna.</string>
   <!-- Klarna pay later copy -->

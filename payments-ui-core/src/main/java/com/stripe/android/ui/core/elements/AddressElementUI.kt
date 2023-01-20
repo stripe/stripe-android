@@ -9,8 +9,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.ui.core.paymentsColors
-import com.stripe.android.ui.core.paymentsShapes
+import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeShapes
 
 @Composable
 internal fun AddressElementUI(
@@ -34,10 +34,10 @@ internal fun AddressElementUI(
                 )
                 if (index != fieldList.lastIndex) {
                     Divider(
-                        color = MaterialTheme.paymentsColors.componentDivider,
-                        thickness = MaterialTheme.paymentsShapes.borderStrokeWidth.dp,
+                        color = MaterialTheme.stripeColors.componentDivider,
+                        thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
                         modifier = Modifier.padding(
-                            horizontal = MaterialTheme.paymentsShapes.borderStrokeWidth.dp
+                            horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
                         )
                     )
                 }

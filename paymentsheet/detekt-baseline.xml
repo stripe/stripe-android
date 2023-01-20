@@ -2,7 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>EmptyDefaultConstructor:PaymentSheetAddPaymentMethodFragment.kt$PaymentSheetAddPaymentMethodFragment$()</ID>
     <ID>EmptyFunctionBlock:BottomSheetController.kt$BottomSheetController.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:PrimaryButtonAnimator.kt$PrimaryButtonAnimator.&lt;no name provided>${ }</ID>
     <ID>ForbiddenComment:PaymentOptionFactory.kt$PaymentOptionFactory$// TODO: Should use labelResource paymentMethodCreateParams or extension function</ID>
@@ -12,13 +11,14 @@
     <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
     <ID>LargeClass:PaymentSheetActivityTest.kt$PaymentSheetActivityTest</ID>
     <ID>LargeClass:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest</ID>
+    <ID>LongMethod:AddPaymentMethod.kt$@Composable private fun AddPaymentMethod( sheetViewModel: BaseSheetViewModel, )</ID>
     <ID>LongMethod:AddressElementActivity.kt$AddressElementActivity$@OptIn(ExperimentalAnimationApi::class) override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel)</ID>
-    <ID>LongMethod:BaseAddPaymentMethodFragment.kt$BaseAddPaymentMethodFragment$@Composable internal fun AddPaymentMethod( showCheckboxFlow: MutableStateFlow&lt;Boolean> )</ID>
     <ID>LongMethod:BaseSheetActivity.kt$BaseSheetActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
-    <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@ExperimentalCoroutinesApi @Test fun `Verify params are set when element address fields are complete`()</ID>
-    <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@ExperimentalCoroutinesApi @Test fun `Verify params are set when required address fields are complete`()</ID>
+    <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
+    <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
     <ID>LongMethod:InputAddressScreen.kt$@Composable internal fun InputAddressScreen( injector: NonFallbackInjector )</ID>
+    <ID>LongMethod:PaymentElement.kt$@Composable internal fun PaymentElement( sheetViewModel: BaseSheetViewModel, enabled: Boolean, supportedPaymentMethods: List&lt;LpmRepository.SupportedPaymentMethod>, selectedItem: LpmRepository.SupportedPaymentMethod, showLinkInlineSignup: Boolean, linkPaymentLauncher: LinkPaymentLauncher, showCheckboxFlow: Flow&lt;Boolean>, onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit, onLinkSignupStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit, formArguments: FormArguments, onFormFieldValuesChanged: (FormFieldValues?) -> Unit, )</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentOptionsAdapter.kt$@Composable internal fun PaymentOptionUi( viewWidth: Dp, isSelected: Boolean, isEditing: Boolean, isEnabled: Boolean, iconRes: Int, @DrawableRes labelIcon: Int? = null, labelText: String = "", removePmDialogTitle: String = "", description: String, onRemoveListener: (() -> Unit)? = null, onRemoveAccessibilityDescription: String = "", onItemSelectedListener: (() -> Unit) )</ID>
     <ID>LongMethod:PaymentSheetActivity.kt$PaymentSheetActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
@@ -43,26 +43,14 @@
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$viewModel.paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$val d = delegate ?: throw IllegalStateException("Cannot run onActivity since the activity hasn't been launched.")</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$certificate</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$hosted_voucher_url</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$message</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$native_data</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$root_certificate_authorities</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$stripe_js</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$three_ds_method_url</ID>
-    <ID>MaxLineLength:PaymentIntentFixtures.kt$PaymentIntentFixtures$url</ID>
-    <ID>MaxLineLength:PaymentOptionsViewModelTestInjection.kt$PaymentOptionsViewModelTestInjection$LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext&lt;Application>().resources))</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.Address$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.BillingDetails$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.Configuration$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.GooglePayConfiguration$*</ID>
     <ID>MaxLineLength:PaymentSheetActivityTest.kt$PaymentSheetActivityTest$fun</ID>
-    <ID>MaxLineLength:PaymentSheetAddPaymentMethodFragmentTest.kt$PaymentSheetAddPaymentMethodFragmentTest.Companion$LpmRepository(LpmRepository.LpmRepositoryArguments(ApplicationProvider.getApplicationContext&lt;Application>().resources))</ID>
     <ID>MaxLineLength:PaymentSheetEventTest.kt$PaymentSheetEventTest$paymentSelection = PaymentSelection.New.Card(PaymentMethodCreateParamsFixtures.DEFAULT_CARD, mock(), mock())</ID>
     <ID>MaxLineLength:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$fun</ID>
-    <ID>MaxLineLength:PrimaryButtonTest.kt$PrimaryButtonTest$primaryButton.setAppearanceConfiguration(PaymentsThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))</ID>
-    <ID>MaxLineLength:SetupIntentFixtures.kt$SetupIntentFixtures$message</ID>
-    <ID>MaxLineLength:SetupIntentFixtures.kt$SetupIntentFixtures$url</ID>
+    <ID>MaxLineLength:PrimaryButtonTest.kt$PrimaryButtonTest$primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))</ID>
     <ID>MaxLineLength:StripeIntentRepositoryTest.kt$StripeIntentRepositoryTest$fun</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$* This will generate payment intent scenarios for all combinations of customers, lpm types in the intent, shipping, and SFU states</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())</ID>
@@ -74,7 +62,6 @@
     <ID>NestedBlockDepth:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$private fun generatePaymentIntentScenarios(): List&lt;PaymentIntentTestInput></ID>
     <ID>ReturnCount:AddressUtils.kt$internal fun CharSequence.levenshtein(other: CharSequence): Int</ID>
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
-    <ID>TooManyFunctions:FlowControllerComponent.kt$FlowControllerComponent$Builder</ID>
     <ID>TooManyFunctions:PaymentOption.kt$DelegateDrawable : Drawable</ID>
     <ID>TooManyFunctions:PaymentOptionsViewModel.kt$PaymentOptionsViewModel : BaseSheetViewModel</ID>
     <ID>TooManyFunctions:PaymentSheetViewModel.kt$PaymentSheetViewModel : BaseSheetViewModel</ID>
@@ -82,12 +69,6 @@
     <ID>UnnecessaryAbstractClass:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule$PaymentSheetLauncherModule</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
     <ID>UnusedPrivateMember:BillingAddressViewTest.kt$BillingAddressViewTest.Companion$private val FRANCE = CountryCode.create("FR")</ID>
-    <ID>UnusedPrivateMember:PaymentSheetAddPaymentMethodFragmentTest.kt$PaymentSheetAddPaymentMethodFragmentTest$private fun convertPixelsToDp(px: Int, resources: Resources): Dp</ID>
-    <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$// a fatal error protected val _fatal = MutableLiveData&lt;Throwable>()</ID>
-    <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _isGooglePayReady = savedStateHandle.getLiveData&lt;Boolean>(SAVE_GOOGLE_PAY_READY)</ID>
-    <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting internal val _isLinkEnabled = MutableLiveData&lt;Boolean>()</ID>
-    <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$@VisibleForTesting(otherwise = VisibleForTesting.PROTECTED) internal val _paymentMethods = savedStateHandle.getLiveData&lt;List&lt;PaymentMethod>>(SAVE_PAYMENT_METHODS)</ID>
-    <ID>VariableNaming:BaseSheetViewModel.kt$BaseSheetViewModel$protected val _linkConfiguration = savedStateHandle.getLiveData&lt;LinkPaymentLauncher.Configuration>(LINK_CONFIGURATION)</ID>
     <ID>VariableNaming:PaymentOptionsViewModel.kt$PaymentOptionsViewModel$@VisibleForTesting internal val _paymentOptionResult = MutableLiveData&lt;PaymentOptionResult>()</ID>
     <ID>VariableNaming:PaymentSheetViewModel.kt$PaymentSheetViewModel$@VisibleForTesting internal val _viewState = MutableLiveData&lt;PaymentSheetViewState>(null)</ID>
   </CurrentIssues>

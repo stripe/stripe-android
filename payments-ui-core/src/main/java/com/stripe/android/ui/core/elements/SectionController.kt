@@ -2,6 +2,9 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import com.stripe.android.uicore.elements.Controller
+import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.SectionFieldErrorController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 

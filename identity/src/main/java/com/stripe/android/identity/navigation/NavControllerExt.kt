@@ -6,7 +6,6 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.UNEXPECTED_ROUTE
 import com.stripe.android.identity.networking.models.Requirement.Companion.matchesFromRoute
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirementError
-import com.stripe.android.identity.utils.fragmentIdToRequirement
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 /**
@@ -68,15 +67,15 @@ internal fun NavController.navigateToFinalErrorScreen(
 }
 
 /**
- * ID of all screens that collect front/back of a document.
+ * Route of all screens that collect front/back of a document.
  */
-private val DOCUMENT_UPLOAD_SCREENS = setOf(
-    R.id.IDUploadFragment,
-    R.id.passportUploadFragment,
-    R.id.driverLicenseUploadFragment,
-    R.id.IDScanFragment,
-    R.id.passportScanFragment,
-    R.id.driverLicenseScanFragment
+private val DOCUMENT_UPLOAD_ROUTES = setOf(
+    IDUploadDestination.ROUTE.route,
+    DriverLicenseUploadDestination.ROUTE.route,
+    PassportUploadDestination.ROUTE.route,
+    IDScanDestination.ROUTE.route,
+    DriverLicenseScanDestination.ROUTE.route,
+    PassportScanDestination.ROUTE.route
 )
 
 /**
@@ -86,18 +85,18 @@ private val DOCUMENT_UPLOAD_SCREENS = setOf(
  * Then pop the screen by calling [NavController.navigateUp].
  */
 internal fun NavController.clearDataAndNavigateUp(identityViewModel: IdentityViewModel): Boolean {
-    currentBackStackEntry?.destination?.id?.let { currentEntryId ->
-        if (DOCUMENT_UPLOAD_SCREENS.contains(currentEntryId)) {
+    currentBackStackEntry?.destination?.route?.let { currentEntryRoute ->
+        if (DOCUMENT_UPLOAD_ROUTES.contains(currentEntryRoute)) {
             identityViewModel.clearUploadedData()
         }
-        currentEntryId.fragmentIdToRequirement().forEach(identityViewModel::clearCollectedData)
+        currentEntryRoute.routeToRequirement().forEach(identityViewModel::clearCollectedData)
     }
 
-    previousBackStackEntry?.destination?.id?.let { previousEntryId ->
-        if (DOCUMENT_UPLOAD_SCREENS.contains(previousEntryId)) {
+    previousBackStackEntry?.destination?.route?.let { previousEntryRoute ->
+        if (DOCUMENT_UPLOAD_ROUTES.contains(previousEntryRoute)) {
             identityViewModel.clearUploadedData()
         }
-        previousEntryId.fragmentIdToRequirement().forEach(identityViewModel::clearCollectedData)
+        previousEntryRoute.routeToRequirement().forEach(identityViewModel::clearCollectedData)
     }
 
     return navigateUp()

@@ -29,6 +29,8 @@ internal data class PartnerAccountsList(
 
     @SerialName(value = "repair_authorization_enabled") val repairAuthorizationEnabled: Boolean? = null,
 
+    @SerialName(value = "skip_account_selection") val skipAccountSelection: Boolean? = null,
+
     @SerialName(value = "total_count") val totalCount: Int? = null
 
 )

@@ -6,7 +6,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AdministrativeAreaConfig
 import com.stripe.android.ui.core.elements.AdministrativeAreaElement
-import com.stripe.android.ui.core.elements.DropdownFieldController
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.PostalCodeConfig
 import com.stripe.android.ui.core.elements.RowController
@@ -15,8 +14,9 @@ import com.stripe.android.ui.core.elements.SectionFieldElement
 import com.stripe.android.ui.core.elements.SectionSingleFieldElement
 import com.stripe.android.ui.core.elements.SimpleTextElement
 import com.stripe.android.ui.core.elements.SimpleTextFieldConfig
-import com.stripe.android.ui.core.elements.SimpleTextFieldController
-import com.stripe.android.ui.core.elements.TextFieldConfig
+import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.elements.TextFieldConfig
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString

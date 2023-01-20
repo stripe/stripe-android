@@ -38,36 +38,29 @@
   <string name="address_label_suburb">Banliyö</string>
   <!-- Used to describe an address field. -->
   <string name="address_label_village_township">Köy veya İlçe</string>
+  <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
+  <string name="address_search_content_description">Ara</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="afterpay_clearpay_message"><![CDATA[<img/> ile <installment_price/> tutarında faizsiz <num_installments/> taksitle ödeyin]]></string>
   <!-- Text for back button -->
   <string name="back">Geri</string>
   <!-- Billing address section title for card form entry. -->
   <string name="billing_details">Fatura adresi</string>
-  <!-- Used when a required field is blank and submit is clicked. -->
-  <string name="blank_and_required">Bu alan boş bırakılamaz.</string>
-  <!-- Used for accessibility to indicate that when you press the dropdown arrow on a form (such as a country or bank), it will bring up a menu to allow you to change the value. -->
-  <string name="change">Değiştir</string>
   <!-- Caption for Email field on address form -->
   <string name="email">E-posta</string>
   <!-- Error message when email is invalid -->
   <string name="email_is_invalid">E-postanız geçersiz.</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="eps_bank">EPS Bank</string>
-  <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
-  <string name="form_label_optional">%s (isteğe bağlı)</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="iban_incomplete">Girdiğiniz IBAN eksik.</string>
-  <!-- An error message displayed when the customer's iban is invalid. -->
-  <string name="iban_invalid">Girdiğiniz IBAN geçersiz.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
   <string name="iban_invalid_country">Girdiğiniz IBAN geçersiz. \"%s\" desteklenen bir ülke kodu değil.</string>
   <!-- An error message displayed when the IBAN does not start with a two-letter country code. -->
   <string name="iban_invalid_start">IBAN numaranız iki harfli bir ülke koduyla başlamalıdır.</string>
   <!-- iDEAL bank section title for iDEAL form entry. -->
   <string name="ideal_bank">iDEAL Bank</string>
-  <!-- Error description for incomplete phone number -->
-  <string name="incomplete_phone_number">Eksik telefon numarası</string>
+  <string name="invalid_email_address">Geçersiz e-posta adresi: %s</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="klarna_buy_now_pay_later">Şimdi satın alın veya daha sonra Klarna ile ödeyin.</string>
   <!-- Klarna pay later copy -->

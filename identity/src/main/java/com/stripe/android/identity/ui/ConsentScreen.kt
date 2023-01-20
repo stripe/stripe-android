@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,7 +36,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.android.material.composethemeadapter.MdcTheme
 import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_CONSENT
@@ -52,6 +52,7 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.getDrawableFromUri
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import com.stripe.android.uicore.text.Html
+import kotlinx.coroutines.launch
 
 internal const val TITLE_TAG = "Title"
 internal const val TIME_ESTIMATE_TAG = "TimeEstimate"
@@ -71,36 +72,37 @@ internal fun ConsentScreen(
 ) {
     val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
-    MdcTheme {
-        CheckVerificationPageAndCompose(
-            verificationPageResource = verificationPageState,
-            onError = {
-                identityViewModel.errorCause.postValue(it)
-                navController.navigateToErrorScreenWithDefaultValues(context)
+    CheckVerificationPageAndCompose(
+        verificationPageResource = verificationPageState,
+        onError = {
+            identityViewModel.errorCause.postValue(it)
+            navController.navigateToErrorScreenWithDefaultValues(context)
+        }
+    ) {
+        val verificationPage = remember { it }
+        if (verificationPage.isUnsupportedClient()) {
+            LaunchedEffect(Unit) {
+                fallbackUrlLauncher.launchFallbackUrl(verificationPage.fallbackUrl)
             }
-        ) {
-            val verificationPage = remember { it }
-            if (verificationPage.isUnsupportedClient()) {
-                LaunchedEffect(Unit) {
-                    fallbackUrlLauncher.launchFallbackUrl(verificationPage.fallbackUrl)
+        } else {
+            LaunchedEffect(Unit) {
+                identityViewModel.updateAnalyticsState { oldState ->
+                    oldState.copy(
+                        requireSelfie = verificationPage.requireSelfie()
+                    )
                 }
-            } else {
-                LaunchedEffect(Unit) {
-                    identityViewModel.updateAnalyticsState { oldState ->
-                        oldState.copy(
-                            requireSelfie = verificationPage.requireSelfie()
-                        )
-                    }
-                }
-                ScreenTransitionLaunchedEffect(
-                    identityViewModel = identityViewModel,
-                    screenName = SCREEN_NAME_CONSENT
-                )
-                SuccessUI(
-                    identityViewModel.verificationArgs.brandLogo,
-                    verificationPage,
-                    onConsentAgreed = {
+            }
+            ScreenTransitionLaunchedEffect(
+                identityViewModel = identityViewModel,
+                screenName = SCREEN_NAME_CONSENT
+            )
+            SuccessUI(
+                identityViewModel.verificationArgs.brandLogo,
+                verificationPage,
+                onConsentAgreed = {
+                    coroutineScope.launch {
                         identityViewModel.postVerificationPageDataAndMaybeNavigate(
                             navController,
                             CollectedDataParam(
@@ -108,8 +110,10 @@ internal fun ConsentScreen(
                             ),
                             ConsentDestination.ROUTE.route
                         )
-                    },
-                    onConsentDeclined = {
+                    }
+                },
+                onConsentDeclined = {
+                    coroutineScope.launch {
                         identityViewModel.postVerificationPageDataAndMaybeNavigate(
                             navController,
                             CollectedDataParam(
@@ -118,8 +122,8 @@ internal fun ConsentScreen(
                             ConsentDestination.ROUTE.route
                         )
                     }
-                )
-            }
+                }
+            )
         }
     }
 }

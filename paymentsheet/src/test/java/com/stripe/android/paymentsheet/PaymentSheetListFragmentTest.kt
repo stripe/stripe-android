@@ -5,9 +5,11 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.fragment.app.testing.withFragment
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -17,24 +19,28 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.Companion.addressRepository
-import com.stripe.android.paymentsheet.PaymentSheetAddPaymentMethodFragmentTest.Companion.lpmRepository
+import com.stripe.android.paymentsheet.PaymentSheetViewModelInjectionTest.Companion.addressRepository
+import com.stripe.android.paymentsheet.PaymentSheetViewModelInjectionTest.Companion.lpmRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.Loading
+import com.stripe.android.paymentsheet.state.GooglePayState
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_GOOGLE_PAY_STATE
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PAYMENT_METHODS
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SAVED_SELECTION
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection() {
+internal class PaymentSheetListFragmentTest : BasePaymentSheetViewModelInjectionTest() {
     @InjectorKey
     private val injectorKey: String = "PaymentSheetListFragmentTest"
 
@@ -73,41 +79,12 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     }
 
     @Test
-    fun `recovers edit state when shown`() {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
-        createScenario(
-            initialState = Lifecycle.State.INITIALIZED
-        ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
-            fragment.initializePaymentOptions(paymentMethods = listOf(paymentMethod))
-        }.moveToState(Lifecycle.State.STARTED).onFragment { fragment ->
-            assertThat(fragment.isEditing).isFalse()
-            fragment.isEditing = true
-        }.recreate().onFragment {
-            assertThat(it.isEditing).isTrue()
-        }
-    }
-
-    @Test
-    fun `When last item is deleted then edit menu item is hidden`() {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
-        createScenario().onFragment { fragment ->
-            fragment.isEditing = true
-            fragment.adapter.items = fragment.adapter.items.dropLast(1)
-            fragment.deletePaymentMethod(PaymentOptionsItem.SavedPaymentMethod(paymentMethod))
-            assertThat(fragment.isEditing).isFalse()
-        }
-    }
-
-    @Test
     fun `sets up adapter`() {
         createScenario(
             initialState = Lifecycle.State.INITIALIZED
         ).moveToState(Lifecycle.State.CREATED).onFragment { fragment ->
             fragment.initializePaymentOptions(
-                isGooglePayReady = false,
-                isLinkEnabled = false,
+                isGooglePayReady = GooglePayState.NotAvailable,
             )
         }.moveToState(Lifecycle.State.RESUMED).onFragment {
             idleLooper()
@@ -160,7 +137,10 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     @Test
     fun `updates selection on click`() {
         val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val selectedItem = PaymentOptionsItem.SavedPaymentMethod(savedPaymentMethod)
+        val selectedItem = PaymentOptionsItem.SavedPaymentMethod(
+            displayName = "Card",
+            paymentMethod = savedPaymentMethod,
+        )
 
         createScenario().onFragment {
             val activityViewModel = activityViewModel(it)
@@ -176,26 +156,19 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
     }
 
     @Test
-    fun `posts transition when add card clicked`() {
-        createScenario().onFragment {
-            val activityViewModel = activityViewModel(it)
-            assertThat(activityViewModel.transition.value?.peekContent()).isNull()
+    fun `posts transition when add card clicked`() = runTest {
+        val scenario = createScenario()
 
-            idleLooper()
+        val viewModel = scenario.withFragment { activityViewModel(this) }
+        val recyclerView = scenario.withFragment { recyclerView(this) }
 
-            val adapter = recyclerView(it).adapter as PaymentOptionsAdapter
+        viewModel.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(Loading)
+
+            val adapter = recyclerView.adapter as PaymentOptionsAdapter
             adapter.addCardClickListener()
-            idleLooper()
 
-            assertThat(activityViewModel.transition.value?.peekContent())
-                .isEqualTo(BaseSheetViewModel.TransitionTarget.AddAnotherPaymentMethod)
-        }
-    }
-
-    @Test
-    fun `started fragment should report onShowExistingPaymentOptions() event`() {
-        createScenario().onFragment {
-            verify(eventReporter).onShowExistingPaymentOptions(any(), any())
+            assertThat(awaitItem()).isEqualTo(AddAnotherPaymentMethod)
         }
     }
 
@@ -279,14 +252,12 @@ internal class PaymentSheetListFragmentTest : PaymentSheetViewModelTestInjection
 
     private fun PaymentSheetListFragment.initializePaymentOptions(
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
-        isGooglePayReady: Boolean = false,
-        isLinkEnabled: Boolean = false,
+        isGooglePayReady: GooglePayState = GooglePayState.NotAvailable,
         savedSelection: SavedSelection = SavedSelection.None,
     ) {
-        sheetViewModel._paymentMethods.value = paymentMethods
-        sheetViewModel._isGooglePayReady.value = isGooglePayReady
-        sheetViewModel._isLinkEnabled.value = isLinkEnabled
-        sheetViewModel.savedStateHandle["saved_selection"] = savedSelection
+        sheetViewModel.savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods
+        sheetViewModel.savedStateHandle[SAVE_GOOGLE_PAY_STATE] = isGooglePayReady
+        sheetViewModel.savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection
     }
 
     private companion object {

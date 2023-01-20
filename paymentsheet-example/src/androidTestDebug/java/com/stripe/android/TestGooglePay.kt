@@ -26,6 +26,7 @@ import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.TestWatcher
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.utils.initializedLpmRepository
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
@@ -138,12 +139,8 @@ class TestGooglePay {
     }
 
     companion object {
-        private val lpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
-                InstrumentationRegistry.getInstrumentation().targetContext.resources
-            )
-        ).apply {
-            forceUpdate(this.supportedPaymentMethods, null)
-        }
+        private val lpmRepository = initializedLpmRepository(
+            context = InstrumentationRegistry.getInstrumentation().targetContext,
+        )
     }
 }

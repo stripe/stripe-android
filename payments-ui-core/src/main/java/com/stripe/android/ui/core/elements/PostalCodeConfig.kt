@@ -5,6 +5,10 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.TextFieldConfig
+import com.stripe.android.uicore.elements.TextFieldIcon
+import com.stripe.android.uicore.elements.TextFieldState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlin.math.max
 

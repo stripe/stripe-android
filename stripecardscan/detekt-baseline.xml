@@ -64,7 +64,6 @@
     <ID>NestedBlockDepth:SSD.kt$internal fun rearrangeOCRArray( locations: Array&lt;FloatArray>, featureMapSizes: OcrFeatureMapSizes, numberOfPriors: Int, locationsPerPrior: Int ): Array&lt;FloatArray></ID>
     <ID>NestedBlockDepth:Yolo.kt$internal fun processYoloLayer( layer: Array&lt;Array&lt;FloatArray>>, anchors: Array&lt;Pair&lt;Int, Int>>, imageSize: Size, numClasses: Int, confidenceThreshold: Float ): List&lt;DetectionBox></ID>
     <ID>ReturnCount:CardExpiry.kt$internal fun isValidExpiry(day: String?, month: String, year: String): Boolean</ID>
-    <ID>ReturnCount:Fetcher.kt$WebFetcher$override suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedData</ID>
     <ID>ReturnCount:RequiresMatchingCard.kt$RequiresMatchingCard$fun compareToRequiredCard(pan: String?): CardMatchResult</ID>
     <ID>ReturnCount:SSD.kt$internal fun determineLayoutAndFilter( detectedBoxes: List&lt;DetectionBox>, verticalOffset: Float ): List&lt;DetectionBox></ID>
     <ID>SwallowedException:Device.kt$t: Throwable</ID>
@@ -90,7 +89,6 @@
     <ID>TooGenericExceptionThrown:RetryTest.kt$RetryTest$throw RuntimeException()</ID>
     <ID>TooManyFunctions:ArrayExtensions.kt$com.stripe.android.stripecardscan.framework.util.ArrayExtensions.kt</ID>
     <ID>TooManyFunctions:CardImageVerificationActivity.kt$CardImageVerificationActivity : SimpleScanActivitySimpleScanStateful</ID>
-    <ID>TooManyFunctions:CardScanActivity.kt$CardScanActivity : ScanActivitySimpleScanStateful</ID>
     <ID>TooManyFunctions:CardScanFragment.kt$CardScanFragment : ScanFragmentSimpleScanStateful</ID>
     <ID>TooManyFunctions:PaymentCardUtils.kt$com.stripe.android.stripecardscan.payment.card.PaymentCardUtils.kt</ID>
     <ID>TooManyFunctions:RectForm.kt$com.stripe.android.stripecardscan.framework.ml.ssd.RectForm.kt</ID>

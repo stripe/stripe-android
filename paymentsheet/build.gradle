@@ -4,7 +4,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'shot'
-apply plugin: 'app.cash.paparazzi'
+apply plugin: 'dev.chrisbanes.paparazzi'
 
 dependencies {
     implementation project(":link")
@@ -127,6 +127,10 @@ android {
                 maxHeapSize = "1024m"
             }
         }
+
+        kotlinOptions {
+            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+        }
     }
 
     composeOptions {
@@ -135,6 +139,10 @@ android {
 
     lintOptions {
         disable "UnrememberedMutableState"
+    }
+
+    kotlinOptions {
+        freeCompilerArgs += ["-opt-in=kotlinx.coroutines.FlowPreview"]
     }
 }
 

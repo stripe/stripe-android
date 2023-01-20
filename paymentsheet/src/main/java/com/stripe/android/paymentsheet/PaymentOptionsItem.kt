@@ -21,8 +21,9 @@ internal sealed class PaymentOptionsItem {
     /**
      * Represents a [PaymentMethod] that is already saved and attached to the current customer.
      */
-    data class SavedPaymentMethod(
-        val paymentMethod: PaymentMethod
+    data class SavedPaymentMethod constructor(
+        val displayName: String,
+        val paymentMethod: PaymentMethod,
     ) : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.SavedPaymentMethod
 

@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.ui.core.PaymentsThemeDefaults
+import com.stripe.android.uicore.StripeThemeDefaults
 
 internal sealed class PaymentSheetEvent : AnalyticsEvent {
     abstract val additionalParams: Map<String, Any>
@@ -47,16 +47,16 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                         ),
                     FIELD_CORNER_RADIUS to (
                         configuration?.appearance?.shapes?.cornerRadiusDp
-                            != PaymentsThemeDefaults.shapes.cornerRadius
+                            != StripeThemeDefaults.shapes.cornerRadius
                         ),
                     FIELD_BORDER_WIDTH to (
                         configuration?.appearance?.shapes?.borderStrokeWidthDp
-                            != PaymentsThemeDefaults.shapes.borderStrokeWidth
+                            != StripeThemeDefaults.shapes.borderStrokeWidth
                         ),
                     FIELD_FONT to (configuration?.appearance?.typography?.fontResId != null),
                     FIELD_SIZE_SCALE_FACTOR to (
                         configuration?.appearance?.typography?.sizeScaleFactor
-                            != PaymentsThemeDefaults.typography.fontSizeMultiplier
+                            != StripeThemeDefaults.typography.fontSizeMultiplier
                         ),
                     FIELD_PRIMARY_BUTTON to primaryButtonConfigMap
                 )

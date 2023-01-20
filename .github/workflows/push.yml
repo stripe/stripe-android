@@ -10,7 +10,8 @@ jobs:
   upload-identity:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/stripe_setup
       - name: Generate Android release bundle for Identity example app
         run: ./gradlew :identity-example:bundleRelease
       - name: Upload artifact to Emerge

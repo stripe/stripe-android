@@ -94,7 +94,8 @@ internal class AccountPickerViewModel @Inject constructor(
             }.sortedBy { it.account.allowSelection.not() }
 
             AccountPickerState.Payload(
-                skipAccountSelection = activeAuthSession.skipAccountSelection == true,
+                skipAccountSelection = partnerAccountList.skipAccountSelection == true ||
+                    activeAuthSession.skipAccountSelection == true,
                 accounts = accounts,
                 selectionMode = if (manifest.singleAccount) SelectionMode.RADIO else SelectionMode.CHECKBOXES,
                 accessibleData = AccessibleDataCalloutModel(

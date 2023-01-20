@@ -32,8 +32,6 @@
   <string name="address_label_city_optional">Thành phố (tùy chọn)</string>
   <!-- Label for input requesting county where input is optional , used for UK based addresses -->
   <string name="address_label_county_optional">Quận (tùy chọn)</string>
-  <!-- Label for input requesting phone number, used for all locations -->
-  <string name="address_label_phone_number">Số điện thoại</string>
   <!-- Label for input requesting phone number where input is optional, used for all locations -->
   <string name="address_label_phone_number_optional">Số điện thoại (tùy chọn)</string>
   <!-- Label for input requesting postal code where input is optional, used for Canada based addresses -->
