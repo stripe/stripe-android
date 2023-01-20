@@ -15,13 +15,10 @@ suspend fun <Response : StripeModel> executeRequestWithModelJsonParser(
     responseJsonParser: ModelJsonParser<Response>,
 ): Response {
     return runCatching {
-        stripeNetworkClient.executeRequest(
-            request
-        )
+        stripeNetworkClient.executeRequest(request)
     }.fold(
         onSuccess = { response ->
             if (response.isError) {
-                // TODO Parse the response code and throw different exceptions
                 throw APIException(
                     stripeError = stripeErrorJsonParser.parse(response.responseJson()),
                     requestId = response.requestId?.value,

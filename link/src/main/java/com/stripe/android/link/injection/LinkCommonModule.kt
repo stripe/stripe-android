@@ -9,8 +9,8 @@ import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
-import com.stripe.android.repository.LinkApiService
-import com.stripe.android.repository.LinkApiServiceImpl
+import com.stripe.android.repository.ConsumersApiService
+import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -33,7 +33,7 @@ internal abstract class LinkCommonModule {
         fun bindLinkService(
             logger: Logger,
             @IOContext workContext: CoroutineContext,
-        ): LinkApiService = LinkApiServiceImpl(
+        ): ConsumersApiService = ConsumersApiServiceImpl(
             appInfo = Stripe.appInfo,
             sdkVersion = ApiVersion(betas = emptySet()).code,
             apiVersion = Stripe.API_VERSION,

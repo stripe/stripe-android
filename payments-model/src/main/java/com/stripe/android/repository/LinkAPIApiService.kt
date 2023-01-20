@@ -11,7 +11,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-interface LinkApiService {
+interface ConsumersApiService {
 
     suspend fun lookupConsumerSession(
         email: String?,
@@ -21,12 +21,12 @@ interface LinkApiService {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-class LinkApiServiceImpl(
+class ConsumersApiServiceImpl(
     private val stripeNetworkClient: StripeNetworkClient,
     apiVersion: String,
     sdkVersion: String = StripeSdkVersion.VERSION,
     appInfo: AppInfo?
-) : LinkApiService {
+) : ConsumersApiService {
 
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
