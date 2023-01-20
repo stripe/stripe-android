@@ -14,6 +14,7 @@ import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -34,6 +35,7 @@ import java.util.Locale
 @RunWith(RobolectricTestRunner::class)
 class LinkApiRepositoryTest {
     private val stripeRepository = mock<StripeRepository>()
+    private val consumersApiService = mock<ConsumersApiService>()
 
     private val paymentIntent = mock<PaymentIntent>().apply {
         whenever(clientSecret).thenReturn("secret")
@@ -43,6 +45,7 @@ class LinkApiRepositoryTest {
         publishableKeyProvider = { PUBLISHABLE_KEY },
         stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
         stripeRepository = stripeRepository,
+        consumersApiService = consumersApiService,
         workContext = Dispatchers.IO,
         locale = Locale.US
     )
@@ -53,7 +56,7 @@ class LinkApiRepositoryTest {
         val cookie = "cookie1"
         linkRepository.lookupConsumer(email, cookie)
 
-        verify(stripeRepository).lookupConsumerSession(
+        verify(consumersApiService).lookupConsumerSession(
             eq(email),
             eq(cookie),
             eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
@@ -63,7 +66,7 @@ class LinkApiRepositoryTest {
     @Test
     fun `lookupConsumer returns successful result`() = runTest {
         val consumerSessionLookup = mock<ConsumerSessionLookup>()
-        whenever(stripeRepository.lookupConsumerSession(any(), any(), any()))
+        whenever(consumersApiService.lookupConsumerSession(any(), any(), any()))
             .thenReturn(consumerSessionLookup)
 
         val result = linkRepository.lookupConsumer("email", "cookie")
@@ -74,7 +77,7 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `lookupConsumer catches exception and returns failure`() = runTest {
-        whenever(stripeRepository.lookupConsumerSession(any(), any(), any()))
+        whenever(consumersApiService.lookupConsumerSession(any(), any(), any()))
             .thenThrow(RuntimeException("error"))
 
         val result = linkRepository.lookupConsumer("email", "cookie")

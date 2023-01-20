@@ -18,14 +18,14 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @Module
-internal abstract class LinkCommonModule {
+internal interface LinkCommonModule {
     @Binds
     @Singleton
-    abstract fun bindLinkRepository(linkApiRepository: LinkApiRepository): LinkRepository
+    fun bindLinkRepository(linkApiRepository: LinkApiRepository): LinkRepository
 
     @Binds
     @Singleton
-    abstract fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
+    fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
 
     companion object {
         @Provides
