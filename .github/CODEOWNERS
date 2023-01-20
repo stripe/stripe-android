@@ -1,13 +1,12 @@
 # Global - fallback to this group if the following groups don't match
-*   @jaynewstrom-stripe @tillh-stripe @ccen-stripe @awush-stripe @jameswoo-stripe @carlosmuvi-stripe
+* @stripe/stripe-android-sdk-reviewers
 
 # Payments SDK
 /payments/ @jaynewstrom-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
-/payments-model/ @jaynewstrom-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
 /paymentsheet/ @jaynewstrom-stripe @tillh-stripe @jameswoo-stripe
 /wechatpay/ @jaynewstrom-stripe @tillh-stripe @ccen-stripe @jameswoo-stripe
 /stripe-test-e2e/ @jaynewstrom-stripe @tillh-stripe @jameswoo-stripe
-/link/ @jaynewstrom-stripe @tillh-stripe @jameswoo-stripe
+/link/ @jaynewstrom-stripe @tillh-stripe @jameswoo-stripe @ccen-stripe @carlosmuvi-stripe
 /payment-method-messaging/ @jaynewstrom-stripe @tillh-stripe @jameswoo-stripe
 
 # CardScan SDK
@@ -24,3 +23,6 @@
 
 # Shared modules
 /camera-core/ @ccen-stripe @awush-stripe
+
+# Configuration files
+*.gradle @stripe/stripe-android-sdk-reviewers
