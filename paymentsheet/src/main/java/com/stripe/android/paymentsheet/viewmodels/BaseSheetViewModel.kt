@@ -521,9 +521,16 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
+    abstract val shouldCompleteLinkFlowInline: Boolean
+
     fun payWithLinkInline(linkConfig: LinkPaymentLauncher.Configuration, userInput: UserInput?) {
         viewModelScope.launch {
-            linkHandler.payWithLinkInline(linkConfig, userInput, selection.value)
+            linkHandler.payWithLinkInline(
+                configuration = linkConfig,
+                userInput = userInput,
+                paymentSelection = selection.value,
+                shouldCompleteLinkInlineFlow = shouldCompleteLinkFlowInline,
+            )
         }
     }
 

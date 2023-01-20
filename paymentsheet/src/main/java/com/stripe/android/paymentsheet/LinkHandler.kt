@@ -132,6 +132,7 @@ internal class LinkHandler @Inject constructor(
         configuration: LinkPaymentLauncher.Configuration,
         userInput: UserInput?,
         paymentSelection: PaymentSelection?,
+        shouldCompleteLinkInlineFlow: Boolean,
     ) {
         (paymentSelection as? PaymentSelection.New.Card?)?.paymentMethodCreateParams?.let { params ->
             savedStateHandle[SAVE_PROCESSING] = true
@@ -143,7 +144,7 @@ internal class LinkHandler @Inject constructor(
                     completeLinkInlinePayment(
                         configuration,
                         params,
-                        userInput is UserInput.SignIn
+                        userInput is UserInput.SignIn && shouldCompleteLinkInlineFlow
                     )
                 }
                 AccountStatus.VerificationStarted,
@@ -154,7 +155,7 @@ internal class LinkHandler @Inject constructor(
                         completeLinkInlinePayment(
                             configuration,
                             params,
-                            userInput is UserInput.SignIn
+                            userInput is UserInput.SignIn && shouldCompleteLinkInlineFlow
                         )
                     } else {
                         savedStateHandle[SAVE_PROCESSING] = false
@@ -168,7 +169,12 @@ internal class LinkHandler @Inject constructor(
                         linkLauncher.signInWithUserInput(configuration, userInput).fold(
                             onSuccess = {
                                 // If successful, the account was fetched or created, so try again
-                                payWithLinkInline(configuration, userInput, paymentSelection)
+                                payWithLinkInline(
+                                    configuration = configuration,
+                                    userInput = userInput,
+                                    paymentSelection = paymentSelection,
+                                    shouldCompleteLinkInlineFlow = shouldCompleteLinkInlineFlow,
+                                )
                             },
                             onFailure = {
                                 _processingState.emit(ProcessingState.Error(it.localizedMessage))
@@ -197,9 +203,9 @@ internal class LinkHandler @Inject constructor(
     private suspend fun completeLinkInlinePayment(
         configuration: LinkPaymentLauncher.Configuration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
-        isReturningUser: Boolean
+        shouldCompleteLinkInlineFlow: Boolean
     ) {
-        if (isReturningUser) {
+        if (shouldCompleteLinkInlineFlow) {
             launchLink(configuration, launchedDirectly = false, paymentMethodCreateParams)
         } else {
             _processingState.emit(
