@@ -10,7 +10,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class ConsumerSession internal constructor(
+data class ConsumerSession(
     val clientSecret: String,
     val emailAddress: String,
     val redactedPhoneNumber: String,
@@ -21,7 +21,7 @@ data class ConsumerSession internal constructor(
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class VerificationSession internal constructor(
+    data class VerificationSession constructor(
         val type: SessionType,
         val state: SessionState
     ) : StripeModel {
