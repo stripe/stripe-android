@@ -56,9 +56,12 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -120,6 +123,7 @@ internal class PaymentOptionsActivityTest {
 
     @AfterTest
     fun cleanup() {
+        Dispatchers.resetMain()
         WeakMapInjectorRegistry.clear()
     }
 
@@ -420,6 +424,8 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `ContinueButton should go back to initial state after updating selection`() {
+        Dispatchers.setMain(testDispatcher)
+
         val scenario = activityScenario()
         scenario.launch(
             createIntent()
