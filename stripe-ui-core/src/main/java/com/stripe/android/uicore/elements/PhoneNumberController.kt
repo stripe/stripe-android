@@ -1,6 +1,9 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +18,7 @@ class PhoneNumberController constructor(
     initiallySelectedCountryCode: String? = null,
     overrideCountryCodes: Set<String> = emptySet(),
     override val showOptionalLabel: Boolean = false
-) : InputController {
+) : InputController, SectionFieldComposable {
     override val label = flowOf(R.string.address_label_phone_number)
 
     private val _fieldValue = MutableStateFlow(initialPhoneNumber)
@@ -156,5 +159,21 @@ class PhoneNumberController constructor(
                 )
             }
         }
+    }
+
+    @Composable
+    override fun ComposeUI(
+        enabled: Boolean,
+        field: SectionFieldElement,
+        modifier: Modifier,
+        hiddenIdentifiers: Set<IdentifierSpec>,
+        lastTextFieldIdentifier: IdentifierSpec?,
+        nextFocusDirection: FocusDirection,
+        previousFocusDirection: FocusDirection
+    ) {
+        PhoneNumberElementUI(
+            enabled,
+            this
+        )
     }
 }

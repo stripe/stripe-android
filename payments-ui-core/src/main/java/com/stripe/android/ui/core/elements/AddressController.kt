@@ -2,6 +2,12 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionFieldComposable
+import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionFieldErrorController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -15,7 +21,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressController(
     val fieldsFlowable: Flow<List<SectionFieldElement>>
-) : SectionFieldErrorController {
+) : SectionFieldErrorController, SectionFieldComposable {
     @StringRes
     val label: Int? = null
 
@@ -25,5 +31,23 @@ class AddressController(
         ) { fieldErrors ->
             fieldErrors.filterNotNull().firstOrNull()
         }
+    }
+
+    @Composable
+    override fun ComposeUI(
+        enabled: Boolean,
+        field: SectionFieldElement,
+        modifier: Modifier,
+        hiddenIdentifiers: Set<IdentifierSpec>,
+        lastTextFieldIdentifier: IdentifierSpec?,
+        nextFocusDirection: FocusDirection,
+        previousFocusDirection: FocusDirection
+    ) {
+        AddressElementUI(
+            enabled,
+            this,
+            hiddenIdentifiers,
+            lastTextFieldIdentifier
+        )
     }
 }

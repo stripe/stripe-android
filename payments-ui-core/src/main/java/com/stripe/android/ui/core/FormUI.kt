@@ -20,7 +20,6 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElementUI
 import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.FormElement
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.MandateTextUI
 import com.stripe.android.ui.core.elements.OTPElement
@@ -31,6 +30,7 @@ import com.stripe.android.ui.core.elements.SectionElement
 import com.stripe.android.ui.core.elements.SectionElementUI
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextElementUI
+import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
 
 @Composable

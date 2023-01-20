@@ -8,6 +8,7 @@ import com.stripe.android.ui.core.address.AddressRepository
 import com.stripe.android.ui.core.elements.autocomplete.IsPlacesAvailable
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.supportedBillingCountries
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

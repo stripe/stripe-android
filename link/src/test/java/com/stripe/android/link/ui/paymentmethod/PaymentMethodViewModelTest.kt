@@ -33,9 +33,9 @@ import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.injection.FormControllerSubcomponent
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

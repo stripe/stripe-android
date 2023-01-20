@@ -29,8 +29,8 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
-import com.stripe.android.ui.core.elements.IdentifierSpec
 import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
