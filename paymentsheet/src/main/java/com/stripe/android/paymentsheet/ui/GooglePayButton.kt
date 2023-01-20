@@ -5,8 +5,29 @@ import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.isVisible
 import com.stripe.android.paymentsheet.databinding.StripeGooglePayButtonBinding
+
+@Composable
+internal fun GooglePayButton(
+    state: PrimaryButton.State?,
+    isEnabled: Boolean,
+    onPressed: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    AndroidView(
+        factory = { context -> GooglePayButton(context) },
+        update = { googlePayButton ->
+            googlePayButton.isEnabled = isEnabled
+            googlePayButton.updateState(state)
+            googlePayButton.setOnClickListener { onPressed() }
+        },
+        modifier = modifier,
+    )
+}
 
 internal class GooglePayButton @JvmOverloads constructor(
     context: Context,
