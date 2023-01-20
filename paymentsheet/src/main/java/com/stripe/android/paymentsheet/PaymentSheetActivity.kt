@@ -14,7 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -24,12 +24,11 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
-import com.stripe.android.paymentsheet.state.GooglePayState
+import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -194,34 +193,22 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
     private fun setupTopContainer() {
         setupGooglePayButton()
-        val dividerText = resources.getString(
-            if (viewModel.supportedPaymentMethods.size == 1 &&
-                viewModel.supportedPaymentMethods.map { it.code }.contains(
-                        LpmRepository.HardcodedCard.code
-                    )
-            ) {
-                R.string.stripe_paymentsheet_or_pay_with_card
-            } else {
-                R.string.stripe_paymentsheet_or_pay_using
-            }
-        )
-        viewModel.showTopContainer.observe(this) { visible ->
-            linkButton.isVisible = linkHandler.isLinkEnabled.value == true
-            googlePayButton.isVisible =
-                viewModel.googlePayState.value == GooglePayState.Available
-            topContainer.isVisible = visible
-            // We have to set the UI after we know it's visible. Setting UI on a GONE or INVISIBLE
-            // view will cause tests to hang indefinitely.
-            if (visible) {
-                googlePayDivider.apply {
-                    setViewCompositionStrategy(
-                        ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
-                    )
-                    setContent {
-                        StripeTheme {
-                            GooglePayDividerUi(dividerText)
-                        }
-                    }
+
+        viewModel.walletsContainerState.launchAndCollectIn(this) { config ->
+            linkButton.isVisible = config.showLink
+            googlePayButton.isVisible = config.showGooglePay
+            topContainer.isVisible = config.shouldShow
+        }
+
+        googlePayDivider.setContent {
+            val containerState by viewModel.walletsContainerState.collectAsState(
+                initial = WalletsContainerState(),
+            )
+
+            StripeTheme {
+                if (containerState.shouldShow) {
+                    val text = stringResource(containerState.dividerTextResource)
+                    GooglePayDividerUi(text)
                 }
             }
         }

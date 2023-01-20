@@ -119,6 +119,9 @@ internal abstract class BaseSheetViewModel(
         } ?: emptyList()
         set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value.map { it.code })
 
+    protected val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> = savedStateHandle
+        .getStateFlow(SAVE_SUPPORTED_PAYMENT_METHOD, initialValue = emptyList())
+
     /**
      * The list of saved payment methods for the current customer.
      * Value is null until it's loaded, and non-null (could be empty) after that.
