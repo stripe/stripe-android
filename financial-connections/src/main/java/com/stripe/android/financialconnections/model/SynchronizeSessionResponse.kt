@@ -92,6 +92,8 @@ internal data class DataAccessNotice(
     @SerialName("title")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val title: String,
+    @SerialName("subtitle")
+    val subtitle: String? = null,
     @SerialName("cta")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val cta: String,
