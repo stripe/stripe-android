@@ -488,7 +488,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         setContentVisible(true)
         when (result) {
             is GooglePayPaymentMethodLauncher.Result.Completed -> {
-                confirmPaymentSelection(PaymentSelection.Saved(result.paymentMethod))
+                savedStateHandle[SAVE_SELECTION] = PaymentSelection.GooglePay
+
+                confirmPaymentSelection(
+                    PaymentSelection.Saved(
+                        paymentMethod = result.paymentMethod,
+                        isGooglePay = true,
+                    )
+                )
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
                 logger.error("Error processing Google Pay payment", result.error)
