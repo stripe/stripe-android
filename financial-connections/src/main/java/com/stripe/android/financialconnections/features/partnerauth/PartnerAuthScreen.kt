@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -287,6 +289,7 @@ private fun LoadedContent(
     }
 }
 
+// TODO@carlosmuvi BANKCON-6003: remove once Backend-driven prepane is fully rolled out.
 @Composable
 private fun DefaultPrePaneContent(
     institution: FinancialConnectionsInstitution,
@@ -361,6 +364,17 @@ private fun InstitutionalPrePaneContent(
                 bottom = 24.dp
             )
     ) {
+        val bankIconModifier = Modifier
+            .size(36.dp)
+            .clip(RoundedCornerShape(6.dp))
+        StripeImage(
+            url = content.institutionIcon.default ?: "",
+            contentDescription = null,
+            imageLoader = LocalImageLoader.current,
+            errorContent = { InstitutionPlaceholder(bankIconModifier) },
+            modifier = bankIconModifier
+        )
+        Spacer(modifier = Modifier.size(16.dp))
         AnnotatedText(
             text = title,
             onClickableTextClick = { },
@@ -438,10 +452,24 @@ private fun InstitutionalPrePaneContent(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(
-                text = stringResource(R.string.stripe_prepane_continue),
-                textAlign = TextAlign.Center
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = content.cta.text,
+                    textAlign = TextAlign.Center
+                )
+                content.cta.icon?.default?.let {
+                    Spacer(modifier = Modifier.size(12.dp))
+                    StripeImage(
+                        url = it,
+                        contentDescription = null,
+                        imageLoader = LocalImageLoader.current,
+                        errorContent = { },
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
         }
     }
 }
