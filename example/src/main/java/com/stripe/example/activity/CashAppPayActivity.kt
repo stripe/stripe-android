@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethodCreateParams
 
 class CashAppPayActivity : StripeIntentActivity() {
@@ -59,9 +60,15 @@ class CashAppPayActivity : StripeIntentActivity() {
             CashAppPayFlow.Setup -> {
                 val params = PaymentMethodCreateParams.createCashAppPay()
 
+                val mandateData = MandateDataParams(
+                    type = MandateDataParams.Type.Online.DEFAULT,
+                )
+
                 createAndConfirmSetupIntent(
                     country = "US",
                     params = params,
+                    mandateData = mandateData,
+                    customerId = "cus_NBob79LekJhxvQ", // replace with your own customer
                     supportedPaymentMethods = "cashapp",
                 )
             }
