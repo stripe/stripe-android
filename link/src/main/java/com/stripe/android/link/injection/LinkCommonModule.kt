@@ -30,7 +30,7 @@ internal abstract class LinkCommonModule {
     companion object {
         @Provides
         @Singleton
-        fun bindLinkService(
+        fun provideConsumersApiService(
             logger: Logger,
             @IOContext workContext: CoroutineContext,
         ): ConsumersApiService = ConsumersApiServiceImpl(
