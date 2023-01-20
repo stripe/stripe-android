@@ -14,9 +14,9 @@ class StaticCardAccountRangeSource(
 ) : CardAccountRangeSource {
     override val loading: Flow<Boolean> = flowOf(false)
 
-    override suspend fun getAccountRange(
+    override suspend fun getAccountRanges(
         cardNumber: CardNumber.Unvalidated
-    ): AccountRange? {
-        return accountRanges.first(cardNumber)
+    ): Set<AccountRange> {
+        return accountRanges.filter(cardNumber).toSet()
     }
 }

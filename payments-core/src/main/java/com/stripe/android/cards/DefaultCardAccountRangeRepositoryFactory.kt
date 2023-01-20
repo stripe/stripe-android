@@ -90,9 +90,9 @@ class DefaultCardAccountRangeRepositoryFactory(
     }
 
     private class NullCardAccountRangeSource : CardAccountRangeSource {
-        override suspend fun getAccountRange(
+        override suspend fun getAccountRanges(
             cardNumber: CardNumber.Unvalidated
-        ): AccountRange? = null
+        ): Set<AccountRange>? = null
 
         override val loading: Flow<Boolean> = flowOf(false)
     }

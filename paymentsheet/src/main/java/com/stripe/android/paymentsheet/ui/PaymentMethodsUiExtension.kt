@@ -26,6 +26,7 @@ internal fun CardBrand.getCardBrandIcon(): Int = when (this) {
     CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard
     CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay
     CardBrand.Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
+    CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_unknown
 }
 
 internal fun PaymentMethod.getLabel(resources: Resources): String? = when (type) {

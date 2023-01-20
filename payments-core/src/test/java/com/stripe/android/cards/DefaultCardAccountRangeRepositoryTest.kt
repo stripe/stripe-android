@@ -201,7 +201,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
 
         // should not access remote source
         repository.getAccountRange(CardNumberFixtures.VISA)
-        verify(remoteSource, never()).getAccountRange(CardNumberFixtures.VISA)
+        verify(remoteSource, never()).getAccountRanges(CardNumberFixtures.VISA)
     }
 
     private fun createRealRepository(
@@ -235,9 +235,10 @@ internal class DefaultCardAccountRangeRepositoryTest {
     private class FakeCardAccountRangeSource(
         isLoading: Boolean = false
     ) : CardAccountRangeSource {
-        override suspend fun getAccountRange(
+
+        override suspend fun getAccountRanges(
             cardNumber: CardNumber.Unvalidated
-        ): AccountRange? {
+        ): Set<AccountRange>? {
             return null
         }
 

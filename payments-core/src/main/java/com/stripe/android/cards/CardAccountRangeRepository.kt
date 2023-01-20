@@ -10,6 +10,10 @@ interface CardAccountRangeRepository {
         cardNumber: CardNumber.Unvalidated
     ): AccountRange?
 
+    suspend fun getAccountRanges(
+        cardNumber: CardNumber.Unvalidated
+    ): Set<AccountRange>?
+
     /**
      * Flow that represents whether any of the [CardAccountRangeSource] instances are loading.
      */
