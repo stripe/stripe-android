@@ -121,6 +121,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
+    override val shouldCompleteLinkFlowInline: Boolean = false
+
     private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
         when (processingState) {
             LinkHandler.ProcessingState.Cancelled -> {

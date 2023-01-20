@@ -4,6 +4,7 @@
 
 ### PaymentSheet
 * [CHANGED][5927](https://github.com/stripe/stripe-android/pull/5927) Customers can now re-enter the autocomplete flow of the Address Element by tapping an icon in the line 1 text field.
+* [FIXED][6090](https://github.com/stripe/stripe-android/pull/6090) Fixed an issue where adding a payment method to a Link account didn’t work when using `PaymentSheet.FlowController`.
 
 ## 20.18.0 - 2023-01-17
 ### Payments
