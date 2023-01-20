@@ -69,12 +69,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -168,7 +165,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-    internal val walletsContainerState: StateFlow<WalletsContainerState> = combine(
+    internal val walletsContainerState: Flow<WalletsContainerState> = combine(
         linkHandler.isLinkEnabled,
         googlePayState,
         isReadyEvents.asFlow(),
@@ -183,11 +180,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 R.string.stripe_paymentsheet_or_pay_using
             },
         )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = WalletsContainerState(),
-    )
+    }
 
     private var paymentLauncher: StripePaymentLauncher? = null
 

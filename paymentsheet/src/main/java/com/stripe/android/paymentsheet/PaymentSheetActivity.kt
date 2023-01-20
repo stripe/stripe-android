@@ -24,6 +24,7 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContract
 import com.stripe.android.paymentsheet.databinding.ActivityPaymentSheetBinding
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.state.WalletsContainerState
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.GooglePayDividerUi
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -200,11 +201,13 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         googlePayDivider.setContent {
-            val topContainerState by viewModel.walletsContainerState.collectAsState()
+            val containerState by viewModel.walletsContainerState.collectAsState(
+                initial = WalletsContainerState(),
+            )
 
             StripeTheme {
-                if (topContainerState.shouldShow) {
-                    val text = stringResource(topContainerState.dividerTextResource)
+                if (containerState.shouldShow) {
+                    val text = stringResource(containerState.dividerTextResource)
                     GooglePayDividerUi(text)
                 }
             }
