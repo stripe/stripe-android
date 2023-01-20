@@ -12,6 +12,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -33,20 +34,35 @@ class CashAppPayActivity : StripeIntentActivity() {
 
         setContent {
             var flow by remember { mutableStateOf(CashAppPayFlow.Payment) }
-            val isProcessing by viewModel.inProgress.observeAsState()
-            val status by viewModel.status.observeAsState()
+            var customerId by remember { mutableStateOf("") }
+
+            val isProcessing by viewModel.inProgress.observeAsState(initial = false)
+            val status by viewModel.status.observeAsState(initial = "")
+
+            val canSubmit = remember(flow, customerId) {
+                flow == CashAppPayFlow.Payment || customerId.isNotBlank()
+            }
 
             CashAppPayScreen(
                 flow = flow,
-                isProcessing = isProcessing ?: false,
-                status = status.orEmpty(),
-                onFlowTypeChanged = { flow = it },
-                onButtonPressed = { payWithCashAppPay(flow) },
+                customerId = customerId,
+                isProcessing = isProcessing,
+                canSubmit = canSubmit,
+                status = status,
+                onFlowTypeChanged = {
+                    viewModel.status.postValue("")
+                    flow = it
+                },
+                onCustomerIdChanged = { customerId = it },
+                onButtonPressed = { payWithCashAppPay(flow, customerId) },
             )
         }
     }
 
-    private fun payWithCashAppPay(flow: CashAppPayFlow) {
+    private fun payWithCashAppPay(
+        flow: CashAppPayFlow,
+        customerId: String,
+    ) {
         when (flow) {
             CashAppPayFlow.Payment -> {
                 val params = PaymentMethodCreateParams.createCashAppPay()
@@ -68,7 +84,7 @@ class CashAppPayActivity : StripeIntentActivity() {
                     country = "US",
                     params = params,
                     mandateData = mandateData,
-                    customerId = "cus_NBob79LekJhxvQ", // replace with your own customer
+                    customerId = customerId,
                     supportedPaymentMethods = "cashapp",
                 )
             }
@@ -84,9 +100,12 @@ private enum class CashAppPayFlow {
 @Composable
 private fun CashAppPayScreen(
     flow: CashAppPayFlow,
+    customerId: String,
     isProcessing: Boolean,
+    canSubmit: Boolean,
     status: String,
     onFlowTypeChanged: (CashAppPayFlow) -> Unit,
+    onCustomerIdChanged: (String) -> Unit,
     onButtonPressed: () -> Unit,
 ) {
     MaterialTheme {
@@ -102,10 +121,21 @@ private fun CashAppPayScreen(
                 }
             }
 
+            if (flow == CashAppPayFlow.Setup) {
+                OutlinedTextField(
+                    value = customerId,
+                    onValueChange = onCustomerIdChanged,
+                    placeholder = { Text("Customer ID (required)") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                )
+            }
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Button(
                     onClick = onButtonPressed,
-                    enabled = !isProcessing,
+                    enabled = !isProcessing && canSubmit,
                     modifier = Modifier.padding(16.dp),
                 ) {
                     val text = when (flow) {
