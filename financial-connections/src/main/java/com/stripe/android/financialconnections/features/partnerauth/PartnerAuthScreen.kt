@@ -364,17 +364,19 @@ private fun InstitutionalPrePaneContent(
                 bottom = 24.dp
             )
     ) {
-        val bankIconModifier = Modifier
-            .size(36.dp)
-            .clip(RoundedCornerShape(6.dp))
-        StripeImage(
-            url = content.institutionIcon.default ?: "",
-            contentDescription = null,
-            imageLoader = LocalImageLoader.current,
-            errorContent = { InstitutionPlaceholder(bankIconModifier) },
-            modifier = bankIconModifier
-        )
-        Spacer(modifier = Modifier.size(16.dp))
+        content.institutionIcon?.default?.let {
+            val institutionIconModifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(6.dp))
+            StripeImage(
+                url = it,
+                contentDescription = null,
+                imageLoader = LocalImageLoader.current,
+                errorContent = { InstitutionPlaceholder(institutionIconModifier) },
+                modifier = institutionIconModifier
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+        }
         AnnotatedText(
             text = title,
             onClickableTextClick = { },

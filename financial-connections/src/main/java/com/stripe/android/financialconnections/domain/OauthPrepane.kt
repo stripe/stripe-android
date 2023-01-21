@@ -31,7 +31,7 @@ internal data class OauthPrepane(
     @SerialName("cta")
     val cta: Cta,
     @SerialName("institution_icon")
-    val institutionIcon: Image,
+    val institutionIcon: Image? = null,
     @SerialName("partner_notice")
     val partnerNotice: PartnerNotice? = null,
     @SerialName("data_access_notice")
@@ -85,6 +85,6 @@ internal sealed class Entry : Parcelable {
 
     companion object {
         internal const val TYPE_TEXT = "text"
-        internal const val TYPE_IMAGE = "image.account"
+        internal const val TYPE_IMAGE = "image"
     }
 }

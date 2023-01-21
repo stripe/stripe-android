@@ -14,7 +14,7 @@ internal object EntrySerializer :
         return when (element.typeValue) {
             Entry.TYPE_TEXT -> Entry.Text.serializer()
             Entry.TYPE_IMAGE -> Entry.Image.serializer()
-            else -> throw IllegalArgumentException("Unknown type!")
+            else -> throw IllegalArgumentException("Unknown type! ${element.typeValue}")
         }
     }
 
