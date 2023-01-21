@@ -258,18 +258,22 @@ private fun LoadedContent(
 ) {
     when (authenticationStatus) {
         is Uninitialized -> when (payload.authSession.isOAuth) {
-            true -> if (payload.authSession.display == null) DefaultPrePaneContent(
-                institution = payload.institution,
-                flow = payload.authSession.flow,
-                isStripeDirect = payload.isStripeDirect,
-                showPartnerDisclosure = payload.authSession.showPartnerDisclosure ?: false,
-                onContinueClick = onContinueClick
-            ) else InstitutionalPrePaneContent(
-                onClickableTextClick = onClickableTextClick,
-                isStripeDirect = payload.isStripeDirect,
-                onContinueClick = onContinueClick,
-                content = payload.authSession.display.text.oauthPrepane,
-            )
+            true -> if (payload.authSession.display == null) {
+                DefaultPrePaneContent(
+                    institution = payload.institution,
+                    flow = payload.authSession.flow,
+                    isStripeDirect = payload.isStripeDirect,
+                    showPartnerDisclosure = payload.authSession.showPartnerDisclosure ?: false,
+                    onContinueClick = onContinueClick
+                )
+            } else {
+                InstitutionalPrePaneContent(
+                    onClickableTextClick = onClickableTextClick,
+                    isStripeDirect = payload.isStripeDirect,
+                    onContinueClick = onContinueClick,
+                    content = payload.authSession.display.text.oauthPrepane,
+                )
+            }
 
             false -> LoadingContent(
                 stringResource(id = R.string.stripe_partnerauth_loading_title),
