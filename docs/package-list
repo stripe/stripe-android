@@ -83,6 +83,7 @@ com.stripe.android.core.storage
 com.stripe.android.core.utils
 com.stripe.android.core.version
 module:stripe-ui-core
+com.stripe.android.uicore
 com.stripe.android.uicore.elements
 com.stripe.android.uicore.format
 com.stripe.android.uicore.forms
