@@ -10,8 +10,7 @@ trigger_map:
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
-    - PROJECT_LOCATION: .
-    - GRADLEW_PATH: ./gradlew
+
 pipelines:
   main-trigger-pipeline:
     stages:
@@ -50,7 +49,8 @@ workflows:
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
       - cache-push@2: {}
+
 meta:
   bitrise.io:
     stack: linux-docker-android-20.04
-    machine_type_id: elite-xl
+    machine_type_id: elite
