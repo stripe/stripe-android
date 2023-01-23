@@ -4,14 +4,25 @@ default_step_lib_source: 'https://github.com/bitrise-io/bitrise-steplib.git'
 project_type: android
 trigger_map:
   - push_branch: '*'
-    workflow: primary
+    pipeline: main-trigger-pipeline
   - pull_request_source_branch: '*'
-    workflow: primary
+    pipeline: main-trigger-pipeline
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
     - PROJECT_LOCATION: .
     - GRADLEW_PATH: ./gradlew
+pipelines:
+  main-trigger-pipeline:
+    stages:
+      - stage-trigger-run-all: {}
+
+stages:
+  stage-trigger-run-all:
+    workflows:
+      - check: {}
+      - test: {}
+
 workflows:
   check:
     steps:
@@ -39,6 +50,3 @@ workflows:
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug
       - cache-push@2: {}
-meta:
-  bitrise.io:
-    machine_type_id: elite
