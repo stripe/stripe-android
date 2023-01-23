@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.success
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +27,7 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
 import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutWithAccounts
+import com.stripe.android.financialconnections.features.common.LoadingContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -48,20 +50,32 @@ internal fun SuccessScreen() {
     val state = viewModel.collectAsState()
     BackHandler(enabled = true) {}
     state.value.payload()?.let { payload ->
-        SuccessContent(
-            accessibleDataModel = payload.accessibleData,
-            disconnectUrl = payload.disconnectUrl,
-            accounts = payload.accounts.data,
-            institution = payload.institution,
-            businessName = payload.businessName,
-            loading = state.value.completeSession is Loading,
-            onDoneClick = viewModel::onDoneClick,
-            onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
-            onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
-            onDisconnectLinkClick = viewModel::onDisconnectLinkClick,
-            showLinkAnotherAccount = payload.showLinkAnotherAccount,
-            onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.SUCCESS) }
-        )
+        if (payload.skipSuccessPane) {
+            SuccessLoading()
+        } else {
+            SuccessContent(
+                accessibleDataModel = payload.accessibleData,
+                disconnectUrl = payload.disconnectUrl,
+                accounts = payload.accounts.data,
+                institution = payload.institution,
+                businessName = payload.businessName,
+                loading = state.value.completeSession is Loading,
+                onDoneClick = viewModel::onDoneClick,
+                onLinkAnotherAccountClick = viewModel::onLinkAnotherAccountClick,
+                showLinkAnotherAccount = payload.showLinkAnotherAccount,
+                onLearnMoreAboutDataAccessClick = viewModel::onLearnMoreAboutDataAccessClick,
+                onDisconnectLinkClick = viewModel::onDisconnectLinkClick
+            ) { parentViewModel.onCloseNoConfirmationClick(Pane.SUCCESS) }
+        }
+
+    }
+}
+
+@Composable
+private fun SuccessLoading() {
+    //TODO@carlosmuvi check designs for loading state.
+    Box(Modifier.fillMaxSize()) {
+        LoadingContent()
     }
 }
 
@@ -269,9 +283,9 @@ internal fun SuccessScreenPreview() {
             loading = false,
             onDoneClick = {},
             onLinkAnotherAccountClick = {},
+            showLinkAnotherAccount = true,
             onLearnMoreAboutDataAccessClick = {},
             onDisconnectLinkClick = {},
-            showLinkAnotherAccount = true,
         ) {}
     }
 }
