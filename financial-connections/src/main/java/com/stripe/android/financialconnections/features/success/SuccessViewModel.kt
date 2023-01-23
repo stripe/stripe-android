@@ -75,7 +75,6 @@ internal class SuccessViewModel @Inject constructor(
                 } else {
                     completeSession()
                 }
-
             }
         )
         onAsync(

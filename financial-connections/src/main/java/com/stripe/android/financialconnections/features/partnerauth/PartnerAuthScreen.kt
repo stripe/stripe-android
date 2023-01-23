@@ -110,8 +110,8 @@ private fun PartnerAuthScreenContent(
     ) {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> LoadingContent(
-                stringResource(id = R.string.stripe_partnerauth_loading_title),
-                stringResource(id = R.string.stripe_partnerauth_loading_desc)
+                title = stringResource(id = R.string.stripe_partnerauth_loading_title),
+                content = stringResource(id = R.string.stripe_partnerauth_loading_desc)
             )
 
             is Fail -> ErrorContent(
@@ -163,7 +163,7 @@ private fun LoadedContent(
     onSelectAnotherBank: () -> Unit
 ) {
     when (authenticationStatus) {
-        is Uninitialized -> when (payload.authSession.isOAuth ?: false) {
+        is Uninitialized -> when (payload.authSession.isOAuth) {
             true -> PrePaneContent(
                 institution = payload.institution,
                 flow = payload.authSession.flow,
@@ -173,14 +173,14 @@ private fun LoadedContent(
             )
 
             false -> LoadingContent(
-                stringResource(id = R.string.stripe_partnerauth_loading_title),
-                stringResource(id = R.string.stripe_partnerauth_loading_desc)
+                title = stringResource(id = R.string.stripe_partnerauth_loading_title),
+                content = stringResource(id = R.string.stripe_partnerauth_loading_desc)
             )
         }
 
         is Loading, is Success -> LoadingContent(
-            stringResource(id = R.string.stripe_partnerauth_loading_title),
-            stringResource(id = R.string.stripe_partnerauth_loading_desc)
+            title = stringResource(id = R.string.stripe_partnerauth_loading_title),
+            content = stringResource(id = R.string.stripe_partnerauth_loading_desc)
         )
 
         is Fail -> {

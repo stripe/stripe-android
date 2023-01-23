@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.success
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
@@ -67,15 +69,20 @@ internal fun SuccessScreen() {
                 onDisconnectLinkClick = viewModel::onDisconnectLinkClick
             ) { parentViewModel.onCloseNoConfirmationClick(Pane.SUCCESS) }
         }
-
     }
 }
 
 @Composable
 private fun SuccessLoading() {
-    //TODO@carlosmuvi check designs for loading state.
-    Box(Modifier.fillMaxSize()) {
-        LoadingContent()
+    // TODO@carlosmuvi check designs for loading state.
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(FinancialConnectionsTheme.colors.backgroundSurface)
+    ) {
+        LoadingContent(
+            modifier = Modifier.align(Alignment.Center)
+        )
     }
 }
 
