@@ -34,19 +34,28 @@ internal class PaymentOptionsStateMapper(
                 googlePayState,
                 ::Pair
             )
-        ) { _, _ ->
-            createPaymentOptionsState()
+        ) { (paymentMethods, currentSelection, initialSelection), (isLinkEnabled, googlePayState) ->
+            createPaymentOptionsState(
+                paymentMethods = paymentMethods,
+                currentSelection = currentSelection,
+                initialSelection = initialSelection,
+                isLinkEnabled = isLinkEnabled,
+                googlePayState = googlePayState,
+            )
         }
     }
 
     @Suppress("ReturnCount")
-    private fun createPaymentOptionsState(): PaymentOptionsState? {
-        val paymentMethods = paymentMethods.value ?: return null
-        val initialSelection = initialSelection.value ?: return null
-        val isLinkEnabled = isLinkEnabled.value ?: return null
-        val googlePayState = googlePayState.value
-
-        val currentSelection = currentSelection.value
+    private fun createPaymentOptionsState(
+        paymentMethods: List<PaymentMethod>?,
+        currentSelection: PaymentSelection?,
+        initialSelection: SavedSelection?,
+        isLinkEnabled: Boolean?,
+        googlePayState: GooglePayState,
+    ): PaymentOptionsState? {
+        if (paymentMethods == null) return null
+        if (initialSelection == null) return null
+        if (isLinkEnabled == null) return null
 
         return PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
