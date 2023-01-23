@@ -1,6 +1,5 @@
 package com.stripe.android.utils.screenshots
 
-import android.os.Build
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -12,15 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
-import app.cash.paparazzi.androidHome
-import app.cash.paparazzi.detectEnvironment
 import com.android.ide.common.rendering.api.SessionParams
 import com.stripe.android.uicore.StripeTheme
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import java.lang.reflect.Field
-import java.lang.reflect.Modifier as ReflectionModifier
 
 class PaparazziRule(
     vararg configOptions: Array<out PaparazziConfigOption>,
@@ -99,35 +94,7 @@ class PaparazziRule(
             deviceConfig = deviceConfig,
             // Needed to shrink the screenshot to the height of the composable
             renderingMode = SessionParams.RenderingMode.V_SCROLL,
-            // Needed to make Paparazzi work in our API 33 project for now
-            environment = detectEnvironment().copy(
-                platformDir = "${androidHome()}/platforms/android-32",
-                compileSdkVersion = 32,
-            ),
         )
-    }
-
-    companion object {
-        init {
-            makePaparazziWorkForApi33()
-        }
-    }
-}
-
-private fun makePaparazziWorkForApi33() {
-    // Temporary workaround to fix an issue with Paparazzi on API 33
-    // See: https://github.com/cashapp/paparazzi/issues/631#issuecomment-1326051546
-    val field = Build.VERSION::class.java.getField("CODENAME")
-    val newValue = "REL"
-
-    Field::class.java.getDeclaredField("modifiers").apply {
-        isAccessible = true
-        setInt(field, field.modifiers and ReflectionModifier.FINAL.inv())
-    }
-
-    field.apply {
-        isAccessible = true
-        set(null, newValue)
     }
 }
 
