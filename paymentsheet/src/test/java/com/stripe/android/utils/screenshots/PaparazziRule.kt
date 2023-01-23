@@ -2,6 +2,7 @@ package com.stripe.android.utils.screenshots
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -68,7 +69,9 @@ class PaparazziRule(
                         Surface(color = MaterialTheme.colors.surface) {
                             Box(
                                 contentAlignment = Alignment.Center,
-                                modifier = Modifier.padding(padding),
+                                modifier = Modifier
+                                    .padding(padding)
+                                    .fillMaxWidth(),
                             ) {
                                 content()
                             }
@@ -82,18 +85,15 @@ class PaparazziRule(
     }
 
     private fun createPaparazziDeviceConfig(): DeviceConfig {
-        return DeviceConfig.PIXEL_6.copy(
-            // Needed to shrink the screenshot to the height of the composable
-            screenHeight = 1,
-            softButtons = false,
-        )
+        return DeviceConfig.PIXEL_6.copy(softButtons = false)
     }
 
     private fun createPaparazzi(deviceConfig: DeviceConfig): Paparazzi {
         return Paparazzi(
             deviceConfig = deviceConfig,
             // Needed to shrink the screenshot to the height of the composable
-            renderingMode = SessionParams.RenderingMode.V_SCROLL,
+            renderingMode = SessionParams.RenderingMode.SHRINK,
+            showSystemUi = false,
         )
     }
 }
