@@ -4,18 +4,23 @@ import android.content.res.Resources
 import com.stripe.android.model.PaymentMethod
 
 internal sealed class PaymentOptionsItem {
+
     abstract val viewType: ViewType
+    abstract val isEnabledDuringEditing: Boolean
 
     object AddCard : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.AddCard
+        override val isEnabledDuringEditing: Boolean = false
     }
 
     object GooglePay : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.GooglePay
+        override val isEnabledDuringEditing: Boolean = false
     }
 
     object Link : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.Link
+        override val isEnabledDuringEditing: Boolean = false
     }
 
     /**
@@ -26,6 +31,7 @@ internal sealed class PaymentOptionsItem {
         val paymentMethod: PaymentMethod,
     ) : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.SavedPaymentMethod
+        override val isEnabledDuringEditing: Boolean = true
 
         fun getDescription(resources: Resources) = when (paymentMethod.type) {
             PaymentMethod.Type.Card -> resources.getString(

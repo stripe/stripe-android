@@ -1023,7 +1023,7 @@ public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentSh
 }
 
 public final class com/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding : androidx/viewbinding/ViewBinding {
-	public final field recycler Landroidx/recyclerview/widget/RecyclerView;
+	public final field content Landroidx/compose/ui/platform/ComposeView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/FragmentPaymentsheetPaymentMethodsListBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
 	public fun getRoot ()Landroid/widget/LinearLayout;
