@@ -12,6 +12,7 @@ import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.parcelize.Parcelize
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
+import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
@@ -195,6 +196,11 @@ data class ApiRequest internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        const val API_HOST = "https://api.stripe.com"
+        val API_TEST_HOST = AtomicReference<String?>(null)
+
+        val API_HOST: String
+            get() {
+                return API_TEST_HOST.get() ?: "https://api.stripe.com"
+            }
     }
 }
