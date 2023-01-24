@@ -10,6 +10,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,6 +21,11 @@ class PaymentOptionsTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @Before
+    fun setUp() {
+        composeTestRule.mainClock.autoAdvance = false
+    }
 
     @Test
     fun `Navigates to AddAnotherPaymentMethod screen when add card is pressed`() {
@@ -39,6 +45,8 @@ class PaymentOptionsTest {
                 onItemRemoved = {},
             )
         }
+
+        composeTestRule.mainClock.advanceTimeBy(300L)
 
         val label = "+ Add"
         val testTag = "${PAYMENT_OPTION_CARD_TEST_TAG}_$label"
@@ -77,6 +85,8 @@ class PaymentOptionsTest {
                 onItemRemoved = {},
             )
         }
+
+        composeTestRule.mainClock.advanceTimeBy(300L)
 
         val testTag = "${PAYMENT_OPTION_CARD_TEST_TAG}_Google Pay"
 
