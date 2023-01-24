@@ -3,8 +3,9 @@ package com.stripe.android.paymentsheet.forms
 import android.content.Context
 import androidx.annotation.StringRes
 import androidx.appcompat.view.ContextThemeWrapper
-import androidx.lifecycle.asLiveData
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
+import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
@@ -41,7 +42,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
@@ -98,6 +98,7 @@ internal class FormViewModelTest {
                 )
             )
         )
+
         showCheckboxFlow.emit(true)
 
         // Set all the card fields, billing is set in the args
@@ -110,26 +111,26 @@ internal class FormViewModelTest {
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.SaveForFutureUse)?.value
         ).isNotNull()
 
-        val values = mutableListOf<Boolean?>()
-        formViewModel.saveForFutureUse.asLiveData()
-            .observeForever {
-                values.add(it)
-            }
+        val receiver = formViewModel.saveForFutureUse.testIn(this)
+        assertThat(receiver.awaitItem()).isTrue()
+
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.SaveForFutureUse)?.value
         ).isEqualTo("true")
 
         formViewModel.setSaveForFutureUse(false)
 
-        assertThat(values[1]).isFalse()
+        assertThat(receiver.awaitItem()).isFalse()
 
         assertThat(
             formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.SaveForFutureUse)?.value
         ).isEqualTo("false")
+
+        receiver.cancel()
     }
 
     @Test
-    fun `Verify setting save for future use visibility removes it from completed values`() {
+    fun `Verify setting save for future use visibility removes it from completed values`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code
         )
@@ -142,22 +143,16 @@ internal class FormViewModelTest {
                 )
             )
         )
-        showCheckboxFlow.tryEmit(true)
 
-        val values = mutableListOf<Set<IdentifierSpec>>()
-        formViewModel.hiddenIdentifiers.asLiveData()
-            .observeForever {
-                values.add(it)
-            }
-        assertThat(values[0]).isEmpty()
+        formViewModel.hiddenIdentifiers.test {
+            assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
 
-        showCheckboxFlow.tryEmit(false)
+            showCheckboxFlow.tryEmit(true)
+            assertThat(awaitItem()).isEmpty()
 
-        ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
-
-        assertThat(values[1]).containsExactly(
-            IdentifierSpec.SaveForFutureUse
-        )
+            showCheckboxFlow.tryEmit(false)
+            assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
+        }
     }
 
     @Test
