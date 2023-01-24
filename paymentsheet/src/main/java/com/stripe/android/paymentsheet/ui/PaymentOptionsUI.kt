@@ -9,7 +9,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -17,7 +16,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionUi
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
@@ -33,23 +31,12 @@ internal fun PaymentOptions(
     viewModel: BaseSheetViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-
     val state by viewModel.paymentOptionsState.collectAsState()
     val isEditing by viewModel.editing.collectAsState()
     val isProcessing by viewModel.processing.collectAsState()
 
-    val nameProvider: (String?) -> String = remember {
-        { code ->
-            val repo = viewModel.lpmResourceRepository.getRepository()
-            val resource = repo.fromCode(code)?.displayNameResource
-            context.getString(resource!!)
-        }
-    }
-
     PaymentOptions(
         state = state,
-        nameProvider = nameProvider,
         isEditing = isEditing,
         isProcessing = isProcessing,
         onAddCardPressed = viewModel::transitionToAddPaymentScreen,
@@ -62,7 +49,6 @@ internal fun PaymentOptions(
 @Composable
 internal fun PaymentOptions(
     state: PaymentOptionsState,
-    nameProvider: (PaymentMethodCode?) -> String?,
     isEditing: Boolean,
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
@@ -83,7 +69,6 @@ internal fun PaymentOptions(
 
                 PaymentOption(
                     item = item,
-                    nameProvider = nameProvider,
                     width = width,
                     isEditing = isEditing,
                     isEnabled = isEnabled,
@@ -110,7 +95,6 @@ internal fun rememberItemWidth(maxWidth: Dp): Dp {
 @Composable
 private fun PaymentOption(
     item: PaymentOptionsItem,
-    nameProvider: (PaymentMethodCode?) -> String?,
     width: Dp,
     isEnabled: Boolean,
     isEditing: Boolean,
@@ -150,7 +134,6 @@ private fun PaymentOption(
         is PaymentOptionsItem.SavedPaymentMethod -> {
             SavedPaymentMethod(
                 paymentMethod = item,
-                nameProvider = nameProvider,
                 width = width,
                 isEnabled = isEnabled,
                 isEditing = isEditing,
@@ -234,7 +217,6 @@ private fun Link(
 @Composable
 private fun SavedPaymentMethod(
     paymentMethod: PaymentOptionsItem.SavedPaymentMethod,
-    nameProvider: (PaymentMethodCode?) -> String?,
     width: Dp,
     isEnabled: Boolean,
     isEditing: Boolean,
@@ -246,9 +228,10 @@ private fun SavedPaymentMethod(
     val context = LocalContext.current
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
     val labelText = paymentMethod.paymentMethod.getLabel(context.resources) ?: return
-    val removeTitle = context.getString(
+
+    val removeTitle = stringResource(
         R.string.stripe_paymentsheet_remove_pm,
-        nameProvider(paymentMethod.paymentMethod.type?.code),
+        paymentMethod.displayName,
     )
 
     PaymentOptionUi(

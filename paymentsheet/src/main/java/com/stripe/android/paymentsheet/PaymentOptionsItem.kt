@@ -26,7 +26,7 @@ internal sealed class PaymentOptionsItem {
     /**
      * Represents a [PaymentMethod] that is already saved and attached to the current customer.
      */
-    data class SavedPaymentMethod constructor(
+    data class SavedPaymentMethod(
         val displayName: String,
         val paymentMethod: PaymentMethod,
     ) : PaymentOptionsItem() {
