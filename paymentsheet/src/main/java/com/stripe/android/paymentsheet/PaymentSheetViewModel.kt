@@ -8,7 +8,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -71,7 +70,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -168,12 +166,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val walletsContainerState: Flow<WalletsContainerState> = combine(
         linkHandler.isLinkEnabled,
         googlePayState,
-        isReadyEvents.asFlow(),
         supportedPaymentMethodsFlow,
-    ) { isLinkAvailable, googlePayState, isReady, paymentMethodTypes ->
+    ) { isLinkAvailable, googlePayState, paymentMethodTypes ->
         WalletsContainerState(
-            showLink = isLinkAvailable == true && isReady.peekContent() == true,
-            showGooglePay = googlePayState.isReadyForUse && isReady.peekContent() == true,
+            showLink = isLinkAvailable == true,
+            showGooglePay = googlePayState.isReadyForUse,
             dividerTextResource = if (paymentMethodTypes.singleOrNull() == Card.code) {
                 R.string.stripe_paymentsheet_or_pay_with_card
             } else {
@@ -192,9 +189,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
 
         eventReporter.onInit(config)
-        if (googlePayLauncherConfig == null) {
-            savedStateHandle[SAVE_GOOGLE_PAY_STATE] = GooglePayState.NotAvailable
-        }
 
         viewModelScope.launch {
             loadPaymentSheetState()
@@ -264,6 +258,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         lpmServerSpec = lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
 
         savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
+        savedStateHandle[SAVE_SAVED_SELECTION] = state.savedSelection
+
+        savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (state.isGooglePayReady) {
+            GooglePayState.Available
+        } else {
+            GooglePayState.NotAvailable
+        }
+
         setStripeIntent(state.stripeIntent)
 
         val linkState = state.linkState
@@ -271,6 +273,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         linkHandler.setupLinkLaunchingEagerly(viewModelScope, linkState)
 
         resetViewState()
+        transitionToFirstScreenWhenReady()
     }
 
     fun setupGooglePay(
@@ -282,13 +285,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 googlePayPaymentMethodLauncherFactory.create(
                     lifecycleScope = lifecycleScope,
                     config = config,
-                    readyCallback = { isReady ->
-                        savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (isReady) {
-                            GooglePayState.Available
-                        } else {
-                            GooglePayState.NotAvailable
-                        }
-                    },
+                    readyCallback = { /* Nothing to do here */ },
                     activityResultLauncher = activityResultLauncher
                 )
         }
@@ -527,17 +524,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         onError(error?.let { getApplication<Application>().resources.getString(it) })
 
     override fun onError(error: String?) = resetViewState(error)
-
-    fun transitionToFirstScreenWhenReady() {
-        viewModelScope.launch {
-            awaitReady()
-            transitionToFirstScreen()
-        }
-    }
-
-    private suspend fun awaitReady() {
-        isReadyEvents.asFlow().filter { it.peekContent() }.first()
-    }
 
     override fun transitionToFirstScreen() {
         val target = if (paymentMethods.value.isNullOrEmpty()) {

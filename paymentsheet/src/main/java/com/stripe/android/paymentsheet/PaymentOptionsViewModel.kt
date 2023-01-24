@@ -5,7 +5,6 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
@@ -39,8 +38,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -110,6 +107,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             setStripeIntent(args.state.stripeIntent)
         }
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.state.customerPaymentMethods
+        savedStateHandle[SAVE_SAVED_SELECTION] = args.state.savedSelection
         savedStateHandle[SAVE_PROCESSING] = false
 
         // If we are not recovering from don't keep activities than the resources
@@ -119,6 +117,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
             lpmServerSpec =
                 lpmResourceRepository.getRepository().serverSpecLoadingState.serverLpmSpecs
         }
+
+        transitionToFirstScreenWhenReady()
     }
 
     override val shouldCompleteLinkFlowInline: Boolean = false
@@ -295,22 +295,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 paymentMethods = paymentMethods.value
             )
         )
-    }
-
-    fun transitionToFirstScreenWhenReady() {
-        viewModelScope.launch {
-            awaitReady()
-            awaitRepositoriesReady()
-            transitionToFirstScreen()
-        }
-    }
-
-    private suspend fun awaitReady() {
-        isReadyEvents.asFlow().filter { it.peekContent() }.first()
-    }
-
-    private suspend fun awaitRepositoriesReady() {
-        isResourceRepositoryReady.filter { it }.first()
     }
 
     override fun transitionToFirstScreen() {
