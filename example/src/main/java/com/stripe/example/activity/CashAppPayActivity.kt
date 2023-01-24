@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethodCreateParams
 
@@ -73,6 +74,22 @@ class CashAppPayActivity : StripeIntentActivity() {
                     supportedPaymentMethods = "cashapp",
                 )
             }
+            CashAppPayFlow.PaymentWithFutureUse -> {
+                val params = PaymentMethodCreateParams.createCashAppPay()
+
+                val mandateData = MandateDataParams(
+                    type = MandateDataParams.Type.Online.DEFAULT,
+                )
+
+                createAndConfirmPaymentIntent(
+                    country = "US",
+                    paymentMethodCreateParams = params,
+                    mandateDataParams = mandateData,
+                    customerId = customerId,
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+                    supportedPaymentMethods = "cashapp",
+                )
+            }
             CashAppPayFlow.Setup -> {
                 val params = PaymentMethodCreateParams.createCashAppPay()
 
@@ -94,6 +111,7 @@ class CashAppPayActivity : StripeIntentActivity() {
 
 private enum class CashAppPayFlow {
     Payment,
+    PaymentWithFutureUse,
     Setup,
 }
 
@@ -110,8 +128,8 @@ private fun CashAppPayScreen(
 ) {
     MaterialTheme {
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                for (flowType in CashAppPayFlow.values()) {
+            for (flowType in CashAppPayFlow.values()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(
                         selected = flow == flowType,
                         onClick = { onFlowTypeChanged(flowType) },
@@ -121,7 +139,7 @@ private fun CashAppPayScreen(
                 }
             }
 
-            if (flow == CashAppPayFlow.Setup) {
+            if (flow == CashAppPayFlow.PaymentWithFutureUse || flow == CashAppPayFlow.Setup) {
                 OutlinedTextField(
                     value = customerId,
                     onValueChange = onCustomerIdChanged,
@@ -140,6 +158,7 @@ private fun CashAppPayScreen(
                 ) {
                     val text = when (flow) {
                         CashAppPayFlow.Payment -> "Pay with Cash App"
+                        CashAppPayFlow.PaymentWithFutureUse -> "Pay & setup with Cash App"
                         CashAppPayFlow.Setup -> "Set up with Cash App"
                     }
                     Text(text)

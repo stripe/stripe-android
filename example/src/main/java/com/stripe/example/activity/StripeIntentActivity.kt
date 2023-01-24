@@ -79,6 +79,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         stripeAccountId: String? = null,
         existingPaymentMethodId: String? = null,
         mandateDataParams: MandateDataParams? = null,
+        customerId: String? = null,
+        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
         onPaymentIntentCreated: (String) -> Unit = {}
     ) {
         requireNotNull(paymentMethodCreateParams ?: existingPaymentMethodId)
@@ -87,7 +89,8 @@ abstract class StripeIntentActivity : AppCompatActivity() {
 
         viewModel.createPaymentIntent(
             country = country,
-            supportedPaymentMethods = supportedPaymentMethods
+            supportedPaymentMethods = supportedPaymentMethods,
+            customerId = customerId,
         ).observe(
             this
         ) { result ->
@@ -99,6 +102,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
                     stripeAccountId,
                     existingPaymentMethodId,
                     mandateDataParams,
+                    setupFutureUsage,
                     onPaymentIntentCreated
                 )
             }
@@ -142,6 +146,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         stripeAccountId: String?,
         existingPaymentMethodId: String?,
         mandateDataParams: MandateDataParams?,
+        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
         onPaymentIntentCreated: (String) -> Unit = {}
     ) {
         val secret = responseData.getString("secret")
@@ -158,13 +163,17 @@ abstract class StripeIntentActivity : AppCompatActivity() {
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
                 paymentMethodCreateParams = requireNotNull(params),
                 clientSecret = secret,
-                shipping = shippingDetails
+                shipping = shippingDetails,
+                setupFutureUsage = setupFutureUsage,
+            ).copy(
+                mandateData = mandateDataParams,
             )
         } else {
             ConfirmPaymentIntentParams.createWithPaymentMethodId(
                 paymentMethodId = existingPaymentMethodId,
                 clientSecret = secret,
-                mandateData = mandateDataParams
+                mandateData = mandateDataParams,
+                setupFutureUsage = setupFutureUsage,
             )
         }
         confirmPaymentIntent(confirmPaymentIntentParams)
