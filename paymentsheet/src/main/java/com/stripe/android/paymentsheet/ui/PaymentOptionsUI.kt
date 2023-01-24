@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
@@ -30,6 +31,7 @@ import com.stripe.android.uicore.stripeColors
 @Composable
 internal fun PaymentOptions(
     viewModel: BaseSheetViewModel,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
 
@@ -53,6 +55,7 @@ internal fun PaymentOptions(
         onAddCardPressed = viewModel::transitionToAddPaymentScreen,
         onItemSelected = viewModel::handlePaymentMethodSelected,
         onItemRemoved = viewModel::removePaymentMethod,
+        modifier = modifier,
     )
 }
 
@@ -65,8 +68,9 @@ internal fun PaymentOptions(
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    BoxWithConstraints {
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
         val width = rememberItemWidth(maxWidth)
 
         LazyRow(
