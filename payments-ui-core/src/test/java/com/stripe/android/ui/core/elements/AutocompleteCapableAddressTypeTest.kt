@@ -1,6 +1,9 @@
 package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.uicore.address.AutocompleteCapableAddressType
+import com.stripe.android.uicore.elements.AddressType
+import com.stripe.android.uicore.elements.PhoneNumberState
 import org.junit.Test
 
 internal class AutocompleteCapableAddressTypeTest {

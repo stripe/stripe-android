@@ -18,8 +18,6 @@
   <string name="address_country_invalid">ประเทศไม่ถูกต้อง</string>
   <!-- Error text indicating that county is required, used for UK addresses -->
   <string name="address_county_required">โปรดป้อนชื่อเคาน์ตี</string>
-  <!-- Caption for Address field on address form -->
-  <string name="address_label_address">ที่อยู่</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">ที่อยู่บรรทัดที่ 1 (ระบุหรือไม่ก็ได้)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -70,10 +68,6 @@
   <string name="address_required">โปรดป้อนที่อยู่</string>
   <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">โปรดป้อนชื่อรัฐ</string>
-  <!-- Error text indicating zip code is invalid, used for US addresses -->
-  <string name="address_zip_invalid">รหัสไปรษณีย์ไม่ถูกต้อง</string>
-  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
-  <string name="address_zip_postal_invalid">รหัสไปรษณีย์ไม่ถูกต้อง</string>
   <!-- Pay over time with Affirm copy -->
   <string name="affirm_buy_now_pay_later">ทยอยชำระเงินด้วย &lt;img src=\"affirm\"&gt;</string>
   <!-- Label for Name on account field on form -->

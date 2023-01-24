@@ -52,12 +52,12 @@ import com.stripe.android.link.ui.signup.EmailCollectionSection
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.ui.core.elements.EmailConfig
 import com.stripe.android.ui.core.elements.NameConfig
-import com.stripe.android.ui.core.elements.menu.Checkbox
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
+import com.stripe.android.uicore.elements.menu.Checkbox
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
 

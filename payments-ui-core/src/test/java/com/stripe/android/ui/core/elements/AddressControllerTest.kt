@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
+import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,6 +13,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
 
+// TODO(ccen) Rewrite the test with generic Element and move it to stripe-ui-core
 @RunWith(RobolectricTestRunner::class)
 class AddressControllerTest {
     private val emailController = SimpleTextFieldController(
