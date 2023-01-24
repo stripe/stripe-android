@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.TextFieldConfig
 
 internal class AddressTextFieldElement(

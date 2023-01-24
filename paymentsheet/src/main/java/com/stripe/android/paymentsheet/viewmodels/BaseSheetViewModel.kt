@@ -3,11 +3,7 @@ package com.stripe.android.paymentsheet.viewmodels
 import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.distinctUntilChanged
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.InjectorKey
@@ -63,8 +59,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.jetbrains.annotations.TestOnly
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -254,18 +248,6 @@ internal abstract class BaseSheetViewModel(
             }.collect()
         }
 
-        if (savedSelection.value == null) {
-            viewModelScope.launch {
-                val savedSelection = withContext(workContext) {
-                    prefsRepository.getSavedSelection(
-                        googlePayState.first().isReadyForUse,
-                        linkHandler.isLinkEnabled.filterNotNull().first()
-                    )
-                }
-                savedStateHandle[SAVE_SAVED_SELECTION] = savedSelection
-            }
-        }
-
         if (!_isResourceRepositoryReady.value) {
             viewModelScope.launch {
                 // This work should be done on the background
@@ -299,39 +281,15 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    protected val isReadyEvents = MediatorLiveData<Boolean>().apply {
-        listOf(
-            savedSelection.asLiveData(),
-            stripeIntent.asLiveData(),
-            paymentMethods.asLiveData(),
-            googlePayState.asLiveData(),
-            linkHandler.isLinkEnabled.asLiveData(),
-            isResourceRepositoryReady.asLiveData()
-        ).forEach { source ->
-            addSource(source) {
-                value = determineIfReady()
-            }
+    protected fun transitionToFirstScreenWhenReady() {
+        viewModelScope.launch {
+            awaitRepositoriesReady()
+            transitionToFirstScreen()
         }
-    }.distinctUntilChanged().map {
-        Event(it)
     }
 
-    private fun determineIfReady(): Boolean {
-        val stripeIntentValue = stripeIntent.value
-        val isGooglePayReadyValue = googlePayState.value
-        val isResourceRepositoryReadyValue = isResourceRepositoryReady.value
-        val isLinkReadyValue = linkHandler.isLinkEnabled.value
-        val savedSelectionValue = savedSelection.value
-        // List of Payment Methods is not passed in the config but we still wait for it to be loaded
-        // before adding the Fragment.
-        val paymentMethodsValue = paymentMethods.value
-
-        return stripeIntentValue != null &&
-            paymentMethodsValue != null &&
-            isGooglePayReadyValue != GooglePayState.Indeterminate &&
-            isResourceRepositoryReadyValue &&
-            isLinkReadyValue != null &&
-            savedSelectionValue != null
+    private suspend fun awaitRepositoriesReady() {
+        isResourceRepositoryReady.filter { it }.first()
     }
 
     abstract fun transitionToFirstScreen()
@@ -571,35 +529,6 @@ internal abstract class BaseSheetViewModel(
     abstract fun onError(error: String? = null)
 
     data class UserErrorMessage(val message: String)
-
-    /**
-     * Used as a wrapper for data that is exposed via a LiveData that represents an event.
-     * From https://medium.com/androiddevelopers/livedata-with-snackbar-navigation-and-other-events-the-singleliveevent-case-ac2622673150
-     * TODO(brnunes): Migrate to Flows once stable: https://medium.com/androiddevelopers/a-safer-way-to-collect-flows-from-android-uis-23080b1f8bda
-     */
-    class Event<out T>(private val content: T) {
-
-        var hasBeenHandled = false
-            private set // Allow external read but not write
-
-        /**
-         * Returns the content and prevents its use again.
-         */
-        fun getContentIfNotHandled(): T? {
-            return if (hasBeenHandled) {
-                null
-            } else {
-                hasBeenHandled = true
-                content
-            }
-        }
-
-        /**
-         * Returns the content, even if it's already been handled.
-         */
-        @TestOnly
-        fun peekContent(): T = content
-    }
 
     companion object {
         internal const val SAVE_STRIPE_INTENT = "stripe_intent"

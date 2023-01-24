@@ -22,7 +22,7 @@ jobs:
       # Check if there has been a binary incompatible change to the API.
       # If this change is intentional, run `./gradlew apiDump` and commit the new API files.
       - name: Run gradle tasks (ktlint detekt lintRelease apiCheck)
-        run: bash scripts/execute_task_for_changed_modules.sh ktlint detekt lintRelease apiCheck
+        run: ./gradlew ktlint detekt lintRelease apiCheck
 
   unit-tests:
     name: Unit tests
@@ -32,7 +32,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/stripe_setup
       - name: Unit tests
-        run: bash scripts/execute_task_for_changed_modules.sh testDebugUnitTest verifyPaparazziDebug
+        run: ./gradlew testDebugUnitTest verifyPaparazziDebug
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
