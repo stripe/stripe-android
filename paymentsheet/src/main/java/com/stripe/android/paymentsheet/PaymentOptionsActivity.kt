@@ -90,10 +90,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             }
         }
 
-        if (savedInstanceState == null) {
-            viewModel.transitionToFirstScreenWhenReady()
-        }
-
         viewModel.selection.launchAndCollectIn(this) {
             viewModel.clearErrorMessages()
             resetPrimaryButtonState()

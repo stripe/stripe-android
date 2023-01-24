@@ -123,10 +123,6 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             }
         }
 
-        if (savedInstanceState == null) {
-            viewModel.transitionToFirstScreenWhenReady()
-        }
-
         viewModel.processing.filter { it }.launchAndCollectIn(this) {
             window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN)
         }
