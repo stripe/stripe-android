@@ -69,8 +69,9 @@ dependencies {
     implementation "androidx.compose.material:material:$androidxComposeVersion"
     // Integration with observables
     implementation "androidx.compose.runtime:runtime-livedata:$androidxComposeVersion"
+    // MdcTheme
+    implementation "com.google.accompanist:accompanist-themeadapter-material:0.28.0"
     // end of Jetpack Compose
-
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 

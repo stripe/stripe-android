@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
@@ -20,10 +19,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.google.accompanist.themeadapter.material.MdcTheme
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -34,8 +35,8 @@ class CashAppPayActivity : StripeIntentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            var flow by remember { mutableStateOf(CashAppPayFlow.Payment) }
-            var customerId by remember { mutableStateOf("") }
+            var flow by rememberSaveable { mutableStateOf(CashAppPayFlow.Payment) }
+            var customerId by rememberSaveable { mutableStateOf("") }
 
             val isProcessing by viewModel.inProgress.observeAsState(initial = false)
             val status by viewModel.status.observeAsState(initial = "")
@@ -126,7 +127,7 @@ private fun CashAppPayScreen(
     onCustomerIdChanged: (String) -> Unit,
     onButtonPressed: () -> Unit,
 ) {
-    MaterialTheme {
+    MdcTheme {
         Column(modifier = Modifier.fillMaxSize()) {
             for (flowType in CashAppPayFlow.values()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
