@@ -1,8 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -10,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
-import org.junit.Before
+import com.stripe.android.utils.WtfComposeTestRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,12 +17,7 @@ import kotlin.math.roundToInt
 class PaymentOptionsTest {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
-
-    @Before
-    fun setUp() {
-        composeTestRule.mainClock.autoAdvance = false
-    }
+    val composeTestRule = WtfComposeTestRule()
 
     @Test
     fun `Navigates to AddAnotherPaymentMethod screen when add card is pressed`() {
@@ -46,17 +38,8 @@ class PaymentOptionsTest {
             )
         }
 
-        composeTestRule.mainClock.advanceTimeBy(300L)
-
         val label = "+ Add"
         val testTag = "${PAYMENT_OPTION_CARD_TEST_TAG}_$label"
-
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodesWithTag(testTag)
-                .fetchSemanticsNodes()
-                .size == 1
-        }
 
         assertThat(didCallOnAddCardPressed).isFalse()
 
@@ -86,16 +69,7 @@ class PaymentOptionsTest {
             )
         }
 
-        composeTestRule.mainClock.advanceTimeBy(300L)
-
         val testTag = "${PAYMENT_OPTION_CARD_TEST_TAG}_Google Pay"
-
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodesWithTag(testTag)
-                .fetchSemanticsNodes()
-                .size == 1
-        }
 
         assertThat(didCallOnItemSelected).isFalse()
 
