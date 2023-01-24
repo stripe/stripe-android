@@ -52,6 +52,12 @@ private class NetworkStatement(
     private fun setup() {
         ApiRequest.API_TEST_HOST.set(mockWebServer.baseUrl.toString().removeSuffix("/"))
         ConnectionFactory.Default.testConnectionCustomization.set { insecureConnection ->
+            if (mockWebServer.baseUrl.host != insecureConnection.url.host) {
+                throw RequestNotFoundException(
+                    "Test request attempted to reach a non test endpoint. " +
+                        "Url: ${insecureConnection.url}"
+                )
+            }
             val connection = insecureConnection as? HttpsURLConnection ?: return@set
             connection.sslSocketFactory = mockWebServer.clientSocketFactory()
         }

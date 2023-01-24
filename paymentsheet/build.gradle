@@ -86,11 +86,16 @@ dependencies {
     implementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
     androidTestImplementation "androidx.test:rules:$androidTestVersion"
     androidTestImplementation "androidx.test:runner:$androidTestVersion"
+    androidTestImplementation "androidx.test.ext:junit-ktx:$androidTestJunitVersion"
+    androidTestImplementation "androidx.test:core-ktx:$androidTestVersion"
     // Test rules and transitive dependencies:
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidxComposeVersion"
     androidTestUtil "androidx.test:orchestrator:$androidTestOrchestratorVersion"
     androidTestImplementation "androidx.test.ext:truth:$androidTestVersion"
     androidTestImplementation "com.google.truth:truth:$truthVersion"
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+
+    androidTestImplementation project(':network-testing')
 
     // Tooling support (Previews, etc.)
     debugImplementation "androidx.compose.ui:ui-tooling:$androidxComposeVersion"

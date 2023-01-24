@@ -27,6 +27,7 @@ interface ConnectionFactory {
     @Throws(IOException::class, InvalidRequestException::class)
     fun createForFile(request: StripeRequest, outputFile: File): StripeConnection<File>
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     object Default : ConnectionFactory {
         val testConnectionCustomization = AtomicReference<((HttpURLConnection) -> Unit)?>(null)
 
