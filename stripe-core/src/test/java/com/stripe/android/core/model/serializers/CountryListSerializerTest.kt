@@ -6,10 +6,7 @@ import com.stripe.android.core.model.CountryCode
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class CountryListSerializerTest {
 
     private val json: Json = Json {
