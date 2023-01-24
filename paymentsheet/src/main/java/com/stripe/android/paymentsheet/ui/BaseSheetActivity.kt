@@ -131,7 +131,7 @@ internal abstract class BaseSheetActivity<ResultType> : AppCompatActivity() {
 
         bottomSheetController.setup()
 
-        bottomSheetController.shouldFinish.observe(this) { shouldFinish ->
+        bottomSheetController.shouldFinish.launchAndCollectIn(this) { shouldFinish ->
             if (shouldFinish) {
                 finish()
             }

@@ -2,15 +2,15 @@ package com.stripe.android.paymentsheet
 
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.distinctUntilChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 internal class BottomSheetController(
     private val bottomSheetBehavior: BottomSheetBehavior<ViewGroup>
 ) {
-    private val _shouldFinish = MutableLiveData(false)
-    internal val shouldFinish = _shouldFinish.distinctUntilChanged()
+    private val _shouldFinish = MutableStateFlow(false)
+    internal val shouldFinish: StateFlow<Boolean> = _shouldFinish
 
     fun setup() {
         bottomSheetBehavior.isHideable = true
