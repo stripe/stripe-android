@@ -46,10 +46,10 @@ import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
-import com.stripe.android.ui.core.elements.OTPElement
-import com.stripe.android.ui.core.elements.OTPElementUI
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.DefaultStripeTheme
+import com.stripe.android.uicore.elements.OTPElement
+import com.stripe.android.uicore.elements.OTPElementUI
 import kotlinx.coroutines.delay
 
 @Preview
