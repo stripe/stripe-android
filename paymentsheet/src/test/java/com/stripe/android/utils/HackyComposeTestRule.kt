@@ -10,9 +10,9 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
 /**
- * Using this TestRule to fix tests that we're hanging for inexplicable reasons.
+ * Using this TestRule to fix tests that were hanging for inexplicable reasons.
  */
-class WtfComposeTestRule : TestRule, TestWatcher() {
+class HackyComposeTestRule : TestRule, TestWatcher() {
 
     val composeTestRule = createComposeRule()
 

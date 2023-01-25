@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
-import com.stripe.android.utils.WtfComposeTestRule
+import com.stripe.android.utils.HackyComposeTestRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,7 +17,7 @@ import kotlin.math.roundToInt
 class PaymentOptionsTest {
 
     @get:Rule
-    val composeTestRule = WtfComposeTestRule()
+    val composeTestRule = HackyComposeTestRule()
 
     @Test
     fun `Navigates to AddAnotherPaymentMethod screen when add card is pressed`() {
