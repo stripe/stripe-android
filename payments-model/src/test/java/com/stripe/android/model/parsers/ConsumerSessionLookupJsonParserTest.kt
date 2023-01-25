@@ -1,10 +1,10 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.model.ConsumerFixtures
+import com.stripe.android.ConsumerFixtures
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import junit.framework.TestCase.assertEquals
 import org.junit.Test
-import kotlin.test.assertEquals
 
 class ConsumerSessionLookupJsonParserTest {
 

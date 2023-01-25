@@ -10,7 +10,16 @@ dependencies {
 
     ktlint "com.pinterest:ktlint:$ktlintVersion"
 
-    testImplementation 'junit:junit:4.13.2'
+
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.json:json:$jsonVersion"
+    testImplementation "org.mockito:mockito-core:$mockitoCoreVersion"
+    testImplementation "androidx.test:core:$androidTestVersion"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion"
+    testImplementation "com.google.truth:truth:$truthVersion"
 }
 
 ext {

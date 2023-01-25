@@ -10,7 +10,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class ConsumerSession internal constructor(
+data class ConsumerSession(
     val clientSecret: String,
     val emailAddress: String,
     val redactedPhoneNumber: String,
@@ -20,18 +20,21 @@ data class ConsumerSession internal constructor(
 ) : StripeModel {
 
     @Parcelize
-    data class VerificationSession internal constructor(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class VerificationSession constructor(
         val type: SessionType,
         val state: SessionState
     ) : StripeModel {
 
         @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class SessionType(val value: String) : Parcelable {
             Unknown(""),
             SignUp("signup"),
             Email("email"),
             Sms("sms");
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             companion object {
                 fun fromValue(value: String): SessionType =
                     values().firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
@@ -39,6 +42,7 @@ data class ConsumerSession internal constructor(
         }
 
         @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class SessionState(val value: String) : Parcelable {
             Unknown(""),
             Started("started"),
@@ -47,6 +51,7 @@ data class ConsumerSession internal constructor(
             Canceled("canceled"),
             Expired("expired");
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             companion object {
                 fun fromValue(value: String): SessionState =
                     values().firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown

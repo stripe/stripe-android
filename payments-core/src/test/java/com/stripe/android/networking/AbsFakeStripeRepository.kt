@@ -15,7 +15,6 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
@@ -285,14 +284,6 @@ internal abstract class AbsFakeStripeRepository : StripeRepository() {
     override suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
     ) = RadarSession("rse_abc123")
-
-    override suspend fun lookupConsumerSession(
-        email: String?,
-        authSessionCookie: String?,
-        requestOptions: ApiRequest.Options
-    ): ConsumerSessionLookup? {
-        return null
-    }
 
     override suspend fun consumerSignUp(
         email: String,

@@ -1,11 +1,13 @@
 package com.stripe.android.model.parsers
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConsumerSession
 import org.json.JSONObject
 
-internal class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
     override fun parse(json: JSONObject): ConsumerSession? {
         val consumerSessionJson = json.optJSONObject(FIELD_CONSUMER_SESSION) ?: return null
 
