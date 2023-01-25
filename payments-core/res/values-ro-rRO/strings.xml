@@ -18,8 +18,6 @@
   <string name="address_country_invalid">Țara dvs. nu este validă</string>
   <!-- Error text indicating that county is required, used for UK addresses -->
   <string name="address_county_required">Introduceți județul în care locuiți</string>
-  <!-- Caption for Address field on address form -->
-  <string name="address_label_address">Adresa</string>
   <!-- Label for input requesting the first line of an address where , used for international addresses -->
   <string name="address_label_address_line1_optional">Rândul 1 pentru adresă (opțional)</string>
   <!-- Address line 2 placeholder for billing address form. -->
@@ -70,10 +68,6 @@
   <string name="address_required">Introduceți adresa dvs.</string>
   <!-- Error text indicating that state is required, used for US addresses -->
   <string name="address_state_required">Introduceți statul în care locuiți</string>
-  <!-- Error text indicating zip code is invalid, used for US addresses -->
-  <string name="address_zip_invalid">Codul dvs. poștal nu este valid.</string>
-  <!-- Error text indicating zip/ postal code is invalid, used for international addresses -->
-  <string name="address_zip_postal_invalid">Codul dvs. poștal nu este valid</string>
   <!-- Pay over time with Affirm copy -->
   <string name="affirm_buy_now_pay_later">Folosiți ca metodă de plată de-a lungul timpului &lt;img src=\"affirm\"&gt;.</string>
   <!-- Label for Name on account field on form -->

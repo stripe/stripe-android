@@ -1,14 +1,16 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.text.toLowerCase
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.address.AddressRepository
-import com.stripe.android.ui.core.elements.autocomplete.IsPlacesAvailable
+import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.AddressType
 import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SameAsShippingController
+import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.supportedBillingCountries
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -18,64 +20,6 @@ import kotlinx.serialization.Transient
 enum class DisplayField {
     @SerialName("country")
     Country
-}
-
-internal interface AutocompleteCapableAddressType {
-    val googleApiKey: String?
-    val autocompleteCountries: Set<String>?
-    val onNavigation: () -> Unit
-
-    fun supportsAutoComplete(
-        country: String?,
-        isPlacesAvailable: IsPlacesAvailable,
-    ): Boolean {
-        val supportedCountries = autocompleteCountries
-        val autocompleteSupportsCountry = supportedCountries
-            ?.map { it.toLowerCase(Locale.current) }
-            ?.contains(country?.toLowerCase(Locale.current)) == true
-        val autocompleteAvailable = isPlacesAvailable() &&
-            !googleApiKey.isNullOrBlank()
-        return autocompleteSupportsCountry && autocompleteAvailable
-    }
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-sealed class AddressType {
-    abstract val phoneNumberState: PhoneNumberState
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    data class ShippingCondensed(
-        override val googleApiKey: String?,
-        override val autocompleteCountries: Set<String>?,
-        override val phoneNumberState: PhoneNumberState,
-        override val onNavigation: () -> Unit
-    ) : AddressType(), AutocompleteCapableAddressType
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    data class ShippingExpanded constructor(
-        override val googleApiKey: String?,
-        override val autocompleteCountries: Set<String>?,
-        override val phoneNumberState: PhoneNumberState,
-        override val onNavigation: () -> Unit,
-    ) : AddressType(), AutocompleteCapableAddressType
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-    data class Normal(
-        override val phoneNumberState: PhoneNumberState =
-            PhoneNumberState.HIDDEN
-    ) : AddressType()
-}
-
-@Serializable
-enum class PhoneNumberState {
-    @SerialName("hidden")
-    HIDDEN,
-
-    @SerialName("optional")
-    OPTIONAL,
-
-    @SerialName("required")
-    REQUIRED
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)

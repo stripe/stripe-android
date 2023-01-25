@@ -2,6 +2,8 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>ConstructorParameterNaming:AddressElement.kt$AddressElement$_identifier: IdentifierSpec</ID>
+    <ID>ConstructorParameterNaming:RowElement.kt$RowElement$_identifier: IdentifierSpec</ID>
     <ID>CyclomaticComplexMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
     <ID>CyclomaticComplexMethod:IdentifierSpec.kt$IdentifierSpec.Companion$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) fun get(value: String)</ID>
     <ID>CyclomaticComplexMethod:TextFieldUI.kt$@Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
@@ -16,6 +18,10 @@
     <ID>MagicNumber:DropdownFieldUI.kt$.9f</ID>
     <ID>MagicNumber:DropdownFieldUI.kt$8.9f</ID>
     <ID>MagicNumber:Html.kt$0.1f</ID>
+    <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$3</ID>
+    <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$5</ID>
+    <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$6</ID>
+    <ID>MagicNumber:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$7</ID>
     <ID>MagicNumber:StripeTheme.kt$0.15</ID>
     <ID>MagicNumber:StripeTheme.kt$0.32</ID>
     <ID>MagicNumber:StripeTheme.kt$3</ID>
@@ -23,9 +29,12 @@
     <ID>MaxLineLength:DrawablePainter.kt$*</ID>
     <ID>MaxLineLength:Html.kt$*</ID>
     <ID>MaxLineLength:UiUtils.kt$*</ID>
+    <ID>ReturnCount:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>
+    <ID>ReturnCount:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
     <ID>ReturnCount:UiUtils.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Context.getDrawableFromUri(uri: Uri): Drawable?</ID>
     <ID>SpreadOperator:PhoneNumberElementUI.kt$( it.errorMessage, *args )</ID>
     <ID>SpreadOperator:TextFieldUI.kt$( it.errorMessage, *args )</ID>
+    <ID>ThrowingExceptionsWithoutMessageOrCause:TransformAddressToElement.kt$IllegalArgumentException()</ID>
     <ID>ThrowsCount:UiUtils.kt$@SuppressLint("DiscouragedApi") internal fun Context.getResourceId(uri: Uri): Pair&lt;Resources, Int></ID>
     <ID>TooManyFunctions:StripeTheme.kt$com.stripe.android.uicore.StripeTheme.kt</ID>
   </CurrentIssues>
