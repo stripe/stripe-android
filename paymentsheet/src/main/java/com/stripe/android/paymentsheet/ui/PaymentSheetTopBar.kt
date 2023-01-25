@@ -29,11 +29,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.paymentsheet.PaymentOptionContract
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel
-import com.stripe.android.paymentsheet.PaymentSheetContract
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.StripeTheme
@@ -43,36 +38,8 @@ import com.stripe.android.uicore.stripeTypography
 
 @Composable
 internal fun PaymentSheetTopBar(
-    args: PaymentSheetContract.Args,
-    elevation: Dp = 0.dp,
-) {
-    val viewModel = viewModel<PaymentSheetViewModel>(
-        factory = PaymentSheetViewModel.Factory { args }
-    )
-    PaymentSheetTopBar(
-        viewModel = viewModel,
-        elevation = elevation,
-    )
-}
-
-@Composable
-internal fun PaymentSheetTopBar(
-    args: PaymentOptionContract.Args,
-    elevation: Dp = 0.dp,
-) {
-    val viewModel = viewModel<PaymentOptionsViewModel>(
-        factory = PaymentOptionsViewModel.Factory { args }
-    )
-    PaymentSheetTopBar(
-        viewModel = viewModel,
-        elevation = elevation,
-    )
-}
-
-@Composable
-internal fun PaymentSheetTopBar(
     viewModel: BaseSheetViewModel,
-    elevation: Dp,
+    elevation: Dp = 0.dp,
 ) {
     val screen by viewModel.currentScreen.collectAsState()
     val stripeIntent by viewModel.stripeIntent.collectAsState()
@@ -136,7 +103,7 @@ internal fun PaymentSheetTopBar(
                     labelResourceId = state.editMenuLabel,
                     isEnabled = state.isEnabled,
                     tintColor = tintColor,
-                    onPressed = onEditIconPressed,
+                    onClick = onEditIconPressed,
                 )
             }
         },
@@ -148,7 +115,7 @@ private fun EditButton(
     labelResourceId: Int,
     isEnabled: Boolean,
     tintColor: Color,
-    onPressed: () -> Unit,
+    onClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -169,7 +136,7 @@ private fun EditButton(
 
     IconButton(
         enabled = isEnabled,
-        onClick = onPressed,
+        onClick = onClick,
     ) {
         val text = stringResource(labelResourceId)
         Text(

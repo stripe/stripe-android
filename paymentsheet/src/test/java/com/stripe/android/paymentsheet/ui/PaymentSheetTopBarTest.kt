@@ -19,13 +19,13 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 
-@OptIn(ExperimentalComposeUiApi::class)
 @RunWith(AndroidJUnit4::class)
 class PaymentSheetTopBarTest {
 
     @get:Rule
     val composeTestRule = HackyComposeTestRule()
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @Test
     fun `Handles navigation icon press correctly`() {
         val mockKeyboardController = mock<SoftwareKeyboardController>()
@@ -39,7 +39,7 @@ class PaymentSheetTopBarTest {
                     state = mockState(isEnabled = true),
                     elevation = 0.dp,
                     onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
-                    onEditIconPressed = {},
+                    onEditIconPressed = { throw AssertionError("Not expected") },
                 )
             }
         }
@@ -52,6 +52,7 @@ class PaymentSheetTopBarTest {
         assertThat(didCallOnNavigationIconPressed).isTrue()
     }
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @Test
     fun `Ignores navigation icon press if not enabled`() {
         val mockKeyboardController = mock<SoftwareKeyboardController>()
@@ -65,7 +66,7 @@ class PaymentSheetTopBarTest {
                     state = mockState(isEnabled = false),
                     elevation = 0.dp,
                     onNavigationIconPressed = { didCallOnNavigationIconPressed = true },
-                    onEditIconPressed = {},
+                    onEditIconPressed = { throw AssertionError("Not expected") },
                 )
             }
         }
@@ -86,7 +87,7 @@ class PaymentSheetTopBarTest {
             PaymentSheetTopBar(
                 state = mockState(showEditMenu = true),
                 elevation = 0.dp,
-                onNavigationIconPressed = {},
+                onNavigationIconPressed = { throw AssertionError("Not expected") },
                 onEditIconPressed = { didCallOnEditIconPressed = true },
             )
         }

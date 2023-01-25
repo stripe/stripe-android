@@ -112,9 +112,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         viewBinding.topBar.setContent {
             StripeTheme {
-                PaymentSheetTopBar(
-                    args = requireNotNull(starterArgs),
-                )
+                PaymentSheetTopBar(viewModel)
             }
         }
 
