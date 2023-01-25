@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.graphics.Typeface
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -12,17 +13,22 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
@@ -33,6 +39,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeTypography
 
 @Composable
 internal fun PaymentSheetTopBar(
@@ -125,19 +132,53 @@ internal fun PaymentSheetTopBar(
         elevation = elevation,
         actions = {
             if (state.showEditMenu) {
-                IconButton(
-                    enabled = state.isEnabled,
-                    onClick = onEditIconPressed,
-                ) {
-                    val text = stringResource(state.editMenuLabel)
-                    Text(
-                        text = text.uppercase(),
-                        color = tintColor,
-                    )
-                }
+                EditButton(
+                    labelResourceId = state.editMenuLabel,
+                    isEnabled = state.isEnabled,
+                    tintColor = tintColor,
+                    onPressed = onEditIconPressed,
+                )
             }
         },
     )
+}
+
+@Composable
+private fun EditButton(
+    labelResourceId: Int,
+    isEnabled: Boolean,
+    tintColor: Color,
+    onPressed: () -> Unit,
+) {
+    val context = LocalContext.current
+    val density = LocalDensity.current
+    val typography = MaterialTheme.stripeTypography
+
+    val editButtonTypeface = remember(typography) {
+        typography.fontFamily?.let {
+            ResourcesCompat.getFont(context, it)
+        } ?: Typeface.DEFAULT
+    }
+
+    val editButtonFontSize = remember(typography) {
+        with(density) {
+            val sizeInPx = StripeThemeDefaults.typography.smallFontSize.value
+            (sizeInPx.dp * typography.fontSizeMultiplier).toSp()
+        }
+    }
+
+    IconButton(
+        enabled = isEnabled,
+        onClick = onPressed,
+    ) {
+        val text = stringResource(labelResourceId)
+        Text(
+            text = text.uppercase(),
+            color = tintColor,
+            fontSize = editButtonFontSize,
+            fontFamily = FontFamily(editButtonTypeface),
+        )
+    }
 }
 
 @Composable
