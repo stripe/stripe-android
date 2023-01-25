@@ -1,3 +1,4 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo

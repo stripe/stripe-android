@@ -27,12 +27,14 @@ data class ConsumerSession(
     ) : StripeModel {
 
         @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class SessionType(val value: String) : Parcelable {
             Unknown(""),
             SignUp("signup"),
             Email("email"),
             Sms("sms");
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             companion object {
                 fun fromValue(value: String): SessionType =
                     values().firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
@@ -40,6 +42,7 @@ data class ConsumerSession(
         }
 
         @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class SessionState(val value: String) : Parcelable {
             Unknown(""),
             Started("started"),
@@ -48,6 +51,7 @@ data class ConsumerSession(
             Canceled("canceled"),
             Expired("expired");
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             companion object {
                 fun fromValue(value: String): SessionState =
                     values().firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
