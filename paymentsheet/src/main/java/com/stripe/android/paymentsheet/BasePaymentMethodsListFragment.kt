@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -11,8 +10,8 @@ import android.view.ViewGroup
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.stripe.android.paymentsheet.databinding.FragmentPaymentsheetPaymentMethodsListBinding
+import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.utils.launchAndCollectIn
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.StripeThemeDefaults
@@ -23,9 +22,6 @@ internal abstract class BasePaymentMethodsListFragment : Fragment() {
 
     abstract val sheetViewModel: BaseSheetViewModel
 
-    private var layoutManager: PaymentMethodsLayoutManager? = null
-    private var adapter: PaymentOptionsAdapter? = null
-
     private var editMenuItem: MenuItem? = null
     private var viewBinding: FragmentPaymentsheetPaymentMethodsListBinding? = null
 
@@ -33,26 +29,13 @@ internal abstract class BasePaymentMethodsListFragment : Fragment() {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(!sheetViewModel.paymentMethods.value.isNullOrEmpty())
 
-        sheetViewModel.paymentOptionsState.launchAndCollectIn(this) { state ->
-            adapter?.update(
-                items = state.items,
-                selectedIndex = state.selectedIndex,
-            )
-        }
-
         sheetViewModel.paymentMethods.launchAndCollectIn(this) { paymentMethods ->
             val hasPaymentMethods = paymentMethods.orEmpty().isNotEmpty()
             editMenuItem?.isVisible = hasPaymentMethods
         }
 
         sheetViewModel.editing.launchAndCollectIn(this) { isEditing ->
-            adapter?.setEditing(isEditing)
             setEditMenuText(isEditing)
-        }
-
-        sheetViewModel.processing.launchAndCollectIn(this) { isProcessing ->
-            adapter?.isEnabled = !isProcessing
-            layoutManager?.canScroll = !isProcessing
         }
     }
 
@@ -67,7 +50,9 @@ internal abstract class BasePaymentMethodsListFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        setupRecyclerView(viewBinding!!)
+        viewBinding?.content?.setContent {
+            PaymentOptions(viewModel = sheetViewModel)
+        }
     }
 
     @Deprecated("Deprecated in Java")
@@ -96,20 +81,6 @@ internal abstract class BasePaymentMethodsListFragment : Fragment() {
         }
     }
 
-    private fun setupRecyclerView(viewBinding: FragmentPaymentsheetPaymentMethodsListBinding) {
-        layoutManager = PaymentMethodsLayoutManager(requireContext()).also {
-            viewBinding.recycler.layoutManager = it
-        }
-
-        adapter = PaymentOptionsAdapter(
-            paymentOptionSelected = { sheetViewModel.handlePaymentMethodSelected(it.toPaymentSelection()) },
-            paymentMethodDeleteListener = { sheetViewModel.removePaymentMethod(it.paymentMethod) },
-            addCardClickListener = sheetViewModel::transitionToAddPaymentScreen,
-        ).also {
-            viewBinding.recycler.adapter = it
-        }
-    }
-
     @Deprecated("Deprecated in Java")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
@@ -124,19 +95,5 @@ internal abstract class BasePaymentMethodsListFragment : Fragment() {
     override fun onDestroyView() {
         viewBinding = null
         super.onDestroyView()
-    }
-
-    private class PaymentMethodsLayoutManager(
-        context: Context,
-    ) : LinearLayoutManager(
-        context,
-        HORIZONTAL,
-        false
-    ) {
-        var canScroll = true
-
-        override fun canScrollHorizontally(): Boolean {
-            return canScroll && super.canScrollHorizontally()
-        }
     }
 }

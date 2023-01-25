@@ -20,8 +20,7 @@
     <ID>LongMethod:InputAddressScreen.kt$@Composable internal fun InputAddressScreen( injector: NonFallbackInjector )</ID>
     <ID>LongMethod:PaymentElement.kt$@Composable internal fun PaymentElement( sheetViewModel: BaseSheetViewModel, enabled: Boolean, supportedPaymentMethods: List&lt;LpmRepository.SupportedPaymentMethod>, selectedItem: LpmRepository.SupportedPaymentMethod, showLinkInlineSignup: Boolean, linkPaymentLauncher: LinkPaymentLauncher, showCheckboxFlow: Flow&lt;Boolean>, onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit, onLinkSignupStateChanged: (LinkPaymentLauncher.Configuration, InlineSignupViewState) -> Unit, formArguments: FormArguments, onFormFieldValuesChanged: (FormFieldValues?) -> Unit, )</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
-    <ID>LongMethod:PaymentOptionsAdapter.kt$@Composable internal fun PaymentOptionUi( viewWidth: Dp, isSelected: Boolean, isEditing: Boolean, isEnabled: Boolean, iconRes: Int, @DrawableRes labelIcon: Int? = null, labelText: String = "", removePmDialogTitle: String = "", description: String, onRemoveListener: (() -> Unit)? = null, onRemoveAccessibilityDescription: String = "", onItemSelectedListener: (() -> Unit) )</ID>
-    <ID>LongMethod:PaymentSheetActivity.kt$PaymentSheetActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>LongMethod:PaymentOptionsAdapter.kt$@Composable internal fun PaymentOptionUi( viewWidth: Dp, isSelected: Boolean, isEditing: Boolean, isEnabled: Boolean, iconRes: Int, modifier: Modifier = Modifier, iconTint: Color? = null, @DrawableRes labelIcon: Int? = null, labelText: String = "", removePmDialogTitle: String = "", description: String, onRemoveListener: (() -> Unit)? = null, onRemoveAccessibilityDescription: String = "", onItemSelectedListener: (() -> Unit), )</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:USBankAccountFormFragment.kt$USBankAccountFormFragment$@Composable private fun AccountDetailsForm( bankName: String?, last4: String?, saveForFutureUsage: Boolean )</ID>
     <ID>LongMethod:USBankAccountFormFragment.kt$USBankAccountFormFragment$override fun onCreateView( inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle? ): View</ID>
@@ -32,7 +31,6 @@
     <ID>MagicNumber:PaymentOptionsAdapter.kt$0.6F</ID>
     <ID>MagicNumber:PaymentOptionsAdapter.kt$18</ID>
     <ID>MagicNumber:PaymentOptionsAdapter.kt$9</ID>
-    <ID>MagicNumber:PaymentOptionsAdapter.kt$PaymentOptionsAdapter.Companion$100</ID>
     <ID>MagicNumber:PrimaryButton.kt$PrimaryButton$0.5f</ID>
     <ID>MagicNumber:USBankAccountFormFragment.kt$USBankAccountFormFragment$0.5f</ID>
     <ID>MaxLineLength:BillingAddressViewTest.kt$BillingAddressViewTest$fun</ID>
@@ -69,7 +67,5 @@
     <ID>UnnecessaryAbstractClass:PaymentSheetLauncherModule.kt$PaymentSheetLauncherModule$PaymentSheetLauncherModule</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
     <ID>UnusedPrivateMember:BillingAddressViewTest.kt$BillingAddressViewTest.Companion$private val FRANCE = CountryCode.create("FR")</ID>
-    <ID>VariableNaming:PaymentOptionsViewModel.kt$PaymentOptionsViewModel$@VisibleForTesting internal val _paymentOptionResult = MutableLiveData&lt;PaymentOptionResult>()</ID>
-    <ID>VariableNaming:PaymentSheetViewModel.kt$PaymentSheetViewModel$@VisibleForTesting internal val _viewState = MutableLiveData&lt;PaymentSheetViewState>(null)</ID>
   </CurrentIssues>
 </SmellBaseline>
