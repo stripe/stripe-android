@@ -104,16 +104,16 @@ internal abstract class BaseSheetViewModel(
     private val _stripeIntent = MutableStateFlow<StripeIntent?>(null)
     internal val stripeIntent: StateFlow<StripeIntent?> = _stripeIntent
 
-    internal var supportedPaymentMethods
-        get() = savedStateHandle.get<List<PaymentMethodCode>>(
-            SAVE_SUPPORTED_PAYMENT_METHOD
-        )?.mapNotNull {
-            lpmResourceRepository.getRepository().fromCode(it)
-        } ?: emptyList()
-        set(value) = savedStateHandle.set(SAVE_SUPPORTED_PAYMENT_METHOD, value.map { it.code })
+    internal var supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod> = emptyList()
+        set(value) {
+            field = value
+            _supportedPaymentMethodsFlow.tryEmit(value.map { it.code })
+        }
 
-    protected val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> = savedStateHandle
-        .getStateFlow(SAVE_SUPPORTED_PAYMENT_METHOD, initialValue = emptyList())
+    private val _supportedPaymentMethodsFlow =
+        MutableStateFlow<List<PaymentMethodCode>>(emptyList())
+    protected val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> =
+        _supportedPaymentMethodsFlow
 
     /**
      * The list of saved payment methods for the current customer.
@@ -532,7 +532,6 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_PAYMENT_METHODS = "customer_payment_methods"
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_SAVED_SELECTION = "saved_selection"
-        internal const val SAVE_SUPPORTED_PAYMENT_METHOD = "supported_payment_methods"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
     }
