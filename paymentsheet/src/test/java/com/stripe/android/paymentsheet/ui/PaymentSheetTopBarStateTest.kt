@@ -27,7 +27,7 @@ class PaymentSheetTopBarStateTest {
             isEditing = false,
         )
 
-        assertThat(state.icon).isEqualTo(R.drawable.stripe_ic_paymentsheet_close_enabled)
+        assertThat(state.icon).isEqualTo(R.drawable.stripe_ic_paymentsheet_close)
     }
 
     @Test
@@ -40,7 +40,7 @@ class PaymentSheetTopBarStateTest {
             isEditing = false,
         )
 
-        assertThat(state.icon).isEqualTo(R.drawable.stripe_ic_paymentsheet_close_enabled)
+        assertThat(state.icon).isEqualTo(R.drawable.stripe_ic_paymentsheet_close)
     }
 
     @Test
@@ -53,7 +53,7 @@ class PaymentSheetTopBarStateTest {
             isEditing = false,
         )
 
-        assertThat(state.icon).isEqualTo(R.drawable.stripe_ic_paymentsheet_back_enabled)
+        assertThat(state.icon).isEqualTo(R.drawable.stripe_ic_paymentsheet_back)
     }
 
     @Test

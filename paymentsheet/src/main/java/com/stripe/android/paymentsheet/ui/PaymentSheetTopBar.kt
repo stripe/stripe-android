@@ -125,7 +125,10 @@ internal fun PaymentSheetTopBar(
         elevation = elevation,
         actions = {
             if (state.showEditMenu) {
-                IconButton(onClick = onEditIconPressed) {
+                IconButton(
+                    enabled = state.isEnabled,
+                    onClick = onEditIconPressed,
+                ) {
                     val text = stringResource(state.editMenuLabel)
                     Text(
                         text = text.uppercase(),
@@ -160,7 +163,7 @@ internal fun TestModeBadge() {
 internal fun PaymentSheetTopBar_Preview() {
     StripeTheme(colors = StripeThemeDefaults.colorsLight.copy(appBarIcon = Color.Red)) {
         val state = PaymentSheetTopBarState(
-            icon = R.drawable.stripe_ic_paymentsheet_back_enabled,
+            icon = R.drawable.stripe_ic_paymentsheet_back,
             contentDescription = R.string.back,
             showTestModeLabel = true,
             showEditMenu = true,

@@ -103,7 +103,7 @@ class PaymentSheetTopBarTest {
         showEditMenu: Boolean = false,
     ): PaymentSheetTopBarState {
         return PaymentSheetTopBarState(
-            icon = R.drawable.stripe_ic_paymentsheet_back_enabled,
+            icon = R.drawable.stripe_ic_paymentsheet_back,
             contentDescription = R.string.back,
             showTestModeLabel = false,
             showEditMenu = showEditMenu,

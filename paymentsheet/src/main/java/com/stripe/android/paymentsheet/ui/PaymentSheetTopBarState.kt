@@ -27,9 +27,9 @@ internal fun rememberPaymentSheetTopBarState(
 ): PaymentSheetTopBarState {
     return remember(screen, paymentMethods, isLiveMode, isProcessing, isEditing) {
         val icon = if (screen == PaymentSheetScreen.AddAnotherPaymentMethod) {
-            R.drawable.stripe_ic_paymentsheet_back_enabled
+            R.drawable.stripe_ic_paymentsheet_back
         } else {
-            R.drawable.stripe_ic_paymentsheet_close_enabled
+            R.drawable.stripe_ic_paymentsheet_close
         }
 
         val contentDescription = if (screen == PaymentSheetScreen.AddAnotherPaymentMethod) {

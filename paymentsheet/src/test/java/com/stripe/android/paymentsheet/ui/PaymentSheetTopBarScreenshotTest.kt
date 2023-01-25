@@ -23,7 +23,7 @@ class PaymentSheetTopBarScreenshotTest {
     @Test
     fun testLoading() {
         val state = PaymentSheetTopBarState(
-            icon = R.drawable.stripe_ic_paymentsheet_close_enabled,
+            icon = R.drawable.stripe_ic_paymentsheet_close,
             contentDescription = R.string.close,
             showTestModeLabel = false,
             showEditMenu = false,
@@ -44,7 +44,7 @@ class PaymentSheetTopBarScreenshotTest {
     @Test
     fun testPaymentMethodsScreen() {
         val state = PaymentSheetTopBarState(
-            icon = R.drawable.stripe_ic_paymentsheet_close_enabled,
+            icon = R.drawable.stripe_ic_paymentsheet_close,
             contentDescription = R.string.close,
             showTestModeLabel = true,
             showEditMenu = true,
@@ -65,7 +65,7 @@ class PaymentSheetTopBarScreenshotTest {
     @Test
     fun testPaymentMethodsScreenEditing() {
         val state = PaymentSheetTopBarState(
-            icon = R.drawable.stripe_ic_paymentsheet_close_enabled,
+            icon = R.drawable.stripe_ic_paymentsheet_close,
             contentDescription = R.string.close,
             showTestModeLabel = true,
             showEditMenu = true,
@@ -86,7 +86,7 @@ class PaymentSheetTopBarScreenshotTest {
     @Test
     fun testAddPaymentMethodScreen() {
         val state = PaymentSheetTopBarState(
-            icon = R.drawable.stripe_ic_paymentsheet_back_enabled,
+            icon = R.drawable.stripe_ic_paymentsheet_back,
             contentDescription = R.string.back,
             showTestModeLabel = true,
             showEditMenu = false,
