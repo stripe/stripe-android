@@ -53,6 +53,7 @@ internal fun PaymentOptionUi(
     isEnabled: Boolean,
     iconRes: Int,
     modifier: Modifier = Modifier,
+    iconTint: Color? = null,
     @DrawableRes labelIcon: Int? = null,
     labelText: String = "",
     removePmDialogTitle: String = "",
@@ -97,6 +98,7 @@ internal fun PaymentOptionUi(
                 Image(
                     painter = painterResource(iconRes),
                     contentDescription = null,
+                    colorFilter = iconTint?.let { ColorFilter.tint(it) },
                     modifier = Modifier
                         .height(40.dp)
                         .width(56.dp)
