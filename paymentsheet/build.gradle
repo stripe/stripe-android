@@ -74,7 +74,7 @@ dependencies {
     testImplementation testLibs.turbine
 
     // temporary fix for running compose test in RobolectricTestRunner, see https://github.com/robolectric/robolectric/issues/6593
-    testImplementation "androidx.test.espresso:espresso-core:3.5.0"
+    testImplementation "androidx.test.espresso:espresso-core:3.5.1"
 
     androidTestImplementation "com.google.android.libraries.places:places:$placesVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidTestJunitVersion"
