@@ -1,14 +1,10 @@
 package com.stripe.android.paymentsheet.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentSheetContract
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentOptionsListBinding
-import com.stripe.android.paymentsheet.databinding.FragmentPaymentSheetListBinding
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
+import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetLoading
 
 internal sealed interface PaymentSheetScreen {
@@ -42,18 +38,12 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun PaymentSheetContent(args: PaymentSheetContract.Args) {
-            AndroidViewBinding(
-                factory = FragmentPaymentSheetListBinding::inflate,
-                modifier = Modifier.testTag(testTag),
-            )
+            PaymentOptions(args = args)
         }
 
         @Composable
         override fun PaymentOptionsContent(args: PaymentOptionContract.Args) {
-            AndroidViewBinding(
-                factory = FragmentPaymentOptionsListBinding::inflate,
-                modifier = Modifier.testTag(testTag),
-            )
+            PaymentOptions(args = args)
         }
     }
 
@@ -87,6 +77,3 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 }
-
-private val PaymentSheetScreen.testTag: String
-    get() = this::class.java.simpleName
