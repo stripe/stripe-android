@@ -39,10 +39,14 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.stripeColors
 
@@ -138,7 +142,10 @@ fun OTPElementUI(
                     },
                     modifier = textFieldModifier,
                     enabled = enabled,
-                    textStyle = MaterialTheme.typography.h2.copy(
+                    textStyle = TextStyle(
+                        fontFamily = FontFamily.Default,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 24.sp,
                         color = MaterialTheme.stripeColors.onComponent,
                         textAlign = TextAlign.Center
                     ),
