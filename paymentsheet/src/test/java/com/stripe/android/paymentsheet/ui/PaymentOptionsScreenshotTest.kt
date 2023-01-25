@@ -24,7 +24,10 @@ class PaymentOptionsScreenshotTest {
         paparazziRule.snapshot {
             PaymentOptions(
                 state = PaymentOptionsState(
-                    items = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
+                    items = listOf(
+                        PaymentOptionsItem.AddCard,
+                        PaymentOptionsItem.Link,
+                    ),
                     selectedIndex = 1,
                 ),
                 isEditing = false,

@@ -2,6 +2,7 @@ package com.stripe.android.utils.screenshots
 
 import android.graphics.Color
 import app.cash.paparazzi.DeviceConfig
+import com.android.resources.NightMode
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
 
@@ -14,8 +15,13 @@ interface PaparazziConfigOption {
     }
 }
 
-enum class SystemAppearance : PaparazziConfigOption {
-    LightTheme, DarkTheme;
+enum class SystemAppearance(private val nightMode: NightMode) : PaparazziConfigOption {
+    LightTheme(NightMode.NOTNIGHT),
+    DarkTheme(NightMode.NIGHT);
+
+    override fun apply(deviceConfig: DeviceConfig): DeviceConfig {
+        return deviceConfig.copy(nightMode = nightMode)
+    }
 }
 
 enum class FontSize(val scaleFactor: Float) : PaparazziConfigOption {

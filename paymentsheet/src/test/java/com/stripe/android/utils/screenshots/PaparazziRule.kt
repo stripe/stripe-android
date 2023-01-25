@@ -65,7 +65,7 @@ class PaparazziRule(
                 }
 
                 paparazzi.snapshot {
-                    StripeTheme(colors = StripeTheme.getColors(testCase.isDarkTheme)) {
+                    StripeTheme {
                         Surface(color = MaterialTheme.colors.surface) {
                             Box(
                                 contentAlignment = Alignment.Center,
