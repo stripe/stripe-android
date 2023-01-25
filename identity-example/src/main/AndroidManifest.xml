@@ -13,18 +13,13 @@
         android:supportsRtl="true"
         android:theme="${appTheme}">
         <activity
-            android:name=".EntryActivity"
+            android:name=".ComposeThemeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ThemeActivity"
-            android:label="@string/classic_example" />
-        <activity android:name=".ComposeThemeActivity" />
     </application>
 
 </manifest>
