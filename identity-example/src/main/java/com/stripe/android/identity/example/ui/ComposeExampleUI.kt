@@ -448,7 +448,6 @@ private fun RequireDocTypes(
         )
     }
 
-
     Row(
         modifier = Modifier.padding(start = 10.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -574,7 +573,6 @@ private fun LoadingButton(
     onLoadingStateChanged: (LoadingState) -> Unit,
     onPostResult: (String, String, String) -> Unit
 ) {
-
     val lifecycleOwner = LocalLifecycleOwner.current
     Button(
         onClick = {
@@ -616,7 +614,6 @@ private fun LoadingButton(
         Text(text = stringResource(id = R.string.start_verification))
     }
 }
-
 
 @Composable
 private fun SubmitView(
@@ -677,7 +674,6 @@ private fun SubmitView(
         }
     }
 }
-
 
 @Composable
 private fun StyledClickableText(
