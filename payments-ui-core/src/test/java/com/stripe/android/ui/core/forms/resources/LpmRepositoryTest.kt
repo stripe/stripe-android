@@ -7,10 +7,16 @@ import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.EmptyFormSpec
 import com.stripe.android.utils.PaymentIntentFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
 class LpmRepositoryTest {
@@ -91,7 +97,15 @@ class LpmRepositoryTest {
     fun `Verify latest server spec`() {
         lpmRepository.update(
             PaymentIntentFactory.create(
-                paymentMethodTypes = listOf("bancontact", "sofort", "ideal", "sepa_debit", "p24", "eps", "giropay")
+                paymentMethodTypes = listOf(
+                    "bancontact",
+                    "sofort",
+                    "ideal",
+                    "sepa_debit",
+                    "p24",
+                    "eps",
+                    "giropay"
+                )
             ),
             """
                 [
@@ -311,5 +325,38 @@ class LpmRepositoryTest {
         )
 
         assertThat(lpmRepository.fromCode("upi")).isNotNull()
+    }
+
+    @Test
+    fun `Verify LpmRepository waitUntilLoaded completes after update`() = runTest(
+        context = TestCoroutineScheduler(),
+        dispatchTimeoutMs = TimeUnit.SECONDS.toMillis(1)
+
+    ) {
+        val lpmRepository = LpmRepository(
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+                isFinancialConnectionsAvailable = { false },
+            )
+        )
+
+        assertThat(lpmRepository.isLoaded()).isFalse()
+
+        val job = launch(Dispatchers.IO) {
+            lpmRepository.waitUntilLoaded()
+        }
+
+        // Allow for the waitUntilLoaded to kick off.
+        advanceTimeBy(1)
+
+        lpmRepository.update(
+            stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("upi")),
+            serverLpmSpecs = "[]"
+        )
+
+        assertThat(lpmRepository.isLoaded()).isTrue()
+        job.join()
+        assertThat(job.isCompleted).isTrue()
     }
 }
