@@ -5,7 +5,6 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
-import com.stripe.android.uicore.R
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -43,12 +42,4 @@ class SimpleTextFieldConfig(
     override fun convertToRaw(displayName: String) = displayName
 
     override fun convertFromRaw(rawValue: String) = rawValue
-
-    companion object {
-        val NAME = SimpleTextFieldConfig(
-            label = R.string.address_label_full_name,
-            capitalization = KeyboardCapitalization.Words,
-            keyboard = KeyboardType.Text
-        )
-    }
 }

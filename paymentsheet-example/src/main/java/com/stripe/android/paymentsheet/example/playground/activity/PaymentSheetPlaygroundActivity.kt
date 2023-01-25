@@ -452,7 +452,7 @@ class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         val checkboxLabel = if (viewBinding.shippingAddressCheckboxLabel.text.isNotBlank()) {
             viewBinding.shippingAddressCheckboxLabel.text.toString()
         } else {
-            getString(R.string.same_as_shipping)
+            getString(R.string.stripe_paymentsheet_address_element_same_as_shipping)
         }
         builder.additionalFields(
             AddressLauncher.AdditionalFieldsConfiguration(

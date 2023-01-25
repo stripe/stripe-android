@@ -175,10 +175,6 @@ public final class com/stripe/android/uicore/elements/SectionFieldElementUIKt {
 public final class com/stripe/android/uicore/elements/SectionUIKt {
 }
 
-public final class com/stripe/android/uicore/elements/SimpleTextFieldConfig$Companion {
-	public final fun getNAME ()Lcom/stripe/android/uicore/elements/SimpleTextFieldConfig;
-}
-
 public final class com/stripe/android/uicore/elements/TextFieldController$DefaultImpls {
 	public static fun ComposeUI-MxjM1cc (Lcom/stripe/android/uicore/elements/TextFieldController;ZLcom/stripe/android/uicore/elements/SectionFieldElement;Landroidx/compose/ui/Modifier;Ljava/util/Set;Lcom/stripe/android/uicore/elements/IdentifierSpec;IILandroidx/compose/runtime/Composer;I)V
 	public static fun getEnabled (Lcom/stripe/android/uicore/elements/TextFieldController;)Z
