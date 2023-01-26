@@ -34,11 +34,13 @@ internal class ManualEntryViewModel @Inject constructor(
         logErrors()
         observeInputs()
         suspend {
-            getManifest().manualEntryUsesMicrodeposits.also {
-                eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY))
-            }
+            val manifest = getManifest()
+            eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY))
+            ManualEntryState.Payload(
+                verifyWithMicrodeposits = manifest.manualEntryUsesMicrodeposits
+            )
         }.execute {
-            copy(verifyWithMicrodeposits = it() ?: false)
+            copy(payload = it)
         }
     }
 
@@ -142,6 +144,7 @@ internal class ManualEntryViewModel @Inject constructor(
 }
 
 internal data class ManualEntryState(
+    val payload: Async<Payload> = Uninitialized,
     val routing: String? = null,
     val account: String? = null,
     val accountConfirm: String? = null,
@@ -149,8 +152,12 @@ internal data class ManualEntryState(
     val accountError: Int? = null,
     val accountConfirmError: Int? = null,
     val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized,
-    val verifyWithMicrodeposits: Boolean = false
+
 ) : MavericksState {
+
+    data class Payload(
+        val verifyWithMicrodeposits: Boolean
+    )
 
     val isValidForm
         get() =

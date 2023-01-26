@@ -369,16 +369,19 @@ internal data class FinancialConnectionsSessionManifest(
 @Parcelize
 internal data class ManualEntry(
     val enabled: Boolean,
-    val mode: ManualEntryMode
+    val mode: Mode
 ) : Parcelable {
-    @Serializable(with = ManualEntryMode.Serializer::class)
-    enum class ManualEntryMode {
+    @Serializable(with = Mode.Serializer::class)
+    enum class Mode(val value: String) {
+        @SerialName(value = "custom")
+        CUSTOM("custom"),
 
-        UNKNOWN;
+        @SerialName(value = "unknown")
+        UNKNOWN("unknown");
 
         internal object Serializer :
-            EnumIgnoreUnknownSerializer<ManualEntryMode>(
-                ManualEntryMode.values(),
+            EnumIgnoreUnknownSerializer<Mode>(
+                Mode.values(),
                 UNKNOWN
             )
     }
