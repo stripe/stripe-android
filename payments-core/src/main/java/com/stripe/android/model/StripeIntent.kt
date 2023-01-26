@@ -293,6 +293,11 @@ sealed interface StripeIntent : StripeModel {
             }
         }
 
+        /**
+         * Contains the authentication URL for redirecting your customer to Cash App.
+         *
+         * **Note**: Cash App Pay is currently in beta. The API of this class is subject to change.
+         */
         @Parcelize
         data class CashAppRedirect(
             val mobileAuthUrl: String,

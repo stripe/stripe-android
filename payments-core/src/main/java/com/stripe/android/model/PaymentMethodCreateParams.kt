@@ -478,6 +478,11 @@ data class PaymentMethodCreateParams internal constructor(
         }
     }
 
+    /**
+     * Encapsulates parameters used to create [PaymentMethodCreateParams] when using Cash App Pay.
+     *
+     * **Note**: Cash App Pay is currently in beta. The API of this class is subject to change.
+     */
     @Parcelize
     class CashAppPay : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> = emptyMap()
@@ -934,6 +939,12 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
+        /**
+         * Helper method to create [PaymentMethodCreateParams] with [CashAppPay] as the payment
+         * method type.
+         *
+         * **Note**: Cash App Pay is currently in beta. The API of this class is subject to change.
+         */
         @JvmStatic
         @JvmOverloads
         fun createCashAppPay(
